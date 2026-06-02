@@ -1,0 +1,25 @@
+{
+  "name": "edunudg",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo dev --filter=@edunudg/web",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "test:rls": "node scripts/run-rls-tests.mjs",
+    "test:e2e": "playwright test",
+    "audit:schema": "node scripts/audit-schema.mjs",
+    "db:push": "supabase db push",
+    "functions:deploy": "supabase functions deploy",
+    "functions:deploy:whatsapp": "supabase functions deploy whatsapp-otp",
+    "functions:deploy:passkey": "supabase functions deploy passkey-verify"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "pg": "^8.21.0",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  }
+}

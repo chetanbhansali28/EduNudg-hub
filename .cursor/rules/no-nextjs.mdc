@@ -1,0 +1,21 @@
+---
+description: Forbid Next.js and SSR frameworks in EduNudg
+alwaysApply: true
+---
+
+# No Next.js
+
+EduNudg uses **Vite + React SPA** only.
+
+## Forbidden
+
+- `next`, `next/router`, `next/navigation`, App Router, `getServerSideProps`, `getStaticProps`
+- React Server Components, `"use server"` in app code
+- Remix, Gatsby for this repo
+
+## Required
+
+- `apps/web` — Vite + React Router
+- Server logic — Supabase RLS, triggers, Edge Functions in `supabase/functions/`
+
+If you need API endpoints, use Supabase Edge Functions, not Next.js API routes.

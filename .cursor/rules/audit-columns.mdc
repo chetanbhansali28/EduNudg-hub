@@ -1,0 +1,22 @@
+---
+description: Require created_by and updated_by on all mutable tables
+globs: supabase/migrations/**/*.sql
+alwaysApply: false
+---
+
+# Audit Columns
+
+Every **mutable** business table must include:
+
+- `created_at timestamptz NOT NULL DEFAULT now()`
+- `updated_at timestamptz NOT NULL DEFAULT now()`
+- `created_by uuid REFERENCES auth.users(id)`
+- `updated_by uuid REFERENCES auth.users(id)`
+
+Attach trigger: `BEFORE INSERT OR UPDATE EXECUTE FUNCTION public.set_row_audit()`
+
+## Append-only exceptions
+
+Document in `docs/database/table-dictionary.md`: `financial_events`, `platform_audit_logs`, `enrollment_history`, `auth_audit_logs` — `created_by` only, no `updated_by`.
+
+Run `pnpm audit:schema` before committing migrations.

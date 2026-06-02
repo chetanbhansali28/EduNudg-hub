@@ -1,0 +1,32 @@
+---
+description: Vite React SPA patterns for EduNudg
+globs: apps/web/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# React SPA Patterns
+
+## Stack
+
+- Vite, React 19, React Router 7
+- Local dev: **port 9000** (`pnpm dev`, `strictPort: true`)
+- TanStack Query for server state
+- `@edunudg/ui` for components
+- `@edunudg/tenant` for host resolution
+
+## Structure
+
+```
+apps/web/src/
+  bootstrap/     # TenantProvider, auth init
+  features/      # domain modules (platform, brand, center)
+  routes/        # portal route trees
+  lib/           # supabase client singleton
+```
+
+## Rules
+
+- Colocate `Component.test.tsx` with features
+- Route guards use `useTenant()` + `useMembership()`
+- No direct `fetch` to Supabase REST — use `@supabase/supabase-js` client
+- Dark mode via `ThemeProvider` in `@edunudg/ui`

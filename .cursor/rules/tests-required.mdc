@@ -1,0 +1,25 @@
+---
+description: Tests required for every feature and bugfix
+alwaysApply: true
+---
+
+# Tests Required
+
+## Policy
+
+No feature or bugfix merges without tests in the same change.
+
+| Change type | Required tests |
+|-------------|----------------|
+| Schema / RLS | `supabase/tests/*.sql` |
+| Package logic | Vitest `*.test.ts` |
+| UI feature | Vitest + Testing Library; Playwright for journeys |
+| Bugfix | Regression test named `regression_*` |
+
+## Commands
+
+- `pnpm test` — Vitest
+- `pnpm test:rls` — Supabase RLS suite
+- `pnpm test:e2e` — Playwright
+
+Use skill: `.cursor/skills/edunudg-write-tests/SKILL.md`

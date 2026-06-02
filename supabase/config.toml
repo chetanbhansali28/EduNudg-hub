@@ -1,0 +1,41 @@
+# EduNudg — Supabase CLI config (linked cloud project).
+# Local development does NOT use Docker or `supabase start`.
+# Apply schema with: supabase link && supabase db push
+# See docs/ops/supabase-cloud-setup.md
+
+project_id = "edunudg"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:9000"
+additional_redirect_urls = ["http://localhost:9000/**"]
+enable_signup = true
+
+# Enable after adding credentials in Supabase Dashboard or below:
+# client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+# secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
+[auth.external.google]
+enabled = false
+
+[auth.external.facebook]
+enabled = false
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed/seed.sql"]

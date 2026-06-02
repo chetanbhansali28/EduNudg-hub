@@ -1,0 +1,24 @@
+---
+description: Multi-tenant isolation and RLS requirements
+alwaysApply: true
+---
+
+# Tenant Safety
+
+## Rules
+
+1. Never bypass Row Level Security in client code.
+2. Never ship `SUPABASE_SERVICE_ROLE_KEY` to the browser.
+3. Every query must respect tenant context from `TenantProvider` + memberships.
+4. Platform admins are the only role that can cross brands — via RLS `is_platform_admin()`, not client flags alone.
+5. New tables need RLS policies in the same migration.
+
+## Tenant columns
+
+- Brand-scoped: `brand_id NOT NULL`
+- Center-scoped: `brand_id` + `center_id NOT NULL`
+- Students belong to `brands`; enrollments belong to `franchise_centers`
+
+## Verification
+
+Run `pnpm test:rls` after schema changes.

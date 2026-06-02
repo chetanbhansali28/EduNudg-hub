@@ -1,0 +1,17 @@
+---
+description: Supabase migration conventions
+globs: supabase/**/*
+alwaysApply: false
+---
+
+# Supabase Migrations
+
+1. Name: `NNN_description.sql` (sequential, zero-padded).
+2. One concern per migration when possible.
+3. Enable RLS: `ALTER TABLE x ENABLE ROW LEVEL SECURITY;` + policies in same file.
+4. Use `000_audit_standard.sql` helpers for audit triggers.
+5. Add indexes for `(brand_id, status)`, foreign keys.
+6. Apply to cloud: `supabase db push` (linked project; no Docker).
+7. Update `docs/database/table-dictionary.md` for new tables.
+
+Never edit applied migrations in production — add a new migration instead.
