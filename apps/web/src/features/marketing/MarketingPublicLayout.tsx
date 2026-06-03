@@ -4,15 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
 import { FooterSection } from "./FooterSection";
 import { MarketingNav } from "./MarketingNav";
-import type { NavTheme } from "./useNavTheme";
 import "./marketing.css";
 
 type Props = {
-  navTheme?: NavTheme;
   showFooter?: boolean;
 };
 
-export function MarketingPublicLayout({ navTheme = "hero", showFooter = true }: Props) {
+export function MarketingPublicLayout({ showFooter = true }: Props) {
   const { data: config, isLoading } = useQuery({
     queryKey: ["marketing-homepage"],
     queryFn: fetchHomepageConfig,
@@ -35,7 +33,7 @@ export function MarketingPublicLayout({ navTheme = "hero", showFooter = true }: 
 
   return (
     <div className="marketing-page">
-      <MarketingNav config={config} theme={navTheme} />
+      <MarketingNav config={config} />
       <Outlet context={{ config }} />
       {showFooter && <FooterSection config={config} />}
     </div>

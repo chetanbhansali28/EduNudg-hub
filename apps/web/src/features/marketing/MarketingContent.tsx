@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
-import { AppleIcon } from "./AppleIcon";
+import { MarketingCtaLink } from "./MarketingCtaLink";
 import { FeatureScrollSection } from "./FeatureScrollSection";
 import { FranchiseSignupSection } from "./FranchiseSignupSection";
 import { ParentEnrollmentSignupSection } from "./ParentEnrollmentSignupSection";
@@ -56,10 +56,12 @@ export function MarketingContent({ config, brandSlug, centerSlug }: Props) {
             </span>
           </h1>
           <p className="novu-hero__subtitle">{config.hero.subtitle}</p>
-          <Link to={config.hero.ctaHref} className="novu-hero__cta group">
-            <AppleIcon />
-            {config.hero.ctaLabel}
-          </Link>
+          <MarketingCtaLink
+            href={config.hero.ctaHref}
+            label={config.hero.ctaLabel}
+            variant="on-dark"
+            className="novu-hero__cta"
+          />
         </div>
       </section>
 

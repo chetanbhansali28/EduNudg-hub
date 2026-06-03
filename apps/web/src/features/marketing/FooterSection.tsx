@@ -1,28 +1,10 @@
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
-import { AppleIcon } from "./AppleIcon";
-import { StaggerLabel } from "./StaggerLabel";
+import { MarketingCtaLink } from "./MarketingCtaLink";
 
 type Props = {
   config: HomepageConfig;
 };
-
-function QrPlaceholder() {
-  return (
-    <div className="novu-site-footer__qr" aria-hidden>
-      <svg viewBox="0 0 37 37" role="img" className="novu-site-footer__qr-svg">
-        <path fill="#fff" d="M0 0h7v1H0zM9 0h1v1H9zM14 0h1v1H14zM17 0h1v1H17zM21 0h1v1H21zM26 0h1v1H26zM30 0h7v1H30z" />
-        <path fill="#fff" d="M0 1h1v1H0zM6 1h1v1H6zM30 1h7v1H30z" />
-        <path fill="#fff" d="M0 6h7v1H0zM30 6h7v1H30z" />
-        <path fill="#fff" d="M0 12h7v1H0zM9 12h1v1H9zM14 12h1v1H14zM17 12h1v1H17zM21 12h1v1H21zM26 12h1v1H26zM30 12h7v1H30z" />
-        <path fill="#fff" d="M0 18h1v1H0zM6 18h1v1H6zM30 18h7v1H30z" />
-        <path fill="#fff" d="M0 24h7v1H0zM30 24h7v1H30z" />
-        <path fill="#fff" d="M0 30h7v1H0zM9 30h1v1H9zM14 30h1v1H14zM17 30h1v1H17zM21 30h1v1H21zM26 30h1v1H26zM30 30h7v1H30z" />
-        <path fill="#fff" d="M0 36h7v1H0zM30 36h7v1H30z" />
-      </svg>
-    </div>
-  );
-}
 
 export function FooterSection({ config }: Props) {
   const cta = config.footerCta;
@@ -42,11 +24,12 @@ export function FooterSection({ config }: Props) {
           {titleMain} <span className="serif">{titleSerif}</span>
         </h2>
         <p>{cta.subtitle}</p>
-        <Link to={cta.ctaHref} className="novu-footer-section__cta-btn group">
-          <AppleIcon />
-          <span className="novu-nav-bar__cta-visually-hidden">{cta.ctaLabel}</span>
-          <StaggerLabel text={cta.ctaLabel} />
-        </Link>
+        <MarketingCtaLink
+          href={cta.ctaHref}
+          label={cta.ctaLabel}
+          variant="on-dark"
+          className="novu-footer-section__cta-btn"
+        />
       </div>
 
       <footer className="novu-site-footer">
@@ -89,7 +72,6 @@ export function FooterSection({ config }: Props) {
               ))}
             </ul>
           </div>
-          <QrPlaceholder />
         </div>
         <div className="novu-site-footer__bottom">
           <span>{config.footer.copyright}</span>

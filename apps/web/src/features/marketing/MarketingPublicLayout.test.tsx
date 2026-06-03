@@ -46,5 +46,6 @@ describe("MarketingPublicLayout", () => {
     expect(await screen.findByText("Page body")).toBeDefined();
     expect(screen.getByLabelText("Site")).toBeDefined();
     expect(screen.getByText("© Test")).toBeDefined();
+    expect(document.querySelector(".novu-site-footer__qr")).toBeNull();
   });
 });

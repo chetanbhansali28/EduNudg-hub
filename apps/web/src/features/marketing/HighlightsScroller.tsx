@@ -91,6 +91,11 @@ export function HighlightsScroller({ cards }: { cards: HomepageShowcaseCard[] })
 
   return (
     <section className="novu-highlights" aria-label="Product highlights">
+      <div ref={scrollerRef} className="novu-highlights__scroller">
+        {cards.map((card) => (
+          <HighlightCard key={card.id} card={card} />
+        ))}
+      </div>
       <div className="novu-highlights__controls">
         <button type="button" onClick={() => scrollBy(-1)} aria-label="Scroll highlights left">
           ←
@@ -98,11 +103,6 @@ export function HighlightsScroller({ cards }: { cards: HomepageShowcaseCard[] })
         <button type="button" onClick={() => scrollBy(1)} aria-label="Scroll highlights right">
           →
         </button>
-      </div>
-      <div ref={scrollerRef} className="novu-highlights__scroller">
-        {cards.map((card) => (
-          <HighlightCard key={card.id} card={card} />
-        ))}
       </div>
     </section>
   );

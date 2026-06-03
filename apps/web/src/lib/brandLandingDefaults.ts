@@ -1,17 +1,20 @@
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
+import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig } from "@/types/homepage";
 
 /** Franchise-recruitment landing defaults for a brand hostname (e.g. abacusworld.localhost). */
 export function buildBrandLandingConfig(
   brandName: string,
-  partial?: Partial<HomepageConfig>
+  partial?: Partial<HomepageConfig>,
+  logoUrl?: string | null
 ): HomepageConfig {
   const base: Partial<HomepageConfig> = {
     meta: {
       siteName: brandName,
       fontSans: "Inter",
       fontSerif: "Instrument Serif",
+      logoUrl: logoUrl ?? null,
     },
     nav: {
       links: [
@@ -129,5 +132,9 @@ export function buildBrandLandingConfig(
     ...partial,
   };
 
-  return mergeHomepageConfig(base);
+  const merged = mergeHomepageConfig(base);
+  return {
+    ...merged,
+    featureSections: withDefaultFeatureVideos(merged.featureSections),
+  };
 }

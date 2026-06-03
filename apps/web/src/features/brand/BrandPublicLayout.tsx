@@ -5,15 +5,13 @@ import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchBrandLandingConfig } from "@/lib/brandLandingApi";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
-import type { NavTheme } from "@/features/marketing/useNavTheme";
 import "@/features/marketing/marketing.css";
 
 type Props = {
-  navTheme?: NavTheme;
   showFooter?: boolean;
 };
 
-export function BrandPublicLayout({ navTheme = "hero", showFooter = true }: Props) {
+export function BrandPublicLayout({ showFooter = true }: Props) {
   const tenant = useTenant();
   const brandSlug = tenant.brandSlug ?? "brand";
 
@@ -39,7 +37,7 @@ export function BrandPublicLayout({ navTheme = "hero", showFooter = true }: Prop
 
   return (
     <div className="marketing-page">
-      <MarketingNav config={config} theme={navTheme} />
+      <MarketingNav config={config} />
       <Outlet context={{ config, brandSlug }} />
       {showFooter && <FooterSection config={config} />}
     </div>

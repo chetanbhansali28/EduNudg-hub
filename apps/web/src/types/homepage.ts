@@ -48,6 +48,8 @@ export interface HomepageConfig {
     fontSans: string;
     fontSerif: string;
     themeNote?: string;
+    /** Brand/center logo for marketing nav (from `brands.logo_url` or platform settings). */
+    logoUrl?: string | null;
   };
   theme: {
     bgColor: string;

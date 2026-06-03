@@ -28,7 +28,7 @@ export async function fetchBrandLandingConfig(brandSlug: string): Promise<Homepa
       return buildBrandLandingConfig(fallbackName);
     }
 
-    return buildBrandLandingConfig(row.brand_name, row.landing ?? undefined);
+    return buildBrandLandingConfig(row.brand_name, row.landing ?? undefined, row.brand_logo_url ?? null);
   } catch {
     return buildBrandLandingConfig(fallbackName);
   }

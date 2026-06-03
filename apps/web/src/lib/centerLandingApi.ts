@@ -5,6 +5,7 @@ import type { HomepageConfig } from "@/types/homepage";
 type CenterLandingRow = {
   brand_slug?: string;
   brand_name?: string;
+  brand_logo_url?: string | null;
   center_slug?: string;
   center_name?: string;
   center_city?: string | null;
@@ -38,7 +39,8 @@ export async function fetchCenterLandingConfig(
       row.center_name,
       row.brand_name,
       row.center_city ?? null,
-      row.landing ?? undefined
+      row.landing ?? undefined,
+      row.brand_logo_url ?? null
     );
   } catch {
     return buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);

@@ -5,15 +5,13 @@ import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchCenterLandingConfig } from "@/lib/centerLandingApi";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
-import type { NavTheme } from "@/features/marketing/useNavTheme";
 import "@/features/marketing/marketing.css";
 
 type Props = {
-  navTheme?: NavTheme;
   showFooter?: boolean;
 };
 
-export function CenterPublicLayout({ navTheme = "hero", showFooter = true }: Props) {
+export function CenterPublicLayout({ showFooter = true }: Props) {
   const tenant = useTenant();
   const brandSlug = tenant.brandSlug ?? "brand";
   const centerSlug = tenant.centerSlug ?? "center";
@@ -40,7 +38,7 @@ export function CenterPublicLayout({ navTheme = "hero", showFooter = true }: Pro
 
   return (
     <div className="marketing-page">
-      <MarketingNav config={config} theme={navTheme} />
+      <MarketingNav config={config} />
       <Outlet context={{ config, brandSlug, centerSlug }} />
       {showFooter && <FooterSection config={config} />}
     </div>
