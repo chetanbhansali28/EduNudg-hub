@@ -79,7 +79,7 @@ export function ParentEnrollmentSignupSection({ brandSlug, centerSlug }: Props) 
                 value={childAge}
                 onChange={setChildAge}
                 placeholder="e.g. 7"
-                inputMode="numeric"
+                type="number"
               />
             </div>
             <label className="ed-field">

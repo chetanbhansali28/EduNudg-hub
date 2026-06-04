@@ -2,8 +2,13 @@ erDiagram
   brands ||--o{ franchise_centers : owns
   brands ||--o{ programs : defines
   brands ||--o{ students : owns
+  brands ||--o{ leads : captures
+  brands ||--o{ franchise_inquiries : receives
+  brands ||--o{ platform_brand_signups : provisions
   franchise_centers ||--o{ student_enrollments : manages
+  franchise_centers ||--o{ leads : assigned
   students ||--o{ student_enrollments : has
+  students }o--o| leads : source_lead
   student_enrollments }o--|| curriculum_versions : pinned_to
   programs ||--o{ curriculum_versions : versions
   curriculum_versions ||--o{ levels : contains
@@ -12,8 +17,12 @@ erDiagram
   franchise_centers ||--o{ batches : runs
   batches ||--o{ batch_enrollments : contains
   students ||--o{ batch_enrollments : attends
-  franchise_centers ||--o{ leads : captures
   franchise_centers ||--o{ invoices : bills
   students ||--o{ invoices : receives
   brands ||--o{ royalty_rules : defines
   brands ||--o{ domain_mappings : maps
+  leads ||--o{ lead_events : timeline
+  leads ||--o{ lead_assignment_history : reassignments
+  brands ||--o{ kit_catalog : defines
+  franchise_centers ||--o{ kit_orders : places
+  brands ||--o{ brand_campaigns : runs

@@ -1,0 +1,13 @@
+---
+description: Modular features, shared theme, service layer, and feature flags for EduNudg
+alwaysApply: true
+---
+
+# Modular architecture
+
+See [`docs/agent-playbook/modular-architecture.md`](../../docs/agent-playbook/modular-architecture.md) and skill `edunudg-modular-features`.
+
+- **Theme:** `@edunudg/ui` primitives for all app screens.
+- **Features:** one folder per capability under `apps/web/src/features/`.
+- **Services:** `apps/web/src/services/` for auth, payments, integrations, shared DB helpers.
+- **Flags:** gate nav, routes, and sensitive RPCs — default new integrations OFF.

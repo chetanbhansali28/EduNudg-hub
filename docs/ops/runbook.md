@@ -35,6 +35,8 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | http://koramangala.abacusworld.localhost:9000/app | Center operations dashboard |
 | http://learn.abacusworld.localhost:9000/login | Student login (white-label) |
 
+**Marketing landing UI** (shared nav, hero, feature phone stage, footer): see [marketing-landing.md](../frontend/marketing-landing.md). On mobile/tablet, nav CTA is right-aligned; feature blocks snap one per screen.
+
 **White-label copy** (optional): in `brand_settings.settings` JSON, set `login_headline` and `login_subtext`. Requires migration `011_portal_branding_public.sql` (`supabase db push`).
 
 Hosts (add to `/etc/hosts`):

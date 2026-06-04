@@ -1,9 +1,19 @@
-# Platform Navigation (`http://localhost:9000/admin`)
+# Platform Navigation
 
-- Command Center
-- Brands
+## Public `/` (`http://localhost:9000`)
+
+EduNudg marketing homepage + **self-serve brand signup** (B2B). No franchise or student forms. Sign-in: `/login`.
+
+Details: [Portal host matrix](../spec/portal-host-matrix.md), [Platform brand onboarding](../journeys/platform-brand-onboarding.md).
+
+## App `/admin` (authenticated)
+
+See [Navigation spec](../spec/navigation-spec.md).
+
+- Command Center (Home)
+- Brands — includes **Signup requests** tab for self-serve approvals
 - Subscriptions & Billing
 - Revenue & Usage
-- Tenants & Audit Logs
-- Platform Settings
-- Support
+- Audit Logs
+- Platform Settings (default timezone IST)
+- Homepage editor (EduNudg marketing)

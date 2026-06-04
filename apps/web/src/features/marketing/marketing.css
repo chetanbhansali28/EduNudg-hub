@@ -98,6 +98,35 @@
   padding: 0 var(--novu-page-gutter);
 }
 
+@media (max-width: 1023.98px) {
+  .novu-nav-bar__inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .novu-nav-bar__pill {
+    display: none;
+  }
+
+  .novu-nav-bar__cta-mobile,
+  .novu-nav-bar__cta-mobile.novu-marketing-cta {
+    display: inline-flex !important;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+  }
+
+  .novu-nav-bar__brand {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .novu-nav-bar__logo .novu-nav-bar__wordmark {
+    max-width: min(42vw, 11rem);
+  }
+}
+
 @media (min-width: 768px) {
   .novu-nav-bar__inner {
     gap: 1rem;
@@ -597,17 +626,54 @@
 }
 
 /* ─── Feature scroll ─── */
+@media (max-width: 1023.98px) {
+  html:has(.marketing-page) {
+    scroll-snap-type: y mandatory;
+  }
+}
+
 .novu-features-stack {
   display: block;
-  padding: 0.5rem var(--novu-page-gutter) 1rem;
+  padding: 0 var(--novu-page-gutter) 1rem;
 }
 
 .novu-features-stack__item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  padding: 1.75rem 0 2rem;
+  justify-content: center;
+  gap: 1.5rem;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 5.5rem var(--novu-page-gutter) 2.5rem;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  scroll-margin-top: 4.5rem;
+}
+
+@media (max-width: 1023.98px) {
+  .novu-features-stack__item {
+    min-height: 100dvh;
+    min-height: 100svh;
+  }
+
+  .novu-features-stack__item .novu-phone-stage {
+    width: min(280px, 78vw);
+    margin-inline: auto;
+  }
+
+  .novu-features-stack__item .novu-phone-stage--compact .novu-phone-stage__device {
+    height: min(40dvh, 400px);
+    max-height: 400px;
+    margin-inline: auto;
+  }
+
+  .novu-features-stack__item .novu-feature-copy {
+    max-width: 22rem;
+    width: 100%;
+    margin-inline: auto;
+    text-align: center;
+  }
 }
 
 .novu-features-stack__item .novu-feature-copy {
@@ -2049,6 +2115,132 @@
   background: #ecfdf5;
   color: #065f46;
   font-weight: 500;
+}
+
+/* Eye-catching enquiry / application blocks */
+.novu-enquiry-promo {
+  position: relative;
+  margin: clamp(3rem, 8vw, 5rem) auto;
+  max-width: 72rem;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+  overflow: hidden;
+}
+
+.novu-enquiry-promo__glow {
+  position: absolute;
+  inset: -20% -10% auto;
+  height: 70%;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.novu-enquiry-promo--student .novu-enquiry-promo__glow {
+  background: radial-gradient(circle, rgb(45 127 249 / 0.45) 0%, transparent 70%);
+}
+
+.novu-enquiry-promo--franchise .novu-enquiry-promo__glow {
+  background: radial-gradient(circle, rgb(234 179 8 / 0.4) 0%, transparent 70%);
+}
+
+.novu-enquiry-promo--platform .novu-enquiry-promo__glow {
+  background: radial-gradient(circle, rgb(99 102 241 / 0.4) 0%, transparent 70%);
+}
+
+.novu-enquiry-promo__inner {
+  position: relative;
+  display: grid;
+  gap: 2rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 24px;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  background: linear-gradient(145deg, #fff 0%, #f8fafc 55%, #f1f5f9 100%);
+  box-shadow:
+    0 24px 48px rgb(15 23 42 / 0.08),
+    0 0 0 1px rgb(255 255 255 / 0.8) inset;
+}
+
+@media (min-width: 900px) {
+  .novu-enquiry-promo__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: 2.5rem;
+  }
+}
+
+.novu-enquiry-promo__eyebrow {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #0f172a;
+  color: #fff;
+}
+
+.novu-enquiry-promo__copy h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.novu-enquiry-promo__subtitle {
+  margin: 0 0 1.25rem;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--novu-muted, #64748b);
+  max-width: 36ch;
+}
+
+.novu-enquiry-promo__perks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.novu-enquiry-promo__perks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.novu-enquiry-promo__perks li::before {
+  content: "✓";
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.novu-enquiry-promo__form-wrap .novu-franchise-apply__card {
+  margin: 0;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border-radius: 16px;
+  border: 1px solid rgb(0 0 0 / 0.06);
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.06);
+}
+
+.novu-enquiry-promo__form-wrap .novu-franchise-apply__card h2 {
+  font-size: 1.25rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -27,3 +27,16 @@ export function brandPortalUrl(slug: string, preferredHostname?: string | null):
   const portSuffix = port && port !== "80" && port !== "443" ? `:${port}` : "";
   return `${protocol}//${hostname}${portSuffix}/`;
 }
+
+/** Center marketing site on {center}.{brand}.localhost (or prod equivalent). */
+export function centerPortalUrl(
+  brandSlug: string,
+  centerSlug: string,
+  preferredHostname?: string | null
+): string {
+  const { protocol, port } = window.location;
+  const brandHost = brandPortalHostname(brandSlug, preferredHostname);
+  const hostname = `${centerSlug}.${brandHost}`;
+  const portSuffix = port && port !== "80" && port !== "443" ? `:${port}` : "";
+  return `${protocol}//${hostname}${portSuffix}/`;
+}

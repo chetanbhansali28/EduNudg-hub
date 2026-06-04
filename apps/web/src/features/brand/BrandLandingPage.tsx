@@ -16,5 +16,5 @@ export function BrandLandingPage() {
     return <p className="marketing-page--loading-inline">Loading…</p>;
   }
 
-  return <MarketingContent config={config} brandSlug={brandSlug} />;
+  return <MarketingContent config={config} portalMode="brand" brandSlug={brandSlug} />;
 }

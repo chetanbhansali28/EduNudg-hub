@@ -9,6 +9,8 @@ Read this file before any implementation work. EduNudg is a **TypeScript + React
 3. [`docs/agent-playbook/forbidden-patterns.md`](docs/agent-playbook/forbidden-patterns.md)
 4. Relevant `.cursor/rules/*.mdc` (always apply)
 5. Task-specific `.cursor/skills/*/SKILL.md`
+6. [`docs/agent-playbook/modular-architecture.md`](docs/agent-playbook/modular-architecture.md) — theme, services, feature modules, flags
+7. Journey specs: [`docs/spec/README.md`](docs/spec/README.md)
 
 ## Agent roles
 
@@ -25,6 +27,8 @@ Read this file before any implementation work. EduNudg is a **TypeScript + React
 2. New screen → Frontend + `edunudg-rbac-check` skill
 3. Auth change → `edunudg-auth-provider` skill
 4. Any feature → `edunudg-write-tests` skill (required)
+5. New screen / integration / payment → `edunudg-modular-features` skill (required)
+5. New screen / integration / payment flow → `edunudg-modular-features` skill (required)
 
 ## Local dev
 

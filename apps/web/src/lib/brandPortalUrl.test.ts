@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { brandPortalHostname, brandPortalUrl } from "./brandPortalUrl";
+import { brandPortalHostname, brandPortalUrl, centerPortalUrl } from "./brandPortalUrl";
 
 describe("brandPortalUrl", () => {
   const original = window.location;
@@ -32,5 +32,12 @@ describe("brandPortalUrl", () => {
     mockLocation("admin.edunudg.com", "");
     expect(brandPortalHostname("acme")).toBe("acme.edunudg.com");
     expect(brandPortalUrl("acme")).toBe("http://acme.edunudg.com/");
+  });
+
+  it("builds center portal url from brand and center slugs", () => {
+    mockLocation("localhost");
+    expect(centerPortalUrl("abacusworld", "koramangala")).toBe(
+      "http://koramangala.abacusworld.localhost:9000/"
+    );
   });
 });

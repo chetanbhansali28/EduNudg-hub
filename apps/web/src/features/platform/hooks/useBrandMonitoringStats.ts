@@ -92,7 +92,8 @@ export function useBrandMonitoringStats(brandId: string | undefined) {
 
       const centerAgg = new Map<string, { name: string; slug: string; enrollments30d: number; fees30dCents: number }>();
       for (const row of centerMetricsRes.data ?? []) {
-        const fc = row.franchise_centers as { name: string; slug: string } | null;
+        const raw = row.franchise_centers as { name: string; slug: string } | { name: string; slug: string }[] | null;
+        const fc = Array.isArray(raw) ? raw[0] : raw;
         const cid = row.center_id as string;
         const cur = centerAgg.get(cid) ?? {
           name: fc?.name ?? "Center",

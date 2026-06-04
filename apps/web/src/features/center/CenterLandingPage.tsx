@@ -18,6 +18,6 @@ export function CenterLandingPage() {
   }
 
   return (
-    <MarketingContent config={config} brandSlug={brandSlug} centerSlug={centerSlug} />
+    <MarketingContent config={config} portalMode="center" brandSlug={brandSlug} centerSlug={centerSlug} />
   );
 }

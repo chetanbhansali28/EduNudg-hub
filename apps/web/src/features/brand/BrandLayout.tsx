@@ -3,7 +3,8 @@ import { AppShell } from "@edunudg/ui";
 import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
-import { brandNavSections, signOutNavItem } from "@/lib/portalNav";
+import { useBrandFeatureFlags } from "@/hooks/useFeatureFlag";
+import { brandNavSections, filterNavByFeatureFlags, signOutNavItem, BRAND_FEATURE_FLAGS } from "@/lib/portalNav";
 import { resolveShellProductName } from "@/lib/portalBranding";
 import { displayUserFromAuth } from "@/lib/portalUser";
 
@@ -13,6 +14,8 @@ export function BrandLayout() {
   const tenant = useTenant();
   const profile = displayUserFromAuth(user);
   const { data: branding } = usePortalBranding();
+  const featureFlags = useBrandFeatureFlags();
+  const navSections = filterNavByFeatureFlags(brandNavSections(pathname), featureFlags, BRAND_FEATURE_FLAGS);
   const shell = resolveShellProductName(
     tenant.portalType,
     branding ?? {
@@ -37,7 +40,7 @@ export function BrandLayout() {
       portalLabel={`Brand · ${shell.productName}`}
       welcomeName={profile.name}
       user={profile}
-      navSections={brandNavSections(pathname)}
+      navSections={navSections}
       footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}
     >

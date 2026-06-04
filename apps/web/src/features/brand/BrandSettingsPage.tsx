@@ -1,42 +1,12 @@
+import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
+import { BrandFeatureTogglesCard } from "@/features/brand/settings/BrandFeatureTogglesCard";
+import { BrandLogoUpload } from "./BrandLogoUpload";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Badge,
-  Button,
-  Card,
-  DataList,
-  Input,
-  ListRow,
-  MutationError,
-  PageTitle,
-  Select,
-} from "@edunudg/ui";
+import { Button, Card, Input, MutationError, PageTitle } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
-import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
-import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
+import { supabaseMaybe } from "@/lib/supabaseResult";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
-import { useBrandScope } from "./hooks/useBrandScope";
-
-type LeadStatus = "new" | "contacted" | "qualified" | "lost" | "converted";
-
-interface Inquiry {
-  id: string;
-  full_name: string;
-  email: string;
-  phone_e164: string | null;
-  city: string | null;
-  message: string | null;
-  status: LeadStatus;
-  created_at: string;
-}
-
-const LEAD_STATUS: { value: LeadStatus; label: string }[] = [
-  { value: "new", label: "New" },
-  { value: "contacted", label: "Contacted" },
-  { value: "qualified", label: "Qualified" },
-  { value: "lost", label: "Lost" },
-  { value: "converted", label: "Converted" },
-];
 
 export function BrandSettingsPage() {
   const { brandId, missingBrand } = useBrandScope();
@@ -45,9 +15,9 @@ export function BrandSettingsPage() {
 
   const [loginHeadline, setLoginHeadline] = useState("");
   const [loginSubtext, setLoginSubtext] = useState("");
+  const [leadStaleDays, setLeadStaleDays] = useState("15");
+  const [timezone, setTimezone] = useState("Asia/Kolkata");
   const [primaryColor, setPrimaryColor] = useState("#2563eb");
-  const [editingInquiryId, setEditingInquiryId] = useState<string | null>(null);
-  const [editInquiryStatus, setEditInquiryStatus] = useState<LeadStatus>("new");
 
   const settings = useQuery({
     queryKey: ["brand-settings", brandId],
@@ -75,16 +45,16 @@ export function BrandSettingsPage() {
     },
   });
 
-  const inquiries = useQuery({
-    queryKey: ["franchise-inquiries", brandId],
+  const brandRow = useQuery({
+    queryKey: ["brand-row", brandId],
     enabled: !!brandId,
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
-        .from("franchise_inquiries")
-        .select("id, full_name, email, phone_e164, city, message, status, created_at")
-        .eq("brand_id", brandId!)
-        .order("created_at", { ascending: false });
-      return supabaseList(data, qErr) as Inquiry[];
+        .from("brands")
+        .select("id, logo_url")
+        .eq("id", brandId!)
+        .maybeSingle();
+      return supabaseMaybe(data, qErr) as { id: string; logo_url: string | null } | null;
     },
   });
 
@@ -92,6 +62,8 @@ export function BrandSettingsPage() {
     const s = settings.data?.settings ?? {};
     setLoginHeadline(String(s.login_headline ?? ""));
     setLoginSubtext(String(s.login_subtext ?? ""));
+    setLeadStaleDays(String(s.lead_stale_days ?? 15));
+    setTimezone(String(s.timezone ?? "Asia/Kolkata"));
   }, [settings.data]);
 
   useEffect(() => {
@@ -99,14 +71,10 @@ export function BrandSettingsPage() {
   }, [theme.data]);
 
   const saveSettings = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (patch: Record<string, unknown>) => {
       if (!brandId) throw new Error("Brand required");
       clear();
-      const merged = {
-        ...(settings.data?.settings ?? {}),
-        login_headline: loginHeadline.trim() || null,
-        login_subtext: loginSubtext.trim() || null,
-      };
+      const merged = { ...(settings.data?.settings ?? {}), ...patch };
       if (settings.data?.id) {
         const { error: mErr } = await getSupabase()
           .from("brand_settings")
@@ -120,7 +88,10 @@ export function BrandSettingsPage() {
         if (mErr) throw mErr;
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["brand-settings", brandId] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["brand-settings", brandId] });
+      void qc.invalidateQueries({ queryKey: ["brand-features", brandId] });
+    },
     onError: capture,
   });
 
@@ -141,99 +112,83 @@ export function BrandSettingsPage() {
     onError: capture,
   });
 
-  const updateInquiry = useMutation({
-    mutationFn: async (id: string) => {
-      clear();
-      const { error: mErr } = await getSupabase()
-        .from("franchise_inquiries")
-        .update({ status: editInquiryStatus })
-        .eq("id", id);
-      if (mErr) throw mErr;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
-      setEditingInquiryId(null);
-    },
-    onError: capture,
-  });
-
-  const deleteInquiry = useMutation({
-    mutationFn: async (id: string) => {
-      if (!confirm("Delete this franchise application?")) return;
-      clear();
-      const { error: mErr } = await getSupabase().from("franchise_inquiries").delete().eq("id", id);
-      if (mErr) throw mErr;
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] }),
-    onError: capture,
-  });
-
   if (missingBrand) {
     return <p className="ed-empty">Brand context not found.</p>;
   }
+
+  const staleDaysNum = parseInt(leadStaleDays, 10);
 
   return (
     <>
       <PageTitle>Brand Settings</PageTitle>
       <MutationError message={error} />
 
+      <Card title="Brand logo">
+        <BrandLogoUpload
+          brandId={brandId}
+          currentLogoUrl={brandRow.data?.logo_url}
+          onUploaded={() => {
+            void qc.invalidateQueries({ queryKey: ["brand-row", brandId] });
+            void qc.invalidateQueries({ queryKey: ["brand-landing"] });
+            void qc.invalidateQueries({ queryKey: ["portal-branding"] });
+          }}
+        />
+      </Card>
+
       <Card title="White-label & login copy">
         <Input label="Login headline" value={loginHeadline} onChange={setLoginHeadline} />
         <Input label="Login subtext" value={loginSubtext} onChange={setLoginSubtext} />
-        <Button onClick={() => saveSettings.mutate()} disabled={saveSettings.isPending}>
-          Save settings
+        <Button
+          onClick={() =>
+            saveSettings.mutate({
+              login_headline: loginHeadline.trim() || null,
+              login_subtext: loginSubtext.trim() || null,
+            })
+          }
+          disabled={saveSettings.isPending}
+        >
+          Save login copy
         </Button>
       </Card>
+
+      <Card title="Lead SLA & timezone">
+        <Input
+          label="Stale lead days after assign"
+          value={leadStaleDays}
+          onChange={setLeadStaleDays}
+          placeholder="15"
+        />
+        <Input label="Timezone (IANA)" value={timezone} onChange={setTimezone} placeholder="Asia/Kolkata" />
+        <Button
+          onClick={() =>
+            saveSettings.mutate({
+              lead_stale_days: Number.isFinite(staleDaysNum) && staleDaysNum > 0 ? staleDaysNum : 15,
+              timezone: timezone.trim() || "Asia/Kolkata",
+            })
+          }
+          disabled={saveSettings.isPending}
+        >
+          Save SLA settings
+        </Button>
+      </Card>
+
+      {brandId && settings.data && (
+        <BrandFeatureTogglesCard
+          brandId={brandId}
+          settingsId={settings.data.id}
+          settings={settings.data.settings}
+          onSaved={() => {
+            void qc.invalidateQueries({ queryKey: ["brand-settings", brandId] });
+            void qc.invalidateQueries({ queryKey: ["brand-features", brandId] });
+          }}
+        />
+      )}
 
       <Card title="Theme">
         <Input label="Primary color" value={primaryColor} onChange={setPrimaryColor} placeholder="#2563eb" />
         <Button onClick={() => saveTheme.mutate()} disabled={saveTheme.isPending}>
           Save theme
         </Button>
-      </Card>
-
-      <Card title="Franchise applications">
-        <DataList
-          items={inquiries.data ?? []}
-          empty="No applications yet."
-          render={(row) => {
-            const editing = editingInquiryId === row.id;
-            return (
-              <ListRow
-                aside={
-                  <CrudRowActions
-                    editing={editing}
-                    onEdit={() => {
-                      setEditingInquiryId(row.id);
-                      setEditInquiryStatus(row.status);
-                    }}
-                    onSave={() => updateInquiry.mutate(row.id)}
-                    onCancel={() => setEditingInquiryId(null)}
-                    onDelete={() => deleteInquiry.mutate(row.id)}
-                    saveDisabled={updateInquiry.isPending}
-                  />
-                }
-              >
-                {editing ? (
-                  <Select
-                    label="Status"
-                    value={editInquiryStatus}
-                    onChange={setEditInquiryStatus}
-                    options={LEAD_STATUS}
-                  />
-                ) : (
-                  <div>
-                    <strong>{row.full_name}</strong>
-                    <div className="ed-text-sm ed-muted">{row.email}</div>
-                    {row.city && <div className="ed-text-sm ed-muted">{row.city}</div>}
-                    {row.message && <p className="ed-text-sm">{row.message}</p>}
-                    <Badge>{row.status}</Badge>
-                  </div>
-                )}
-              </ListRow>
-            );
-          }}
-        />
       </Card>
     </>
   );

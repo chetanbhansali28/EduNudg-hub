@@ -5,11 +5,15 @@ import {
   Button,
   Card,
   DataList,
+  FormGrid,
   Input,
   ListRow,
   MutationError,
+  PageGrid,
+  PageGridFull,
   PageTitle,
   Select,
+  Textarea,
 } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
@@ -23,6 +27,9 @@ interface Program {
   id: string;
   name: string;
   description: string | null;
+  why_take: string | null;
+  what_you_learn: string | null;
+  marketing_video_url: string | null;
   is_active: boolean;
 }
 
@@ -37,6 +44,11 @@ interface Level {
   id: string;
   name: string;
   sort_order: number;
+  abacus_level_code: string | null;
+  topics_covered: string[] | unknown;
+  why_take: string | null;
+  what_you_learn: string | null;
+  marketing_video_url: string | null;
 }
 
 interface Module {
@@ -66,8 +78,22 @@ export function CurriculumPage() {
 
   const [programName, setProgramName] = useState("");
   const [programDesc, setProgramDesc] = useState("");
+  const [programWhyTake, setProgramWhyTake] = useState("");
+  const [programWhatLearn, setProgramWhatLearn] = useState("");
+  const [programVideoUrl, setProgramVideoUrl] = useState("");
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
-  const [editProgram, setEditProgram] = useState({ name: "", description: "" });
+  const [editProgram, setEditProgram] = useState({
+    name: "",
+    description: "",
+    whyTake: "",
+    whatYouLearn: "",
+    marketingVideoUrl: "",
+  });
+  const [levelAbacusCode, setLevelAbacusCode] = useState("");
+  const [levelTopics, setLevelTopics] = useState("");
+  const [levelWhyTake, setLevelWhyTake] = useState("");
+  const [levelWhatLearn, setLevelWhatLearn] = useState("");
+  const [levelVideoUrl, setLevelVideoUrl] = useState("");
 
   const [selectedProgramId, setSelectedProgramId] = useState("");
   const [selectedVersionId, setSelectedVersionId] = useState("");
@@ -85,7 +111,7 @@ export function CurriculumPage() {
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("programs")
-        .select("id, name, description, is_active")
+        .select("id, name, description, why_take, what_you_learn, marketing_video_url, is_active")
         .eq("brand_id", brandId!)
         .is("deleted_at", null)
         .order("name");
@@ -113,7 +139,7 @@ export function CurriculumPage() {
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("levels")
-        .select("id, name, sort_order")
+        .select("id, name, sort_order, abacus_level_code, topics_covered, why_take, what_you_learn, marketing_video_url")
         .eq("curriculum_version_id", selectedVersionId)
         .order("sort_order");
       return supabaseList(data, qErr) as Level[];
@@ -156,6 +182,9 @@ export function CurriculumPage() {
         brand_id: brandId,
         name: programName.trim(),
         description: programDesc.trim() || null,
+        why_take: programWhyTake.trim() || null,
+        what_you_learn: programWhatLearn.trim() || null,
+        marketing_video_url: programVideoUrl.trim() || null,
       });
       if (mErr) throw mErr;
     },
@@ -172,7 +201,13 @@ export function CurriculumPage() {
       clear();
       const { error: mErr } = await getSupabase()
         .from("programs")
-        .update({ name: editProgram.name.trim(), description: editProgram.description.trim() || null })
+        .update({
+          name: editProgram.name.trim(),
+          description: editProgram.description.trim() || null,
+          why_take: editProgram.whyTake.trim() || null,
+          what_you_learn: editProgram.whatYouLearn.trim() || null,
+          marketing_video_url: editProgram.marketingVideoUrl.trim() || null,
+        })
         .eq("id", id);
       if (mErr) throw mErr;
     },
@@ -252,18 +287,55 @@ export function CurriculumPage() {
       if (!brandId || !selectedVersionId) throw new Error("Select a version");
       clear();
       const order = (levels.data?.length ?? 0) + 1;
+      const topics = levelTopics
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
       const { error: mErr } = await getSupabase().from("levels").insert({
         brand_id: brandId,
         curriculum_version_id: selectedVersionId,
         name: levelName.trim(),
         sort_order: order,
+        abacus_level_code: levelAbacusCode.trim() || null,
+        topics_covered: topics,
+        why_take: levelWhyTake.trim() || null,
+        what_you_learn: levelWhatLearn.trim() || null,
+        marketing_video_url: levelVideoUrl.trim() || null,
       });
       if (mErr) throw mErr;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["levels", selectedVersionId] });
       setLevelName("");
+      setLevelAbacusCode("");
+      setLevelTopics("");
+      setLevelWhyTake("");
+      setLevelWhatLearn("");
+      setLevelVideoUrl("");
     },
+    onError: capture,
+  });
+
+  const updateLevelDetails = useMutation({
+    mutationFn: async (id: string) => {
+      clear();
+      const topics = levelTopics
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      const { error: mErr } = await getSupabase()
+        .from("levels")
+        .update({
+          abacus_level_code: levelAbacusCode.trim() || null,
+          topics_covered: topics,
+          why_take: levelWhyTake.trim() || null,
+          what_you_learn: levelWhatLearn.trim() || null,
+          marketing_video_url: levelVideoUrl.trim() || null,
+        })
+        .eq("id", id);
+      if (mErr) throw mErr;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["levels", selectedVersionId] }),
     onError: capture,
   });
 
@@ -361,9 +433,15 @@ export function CurriculumPage() {
       <PageTitle>Curriculum</PageTitle>
       <MutationError message={error} />
 
+      <PageGridFull>
       <Card title="Programs">
-        <Input label="Program name" value={programName} onChange={setProgramName} />
+        <FormGrid>
+          <Input label="Program name" value={programName} onChange={setProgramName} />
+          <Input label="Marketing video URL" value={programVideoUrl} onChange={setProgramVideoUrl} placeholder="https://…" />
+        </FormGrid>
         <Input label="Description" value={programDesc} onChange={setProgramDesc} />
+        <Textarea label="Why take abacus (program overview)" value={programWhyTake} onChange={setProgramWhyTake} rows={3} />
+        <Textarea label="What you will learn" value={programWhatLearn} onChange={setProgramWhatLearn} rows={3} />
         <Button onClick={() => createProgram.mutate()} disabled={!programName.trim() || createProgram.isPending}>
           Add program
         </Button>
@@ -379,7 +457,13 @@ export function CurriculumPage() {
                     editing={editing}
                     onEdit={() => {
                       setEditingProgramId(p.id);
-                      setEditProgram({ name: p.name, description: p.description ?? "" });
+                      setEditProgram({
+                        name: p.name,
+                        description: p.description ?? "",
+                        whyTake: p.why_take ?? "",
+                        whatYouLearn: p.what_you_learn ?? "",
+                        marketingVideoUrl: p.marketing_video_url ?? "",
+                      });
                     }}
                     onSave={() => updateProgram.mutate(p.id)}
                     onCancel={() => setEditingProgramId(null)}
@@ -390,7 +474,16 @@ export function CurriculumPage() {
               >
                 {editing ? (
                   <div className="ed-form-section">
-                    <Input label="Name" value={editProgram.name} onChange={(v) => setEditProgram((f) => ({ ...f, name: v }))} />
+                    <FormGrid>
+                      <Input label="Name" value={editProgram.name} onChange={(v) => setEditProgram((f) => ({ ...f, name: v }))} />
+                      <Input
+                        label="Marketing video URL"
+                        value={editProgram.marketingVideoUrl}
+                        onChange={(v) => setEditProgram((f) => ({ ...f, marketingVideoUrl: v }))}
+                      />
+                    </FormGrid>
+                    <Textarea label="Why take abacus" value={editProgram.whyTake} onChange={(v) => setEditProgram((f) => ({ ...f, whyTake: v }))} rows={2} />
+                    <Textarea label="What you will learn" value={editProgram.whatYouLearn} onChange={(v) => setEditProgram((f) => ({ ...f, whatYouLearn: v }))} rows={2} />
                     <Input label="Description" value={editProgram.description} onChange={(v) => setEditProgram((f) => ({ ...f, description: v }))} />
                   </div>
                 ) : (
@@ -413,7 +506,9 @@ export function CurriculumPage() {
           }}
         />
       </Card>
+      </PageGridFull>
 
+      <PageGrid cols={3}>
       {selectedProgramId && (
         <Card title="Versions">
           <Button onClick={() => createVersion.mutate()} disabled={createVersion.isPending}>
@@ -458,7 +553,14 @@ export function CurriculumPage() {
 
       {selectedVersionId && (
         <Card title="Levels">
-          <Input label="Level name" value={levelName} onChange={setLevelName} />
+          <FormGrid>
+            <Input label="Level name" value={levelName} onChange={setLevelName} placeholder="Level 1 — Foundations" />
+            <Input label="Abacus level code" value={levelAbacusCode} onChange={setLevelAbacusCode} placeholder="L1" />
+          </FormGrid>
+          <Input label="Topics covered (comma-separated)" value={levelTopics} onChange={setLevelTopics} placeholder="Finger basics, Small friends, …" />
+          <Textarea label="Why this level" value={levelWhyTake} onChange={setLevelWhyTake} rows={2} />
+          <Textarea label="What you will learn" value={levelWhatLearn} onChange={setLevelWhatLearn} rows={2} />
+          <Input label="Level marketing video URL" value={levelVideoUrl} onChange={setLevelVideoUrl} />
           <Button onClick={() => createLevel.mutate()} disabled={!levelName.trim() || createLevel.isPending}>
             Add level
           </Button>
@@ -472,14 +574,26 @@ export function CurriculumPage() {
                   onClick={() => {
                     setSelectedLevelId(l.id);
                     setSelectedModuleId("");
+                    const topics = Array.isArray(l.topics_covered) ? (l.topics_covered as string[]).join(", ") : "";
+                    setLevelAbacusCode(l.abacus_level_code ?? "");
+                    setLevelTopics(topics);
+                    setLevelWhyTake(l.why_take ?? "");
+                    setLevelWhatLearn(l.what_you_learn ?? "");
+                    setLevelVideoUrl(l.marketing_video_url ?? "");
                   }}
                 >
                   {l.name}
+                  {l.abacus_level_code && <span className="ed-text-sm ed-muted"> · {l.abacus_level_code}</span>}
                   {selectedLevelId === l.id && <Badge tone="success"> Selected</Badge>}
                 </button>
               </ListRow>
             )}
           />
+          {selectedLevelId && (
+            <Button variant="ghost" onClick={() => updateLevelDetails.mutate(selectedLevelId)} disabled={updateLevelDetails.isPending}>
+              Save level details
+            </Button>
+          )}
         </Card>
       )}
 
@@ -527,6 +641,7 @@ export function CurriculumPage() {
           />
         </Card>
       )}
+      </PageGrid>
     </>
   );
 }

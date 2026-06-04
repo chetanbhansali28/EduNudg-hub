@@ -13,15 +13,46 @@ import {
   IconWallet,
 } from "@edunudg/ui";
 
+export const BRAND_FEATURE_FLAGS: Record<string, string> = {
+  "/app/leads": "student_leads",
+  "/app/franchise-applications": "franchise_applications",
+  "/app/billing": "brand_billing",
+  "/app/campaigns": "campaigns",
+  "/app/kits": "kits",
+};
+
+export const CENTER_FEATURE_FLAGS: Record<string, string> = {
+  "/app/kits": "kits",
+};
+
+export function filterNavByFeatureFlags(
+  sections: ShellNavSection[],
+  flags: Record<string, boolean>,
+  flagMap: Record<string, string>
+): ShellNavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => {
+        const key = flagMap[item.href];
+        if (!key) return true;
+        return flags[key] ?? false;
+      }),
+    }))
+    .filter((section) => section.items.length > 0);
+}
+
 type NavDef = { path: string; label: string; icon: ReactNode; badge?: number };
 
 function item(path: string, label: string, icon: ReactNode, pathname: string, badge?: number): ShellNavItem {
   const active =
     path === "/"
       ? pathname === "/" || pathname === "/admin"
-      : path === "/app"
-        ? pathname === "/app" || pathname === "/app/"
-        : pathname === path || pathname.startsWith(`${path}/`);
+      : path === "/admin"
+        ? pathname === "/admin" || pathname === "/admin/"
+        : path === "/app"
+          ? pathname === "/app" || pathname === "/app/"
+          : pathname === path || pathname.startsWith(`${path}/`);
   return { href: path, label, icon, active, badge };
 }
 
@@ -62,14 +93,27 @@ export function brandNavSections(pathname: string): ShellNavSection[] {
     section(
       "Features",
       [
+        { path: "/app/leads", label: "Student Leads", icon: <IconUsers /> },
+        { path: "/app/franchise-applications", label: "Franchise Applications", icon: <IconClipboard /> },
         { path: "/app/curriculum", label: "Curriculum", icon: <IconBook /> },
         { path: "/app/centers", label: "Franchise Centers", icon: <IconBuilding /> },
         { path: "/app/royalties", label: "Royalties", icon: <IconWallet /> },
         { path: "/app/analytics", label: "Analytics", icon: <IconChart /> },
+        { path: "/app/campaigns", label: "Campaigns", icon: <IconChart /> },
+        { path: "/app/success-stories", label: "Success stories", icon: <IconUsers /> },
+        { path: "/app/kits", label: "Kit catalog", icon: <IconBook /> },
       ],
       pathname
     ),
-    section("General", [{ path: "/app/settings", label: "Settings", icon: <IconSettings /> }], pathname),
+    section(
+      "General",
+      [
+        { path: "/app/homepage", label: "Marketing pages", icon: <IconBook /> },
+        { path: "/app/billing", label: "Billing", icon: <IconWallet /> },
+        { path: "/app/settings", label: "Settings", icon: <IconSettings /> },
+      ],
+      pathname
+    ),
   ];
 }
 
@@ -79,15 +123,24 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
     section(
       "Features",
       [
-        { path: "/app/admissions", label: "Admissions", icon: <IconClipboard /> },
+        { path: "/app/leads", label: "Leads", icon: <IconClipboard /> },
         { path: "/app/students", label: "Students", icon: <IconUsers /> },
         { path: "/app/batches", label: "Batches", icon: <IconGraduation /> },
         { path: "/app/attendance", label: "Attendance", icon: <IconChart /> },
         { path: "/app/fees", label: "Fees & Payments", icon: <IconWallet /> },
         { path: "/app/inventory", label: "Inventory", icon: <IconBuilding /> },
+        { path: "/app/kits", label: "Kit orders", icon: <IconBook /> },
       ],
       pathname
     ),
+    section("General", [{ path: "/app/settings", label: "Settings", icon: <IconSettings /> }], pathname),
+  ];
+}
+
+export function studentNavSections(pathname: string): ShellNavSection[] {
+  return [
+    section("Main menu", [{ path: "/", label: "Dashboard", icon: <IconHome /> }], pathname),
+    section("General", [{ path: "/profile", label: "Profile", icon: <IconSettings /> }], pathname),
   ];
 }
 

@@ -12,5 +12,5 @@ export function MarketingHomePage() {
     return <p className="marketing-page--loading-inline">Loading…</p>;
   }
 
-  return <MarketingContent config={config} />;
+  return <MarketingContent config={config} portalMode="platform" />;
 }

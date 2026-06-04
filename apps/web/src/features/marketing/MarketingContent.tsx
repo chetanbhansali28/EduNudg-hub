@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { FeatureScrollSection } from "./FeatureScrollSection";
+import type { PortalMode } from "@/lib/portalMode";
+import { BrandStudentApplicationSection } from "./BrandStudentApplicationSection";
+import { CenterStudentRegistrationSection } from "./CenterStudentRegistrationSection";
 import { FranchiseSignupSection } from "./FranchiseSignupSection";
-import { ParentEnrollmentSignupSection } from "./ParentEnrollmentSignupSection";
+import { PlatformBrandSignupSection } from "@/features/platform/brandSignups/PlatformBrandSignupSection";
 import { HighlightsScroller } from "./HighlightsScroller";
 import { PrivacySection } from "./PrivacySection";
 import { TestimonialsCarousel } from "./TestimonialsCarousel";
@@ -27,11 +30,12 @@ function FaqList({ items }: { items: { question: string; answer: string }[] }) {
 
 type Props = {
   config: HomepageConfig;
+  portalMode: PortalMode;
   brandSlug?: string | null;
   centerSlug?: string | null;
 };
 
-export function MarketingContent({ config, brandSlug, centerSlug }: Props) {
+export function MarketingContent({ config, portalMode, brandSlug, centerSlug }: Props) {
   useScrollReveal(true);
 
   return (
@@ -77,10 +81,16 @@ export function MarketingContent({ config, brandSlug, centerSlug }: Props) {
 
         <TestimonialsCarousel testimonials={config.testimonials} />
 
-        {brandSlug && centerSlug && (
-          <ParentEnrollmentSignupSection brandSlug={brandSlug} centerSlug={centerSlug} />
+        {portalMode === "platform" && <PlatformBrandSignupSection />}
+        {portalMode === "brand" && brandSlug && (
+          <>
+            <FranchiseSignupSection brandSlug={brandSlug} />
+            <BrandStudentApplicationSection brandSlug={brandSlug} />
+          </>
         )}
-        {brandSlug && !centerSlug && <FranchiseSignupSection brandSlug={brandSlug} />}
+        {portalMode === "center" && brandSlug && centerSlug && (
+          <CenterStudentRegistrationSection brandSlug={brandSlug} centerSlug={centerSlug} />
+        )}
 
         <section id="faq" data-nav-theme="light" className="novu-faq">
           <h2 className="novu-reveal">Got questions?</h2>

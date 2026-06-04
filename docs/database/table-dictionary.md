@@ -13,6 +13,8 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `enrollment_history` | `created_by` only |
 | `brand_status_events` | `created_by` only |
 | `auth_audit_logs` | `created_by` only |
+| `lead_events` | timeline |
+| `lead_assignment_history` | reassignments |
 
 ## Core
 
@@ -20,33 +22,81 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 |-------|-------|-------------|
 | `profiles` | user | Extended auth user profile |
 | `brands` | platform | Franchise brand tenant |
-| `franchise_centers` | brand | Physical center |
+| `franchise_centers` | brand | Physical center / franchise |
 | `memberships` | auth | User role per scope |
 | `domain_mappings` | routing | Hostname → portal |
+| `platform_brand_signups` | platform | Self-serve EduNudg brand signup queue |
 
-## Auth
-
-| Table | Description |
-|-------|-------------|
-| `auth_identities` | Linked OAuth / WhatsApp / passkey |
-| `passkey_credentials` | WebAuthn credentials |
-| `auth_audit_logs` | Login events |
-| `auth_rate_limits` | OTP rate limiting |
-
-See migrations `000`–`011` for full schema.
-
-## Public RPC (no table)
-
-| Function | Description |
-|----------|-------------|
-| `get_portal_branding(brand_slug, center_slug)` | Anon-safe JSON for login white-label: brand/center name, logo, optional `brand_settings.settings.login_headline` / `login_subtext`. Migration `011`. |
-| `get_brand_landing_public(brand_slug)` | Anon-safe brand name, logo, and `brand_settings.settings.landing` JSON for franchise marketing page. Migration `012`. |
-| `submit_franchise_inquiry(...)` | Anon-safe insert into `franchise_inquiries`. Migration `012`. |
-
-## Franchise recruitment
+## Leads & recruitment
 
 | Table | Scope | Description |
 |-------|-------|-------------|
-| `franchise_inquiries` | brand | Prospective franchisee applications from brand public landing |
+| `leads` | brand / center | Student pipeline; `lead_source` brand \| center; nullable `center_id` |
+| `lead_events` | brand | Merge, lost, reopen, assign audit |
+| `lead_assignment_history` | brand | Center reassignments |
+| `franchise_inquiries` | brand | Prospective franchisee applications |
 
-Brand operators with `has_brand_access` can update/delete inquiries and mutate `analytics_daily_brand` (migration `013`).
+## Students
+
+| Table | Scope | Description |
+|-------|-------|-------------|
+| `students` | brand | `source_lead_id` optional lineage |
+| `student_profiles` | brand | Extended profile JSON/columns |
+
+## Kits (Phase D)
+
+| Table | Scope | Description |
+|-------|-------|-------------|
+| `kit_catalog` | brand | SKUs centers can order |
+| `kit_orders` | center | Orders to brand |
+| `kit_order_lines` | center | Line items |
+| `student_kit_allocations` | center | Hidden from student portal |
+
+## Campaigns (Phase E)
+
+| Table | Scope | Description |
+|-------|-------|-------------|
+| `brand_campaigns` | brand | Promotions for centers |
+| `brand_success_stories` | brand | Parent/franchise testimonials (brand-managed CRUD) |
+
+## Curriculum extensions (`019`)
+
+| Column | Table | Purpose |
+|--------|-------|---------|
+| `why_take`, `what_you_learn`, `marketing_video_url` | `programs`, `levels` | Abacus marketing copy |
+| `abacus_level_code`, `topics_covered` | `levels` | Level label + topic list (jsonb array) |
+
+## Settings JSON keys (`brand_settings.settings`)
+
+| Key | Default | Purpose |
+|-----|---------|---------|
+| `lead_stale_days` | 15 | SLA after assign |
+| `timezone` | Asia/Kolkata | Display + SLA |
+| `features` | object | Module flags |
+| `integrations` | object | Auth/payment flags |
+| `landing` | object | Marketing copy |
+
+## Public RPC
+
+| Function | Description |
+|----------|-------------|
+| `get_portal_branding` | Login white-label |
+| `get_brand_landing_public` | Brand marketing |
+| `submit_franchise_inquiry_v2` | Franchise application |
+| `submit_brand_student_application` | Student application (`lead_source=brand`) |
+| `get_center_landing_public` | Center marketing (brand logo only) |
+| `submit_center_student_registration` | Center registration (`lead_source=center`) |
+| `submit_platform_brand_signup` | Platform B2B signup |
+| `approve_platform_brand_signup` | Platform admin |
+| `suggest_centers_for_lead` | Pincode suggestions |
+| `assign_lead_to_center` / `reassign_lead` | Brand manual assign |
+| `update_lead_status` | Center SLA reset |
+| `mark_lead_lost` | Center only |
+| `reopen_lead` | Brand only |
+| `convert_lead_to_student` | Center staff |
+| `create_platform_brand_signup_staff` | Platform manual brand signup |
+| `create_franchise_inquiry_staff` | Brand manual franchise application |
+| `create_brand_student_lead_staff` | Brand manual student lead |
+| `create_center_student_lead_staff` | Center manual student lead |
+
+See migrations `016`–`019`.

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Input, MutationError } from "@edunudg/ui";
 import { submitFranchiseInquiry } from "@/lib/brandLandingApi";
+import { EnquiryPromoSection } from "./EnquiryPromoSection";
 
 type Props = {
   brandSlug: string;
@@ -11,6 +12,11 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
+  const [proposedName, setProposedName] = useState("");
+  const [addressLine, setAddressLine] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [priorExperience, setPriorExperience] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +37,11 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
       phone,
       city,
       message,
+      proposedFranchiseName: proposedName,
+      addressLine,
+      state,
+      pincode,
+      priorExperience,
     });
     setSubmitting(false);
     if (err) {
@@ -41,10 +52,21 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
   };
 
   return (
-    <section id="apply" data-nav-theme="light" className="novu-franchise-apply novu-reveal">
+    <EnquiryPromoSection
+      id="apply"
+      accent="franchise"
+      eyebrow="Franchise opportunity"
+      title="Own an abacus center in your city"
+      subtitle="Join a proven program with curriculum, marketing, and operations support. Applications take about 3 minutes."
+      perks={[
+        "Full training & onboarding playbook",
+        "Brand marketing assets & parent leads",
+        "Dedicated success manager",
+      ]}
+    >
       <div className="novu-franchise-apply__card">
-        <h2>Start your franchise application</h2>
-        <p>Tell us about yourself and your preferred city. Our team will reach out with next steps.</p>
+        <h2>Start your application</h2>
+        <p>Tell us about yourself — we respond within 2 business days.</p>
 
         {submitted ? (
           <p className="novu-franchise-apply__success" role="status">
@@ -57,7 +79,20 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
               <Input label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" />
               <Input label="Phone" value={phone} onChange={setPhone} placeholder="+91…" autoComplete="tel" />
               <Input label="Preferred city" value={city} onChange={setCity} autoComplete="address-level2" />
+              <Input label="Proposed franchise name" value={proposedName} onChange={setProposedName} />
+              <Input label="Pincode" value={pincode} onChange={setPincode} />
+              <Input label="State" value={state} onChange={setState} />
             </div>
+            <Input label="Address" value={addressLine} onChange={setAddressLine} />
+            <label className="ed-field">
+              <span className="ed-field__label">Prior experience</span>
+              <textarea
+                className="ed-field__input novu-franchise-apply__textarea"
+                value={priorExperience}
+                rows={3}
+                onChange={(e) => setPriorExperience(e.target.value)}
+              />
+            </label>
             <label className="ed-field">
               <span className="ed-field__label">Message (optional)</span>
               <textarea
@@ -70,11 +105,11 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
             </label>
             <MutationError message={error} />
             <Button type="submit" disabled={submitting} block>
-              {submitting ? "Submitting…" : "Submit application"}
+              {submitting ? "Submitting…" : "Submit franchise application"}
             </Button>
           </form>
         )}
       </div>
-    </section>
+    </EnquiryPromoSection>
   );
 }

@@ -59,13 +59,13 @@ export function CentersPage() {
     queryKey: ["centers", brandId],
     enabled: !!brandId,
     queryFn: async () => {
-      const { data, err } = await getSupabase()
+      const { data, error } = await getSupabase()
         .from("franchise_centers")
         .select("id, slug, name, status, city, address_line1, region, country")
         .eq("brand_id", brandId!)
         .is("deleted_at", null)
         .order("name");
-      return supabaseList(data, err) as Center[];
+      return supabaseList(data, error) as Center[];
     },
   });
 

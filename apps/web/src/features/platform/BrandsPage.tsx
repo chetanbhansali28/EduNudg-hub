@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { brandAdminPath } from "@/lib/adminPaths";
 import { brandPortalUrl } from "@/lib/brandPortalUrl";
+import { uniqueBrandSlug } from "@/lib/brandSlug";
+import { uploadBrandLogo } from "@/lib/brandLogoStorage";
 import { Badge, Button, Card, DataList, Input, ListRow, MutationError, PageTitle, Select } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
+import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
+import { PlatformSignupRequestsPanel } from "@/features/platform/brandSignups/PlatformSignupRequestsPanel";
+import { ManualPlatformBrandSignupCard } from "@/features/platform/brandSignups/ManualPlatformBrandSignupCard";
 import { CrudRowActions } from "./components/CrudRowActions";
 import { useMutationError } from "./hooks/useMutationError";
 
@@ -26,12 +31,17 @@ const STATUS_OPTIONS: { value: BrandStatus; label: string }[] = [
   { value: "archived", label: "Archived" },
 ];
 
-const emptyForm = { slug: "", name: "", status: "draft" as BrandStatus, logo_url: "" };
+const emptyForm = { slug: "", name: "", status: "draft" as BrandStatus };
+
+type BrandsTab = "brands" | "signups";
 
 export function BrandsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const [tab, setTab] = useState<BrandsTab>("brands");
   const [form, setForm] = useState(emptyForm);
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [createLogoFile, setCreateLogoFile] = useState<File | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
 
@@ -47,25 +57,47 @@ export function BrandsPage() {
     },
   });
 
+  useEffect(() => {
+    if (slugTouched || !form.name.trim()) return;
+    const name = form.name.trim();
+    let cancelled = false;
+    void uniqueBrandSlug(name).then((slug) => {
+      if (!cancelled) setForm((f) => ({ ...f, slug }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [form.name, slugTouched]);
+
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["brands"] });
     qc.invalidateQueries({ queryKey: ["platform-stats"] });
+    qc.invalidateQueries({ queryKey: ["brand-landing"] });
+    qc.invalidateQueries({ queryKey: ["portal-branding"] });
   };
 
   const createBrand = useMutation({
     mutationFn: async () => {
       clear();
-      const { error: mErr } = await getSupabase().from("brands").insert({
-        slug: form.slug.trim(),
-        name: form.name.trim(),
-        status: form.status,
-        logo_url: form.logo_url.trim() || null,
-      });
+      const slug = await uniqueBrandSlug(form.slug.trim() || form.name.trim());
+      const { data, error: mErr } = await getSupabase()
+        .from("brands")
+        .insert({
+          slug,
+          name: form.name.trim(),
+          status: form.status,
+          logo_url: null,
+        })
+        .select("id")
+        .single();
       if (mErr) throw mErr;
+      if (createLogoFile) await uploadBrandLogo(data.id, createLogoFile);
     },
     onSuccess: () => {
       invalidate();
       setForm(emptyForm);
+      setSlugTouched(false);
+      setCreateLogoFile(null);
     },
     onError: capture,
   });
@@ -73,13 +105,13 @@ export function BrandsPage() {
   const updateBrand = useMutation({
     mutationFn: async (id: string) => {
       clear();
+      const slug = await uniqueBrandSlug(editForm.slug.trim() || editForm.name.trim(), { excludeBrandId: id });
       const { error: mErr } = await getSupabase()
         .from("brands")
         .update({
-          slug: editForm.slug.trim(),
+          slug,
           name: editForm.name.trim(),
           status: editForm.status,
-          logo_url: editForm.logo_url.trim() || null,
         })
         .eq("id", id);
       if (mErr) throw mErr;
@@ -112,23 +144,56 @@ export function BrandsPage() {
       slug: b.slug,
       name: b.name,
       status: b.status,
-      logo_url: b.logo_url ?? "",
     });
   };
+
+  const editingBrand = brands.data?.find((b) => b.id === editingId);
 
   return (
     <>
       <PageTitle>Brands</PageTitle>
+      <div className="ed-form-section" style={{ flexDirection: "row", gap: "0.5rem" }}>
+        <Button variant={tab === "brands" ? "primary" : "ghost"} onClick={() => setTab("brands")}>
+          All brands
+        </Button>
+        <Button variant={tab === "signups" ? "primary" : "ghost"} onClick={() => setTab("signups")}>
+          Signup requests
+        </Button>
+      </div>
       <MutationError message={error} />
+      {tab === "signups" ? (
+        <>
+          <ManualPlatformBrandSignupCard />
+          <PlatformSignupRequestsPanel />
+        </>
+      ) : (
+        <>
       <Card title="Create brand">
-        <Input label="Slug" value={form.slug} onChange={(v) => setForm((f) => ({ ...f, slug: v }))} placeholder="abacusworld" />
-        <Input label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} placeholder="Abacus World" />
         <Input
-          label="Logo URL"
-          value={form.logo_url}
-          onChange={(v) => setForm((f) => ({ ...f, logo_url: v }))}
-          placeholder="https://…"
+          label="Name"
+          value={form.name}
+          onChange={(v) => setForm((f) => ({ ...f, name: v }))}
+          placeholder="Abacus World"
         />
+        <Input
+          label="Slug"
+          value={form.slug}
+          onChange={(v) => {
+            setSlugTouched(true);
+            setForm((f) => ({ ...f, slug: v }));
+          }}
+          placeholder="abacusworld"
+        />
+        <label className="ed-field">
+          <span className="ed-field__label">Logo</span>
+          <input
+            className="ed-field__input"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
+            onChange={(e) => setCreateLogoFile(e.target.files?.[0] ?? null)}
+          />
+          <p className="ed-text-sm ed-muted">Uploaded to brand-assets when the brand is created.</p>
+        </label>
         <Select label="Status" value={form.status} onChange={(v) => setForm((f) => ({ ...f, status: v }))} options={STATUS_OPTIONS} />
         <Button onClick={() => createBrand.mutate()} disabled={!form.slug.trim() || !form.name.trim() || createBrand.isPending}>
           Create brand
@@ -167,10 +232,10 @@ export function BrandsPage() {
                   <div className="ed-form-section">
                     <Input label="Name" value={editForm.name} onChange={(v) => setEditForm((f) => ({ ...f, name: v }))} />
                     <Input label="Slug" value={editForm.slug} onChange={(v) => setEditForm((f) => ({ ...f, slug: v }))} />
-                    <Input
-                      label="Logo URL"
-                      value={editForm.logo_url}
-                      onChange={(v) => setEditForm((f) => ({ ...f, logo_url: v }))}
+                    <BrandLogoUpload
+                      brandId={b.id}
+                      currentLogoUrl={editingBrand?.logo_url}
+                      onUploaded={() => invalidate()}
                     />
                     <Select
                       label="Status"
@@ -195,6 +260,8 @@ export function BrandsPage() {
           }}
         />
       </Card>
+        </>
+      )}
     </>
   );
 }

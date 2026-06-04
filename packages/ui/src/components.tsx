@@ -273,3 +273,54 @@ export function ListRow({ children, aside }: { children: ReactNode; aside?: Reac
     </div>
   );
 }
+
+/** App content grid: 1 col mobile, 2 col tablet, 3 col desktop (when cols=3). */
+export function PageGrid({
+  children,
+  cols = 3,
+  className,
+}: {
+  children: ReactNode;
+  cols?: 2 | 3;
+  className?: string;
+}) {
+  const colClass = cols === 2 ? "ed-page-grid--2" : "ed-page-grid--3";
+  return <div className={["ed-page-grid", colClass, className].filter(Boolean).join(" ")}>{children}</div>;
+}
+
+/** Full-width row inside PageGrid (forms, tables). */
+export function PageGridFull({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={["ed-page-grid__full", className].filter(Boolean).join(" ")}>{children}</div>;
+}
+
+/** Two-column form fields from tablet up. */
+export function FormGrid({ children }: { children: ReactNode }) {
+  return <div className="ed-form-grid">{children}</div>;
+}
+
+export function Textarea({
+  label,
+  value,
+  onChange,
+  rows = 4,
+  placeholder,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  rows?: number;
+  placeholder?: string;
+}) {
+  return (
+    <label className="ed-field">
+      <span className="ed-field__label">{label}</span>
+      <textarea
+        className="ed-field__input"
+        rows={rows}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </label>
+  );
+}

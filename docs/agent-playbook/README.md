@@ -6,7 +6,13 @@ Instructions for humans and AI agents working on EduNudg.
 
 1. [Definition of Done](./definition-of-done.md)
 2. [Forbidden Patterns](./forbidden-patterns.md)
-3. [AGENTS.md](../../AGENTS.md) at repo root
+3. [Modular architecture](./modular-architecture.md) — theme, services, flags, one-feature-per-folder
+4. [AGENTS.md](../../AGENTS.md) at repo root
+5. [Spec index](../spec/README.md) — franchise/student journey FRs
+
+## Frontend docs
+
+- [Marketing landing pages](../frontend/marketing-landing.md) — platform / brand / center public `/` theme
 
 ## Project stack
 

@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
+import { FeatureFlagRoute } from "@/features/auth/FeatureFlagRoute";
+import { RequireMembership } from "@/features/auth/RequireMembership";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { PlatformLayout } from "@/features/platform/PlatformLayout";
 import { CommandCenter } from "@/features/platform/CommandCenter";
@@ -20,11 +22,20 @@ import { CentersPage } from "@/features/brand/CentersPage";
 import { RoyaltiesPage } from "@/features/brand/RoyaltiesPage";
 import { BrandAnalyticsPage } from "@/features/brand/BrandAnalyticsPage";
 import { BrandSettingsPage } from "@/features/brand/BrandSettingsPage";
+import { StudentLeadsPage } from "@/features/brand/studentLeads/StudentLeadsPage";
+import { FranchiseApplicationsPage } from "@/features/brand/franchiseApplications/FranchiseApplicationsPage";
+import { BrandBillingPage } from "@/features/brand/billing/BrandBillingPage";
+import { BrandCampaignsPage } from "@/features/brand/campaigns/BrandCampaignsPage";
+import { BrandSuccessStoriesPage } from "@/features/brand/successStories/BrandSuccessStoriesPage";
+import { KitCatalogPage } from "@/features/brand/kits/KitCatalogPage";
+import { BrandMarketingEditorPage } from "@/features/brand/marketing/BrandMarketingEditorPage";
 import { CenterLandingPage } from "@/features/center/CenterLandingPage";
 import { CenterPublicLayout } from "@/features/center/CenterPublicLayout";
 import { CenterLayout } from "@/features/center/CenterLayout";
 import { CenterDashboard } from "@/features/center/CenterDashboard";
-import { AdmissionsPage } from "@/features/center/AdmissionsPage";
+import { CenterLeadsPage } from "@/features/center/leads/CenterLeadsPage";
+import { CenterKitOrdersPage } from "@/features/center/kits/CenterKitOrdersPage";
+import { CenterSettingsPage } from "@/features/center/settings/CenterSettingsPage";
 import { StudentsPage } from "@/features/center/StudentsPage";
 import { BatchesPage } from "@/features/center/BatchesPage";
 import { AttendancePage } from "@/features/center/AttendancePage";
@@ -33,7 +44,9 @@ import { InventoryPage } from "@/features/center/InventoryPage";
 import { MarketingHomePage } from "@/features/marketing/MarketingHomePage";
 import { MarketingPublicLayout } from "@/features/marketing/MarketingPublicLayout";
 import { HomepageEditorPage } from "@/features/platform/HomepageEditorPage";
-import { StudentPortalPage } from "@/features/learn/StudentPortalPage";
+import { StudentLearnLayout } from "@/features/learn/StudentLearnLayout";
+import { StudentDashboardPage } from "@/features/learn/StudentDashboardPage";
+import { StudentProfilePage } from "@/features/learn/StudentProfilePage";
 import { ParentPortalPage } from "@/features/learn/ParentPortalPage";
 import { ThemeProvider } from "@edunudg/ui";
 
@@ -59,7 +72,18 @@ export function AppRoutes() {
     return (
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<StudentPortalPage />} />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <StudentLearnLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<StudentDashboardPage />} />
+          <Route path="profile" element={<StudentProfilePage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }
@@ -86,7 +110,9 @@ export function AppRoutes() {
             path="/admin"
             element={
               <RequireAuth>
-                <PlatformLayout />
+                <RequireMembership>
+                  <PlatformLayout />
+                </RequireMembership>
               </RequireAuth>
             }
           >
@@ -111,15 +137,59 @@ export function AppRoutes() {
             path="/app"
             element={
               <RequireAuth>
-                <BrandLayout />
+                <RequireMembership>
+                  <BrandLayout />
+                </RequireMembership>
               </RequireAuth>
             }
           >
             <Route index element={<BrandDashboard />} />
             <Route path="curriculum" element={<CurriculumPage />} />
+            <Route
+              path="leads"
+              element={
+                <FeatureFlagRoute flag="student_leads">
+                  <StudentLeadsPage />
+                </FeatureFlagRoute>
+              }
+            />
+            <Route
+              path="franchise-applications"
+              element={
+                <FeatureFlagRoute flag="franchise_applications">
+                  <FranchiseApplicationsPage />
+                </FeatureFlagRoute>
+              }
+            />
             <Route path="centers" element={<CentersPage />} />
             <Route path="royalties" element={<RoyaltiesPage />} />
             <Route path="analytics" element={<BrandAnalyticsPage />} />
+            <Route
+              path="billing"
+              element={
+                <FeatureFlagRoute flag="brand_billing">
+                  <BrandBillingPage />
+                </FeatureFlagRoute>
+              }
+            />
+            <Route
+              path="campaigns"
+              element={
+                <FeatureFlagRoute flag="campaigns">
+                  <BrandCampaignsPage />
+                </FeatureFlagRoute>
+              }
+            />
+            <Route path="success-stories" element={<BrandSuccessStoriesPage />} />
+            <Route
+              path="kits"
+              element={
+                <FeatureFlagRoute flag="kits">
+                  <KitCatalogPage />
+                </FeatureFlagRoute>
+              }
+            />
+            <Route path="homepage" element={<BrandMarketingEditorPage />} />
             <Route path="settings" element={<BrandSettingsPage />} />
           </Route>
         </>
@@ -134,19 +204,31 @@ export function AppRoutes() {
             path="/app"
             element={
               <RequireAuth>
-                <CenterLayout />
+                <RequireMembership>
+                  <CenterLayout />
+                </RequireMembership>
               </RequireAuth>
             }
           >
             <Route index element={<CenterDashboard />} />
-            <Route path="admissions" element={<AdmissionsPage />} />
+            <Route path="leads" element={<CenterLeadsPage />} />
             <Route path="students" element={<StudentsPage />} />
+            <Route path="settings" element={<CenterSettingsPage />} />
+            <Route
+              path="kits"
+              element={
+                <FeatureFlagRoute flag="kits">
+                  <CenterKitOrdersPage />
+                </FeatureFlagRoute>
+              }
+            />
             <Route path="batches" element={<BatchesPage />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="fees" element={<FeesPage />} />
             <Route path="inventory" element={<InventoryPage />} />
           </Route>
-          <Route path="/admissions" element={<Navigate to="/app/admissions" replace />} />
+          <Route path="/admissions" element={<Navigate to="/app/leads" replace />} />
+          <Route path="/app/admissions" element={<Navigate to="/app/leads" replace />} />
           <Route path="/students" element={<Navigate to="/app/students" replace />} />
           <Route path="/batches" element={<Navigate to="/app/batches" replace />} />
           <Route path="/attendance" element={<Navigate to="/app/attendance" replace />} />

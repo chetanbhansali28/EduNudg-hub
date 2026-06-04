@@ -17,6 +17,10 @@
 - God components > 300 lines — split into features
 - Raw SQL in React components
 - Hardcoded brand/center IDs in source
+- Adding major flows by editing unrelated existing page files — use a new feature module
+- `getSupabase()` / OAuth / payment SDK calls directly in page components — use `services/`
+- Shipping integrations without an OFF feature flag
+- Center marking leads lost from brand UI (center only); brand reopening without `reopen_lead` RPC
 
 ## Vibe-coding red flags
 
