@@ -8,7 +8,6 @@ import {
   Input,
   ListRow,
   MutationError,
-  PageGrid,
   PageGridFull,
   PageTitle,
   Select,
@@ -117,7 +116,7 @@ export function CenterLeadsPage() {
         </PageGridFull>
       )}
 
-      <PageGrid cols={2}>
+      <PageGridFull>
         <Card title="Assigned leads">
           <DataList
             items={leads.data ?? []}
@@ -153,9 +152,9 @@ export function CenterLeadsPage() {
                 </div>
               </ListRow>
             )}
-          />
+        />
         </Card>
-      </PageGrid>
+      </PageGridFull>
 
       {convertTarget && (
         <ConvertLeadDialog

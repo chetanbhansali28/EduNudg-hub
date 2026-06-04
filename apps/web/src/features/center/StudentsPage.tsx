@@ -1,14 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { Button, Card, DataList, Input, PageTitle } from "@edunudg/ui";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Card, DataList, PageTitle } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useTenant } from "@/bootstrap/TenantProvider";
 
 export function StudentsPage() {
   const tenant = useTenant();
-  const qc = useQueryClient();
-  const [name, setName] = useState("");
 
   const students = useQuery({
     queryKey: ["students", tenant.brandId],
@@ -30,30 +28,6 @@ export function StudentsPage() {
     },
   });
 
-  const registerStudent = useMutation({
-    mutationFn: async () => {
-      if (!tenant.brandId || !tenant.centerId) throw new Error("Center required");
-      const { data: student, error: sErr } = await getSupabase()
-        .from("students")
-        .insert({ brand_id: tenant.brandId, full_name: name })
-        .select("id")
-        .single();
-      if (sErr) throw sErr;
-      const { error: eErr } = await getSupabase().from("student_enrollments").insert({
-        brand_id: tenant.brandId,
-        center_id: tenant.centerId,
-        student_id: student.id,
-        status: "active",
-      });
-      if (eErr) throw eErr;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["students"] });
-      qc.invalidateQueries({ queryKey: ["enrollments"] });
-      setName("");
-    },
-  });
-
   const transfers = useQuery({
     queryKey: ["transfer-requests"],
     queryFn: async () => {
@@ -65,27 +39,26 @@ export function StudentsPage() {
   return (
     <>
       <PageTitle>Students & Transfers</PageTitle>
-      <Card title="Register & enroll">
-        <Input label="Student name" value={name} onChange={setName} />
-        <Button onClick={() => registerStudent.mutate()} disabled={!name}>
-          Register + enroll
-        </Button>
+
+      <Card title="Add students">
+        <p className="ed-text-sm ed-muted">
+          New students should be created by converting a lead after you call the parent — that keeps enrollment data
+          aligned with the lead pipeline.
+        </p>
+        <Link to="/app/leads">
+          <Button>Go to leads</Button>
+        </Link>
       </Card>
+
       <Card title="Students (brand-owned)">
-        <DataList
-          items={(students.data ?? []).map((s) => (s))}
-          render={(s) => <strong>{s.full_name}</strong>}
-        />
+        <DataList items={(students.data ?? []).map((s) => s)} render={(s) => <strong>{s.full_name}</strong>} />
       </Card>
       <Card title="Active enrollments (this center)">
-        <DataList
-          items={(enrollments.data ?? []).map((e) => (e))}
-          render={(e) => <span>Enrollment — {e.status}</span>}
-        />
+        <DataList items={(enrollments.data ?? []).map((e) => e)} render={(e) => <span>Enrollment — {e.status}</span>} />
       </Card>
       <Card title="Transfer requests">
         <DataList
-          items={(transfers.data ?? []).map((t) => (t))}
+          items={(transfers.data ?? []).map((t) => t)}
           empty="No transfers."
           render={(t) => <span>{t.status}</span>}
         />

@@ -5,7 +5,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 **Confirmed (product):**
 
 - Brand: separate **Student Leads** and **Franchise Applications**
-- Platform: self-serve approvals under **Brands → Signup requests** tab (no new top-level item)
+- Platform: self-serve approvals on **`/admin/brands`** (manual add + pending queue + brand list)
 - Student (`learn.*`): **Dashboard** + **Profile** only in v1
 
 ---
@@ -16,7 +16,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 |---------|------|-------|--------|
 | Main menu | Home | `/admin` | Exists |
 | Features | Brands | `/admin/brands` | Exists |
-| | ↳ Signup requests | `/admin/brands` tab **signups** | Exists — includes manual add |
+| | ↳ Brand signups | `/admin/brands` | Manual add + pending queue + approve |
 | | Subscriptions | `/admin/subscriptions` | Exists |
 | | Revenue & Usage | `/admin/revenue` | Exists |
 | | Audit Logs | `/admin/audit` | Exists |

@@ -1,27 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, PageToolbar } from "@edunudg/ui";
+import { Button, Card, PageTitle } from "@edunudg/ui";
 import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
-import {
-  fetchBrandMarketingEditor,
-  saveBrandMarketingLanding,
-  type BrandMarketingSettingsKey,
-} from "@/lib/brandLandingEditorApi";
+import { fetchBrandMarketingEditor, saveBrandMarketingLanding } from "@/lib/brandLandingEditorApi";
 import { brandPortalUrl, centerPortalUrl } from "@/lib/brandPortalUrl";
 import { getSupabase } from "@/lib/supabase";
 import type { HomepageConfig } from "@/types/homepage";
 
-type MarketingTab = "brand" | "center";
-
 export function BrandMarketingEditorPage() {
   const { brandId, missingBrand } = useBrandScope();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<MarketingTab>("brand");
   const [brandConfig, setBrandConfig] = useState<HomepageConfig | null>(null);
   const [centerConfig, setCenterConfig] = useState<HomepageConfig | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [brandSaved, setBrandSaved] = useState(false);
+  const [centerSaved, setCenterSaved] = useState(false);
 
   const editor = useQuery({
     queryKey: ["brand-marketing-editor", brandId],
@@ -53,26 +47,41 @@ export function BrandMarketingEditorPage() {
     setCenterConfig(editor.data.centerLandingConfig);
   }, [editor.data]);
 
-  const save = useMutation({
+  const saveBrand = useMutation({
     mutationFn: async () => {
-      if (!brandId || !editor.data) throw new Error("Brand required");
-      const key: BrandMarketingSettingsKey = tab === "brand" ? "landing" : "center_landing";
-      const config = tab === "brand" ? brandConfig : centerConfig;
-      if (!config) throw new Error("Config required");
+      if (!brandId || !editor.data || !brandConfig) throw new Error("Brand required");
       await saveBrandMarketingLanding(
         brandId,
         editor.data.settingsId,
         editor.data.existingSettings,
-        key,
-        config
+        "landing",
+        brandConfig
       );
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["brand-marketing-editor", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
+      setBrandSaved(true);
+      setTimeout(() => setBrandSaved(false), 3000);
+    },
+  });
+
+  const saveCenter = useMutation({
+    mutationFn: async () => {
+      if (!brandId || !editor.data || !centerConfig) throw new Error("Brand required");
+      await saveBrandMarketingLanding(
+        brandId,
+        editor.data.settingsId,
+        editor.data.existingSettings,
+        "center_landing",
+        centerConfig
+      );
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["brand-marketing-editor", brandId] });
       void qc.invalidateQueries({ queryKey: ["center-landing"] });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      setCenterSaved(true);
+      setTimeout(() => setCenterSaved(false), 3000);
     },
   });
 
@@ -88,76 +97,52 @@ export function BrandMarketingEditorPage() {
   const brandPreviewUrl = brandPortalUrl(brandSlug);
   const centerPreviewUrl =
     previewCenter.data && brandSlug ? centerPortalUrl(brandSlug, previewCenter.data) : null;
-  const activeConfig = tab === "brand" ? brandConfig : centerConfig;
-  const setActiveConfig = tab === "brand" ? setBrandConfig : setCenterConfig;
 
   return (
     <>
-      <PageToolbar
-        title="Marketing pages"
-        subtitle={
-          tab === "brand" ? (
-            <>
-              Franchise recruitment site ·{" "}
-              <a href={brandPreviewUrl} target="_blank" rel="noreferrer">
-                Preview brand site
-              </a>
-            </>
-          ) : (
-            <>
-              Parent enrollment template for all centers ·{" "}
-              {centerPreviewUrl ? (
-                <a href={centerPreviewUrl} target="_blank" rel="noreferrer">
-                  Preview center site
-                </a>
-              ) : (
-                "Add an active center to preview"
-              )}
-            </>
-          )
-        }
-      >
-        <Button variant={tab === "brand" ? "primary" : "ghost"} onClick={() => setTab("brand")}>
-          Brand site
-        </Button>
-        <Button variant={tab === "center" ? "primary" : "ghost"} onClick={() => setTab("center")}>
-          Center sites
-        </Button>
-        <a href={tab === "brand" ? brandPreviewUrl : centerPreviewUrl ?? brandPreviewUrl} target="_blank" rel="noreferrer">
-          <Button variant="ghost">Preview</Button>
-        </a>
-        <Button onClick={() => save.mutate()} disabled={save.isPending}>
-          {save.isPending ? "Saving…" : saved ? "Saved" : "Save changes"}
-        </Button>
-      </PageToolbar>
+      <PageTitle>Marketing pages</PageTitle>
 
-      {tab === "brand" && (
-        <p className="ed-text-sm ed-muted" style={{ marginBottom: "1rem" }}>
-          Testimonial quotes come from published{" "}
-          <Link to="/app/success-stories">success stories</Link>. Edit the section title and subtitle below.
+      <Card title="Brand site (franchise recruitment)">
+        <p className="ed-text-sm ed-muted">
+          Public homepage on your brand hostname ·{" "}
+          <a href={brandPreviewUrl} target="_blank" rel="noreferrer">
+            Preview
+          </a>
+          . Testimonial quotes come from published{" "}
+          <Link to="/app/success-stories">success stories</Link>.
         </p>
-      )}
-
-      {tab === "center" && (
-        <p className="ed-text-sm ed-muted" style={{ marginBottom: "1rem" }}>
-          This template applies to every center hostname (e.g. koramangala.{brandSlug}.localhost). Center name and
-          city are filled in automatically per location.
-        </p>
-      )}
-
-      <HomepageEditorForm
-        config={activeConfig}
-        onChange={setActiveConfig}
-        testimonialsManagedExternally={tab === "brand"}
-        testimonialsExternalHint={
-          tab === "brand" ? (
+        <HomepageEditorForm
+          config={brandConfig}
+          onChange={setBrandConfig}
+          testimonialsManagedExternally
+          testimonialsExternalHint={
             <p className="ed-text-sm ed-muted">
-              Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page. Published stories
-              replace the default testimonials on your live brand site.
+              Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page.
             </p>
-          ) : undefined
-        }
-      />
+          }
+        />
+        <Button onClick={() => saveBrand.mutate()} disabled={saveBrand.isPending}>
+          {saveBrand.isPending ? "Saving…" : brandSaved ? "Saved" : "Save brand site"}
+        </Button>
+      </Card>
+
+      <Card title="Center sites (parent enrollment template)">
+        <p className="ed-text-sm ed-muted">
+          Template for every center hostname (e.g. koramangala.{brandSlug}.localhost). Center name and city are filled
+          in per location.{" "}
+          {centerPreviewUrl ? (
+            <a href={centerPreviewUrl} target="_blank" rel="noreferrer">
+              Preview center site
+            </a>
+          ) : (
+            "Add an active center to preview."
+          )}
+        </p>
+        <HomepageEditorForm config={centerConfig} onChange={setCenterConfig} />
+        <Button onClick={() => saveCenter.mutate()} disabled={saveCenter.isPending}>
+          {saveCenter.isPending ? "Saving…" : centerSaved ? "Saved" : "Save center template"}
+        </Button>
+      </Card>
     </>
   );
 }

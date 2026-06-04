@@ -41,7 +41,7 @@ export function ManualPlatformBrandSignupCard() {
 
   return (
     <Card title="Add brand signup manually">
-      <p className="ed-text-sm ed-muted">Phone or event lead — appears in Signup requests for approval.</p>
+      <p className="ed-text-sm ed-muted">Phone or event lead — appears below for approval before the brand goes live.</p>
       <MutationError message={error} />
       <FormGrid>
         <Input label="Brand name" value={requestedName} onChange={setRequestedName} />

@@ -11,7 +11,7 @@ Details: [Portal host matrix](../spec/portal-host-matrix.md), [Platform brand on
 See [Navigation spec](../spec/navigation-spec.md).
 
 - Command Center (Home)
-- Brands — includes **Signup requests** tab for self-serve approvals
+- Brands — manual signup, pending approvals, and brand list on one page
 - Subscriptions & Billing
 - Revenue & Usage
 - Audit Logs

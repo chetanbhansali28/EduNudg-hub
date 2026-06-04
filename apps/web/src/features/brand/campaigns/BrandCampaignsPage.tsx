@@ -9,7 +9,6 @@ import {
   Input,
   ListRow,
   MutationError,
-  PageGrid,
   PageGridFull,
   PageTitle,
   Textarea,
@@ -157,8 +156,8 @@ export function BrandCampaignsPage() {
         </Card>
       </PageGridFull>
 
-      <PageGrid cols={2}>
-        <Card title="All campaigns">
+      <PageGridFull>
+        <Card title="Campaigns">
           <DataList
             items={campaigns.data ?? []}
             empty="No campaigns yet."
@@ -244,7 +243,7 @@ export function BrandCampaignsPage() {
             }}
           />
         </Card>
-      </PageGrid>
+      </PageGridFull>
     </>
   );
 }

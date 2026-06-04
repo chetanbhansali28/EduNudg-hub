@@ -6,7 +6,7 @@ import { getSupabase } from "@/lib/supabase";
 import { brandAdminPath, isUuid } from "@/lib/adminPaths";
 import { brandPortalUrl } from "@/lib/brandPortalUrl";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
-import { formatInrFromPaise, useBrandMonitoringStats } from "./hooks/useBrandMonitoringStats";
+import { formatInrFromPaise, useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
 
 interface BrandRow {
   id: string;
@@ -163,9 +163,9 @@ export function BrandDetailPage() {
           <>
             <KpiGrid>
               <KpiCard
-                label="Revenue (30d)"
+                label="Royalty collected (30d)"
                 value={stats ? formatInrFromPaise(stats.revenue30dCents) : "—"}
-                hint="Daily brand rollups"
+                hint="Paid settlements"
               />
               <KpiCard label="Enrollments (30d)" value={stats?.enrollments30d ?? 0} />
               <KpiCard
@@ -187,23 +187,23 @@ export function BrandDetailPage() {
               <KpiCard label="Subscription" value={sub?.subscription_plans?.name ?? "—"} hint={sub?.status} />
             </KpiGrid>
 
-            {stats && stats.recentDaily.length > 0 ? (
+            {stats && stats.recentDaily.some((row) => row.enrollments_count > 0 || row.revenue_cents > 0) ? (
               <div className="ed-monitoring-table-wrap">
                 <p className="ed-text-sm ed-muted" style={{ marginBottom: "0.5rem" }}>
-                  Daily trend (most recent first)
+                  Daily trend (computed from enrollments &amp; royalties)
                 </p>
                 <table className="ed-monitoring-table">
                   <thead>
                     <tr>
                       <th>Date</th>
                       <th>Enrollments</th>
-                      <th>Revenue</th>
+                      <th>Royalty (paid)</th>
                       <th>Active centers</th>
                     </tr>
                   </thead>
                   <tbody>
                     {stats.recentDaily.map((row) => (
-                      <tr key={row.id}>
+                      <tr key={row.metric_date}>
                         <td>{row.metric_date}</td>
                         <td>{row.enrollments_count}</td>
                         <td>{formatInrFromPaise(row.revenue_cents)}</td>
@@ -214,7 +214,7 @@ export function BrandDetailPage() {
                 </table>
               </div>
             ) : (
-              <p className="ed-text-sm ed-muted">No daily rollup data yet. Add metrics under Revenue &amp; Usage.</p>
+              <p className="ed-text-sm ed-muted">No enrollments or royalty payments in the last two weeks yet.</p>
             )}
 
             {stats && stats.topCenters.length > 0 && (

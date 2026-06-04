@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, DataList, Input, ListRow, MutationError, PageGrid, PageGridFull, PageTitle } from "@edunudg/ui";
+import { Badge, Button, Card, DataList, Input, ListRow, MutationError, PageGridFull, PageTitle, Select } from "@edunudg/ui";
 import { ManualFranchiseInquiryCard } from "@/features/shared/manualLeads/ManualFranchiseInquiryCard";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
@@ -20,10 +20,23 @@ interface Inquiry {
   created_at: string;
 }
 
+type InquiryFilter = "all" | "pending" | "decided";
+
+const FILTER_OPTIONS: { value: InquiryFilter; label: string }[] = [
+  { value: "all", label: "All applications" },
+  { value: "pending", label: "Pending review" },
+  { value: "decided", label: "Approved / rejected / converted" },
+];
+
+function isPending(row: Inquiry) {
+  return row.status === "new" || row.status === "contacted" || row.status === "qualified";
+}
+
 export function FranchiseApplicationsPage() {
   const { brandId, missingBrand } = useBrandScope();
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const [filter, setFilter] = useState<InquiryFilter>("pending");
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [centerSlug, setCenterSlug] = useState("");
   const [centerName, setCenterName] = useState("");
@@ -82,7 +95,12 @@ export function FranchiseApplicationsPage() {
 
   if (missingBrand) return <p className="ed-empty">Brand context not found.</p>;
 
-  const pending = (inquiries.data ?? []).filter((r) => r.status === "new" || r.status === "contacted" || r.status === "qualified");
+  const all = inquiries.data ?? [];
+  const filtered = all.filter((row) => {
+    if (filter === "pending") return isPending(row);
+    if (filter === "decided") return !isPending(row);
+    return true;
+  });
 
   return (
     <>
@@ -93,42 +111,34 @@ export function FranchiseApplicationsPage() {
         {brandId && <ManualFranchiseInquiryCard brandId={brandId} />}
       </PageGridFull>
 
-      <PageGrid cols={2}>
-      <Card title={`Pending (${pending.length})`}>
+      <Card title="Applications">
+        <Select label="Show" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
         <DataList
-          items={pending}
-          empty="No pending franchise applications."
-          render={(row) => (
-            <ListRow
-              aside={
-                <div className="ed-form-section">
-                  <Button variant="ghost" onClick={() => setApprovingId(row.id)}>
-                    Approve
-                  </Button>
-                  <Button variant="ghost" onClick={() => setRejectingId(row.id)}>
-                    Reject
-                  </Button>
-                </div>
-              }
-            >
-              <InquirySummary row={row} />
-            </ListRow>
-          )}
+          items={filtered}
+          empty="No franchise applications in this view."
+          render={(row) => {
+            const pending = isPending(row);
+            return (
+              <ListRow
+                aside={
+                  pending ? (
+                    <div className="ed-form-section">
+                      <Button variant="ghost" onClick={() => setApprovingId(row.id)}>
+                        Approve
+                      </Button>
+                      <Button variant="ghost" onClick={() => setRejectingId(row.id)}>
+                        Reject
+                      </Button>
+                    </div>
+                  ) : undefined
+                }
+              >
+                <InquirySummary row={row} />
+              </ListRow>
+            );
+          }}
         />
       </Card>
-
-      <Card title="All applications">
-        <DataList
-          items={inquiries.data ?? []}
-          empty="No franchise applications yet."
-          render={(row) => (
-            <ListRow>
-              <InquirySummary row={row} />
-            </ListRow>
-          )}
-        />
-      </Card>
-      </PageGrid>
 
       {approvingId && (
         <Card title="Approve — provision center">

@@ -9,7 +9,6 @@ import {
   Input,
   ListRow,
   MutationError,
-  PageGrid,
   PageGridFull,
   PageTitle,
 } from "@edunudg/ui";
@@ -154,7 +153,7 @@ export function KitCatalogPage() {
         </Card>
       </PageGridFull>
 
-      <PageGrid cols={2}>
+      <PageGridFull>
         <Card title="Catalog items">
           <DataList
             items={catalog.data ?? []}
@@ -227,7 +226,7 @@ export function KitCatalogPage() {
             }}
           />
         </Card>
-      </PageGrid>
+      </PageGridFull>
     </>
   );
 }

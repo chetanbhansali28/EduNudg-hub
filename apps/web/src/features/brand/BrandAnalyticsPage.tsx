@@ -1,195 +1,106 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Button,
-  Card,
-  DataList,
-  Input,
-  KpiCard,
-  KpiGrid,
-  ListRow,
-  MutationError,
-  PageTitle,
-} from "@edunudg/ui";
-import { getSupabase } from "@/lib/supabase";
-import { supabaseList } from "@/lib/supabaseResult";
-import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
-import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { Badge, Card, DataList, KpiCard, KpiGrid, ListRow, PageTitle } from "@edunudg/ui";
+import { formatInrFromPaise, useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
 import { useBrandScope } from "./hooks/useBrandScope";
-
-interface DailyMetric {
-  id: string;
-  metric_date: string;
-  enrollments_count: number;
-  revenue_cents: number;
-  active_centers: number;
-}
-
-const emptyMetric = {
-  metric_date: "",
-  enrollments_count: "",
-  revenue_inr: "",
-  active_centers: "",
-};
 
 export function BrandAnalyticsPage() {
   const { brandId, missingBrand } = useBrandScope();
-  const qc = useQueryClient();
-  const { error, clear, capture } = useMutationError();
-  const [form, setForm] = useState(emptyMetric);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState(emptyMetric);
-
-  const metrics = useQuery({
-    queryKey: ["analytics-daily-brand", brandId],
-    enabled: !!brandId,
-    queryFn: async () => {
-      const { data, error: qErr } = await getSupabase()
-        .from("analytics_daily_brand")
-        .select("id, metric_date, enrollments_count, revenue_cents, active_centers")
-        .eq("brand_id", brandId!)
-        .order("metric_date", { ascending: false })
-        .limit(30);
-      return supabaseList(data, qErr) as DailyMetric[];
-    },
-  });
-
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["analytics-daily-brand", brandId] });
-
-  const rows = metrics.data ?? [];
-  const summary = {
-    enrollments: rows.reduce((s, r) => s + (r.enrollments_count ?? 0), 0),
-    revenue: rows.reduce((s, r) => s + (r.revenue_cents ?? 0), 0),
-    latestCenters: rows[0]?.active_centers ?? 0,
-  };
-
-  const toPayload = (f: typeof emptyMetric) => {
-    const revenue = Math.round(parseFloat(f.revenue_inr || "0") * 100);
-    return {
-      metric_date: f.metric_date,
-      enrollments_count: parseInt(f.enrollments_count || "0", 10),
-      revenue_cents: Number.isNaN(revenue) ? 0 : revenue,
-      active_centers: parseInt(f.active_centers || "0", 10),
-    };
-  };
-
-  const createMetric = useMutation({
-    mutationFn: async () => {
-      if (!brandId) throw new Error("Brand required");
-      clear();
-      const { error: mErr } = await getSupabase().from("analytics_daily_brand").insert({
-        brand_id: brandId,
-        ...toPayload(form),
-      });
-      if (mErr) throw mErr;
-    },
-    onSuccess: () => {
-      invalidate();
-      setForm(emptyMetric);
-    },
-    onError: capture,
-  });
-
-  const updateMetric = useMutation({
-    mutationFn: async (id: string) => {
-      clear();
-      const { error: mErr } = await getSupabase()
-        .from("analytics_daily_brand")
-        .update(toPayload(editForm))
-        .eq("id", id);
-      if (mErr) throw mErr;
-    },
-    onSuccess: () => {
-      invalidate();
-      setEditingId(null);
-    },
-    onError: capture,
-  });
-
-  const deleteMetric = useMutation({
-    mutationFn: async (id: string) => {
-      if (!confirm("Delete this daily metric?")) return;
-      clear();
-      const { error: mErr } = await getSupabase().from("analytics_daily_brand").delete().eq("id", id);
-      if (mErr) throw mErr;
-    },
-    onSuccess: invalidate,
-    onError: capture,
-  });
+  const stats = useBrandMonitoringStats(brandId);
 
   if (missingBrand) {
     return <p className="ed-empty">Brand context not found.</p>;
   }
 
+  const s = stats.data;
+
   return (
     <>
       <PageTitle>Analytics</PageTitle>
-      <MutationError message={error} />
+      <p className="ed-text-sm ed-muted">
+        Live metrics from your franchise network — enrollments, centers, leads, and paid royalties. Nothing to
+        enter manually; numbers update as your team works in EduNudg.
+      </p>
 
-      <KpiGrid>
-        <KpiCard label="Enrollments (recent rows)" value={rows.length ? summary.enrollments : "—"} />
-        <KpiCard
-          label="Revenue (recent rows)"
-          value={rows.length ? `₹${(summary.revenue / 100).toLocaleString()}` : "—"}
-        />
-        <KpiCard label="Active centers (latest day)" value={rows.length ? summary.latestCenters : "—"} />
-      </KpiGrid>
+      {stats.isLoading ? (
+        <p className="ed-text-sm ed-muted">Loading analytics…</p>
+      ) : (
+        <>
+          <KpiGrid>
+            <KpiCard
+              label="New enrollments (30d)"
+              value={s?.enrollments30d ?? 0}
+              hint={`${s?.enrollmentsActive ?? 0} active total`}
+            />
+            <KpiCard label="Students" value={s?.students ?? 0} />
+            <KpiCard
+              label="Centers"
+              value={`${s?.centersActive ?? 0} / ${s?.centersTotal ?? 0}`}
+              hint="Active / total"
+            />
+            <KpiCard label="Open student leads" value={s?.leadsOpen ?? 0} />
+            <KpiCard
+              label="Royalty collected (30d)"
+              value={s != null ? formatInrFromPaise(s.revenue30dCents) : "—"}
+              hint="Paid settlements in period"
+            />
+            <KpiCard
+              label="Unpaid platform invoices"
+              value={s != null ? formatInrFromPaise(s.unpaidAmountCents) : "—"}
+              hint={s ? `${s.unpaidInvoices} open` : undefined}
+            />
+          </KpiGrid>
 
-      <Card title="Add daily snapshot">
-        <Input label="Date" value={form.metric_date} onChange={(v) => setForm((f) => ({ ...f, metric_date: v }))} placeholder="YYYY-MM-DD" />
-        <Input label="Enrollments" value={form.enrollments_count} onChange={(v) => setForm((f) => ({ ...f, enrollments_count: v }))} />
-        <Input label="Revenue (INR)" value={form.revenue_inr} onChange={(v) => setForm((f) => ({ ...f, revenue_inr: v }))} />
-        <Input label="Active centers" value={form.active_centers} onChange={(v) => setForm((f) => ({ ...f, active_centers: v }))} />
-        <Button onClick={() => createMetric.mutate()} disabled={!form.metric_date || createMetric.isPending}>
-          Add snapshot
-        </Button>
-      </Card>
+          <Card title="Daily enrollment trend (last 14 days)">
+            {s && s.recentDaily.some((row) => row.enrollments_count > 0) ? (
+              <div className="ed-monitoring-table-wrap">
+                <table className="ed-monitoring-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>New enrollments</th>
+                      <th>Royalty (paid)</th>
+                      <th>Active centers</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {s.recentDaily.map((row) => (
+                      <tr key={row.metric_date}>
+                        <td>{row.metric_date}</td>
+                        <td>{row.enrollments_count}</td>
+                        <td>{formatInrFromPaise(row.revenue_cents)}</td>
+                        <td>{row.active_centers}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="ed-text-sm ed-muted">
+                No enrollments in the last two weeks yet. Converting leads and enrolling students will populate this
+                chart automatically.
+              </p>
+            )}
+          </Card>
 
-      <Card title="Daily metrics">
-        <DataList
-          items={metrics.data ?? []}
-          empty="No metrics recorded."
-          render={(m) => {
-            const editing = editingId === m.id;
-            return (
-              <ListRow
-                aside={
-                  <CrudRowActions
-                    editing={editing}
-                    onEdit={() => {
-                      setEditingId(m.id);
-                      setEditForm({
-                        metric_date: m.metric_date,
-                        enrollments_count: String(m.enrollments_count),
-                        revenue_inr: String(m.revenue_cents / 100),
-                        active_centers: String(m.active_centers),
-                      });
-                    }}
-                    onSave={() => updateMetric.mutate(m.id)}
-                    onCancel={() => setEditingId(null)}
-                    onDelete={() => deleteMetric.mutate(m.id)}
-                    saveDisabled={updateMetric.isPending}
-                  />
-                }
-              >
-                {editing ? (
-                  <div className="ed-form-section">
-                    <Input label="Date" value={editForm.metric_date} onChange={(v) => setEditForm((f) => ({ ...f, metric_date: v }))} />
-                    <Input label="Enrollments" value={editForm.enrollments_count} onChange={(v) => setEditForm((f) => ({ ...f, enrollments_count: v }))} />
-                    <Input label="Revenue (INR)" value={editForm.revenue_inr} onChange={(v) => setEditForm((f) => ({ ...f, revenue_inr: v }))} />
-                    <Input label="Active centers" value={editForm.active_centers} onChange={(v) => setEditForm((f) => ({ ...f, active_centers: v }))} />
-                  </div>
-                ) : (
-                  <span>
-                    {m.metric_date}: {m.enrollments_count} enrollments · ₹{(m.revenue_cents / 100).toLocaleString()} ·{" "}
-                    {m.active_centers} centers
-                  </span>
+          <Card title="Top centers (30d enrollments)">
+            {s && s.topCenters.length > 0 ? (
+              <DataList
+                items={s.topCenters}
+                render={(c) => (
+                  <ListRow>
+                    <div>
+                      <strong>{c.name}</strong>
+                      <div className="ed-text-sm ed-muted">{c.slug}</div>
+                    </div>
+                    <Badge tone="success">{c.enrollments30d} enrollments</Badge>
+                  </ListRow>
                 )}
-              </ListRow>
-            );
-          }}
-        />
-      </Card>
+              />
+            ) : (
+              <p className="ed-text-sm ed-muted">Center rankings appear once enrollments are recorded.</p>
+            )}
+          </Card>
+        </>
+      )}
     </>
   );
 }

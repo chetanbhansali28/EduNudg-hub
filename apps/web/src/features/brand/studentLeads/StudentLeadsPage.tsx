@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
@@ -7,7 +7,6 @@ import {
   DataList,
   ListRow,
   MutationError,
-  PageGrid,
   PageGridFull,
   PageTitle,
   Select,
@@ -25,10 +24,30 @@ import {
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 
+type LeadFilter = "all" | "unassigned" | "stale" | "lost";
+
+const FILTER_OPTIONS: { value: LeadFilter; label: string }[] = [
+  { value: "all", label: "All leads" },
+  { value: "unassigned", label: "Unassigned" },
+  { value: "stale", label: "Stale — no center action" },
+  { value: "lost", label: "Lost" },
+];
+
+function isStale(lead: LeadRow, now: number) {
+  return (
+    !!lead.center_id &&
+    !!lead.stale_at &&
+    new Date(lead.stale_at).getTime() < now &&
+    lead.status !== "converted" &&
+    lead.status !== "lost"
+  );
+}
+
 export function StudentLeadsPage() {
   const { brandId, missingBrand } = useBrandScope();
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const [filter, setFilter] = useState<LeadFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isReallocate, setIsReallocate] = useState(false);
   const [assignCenterId, setAssignCenterId] = useState("");
@@ -96,19 +115,26 @@ export function StudentLeadsPage() {
     onError: capture,
   });
 
-  if (missingBrand) return <p className="ed-empty">Brand context not found.</p>;
-
   const now = Date.now();
-  const unassigned = (leads.data ?? []).filter((l) => !l.center_id);
-  const stale = (leads.data ?? []).filter(
-    (l) =>
-      l.center_id &&
-      l.stale_at &&
-      new Date(l.stale_at).getTime() < now &&
-      l.status !== "converted" &&
-      l.status !== "lost"
+  const allLeads = leads.data ?? [];
+
+  const counts = useMemo(
+    () => ({
+      unassigned: allLeads.filter((l) => !l.center_id).length,
+      stale: allLeads.filter((l) => isStale(l, now)).length,
+      lost: allLeads.filter((l) => l.status === "lost").length,
+    }),
+    [allLeads, now]
   );
-  const lost = (leads.data ?? []).filter((l) => l.status === "lost");
+
+  const filtered = allLeads.filter((l) => {
+    if (filter === "unassigned") return !l.center_id;
+    if (filter === "stale") return isStale(l, now);
+    if (filter === "lost") return l.status === "lost";
+    return true;
+  });
+
+  if (missingBrand) return <p className="ed-empty">Brand context not found.</p>;
 
   return (
     <>
@@ -121,35 +147,45 @@ export function StudentLeadsPage() {
         )}
       </PageGridFull>
 
-      <PageGrid cols={3}>
-        <Card title={`Unassigned (${unassigned.length})`}>
-          <DataList items={unassigned} empty="No unassigned leads." render={(l) => renderLead(l)} />
-        </Card>
-        <Card title={`Stale — no center action (${stale.length})`}>
-          <DataList items={stale} empty="No stale leads." render={(l) => renderLead(l, true)} />
-        </Card>
-        <Card title={`Lost (${lost.length})`}>
-          <DataList
-            items={lost}
-            empty="No lost leads."
-            render={(l) => (
+      <Card title="Lead pipeline">
+        <p className="ed-text-sm ed-muted">
+          Unassigned {counts.unassigned} · Stale {counts.stale} · Lost {counts.lost}
+        </p>
+        <Select label="Show" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
+        <DataList
+          items={filtered}
+          empty="No leads in this view."
+          render={(l) => {
+            const stale = isStale(l, now);
+            const showReassign = stale;
+            return (
               <ListRow
                 aside={
-                  <Button variant="ghost" onClick={() => reopen.mutate(l.id)} disabled={reopen.isPending}>
-                    Reopen
-                  </Button>
+                  l.status === "lost" ? (
+                    <Button variant="ghost" onClick={() => reopen.mutate(l.id)} disabled={reopen.isPending}>
+                      Reopen
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setSelectedId(l.id);
+                        setIsReallocate(showReassign);
+                        setAssignCenterId(l.center_id ?? "");
+                      }}
+                    >
+                      {!l.center_id ? "Assign" : showReassign ? "Reallocate" : "Reassign"}
+                    </Button>
+                  )
                 }
               >
-                <LeadSummary lead={l} />
+                <LeadSummary lead={l} stale={stale} unassigned={!l.center_id} />
                 {l.lost_reason && <p className="ed-text-sm">Reason: {l.lost_reason}</p>}
               </ListRow>
-            )}
-          />
-        </Card>
-        <Card title="All leads">
-          <DataList items={leads.data ?? []} empty="No leads." render={(l) => renderLead(l)} />
-        </Card>
-      </PageGrid>
+            );
+          }}
+        />
+      </Card>
 
       {selectedId && (
         <Card title={isReallocate ? "Reallocate to center" : "Assign to center"}>
@@ -203,30 +239,9 @@ export function StudentLeadsPage() {
       )}
     </>
   );
-
-  function renderLead(l: LeadRow, showReassign = false) {
-    return (
-      <ListRow
-        aside={
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setSelectedId(l.id);
-              setIsReallocate(showReassign);
-              setAssignCenterId(l.center_id ?? "");
-            }}
-          >
-            {l.center_id ? (showReassign ? "Reallocate" : "View") : "Assign"}
-          </Button>
-        }
-      >
-        <LeadSummary lead={l} />
-      </ListRow>
-    );
-  }
 }
 
-function LeadSummary({ lead }: { lead: LeadRow }) {
+function LeadSummary({ lead, stale, unassigned }: { lead: LeadRow; stale?: boolean; unassigned?: boolean }) {
   return (
     <div>
       <strong>{lead.parent_name ?? lead.full_name}</strong>
@@ -235,6 +250,8 @@ function LeadSummary({ lead }: { lead: LeadRow }) {
       </div>
       {lead.child_name && <div className="ed-text-sm">Child: {lead.child_name}</div>}
       <Badge>{lead.status}</Badge> <Badge>{lead.lead_source ?? "—"}</Badge>
+      {unassigned && <Badge tone="warning">Unassigned</Badge>}
+      {stale && <Badge tone="warning">Stale</Badge>}
     </div>
   );
 }

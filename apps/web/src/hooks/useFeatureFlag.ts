@@ -34,9 +34,8 @@ export function useBrandFeatureFlags(): Record<string, boolean> {
         .eq("brand_id", brandId!)
         .maybeSingle();
       if (error) throw error;
-      return (data?.settings as Record<string, unknown> | undefined)?.features as
-        | Record<string, boolean>
-        | undefined;
+      const features = (data?.settings as Record<string, unknown> | undefined)?.features;
+      return (features as Record<string, boolean> | undefined) ?? {};
     },
     staleTime: 60_000,
   });

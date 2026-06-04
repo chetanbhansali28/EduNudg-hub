@@ -82,7 +82,22 @@ describe("BrandDetailPage", () => {
       if (table === "students") {
         return countChain(12);
       }
-      if (table === "analytics_daily_brand") {
+      if (table === "student_enrollments") {
+        let head = false;
+        const c = {
+          select: vi.fn((_cols: string, opts?: { head?: boolean }) => {
+            head = !!opts?.head;
+            return c;
+          }),
+          eq: vi.fn(() => {
+            if (head) return Promise.resolve({ data: null, error: null, count: 5 });
+            return c;
+          }),
+          gte: vi.fn(() => Promise.resolve({ data: [], error: null })),
+        };
+        return c;
+      }
+      if (table === "royalty_settlements") {
         return chain({ data: [], error: null });
       }
       if (table === "platform_invoices") {

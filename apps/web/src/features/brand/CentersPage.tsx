@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
@@ -37,7 +38,7 @@ const STATUS_OPTIONS: { value: CenterStatus; label: string }[] = [
   { value: "closed", label: "Closed" },
 ];
 
-const emptyForm = {
+const emptyEditForm = {
   slug: "",
   name: "",
   status: "pending" as CenterStatus,
@@ -51,48 +52,24 @@ export function CentersPage() {
   const { brandId, missingBrand } = useBrandScope();
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
-  const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState(emptyForm);
+  const [editForm, setEditForm] = useState(emptyEditForm);
 
   const centers = useQuery({
     queryKey: ["centers", brandId],
     enabled: !!brandId,
     queryFn: async () => {
-      const { data, error } = await getSupabase()
+      const { data, error: qErr } = await getSupabase()
         .from("franchise_centers")
         .select("id, slug, name, status, city, address_line1, region, country")
         .eq("brand_id", brandId!)
         .is("deleted_at", null)
         .order("name");
-      return supabaseList(data, error) as Center[];
+      return supabaseList(data, qErr) as Center[];
     },
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["centers", brandId] });
-
-  const createCenter = useMutation({
-    mutationFn: async () => {
-      if (!brandId) throw new Error("Brand context required");
-      clear();
-      const { error: mErr } = await getSupabase().from("franchise_centers").insert({
-        brand_id: brandId,
-        slug: form.slug.trim(),
-        name: form.name.trim(),
-        status: form.status,
-        city: form.city.trim() || null,
-        address_line1: form.address_line1.trim() || null,
-        region: form.region.trim() || null,
-        country: form.country.trim() || "IN",
-      });
-      if (mErr) throw mErr;
-    },
-    onSuccess: () => {
-      invalidate();
-      setForm(emptyForm);
-    },
-    onError: capture,
-  });
 
   const updateCenter = useMutation({
     mutationFn: async (id: string) => {
@@ -154,25 +131,21 @@ export function CentersPage() {
     <>
       <PageTitle>Franchise Centers</PageTitle>
       <MutationError message={error} />
-      <Card title="Add center">
-        <Input label="Slug" value={form.slug} onChange={(v) => setForm((f) => ({ ...f, slug: v }))} placeholder="koramangala" />
-        <Input label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
-        <Select label="Status" value={form.status} onChange={(v) => setForm((f) => ({ ...f, status: v }))} options={STATUS_OPTIONS} />
-        <Input label="City" value={form.city} onChange={(v) => setForm((f) => ({ ...f, city: v }))} />
-        <Input label="Address" value={form.address_line1} onChange={(v) => setForm((f) => ({ ...f, address_line1: v }))} />
-        <Input label="Region" value={form.region} onChange={(v) => setForm((f) => ({ ...f, region: v }))} />
-        <Input label="Country" value={form.country} onChange={(v) => setForm((f) => ({ ...f, country: v }))} />
-        <Button
-          onClick={() => createCenter.mutate()}
-          disabled={!form.slug.trim() || !form.name.trim() || createCenter.isPending}
-        >
-          Create center
-        </Button>
+
+      <Card title="Add a new center">
+        <p className="ed-text-sm ed-muted">
+          New centers are provisioned when you approve a franchise application — that creates the center record and{" "}
+          <code>{`{center}.{brand}`}</code> domain mapping in one step.
+        </p>
+        <Link to="/app/franchise-applications">
+          <Button>Go to franchise applications</Button>
+        </Link>
       </Card>
-      <Card title="All centers">
+
+      <Card title="Centers">
         <DataList
           items={centers.data ?? []}
-          empty="No centers yet."
+          empty="No centers yet. Approve a franchise application to provision the first center."
           render={(c) => {
             const editing = editingId === c.id;
             return (

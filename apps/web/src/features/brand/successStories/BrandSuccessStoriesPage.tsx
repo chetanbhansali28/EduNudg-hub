@@ -9,7 +9,6 @@ import {
   Input,
   ListRow,
   MutationError,
-  PageGrid,
   PageGridFull,
   PageTitle,
   Textarea,
@@ -164,8 +163,8 @@ export function BrandSuccessStoriesPage() {
         </Card>
       </PageGridFull>
 
-      <PageGrid cols={2}>
-        <Card title="All stories">
+      <PageGridFull>
+        <Card title="Success stories">
           <DataList
             items={stories.data ?? []}
             empty="No success stories yet."
@@ -213,7 +212,7 @@ export function BrandSuccessStoriesPage() {
             }}
           />
         </Card>
-      </PageGrid>
+      </PageGridFull>
     </>
   );
 }

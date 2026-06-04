@@ -15,7 +15,7 @@ Student lead RPCs call `upsert_lead_by_whatsapp` — duplicate WhatsApp per bran
 
 ## UI
 
-- Platform: **Brands → Signup requests** — manual card above queue
+- Platform: **`/admin/brands`** — manual signup card above the pending queue
 - Brand: **Student Leads** / **Franchise Applications** — manual card at top
 - Center: **Leads** — manual card at top
 

@@ -9,6 +9,7 @@ const fromMock = vi.fn();
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({
     from: fromMock,
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
   }),
 }));
 
@@ -45,15 +46,26 @@ describe("BrandsPage", () => {
           error: null,
         });
       }
+      if (table === "platform_brand_signups") {
+        return chain({ data: [], error: null });
+      }
       return chain({ data: [], error: null });
     });
   });
 
-  it("renders brand list and create form", async () => {
+  it("renders brand list and manual signup form", async () => {
     renderBrands();
     expect(await screen.findByText("Demo Brand")).toBeDefined();
-    expect(screen.getByLabelText("Slug")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Create brand" })).toBeDefined();
+    expect(screen.getByText("Add brand signup manually")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Create signup request" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Create brand" })).toBeNull();
+  });
+
+  it("regression_brands_page_no_signup_tabs", async () => {
+    renderBrands();
+    await screen.findByText("Demo Brand");
+    expect(screen.queryByRole("button", { name: "Signup requests" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "All brands" })).toBeNull();
   });
 
   it("regression_brands_page_shows_edit_and_delete_actions", async () => {

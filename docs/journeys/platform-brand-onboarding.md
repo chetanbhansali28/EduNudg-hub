@@ -16,7 +16,7 @@ flowchart LR
 
 1. **Visitor** — `http://localhost:9000/` → **Start your brand on EduNudg** form (city required).
 2. **RPC** — `submit_platform_brand_signup` → `platform_brand_signups` (pending).
-3. **Platform admin** — `/admin/brands` → tab **Signup requests** → Approve.
+3. **Platform admin** — `/admin/brands` → Approve from the signup requests list.
 4. **Approve RPC** (single transaction):
    - `brands` row, slug `slugify(name)-slugify(city)` (+ numeric suffix if collision)
    - `domain_mappings` → `{slug}.localhost:9000`

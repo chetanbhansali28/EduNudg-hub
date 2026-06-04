@@ -10,4 +10,9 @@ describe("resolveFeatureFlags", () => {
     expect(resolveFeatureFlags({}, "student_leads")).toBe(FEATURE_FLAG_DEFAULTS.student_leads);
     expect(resolveFeatureFlags(undefined, "kits")).toBe(false);
   });
+
+  it("regression_empty_features_object_not_undefined", () => {
+    expect(resolveFeatureFlags(undefined, "student_leads")).toBe(true);
+    expect(resolveFeatureFlags({}, "campaigns")).toBe(false);
+  });
 });
