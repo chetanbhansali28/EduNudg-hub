@@ -85,8 +85,7 @@ pnpm test:rls
 - Public config key: `platform_settings.marketing_homepage` (migration `009_marketing_homepage.sql`)
 - Anonymous users can **read**; platform admins can **read/write** via RLS
 - Edit at **Platform → Homepage** (`/admin/homepage`) after signing in as `admin@edunudg.com`
-- Typography follows [Novu on One Page Love](https://onepagelove.com/novu): DM Sans + Instrument Serif (substitutes for Messina + Victor Serif)
-- Live site reference: [withnovu.com](https://www.withnovu.com/)
+- Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
 
 ```bash
 supabase db push   # applies 009 if not yet applied

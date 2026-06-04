@@ -33,7 +33,7 @@ export function buildBrandLandingConfig(
       line2: "Build a legacy in",
       line2Serif: "your city.",
       subtitle: `Join the ${brandName} franchise network—proven curriculum, center launch playbooks, and technology that keeps operations calm as you scale.`,
-      ctaLabel: "Start your application",
+      ctaLabel: "Apply now",
       ctaHref: "#apply",
       backgroundImageUrl: DEFAULT_HOMEPAGE_CONFIG.hero.backgroundImageUrl,
       phoneFrameUrl: DEFAULT_HOMEPAGE_CONFIG.hero.phoneFrameUrl,

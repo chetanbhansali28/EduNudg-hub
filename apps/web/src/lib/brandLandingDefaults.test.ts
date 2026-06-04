@@ -7,6 +7,10 @@ describe("buildBrandLandingConfig", () => {
     expect(config.meta.siteName).toBe("Abacus World");
     expect(config.hero.line1Serif).toContain("Abacus World");
     expect(config.nav.links.some((l) => l.href === "#apply")).toBe(true);
+    expect(config.hero.ctaLabel).toBe(config.nav.ctaLabel);
+    expect(config.footerCta.ctaLabel).toBe(config.nav.ctaLabel);
+    expect(config.hero.ctaHref).toBe(config.nav.ctaHref);
+    expect(config.footerCta.ctaHref).toBe(config.nav.ctaHref);
     expect(config.footer.companyLinks.some((l) => l.href === "/login")).toBe(true);
   });
 });

@@ -64,8 +64,8 @@ export function MarketingContent({ config, portalMode, brandSlug, centerSlug, ce
           </h1>
           <p className="novu-hero__subtitle">{config.hero.subtitle}</p>
           <MarketingCtaLink
-            href={config.hero.ctaHref}
-            label={config.hero.ctaLabel}
+            href={config.nav.ctaHref}
+            label={config.nav.ctaLabel}
             variant="on-dark"
             className="novu-hero__cta"
           />

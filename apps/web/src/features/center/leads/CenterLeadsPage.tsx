@@ -14,6 +14,7 @@ import {
 } from "@edunudg/ui";
 import { ConvertLeadDialog } from "@/features/center/convertStudent/ConvertLeadDialog";
 import { ManualStudentLeadCard } from "@/features/shared/manualLeads/ManualStudentLeadCard";
+import { leadListTitle, StudentLeadDetailCard } from "@/features/shared/leads/StudentLeadDetailCard";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { isLeadStale } from "@/lib/leadSla";
@@ -64,8 +65,9 @@ export function CenterLeadsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<LeadFilter>("open");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [lostMode, setLostMode] = useState(false);
   const [lostReason, setLostReason] = useState("");
-  const [lostTargetId, setLostTargetId] = useState<string | null>(null);
   const [convertTarget, setConvertTarget] = useState<LeadRow | null>(null);
 
   const invalidate = () => {
@@ -87,6 +89,20 @@ export function CenterLeadsPage() {
       return supabaseList(data, qErr) as LeadRow[];
     },
   });
+
+  const selected = (leads.data ?? []).find((row) => row.id === selectedId) ?? null;
+
+  const closeDetail = () => {
+    setSelectedId(null);
+    setLostMode(false);
+    setLostReason("");
+  };
+
+  const selectLead = (id: string) => {
+    setSelectedId(id);
+    setLostMode(false);
+    setLostReason("");
+  };
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: LeadStatus }) => {
@@ -118,20 +134,20 @@ export function CenterLeadsPage() {
     onSuccess: () => {
       invalidate();
       setConvertTarget(null);
+      closeDetail();
     },
     onError: capture,
   });
 
   const markLost = useMutation({
     mutationFn: async () => {
-      if (!lostTargetId || !lostReason.trim()) return;
+      if (!selectedId || !lostReason.trim()) return;
       clear();
-      await markLeadLost(lostTargetId, lostReason.trim());
+      await markLeadLost(selectedId, lostReason.trim());
     },
     onSuccess: () => {
       invalidate();
-      setLostTargetId(null);
-      setLostReason("");
+      closeDetail();
     },
     onError: capture,
   });
@@ -150,6 +166,11 @@ export function CenterLeadsPage() {
 
   if (!centerId) return <p className="ed-empty">Center context not found.</p>;
 
+  const selectedPipeline =
+    selected && selected.status !== "converted" && selected.status !== "lost";
+  const selectedHint = selected ? slaHint(selected, now) : null;
+  const selectedStale = selected ? isLeadStale(selected, now) : false;
+
   return (
     <>
       <PageTitle>Leads</PageTitle>
@@ -164,6 +185,7 @@ export function CenterLeadsPage() {
       </PageGridFull>
 
       <Card title="Lead pipeline">
+        <p className="ed-text-sm ed-muted">Select a parent name to open the full lead before updating status or converting.</p>
         <Select label="Show" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
         <DataList
           items={filtered}
@@ -171,43 +193,71 @@ export function CenterLeadsPage() {
           render={(l) => {
             const stale = isLeadStale(l, now);
             const hint = slaHint(l, now);
-            const pipeline = l.status !== "converted" && l.status !== "lost";
+            const isSelected = l.id === selectedId;
             return (
-              <ListRow
-                aside={
-                  pipeline ? (
-                    <div className="ed-form-section">
-                      <Select
-                        label="Status"
-                        value={l.status}
-                        onChange={(v) => updateStatus.mutate({ id: l.id, status: v })}
-                        options={STATUS_OPTIONS}
-                      />
-                      <Button onClick={() => setConvertTarget(l)} disabled={convert.isPending}>
-                        Convert to student
-                      </Button>
-                      <Button variant="ghost" onClick={() => setLostTargetId(l.id)}>
-                        Mark lost
-                      </Button>
-                    </div>
-                  ) : undefined
-                }
-              >
+              <ListRow>
                 <div>
-                  <strong>{l.parent_name ?? l.full_name}</strong>
+                  <button
+                    type="button"
+                    className={`ed-inquiry-list__link${isSelected ? " ed-inquiry-list__link--active" : ""}`}
+                    onClick={() => selectLead(l.id)}
+                  >
+                    {leadListTitle(l)}
+                  </button>
                   <div className="ed-text-sm ed-muted">{l.whatsapp_e164}</div>
                   {l.child_name && <div className="ed-text-sm">Child: {l.child_name}</div>}
                   <Badge>{l.status}</Badge>{" "}
                   <Badge>{l.lead_source === "center" ? "Direct registration" : "Brand assigned"}</Badge>
                   {stale && <Badge tone="warning">Brand SLA expired</Badge>}
                   {hint && <p className="ed-text-sm ed-muted">{hint}</p>}
-                  {l.lost_reason && <p className="ed-text-sm">Reason: {l.lost_reason}</p>}
                 </div>
               </ListRow>
             );
           }}
         />
       </Card>
+
+      {selected && (
+        <StudentLeadDetailCard
+          lead={selected}
+          stale={selectedStale}
+          onClose={closeDetail}
+          actions={
+            <>
+              {selectedHint && <p className="ed-text-sm ed-muted">{selectedHint}</p>}
+              {lostMode ? (
+                <>
+                  <p className="ed-text-sm ed-muted">Reason is required and visible to the brand (FR-C11b).</p>
+                  <Input label="Reason (required)" value={lostReason} onChange={setLostReason} />
+                  <div className="ed-form-section">
+                    <Button onClick={() => markLost.mutate()} disabled={!lostReason.trim() || markLost.isPending}>
+                      Confirm lost
+                    </Button>
+                    <Button variant="ghost" onClick={() => setLostMode(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : selectedPipeline ? (
+                <div className="ed-form-section">
+                  <Select
+                    label="Status"
+                    value={selected.status}
+                    onChange={(v) => updateStatus.mutate({ id: selected.id, status: v })}
+                    options={STATUS_OPTIONS}
+                  />
+                  <Button onClick={() => setConvertTarget(selected)} disabled={convert.isPending}>
+                    Convert to student
+                  </Button>
+                  <Button variant="ghost" onClick={() => setLostMode(true)}>
+                    Mark lost
+                  </Button>
+                </div>
+              ) : null}
+            </>
+          }
+        />
+      )}
 
       {convertTarget && (
         <ConvertLeadDialog
@@ -216,19 +266,6 @@ export function CenterLeadsPage() {
           onCancel={() => setConvertTarget(null)}
           onConfirm={(overrides) => convert.mutate({ id: convertTarget.id, overrides })}
         />
-      )}
-
-      {lostTargetId && (
-        <Card title="Mark lead lost">
-          <p className="ed-text-sm ed-muted">Reason is required and visible to the brand (FR-C11b).</p>
-          <Input label="Reason (required)" value={lostReason} onChange={setLostReason} />
-          <Button onClick={() => markLost.mutate()} disabled={!lostReason.trim() || markLost.isPending}>
-            Confirm lost
-          </Button>
-          <Button variant="ghost" onClick={() => setLostTargetId(null)}>
-            Cancel
-          </Button>
-        </Card>
       )}
     </>
   );

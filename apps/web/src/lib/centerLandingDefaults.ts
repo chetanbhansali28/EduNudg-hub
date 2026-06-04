@@ -35,7 +35,7 @@ export function buildCenterLandingConfig(
       line2: "Fun abacus classes",
       line2Serif: city ? `in ${city}.` : "near you.",
       subtitle: `${centerName} helps children build speed, focus, and confidence with ${brandName}'s proven abacus program—small batches, caring instructors, and progress you can see every week.`,
-      ctaLabel: "Book a free trial class",
+      ctaLabel: "Book a free trial",
       ctaHref: "#enroll",
       backgroundImageUrl: DEFAULT_HOMEPAGE_CONFIG.hero.backgroundImageUrl,
       phoneFrameUrl: DEFAULT_HOMEPAGE_CONFIG.hero.phoneFrameUrl,
@@ -114,7 +114,7 @@ export function buildCenterLandingConfig(
     footerCta: {
       title: "Ready for your child's",
       subtitle: "free trial class? We'll reach out within one business day to confirm a slot.",
-      ctaLabel: "Book free trial",
+      ctaLabel: "Book a free trial",
       ctaHref: "#enroll",
     },
     footer: {

@@ -25,8 +25,8 @@ export function FooterSection({ config }: Props) {
         </h2>
         <p>{cta.subtitle}</p>
         <MarketingCtaLink
-          href={cta.ctaHref}
-          label={cta.ctaLabel}
+          href={config.nav.ctaHref}
+          label={config.nav.ctaLabel}
           variant="on-dark"
           className="novu-footer-section__cta-btn"
         />

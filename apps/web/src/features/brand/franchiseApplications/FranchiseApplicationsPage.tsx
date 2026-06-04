@@ -34,10 +34,7 @@ export function FranchiseApplicationsPage() {
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<InquiryFilter>("pending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [approveMode, setApproveMode] = useState(false);
   const [rejectMode, setRejectMode] = useState(false);
-  const [centerSlug, setCenterSlug] = useState("");
-  const [centerName, setCenterName] = useState("");
   const [rejectReason, setRejectReason] = useState("");
 
   const inquiries = useQuery({
@@ -56,10 +53,7 @@ export function FranchiseApplicationsPage() {
   const selected = (inquiries.data ?? []).find((row) => row.id === selectedId) ?? null;
 
   const resetActionState = () => {
-    setApproveMode(false);
     setRejectMode(false);
-    setCenterSlug("");
-    setCenterName("");
     setRejectReason("");
   };
 
@@ -77,10 +71,7 @@ export function FranchiseApplicationsPage() {
     mutationFn: async () => {
       if (!selectedId) return;
       clear();
-      const { error: err } = await approveFranchiseInquiry(selectedId, {
-        centerSlug: centerSlug || undefined,
-        centerName: centerName || undefined,
-      });
+      const { error: err } = await approveFranchiseInquiry(selectedId);
       if (err) throw new Error(err);
     },
     onSuccess: () => {
@@ -165,23 +156,14 @@ export function FranchiseApplicationsPage() {
           inquiry={selected}
           pending={isPending(selected)}
           onClose={closeDetail}
-          onApprove={() => {
-            setRejectMode(false);
-            setApproveMode(true);
-          }}
+          onApprove={() => approve.mutate()}
           onReject={() => {
-            setApproveMode(false);
             setRejectMode(true);
+            setRejectReason("");
           }}
-          approveMode={approveMode}
           rejectMode={rejectMode}
-          centerSlug={centerSlug}
-          centerName={centerName}
-          onCenterSlugChange={setCenterSlug}
-          onCenterNameChange={setCenterName}
           rejectReason={rejectReason}
           onRejectReasonChange={setRejectReason}
-          onConfirmApprove={() => approve.mutate()}
           onConfirmReject={() => reject.mutate()}
           onCancelAction={resetActionState}
           approvePending={approve.isPending}

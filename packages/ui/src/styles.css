@@ -1105,6 +1105,188 @@
   margin-bottom: 1rem;
 }
 
+.ed-homepage-editor {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .ed-homepage-editor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ed-homepage-editor-shell .ed-homepage-editor-pages {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.ed-homepage-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid #d0d5dd;
+  border-radius: var(--ed-radius-lg);
+  background: var(--ed-card);
+  box-shadow: var(--ed-shadow);
+}
+
+.ed-homepage-editor-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.ed-homepage-editor-panel__title {
+  margin: 0 0 0.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ed-fg);
+}
+
+.ed-homepage-editor-panel__desc {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ed-muted);
+  line-height: 1.5;
+  max-width: 42rem;
+}
+
+.ed-homepage-editor-panel__header .ed-btn--primary {
+  flex-shrink: 0;
+}
+
+/* Higher-contrast fields and accordions for marketing homepage editors */
+.ed-homepage-editor-shell .ed-editor-accordion {
+  border: 1px solid #d0d5dd;
+  border-radius: var(--ed-radius);
+  background: var(--ed-card);
+  box-shadow: var(--ed-shadow);
+}
+
+.ed-homepage-editor-shell .ed-editor-accordion__summary {
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  color: var(--ed-fg);
+  background: #f3f4f6;
+}
+
+.ed-homepage-editor-shell .ed-editor-accordion:not([open]) .ed-editor-accordion__summary {
+  border-radius: var(--ed-radius);
+}
+
+.ed-homepage-editor-shell .ed-editor-accordion[open] .ed-editor-accordion__summary {
+  border-bottom: 1px solid #d0d5dd;
+}
+
+.ed-homepage-editor-shell .ed-editor-accordion__body {
+  padding: 1rem;
+  background: #ffffff;
+}
+
+.ed-homepage-editor-shell .ed-field__label {
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.ed-homepage-editor-shell .ed-field__input,
+.ed-homepage-editor-shell .ed-field__input[type="file"] {
+  background: #ffffff;
+  border: 1px solid #c5ccd6;
+  color: var(--ed-fg);
+  box-shadow: inset 0 1px 2px rgb(16 24 40 / 0.05);
+}
+
+.ed-homepage-editor-shell .ed-field__input::placeholder {
+  color: #9ca3af;
+}
+
+.ed-homepage-editor-shell .ed-field__input:hover:not(:disabled) {
+  border-color: #9ca3af;
+}
+
+.ed-homepage-editor-shell .ed-field__input:focus {
+  outline: none;
+  border-color: #1a1d21;
+  box-shadow: 0 0 0 3px rgb(26 29 33 / 0.12);
+}
+
+.ed-homepage-editor-shell .ed-btn--primary {
+  background: #1a1d21;
+  color: #ffffff;
+}
+
+.ed-homepage-editor-shell .ed-btn--primary:hover:not(:disabled) {
+  background: #2d3436;
+}
+
+.ed-homepage-editor-shell .ed-form-section {
+  border-bottom-color: #e5e7eb;
+}
+
+.ed-homepage-editor-shell .ed-marketing-media-preview {
+  border: 1px solid #d0d5dd;
+}
+
+.ed-editor-accordion {
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  background: var(--ed-card);
+}
+
+.ed-editor-accordion__summary {
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ed-editor-accordion__summary::-webkit-details-marker {
+  display: none;
+}
+
+.ed-editor-accordion__summary::after {
+  content: "+";
+  float: right;
+  font-weight: 400;
+  color: var(--ed-muted);
+}
+
+.ed-editor-accordion[open] .ed-editor-accordion__summary::after {
+  content: "−";
+}
+
+.ed-editor-accordion__body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--ed-border);
+}
+
+.ed-editor-accordion__body > .ed-field:first-child,
+.ed-editor-accordion__body > .ed-form-section:first-child {
+  margin-top: 1rem;
+}
+
+.ed-marketing-media-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 10rem;
+  margin-bottom: 0.5rem;
+  border-radius: var(--ed-radius-sm);
+  object-fit: cover;
+}
+
+.ed-marketing-media-url {
+  word-break: break-all;
+}
+
 .ed-form-section {
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;

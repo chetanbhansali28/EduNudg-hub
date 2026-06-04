@@ -1,10 +1,15 @@
 import type { ReactNode } from "react";
-import { Button, Card, Input } from "@edunudg/ui";
+import { Button, Input } from "@edunudg/ui";
 import type { HomepageConfig, HomepageFaq, HomepageFeatureSection } from "@/types/homepage";
+import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
+import { EditorAccordion } from "./EditorAccordion";
+import { MarketingMediaField } from "./MarketingMediaField";
 
 export type HomepageEditorFormProps = {
   config: HomepageConfig;
   onChange: (config: HomepageConfig) => void;
+  /** Where uploaded images/videos are stored in Supabase Storage. */
+  uploadScope?: MarketingUploadScope;
   /** When true, testimonial quotes are managed elsewhere (e.g. success stories). */
   testimonialsManagedExternally?: boolean;
   testimonialsExternalHint?: ReactNode;
@@ -13,6 +18,7 @@ export type HomepageEditorFormProps = {
 export function HomepageEditorForm({
   config,
   onChange,
+  uploadScope = { kind: "platform" },
   testimonialsManagedExternally = false,
   testimonialsExternalHint,
 }: HomepageEditorFormProps) {
@@ -20,37 +26,60 @@ export function HomepageEditorForm({
     onChange({ ...config, hero: { ...config.hero, [field]: value } });
   };
 
+  const updatePrimaryCta = (field: "ctaLabel" | "ctaHref", value: string) => {
+    onChange({
+      ...config,
+      nav: { ...config.nav, [field]: value },
+      hero: { ...config.hero, [field]: value },
+      footerCta: { ...config.footerCta, [field]: value },
+    });
+  };
+
   return (
-    <>
-      <Card title="Site">
+    <div className="ed-homepage-editor">
+      <EditorAccordion title="Site">
         <Input
           label="Site name (logo)"
           value={config.meta.siteName}
           onChange={(v) => onChange({ ...config, meta: { ...config.meta, siteName: v } })}
         />
-      </Card>
+      </EditorAccordion>
 
-      <Card title="Hero">
+      <EditorAccordion title="Hero">
         <Input label="Line 1 (sans)" value={config.hero.line1} onChange={(v) => updateHero("line1", v)} />
         <Input label="Line 1 (serif)" value={config.hero.line1Serif} onChange={(v) => updateHero("line1Serif", v)} />
         <Input label="Line 2 (sans)" value={config.hero.line2} onChange={(v) => updateHero("line2", v)} />
         <Input label="Line 2 (serif)" value={config.hero.line2Serif} onChange={(v) => updateHero("line2Serif", v)} />
         <Input label="Subtitle" value={config.hero.subtitle} onChange={(v) => updateHero("subtitle", v)} />
-        <Input label="CTA label" value={config.hero.ctaLabel} onChange={(v) => updateHero("ctaLabel", v)} />
-        <Input label="CTA link" value={config.hero.ctaHref} onChange={(v) => updateHero("ctaHref", v)} />
         <Input
-          label="Hero background image URL"
+          label="Primary CTA label (nav, hero, footer)"
+          value={config.nav.ctaLabel}
+          onChange={(v) => updatePrimaryCta("ctaLabel", v)}
+        />
+        <Input
+          label="Primary CTA link"
+          value={config.nav.ctaHref}
+          onChange={(v) => updatePrimaryCta("ctaHref", v)}
+        />
+        <MarketingMediaField
+          label="Hero background image"
           value={config.hero.backgroundImageUrl}
           onChange={(v) => updateHero("backgroundImageUrl", v)}
+          mediaType="image"
+          uploadSubdir="hero-background"
+          uploadScope={uploadScope}
         />
-        <Input
-          label="Phone frame image URL"
+        <MarketingMediaField
+          label="Phone frame image"
           value={config.hero.phoneFrameUrl}
           onChange={(v) => updateHero("phoneFrameUrl", v)}
+          mediaType="image"
+          uploadSubdir="hero-phone-frame"
+          uploadScope={uploadScope}
         />
-      </Card>
+      </EditorAccordion>
 
-      <Card title="Feature sections (phone blocks)">
+      <EditorAccordion title="Feature sections (phone blocks)">
         {config.featureSections.map((section, i) => (
           <div key={section.id} className="ed-form-section">
             <Input
@@ -80,6 +109,18 @@ export function HomepageEditorForm({
                 onChange({ ...config, featureSections });
               }}
             />
+            <MarketingMediaField
+              label="Phone screen video"
+              value={section.videoUrl ?? ""}
+              onChange={(v) => {
+                const featureSections = [...config.featureSections];
+                featureSections[i] = { ...section, videoUrl: v || undefined };
+                onChange({ ...config, featureSections });
+              }}
+              mediaType="video"
+              uploadSubdir={`feature-${section.id}`}
+              uploadScope={uploadScope}
+            />
           </div>
         ))}
         <Button
@@ -96,9 +137,9 @@ export function HomepageEditorForm({
         >
           Add feature section
         </Button>
-      </Card>
+      </EditorAccordion>
 
-      <Card title="Highlight cards (horizontal scroller)">
+      <EditorAccordion title="Highlight cards (horizontal scroller)">
         {config.showcaseCards.map((card, i) => (
           <div key={card.id} className="ed-form-section">
             <Input
@@ -128,20 +169,35 @@ export function HomepageEditorForm({
                 onChange({ ...config, showcaseCards });
               }}
             />
-            <Input
-              label="Background image URL"
+            <MarketingMediaField
+              label="Background image"
               value={card.imageUrl ?? ""}
               onChange={(v) => {
                 const showcaseCards = [...config.showcaseCards];
                 showcaseCards[i] = { ...card, imageUrl: v || undefined };
                 onChange({ ...config, showcaseCards });
               }}
+              mediaType="image"
+              uploadSubdir={`showcase-${card.id}-bg`}
+              uploadScope={uploadScope}
+            />
+            <MarketingMediaField
+              label="Phone image (white-phone layout)"
+              value={card.phoneImageUrl ?? ""}
+              onChange={(v) => {
+                const showcaseCards = [...config.showcaseCards];
+                showcaseCards[i] = { ...card, phoneImageUrl: v || undefined };
+                onChange({ ...config, showcaseCards });
+              }}
+              mediaType="image"
+              uploadSubdir={`showcase-${card.id}-phone`}
+              uploadScope={uploadScope}
             />
           </div>
         ))}
-      </Card>
+      </EditorAccordion>
 
-      <Card title="Testimonials">
+      <EditorAccordion title="Testimonials">
         <Input
           label="Section title"
           value={config.testimonials.title}
@@ -180,9 +236,9 @@ export function HomepageEditorForm({
             </div>
           ))
         )}
-      </Card>
+      </EditorAccordion>
 
-      <Card title="FAQ">
+      <EditorAccordion title="FAQ">
         {config.faq.map((f, i) => (
           <div key={i} className="ed-form-section">
             <Input
@@ -216,9 +272,9 @@ export function HomepageEditorForm({
         >
           Add FAQ
         </Button>
-      </Card>
+      </EditorAccordion>
 
-      <Card title="Privacy & footer">
+      <EditorAccordion title="Privacy & footer">
         <Input
           label="Privacy title"
           value={config.privacy.title}
@@ -234,12 +290,25 @@ export function HomepageEditorForm({
           value={config.footerCta.title}
           onChange={(v) => onChange({ ...config, footerCta: { ...config.footerCta, title: v } })}
         />
+        <MarketingMediaField
+          label="Footer CTA background image"
+          value={config.footerCta.backgroundImageUrl ?? ""}
+          onChange={(v) =>
+            onChange({
+              ...config,
+              footerCta: { ...config.footerCta, backgroundImageUrl: v || undefined },
+            })
+          }
+          mediaType="image"
+          uploadSubdir="footer-background"
+          uploadScope={uploadScope}
+        />
         <Input
           label="Copyright"
           value={config.footer.copyright}
           onChange={(v) => onChange({ ...config, footer: { ...config.footer, copyright: v } })}
         />
-      </Card>
-    </>
+      </EditorAccordion>
+    </div>
   );
 }

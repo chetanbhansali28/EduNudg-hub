@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Button, PageToolbar } from "@edunudg/ui";
+import { Button } from "@edunudg/ui";
 import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
+import { HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
 import { fetchHomepageConfig, saveHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import type { HomepageConfig } from "@/types/homepage";
@@ -29,39 +30,25 @@ export function HomepageEditorPage() {
   if (isLoading) return <p>Loading homepage config…</p>;
 
   return (
-    <>
-      <PageToolbar
-        title="Marketing homepage"
-        subtitle={
-          <>
-            Novu layout · Inter + Instrument Serif ·{" "}
-            <a href="/" target="_blank" rel="noreferrer">
-              Preview live
-            </a>
-          </>
-        }
-      >
-        <Link to="/">
-          <Button variant="ghost">Preview</Button>
-        </Link>
-        <Button onClick={() => save.mutate()} disabled={save.isPending}>
-          {save.isPending ? "Saving…" : saved ? "Saved" : "Save changes"}
-        </Button>
-      </PageToolbar>
-
-      <HomepageEditorForm config={config} onChange={setConfig} />
-
-      <p style={{ fontSize: "0.8125rem", color: "var(--ed-muted)", marginTop: "1rem" }}>
-        Layout matches{" "}
-        <a href="https://www.withnovu.com/" target="_blank" rel="noreferrer">
-          withnovu.com
+    <HomepageEditorShell
+      title="Marketing homepage"
+      subtitle={
+        <a href="/" target="_blank" rel="noreferrer">
+          Preview live site
         </a>
-        . Typography: Inter + Instrument Serif per{" "}
-        <a href="https://onepagelove.com/novu" target="_blank" rel="noreferrer">
-          One Page Love
-        </a>
-        .
-      </p>
-    </>
+      }
+      actions={
+        <>
+          <Link to="/">
+            <Button variant="ghost">Preview</Button>
+          </Link>
+          <Button onClick={() => save.mutate()} disabled={save.isPending}>
+            {save.isPending ? "Saving…" : saved ? "Saved" : "Save changes"}
+          </Button>
+        </>
+      }
+    >
+      <HomepageEditorForm config={config} onChange={setConfig} uploadScope={{ kind: "platform" }} />
+    </HomepageEditorShell>
   );
 }

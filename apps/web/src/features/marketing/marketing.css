@@ -1,4 +1,4 @@
-/* Novu.com clone — Inter + Instrument Serif */
+/* Marketing public site — Inter + Instrument Serif */
 
 .marketing-page {
   --novu-font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -66,7 +66,7 @@
   font-weight: 400;
 }
 
-/* ─── Nav (Novu: slide-in + data-nav-theme) ─── */
+/* ─── Nav (slide-in + data-nav-theme) ─── */
 .novu-nav-bar {
   position: fixed;
   inset: 0 0 auto;

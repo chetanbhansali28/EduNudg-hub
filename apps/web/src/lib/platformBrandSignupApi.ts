@@ -52,16 +52,22 @@ export interface PlatformSignupRow {
   requested_name: string;
   admin_full_name: string;
   email: string;
+  phone_e164: string | null;
   city: string;
+  country: string | null;
+  message: string | null;
   status: string;
   proposed_slug: string | null;
+  rejected_reason: string | null;
   created_at: string;
 }
 
 export async function listPendingPlatformSignups(): Promise<PlatformSignupRow[]> {
   const { data, error } = await getSupabase()
     .from("platform_brand_signups")
-    .select("id, requested_name, admin_full_name, email, city, status, proposed_slug, created_at")
+    .select(
+      "id, requested_name, admin_full_name, email, phone_e164, city, country, message, status, proposed_slug, rejected_reason, created_at"
+    )
     .eq("status", "pending")
     .order("created_at", { ascending: false });
   if (error) throw error;

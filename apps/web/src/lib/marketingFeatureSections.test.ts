@@ -11,6 +11,6 @@ describe("withDefaultFeatureVideos", () => {
         body: "Body",
       },
     ]);
-    expect(out[0].videoUrl).toContain(".mp4");
+    expect(out[0].videoUrl).toBeUndefined();
   });
 });

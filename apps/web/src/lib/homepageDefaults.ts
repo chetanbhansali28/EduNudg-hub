@@ -1,16 +1,18 @@
 import type { HomepageConfig } from "@/types/homepage";
 
-const NOVU = "https://www.withnovu.com";
-const NOVU_HERO = `${NOVU}/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fhero.0_ec4ua0qjite.jpg&w=1920&q=75`;
-const NOVU_PHONE = `${NOVU}/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fphone-frame.0jubfec8z6wnh.png&w=828&q=75`;
-const NOVU_SECOND = `${NOVU}/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fnovu-second.14geujvydhgvo.png&w=828&q=75`;
+/** Stock placeholders until admins upload assets via the homepage editor. */
+const DEFAULT_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1920&q=80";
+const DEFAULT_PHONE_FRAME =
+  "https://images.unsplash.com/photo-1512941937667-90a1b58e7e9c?auto=format&fit=crop&w=828&q=80";
+const DEFAULT_HIGHLIGHT_IMAGE =
+  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80";
 
 export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
   meta: {
     siteName: "EduNudg",
     fontSans: "Inter",
     fontSerif: "Instrument Serif",
-    themeNote: "Novu layout clone",
   },
   theme: {
     bgColor: "#000000",
@@ -39,8 +41,8 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
       "EduNudg connects franchisors, centers, instructors, and families in one premium learning operating system built for scale.",
     ctaLabel: "Get started",
     ctaHref: "/login",
-    backgroundImageUrl: NOVU_HERO,
-    phoneFrameUrl: NOVU_PHONE,
+    backgroundImageUrl: DEFAULT_HERO_IMAGE,
+    phoneFrameUrl: DEFAULT_PHONE_FRAME,
   },
   featureSections: [
     {
@@ -48,28 +50,24 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
       title: "Just plan.",
       titleSerif: "We'll orchestrate.",
       body: "Say what your network needs. EduNudg structures curriculum, centers, and enrollments in seconds—not spreadsheets.",
-      videoUrl: `${NOVU}/videos/Alex-cut.mp4`,
     },
     {
       id: "focus",
       title: "Stay out of",
       titleSerif: "your own way.",
       body: "No crowded ERP screens. A calm command center for brand owners and center operators—only what matters today.",
-      videoUrl: `${NOVU}/videos/Focus-cut.mp4`,
     },
     {
       id: "priorities",
       title: "Prioritise what",
       titleSerif: "actually matters.",
       body: "Royalty rules, center health, and student progress—ranked and visible so leaders act on signal, not noise.",
-      videoUrl: `${NOVU}/videos/list.mp4`,
     },
     {
       id: "reflect",
       title: "See your network",
       titleSerif: "clearly.",
       body: "Executive dashboards and drill-down analytics. Understand enrollment, revenue, and learning outcomes at a glance.",
-      videoUrl: `${NOVU}/videos/Wrap-up.mp4`,
     },
   ],
   showcaseCards: [
@@ -79,7 +77,7 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
       titleItalic: "plan",
       body: "Open EduNudg in the morning and see what your network needs. Curriculum, centers, and enrollments—structured before your first coffee.",
       layout: "image-dark",
-      imageUrl: `${NOVU}/images/highlights/cheerful-phone-user.jpg`,
+      imageUrl: DEFAULT_HIGHLIGHT_IMAGE,
     },
     {
       id: "structure",
@@ -87,7 +85,7 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
       titleItalic: "seconds",
       body: "EduNudg reads your operations, finds the real priorities, and lays out your day in less time than it takes to pour coffee.",
       layout: "white-phone",
-      phoneImageUrl: NOVU_SECOND,
+      phoneImageUrl: DEFAULT_PHONE_FRAME,
     },
     {
       id: "three",
@@ -95,7 +93,7 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
       titleItalic: "three",
       body: "Brand, center, and family—three portals, one source of truth. The constraint forces clarity across your franchise network.",
       layout: "image-priorities",
-      imageUrl: `${NOVU}/images/highlights/contemplative-back.jpg`,
+      imageUrl: DEFAULT_HIGHLIGHT_IMAGE,
       priorities: [
         { label: "Curriculum governance", tag: "Brand" },
         { label: "Center operations", tag: "Franchise" },
@@ -108,7 +106,7 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
       titleItalic: "dashboard",
       body: "Glance at center health, capture enrollments, and close the loop on fees without ever leaving the command center.",
       layout: "image-watch",
-      imageUrl: `${NOVU}/images/highlights/misty-cabin.jpg`,
+      imageUrl: DEFAULT_HIGHLIGHT_IMAGE,
     },
     {
       id: "weekly",
@@ -116,7 +114,7 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
       titleItalic: "moment",
       body: "Every week EduNudg surfaces patterns, highlights, and challenges across your network. A moment, not a dashboard.",
       layout: "image-weekly",
-      imageUrl: `${NOVU}/images/highlights/cheerful-phone-user.jpg`,
+      imageUrl: DEFAULT_HIGHLIGHT_IMAGE,
     },
   ],
   privacy: {
@@ -187,7 +185,7 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
     subtitle: "Clarity for leaders. Continuity for learners.",
     ctaLabel: "Get started",
     ctaHref: "/login",
-    backgroundImageUrl: NOVU_HERO,
+    backgroundImageUrl: DEFAULT_HERO_IMAGE,
   },
   footer: {
     productLinks: [

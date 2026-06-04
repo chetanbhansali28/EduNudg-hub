@@ -14,5 +14,6 @@ describe("MarketingCtaLink", () => {
       "novu-marketing-cta--on-dark"
     );
     expect(document.querySelector(".novu-stagger-label")).toBeTruthy();
+    expect(document.querySelector(".novu-marketing-cta svg")).toBeNull();
   });
 });

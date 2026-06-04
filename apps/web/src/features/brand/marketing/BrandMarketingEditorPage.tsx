@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, PageTitle } from "@edunudg/ui";
 import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
+import { HomepageEditorPanel, HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { fetchBrandMarketingEditor, saveBrandMarketingLanding } from "@/lib/brandLandingEditorApi";
 import { brandPortalUrl, centerPortalUrl } from "@/lib/brandPortalUrl";
@@ -99,50 +99,68 @@ export function BrandMarketingEditorPage() {
     previewCenter.data && brandSlug ? centerPortalUrl(brandSlug, previewCenter.data) : null;
 
   return (
-    <>
-      <PageTitle>Marketing pages</PageTitle>
-
-      <Card title="Brand site (franchise recruitment)">
-        <p className="ed-text-sm ed-muted">
-          Public homepage on your brand hostname ·{" "}
-          <a href={brandPreviewUrl} target="_blank" rel="noreferrer">
-            Preview
-          </a>
-          . Testimonial quotes come from published{" "}
-          <Link to="/app/success-stories">success stories</Link>.
-        </p>
-        <HomepageEditorForm
-          config={brandConfig}
-          onChange={setBrandConfig}
-          testimonialsManagedExternally
-          testimonialsExternalHint={
-            <p className="ed-text-sm ed-muted">
-              Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page.
-            </p>
+    <HomepageEditorShell
+      title="Marketing pages"
+      subtitle="Edit your brand recruitment site and center enrollment template."
+    >
+      <div className="ed-homepage-editor-pages">
+        <HomepageEditorPanel
+          title="Brand site (franchise recruitment)"
+          saveLabel="Save brand site"
+          onSave={() => saveBrand.mutate()}
+          savePending={saveBrand.isPending}
+          saved={brandSaved}
+          description={
+            <>
+              Public homepage on your brand hostname ·{" "}
+              <a href={brandPreviewUrl} target="_blank" rel="noreferrer">
+                Preview
+              </a>
+              . Testimonial quotes come from published{" "}
+              <Link to="/app/success-stories">success stories</Link>.
+            </>
           }
-        />
-        <Button onClick={() => saveBrand.mutate()} disabled={saveBrand.isPending}>
-          {saveBrand.isPending ? "Saving…" : brandSaved ? "Saved" : "Save brand site"}
-        </Button>
-      </Card>
+        >
+          <HomepageEditorForm
+            config={brandConfig}
+            onChange={setBrandConfig}
+            uploadScope={{ kind: "brand", brandId: brandId! }}
+            testimonialsManagedExternally
+            testimonialsExternalHint={
+              <p className="ed-text-sm ed-muted">
+                Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page.
+              </p>
+            }
+          />
+        </HomepageEditorPanel>
 
-      <Card title="Center sites (parent enrollment template)">
-        <p className="ed-text-sm ed-muted">
-          Template for every center hostname (e.g. koramangala.{brandSlug}.localhost). Center name and city are filled
-          in per location.{" "}
-          {centerPreviewUrl ? (
-            <a href={centerPreviewUrl} target="_blank" rel="noreferrer">
-              Preview center site
-            </a>
-          ) : (
-            "Add an active center to preview."
-          )}
-        </p>
-        <HomepageEditorForm config={centerConfig} onChange={setCenterConfig} />
-        <Button onClick={() => saveCenter.mutate()} disabled={saveCenter.isPending}>
-          {saveCenter.isPending ? "Saving…" : centerSaved ? "Saved" : "Save center template"}
-        </Button>
-      </Card>
-    </>
+        <HomepageEditorPanel
+          title="Center sites (parent enrollment template)"
+          saveLabel="Save center template"
+          onSave={() => saveCenter.mutate()}
+          savePending={saveCenter.isPending}
+          saved={centerSaved}
+          description={
+            <>
+              Template for every center hostname (e.g. koramangala.{brandSlug}.localhost). Center name and city are
+              filled in per location.{" "}
+              {centerPreviewUrl ? (
+                <a href={centerPreviewUrl} target="_blank" rel="noreferrer">
+                  Preview center site
+                </a>
+              ) : (
+                "Add an active center to preview."
+              )}
+            </>
+          }
+        >
+          <HomepageEditorForm
+            config={centerConfig}
+            onChange={setCenterConfig}
+            uploadScope={{ kind: "brand", brandId: brandId! }}
+          />
+        </HomepageEditorPanel>
+      </div>
+    </HomepageEditorShell>
   );
 }

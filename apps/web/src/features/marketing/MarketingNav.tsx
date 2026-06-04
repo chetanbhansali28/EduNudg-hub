@@ -109,7 +109,6 @@ export function MarketingNav({ config }: Props) {
             variant={navCtaVariant}
             className="novu-nav-bar__cta"
             srOnlyLabel
-            showIcon={false}
           />
         </div>
 
@@ -118,7 +117,6 @@ export function MarketingNav({ config }: Props) {
           label={config.nav.ctaLabel}
           variant={navCtaVariant}
           className="novu-nav-bar__cta-mobile"
-          showIcon={false}
         />
       </div>
     </nav>

@@ -1,4 +1,4 @@
-/** Novu-style per-letter hover stagger on CTA labels */
+/** Per-letter hover stagger on marketing CTA labels */
 export function StaggerLabel({ text }: { text: string }) {
   return (
     <span className="novu-stagger-label" aria-hidden>

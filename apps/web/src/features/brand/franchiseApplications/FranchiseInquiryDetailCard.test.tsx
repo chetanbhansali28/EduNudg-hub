@@ -22,7 +22,7 @@ const inquiry: FranchiseInquiry = {
 };
 
 describe("FranchiseInquiryDetailCard", () => {
-  it("shows all application fields and approve flow", () => {
+  it("shows all application fields and approve flow without slug inputs", () => {
     const onApprove = vi.fn();
 
     render(
@@ -32,15 +32,9 @@ describe("FranchiseInquiryDetailCard", () => {
         onClose={vi.fn()}
         onApprove={onApprove}
         onReject={vi.fn()}
-        approveMode={false}
         rejectMode={false}
-        centerSlug=""
-        centerName=""
-        onCenterSlugChange={vi.fn()}
-        onCenterNameChange={vi.fn()}
         rejectReason=""
         onRejectReasonChange={vi.fn()}
-        onConfirmApprove={vi.fn()}
         onConfirmReject={vi.fn()}
         onCancelAction={vi.fn()}
         approvePending={false}
@@ -50,7 +44,9 @@ describe("FranchiseInquiryDetailCard", () => {
 
     expect(screen.getAllByText("Abacus Pune West").length).toBeGreaterThan(0);
     expect(screen.getByText("Tutoring background")).toBeDefined();
-    fireEvent.click(screen.getByRole("button", { name: "Approve" }));
+    expect(screen.queryByLabelText("Center slug (optional)")).toBeNull();
+    expect(screen.getByText(/slug is generated automatically/i)).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Approve & create center" }));
     expect(onApprove).toHaveBeenCalled();
   });
 });

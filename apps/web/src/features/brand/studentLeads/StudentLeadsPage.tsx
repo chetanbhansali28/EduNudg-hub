@@ -12,6 +12,7 @@ import {
   Select,
 } from "@edunudg/ui";
 import { ManualStudentLeadCard } from "@/features/shared/manualLeads/ManualStudentLeadCard";
+import { leadListTitle, StudentLeadDetailCard } from "@/features/shared/leads/StudentLeadDetailCard";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { isLeadStale, leadAgeDays } from "@/lib/leadSla";
@@ -68,6 +69,7 @@ export function StudentLeadsPage() {
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<LeadFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [assignMode, setAssignMode] = useState(false);
   const [isReallocate, setIsReallocate] = useState(false);
   const [assignCenterId, setAssignCenterId] = useState("");
 
@@ -86,9 +88,11 @@ export function StudentLeadsPage() {
     },
   });
 
+  const selected = (leads.data ?? []).find((row) => row.id === selectedId) ?? null;
+
   const suggestions = useQuery({
     queryKey: ["lead-suggestions", selectedId],
-    enabled: !!selectedId,
+    enabled: !!selectedId && assignMode,
     queryFn: () => suggestCentersForLead(selectedId!),
   });
 
@@ -122,6 +126,20 @@ export function StudentLeadsPage() {
     return map;
   }, [centers.data]);
 
+  const closeDetail = () => {
+    setSelectedId(null);
+    setAssignMode(false);
+    setIsReallocate(false);
+    setAssignCenterId("");
+  };
+
+  const selectLead = (id: string) => {
+    setSelectedId(id);
+    setAssignMode(false);
+    setIsReallocate(false);
+    setAssignCenterId("");
+  };
+
   const assign = useMutation({
     mutationFn: async () => {
       if (!selectedId || !assignCenterId) return;
@@ -135,9 +153,7 @@ export function StudentLeadsPage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["brand-leads", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-dashboard", brandId] });
-      setSelectedId(null);
-      setIsReallocate(false);
-      setAssignCenterId("");
+      closeDetail();
     },
     onError: capture,
   });
@@ -150,6 +166,7 @@ export function StudentLeadsPage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["brand-leads", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-dashboard", brandId] });
+      closeDetail();
     },
     onError: capture,
   });
@@ -179,6 +196,11 @@ export function StudentLeadsPage() {
 
   if (missingBrand) return <p className="ed-empty">Brand context not found.</p>;
 
+  const selectedStale = selected ? isLeadStale(selected, now) : false;
+  const selectedUnassigned =
+    selected && !selected.center_id && selected.status !== "lost" && selected.status !== "converted";
+  const showReassign = selectedStale;
+
   return (
     <>
       <PageTitle>Student Leads</PageTitle>
@@ -194,6 +216,7 @@ export function StudentLeadsPage() {
         <p className="ed-text-sm ed-muted">
           Unassigned {counts.unassigned} · Needs attention {counts.stale} · Lost {counts.lost}
         </p>
+        <p className="ed-text-sm ed-muted">Select a parent name to open the full lead before assigning or reopening.</p>
         <Select label="Show" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
         <DataList
           items={filtered}
@@ -201,87 +224,96 @@ export function StudentLeadsPage() {
           render={(l) => {
             const stale = isLeadStale(l, now);
             const unassigned = !l.center_id && l.status !== "lost" && l.status !== "converted";
-            const showReassign = stale;
+            const isSelected = l.id === selectedId;
             return (
-              <ListRow
-                aside={
-                  l.status === "lost" ? (
-                    <Button variant="ghost" onClick={() => reopen.mutate(l.id)} disabled={reopen.isPending}>
-                      Reopen
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setSelectedId(l.id);
-                        setIsReallocate(showReassign);
-                        setAssignCenterId(l.center_id ?? "");
-                      }}
-                    >
-                      {!l.center_id ? "Assign" : showReassign ? "Reallocate" : "Reassign"}
-                    </Button>
-                  )
-                }
-              >
+              <ListRow>
                 <LeadSummary
                   lead={l}
                   stale={stale}
                   unassigned={unassigned}
                   assignedCenterName={l.center_id ? centerNameById.get(l.center_id) : undefined}
                   ageDays={unassigned ? leadAgeDays(l.created_at, now) : undefined}
+                  isSelected={isSelected}
+                  onSelect={() => selectLead(l.id)}
                 />
-                {l.lost_reason && <p className="ed-text-sm">Reason: {l.lost_reason}</p>}
               </ListRow>
             );
           }}
         />
       </Card>
 
-      {selectedId && (
-        <Card title={isReallocate ? "Reallocate to center" : "Assign to center"}>
-          {isReallocate && (
-            <p className="ed-text-sm ed-muted">
-              Reallocation resets the SLA clock for the new center (timer starts over per brand settings).
-            </p>
-          )}
-          <p className="ed-text-sm ed-muted">Pincode suggestions — manual assign required (FR-B11)</p>
-          {noSuggestions ? (
-            <p className="ed-text-sm ed-muted">
-              No centers found for this pincode — add a center with location data or assign manually below.
-            </p>
-          ) : (
-            <ul>
-              {exactSuggestions.map((c) => (
-                <SuggestionButton key={c.center_id} center={c} tier="exact" onSelect={setAssignCenterId} />
-              ))}
-              {nearSuggestions.map((c) => (
-                <SuggestionButton key={c.center_id} center={c} tier="near" onSelect={setAssignCenterId} />
-              ))}
-            </ul>
-          )}
-          <Select
-            label="Or choose any center in brand"
-            value={assignCenterId}
-            onChange={setAssignCenterId}
-            options={(centers.data ?? []).map((c) => ({
-              value: c.id,
-              label: `${c.display_name ?? c.name}${c.city ? ` · ${c.city}` : ""}`,
-            }))}
-            placeholder="Select center"
-          />
-          <Button onClick={() => assign.mutate()} disabled={!assignCenterId || assign.isPending}>
-            {isReallocate ? "Reallocate" : "Assign"}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setSelectedId(null);
-              setIsReallocate(false);
-            }}
-          >
-            Cancel
-          </Button>
-        </Card>
+      {selected && (
+        <StudentLeadDetailCard
+          lead={selected}
+          stale={selectedStale}
+          unassigned={!!selectedUnassigned}
+          assignedCenterName={selected.center_id ? centerNameById.get(selected.center_id) : undefined}
+          ageDays={selectedUnassigned ? leadAgeDays(selected.created_at, now) : undefined}
+          onClose={closeDetail}
+          actions={
+            assignMode ? (
+              <>
+                {isReallocate && (
+                  <p className="ed-text-sm ed-muted">
+                    Reallocation resets the SLA clock for the new center (timer starts over per brand settings).
+                  </p>
+                )}
+                <p className="ed-text-sm ed-muted">Pincode suggestions — manual assign required (FR-B11)</p>
+                {noSuggestions ? (
+                  <p className="ed-text-sm ed-muted">
+                    No centers found for this pincode — add a center with location data or assign manually below.
+                  </p>
+                ) : (
+                  <ul>
+                    {exactSuggestions.map((c) => (
+                      <SuggestionButton key={c.center_id} center={c} tier="exact" onSelect={setAssignCenterId} />
+                    ))}
+                    {nearSuggestions.map((c) => (
+                      <SuggestionButton key={c.center_id} center={c} tier="near" onSelect={setAssignCenterId} />
+                    ))}
+                  </ul>
+                )}
+                <Select
+                  label="Or choose any center in brand"
+                  value={assignCenterId}
+                  onChange={setAssignCenterId}
+                  options={(centers.data ?? []).map((c) => ({
+                    value: c.id,
+                    label: `${c.display_name ?? c.name}${c.city ? ` · ${c.city}` : ""}`,
+                  }))}
+                  placeholder="Select center"
+                />
+                <div className="ed-form-section">
+                  <Button onClick={() => assign.mutate()} disabled={!assignCenterId || assign.isPending}>
+                    {isReallocate ? "Reallocate" : "Assign"}
+                  </Button>
+                  <Button variant="ghost" onClick={() => setAssignMode(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="ed-form-section">
+                {selected.status === "lost" ? (
+                  <Button variant="ghost" onClick={() => reopen.mutate(selected.id)} disabled={reopen.isPending}>
+                    Reopen
+                  </Button>
+                ) : selected.status !== "converted" ? (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setAssignMode(true);
+                      setIsReallocate(showReassign);
+                      setAssignCenterId(selected.center_id ?? "");
+                    }}
+                  >
+                    {!selected.center_id ? "Assign" : showReassign ? "Reallocate" : "Reassign"}
+                  </Button>
+                ) : null}
+              </div>
+            )
+          }
+        />
       )}
     </>
   );
@@ -293,16 +325,26 @@ function LeadSummary({
   unassigned,
   assignedCenterName,
   ageDays,
+  isSelected,
+  onSelect,
 }: {
   lead: LeadRow;
   stale?: boolean;
   unassigned?: boolean;
   assignedCenterName?: string;
   ageDays?: number;
+  isSelected?: boolean;
+  onSelect: () => void;
 }) {
   return (
     <div>
-      <strong>{lead.parent_name ?? lead.full_name}</strong>
+      <button
+        type="button"
+        className={`ed-inquiry-list__link${isSelected ? " ed-inquiry-list__link--active" : ""}`}
+        onClick={onSelect}
+      >
+        {leadListTitle(lead)}
+      </button>
       <div className="ed-text-sm ed-muted">
         {lead.whatsapp_e164} · {lead.city} {lead.pincode}
       </div>

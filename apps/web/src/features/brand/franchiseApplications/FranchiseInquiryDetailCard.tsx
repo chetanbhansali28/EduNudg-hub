@@ -1,4 +1,5 @@
 import { Badge, Button, Card, Input } from "@edunudg/ui";
+import { RecordDetailField, formatRecordWhen } from "@/features/shared/recordDetail";
 
 export interface FranchiseInquiry {
   id: string;
@@ -25,34 +26,14 @@ type Props = {
   onClose: () => void;
   onApprove: () => void;
   onReject: () => void;
-  approveMode: boolean;
   rejectMode: boolean;
-  centerSlug: string;
-  centerName: string;
-  onCenterSlugChange: (v: string) => void;
-  onCenterNameChange: (v: string) => void;
   rejectReason: string;
   onRejectReasonChange: (v: string) => void;
-  onConfirmApprove: () => void;
   onConfirmReject: () => void;
   onCancelAction: () => void;
   approvePending: boolean;
   rejectPending: boolean;
 };
-
-function DetailField({ label, value }: { label: string; value: string | null | undefined }) {
-  if (!value?.trim()) return null;
-  return (
-    <div className="ed-inquiry-detail__field">
-      <dt className="ed-text-sm ed-muted">{label}</dt>
-      <dd className="ed-text-sm">{value}</dd>
-    </div>
-  );
-}
-
-function formatWhen(iso: string) {
-  return new Date(iso).toLocaleString();
-}
 
 export function FranchiseInquiryDetailCard({
   inquiry,
@@ -60,15 +41,9 @@ export function FranchiseInquiryDetailCard({
   onClose,
   onApprove,
   onReject,
-  approveMode,
   rejectMode,
-  centerSlug,
-  centerName,
-  onCenterSlugChange,
-  onCenterNameChange,
   rejectReason,
   onRejectReasonChange,
-  onConfirmApprove,
   onConfirmReject,
   onCancelAction,
   approvePending,
@@ -83,8 +58,8 @@ export function FranchiseInquiryDetailCard({
           <div>
             <h3 className="ed-inquiry-detail__title">{title}</h3>
             <p className="ed-text-sm ed-muted">
-              Submitted {formatWhen(inquiry.created_at)}
-              {inquiry.updated_at !== inquiry.created_at && ` · Updated ${formatWhen(inquiry.updated_at)}`}
+              Submitted {formatRecordWhen(inquiry.created_at)}
+              {inquiry.updated_at !== inquiry.created_at && ` · Updated ${formatRecordWhen(inquiry.updated_at)}`}
             </p>
           </div>
           <Badge tone={pending ? "warning" : inquiry.status === "lost" ? "default" : "success"}>
@@ -93,14 +68,14 @@ export function FranchiseInquiryDetailCard({
         </div>
 
         <dl className="ed-inquiry-detail__grid">
-          <DetailField label="Applicant name" value={inquiry.full_name} />
-          <DetailField label="Email" value={inquiry.email} />
-          <DetailField label="Phone / WhatsApp" value={inquiry.phone_e164} />
-          <DetailField label="Proposed franchise name" value={inquiry.proposed_franchise_name} />
-          <DetailField label="Preferred city" value={inquiry.city} />
-          <DetailField label="State" value={inquiry.state} />
-          <DetailField label="Pincode" value={inquiry.pincode} />
-          <DetailField label="Address" value={inquiry.address_line} />
+          <RecordDetailField label="Applicant name" value={inquiry.full_name} />
+          <RecordDetailField label="Email" value={inquiry.email} />
+          <RecordDetailField label="Phone / WhatsApp" value={inquiry.phone_e164} />
+          <RecordDetailField label="Proposed franchise name" value={inquiry.proposed_franchise_name} />
+          <RecordDetailField label="Preferred city" value={inquiry.city} />
+          <RecordDetailField label="State" value={inquiry.state} />
+          <RecordDetailField label="Pincode" value={inquiry.pincode} />
+          <RecordDetailField label="Address" value={inquiry.address_line} />
         </dl>
 
         {inquiry.prior_experience?.trim() && (
@@ -128,24 +103,6 @@ export function FranchiseInquiryDetailCard({
           <p className="ed-text-sm ed-muted">Center provisioned (ID {inquiry.converted_center_id.slice(0, 8)}…)</p>
         )}
 
-        {approveMode && (
-          <div className="ed-inquiry-detail__actions">
-            <p className="ed-text-sm ed-muted">
-              Approving creates a franchise center and <code>{`{center}.{brand}`}</code> domain mapping.
-            </p>
-            <Input label="Center slug (optional)" value={centerSlug} onChange={onCenterSlugChange} placeholder="koramangala" />
-            <Input label="Display name (optional)" value={centerName} onChange={onCenterNameChange} />
-            <div className="ed-form-section">
-              <Button onClick={onConfirmApprove} disabled={approvePending}>
-                {approvePending ? "Provisioning…" : "Confirm approve & create center"}
-              </Button>
-              <Button variant="ghost" onClick={onCancelAction}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-
         {rejectMode && (
           <div className="ed-inquiry-detail__actions">
             <Input label="Rejection reason (required)" value={rejectReason} onChange={onRejectReasonChange} />
@@ -160,11 +117,17 @@ export function FranchiseInquiryDetailCard({
           </div>
         )}
 
-        {!approveMode && !rejectMode && (
+        {!rejectMode && (
           <div className="ed-form-section">
             {pending && (
               <>
-                <Button onClick={onApprove}>Approve</Button>
+                <p className="ed-text-sm ed-muted">
+                  Approving creates a franchise center and <code>{`{center}.{brand}`}</code> domain mapping. The center
+                  slug is generated automatically from the franchise name and city.
+                </p>
+                <Button onClick={onApprove} disabled={approvePending}>
+                  {approvePending ? "Provisioning…" : "Approve & create center"}
+                </Button>
                 <Button variant="ghost" onClick={onReject}>
                   Reject
                 </Button>
