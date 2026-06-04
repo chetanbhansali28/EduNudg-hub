@@ -2,20 +2,63 @@ import { getSupabase } from "@/lib/supabase";
 import { buildCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import type { HomepageConfig } from "@/types/homepage";
 
+export type CenterPublicProfile = {
+  centerId: string;
+  centerSlug: string;
+  centerName: string;
+  displayName: string | null;
+  city: string | null;
+  pincode: string | null;
+  addressLine1: string | null;
+  contactPhone: string | null;
+  shortDescription: string | null;
+  brandName: string;
+  brandSlug: string;
+};
+
+export type CenterLandingBundle = {
+  config: HomepageConfig;
+  profile: CenterPublicProfile;
+};
+
 type CenterLandingRow = {
   brand_slug?: string;
   brand_name?: string;
   brand_logo_url?: string | null;
+  center_id?: string;
   center_slug?: string;
   center_name?: string;
+  center_display_name?: string | null;
   center_city?: string | null;
+  center_pincode?: string | null;
+  center_address_line1?: string | null;
+  center_contact_phone?: string | null;
+  center_short_description?: string | null;
   landing?: Partial<HomepageConfig>;
 };
 
-export async function fetchCenterLandingConfig(
+function fallbackProfile(brandSlug: string, centerSlug: string): CenterPublicProfile {
+  const fallbackCenter = centerSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const fallbackBrand = brandSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return {
+    centerId: "",
+    centerSlug,
+    centerName: fallbackCenter,
+    displayName: null,
+    city: null,
+    pincode: null,
+    addressLine1: null,
+    contactPhone: null,
+    shortDescription: null,
+    brandName: fallbackBrand,
+    brandSlug,
+  };
+}
+
+export async function fetchCenterLandingBundle(
   brandSlug: string,
   centerSlug: string
-): Promise<HomepageConfig | null> {
+): Promise<CenterLandingBundle | null> {
   if (!brandSlug || !centerSlug) return null;
 
   const fallbackCenter = centerSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -27,24 +70,57 @@ export async function fetchCenterLandingConfig(
       p_center_slug: centerSlug,
     });
     if (error || !data || typeof data !== "object") {
-      return buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
+      return {
+        config: buildCenterLandingConfig(fallbackCenter, fallbackBrand, null),
+        profile: fallbackProfile(brandSlug, centerSlug),
+      };
     }
 
     const row = data as CenterLandingRow;
     if (!row.center_name || !row.brand_name) {
-      return buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
+      return {
+        config: buildCenterLandingConfig(fallbackCenter, fallbackBrand, null),
+        profile: fallbackProfile(brandSlug, centerSlug),
+      };
     }
 
-    return buildCenterLandingConfig(
-      row.center_name,
-      row.brand_name,
-      row.center_city ?? null,
-      row.landing ?? undefined,
-      row.brand_logo_url ?? null
-    );
+    return {
+      config: buildCenterLandingConfig(
+        row.center_name,
+        row.brand_name,
+        row.center_city ?? null,
+        row.landing ?? undefined,
+        row.brand_logo_url ?? null
+      ),
+      profile: {
+        centerId: row.center_id ?? "",
+        centerSlug: row.center_slug ?? centerSlug,
+        centerName: row.center_name,
+        displayName: row.center_display_name ?? null,
+        city: row.center_city ?? null,
+        pincode: row.center_pincode ?? null,
+        addressLine1: row.center_address_line1 ?? null,
+        contactPhone: row.center_contact_phone ?? null,
+        shortDescription: row.center_short_description ?? null,
+        brandName: row.brand_name,
+        brandSlug: row.brand_slug ?? brandSlug,
+      },
+    };
   } catch {
-    return buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
+    return {
+      config: buildCenterLandingConfig(fallbackCenter, fallbackBrand, null),
+      profile: fallbackProfile(brandSlug, centerSlug),
+    };
   }
+}
+
+/** @deprecated Use fetchCenterLandingBundle */
+export async function fetchCenterLandingConfig(
+  brandSlug: string,
+  centerSlug: string
+): Promise<HomepageConfig | null> {
+  const bundle = await fetchCenterLandingBundle(brandSlug, centerSlug);
+  return bundle?.config ?? null;
 }
 
 export type CenterEnrollmentLeadInput = {

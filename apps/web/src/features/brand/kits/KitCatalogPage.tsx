@@ -12,11 +12,16 @@ import {
   PageGridFull,
   PageTitle,
 } from "@edunudg/ui";
+import { deleteKitCatalogItem, upsertKitCatalogItem } from "@/lib/kitOrdersApi";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { BrandCompetitionsSection } from "./BrandCompetitionsSection";
+import { BrandKitOrdersSection } from "./BrandKitOrdersSection";
 
 interface KitItem {
   id: string;
@@ -46,6 +51,7 @@ export function KitCatalogPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const { bindClose, closeAddForm } = useAddFormCloser();
 
   const catalog = useQuery({
     queryKey: ["kit-catalog", brandId],
@@ -66,37 +72,34 @@ export function KitCatalogPage() {
     mutationFn: async () => {
       if (!brandId) throw new Error("Brand required");
       clear();
-      const { error: mErr } = await getSupabase().from("kit_catalog").insert({
-        brand_id: brandId,
-        sku: form.sku.trim(),
-        name: form.name.trim(),
-        price_cents: rupeesToCents(form.priceRupees),
-        currency: form.currency.trim() || "INR",
-        is_active: form.isActive,
+      await upsertKitCatalogItem(brandId, {
+        sku: form.sku,
+        name: form.name,
+        priceCents: rupeesToCents(form.priceRupees),
+        currency: form.currency,
+        isActive: form.isActive,
       });
-      if (mErr) throw mErr;
     },
     onSuccess: () => {
       invalidate();
       setForm(emptyForm);
+      closeAddForm();
     },
     onError: capture,
   });
 
   const update = useMutation({
     mutationFn: async (id: string) => {
+      if (!brandId) throw new Error("Brand required");
       clear();
-      const { error: mErr } = await getSupabase()
-        .from("kit_catalog")
-        .update({
-          sku: editForm.sku.trim(),
-          name: editForm.name.trim(),
-          price_cents: rupeesToCents(editForm.priceRupees),
-          currency: editForm.currency.trim() || "INR",
-          is_active: editForm.isActive,
-        })
-        .eq("id", id);
-      if (mErr) throw mErr;
+      await upsertKitCatalogItem(brandId, {
+        id,
+        sku: editForm.sku,
+        name: editForm.name,
+        priceCents: rupeesToCents(editForm.priceRupees),
+        currency: editForm.currency,
+        isActive: editForm.isActive,
+      });
     },
     onSuccess: () => {
       invalidate();
@@ -107,10 +110,10 @@ export function KitCatalogPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
+      if (!brandId) throw new Error("Brand required");
       if (!confirm("Delete this kit item?")) return;
       clear();
-      const { error: mErr } = await getSupabase().from("kit_catalog").delete().eq("id", id);
-      if (mErr) throw mErr;
+      await deleteKitCatalogItem(brandId, id);
     },
     onSuccess: invalidate,
     onError: capture,
@@ -124,33 +127,50 @@ export function KitCatalogPage() {
       <MutationError message={error} />
 
       <PageGridFull>
-        <Card title="Add kit item">
-          <FormGrid>
-            <Input label="SKU" value={form.sku} onChange={(v) => setForm((f) => ({ ...f, sku: v }))} />
-            <Input label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
-            <Input
-              label="Price (₹)"
-              value={form.priceRupees}
-              onChange={(v) => setForm((f) => ({ ...f, priceRupees: v }))}
-              type="number"
-              placeholder="0.00"
-            />
-            <Input label="Currency" value={form.currency} onChange={(v) => setForm((f) => ({ ...f, currency: v }))} />
-          </FormGrid>
-          <label className="ed-field">
-            <span className="ed-field__label">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
-              />{" "}
-              Active (available to centers)
-            </span>
-          </label>
-          <Button onClick={() => create.mutate()} disabled={!form.sku.trim() || !form.name.trim() || create.isPending}>
-            Add item
-          </Button>
+        <AddFormSection buttonLabel="Add kit item" panelTitle="Add kit item">
+          {({ close }) => {
+            bindClose(close);
+            return (
+              <>
+                <FormGrid>
+                  <Input label="SKU" value={form.sku} onChange={(v) => setForm((f) => ({ ...f, sku: v }))} />
+                  <Input label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
+                  <Input
+                    label="Price (₹)"
+                    value={form.priceRupees}
+                    onChange={(v) => setForm((f) => ({ ...f, priceRupees: v }))}
+                    type="number"
+                    placeholder="0.00"
+                  />
+                  <Input label="Currency" value={form.currency} onChange={(v) => setForm((f) => ({ ...f, currency: v }))} />
+                </FormGrid>
+                <label className="ed-field">
+                  <span className="ed-field__label">
+                    <input
+                      type="checkbox"
+                      checked={form.isActive}
+                      onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
+                    />{" "}
+                    Active (available to centers)
+                  </span>
+                </label>
+                <Button onClick={() => create.mutate()} disabled={!form.sku.trim() || !form.name.trim() || create.isPending}>
+                  Add item
+                </Button>
+              </>
+            );
+          }}
+        </AddFormSection>
+      </PageGridFull>
+
+      <PageGridFull>
+        <Card title="Center kit orders">
+          <BrandKitOrdersSection brandId={brandId!} />
         </Card>
+      </PageGridFull>
+
+      <PageGridFull>
+        <BrandCompetitionsSection brandId={brandId!} />
       </PageGridFull>
 
       <PageGridFull>

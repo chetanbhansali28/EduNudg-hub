@@ -15,6 +15,8 @@ import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "./components/CrudRowActions";
 import { useMutationError } from "./hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
 interface Plan {
   id: string;
@@ -61,6 +63,8 @@ export function SubscriptionsPage() {
   const [subForm, setSubForm] = useState({ brand_id: "", plan_id: "", status: "active" as SubStatus });
   const [editingSubId, setEditingSubId] = useState<string | null>(null);
   const [editSub, setEditSub] = useState({ brand_id: "", plan_id: "", status: "active" as SubStatus });
+  const planCloser = useAddFormCloser();
+  const subCloser = useAddFormCloser();
 
   const plans = useQuery({
     queryKey: ["subscription-plans"],
@@ -117,6 +121,7 @@ export function SubscriptionsPage() {
     onSuccess: () => {
       invalidatePlans();
       setPlanForm(emptyPlan);
+      planCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -167,6 +172,7 @@ export function SubscriptionsPage() {
     onSuccess: () => {
       invalidateSubs();
       setSubForm({ brand_id: "", plan_id: "", status: "active" });
+      subCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -209,29 +215,36 @@ export function SubscriptionsPage() {
       <PageTitle>Subscriptions & Billing</PageTitle>
       <MutationError message={error} />
 
-      <Card title="Create plan">
-        <Input label="Code" value={planForm.code} onChange={(v) => setPlanForm((f) => ({ ...f, code: v }))} placeholder="growth" />
-        <Input label="Name" value={planForm.name} onChange={(v) => setPlanForm((f) => ({ ...f, name: v }))} placeholder="Growth" />
-        <Input
-          label="Price (paise)"
-          value={planForm.price_cents}
-          onChange={(v) => setPlanForm((f) => ({ ...f, price_cents: v }))}
-          type="number"
-          placeholder="2499900"
-        />
-        <Input
-          label="Billing interval"
-          value={planForm.billing_interval}
-          onChange={(v) => setPlanForm((f) => ({ ...f, billing_interval: v }))}
-          placeholder="month"
-        />
-        <Button
-          onClick={() => createPlan.mutate()}
-          disabled={!planForm.code.trim() || !planForm.name.trim() || createPlan.isPending}
-        >
-          Create plan
-        </Button>
-      </Card>
+      <AddFormSection buttonLabel="Create plan" panelTitle="Create plan">
+        {({ close }) => {
+          planCloser.bindClose(close);
+          return (
+            <>
+              <Input label="Code" value={planForm.code} onChange={(v) => setPlanForm((f) => ({ ...f, code: v }))} placeholder="growth" />
+              <Input label="Name" value={planForm.name} onChange={(v) => setPlanForm((f) => ({ ...f, name: v }))} placeholder="Growth" />
+              <Input
+                label="Price (paise)"
+                value={planForm.price_cents}
+                onChange={(v) => setPlanForm((f) => ({ ...f, price_cents: v }))}
+                type="number"
+                placeholder="2499900"
+              />
+              <Input
+                label="Billing interval"
+                value={planForm.billing_interval}
+                onChange={(v) => setPlanForm((f) => ({ ...f, billing_interval: v }))}
+                placeholder="month"
+              />
+              <Button
+                onClick={() => createPlan.mutate()}
+                disabled={!planForm.code.trim() || !planForm.name.trim() || createPlan.isPending}
+              >
+                Create plan
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
 
       <Card title="Plans">
         <DataList
@@ -295,29 +308,36 @@ export function SubscriptionsPage() {
         />
       </Card>
 
-      <Card title="Assign subscription">
-        <Select
-          label="Brand"
-          value={subForm.brand_id}
-          onChange={(v) => setSubForm((f) => ({ ...f, brand_id: v }))}
-          options={brandOptions}
-          placeholder="Select brand"
-        />
-        <Select
-          label="Plan"
-          value={subForm.plan_id}
-          onChange={(v) => setSubForm((f) => ({ ...f, plan_id: v }))}
-          options={planOptions}
-          placeholder="Select plan"
-        />
-        <Select label="Status" value={subForm.status} onChange={(v) => setSubForm((f) => ({ ...f, status: v }))} options={SUB_STATUS_OPTIONS} />
-        <Button
-          onClick={() => createSub.mutate()}
-          disabled={!subForm.brand_id || !subForm.plan_id || createSub.isPending}
-        >
-          Assign plan
-        </Button>
-      </Card>
+      <AddFormSection buttonLabel="Assign subscription" panelTitle="Assign subscription">
+        {({ close }) => {
+          subCloser.bindClose(close);
+          return (
+            <>
+              <Select
+                label="Brand"
+                value={subForm.brand_id}
+                onChange={(v) => setSubForm((f) => ({ ...f, brand_id: v }))}
+                options={brandOptions}
+                placeholder="Select brand"
+              />
+              <Select
+                label="Plan"
+                value={subForm.plan_id}
+                onChange={(v) => setSubForm((f) => ({ ...f, plan_id: v }))}
+                options={planOptions}
+                placeholder="Select plan"
+              />
+              <Select label="Status" value={subForm.status} onChange={(v) => setSubForm((f) => ({ ...f, status: v }))} options={SUB_STATUS_OPTIONS} />
+              <Button
+                onClick={() => createSub.mutate()}
+                disabled={!subForm.brand_id || !subForm.plan_id || createSub.isPending}
+              >
+                Assign plan
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
 
       <Card title="Brand subscriptions">
         <DataList

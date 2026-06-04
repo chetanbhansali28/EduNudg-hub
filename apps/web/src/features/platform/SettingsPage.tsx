@@ -6,6 +6,8 @@ import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "./components/CrudRowActions";
 import { useMutationError } from "./hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
 interface PlatformSetting {
   id: string;
@@ -23,6 +25,7 @@ export function SettingsPage() {
   const [form, setForm] = useState(emptySetting);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyEdit);
+  const { bindClose, closeAddForm } = useAddFormCloser();
 
   const settings = useQuery({
     queryKey: ["platform-settings"],
@@ -54,6 +57,7 @@ export function SettingsPage() {
     onSuccess: () => {
       invalidate();
       setForm(emptySetting);
+      closeAddForm();
     },
     onError: capture,
   });
@@ -114,23 +118,30 @@ export function SettingsPage() {
           <Button variant="ghost">Open homepage editor</Button>
         </Link>
       </Card>
-      <Card title="Create setting">
-        <Input label="Key" value={form.key} onChange={(v) => setForm((f) => ({ ...f, key: v }))} placeholder="support_email" />
-        <Input label="Value (JSON)" value={form.value} onChange={(v) => setForm((f) => ({ ...f, value: v }))} placeholder='{"email":"help@edunudg.com"}' />
-        <Button
-          onClick={() => {
-            try {
-              parseValue(form.value);
-              createSetting.mutate();
-            } catch {
-              capture(new Error("Value must be valid JSON"));
-            }
-          }}
-          disabled={!form.key.trim() || createSetting.isPending}
-        >
-          Create setting
-        </Button>
-      </Card>
+      <AddFormSection buttonLabel="Create setting" panelTitle="Create setting">
+        {({ close }) => {
+          bindClose(close);
+          return (
+            <>
+              <Input label="Key" value={form.key} onChange={(v) => setForm((f) => ({ ...f, key: v }))} placeholder="support_email" />
+              <Input label="Value (JSON)" value={form.value} onChange={(v) => setForm((f) => ({ ...f, value: v }))} placeholder='{"email":"help@edunudg.com"}' />
+              <Button
+                onClick={() => {
+                  try {
+                    parseValue(form.value);
+                    createSetting.mutate();
+                  } catch {
+                    capture(new Error("Value must be valid JSON"));
+                  }
+                }}
+                disabled={!form.key.trim() || createSetting.isPending}
+              >
+                Create setting
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
       <Card title="All settings">
         <DataList
           items={generalSettings}

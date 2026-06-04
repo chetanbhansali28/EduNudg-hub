@@ -89,7 +89,23 @@ export async function submitCenterStudentRegistration(
 export async function suggestCentersForLead(leadId: string) {
   const { data, error } = await getSupabase().rpc("suggest_centers_for_lead", { p_lead_id: leadId });
   if (error) throw error;
-  return data as { exact: unknown[]; near: unknown[] };
+  return data as { exact: SuggestedCenter[]; near: SuggestedCenter[] };
+}
+
+export interface SuggestedCenter {
+  center_id: string;
+  name: string;
+  slug?: string;
+  pincode?: string;
+  city?: string;
+  address_line1?: string | null;
+  distance_last3?: number;
+}
+
+export async function countStaleBrandLeads(brandId: string): Promise<number> {
+  const { data, error } = await getSupabase().rpc("count_stale_brand_leads", { p_brand_id: brandId });
+  if (error) throw error;
+  return (data as number) ?? 0;
 }
 
 export async function assignLeadToCenter(leadId: string, centerId: string) {

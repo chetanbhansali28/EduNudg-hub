@@ -56,9 +56,12 @@ describe("BrandsPage", () => {
   it("renders brand list and manual signup form", async () => {
     renderBrands();
     expect(await screen.findByText("Demo Brand")).toBeDefined();
-    expect(screen.getByText("Add brand signup manually")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Create signup request" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Add brand" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Create signup request" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Create brand" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Add brand" }));
+    expect(screen.getByRole("button", { name: "Create signup request" })).toBeDefined();
   });
 
   it("regression_brands_page_no_signup_tabs", async () => {

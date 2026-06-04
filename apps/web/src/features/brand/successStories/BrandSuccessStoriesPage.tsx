@@ -18,6 +18,8 @@ import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
 interface Story {
   id: string;
@@ -49,6 +51,7 @@ export function BrandSuccessStoriesPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const { bindClose, closeAddForm } = useAddFormCloser();
 
   const stories = useQuery({
     queryKey: ["brand-success-stories", brandId],
@@ -86,6 +89,7 @@ export function BrandSuccessStoriesPage() {
     onSuccess: () => {
       invalidate();
       setForm(emptyForm);
+      closeAddForm();
     },
     onError: capture,
   });
@@ -134,33 +138,40 @@ export function BrandSuccessStoriesPage() {
       <MutationError message={error} />
 
       <PageGridFull>
-        <Card title="Add success story">
-          <FormGrid>
-            <Input label="Title" value={form.title} onChange={(v) => setForm((f) => ({ ...f, title: v }))} />
-            <Input label="Author name" value={form.authorName} onChange={(v) => setForm((f) => ({ ...f, authorName: v }))} />
-            <Input label="Author role" value={form.authorRole} onChange={(v) => setForm((f) => ({ ...f, authorRole: v }))} />
-            <Input label="Rating (1–5)" value={form.rating} onChange={(v) => setForm((f) => ({ ...f, rating: v }))} />
-            <Input label="Image URL" value={form.imageUrl} onChange={(v) => setForm((f) => ({ ...f, imageUrl: v }))} />
-            <Input label="Sort order" value={form.sortOrder} onChange={(v) => setForm((f) => ({ ...f, sortOrder: v }))} />
-          </FormGrid>
-          <Textarea label="Quote" value={form.quote} onChange={(v) => setForm((f) => ({ ...f, quote: v }))} rows={4} />
-          <label className="ed-field">
-            <span className="ed-field__label">
-              <input
-                type="checkbox"
-                checked={form.isPublished}
-                onChange={(e) => setForm((f) => ({ ...f, isPublished: e.target.checked }))}
-              />{" "}
-              Published on brand marketing site (#testimonials)
-            </span>
-          </label>
-          <Button
-            onClick={() => create.mutate()}
-            disabled={!form.title.trim() || !form.quote.trim() || !form.authorName.trim() || create.isPending}
-          >
-            Create story
-          </Button>
-        </Card>
+        <AddFormSection buttonLabel="Add success story" panelTitle="Add success story">
+          {({ close }) => {
+            bindClose(close);
+            return (
+              <>
+                <FormGrid>
+                  <Input label="Title" value={form.title} onChange={(v) => setForm((f) => ({ ...f, title: v }))} />
+                  <Input label="Author name" value={form.authorName} onChange={(v) => setForm((f) => ({ ...f, authorName: v }))} />
+                  <Input label="Author role" value={form.authorRole} onChange={(v) => setForm((f) => ({ ...f, authorRole: v }))} />
+                  <Input label="Rating (1–5)" value={form.rating} onChange={(v) => setForm((f) => ({ ...f, rating: v }))} />
+                  <Input label="Image URL" value={form.imageUrl} onChange={(v) => setForm((f) => ({ ...f, imageUrl: v }))} />
+                  <Input label="Sort order" value={form.sortOrder} onChange={(v) => setForm((f) => ({ ...f, sortOrder: v }))} />
+                </FormGrid>
+                <Textarea label="Quote" value={form.quote} onChange={(v) => setForm((f) => ({ ...f, quote: v }))} rows={4} />
+                <label className="ed-field">
+                  <span className="ed-field__label">
+                    <input
+                      type="checkbox"
+                      checked={form.isPublished}
+                      onChange={(e) => setForm((f) => ({ ...f, isPublished: e.target.checked }))}
+                    />{" "}
+                    Published on brand marketing site (#testimonials)
+                  </span>
+                </label>
+                <Button
+                  onClick={() => create.mutate()}
+                  disabled={!form.title.trim() || !form.quote.trim() || !form.authorName.trim() || create.isPending}
+                >
+                  Create story
+                </Button>
+              </>
+            );
+          }}
+        </AddFormSection>
       </PageGridFull>
 
       <PageGridFull>

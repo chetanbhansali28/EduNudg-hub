@@ -18,5 +18,5 @@ See [Navigation spec](../spec/navigation-spec.md).
 - Fees & Payments
 - Inventory (kits Phase D)
 - **Kit orders** (`/app/kits`) — when brand enables `kits` feature
-- Settings (planned) — fees, profile photo, public blurb
+- Settings — read-only center profile (brand-managed public blurb)
 - Assessments / Reports — Phase D

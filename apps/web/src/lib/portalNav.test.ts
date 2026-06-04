@@ -73,6 +73,20 @@ describe("portalNav", () => {
     expect(kits?.href).toBe("/app/kits");
   });
 
+  it("center nav includes assessments and reports", () => {
+    const sections = centerNavSections("/app/reports");
+    const reports = sections[1]?.items.find((i) => i.label === "Reports");
+    const assessments = sections[1]?.items.find((i) => i.label === "Assessments");
+    expect(reports?.active).toBe(true);
+    expect(assessments?.href).toBe("/app/assessments");
+  });
+
+  it("center nav includes campaigns behind flag path", () => {
+    const sections = centerNavSections("/app/campaigns");
+    const campaigns = sections[1]?.items.find((i) => i.label === "Campaigns");
+    expect(campaigns?.href).toBe("/app/campaigns");
+  });
+
   it("regression_filterNav_hides_campaigns_when_flag_off", () => {
     const sections = filterNavByFeatureFlags(
       brandNavSections("/app"),

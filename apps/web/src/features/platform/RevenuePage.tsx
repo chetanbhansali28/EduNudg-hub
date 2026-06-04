@@ -17,6 +17,8 @@ import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "./components/CrudRowActions";
 import { useMutationError } from "./hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
 type InvoiceStatus = "draft" | "sent" | "paid" | "partial" | "overdue" | "cancelled";
 
@@ -66,6 +68,8 @@ export function RevenuePage() {
   const [metricForm, setMetricForm] = useState(emptyMetric);
   const [editingMetricId, setEditingMetricId] = useState<string | null>(null);
   const [editMetric, setEditMetric] = useState(emptyMetric);
+  const invoiceCloser = useAddFormCloser();
+  const metricCloser = useAddFormCloser();
 
   const brands = useQuery({
     queryKey: ["brands-options"],
@@ -123,6 +127,7 @@ export function RevenuePage() {
     onSuccess: () => {
       invalidateInvoices();
       setInvoiceForm(emptyInvoice);
+      invoiceCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -173,6 +178,7 @@ export function RevenuePage() {
     onSuccess: () => {
       invalidateMetrics();
       setMetricForm(emptyMetric);
+      metricCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -222,33 +228,40 @@ export function RevenuePage() {
         <KpiCard label="Invoices" value={invoices.data?.length ?? 0} />
       </KpiGrid>
 
-      <Card title="Create invoice">
-        <Select
-          label="Brand"
-          value={invoiceForm.brand_id}
-          onChange={(v) => setInvoiceForm((f) => ({ ...f, brand_id: v }))}
-          options={brandOptions}
-          placeholder="Select brand"
-        />
-        <Input
-          label="Amount (paise)"
-          value={invoiceForm.amount_cents}
-          onChange={(v) => setInvoiceForm((f) => ({ ...f, amount_cents: v }))}
-          type="number"
-        />
-        <Select
-          label="Status"
-          value={invoiceForm.status}
-          onChange={(v) => setInvoiceForm((f) => ({ ...f, status: v }))}
-          options={INVOICE_STATUS_OPTIONS}
-        />
-        <Button
-          onClick={() => createInvoice.mutate()}
-          disabled={!invoiceForm.brand_id || createInvoice.isPending}
-        >
-          Create invoice
-        </Button>
-      </Card>
+      <AddFormSection buttonLabel="Create invoice" panelTitle="Create invoice">
+        {({ close }) => {
+          invoiceCloser.bindClose(close);
+          return (
+            <>
+              <Select
+                label="Brand"
+                value={invoiceForm.brand_id}
+                onChange={(v) => setInvoiceForm((f) => ({ ...f, brand_id: v }))}
+                options={brandOptions}
+                placeholder="Select brand"
+              />
+              <Input
+                label="Amount (paise)"
+                value={invoiceForm.amount_cents}
+                onChange={(v) => setInvoiceForm((f) => ({ ...f, amount_cents: v }))}
+                type="number"
+              />
+              <Select
+                label="Status"
+                value={invoiceForm.status}
+                onChange={(v) => setInvoiceForm((f) => ({ ...f, status: v }))}
+                options={INVOICE_STATUS_OPTIONS}
+              />
+              <Button
+                onClick={() => createInvoice.mutate()}
+                disabled={!invoiceForm.brand_id || createInvoice.isPending}
+              >
+                Create invoice
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
 
       <Card title="Platform invoices">
         <DataList
@@ -310,45 +323,52 @@ export function RevenuePage() {
         />
       </Card>
 
-      <Card title="Add daily brand metric">
-        <Select
-          label="Brand"
-          value={metricForm.brand_id}
-          onChange={(v) => setMetricForm((f) => ({ ...f, brand_id: v }))}
-          options={brandOptions}
-          placeholder="Select brand"
-        />
-        <Input
-          label="Date (YYYY-MM-DD)"
-          value={metricForm.metric_date}
-          onChange={(v) => setMetricForm((f) => ({ ...f, metric_date: v }))}
-          placeholder="2026-06-01"
-        />
-        <Input
-          label="Enrollments"
-          value={metricForm.enrollments_count}
-          onChange={(v) => setMetricForm((f) => ({ ...f, enrollments_count: v }))}
-          type="number"
-        />
-        <Input
-          label="Revenue (paise)"
-          value={metricForm.revenue_cents}
-          onChange={(v) => setMetricForm((f) => ({ ...f, revenue_cents: v }))}
-          type="number"
-        />
-        <Input
-          label="Active centers"
-          value={metricForm.active_centers}
-          onChange={(v) => setMetricForm((f) => ({ ...f, active_centers: v }))}
-          type="number"
-        />
-        <Button
-          onClick={() => createMetric.mutate()}
-          disabled={!metricForm.brand_id || !metricForm.metric_date || createMetric.isPending}
-        >
-          Add metric
-        </Button>
-      </Card>
+      <AddFormSection buttonLabel="Add daily brand metric" panelTitle="Add daily brand metric">
+        {({ close }) => {
+          metricCloser.bindClose(close);
+          return (
+            <>
+              <Select
+                label="Brand"
+                value={metricForm.brand_id}
+                onChange={(v) => setMetricForm((f) => ({ ...f, brand_id: v }))}
+                options={brandOptions}
+                placeholder="Select brand"
+              />
+              <Input
+                label="Date (YYYY-MM-DD)"
+                value={metricForm.metric_date}
+                onChange={(v) => setMetricForm((f) => ({ ...f, metric_date: v }))}
+                placeholder="2026-06-01"
+              />
+              <Input
+                label="Enrollments"
+                value={metricForm.enrollments_count}
+                onChange={(v) => setMetricForm((f) => ({ ...f, enrollments_count: v }))}
+                type="number"
+              />
+              <Input
+                label="Revenue (paise)"
+                value={metricForm.revenue_cents}
+                onChange={(v) => setMetricForm((f) => ({ ...f, revenue_cents: v }))}
+                type="number"
+              />
+              <Input
+                label="Active centers"
+                value={metricForm.active_centers}
+                onChange={(v) => setMetricForm((f) => ({ ...f, active_centers: v }))}
+                type="number"
+              />
+              <Button
+                onClick={() => createMetric.mutate()}
+                disabled={!metricForm.brand_id || !metricForm.metric_date || createMetric.isPending}
+              >
+                Add metric
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
 
       <Card title="Daily brand rollups">
         <DataList

@@ -14,12 +14,14 @@ import {
 import { ManualStudentLeadCard } from "@/features/shared/manualLeads/ManualStudentLeadCard";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
+import { isLeadStale, leadAgeDays } from "@/lib/leadSla";
 import {
   assignLeadToCenter,
   reopenLead,
   reassignLead,
   suggestCentersForLead,
   type LeadRow,
+  type SuggestedCenter,
 } from "@/lib/leadsApi";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -28,18 +30,35 @@ type LeadFilter = "all" | "unassigned" | "stale" | "lost";
 
 const FILTER_OPTIONS: { value: LeadFilter; label: string }[] = [
   { value: "all", label: "All leads" },
-  { value: "unassigned", label: "Unassigned" },
-  { value: "stale", label: "Stale — no center action" },
+  { value: "unassigned", label: "Unassigned applications" },
+  { value: "stale", label: "Leads needing attention" },
   { value: "lost", label: "Lost" },
 ];
 
-function isStale(lead: LeadRow, now: number) {
+function SuggestionButton({
+  center,
+  tier,
+  onSelect,
+}: {
+  center: SuggestedCenter;
+  tier: "exact" | "near";
+  onSelect: (id: string) => void;
+}) {
+  const label =
+    tier === "exact"
+      ? `Exact pincode match — ${center.name}`
+      : `Nearby in ${center.city ?? "city"} — ${center.name} (Δ${center.distance_last3 ?? 0})`;
+
   return (
-    !!lead.center_id &&
-    !!lead.stale_at &&
-    new Date(lead.stale_at).getTime() < now &&
-    lead.status !== "converted" &&
-    lead.status !== "lost"
+    <li>
+      <button type="button" className="ed-text-sm" onClick={() => onSelect(center.center_id)}>
+        {label}
+        {center.address_line1 && (
+          <span className="ed-muted"> · {center.address_line1}</span>
+        )}
+        {center.pincode && <span className="ed-muted"> · {center.pincode}</span>}
+      </button>
+    </li>
   );
 }
 
@@ -79,13 +98,29 @@ export function StudentLeadsPage() {
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("franchise_centers")
-        .select("id, name, display_name, pincode, city")
+        .select("id, name, display_name, slug, pincode, city, address_line1")
         .eq("brand_id", brandId!)
         .is("deleted_at", null)
         .order("name");
-      return supabaseList(data, qErr) as { id: string; name: string; display_name: string | null }[];
+      return supabaseList(data, qErr) as {
+        id: string;
+        name: string;
+        display_name: string | null;
+        slug: string;
+        pincode: string | null;
+        city: string | null;
+        address_line1: string | null;
+      }[];
     },
   });
+
+  const centerNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of centers.data ?? []) {
+      map.set(c.id, c.display_name ?? c.name);
+    }
+    return map;
+  }, [centers.data]);
 
   const assign = useMutation({
     mutationFn: async () => {
@@ -99,6 +134,7 @@ export function StudentLeadsPage() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["brand-leads", brandId] });
+      void qc.invalidateQueries({ queryKey: ["brand-dashboard", brandId] });
       setSelectedId(null);
       setIsReallocate(false);
       setAssignCenterId("");
@@ -111,7 +147,10 @@ export function StudentLeadsPage() {
       clear();
       await reopenLead(leadId);
     },
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["brand-leads", brandId] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["brand-leads", brandId] });
+      void qc.invalidateQueries({ queryKey: ["brand-dashboard", brandId] });
+    },
     onError: capture,
   });
 
@@ -120,19 +159,23 @@ export function StudentLeadsPage() {
 
   const counts = useMemo(
     () => ({
-      unassigned: allLeads.filter((l) => !l.center_id).length,
-      stale: allLeads.filter((l) => isStale(l, now)).length,
+      unassigned: allLeads.filter((l) => !l.center_id && l.status !== "lost" && l.status !== "converted").length,
+      stale: allLeads.filter((l) => isLeadStale(l, now)).length,
       lost: allLeads.filter((l) => l.status === "lost").length,
     }),
     [allLeads, now]
   );
 
   const filtered = allLeads.filter((l) => {
-    if (filter === "unassigned") return !l.center_id;
-    if (filter === "stale") return isStale(l, now);
+    if (filter === "unassigned") return !l.center_id && l.status !== "lost" && l.status !== "converted";
+    if (filter === "stale") return isLeadStale(l, now);
     if (filter === "lost") return l.status === "lost";
     return true;
   });
+
+  const exactSuggestions = suggestions.data?.exact ?? [];
+  const nearSuggestions = suggestions.data?.near ?? [];
+  const noSuggestions = exactSuggestions.length === 0 && nearSuggestions.length === 0;
 
   if (missingBrand) return <p className="ed-empty">Brand context not found.</p>;
 
@@ -149,14 +192,15 @@ export function StudentLeadsPage() {
 
       <Card title="Lead pipeline">
         <p className="ed-text-sm ed-muted">
-          Unassigned {counts.unassigned} · Stale {counts.stale} · Lost {counts.lost}
+          Unassigned {counts.unassigned} · Needs attention {counts.stale} · Lost {counts.lost}
         </p>
         <Select label="Show" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
         <DataList
           items={filtered}
           empty="No leads in this view."
           render={(l) => {
-            const stale = isStale(l, now);
+            const stale = isLeadStale(l, now);
+            const unassigned = !l.center_id && l.status !== "lost" && l.status !== "converted";
             const showReassign = stale;
             return (
               <ListRow
@@ -179,7 +223,13 @@ export function StudentLeadsPage() {
                   )
                 }
               >
-                <LeadSummary lead={l} stale={stale} unassigned={!l.center_id} />
+                <LeadSummary
+                  lead={l}
+                  stale={stale}
+                  unassigned={unassigned}
+                  assignedCenterName={l.center_id ? centerNameById.get(l.center_id) : undefined}
+                  ageDays={unassigned ? leadAgeDays(l.created_at, now) : undefined}
+                />
                 {l.lost_reason && <p className="ed-text-sm">Reason: {l.lost_reason}</p>}
               </ListRow>
             );
@@ -191,35 +241,31 @@ export function StudentLeadsPage() {
         <Card title={isReallocate ? "Reallocate to center" : "Assign to center"}>
           {isReallocate && (
             <p className="ed-text-sm ed-muted">
-              Reallocation resets the SLA clock for the new center (15-day timer starts over).
+              Reallocation resets the SLA clock for the new center (timer starts over per brand settings).
             </p>
           )}
-          <p className="ed-text-sm ed-muted">Pincode suggestions (manual assign required)</p>
-          <ul>
-            {((suggestions.data?.exact as { center_id: string; name: string }[]) ?? []).map((c) => (
-              <li key={c.center_id}>
-                <button type="button" onClick={() => setAssignCenterId(c.center_id)}>
-                  Exact: {c.name}
-                </button>
-              </li>
-            ))}
-            {((suggestions.data?.near as { center_id: string; name: string; distance_last3: number }[]) ?? []).map(
-              (c) => (
-                <li key={c.center_id}>
-                  <button type="button" onClick={() => setAssignCenterId(c.center_id)}>
-                    Near: {c.name} (Δ{c.distance_last3})
-                  </button>
-                </li>
-              )
-            )}
-          </ul>
+          <p className="ed-text-sm ed-muted">Pincode suggestions — manual assign required (FR-B11)</p>
+          {noSuggestions ? (
+            <p className="ed-text-sm ed-muted">
+              No centers found for this pincode — add a center with location data or assign manually below.
+            </p>
+          ) : (
+            <ul>
+              {exactSuggestions.map((c) => (
+                <SuggestionButton key={c.center_id} center={c} tier="exact" onSelect={setAssignCenterId} />
+              ))}
+              {nearSuggestions.map((c) => (
+                <SuggestionButton key={c.center_id} center={c} tier="near" onSelect={setAssignCenterId} />
+              ))}
+            </ul>
+          )}
           <Select
-            label="Or choose any center"
+            label="Or choose any center in brand"
             value={assignCenterId}
             onChange={setAssignCenterId}
             options={(centers.data ?? []).map((c) => ({
               value: c.id,
-              label: c.display_name ?? c.name,
+              label: `${c.display_name ?? c.name}${c.city ? ` · ${c.city}` : ""}`,
             }))}
             placeholder="Select center"
           />
@@ -241,7 +287,19 @@ export function StudentLeadsPage() {
   );
 }
 
-function LeadSummary({ lead, stale, unassigned }: { lead: LeadRow; stale?: boolean; unassigned?: boolean }) {
+function LeadSummary({
+  lead,
+  stale,
+  unassigned,
+  assignedCenterName,
+  ageDays,
+}: {
+  lead: LeadRow;
+  stale?: boolean;
+  unassigned?: boolean;
+  assignedCenterName?: string;
+  ageDays?: number;
+}) {
   return (
     <div>
       <strong>{lead.parent_name ?? lead.full_name}</strong>
@@ -249,9 +307,13 @@ function LeadSummary({ lead, stale, unassigned }: { lead: LeadRow; stale?: boole
         {lead.whatsapp_e164} · {lead.city} {lead.pincode}
       </div>
       {lead.child_name && <div className="ed-text-sm">Child: {lead.child_name}</div>}
+      {assignedCenterName && (
+        <div className="ed-text-sm ed-muted">Assigned: {assignedCenterName}</div>
+      )}
       <Badge>{lead.status}</Badge> <Badge>{lead.lead_source ?? "—"}</Badge>
-      {unassigned && <Badge tone="warning">Unassigned</Badge>}
-      {stale && <Badge tone="warning">Stale</Badge>}
+      {unassigned && ageDays != null && <Badge tone="warning">{ageDays}d unassigned</Badge>}
+      {unassigned && ageDays == null && <Badge tone="warning">Unassigned</Badge>}
+      {stale && <Badge tone="warning">Needs attention</Badge>}
     </div>
   );
 }

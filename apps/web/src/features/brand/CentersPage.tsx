@@ -16,6 +16,7 @@ import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useBrandScope } from "./hooks/useBrandScope";
 
 type CenterStatus = "pending" | "active" | "suspended" | "closed";
@@ -132,15 +133,17 @@ export function CentersPage() {
       <PageTitle>Franchise Centers</PageTitle>
       <MutationError message={error} />
 
-      <Card title="Add a new center">
-        <p className="ed-text-sm ed-muted">
-          New centers are provisioned when you approve a franchise application — that creates the center record and{" "}
-          <code>{`{center}.{brand}`}</code> domain mapping in one step.
-        </p>
-        <Link to="/app/franchise-applications">
-          <Button>Go to franchise applications</Button>
-        </Link>
-      </Card>
+      <AddFormSection buttonLabel="Add center" panelTitle="Add a new center">
+        <>
+          <p className="ed-text-sm ed-muted">
+            New centers are provisioned when you approve a franchise application — that creates the center record and{" "}
+            <code>{`{center}.{brand}`}</code> domain mapping in one step.
+          </p>
+          <Link to="/app/franchise-applications">
+            <Button>Go to franchise applications</Button>
+          </Link>
+        </>
+      </AddFormSection>
 
       <Card title="Centers">
         <DataList
@@ -151,14 +154,21 @@ export function CentersPage() {
             return (
               <ListRow
                 aside={
-                  <CrudRowActions
-                    editing={editing}
-                    onEdit={() => startEdit(c)}
-                    onSave={() => updateCenter.mutate(c.id)}
-                    onCancel={() => setEditingId(null)}
-                    onDelete={() => deleteCenter.mutate(c.id)}
-                    saveDisabled={!editForm.slug.trim() || !editForm.name.trim() || updateCenter.isPending}
-                  />
+                  <div className="ed-form-section">
+                    {!editing && (
+                      <Link to={`/app/centers/${c.slug}`}>
+                        <Button variant="ghost">View</Button>
+                      </Link>
+                    )}
+                    <CrudRowActions
+                      editing={editing}
+                      onEdit={() => startEdit(c)}
+                      onSave={() => updateCenter.mutate(c.id)}
+                      onCancel={() => setEditingId(null)}
+                      onDelete={() => deleteCenter.mutate(c.id)}
+                      saveDisabled={!editForm.slug.trim() || !editForm.name.trim() || updateCenter.isPending}
+                    />
+                  </div>
                 }
               >
                 {editing ? (

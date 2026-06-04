@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Input, MutationError } from "@edunudg/ui";
 import { submitBrandStudentApplication } from "@/lib/leadsApi";
+import { isIndiaPincode } from "@/lib/leadSla";
 import { EnquiryPromoSection } from "./EnquiryPromoSection";
 
 type Props = { brandSlug: string };
@@ -19,8 +20,15 @@ export function BrandStudentApplicationSection({ brandSlug }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
+  const pincodeValid = isIndiaPincode(pincode);
+  const pincodeHint = pincode.trim() && !pincodeValid ? "Enter a valid 6-digit India pincode" : undefined;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!pincodeValid) {
+      setError("Enter a valid 6-digit India pincode.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     const { error: err } = await submitBrandStudentApplication(brandSlug, {
@@ -71,6 +79,7 @@ export function BrandStudentApplicationSection({ brandSlug }: Props) {
               <Input label="Email" value={email} onChange={setEmail} type="email" />
               <Input label="City" value={city} onChange={setCity} />
               <Input label="Pincode" value={pincode} onChange={setPincode} placeholder="6 digits" />
+              {pincodeHint && <p className="ed-text-sm ed-muted">{pincodeHint}</p>}
               <Input label="Child name" value={childName} onChange={setChildName} />
             </div>
             <Input label="Child date of birth" value={childDob} onChange={setChildDob} type="date" />
@@ -85,7 +94,8 @@ export function BrandStudentApplicationSection({ brandSlug }: Props) {
                 !whatsapp.trim() ||
                 !email.trim() ||
                 !city.trim() ||
-                !pincode.trim()
+                !pincode.trim() ||
+                !pincodeValid
               }
             >
               {submitting ? "Submitting…" : "Request a free trial"}

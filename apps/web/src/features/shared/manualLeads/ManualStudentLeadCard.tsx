@@ -1,14 +1,24 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
+import { Button, FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
 import { createBrandStudentLeadStaff, createCenterStudentLeadStaff } from "@/lib/manualLeadsApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { isIndiaPincode } from "@/lib/leadSla";
+import { AddFormSection } from "@/features/shared/AddFormSection";
 
 type Props =
   | { scope: "brand"; brandId: string; invalidateKey: unknown[] }
   | { scope: "center"; centerId: string; invalidateKey: unknown[] };
 
 export function ManualStudentLeadCard(props: Props) {
+  return (
+    <AddFormSection buttonLabel="Add lead" panelTitle="Add student lead manually">
+      {({ close }) => <ManualStudentLeadForm {...props} onComplete={close} />}
+    </AddFormSection>
+  );
+}
+
+function ManualStudentLeadForm(props: Props & { onComplete: () => void }) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [parentName, setParentName] = useState("");
@@ -17,18 +27,37 @@ export function ManualStudentLeadCard(props: Props) {
   const [city, setCity] = useState("");
   const [pincode, setPincode] = useState("");
   const [childName, setChildName] = useState("");
+  const [childDob, setChildDob] = useState("");
+  const [schoolName, setSchoolName] = useState("");
   const [notes, setNotes] = useState("");
+
+  const isBrand = props.scope === "brand";
+  const pincodeRequired = isBrand;
+  const pincodeValid = pincodeRequired ? isIndiaPincode(pincode) : !pincode.trim() || isIndiaPincode(pincode);
+  const pincodeHint =
+    pincode.trim() && !pincodeValid
+      ? isBrand
+        ? "Enter a valid 6-digit India pincode"
+        : "Use a 6-digit India pincode or leave blank"
+      : undefined;
 
   const save = useMutation({
     mutationFn: async () => {
+      if (!pincodeValid) {
+        throw new Error(
+          isBrand ? "Enter a valid 6-digit India pincode." : "Enter a valid 6-digit India pincode or leave blank."
+        );
+      }
       clear();
       const payload = {
         parentName,
         whatsappE164: whatsapp,
         email,
         city,
-        pincode,
+        pincode: pincode || undefined,
         childName,
+        childDob: childDob || undefined,
+        schoolName: schoolName || undefined,
         notes,
       };
       if (props.scope === "brand") {
@@ -47,30 +76,59 @@ export function ManualStudentLeadCard(props: Props) {
       setCity("");
       setPincode("");
       setChildName("");
+      setChildDob("");
+      setSchoolName("");
       setNotes("");
+      props.onComplete();
     },
     onError: capture,
   });
 
+  const brandCanSubmit =
+    parentName.trim() &&
+    whatsapp.trim() &&
+    email.trim() &&
+    city.trim() &&
+    pincode.trim() &&
+    pincodeValid;
+
+  const centerCanSubmit = parentName.trim() && whatsapp.trim() && email.trim() && pincodeValid;
+
   return (
-    <Card title="Add student lead manually">
-      <p className="ed-text-sm ed-muted">Walk-in or phone enquiry — merges on duplicate WhatsApp per brand.</p>
+    <>
+      <p className="ed-text-sm ed-muted">
+        Walk-in or phone enquiry — same fields as the public {isBrand ? "student application" : "center registration"}{" "}
+        form. Duplicate WhatsApp merges per brand.
+      </p>
       <MutationError message={error} />
       <FormGrid>
         <Input label="Parent name" value={parentName} onChange={setParentName} />
-        <Input label="WhatsApp" value={whatsapp} onChange={setWhatsapp} placeholder="+91…" />
+        <Input label="WhatsApp number" value={whatsapp} onChange={setWhatsapp} placeholder="+91…" />
         <Input label="Email" value={email} onChange={setEmail} type="email" />
-        <Input label="City" value={city} onChange={setCity} />
-        {props.scope === "brand" && <Input label="Pincode" value={pincode} onChange={setPincode} />}
-        <Input label="Child name" value={childName} onChange={setChildName} />
+        {isBrand ? (
+          <>
+            <Input label="City" value={city} onChange={setCity} />
+            <Input label="Pincode" value={pincode} onChange={setPincode} placeholder="6 digits" />
+          </>
+        ) : (
+          <>
+            <Input label="Child name" value={childName} onChange={setChildName} />
+            <Input label="City (optional)" value={city} onChange={setCity} />
+            <Input label="Pincode (optional)" value={pincode} onChange={setPincode} placeholder="6 digits" />
+          </>
+        )}
+        {isBrand && <Input label="Child name" value={childName} onChange={setChildName} />}
       </FormGrid>
-      <Textarea label="Notes" value={notes} onChange={setNotes} rows={2} />
+      {pincodeHint && <p className="ed-text-sm ed-muted">{pincodeHint}</p>}
+      <Input label="Child date of birth" value={childDob} onChange={setChildDob} type="date" />
+      {isBrand && <Input label="School name (optional)" value={schoolName} onChange={setSchoolName} />}
+      <Textarea label="Notes (optional)" value={notes} onChange={setNotes} rows={2} />
       <Button
         onClick={() => save.mutate()}
-        disabled={save.isPending || !parentName.trim() || !whatsapp.trim()}
+        disabled={save.isPending || !(isBrand ? brandCanSubmit : centerCanSubmit)}
       >
         Create lead
       </Button>
-    </Card>
+    </>
   );
 }

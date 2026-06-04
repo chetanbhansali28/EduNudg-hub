@@ -9,13 +9,15 @@ import {
   Input,
   ListRow,
   MutationError,
-  PageGrid,
   PageTitle,
   Select,
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { createCenterKitOrder, listActiveKitCatalog, listCenterKitOrders } from "@/lib/kitOrdersApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { CenterKitAllocationsCard } from "./CenterKitAllocationsCard";
 
 export function CenterKitOrdersPage() {
   const tenant = useTenant();
@@ -25,6 +27,7 @@ export function CenterKitOrdersPage() {
   const { error, clear, capture } = useMutationError();
   const [catalogItemId, setCatalogItemId] = useState("");
   const [quantity, setQuantity] = useState("1");
+  const { bindClose, closeAddForm } = useAddFormCloser();
 
   const catalog = useQuery({
     queryKey: ["kit-catalog-active", brandId],
@@ -53,6 +56,7 @@ export function CenterKitOrdersPage() {
       void qc.invalidateQueries({ queryKey: ["center-kit-orders", centerId] });
       setCatalogItemId("");
       setQuantity("1");
+      closeAddForm();
     },
     onError: capture,
   });
@@ -64,27 +68,33 @@ export function CenterKitOrdersPage() {
       <PageTitle>Kit orders</PageTitle>
       <MutationError message={error} />
 
-      <PageGrid cols={2}>
-        <Card title="Place order">
-          <Select
-            label="Kit item"
-            value={catalogItemId}
-            onChange={setCatalogItemId}
-            placeholder="Select kit"
-            options={(catalog.data ?? []).map((c) => ({
-              value: c.id,
-              label: `${c.name} (₹${(c.price_cents / 100).toFixed(0)})`,
-            }))}
-          />
-          <FormGrid>
-            <Input label="Quantity" value={quantity} onChange={setQuantity} />
-          </FormGrid>
-          <Button onClick={() => placeOrder.mutate()} disabled={!catalogItemId || placeOrder.isPending}>
-            Submit order to brand
-          </Button>
-        </Card>
+      <AddFormSection buttonLabel="Place order" panelTitle="Place order">
+        {({ close }) => {
+          bindClose(close);
+          return (
+            <>
+              <Select
+                label="Kit item"
+                value={catalogItemId}
+                onChange={setCatalogItemId}
+                placeholder="Select kit"
+                options={(catalog.data ?? []).map((c) => ({
+                  value: c.id,
+                  label: `${c.name} (₹${(c.price_cents / 100).toFixed(0)})`,
+                }))}
+              />
+              <FormGrid>
+                <Input label="Quantity" value={quantity} onChange={setQuantity} />
+              </FormGrid>
+              <Button onClick={() => placeOrder.mutate()} disabled={!catalogItemId || placeOrder.isPending}>
+                Submit order to brand
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
 
-        <Card title="Order history">
+      <Card title="Order history">
           <DataList
             items={orders.data ?? []}
             empty="No kit orders yet."
@@ -94,15 +104,23 @@ export function CenterKitOrdersPage() {
                   <strong>Order {o.id.slice(0, 8)}</strong>
                   <div className="ed-text-sm ed-muted">{new Date(o.created_at).toLocaleString()}</div>
                   <Badge>{o.status}</Badge>
-                  <div className="ed-text-sm">
-                    {o.kit_order_lines?.length ?? 0} line(s)
-                  </div>
+                  <ul className="ed-text-sm">
+                    {o.kit_order_lines?.map((line) => {
+                      const catalog = Array.isArray(line.kit_catalog) ? line.kit_catalog[0] : line.kit_catalog;
+                      return (
+                        <li key={line.id}>
+                          {catalog?.name ?? "Item"} × {line.quantity}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               </ListRow>
             )}
           />
-        </Card>
-      </PageGrid>
+      </Card>
+
+      <CenterKitAllocationsCard brandId={brandId} centerId={centerId} />
     </>
   );
 }

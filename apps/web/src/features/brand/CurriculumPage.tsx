@@ -19,6 +19,8 @@ import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { useBrandScope } from "./hooks/useBrandScope";
 
 type CurriculumStatus = "draft" | "published" | "archived";
@@ -104,6 +106,10 @@ export function CurriculumPage() {
   const [moduleTitle, setModuleTitle] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
   const [lessonDuration, setLessonDuration] = useState("");
+  const programCloser = useAddFormCloser();
+  const levelCloser = useAddFormCloser();
+  const moduleCloser = useAddFormCloser();
+  const lessonCloser = useAddFormCloser();
 
   const programs = useQuery({
     queryKey: ["programs", brandId],
@@ -192,6 +198,7 @@ export function CurriculumPage() {
       invalidatePrograms();
       setProgramName("");
       setProgramDesc("");
+      programCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -312,6 +319,7 @@ export function CurriculumPage() {
       setLevelWhyTake("");
       setLevelWhatLearn("");
       setLevelVideoUrl("");
+      levelCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -369,6 +377,7 @@ export function CurriculumPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["modules", selectedLevelId] });
       setModuleTitle("");
+      moduleCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -407,6 +416,7 @@ export function CurriculumPage() {
       qc.invalidateQueries({ queryKey: ["lessons", selectedModuleId] });
       setLessonTitle("");
       setLessonDuration("");
+      lessonCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -435,16 +445,25 @@ export function CurriculumPage() {
 
       <PageGridFull>
       <Card title="Programs">
-        <FormGrid>
-          <Input label="Program name" value={programName} onChange={setProgramName} />
-          <Input label="Marketing video URL" value={programVideoUrl} onChange={setProgramVideoUrl} placeholder="https://…" />
-        </FormGrid>
-        <Input label="Description" value={programDesc} onChange={setProgramDesc} />
-        <Textarea label="Why take abacus (program overview)" value={programWhyTake} onChange={setProgramWhyTake} rows={3} />
-        <Textarea label="What you will learn" value={programWhatLearn} onChange={setProgramWhatLearn} rows={3} />
-        <Button onClick={() => createProgram.mutate()} disabled={!programName.trim() || createProgram.isPending}>
-          Add program
-        </Button>
+        <AddFormSection buttonLabel="Add program" panelTitle="Add program">
+          {({ close }) => {
+            programCloser.bindClose(close);
+            return (
+              <>
+                <FormGrid>
+                  <Input label="Program name" value={programName} onChange={setProgramName} />
+                  <Input label="Marketing video URL" value={programVideoUrl} onChange={setProgramVideoUrl} placeholder="https://…" />
+                </FormGrid>
+                <Input label="Description" value={programDesc} onChange={setProgramDesc} />
+                <Textarea label="Why take abacus (program overview)" value={programWhyTake} onChange={setProgramWhyTake} rows={3} />
+                <Textarea label="What you will learn" value={programWhatLearn} onChange={setProgramWhatLearn} rows={3} />
+                <Button onClick={() => createProgram.mutate()} disabled={!programName.trim() || createProgram.isPending}>
+                  Add program
+                </Button>
+              </>
+            );
+          }}
+        </AddFormSection>
         <DataList
           items={programs.data ?? []}
           empty="No programs yet."
@@ -553,17 +572,26 @@ export function CurriculumPage() {
 
       {selectedVersionId && (
         <Card title="Levels">
-          <FormGrid>
-            <Input label="Level name" value={levelName} onChange={setLevelName} placeholder="Level 1 — Foundations" />
-            <Input label="Abacus level code" value={levelAbacusCode} onChange={setLevelAbacusCode} placeholder="L1" />
-          </FormGrid>
-          <Input label="Topics covered (comma-separated)" value={levelTopics} onChange={setLevelTopics} placeholder="Finger basics, Small friends, …" />
-          <Textarea label="Why this level" value={levelWhyTake} onChange={setLevelWhyTake} rows={2} />
-          <Textarea label="What you will learn" value={levelWhatLearn} onChange={setLevelWhatLearn} rows={2} />
-          <Input label="Level marketing video URL" value={levelVideoUrl} onChange={setLevelVideoUrl} />
-          <Button onClick={() => createLevel.mutate()} disabled={!levelName.trim() || createLevel.isPending}>
-            Add level
-          </Button>
+          <AddFormSection buttonLabel="Add level" panelTitle="Add level">
+            {({ close }) => {
+              levelCloser.bindClose(close);
+              return (
+                <>
+                  <FormGrid>
+                    <Input label="Level name" value={levelName} onChange={setLevelName} placeholder="Level 1 — Foundations" />
+                    <Input label="Abacus level code" value={levelAbacusCode} onChange={setLevelAbacusCode} placeholder="L1" />
+                  </FormGrid>
+                  <Input label="Topics covered (comma-separated)" value={levelTopics} onChange={setLevelTopics} placeholder="Finger basics, Small friends, …" />
+                  <Textarea label="Why this level" value={levelWhyTake} onChange={setLevelWhyTake} rows={2} />
+                  <Textarea label="What you will learn" value={levelWhatLearn} onChange={setLevelWhatLearn} rows={2} />
+                  <Input label="Level marketing video URL" value={levelVideoUrl} onChange={setLevelVideoUrl} />
+                  <Button onClick={() => createLevel.mutate()} disabled={!levelName.trim() || createLevel.isPending}>
+                    Add level
+                  </Button>
+                </>
+              );
+            }}
+          </AddFormSection>
           <DataList
             items={levels.data ?? []}
             render={(l) => (
@@ -599,10 +627,19 @@ export function CurriculumPage() {
 
       {selectedLevelId && (
         <Card title="Modules">
-          <Input label="Module title" value={moduleTitle} onChange={setModuleTitle} />
-          <Button onClick={() => createModule.mutate()} disabled={!moduleTitle.trim() || createModule.isPending}>
-            Add module
-          </Button>
+          <AddFormSection buttonLabel="Add module" panelTitle="Add module">
+            {({ close }) => {
+              moduleCloser.bindClose(close);
+              return (
+                <>
+                  <Input label="Module title" value={moduleTitle} onChange={setModuleTitle} />
+                  <Button onClick={() => createModule.mutate()} disabled={!moduleTitle.trim() || createModule.isPending}>
+                    Add module
+                  </Button>
+                </>
+              );
+            }}
+          </AddFormSection>
           <DataList
             items={modules.data ?? []}
             render={(m) => (
@@ -623,11 +660,20 @@ export function CurriculumPage() {
 
       {selectedModuleId && (
         <Card title="Lessons">
-          <Input label="Lesson title" value={lessonTitle} onChange={setLessonTitle} />
-          <Input label="Duration (minutes)" value={lessonDuration} onChange={setLessonDuration} />
-          <Button onClick={() => createLesson.mutate()} disabled={!lessonTitle.trim() || createLesson.isPending}>
-            Add lesson
-          </Button>
+          <AddFormSection buttonLabel="Add lesson" panelTitle="Add lesson">
+            {({ close }) => {
+              lessonCloser.bindClose(close);
+              return (
+                <>
+                  <Input label="Lesson title" value={lessonTitle} onChange={setLessonTitle} />
+                  <Input label="Duration (minutes)" value={lessonDuration} onChange={setLessonDuration} />
+                  <Button onClick={() => createLesson.mutate()} disabled={!lessonTitle.trim() || createLesson.isPending}>
+                    Add lesson
+                  </Button>
+                </>
+              );
+            }}
+          </AddFormSection>
           <DataList
             items={lessons.data ?? []}
             render={(l) => (

@@ -3,7 +3,9 @@ import type { HomepageConfig } from "@/types/homepage";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { FeatureScrollSection } from "./FeatureScrollSection";
 import type { PortalMode } from "@/lib/portalMode";
+import type { CenterPublicProfile } from "@/lib/centerLandingApi";
 import { BrandStudentApplicationSection } from "./BrandStudentApplicationSection";
+import { CenterBlurbSection } from "./CenterBlurbSection";
 import { CenterStudentRegistrationSection } from "./CenterStudentRegistrationSection";
 import { FranchiseSignupSection } from "./FranchiseSignupSection";
 import { PlatformBrandSignupSection } from "@/features/platform/brandSignups/PlatformBrandSignupSection";
@@ -33,9 +35,10 @@ type Props = {
   portalMode: PortalMode;
   brandSlug?: string | null;
   centerSlug?: string | null;
+  centerProfile?: CenterPublicProfile | null;
 };
 
-export function MarketingContent({ config, portalMode, brandSlug, centerSlug }: Props) {
+export function MarketingContent({ config, portalMode, brandSlug, centerSlug, centerProfile }: Props) {
   useScrollReveal(true);
 
   return (
@@ -89,7 +92,10 @@ export function MarketingContent({ config, portalMode, brandSlug, centerSlug }: 
           </>
         )}
         {portalMode === "center" && brandSlug && centerSlug && (
-          <CenterStudentRegistrationSection brandSlug={brandSlug} centerSlug={centerSlug} />
+          <>
+            {centerProfile && <CenterBlurbSection profile={centerProfile} />}
+            <CenterStudentRegistrationSection brandSlug={brandSlug} centerSlug={centerSlug} />
+          </>
         )}
 
         <section id="faq" data-nav-theme="light" className="novu-faq">

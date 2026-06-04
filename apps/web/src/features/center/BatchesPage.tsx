@@ -4,11 +4,14 @@ import { Button, Card, DataList, Input, PageTitle } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useTenant } from "@/bootstrap/TenantProvider";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
 export function BatchesPage() {
   const tenant = useTenant();
   const qc = useQueryClient();
   const [batchName, setBatchName] = useState("");
+  const { bindClose, closeAddForm } = useAddFormCloser();
 
   const batches = useQuery({
     queryKey: ["batches", tenant.centerId],
@@ -33,19 +36,27 @@ export function BatchesPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["batches"] });
       setBatchName("");
+      closeAddForm();
     },
   });
 
   return (
     <>
       <PageTitle>Batches & Schedule</PageTitle>
-      <Card>
-        <Input label="Batch name" value={batchName} onChange={setBatchName} />
-        <Button onClick={() => addBatch.mutate()} disabled={!batchName}>
-          Create batch
-        </Button>
-      </Card>
-      <Card>
+      <AddFormSection buttonLabel="Create batch" panelTitle="Create batch">
+        {({ close }) => {
+          bindClose(close);
+          return (
+            <>
+              <Input label="Batch name" value={batchName} onChange={setBatchName} />
+              <Button onClick={() => addBatch.mutate()} disabled={!batchName || addBatch.isPending}>
+                Create batch
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
+      <Card title="Batches">
         <DataList
           items={(batches.data ?? []).map((b) => (b))}
           render={(b) => <strong>{b.name}</strong>}

@@ -21,6 +21,7 @@ import { CurriculumPage } from "@/features/brand/CurriculumPage";
 import { CentersPage } from "@/features/brand/CentersPage";
 import { RoyaltiesPage } from "@/features/brand/RoyaltiesPage";
 import { BrandAnalyticsPage } from "@/features/brand/BrandAnalyticsPage";
+import { BrandCenterDetailPage } from "@/features/brand/BrandCenterDetailPage";
 import { BrandSettingsPage } from "@/features/brand/BrandSettingsPage";
 import { StudentLeadsPage } from "@/features/brand/studentLeads/StudentLeadsPage";
 import { FranchiseApplicationsPage } from "@/features/brand/franchiseApplications/FranchiseApplicationsPage";
@@ -35,6 +36,9 @@ import { CenterLayout } from "@/features/center/CenterLayout";
 import { CenterDashboard } from "@/features/center/CenterDashboard";
 import { CenterLeadsPage } from "@/features/center/leads/CenterLeadsPage";
 import { CenterKitOrdersPage } from "@/features/center/kits/CenterKitOrdersPage";
+import { CenterCampaignsPage } from "@/features/center/campaigns/CenterCampaignsPage";
+import { CenterAssessmentsPage } from "@/features/center/assessments/CenterAssessmentsPage";
+import { CenterReportsPage } from "@/features/center/reports/CenterReportsPage";
 import { CenterSettingsPage } from "@/features/center/settings/CenterSettingsPage";
 import { StudentsPage } from "@/features/center/StudentsPage";
 import { BatchesPage } from "@/features/center/BatchesPage";
@@ -162,6 +166,7 @@ export function AppRoutes() {
               }
             />
             <Route path="centers" element={<CentersPage />} />
+            <Route path="centers/:centerSlug" element={<BrandCenterDetailPage />} />
             <Route path="royalties" element={<RoyaltiesPage />} />
             <Route path="analytics" element={<BrandAnalyticsPage />} />
             <Route
@@ -222,6 +227,16 @@ export function AppRoutes() {
                 </FeatureFlagRoute>
               }
             />
+            <Route
+              path="campaigns"
+              element={
+                <FeatureFlagRoute flag="campaigns">
+                  <CenterCampaignsPage />
+                </FeatureFlagRoute>
+              }
+            />
+            <Route path="assessments" element={<CenterAssessmentsPage />} />
+            <Route path="reports" element={<CenterReportsPage />} />
             <Route path="batches" element={<BatchesPage />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="fees" element={<FeesPage />} />
@@ -234,6 +249,8 @@ export function AppRoutes() {
           <Route path="/attendance" element={<Navigate to="/app/attendance" replace />} />
           <Route path="/fees" element={<Navigate to="/app/fees" replace />} />
           <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
+          <Route path="/assessments" element={<Navigate to="/app/assessments" replace />} />
+          <Route path="/reports" element={<Navigate to="/app/reports" replace />} />
         </>
       )}
       <Route path="*" element={<Navigate to="/" replace />} />

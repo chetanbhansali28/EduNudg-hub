@@ -1,24 +1,17 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, DataList, Input, ListRow, MutationError, PageGridFull, PageTitle, Select } from "@edunudg/ui";
+import { Badge, Button, Card, DataList, ListRow, MutationError, PageGridFull, PageTitle, Select } from "@edunudg/ui";
 import { ManualFranchiseInquiryCard } from "@/features/shared/manualLeads/ManualFranchiseInquiryCard";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { approveFranchiseInquiry, rejectFranchiseInquiry } from "@/lib/franchiseInquiriesApi";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
-
-interface Inquiry {
-  id: string;
-  full_name: string;
-  email: string;
-  city: string | null;
-  proposed_franchise_name: string | null;
-  pincode: string | null;
-  status: string;
-  converted_center_id: string | null;
-  created_at: string;
-}
+import {
+  FranchiseInquiryDetailCard,
+  inquiryListTitle,
+  type FranchiseInquiry,
+} from "./FranchiseInquiryDetailCard";
 
 type InquiryFilter = "all" | "pending" | "decided";
 
@@ -28,7 +21,10 @@ const FILTER_OPTIONS: { value: InquiryFilter; label: string }[] = [
   { value: "decided", label: "Approved / rejected / converted" },
 ];
 
-function isPending(row: Inquiry) {
+const INQUIRY_SELECT =
+  "id, full_name, email, phone_e164, city, state, pincode, address_line, proposed_franchise_name, prior_experience, message, status, rejected_reason, converted_center_id, created_at, updated_at";
+
+function isPending(row: FranchiseInquiry) {
   return row.status === "new" || row.status === "contacted" || row.status === "qualified";
 }
 
@@ -37,10 +33,11 @@ export function FranchiseApplicationsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<InquiryFilter>("pending");
-  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [approveMode, setApproveMode] = useState(false);
+  const [rejectMode, setRejectMode] = useState(false);
   const [centerSlug, setCenterSlug] = useState("");
   const [centerName, setCenterName] = useState("");
-  const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
   const inquiries = useQuery({
@@ -49,20 +46,38 @@ export function FranchiseApplicationsPage() {
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("franchise_inquiries")
-        .select(
-          "id, full_name, email, city, proposed_franchise_name, pincode, status, converted_center_id, created_at"
-        )
+        .select(INQUIRY_SELECT)
         .eq("brand_id", brandId!)
         .order("created_at", { ascending: false });
-      return supabaseList(data, qErr) as Inquiry[];
+      return supabaseList(data, qErr) as FranchiseInquiry[];
     },
   });
 
+  const selected = (inquiries.data ?? []).find((row) => row.id === selectedId) ?? null;
+
+  const resetActionState = () => {
+    setApproveMode(false);
+    setRejectMode(false);
+    setCenterSlug("");
+    setCenterName("");
+    setRejectReason("");
+  };
+
+  const closeDetail = () => {
+    setSelectedId(null);
+    resetActionState();
+  };
+
+  const selectInquiry = (id: string) => {
+    setSelectedId(id);
+    resetActionState();
+  };
+
   const approve = useMutation({
     mutationFn: async () => {
-      if (!approvingId) return;
+      if (!selectedId) return;
       clear();
-      const { error: err } = await approveFranchiseInquiry(approvingId, {
+      const { error: err } = await approveFranchiseInquiry(selectedId, {
         centerSlug: centerSlug || undefined,
         centerName: centerName || undefined,
       });
@@ -71,24 +86,21 @@ export function FranchiseApplicationsPage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
       void qc.invalidateQueries({ queryKey: ["centers", brandId] });
-      setApprovingId(null);
-      setCenterSlug("");
-      setCenterName("");
+      closeDetail();
     },
     onError: capture,
   });
 
   const reject = useMutation({
     mutationFn: async () => {
-      if (!rejectingId || !rejectReason.trim()) return;
+      if (!selectedId || !rejectReason.trim()) return;
       clear();
-      const { error: err } = await rejectFranchiseInquiry(rejectingId, rejectReason);
+      const { error: err } = await rejectFranchiseInquiry(selectedId, rejectReason);
       if (err) throw new Error(err);
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
-      setRejectingId(null);
-      setRejectReason("");
+      closeDetail();
     },
     onError: capture,
   });
@@ -112,75 +124,70 @@ export function FranchiseApplicationsPage() {
       </PageGridFull>
 
       <Card title="Applications">
+        <p className="ed-text-sm ed-muted">Select a franchise name to open the full application before approving or rejecting.</p>
         <Select label="Show" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
         <DataList
           items={filtered}
           empty="No franchise applications in this view."
           render={(row) => {
             const pending = isPending(row);
+            const isSelected = row.id === selectedId;
             return (
-              <ListRow
-                aside={
-                  pending ? (
-                    <div className="ed-form-section">
-                      <Button variant="ghost" onClick={() => setApprovingId(row.id)}>
-                        Approve
-                      </Button>
-                      <Button variant="ghost" onClick={() => setRejectingId(row.id)}>
-                        Reject
-                      </Button>
+              <ListRow>
+                <div>
+                  <button
+                    type="button"
+                    className={`ed-inquiry-list__link${isSelected ? " ed-inquiry-list__link--active" : ""}`}
+                    onClick={() => selectInquiry(row.id)}
+                  >
+                    {inquiryListTitle(row)}
+                  </button>
+                  <div className="ed-text-sm ed-muted">{row.full_name} · {row.email}</div>
+                  {row.city && (
+                    <div className="ed-text-sm ed-muted">
+                      {row.city}
+                      {row.pincode ? ` · ${row.pincode}` : ""}
                     </div>
-                  ) : undefined
-                }
-              >
-                <InquirySummary row={row} />
+                  )}
+                  <Badge>{row.status}</Badge>
+                  {!pending && row.converted_center_id && (
+                    <span className="ed-text-sm ed-muted"> · Center provisioned</span>
+                  )}
+                </div>
               </ListRow>
             );
           }}
         />
       </Card>
 
-      {approvingId && (
-        <Card title="Approve — provision center">
-          <Input label="Center slug (optional)" value={centerSlug} onChange={setCenterSlug} placeholder="koramangala" />
-          <Input label="Display name (optional)" value={centerName} onChange={setCenterName} />
-          <Button onClick={() => approve.mutate()} disabled={approve.isPending}>
-            Create center & domain
-          </Button>
-          <Button variant="ghost" onClick={() => setApprovingId(null)}>
-            Cancel
-          </Button>
-        </Card>
-      )}
-
-      {rejectingId && (
-        <Card title="Reject application">
-          <Input label="Reason" value={rejectReason} onChange={setRejectReason} />
-          <Button onClick={() => reject.mutate()} disabled={!rejectReason.trim() || reject.isPending}>
-            Confirm reject
-          </Button>
-          <Button variant="ghost" onClick={() => setRejectingId(null)}>
-            Cancel
-          </Button>
-        </Card>
+      {selected && (
+        <FranchiseInquiryDetailCard
+          inquiry={selected}
+          pending={isPending(selected)}
+          onClose={closeDetail}
+          onApprove={() => {
+            setRejectMode(false);
+            setApproveMode(true);
+          }}
+          onReject={() => {
+            setApproveMode(false);
+            setRejectMode(true);
+          }}
+          approveMode={approveMode}
+          rejectMode={rejectMode}
+          centerSlug={centerSlug}
+          centerName={centerName}
+          onCenterSlugChange={setCenterSlug}
+          onCenterNameChange={setCenterName}
+          rejectReason={rejectReason}
+          onRejectReasonChange={setRejectReason}
+          onConfirmApprove={() => approve.mutate()}
+          onConfirmReject={() => reject.mutate()}
+          onCancelAction={resetActionState}
+          approvePending={approve.isPending}
+          rejectPending={reject.isPending}
+        />
       )}
     </>
-  );
-}
-
-function InquirySummary({ row }: { row: Inquiry }) {
-  return (
-    <div>
-      <strong>{row.full_name}</strong>
-      <div className="ed-text-sm ed-muted">{row.email}</div>
-      {row.proposed_franchise_name && <div className="ed-text-sm">Franchise: {row.proposed_franchise_name}</div>}
-      {row.city && (
-        <div className="ed-text-sm">
-          {row.city} {row.pincode}
-        </div>
-      )}
-      <Badge>{row.status}</Badge>
-      {row.converted_center_id && <span className="ed-text-sm ed-muted"> · Center provisioned</span>}
-    </div>
   );
 }

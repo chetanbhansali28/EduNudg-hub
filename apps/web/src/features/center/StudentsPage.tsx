@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, DataList, PageTitle } from "@edunudg/ui";
+import { AddFormSection } from "@/features/shared/AddFormSection";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useTenant } from "@/bootstrap/TenantProvider";
+import { CenterStudentLearnRecordsCard } from "@/features/center/learn/CenterStudentLearnRecordsCard";
 
 export function StudentsPage() {
   const tenant = useTenant();
@@ -40,15 +42,17 @@ export function StudentsPage() {
     <>
       <PageTitle>Students & Transfers</PageTitle>
 
-      <Card title="Add students">
-        <p className="ed-text-sm ed-muted">
-          New students should be created by converting a lead after you call the parent — that keeps enrollment data
-          aligned with the lead pipeline.
-        </p>
-        <Link to="/app/leads">
-          <Button>Go to leads</Button>
-        </Link>
-      </Card>
+      <AddFormSection buttonLabel="Add students" panelTitle="Add students">
+        <>
+          <p className="ed-text-sm ed-muted">
+            New students should be created by converting a lead after you call the parent — that keeps enrollment data
+            aligned with the lead pipeline.
+          </p>
+          <Link to="/app/leads">
+            <Button>Go to leads</Button>
+          </Link>
+        </>
+      </AddFormSection>
 
       <Card title="Students (brand-owned)">
         <DataList items={(students.data ?? []).map((s) => s)} render={(s) => <strong>{s.full_name}</strong>} />
@@ -63,6 +67,10 @@ export function StudentsPage() {
           render={(t) => <span>{t.status}</span>}
         />
       </Card>
+
+      {tenant.brandId && tenant.centerId && (
+        <CenterStudentLearnRecordsCard brandId={tenant.brandId} centerId={tenant.centerId} />
+      )}
     </>
   );
 }

@@ -23,6 +23,7 @@ export const BRAND_FEATURE_FLAGS: Record<string, string> = {
 
 export const CENTER_FEATURE_FLAGS: Record<string, string> = {
   "/app/kits": "kits",
+  "/app/campaigns": "campaigns",
 };
 
 export function filterNavByFeatureFlags(
@@ -130,6 +131,9 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
         { path: "/app/fees", label: "Fees & Payments", icon: <IconWallet /> },
         { path: "/app/inventory", label: "Inventory", icon: <IconBuilding /> },
         { path: "/app/kits", label: "Kit orders", icon: <IconBook /> },
+        { path: "/app/campaigns", label: "Campaigns", icon: <IconChart /> },
+        { path: "/app/assessments", label: "Assessments", icon: <IconClipboard /> },
+        { path: "/app/reports", label: "Reports", icon: <IconChart /> },
       ],
       pathname
     ),

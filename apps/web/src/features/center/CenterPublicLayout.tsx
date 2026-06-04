@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
-import { fetchCenterLandingConfig } from "@/lib/centerLandingApi";
+import { fetchCenterLandingBundle } from "@/lib/centerLandingApi";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
 import "@/features/marketing/marketing.css";
@@ -16,19 +16,19 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
   const brandSlug = tenant.brandSlug ?? "brand";
   const centerSlug = tenant.centerSlug ?? "center";
 
-  const { data: config, isLoading } = useQuery({
+  const { data: bundle, isLoading } = useQuery({
     queryKey: ["center-landing", brandSlug, centerSlug],
-    queryFn: () => fetchCenterLandingConfig(brandSlug, centerSlug),
+    queryFn: () => fetchCenterLandingBundle(brandSlug, centerSlug),
   });
 
   useEffect(() => {
-    if (config) {
-      document.documentElement.style.setProperty("--novu-yellow", config.theme.yellowGlow);
-      document.documentElement.style.setProperty("--novu-radius-section", config.theme.radiusSection);
+    if (bundle?.config) {
+      document.documentElement.style.setProperty("--novu-yellow", bundle.config.theme.yellowGlow);
+      document.documentElement.style.setProperty("--novu-radius-section", bundle.config.theme.radiusSection);
     }
-  }, [config]);
+  }, [bundle?.config]);
 
-  if (isLoading || !config) {
+  if (isLoading || !bundle) {
     return (
       <div className="marketing-page marketing-page--loading">
         <p>Loading…</p>
@@ -38,9 +38,9 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
 
   return (
     <div className="marketing-page">
-      <MarketingNav config={config} />
-      <Outlet context={{ config, brandSlug, centerSlug }} />
-      {showFooter && <FooterSection config={config} />}
+      <MarketingNav config={bundle.config} />
+      <Outlet context={{ config: bundle.config, profile: bundle.profile, brandSlug, centerSlug }} />
+      {showFooter && <FooterSection config={bundle.config} />}
     </div>
   );
 }

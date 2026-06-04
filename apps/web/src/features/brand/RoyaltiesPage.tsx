@@ -15,6 +15,8 @@ import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { useBrandScope } from "./hooks/useBrandScope";
 
 type RoyaltyType = "fixed" | "percentage" | "per_student" | "per_level" | "hybrid";
@@ -63,6 +65,8 @@ export function RoyaltiesPage() {
   const [editRule, setEditRule] = useState(emptyRule);
   const [editingSettlementId, setEditingSettlementId] = useState<string | null>(null);
   const [editSettlement, setEditSettlement] = useState(emptySettlement);
+  const ruleCloser = useAddFormCloser();
+  const settlementCloser = useAddFormCloser();
 
   const rules = useQuery({
     queryKey: ["royalty-rules", brandId],
@@ -123,6 +127,7 @@ export function RoyaltiesPage() {
     onSuccess: () => {
       invalidateRules();
       setRuleForm(emptyRule);
+      ruleCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -177,6 +182,7 @@ export function RoyaltiesPage() {
     onSuccess: () => {
       invalidateSettlements();
       setSettlementForm(emptySettlement);
+      settlementCloser.closeAddForm();
     },
     onError: capture,
   });
@@ -227,13 +233,20 @@ export function RoyaltiesPage() {
       <PageTitle>Royalties & Finance</PageTitle>
       <MutationError message={error} />
 
-      <Card title="Add royalty rule">
-        <Input label="Name" value={ruleForm.name} onChange={(v) => setRuleForm((f) => ({ ...f, name: v }))} />
-        <Select label="Type" value={ruleForm.rule_type} onChange={(v) => setRuleForm((f) => ({ ...f, rule_type: v }))} options={RULE_TYPES} />
-        <Button onClick={() => createRule.mutate()} disabled={!ruleForm.name.trim() || createRule.isPending}>
-          Create rule
-        </Button>
-      </Card>
+      <AddFormSection buttonLabel="Add royalty rule" panelTitle="Add royalty rule">
+        {({ close }) => {
+          ruleCloser.bindClose(close);
+          return (
+            <>
+              <Input label="Name" value={ruleForm.name} onChange={(v) => setRuleForm((f) => ({ ...f, name: v }))} />
+              <Select label="Type" value={ruleForm.rule_type} onChange={(v) => setRuleForm((f) => ({ ...f, rule_type: v }))} options={RULE_TYPES} />
+              <Button onClick={() => createRule.mutate()} disabled={!ruleForm.name.trim() || createRule.isPending}>
+                Create rule
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
 
       <Card title="Royalty rules">
         <DataList
@@ -274,27 +287,34 @@ export function RoyaltiesPage() {
         />
       </Card>
 
-      <Card title="Record settlement">
-        <Select
-          label="Center (optional)"
-          value={settlementForm.center_id}
-          onChange={(v) => setSettlementForm((f) => ({ ...f, center_id: v }))}
-          options={centerOptions}
-          placeholder="Brand-wide"
-        />
-        <Input label="Period start" value={settlementForm.period_start} onChange={(v) => setSettlementForm((f) => ({ ...f, period_start: v }))} placeholder="YYYY-MM-DD" />
-        <Input label="Period end" value={settlementForm.period_end} onChange={(v) => setSettlementForm((f) => ({ ...f, period_end: v }))} placeholder="YYYY-MM-DD" />
-        <Input label="Amount (INR)" value={settlementForm.amount_inr} onChange={(v) => setSettlementForm((f) => ({ ...f, amount_inr: v }))} />
-        <Input label="Status" value={settlementForm.status} onChange={(v) => setSettlementForm((f) => ({ ...f, status: v }))} />
-        <Button
-          onClick={() => createSettlement.mutate()}
-          disabled={
-            !settlementForm.period_start || !settlementForm.period_end || !settlementForm.amount_inr || createSettlement.isPending
-          }
-        >
-          Add settlement
-        </Button>
-      </Card>
+      <AddFormSection buttonLabel="Record settlement" panelTitle="Record settlement">
+        {({ close }) => {
+          settlementCloser.bindClose(close);
+          return (
+            <>
+              <Select
+                label="Center (optional)"
+                value={settlementForm.center_id}
+                onChange={(v) => setSettlementForm((f) => ({ ...f, center_id: v }))}
+                options={centerOptions}
+                placeholder="Brand-wide"
+              />
+              <Input label="Period start" value={settlementForm.period_start} onChange={(v) => setSettlementForm((f) => ({ ...f, period_start: v }))} placeholder="YYYY-MM-DD" />
+              <Input label="Period end" value={settlementForm.period_end} onChange={(v) => setSettlementForm((f) => ({ ...f, period_end: v }))} placeholder="YYYY-MM-DD" />
+              <Input label="Amount (INR)" value={settlementForm.amount_inr} onChange={(v) => setSettlementForm((f) => ({ ...f, amount_inr: v }))} />
+              <Input label="Status" value={settlementForm.status} onChange={(v) => setSettlementForm((f) => ({ ...f, status: v }))} />
+              <Button
+                onClick={() => createSettlement.mutate()}
+                disabled={
+                  !settlementForm.period_start || !settlementForm.period_end || !settlementForm.amount_inr || createSettlement.isPending
+                }
+              >
+                Add settlement
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
 
       <Card title="Settlements">
         <DataList

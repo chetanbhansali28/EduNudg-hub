@@ -17,12 +17,25 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
 
 vi.mock("@/lib/centerLandingApi", async () => {
   const { buildCenterLandingConfig } = await import("@/lib/centerLandingDefaults");
+  const config = buildCenterLandingConfig("Abacus World Koramangala", "Abacus World", "Bengaluru");
   return {
-    fetchCenterLandingConfig: vi
-      .fn()
-      .mockResolvedValue(
-        buildCenterLandingConfig("Abacus World Koramangala", "Abacus World", "Bengaluru")
-      ),
+    fetchCenterLandingBundle: vi.fn().mockResolvedValue({
+      config,
+      profile: {
+        centerId: "c1",
+        centerSlug: "koramangala",
+        centerName: "Abacus World Koramangala",
+        displayName: null,
+        city: "Bengaluru",
+        pincode: null,
+        addressLine1: null,
+        contactPhone: null,
+        shortDescription: null,
+        brandName: "Abacus World",
+        brandSlug: "abacusworld",
+      },
+    }),
+    fetchCenterLandingConfig: vi.fn().mockResolvedValue(config),
   };
 });
 
@@ -30,14 +43,17 @@ vi.mock("@/features/marketing/MarketingContent", () => ({
   MarketingContent: ({
     brandSlug,
     centerSlug,
+    centerProfile,
   }: {
     brandSlug?: string;
     centerSlug?: string;
+    centerProfile?: { centerName: string } | null;
   }) => (
     <div>
       Center landing
       {brandSlug && <span>{brandSlug}</span>}
       {centerSlug && <span>{centerSlug}</span>}
+      {centerProfile && <span>{centerProfile.centerName}</span>}
     </div>
   ),
 }));

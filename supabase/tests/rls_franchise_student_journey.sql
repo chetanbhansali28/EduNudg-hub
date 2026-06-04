@@ -48,5 +48,11 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'Missing convert_lead_to_student with overrides';
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'count_stale_brand_leads') THEN
+    RAISE EXCEPTION 'Missing count_stale_brand_leads';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'is_lead_stale') THEN
+    RAISE EXCEPTION 'Missing is_lead_stale';
+  END IF;
   RAISE NOTICE 'RLS franchise student journey smoke test passed';
 END $$;

@@ -1,5 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { createBrandStudentLeadStaff, createPlatformBrandSignupStaff } from "./manualLeadsApi";
+import {
+  createBrandStudentLeadStaff,
+  createFranchiseInquiryStaff,
+  createPlatformBrandSignupStaff,
+} from "./manualLeadsApi";
 
 const rpc = vi.fn();
 
@@ -32,5 +36,29 @@ describe("manualLeadsApi", () => {
     });
     expect(result.id).toBe("l1");
     expect(rpc).toHaveBeenCalledWith("create_brand_student_lead_staff", expect.objectContaining({ p_brand_id: "brand-id" }));
+  });
+
+  it("createFranchiseInquiryStaff passes extended apply fields", async () => {
+    rpc.mockResolvedValue({ data: "inq-1", error: null });
+    const result = await createFranchiseInquiryStaff("brand-id", {
+      fullName: "Asha",
+      email: "asha@example.com",
+      phoneE164: "+919876543210",
+      city: "Pune",
+      proposedFranchiseName: "Abacus Pune",
+      pincode: "411001",
+      state: "Maharashtra",
+      addressLine: "42 FC Road",
+      priorExperience: "Tutoring",
+      message: "Q3 timeline",
+    });
+    expect(result.id).toBe("inq-1");
+    expect(rpc).toHaveBeenCalledWith(
+      "create_franchise_inquiry_staff",
+      expect.objectContaining({
+        p_pincode: "411001",
+        p_prior_experience: "Tutoring",
+      })
+    );
   });
 });

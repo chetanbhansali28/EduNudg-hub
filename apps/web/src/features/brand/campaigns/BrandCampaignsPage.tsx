@@ -13,21 +13,12 @@ import {
   PageTitle,
   Textarea,
 } from "@edunudg/ui";
-import { getSupabase } from "@/lib/supabase";
-import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
-
-interface Campaign {
-  id: string;
-  name: string;
-  description: string | null;
-  goal_type: string;
-  starts_at: string | null;
-  ends_at: string | null;
-  is_active: boolean;
-}
+import { deleteBrandCampaign, listBrandCampaigns, upsertBrandCampaign } from "@/lib/campaignsApi";
+import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
 const emptyForm = {
   name: "",
@@ -45,18 +36,12 @@ export function BrandCampaignsPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const { bindClose, closeAddForm } = useAddFormCloser();
 
   const campaigns = useQuery({
     queryKey: ["brand-campaigns", brandId],
     enabled: !!brandId,
-    queryFn: async () => {
-      const { data, error: qErr } = await getSupabase()
-        .from("brand_campaigns")
-        .select("id, name, description, goal_type, starts_at, ends_at, is_active")
-        .eq("brand_id", brandId!)
-        .order("created_at", { ascending: false });
-      return supabaseList(data, qErr) as Campaign[];
-    },
+    queryFn: () => listBrandCampaigns(brandId!),
   });
 
   const invalidate = () => void qc.invalidateQueries({ queryKey: ["brand-campaigns", brandId] });
@@ -65,39 +50,21 @@ export function BrandCampaignsPage() {
     mutationFn: async () => {
       if (!brandId) throw new Error("Brand required");
       clear();
-      const { error: mErr } = await getSupabase().from("brand_campaigns").insert({
-        brand_id: brandId,
-        name: form.name.trim(),
-        description: form.description.trim() || null,
-        goal_type: form.goalType.trim() || "enrollment",
-        starts_at: form.startsAt ? new Date(form.startsAt).toISOString() : null,
-        ends_at: form.endsAt ? new Date(form.endsAt).toISOString() : null,
-        is_active: form.isActive,
-      });
-      if (mErr) throw mErr;
+      await upsertBrandCampaign(brandId, form);
     },
     onSuccess: () => {
       invalidate();
       setForm(emptyForm);
+      closeAddForm();
     },
     onError: capture,
   });
 
   const update = useMutation({
     mutationFn: async (id: string) => {
+      if (!brandId) throw new Error("Brand required");
       clear();
-      const { error: mErr } = await getSupabase()
-        .from("brand_campaigns")
-        .update({
-          name: editForm.name.trim(),
-          description: editForm.description.trim() || null,
-          goal_type: editForm.goalType.trim() || "enrollment",
-          starts_at: editForm.startsAt ? new Date(editForm.startsAt).toISOString() : null,
-          ends_at: editForm.endsAt ? new Date(editForm.endsAt).toISOString() : null,
-          is_active: editForm.isActive,
-        })
-        .eq("id", id);
-      if (mErr) throw mErr;
+      await upsertBrandCampaign(brandId, { ...editForm, id });
     },
     onSuccess: () => {
       invalidate();
@@ -108,10 +75,10 @@ export function BrandCampaignsPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
+      if (!brandId) throw new Error("Brand required");
       if (!confirm("Delete this campaign?")) return;
       clear();
-      const { error: mErr } = await getSupabase().from("brand_campaigns").delete().eq("id", id);
-      if (mErr) throw mErr;
+      await deleteBrandCampaign(brandId, id);
     },
     onSuccess: invalidate,
     onError: capture,
@@ -124,36 +91,44 @@ export function BrandCampaignsPage() {
   return (
     <>
       <PageTitle>Campaigns</PageTitle>
+      <p className="ed-text-sm ed-muted">Enrollment and marketing campaigns visible to franchise centers when active.</p>
       <MutationError message={error} />
 
       <PageGridFull>
-        <Card title="Create campaign">
-          <FormGrid>
-            <Input label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
-            <Input
-              label="Goal type"
-              value={form.goalType}
-              onChange={(v) => setForm((f) => ({ ...f, goalType: v }))}
-              placeholder="enrollment"
-            />
-            <Input label="Starts" value={form.startsAt} onChange={(v) => setForm((f) => ({ ...f, startsAt: v }))} type="datetime-local" />
-            <Input label="Ends" value={form.endsAt} onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))} type="datetime-local" />
-          </FormGrid>
-          <Textarea label="Description" value={form.description} onChange={(v) => setForm((f) => ({ ...f, description: v }))} />
-          <label className="ed-field">
-            <span className="ed-field__label">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
-              />{" "}
-              Active
-            </span>
-          </label>
-          <Button onClick={() => create.mutate()} disabled={!form.name.trim() || create.isPending}>
-            Create campaign
-          </Button>
-        </Card>
+        <AddFormSection buttonLabel="Add campaign" panelTitle="Create campaign">
+          {({ close }) => {
+            bindClose(close);
+            return (
+              <>
+                <FormGrid>
+                  <Input label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
+                  <Input
+                    label="Goal type"
+                    value={form.goalType}
+                    onChange={(v) => setForm((f) => ({ ...f, goalType: v }))}
+                    placeholder="enrollment"
+                  />
+                  <Input label="Starts" value={form.startsAt} onChange={(v) => setForm((f) => ({ ...f, startsAt: v }))} type="datetime-local" />
+                  <Input label="Ends" value={form.endsAt} onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))} type="datetime-local" />
+                </FormGrid>
+                <Textarea label="Description" value={form.description} onChange={(v) => setForm((f) => ({ ...f, description: v }))} />
+                <label className="ed-field">
+                  <span className="ed-field__label">
+                    <input
+                      type="checkbox"
+                      checked={form.isActive}
+                      onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
+                    />{" "}
+                    Active (visible to centers)
+                  </span>
+                </label>
+                <Button onClick={() => create.mutate()} disabled={!form.name.trim() || create.isPending}>
+                  Create campaign
+                </Button>
+              </>
+            );
+          }}
+        </AddFormSection>
       </PageGridFull>
 
       <PageGridFull>

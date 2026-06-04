@@ -51,12 +51,16 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `kit_orders` | center | Orders to brand |
 | `kit_order_lines` | center | Line items |
 | `student_kit_allocations` | center | Hidden from student portal |
+| `student_level_progress` | center | Level progress shown on learn dashboard |
+| `brand_competitions` | brand | Competition calendar |
+| `student_competition_entries` | center | Student competition results |
 
-## Campaigns (Phase E)
+## Campaigns & ops (Phase E)
 
 | Table | Scope | Description |
 |-------|-------|-------------|
-| `brand_campaigns` | brand | Promotions for centers |
+| `brand_campaigns` | brand | Promotions for centers (mutations via RPC) |
+| `student_assessments` | center | Level checks and scores (mutations via RPC) |
 | `brand_success_stories` | brand | Parent/franchise testimonials (brand-managed CRUD) |
 
 ## Curriculum extensions (`019`)

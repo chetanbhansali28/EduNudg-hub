@@ -43,7 +43,7 @@ describe("StudentLeadsPage", () => {
     );
     expect(await screen.findByText("Lead pipeline")).toBeDefined();
     expect(screen.getByLabelText("Show")).toBeDefined();
-    expect(screen.queryByText(/^Unassigned \(/)).toBeNull();
+    expect(screen.getByText("Leads needing attention")).toBeDefined();
     expect(screen.queryByText(/^Stale \(/)).toBeNull();
     expect(screen.getAllByText("Lead pipeline")).toHaveLength(1);
   });

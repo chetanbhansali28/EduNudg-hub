@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StudentsPage } from "./StudentsPage";
@@ -36,6 +36,9 @@ describe("StudentsPage", () => {
         </QueryClientProvider>
       </MemoryRouter>
     );
+    expect(screen.getByRole("button", { name: "Add students" })).toBeDefined();
+    expect(screen.queryByText("Go to leads")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Add students" }));
     expect(screen.getByText("Go to leads")).toBeDefined();
     expect(screen.queryByText("Register + enroll")).toBeNull();
   });

@@ -1,10 +1,19 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
+import { Button, FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
 import { createPlatformBrandSignupStaff } from "@/lib/manualLeadsApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { AddFormSection } from "@/features/shared/AddFormSection";
 
 export function ManualPlatformBrandSignupCard() {
+  return (
+    <AddFormSection buttonLabel="Add brand" panelTitle="Add brand signup manually">
+      {({ close }) => <ManualPlatformBrandSignupForm onComplete={close} />}
+    </AddFormSection>
+  );
+}
+
+function ManualPlatformBrandSignupForm({ onComplete }: { onComplete: () => void }) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [requestedName, setRequestedName] = useState("");
@@ -35,12 +44,13 @@ export function ManualPlatformBrandSignupCard() {
       setCity("");
       setPhone("");
       setMessage("");
+      onComplete();
     },
     onError: capture,
   });
 
   return (
-    <Card title="Add brand signup manually">
+    <>
       <p className="ed-text-sm ed-muted">Phone or event lead — appears below for approval before the brand goes live.</p>
       <MutationError message={error} />
       <FormGrid>
@@ -57,6 +67,6 @@ export function ManualPlatformBrandSignupCard() {
       >
         Create signup request
       </Button>
-    </Card>
+    </>
   );
 }

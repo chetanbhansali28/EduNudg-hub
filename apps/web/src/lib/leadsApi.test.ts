@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { reassignLead, convertLeadToStudent, submitBrandStudentApplication } from "./leadsApi";
+import { reassignLead, convertLeadToStudent, countStaleBrandLeads, submitBrandStudentApplication } from "./leadsApi";
 
 const rpc = vi.fn();
 
@@ -51,6 +51,13 @@ describe("leadsApi", () => {
 
     expect(result.id).toBeNull();
     expect(result.error).toBe("Brand not found");
+  });
+
+  it("countStaleBrandLeads calls count_stale_brand_leads RPC", async () => {
+    rpc.mockResolvedValue({ data: 3, error: null });
+    const count = await countStaleBrandLeads("brand-1");
+    expect(count).toBe(3);
+    expect(rpc).toHaveBeenCalledWith("count_stale_brand_leads", { p_brand_id: "brand-1" });
   });
 
   it("reassignLead calls reassign_lead RPC", async () => {

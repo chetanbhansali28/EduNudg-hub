@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SubscriptionsPage } from "./SubscriptionsPage";
 
@@ -63,7 +63,9 @@ describe("SubscriptionsPage", () => {
 
   it("regression_subscriptions_page_has_assign_subscription_form", async () => {
     renderSubs();
-    await screen.findByText("Assign subscription");
+    expect(await screen.findByRole("button", { name: "Assign subscription" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Assign plan" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Assign subscription" }));
     expect(screen.getByRole("button", { name: "Assign plan" })).toBeDefined();
   });
 });
