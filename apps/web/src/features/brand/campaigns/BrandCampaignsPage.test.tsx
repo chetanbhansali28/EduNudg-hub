@@ -23,6 +23,6 @@ describe("BrandCampaignsPage", () => {
     );
     expect(await screen.findByRole("button", { name: "Add campaign" })).toBeDefined();
     fireEvent.click(screen.getByRole("button", { name: "Add campaign" }));
-    expect(screen.getByText("Active (visible to centers)")).toBeDefined();
+    expect(screen.getByText("Active")).toBeDefined();
   });
 });

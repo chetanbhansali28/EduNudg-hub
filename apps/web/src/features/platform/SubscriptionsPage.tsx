@@ -1,22 +1,35 @@
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
   Button,
   Card,
   DataList,
+  FormGrid,
   Input,
   ListRow,
   MutationError,
   PageTitle,
   Select,
+  ToggleField,
+  ToggleGrid,
 } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
+import { formatInrFromPaise, paiseToRupeesInput, rupeesToPaise } from "@/lib/inrCurrency";
+import {
+  emptyPlanFeaturesForm,
+  parsePlanFeatures,
+  planFeaturesFromForm,
+  planFeaturesToForm,
+  pricingFeatureBullets,
+  type SubscriptionPlanFeatures,
+} from "@/lib/subscriptionPlanFeatures";
 import { CrudRowActions } from "./components/CrudRowActions";
 import { useMutationError } from "./hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { PlanFeaturesEditor } from "./subscriptions/PlanFeaturesEditor";
 
 interface Plan {
   id: string;
@@ -26,6 +39,8 @@ interface Plan {
   currency: string;
   billing_interval: string;
   is_active: boolean;
+  is_default: boolean;
+  features: SubscriptionPlanFeatures;
 }
 
 interface BrandOption {
@@ -51,14 +66,59 @@ const SUB_STATUS_OPTIONS: { value: SubStatus; label: string }[] = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
-const emptyPlan = { code: "", name: "", price_cents: "", billing_interval: "month", is_active: true };
+type PlanForm = {
+  code: string;
+  name: string;
+  priceRupees: string;
+  billing_interval: string;
+  is_active: string;
+  is_default: string;
+  features: Record<keyof SubscriptionPlanFeatures, string>;
+};
+
+function emptyPlanForm(): PlanForm {
+  return {
+    code: "",
+    name: "",
+    priceRupees: "",
+    billing_interval: "month",
+    is_active: "true",
+    is_default: "false",
+    features: emptyPlanFeaturesForm(),
+  };
+}
+
+function planToForm(p: Plan): PlanForm {
+  return {
+    code: p.code,
+    name: p.name,
+    priceRupees: paiseToRupeesInput(p.price_cents),
+    billing_interval: p.billing_interval,
+    is_active: String(p.is_active),
+    is_default: String(p.is_default),
+    features: planFeaturesToForm(p.features),
+  };
+}
+
+function formToPayload(form: PlanForm) {
+  return {
+    code: form.code.trim(),
+    name: form.name.trim(),
+    price_cents: rupeesToPaise(form.priceRupees),
+    currency: "INR",
+    billing_interval: form.billing_interval,
+    is_active: form.is_active === "true",
+    is_default: form.is_default === "true",
+    features: planFeaturesFromForm(form.features),
+  };
+}
 
 export function SubscriptionsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
-  const [planForm, setPlanForm] = useState(emptyPlan);
+  const [planForm, setPlanForm] = useState<PlanForm>(emptyPlanForm());
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
-  const [editPlan, setEditPlan] = useState(emptyPlan);
+  const [editPlan, setEditPlan] = useState<PlanForm>(emptyPlanForm());
 
   const [subForm, setSubForm] = useState({ brand_id: "", plan_id: "", status: "active" as SubStatus });
   const [editingSubId, setEditingSubId] = useState<string | null>(null);
@@ -70,7 +130,8 @@ export function SubscriptionsPage() {
     queryKey: ["subscription-plans"],
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase().from("subscription_plans").select("*").order("price_cents");
-      return supabaseList(data, qErr) as Plan[];
+      const rows = supabaseList(data, qErr) as (Omit<Plan, "features"> & { features?: unknown })[];
+      return rows.map((row) => ({ ...row, features: parsePlanFeatures(row.features) }));
     },
   });
 
@@ -102,6 +163,7 @@ export function SubscriptionsPage() {
 
   const invalidatePlans = () => {
     qc.invalidateQueries({ queryKey: ["subscription-plans"] });
+    qc.invalidateQueries({ queryKey: ["public-subscription-plans"] });
     qc.invalidateQueries({ queryKey: ["platform-stats"] });
   };
   const invalidateSubs = () => qc.invalidateQueries({ queryKey: ["brand-subscriptions"] });
@@ -109,18 +171,12 @@ export function SubscriptionsPage() {
   const createPlan = useMutation({
     mutationFn: async () => {
       clear();
-      const { error: mErr } = await getSupabase().from("subscription_plans").insert({
-        code: planForm.code.trim(),
-        name: planForm.name.trim(),
-        price_cents: Number(planForm.price_cents) || 0,
-        billing_interval: planForm.billing_interval,
-        is_active: planForm.is_active,
-      });
+      const { error: mErr } = await getSupabase().from("subscription_plans").insert(formToPayload(planForm));
       if (mErr) throw mErr;
     },
     onSuccess: () => {
       invalidatePlans();
-      setPlanForm(emptyPlan);
+      setPlanForm(emptyPlanForm());
       planCloser.closeAddForm();
     },
     onError: capture,
@@ -129,16 +185,7 @@ export function SubscriptionsPage() {
   const updatePlan = useMutation({
     mutationFn: async (id: string) => {
       clear();
-      const { error: mErr } = await getSupabase()
-        .from("subscription_plans")
-        .update({
-          code: editPlan.code.trim(),
-          name: editPlan.name.trim(),
-          price_cents: Number(editPlan.price_cents) || 0,
-          billing_interval: editPlan.billing_interval,
-          is_active: editPlan.is_active,
-        })
-        .eq("id", id);
+      const { error: mErr } = await getSupabase().from("subscription_plans").update(formToPayload(editPlan)).eq("id", id);
       if (mErr) throw mErr;
     },
     onSuccess: () => {
@@ -151,7 +198,6 @@ export function SubscriptionsPage() {
   const deletePlan = useMutation({
     mutationFn: async (id: string) => {
       clear();
-      if (!confirm("Delete this plan? Brands must not reference it.")) return;
       const { error: mErr } = await getSupabase().from("subscription_plans").delete().eq("id", id);
       if (mErr) throw mErr;
     },
@@ -200,7 +246,6 @@ export function SubscriptionsPage() {
   const deleteSub = useMutation({
     mutationFn: async (id: string) => {
       clear();
-      if (!confirm("Remove this brand subscription?")) return;
       const { error: mErr } = await getSupabase().from("brand_subscriptions").delete().eq("id", id);
       if (mErr) throw mErr;
     },
@@ -208,33 +253,62 @@ export function SubscriptionsPage() {
     onError: capture,
   });
 
-  const formatPrice = (cents: number) => `₹${(cents / 100).toLocaleString()}`;
+  const renderPlanFields = (
+    form: PlanForm,
+    setForm: Dispatch<SetStateAction<PlanForm>>
+  ) => (
+    <>
+      <FormGrid>
+        <Input label="Code" value={form.code} onChange={(v) => setForm((f) => ({ ...f, code: v }))} placeholder="growth" />
+        <Input label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} placeholder="Growth" />
+        <Input
+          label="Price (₹ / month)"
+          value={form.priceRupees}
+          onChange={(v) => setForm((f) => ({ ...f, priceRupees: v }))}
+          type="number"
+          step="0.01"
+          placeholder="9999.00"
+        />
+        <Input
+          label="Billing interval"
+          value={form.billing_interval}
+          onChange={(v) => setForm((f) => ({ ...f, billing_interval: v }))}
+          placeholder="month"
+        />
+      </FormGrid>
+      <ToggleGrid>
+        <ToggleField
+          label="Active"
+          checked={form.is_active === "true"}
+          onChange={(checked) => setForm((f) => ({ ...f, is_active: String(checked) }))}
+        />
+        <ToggleField
+          label="Default plan for new brands"
+          checked={form.is_default === "true"}
+          onChange={(checked) => setForm((f) => ({ ...f, is_default: String(checked) }))}
+        />
+      </ToggleGrid>
+      <PlanFeaturesEditor
+        values={form.features}
+        onChange={(key, value) => setForm((f) => ({ ...f, features: { ...f.features, [key]: value } }))}
+      />
+    </>
+  );
 
   return (
     <>
       <PageTitle>Subscriptions & Billing</PageTitle>
       <MutationError message={error} />
+      <p className="ed-text-sm ed-muted">
+        Prices are in Indian Rupees (INR). The default plan is assigned automatically when a brand signup is approved.
+      </p>
 
       <AddFormSection buttonLabel="Create plan" panelTitle="Create plan">
         {({ close }) => {
           planCloser.bindClose(close);
           return (
             <>
-              <Input label="Code" value={planForm.code} onChange={(v) => setPlanForm((f) => ({ ...f, code: v }))} placeholder="growth" />
-              <Input label="Name" value={planForm.name} onChange={(v) => setPlanForm((f) => ({ ...f, name: v }))} placeholder="Growth" />
-              <Input
-                label="Price (paise)"
-                value={planForm.price_cents}
-                onChange={(v) => setPlanForm((f) => ({ ...f, price_cents: v }))}
-                type="number"
-                placeholder="2499900"
-              />
-              <Input
-                label="Billing interval"
-                value={planForm.billing_interval}
-                onChange={(v) => setPlanForm((f) => ({ ...f, billing_interval: v }))}
-                placeholder="month"
-              />
+              {renderPlanFields(planForm, setPlanForm)}
               <Button
                 onClick={() => createPlan.mutate()}
                 disabled={!planForm.code.trim() || !planForm.name.trim() || createPlan.isPending}
@@ -247,65 +321,70 @@ export function SubscriptionsPage() {
       </AddFormSection>
 
       <Card title="Plans">
-        <DataList
-          items={plans.data ?? []}
-          empty="No plans yet."
-          render={(p) => {
-            const editing = editingPlanId === p.id;
-            return (
-              <ListRow
-                aside={
-                  <CrudRowActions
-                    editing={editing}
-                    onEdit={() => {
-                      clear();
-                      setEditingPlanId(p.id);
-                      setEditPlan({
-                        code: p.code,
-                        name: p.name,
-                        price_cents: String(p.price_cents),
-                        billing_interval: p.billing_interval,
-                        is_active: p.is_active,
-                      });
-                    }}
-                    onSave={() => updatePlan.mutate(p.id)}
-                    onCancel={() => setEditingPlanId(null)}
-                    onDelete={() => deletePlan.mutate(p.id)}
-                    saveDisabled={!editPlan.code.trim() || !editPlan.name.trim()}
-                  />
-                }
-              >
-                {editing ? (
-                  <div className="ed-form-section">
-                    <Input label="Code" value={editPlan.code} onChange={(v) => setEditPlan((f) => ({ ...f, code: v }))} />
-                    <Input label="Name" value={editPlan.name} onChange={(v) => setEditPlan((f) => ({ ...f, name: v }))} />
-                    <Input
-                      label="Price (paise)"
-                      value={editPlan.price_cents}
-                      onChange={(v) => setEditPlan((f) => ({ ...f, price_cents: v }))}
-                      type="number"
-                    />
-                    <Input
-                      label="Billing interval"
-                      value={editPlan.billing_interval}
-                      onChange={(v) => setEditPlan((f) => ({ ...f, billing_interval: v }))}
-                    />
-                  </div>
-                ) : (
-                  <span>
-                    {p.name} — {formatPrice(p.price_cents)}/{p.billing_interval}
-                    {!p.is_active && (
-                      <>
-                        {" "}
-                        <Badge tone="warning">inactive</Badge>
-                      </>
-                    )}
-                  </span>
-                )}
-              </ListRow>
-            );
-          }}
-        />
+        {(plans.data ?? []).length === 0 ? (
+          <p className="ed-empty">No plans yet.</p>
+        ) : (
+          <div className="ed-plan-cards">
+            {(plans.data ?? []).map((p) => {
+              const editing = editingPlanId === p.id;
+              const bullets = pricingFeatureBullets(p.features);
+              return (
+                <article
+                  key={p.id}
+                  className={`ed-plan-card${p.is_default ? " ed-plan-card--highlight" : ""}${editing ? " ed-plan-card--editing" : ""}`}
+                >
+                  {editing ? (
+                    <>
+                      <div className="ed-form-section">{renderPlanFields(editPlan, setEditPlan)}</div>
+                      <div className="ed-plan-card__actions">
+                        <CrudRowActions
+                          editing
+                          onEdit={() => undefined}
+                          onSave={() => updatePlan.mutate(p.id)}
+                          onCancel={() => setEditingPlanId(null)}
+                          onDelete={() => deletePlan.mutate(p.id)}
+                          deleteDescription="Brands must not reference this plan."
+                          saveDisabled={!editPlan.code.trim() || !editPlan.name.trim() || updatePlan.isPending}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="ed-plan-card__header">
+                        <h3 className="ed-plan-card__name">{p.name}</h3>
+                        {!p.is_active && <Badge tone="warning">inactive</Badge>}
+                        {p.is_default && <Badge tone="success">default plan</Badge>}
+                      </div>
+                      <p className="ed-plan-card__price">
+                        {formatInrFromPaise(p.price_cents, p.currency)}
+                        <span className="ed-plan-card__interval">/{p.billing_interval}</span>
+                      </p>
+                      <ul className="ed-plan-card__features">
+                        {bullets.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                      <div className="ed-plan-card__actions">
+                        <CrudRowActions
+                          editing={false}
+                          onEdit={() => {
+                            clear();
+                            setEditingPlanId(p.id);
+                            setEditPlan(planToForm(p));
+                          }}
+                          onSave={() => undefined}
+                          onCancel={() => undefined}
+                          onDelete={() => deletePlan.mutate(p.id)}
+                          deleteDescription="Brands must not reference this plan."
+                        />
+                      </div>
+                    </>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        )}
       </Card>
 
       <AddFormSection buttonLabel="Assign subscription" panelTitle="Assign subscription">
@@ -358,6 +437,7 @@ export function SubscriptionsPage() {
                     onSave={() => updateSub.mutate(s.id)}
                     onCancel={() => setEditingSubId(null)}
                     onDelete={() => deleteSub.mutate(s.id)}
+                    deleteDescription="This removes the brand's platform subscription assignment."
                     saveDisabled={!editSub.brand_id || !editSub.plan_id}
                   />
                 }

@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { formatInrFromPaise as formatInrFromPaiseShared } from "@/lib/inrCurrency";
 
 export interface BrandDailyTrendRow {
   metric_date: string;
@@ -176,5 +177,5 @@ export async function fetchBrandAnalyticsStats(brandId: string): Promise<BrandAn
 }
 
 export function formatInrFromPaise(cents: number): string {
-  return `₹${(cents / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+  return formatInrFromPaiseShared(cents);
 }

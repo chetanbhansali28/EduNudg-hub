@@ -8,6 +8,7 @@ import { CrudRowActions } from "./components/CrudRowActions";
 import { useMutationError } from "./hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { PlatformIntegrationsCard } from "./PlatformIntegrationsCard";
 
 interface PlatformSetting {
   id: string;
@@ -87,7 +88,6 @@ export function SettingsPage() {
       if (key === HOMEPAGE_KEY) {
         throw new Error("Delete the homepage via Homepage editor, or change the key first.");
       }
-      if (!confirm(`Delete setting "${key}"?`)) return;
       const { error: mErr } = await getSupabase().from("platform_settings").delete().eq("id", id);
       if (mErr) throw mErr;
     },
@@ -104,12 +104,15 @@ export function SettingsPage() {
     });
   };
 
-  const generalSettings = (settings.data ?? []).filter((s) => s.key !== HOMEPAGE_KEY);
+  const generalSettings = (settings.data ?? []).filter(
+    (s) => s.key !== HOMEPAGE_KEY && s.key !== "integrations"
+  );
 
   return (
     <>
       <PageTitle>Platform Settings</PageTitle>
       <MutationError message={error} />
+      <PlatformIntegrationsCard />
       <Card title="Marketing homepage">
         <p className="ed-text-sm ed-muted">
           Homepage content is edited on the dedicated screen.
@@ -164,6 +167,7 @@ export function SettingsPage() {
                     }}
                     onCancel={() => setEditingId(null)}
                     onDelete={() => deleteSetting.mutate({ id: s.id, key: s.key })}
+                    deleteTitle={`Delete setting "${s.key}"?`}
                     saveDisabled={!editForm.key.trim()}
                   />
                 }

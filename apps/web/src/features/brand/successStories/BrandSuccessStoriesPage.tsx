@@ -12,6 +12,7 @@ import {
   PageGridFull,
   PageTitle,
   Textarea,
+  ToggleField,
 } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
@@ -121,7 +122,6 @@ export function BrandSuccessStoriesPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Delete this success story?")) return;
       clear();
       const { error: mErr } = await getSupabase().from("brand_success_stories").delete().eq("id", id);
       if (mErr) throw mErr;
@@ -152,16 +152,12 @@ export function BrandSuccessStoriesPage() {
                   <Input label="Sort order" value={form.sortOrder} onChange={(v) => setForm((f) => ({ ...f, sortOrder: v }))} />
                 </FormGrid>
                 <Textarea label="Quote" value={form.quote} onChange={(v) => setForm((f) => ({ ...f, quote: v }))} rows={4} />
-                <label className="ed-field">
-                  <span className="ed-field__label">
-                    <input
-                      type="checkbox"
-                      checked={form.isPublished}
-                      onChange={(e) => setForm((f) => ({ ...f, isPublished: e.target.checked }))}
-                    />{" "}
-                    Published on brand marketing site (#testimonials)
-                  </span>
-                </label>
+                <ToggleField
+                  label="Published"
+                  description="Show on brand marketing site (#testimonials)"
+                  checked={form.isPublished}
+                  onChange={(checked) => setForm((f) => ({ ...f, isPublished: checked }))}
+                />
                 <Button
                   onClick={() => create.mutate()}
                   disabled={!form.title.trim() || !form.quote.trim() || !form.authorName.trim() || create.isPending}

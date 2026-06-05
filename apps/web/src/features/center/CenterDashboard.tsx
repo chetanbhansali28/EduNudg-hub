@@ -1,11 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { KpiCard, KpiGrid, PageTitle } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
+import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { fetchCenterDashboardStats } from "@/lib/centerDashboardStats";
-
-function formatInr(cents: number): string {
-  return `₹${(cents / 100).toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
-}
 
 export function CenterDashboard() {
   const tenant = useTenant();
@@ -44,7 +41,7 @@ export function CenterDashboard() {
             value={s?.feeCollectionRate != null ? `${s.feeCollectionRate}%` : "—"}
             hint={
               s && s.overdueFeesCents > 0
-                ? `${formatInr(s.overdueFeesCents)} overdue`
+                ? `${formatInrFromPaise(s.overdueFeesCents)} overdue`
                 : "Paid vs billable"
             }
           />

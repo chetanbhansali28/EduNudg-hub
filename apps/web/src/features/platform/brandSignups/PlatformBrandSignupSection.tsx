@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button, Input, MutationError } from "@edunudg/ui";
+import { usePlatformIntegration } from "@/hooks/usePlatformIntegration";
 import { submitPlatformBrandSignup } from "@/lib/platformBrandSignupApi";
 import { EnquiryPromoSection } from "@/features/marketing/EnquiryPromoSection";
 
 export function PlatformBrandSignupSection() {
+  const signupEnabled = usePlatformIntegration("platform_brand_signup");
   const [requestedName, setRequestedName] = useState("");
   const [adminFullName, setAdminFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,6 +35,8 @@ export function PlatformBrandSignupSection() {
     }
     setDone(true);
   };
+
+  if (!signupEnabled) return null;
 
   return (
     <EnquiryPromoSection

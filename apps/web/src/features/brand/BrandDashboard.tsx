@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { KpiCard, KpiGrid, PageTitle } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
+import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { countStaleBrandLeads } from "@/lib/leadsApi";
 import { useBrandScope } from "./hooks/useBrandScope";
 
@@ -84,7 +85,7 @@ export function BrandDashboard() {
         />
         <KpiCard
           label="Royalty due (pending)"
-          value={s != null ? `₹${(s.royaltyDue / 100).toLocaleString()}` : "—"}
+          value={s != null ? formatInrFromPaise(s.royaltyDue) : "—"}
         />
         <KpiCard label="Curriculum drafts" value={s?.draftVersions ?? "—"} />
       </KpiGrid>

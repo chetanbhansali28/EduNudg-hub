@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, DataList, PageTitle } from "@edunudg/ui";
+import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useTenant } from "@/bootstrap/TenantProvider";
@@ -34,7 +35,7 @@ export function FeesPage() {
           items={(invoices.data ?? []).map((i) => (i))}
           render={(i) => (
             <span>
-              ₹{(i.amount_cents / 100).toLocaleString()} — {i.status}
+              {formatInrFromPaise(i.amount_cents)} — {i.status}
             </span>
           )}
         />
@@ -42,7 +43,7 @@ export function FeesPage() {
       <Card title="Payments">
         <DataList
           items={(payments.data ?? []).map((p) => (p))}
-          render={(p) => <span>₹{(p.amount_cents / 100).toLocaleString()}</span>}
+          render={(p) => <span>{formatInrFromPaise(p.amount_cents)}</span>}
         />
       </Card>
     </>

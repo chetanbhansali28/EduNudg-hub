@@ -1264,6 +1264,201 @@
   transform: translateY(0);
 }
 
+/* ─── Pricing (platform homepage) ─── */
+.novu-pricing-section {
+  position: relative;
+  z-index: 30;
+  isolation: isolate;
+  background: var(--novu-white);
+  color: var(--novu-black);
+  padding: 4rem 0 5rem;
+  overflow: visible;
+}
+
+@media (min-width: 768px) {
+  .novu-pricing-section {
+    padding: 5rem 0 6rem;
+  }
+}
+
+.novu-pricing-section__wrap {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding-inline: var(--novu-page-gutter);
+}
+
+.novu-pricing-section__status {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9375rem;
+  color: rgb(0 0 0 / 0.62);
+}
+
+.novu-pricing-section__header {
+  max-width: 42rem;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+  color: var(--novu-black);
+}
+
+.novu-pricing-section__header h2 {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--novu-black);
+}
+
+.novu-pricing-section__header h2 .serif {
+  font-family: var(--novu-serif, Georgia, serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--novu-black);
+}
+
+.novu-pricing-section__header p {
+  margin-top: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: rgb(0 0 0 / 0.62);
+}
+
+.novu-pricing-grid {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--novu-page-gutter);
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.novu-pricing-grid::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .novu-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+    overflow: visible;
+    align-items: stretch;
+    padding-bottom: 0;
+  }
+}
+
+.novu-pricing-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 min(300px, calc(100vw - var(--novu-page-gutter) * 2 - 1rem));
+  scroll-snap-align: start;
+  padding: 1.75rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  background: var(--novu-white);
+  color: var(--novu-black);
+  box-shadow: 0 8px 32px -24px rgb(0 0 0 / 0.25);
+}
+
+@media (min-width: 1024px) {
+  .novu-pricing-card {
+    flex: unset;
+    min-width: 0;
+  }
+}
+
+.novu-pricing-card--highlight {
+  border-color: var(--novu-black);
+  box-shadow: 0 16px 48px -28px rgb(0 0 0 / 0.35);
+}
+
+.novu-pricing-card__badge {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgb(0 0 0 / 0.06);
+  color: var(--novu-black);
+}
+
+.novu-pricing-card--highlight .novu-pricing-card__badge {
+  background: var(--novu-black);
+  color: var(--novu-white);
+}
+
+.novu-pricing-card__name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--novu-black);
+}
+
+.novu-pricing-card__price {
+  margin: 0.75rem 0 1.25rem;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--novu-black);
+}
+
+.novu-pricing-card__interval {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgb(0 0 0 / 0.5);
+}
+
+.novu-pricing-card__features {
+  flex: 1;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.novu-pricing-card__features li {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: rgb(0 0 0 / 0.72);
+}
+
+.novu-pricing-card__features li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  color: var(--novu-black);
+}
+
+.novu-pricing-card__cta {
+  margin-top: auto;
+  width: 100%;
+  background: var(--novu-black) !important;
+  color: var(--novu-white) !important;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.22);
+}
+
+.novu-pricing-card__cta .novu-stagger-label,
+.novu-pricing-card__cta .novu-stagger-label__top,
+.novu-pricing-card__cta .novu-stagger-label__bottom {
+  color: var(--novu-white);
+}
+
+.novu-pricing-card__cta:focus-visible {
+  outline: 2px solid var(--novu-black);
+  outline-offset: 3px;
+}
+
 /* ─── Privacy (black card + lock) ─── */
 .novu-privacy-section {
   position: relative;

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, DataList, FormGrid, Input, ListRow, MutationError, Select } from "@edunudg/ui";
+import { Button, Card, DataList, FormGrid, Input, ListRow, MutationError, ToggleField } from "@edunudg/ui";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
@@ -84,20 +84,17 @@ export function BrandCompetitionsSection({ brandId }: Props) {
                 {c.event_date ?? "Date TBD"}
                 {c.location ? ` · ${c.location}` : ""}
               </div>
-              <Select
-                label="Status"
-                value={c.is_active ? "active" : "inactive"}
-                onChange={(v) =>
+              <ToggleField
+                label="Active"
+                description="Visible on student learn dashboard"
+                checked={c.is_active}
+                onChange={(checked) =>
                   toggleActive.mutate({
                     id: c.id,
-                    isActive: v === "active",
+                    isActive: checked,
                     row: { name: c.name, event_date: c.event_date, location: c.location },
                   })
                 }
-                options={[
-                  { value: "active", label: "Active" },
-                  { value: "inactive", label: "Inactive" },
-                ]}
               />
             </div>
           </ListRow>

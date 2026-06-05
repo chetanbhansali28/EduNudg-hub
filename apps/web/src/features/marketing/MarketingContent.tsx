@@ -10,6 +10,7 @@ import { CenterStudentRegistrationSection } from "./CenterStudentRegistrationSec
 import { FranchiseSignupSection } from "./FranchiseSignupSection";
 import { PlatformBrandSignupSection } from "@/features/platform/brandSignups/PlatformBrandSignupSection";
 import { HighlightsScroller } from "./HighlightsScroller";
+import { PlatformPricingSection } from "./PlatformPricingSection";
 import { PrivacySection } from "./PrivacySection";
 import { TestimonialsCarousel } from "./TestimonialsCarousel";
 import { useScrollReveal } from "./useScrollReveal";
@@ -79,6 +80,10 @@ export function MarketingContent({ config, portalMode, brandSlug, centerSlug, ce
         />
 
         <HighlightsScroller cards={config.showcaseCards} />
+
+        {portalMode === "platform" && (
+          <PlatformPricingSection ctaHref={config.nav.ctaHref} ctaLabel={config.nav.ctaLabel} />
+        )}
 
         <PrivacySection privacy={config.privacy} />
 

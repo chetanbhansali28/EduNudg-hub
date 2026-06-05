@@ -14,6 +14,7 @@ import {
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { createCenterKitOrder, listActiveKitCatalog, listCenterKitOrders } from "@/lib/kitOrdersApi";
+import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
@@ -80,7 +81,7 @@ export function CenterKitOrdersPage() {
                 placeholder="Select kit"
                 options={(catalog.data ?? []).map((c) => ({
                   value: c.id,
-                  label: `${c.name} (₹${(c.price_cents / 100).toFixed(0)})`,
+                  label: `${c.name} (${formatInrFromPaise(c.price_cents, c.currency)})`,
                 }))}
               />
               <FormGrid>

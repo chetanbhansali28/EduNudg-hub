@@ -12,6 +12,7 @@ import {
   PageGridFull,
   PageTitle,
   Textarea,
+  ToggleField,
 } from "@edunudg/ui";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
@@ -76,7 +77,6 @@ export function BrandCampaignsPage() {
   const remove = useMutation({
     mutationFn: async (id: string) => {
       if (!brandId) throw new Error("Brand required");
-      if (!confirm("Delete this campaign?")) return;
       clear();
       await deleteBrandCampaign(brandId, id);
     },
@@ -112,16 +112,12 @@ export function BrandCampaignsPage() {
                   <Input label="Ends" value={form.endsAt} onChange={(v) => setForm((f) => ({ ...f, endsAt: v }))} type="datetime-local" />
                 </FormGrid>
                 <Textarea label="Description" value={form.description} onChange={(v) => setForm((f) => ({ ...f, description: v }))} />
-                <label className="ed-field">
-                  <span className="ed-field__label">
-                    <input
-                      type="checkbox"
-                      checked={form.isActive}
-                      onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
-                    />{" "}
-                    Active (visible to centers)
-                  </span>
-                </label>
+                <ToggleField
+                  label="Active"
+                  description="Visible to franchise centers"
+                  checked={form.isActive}
+                  onChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
+                />
                 <Button onClick={() => create.mutate()} disabled={!form.name.trim() || create.isPending}>
                   Create campaign
                 </Button>
@@ -188,16 +184,11 @@ export function BrandCampaignsPage() {
                         value={editForm.description}
                         onChange={(v) => setEditForm((f) => ({ ...f, description: v }))}
                       />
-                      <label className="ed-field">
-                        <span className="ed-field__label">
-                          <input
-                            type="checkbox"
-                            checked={editForm.isActive}
-                            onChange={(e) => setEditForm((f) => ({ ...f, isActive: e.target.checked }))}
-                          />{" "}
-                          Active
-                        </span>
-                      </label>
+                      <ToggleField
+                        label="Active"
+                        checked={editForm.isActive}
+                        onChange={(checked) => setEditForm((f) => ({ ...f, isActive: checked }))}
+                      />
                     </div>
                   ) : (
                     <div>
@@ -207,8 +198,8 @@ export function BrandCampaignsPage() {
                       {c.description && <p className="ed-text-sm">{c.description}</p>}
                       {(c.starts_at || c.ends_at) && (
                         <div className="ed-text-sm ed-muted">
-                          {c.starts_at ? new Date(c.starts_at).toLocaleString() : "‚Äî"} ‚Üí{" "}
-                          {c.ends_at ? new Date(c.ends_at).toLocaleString() : "‚Äî"}
+                          {c.starts_at ? new Date(c.starts_at).toLocaleString() : "ù"} ?{" "}
+                          {c.ends_at ? new Date(c.ends_at).toLocaleString() : "ù"}
                         </div>
                       )}
                     </div>

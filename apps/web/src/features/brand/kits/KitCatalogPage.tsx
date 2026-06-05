@@ -11,8 +11,10 @@ import {
   MutationError,
   PageGridFull,
   PageTitle,
+  ToggleField,
 } from "@edunudg/ui";
 import { deleteKitCatalogItem, upsertKitCatalogItem } from "@/lib/kitOrdersApi";
+import { formatInrFromPaise, paiseToRupeesInput, rupeesToPaise } from "@/lib/inrCurrency";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
@@ -33,16 +35,6 @@ interface KitItem {
 }
 
 const emptyForm = { sku: "", name: "", priceRupees: "", currency: "INR", isActive: true };
-
-function rupeesToCents(rupees: string): number {
-  const n = parseFloat(rupees);
-  if (Number.isNaN(n) || n < 0) return 0;
-  return Math.round(n * 100);
-}
-
-function centsToRupees(cents: number): string {
-  return (cents / 100).toFixed(2);
-}
 
 export function KitCatalogPage() {
   const { brandId, missingBrand } = useBrandScope();
@@ -75,7 +67,7 @@ export function KitCatalogPage() {
       await upsertKitCatalogItem(brandId, {
         sku: form.sku,
         name: form.name,
-        priceCents: rupeesToCents(form.priceRupees),
+        priceCents: rupeesToPaise(form.priceRupees),
         currency: form.currency,
         isActive: form.isActive,
       });
@@ -96,7 +88,7 @@ export function KitCatalogPage() {
         id,
         sku: editForm.sku,
         name: editForm.name,
-        priceCents: rupeesToCents(editForm.priceRupees),
+        priceCents: rupeesToPaise(editForm.priceRupees),
         currency: editForm.currency,
         isActive: editForm.isActive,
       });
@@ -111,7 +103,6 @@ export function KitCatalogPage() {
   const remove = useMutation({
     mutationFn: async (id: string) => {
       if (!brandId) throw new Error("Brand required");
-      if (!confirm("Delete this kit item?")) return;
       clear();
       await deleteKitCatalogItem(brandId, id);
     },
@@ -144,16 +135,12 @@ export function KitCatalogPage() {
                   />
                   <Input label="Currency" value={form.currency} onChange={(v) => setForm((f) => ({ ...f, currency: v }))} />
                 </FormGrid>
-                <label className="ed-field">
-                  <span className="ed-field__label">
-                    <input
-                      type="checkbox"
-                      checked={form.isActive}
-                      onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))}
-                    />{" "}
-                    Active (available to centers)
-                  </span>
-                </label>
+                <ToggleField
+                  label="Active"
+                  description="Available to franchise centers"
+                  checked={form.isActive}
+                  onChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
+                />
                 <Button onClick={() => create.mutate()} disabled={!form.sku.trim() || !form.name.trim() || create.isPending}>
                   Add item
                 </Button>
@@ -190,7 +177,7 @@ export function KitCatalogPage() {
                         setEditForm({
                           sku: item.sku,
                           name: item.name,
-                          priceRupees: centsToRupees(item.price_cents),
+                          priceRupees: paiseToRupeesInput(item.price_cents),
                           currency: item.currency,
                           isActive: item.is_active,
                         });
@@ -219,16 +206,11 @@ export function KitCatalogPage() {
                           onChange={(v) => setEditForm((f) => ({ ...f, currency: v }))}
                         />
                       </FormGrid>
-                      <label className="ed-field">
-                        <span className="ed-field__label">
-                          <input
-                            type="checkbox"
-                            checked={editForm.isActive}
-                            onChange={(e) => setEditForm((f) => ({ ...f, isActive: e.target.checked }))}
-                          />{" "}
-                          Active
-                        </span>
-                      </label>
+                      <ToggleField
+                        label="Active"
+                        checked={editForm.isActive}
+                        onChange={(checked) => setEditForm((f) => ({ ...f, isActive: checked }))}
+                      />
                     </div>
                   ) : (
                     <div>
@@ -237,7 +219,7 @@ export function KitCatalogPage() {
                         {item.is_active ? "Active" : "Inactive"}
                       </Badge>
                       <div className="ed-text-sm ed-muted">
-                        {item.sku} · ₹{centsToRupees(item.price_cents)} {item.currency}
+                        {item.sku} · {formatInrFromPaise(item.price_cents, item.currency)}
                       </div>
                     </div>
                   )}

@@ -81,7 +81,6 @@ export function BrandsPage() {
   const deleteBrand = useMutation({
     mutationFn: async (id: string) => {
       clear();
-      if (!confirm("Archive this brand? Related data remains but the brand is hidden from lists.")) return;
       const { error: mErr } = await getSupabase()
         .from("brands")
         .update({ deleted_at: new Date().toISOString(), status: "archived" })
@@ -136,6 +135,8 @@ export function BrandsPage() {
                       onSave={() => updateBrand.mutate(b.id)}
                       onCancel={() => setEditingId(null)}
                       onDelete={() => deleteBrand.mutate(b.id)}
+                      deleteDescription="Related data remains but the brand is hidden from lists."
+                      deleteTitle="Archive this brand?"
                       saveDisabled={!editForm.slug.trim() || !editForm.name.trim() || updateBrand.isPending}
                     />
                   </>

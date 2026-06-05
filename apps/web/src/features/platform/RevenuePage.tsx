@@ -13,6 +13,7 @@ import {
   PageTitle,
   Select,
 } from "@edunudg/ui";
+import { formatInrFromPaise, paiseToRupeesInput, rupeesToPaise } from "@/lib/inrCurrency";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "./components/CrudRowActions";
@@ -55,8 +56,8 @@ const INVOICE_STATUS_OPTIONS: { value: InvoiceStatus; label: string }[] = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
-const emptyInvoice = { brand_id: "", amount_cents: "", status: "draft" as InvoiceStatus };
-const emptyMetric = { brand_id: "", metric_date: "", enrollments_count: "0", revenue_cents: "0", active_centers: "0" };
+const emptyInvoice = { brand_id: "", amount_rupees: "", status: "draft" as InvoiceStatus };
+const emptyMetric = { brand_id: "", metric_date: "", enrollments_count: "0", revenue_rupees: "0", active_centers: "0" };
 
 export function RevenuePage() {
   const qc = useQueryClient();
@@ -119,7 +120,7 @@ export function RevenuePage() {
       clear();
       const { error: mErr } = await getSupabase().from("platform_invoices").insert({
         brand_id: invoiceForm.brand_id,
-        amount_cents: Number(invoiceForm.amount_cents) || 0,
+        amount_cents: rupeesToPaise(invoiceForm.amount_rupees),
         status: invoiceForm.status,
       });
       if (mErr) throw mErr;
@@ -139,7 +140,7 @@ export function RevenuePage() {
         .from("platform_invoices")
         .update({
           brand_id: editInvoice.brand_id,
-          amount_cents: Number(editInvoice.amount_cents) || 0,
+          amount_cents: rupeesToPaise(editInvoice.amount_rupees),
           status: editInvoice.status,
         })
         .eq("id", id);
@@ -155,7 +156,6 @@ export function RevenuePage() {
   const deleteInvoice = useMutation({
     mutationFn: async (id: string) => {
       clear();
-      if (!confirm("Delete this invoice?")) return;
       const { error: mErr } = await getSupabase().from("platform_invoices").delete().eq("id", id);
       if (mErr) throw mErr;
     },
@@ -170,7 +170,7 @@ export function RevenuePage() {
         brand_id: metricForm.brand_id,
         metric_date: metricForm.metric_date,
         enrollments_count: Number(metricForm.enrollments_count) || 0,
-        revenue_cents: Number(metricForm.revenue_cents) || 0,
+        revenue_cents: rupeesToPaise(metricForm.revenue_rupees),
         active_centers: Number(metricForm.active_centers) || 0,
       });
       if (mErr) throw mErr;
@@ -192,7 +192,7 @@ export function RevenuePage() {
           brand_id: editMetric.brand_id,
           metric_date: editMetric.metric_date,
           enrollments_count: Number(editMetric.enrollments_count) || 0,
-          revenue_cents: Number(editMetric.revenue_cents) || 0,
+          revenue_cents: rupeesToPaise(editMetric.revenue_rupees),
           active_centers: Number(editMetric.active_centers) || 0,
         })
         .eq("id", id);
@@ -208,7 +208,6 @@ export function RevenuePage() {
   const deleteMetric = useMutation({
     mutationFn: async (id: string) => {
       clear();
-      if (!confirm("Delete this rollup row?")) return;
       const { error: mErr } = await getSupabase().from("analytics_daily_brand").delete().eq("id", id);
       if (mErr) throw mErr;
     },
@@ -216,14 +215,12 @@ export function RevenuePage() {
     onError: capture,
   });
 
-  const formatCents = (cents: number) => `₹${(cents / 100).toLocaleString()}`;
-
   return (
     <>
       <PageTitle>Revenue & Usage</PageTitle>
       <MutationError message={error} />
       <KpiGrid>
-        <KpiCard label="Rollup revenue (sample)" value={formatCents(totalRevenue)} hint="From daily brand metrics" />
+        <KpiCard label="Rollup revenue (sample)" value={formatInrFromPaise(totalRevenue)} hint="From daily brand metrics" />
         <KpiCard label="Rollup enrollments" value={totalEnrollments} />
         <KpiCard label="Invoices" value={invoices.data?.length ?? 0} />
       </KpiGrid>
@@ -241,10 +238,11 @@ export function RevenuePage() {
                 placeholder="Select brand"
               />
               <Input
-                label="Amount (paise)"
-                value={invoiceForm.amount_cents}
-                onChange={(v) => setInvoiceForm((f) => ({ ...f, amount_cents: v }))}
+                label="Amount (₹)"
+                value={invoiceForm.amount_rupees}
+                onChange={(v) => setInvoiceForm((f) => ({ ...f, amount_rupees: v }))}
                 type="number"
+                step="0.01"
               />
               <Select
                 label="Status"
@@ -279,7 +277,7 @@ export function RevenuePage() {
                       setEditingInvoiceId(inv.id);
                       setEditInvoice({
                         brand_id: inv.brand_id,
-                        amount_cents: String(inv.amount_cents),
+                        amount_rupees: paiseToRupeesInput(inv.amount_cents),
                         status: inv.status,
                       });
                     }}
@@ -299,10 +297,11 @@ export function RevenuePage() {
                       options={brandOptions}
                     />
                     <Input
-                      label="Amount (paise)"
-                      value={editInvoice.amount_cents}
-                      onChange={(v) => setEditInvoice((f) => ({ ...f, amount_cents: v }))}
+                      label="Amount (₹)"
+                      value={editInvoice.amount_rupees}
+                      onChange={(v) => setEditInvoice((f) => ({ ...f, amount_rupees: v }))}
                       type="number"
+                      step="0.01"
                     />
                     <Select
                       label="Status"
@@ -313,7 +312,7 @@ export function RevenuePage() {
                   </div>
                 ) : (
                   <span>
-                    {inv.brands?.name ?? "Brand"} — {formatCents(inv.amount_cents)}{" "}
+                    {inv.brands?.name ?? "Brand"} — {formatInrFromPaise(inv.amount_cents)}{" "}
                     <Badge tone={inv.status === "paid" ? "success" : "default"}>{inv.status}</Badge>
                   </span>
                 )}
@@ -348,10 +347,11 @@ export function RevenuePage() {
                 type="number"
               />
               <Input
-                label="Revenue (paise)"
-                value={metricForm.revenue_cents}
-                onChange={(v) => setMetricForm((f) => ({ ...f, revenue_cents: v }))}
+                label="Revenue (₹)"
+                value={metricForm.revenue_rupees}
+                onChange={(v) => setMetricForm((f) => ({ ...f, revenue_rupees: v }))}
                 type="number"
+                step="0.01"
               />
               <Input
                 label="Active centers"
@@ -388,7 +388,7 @@ export function RevenuePage() {
                         brand_id: m.brand_id,
                         metric_date: m.metric_date,
                         enrollments_count: String(m.enrollments_count),
-                        revenue_cents: String(m.revenue_cents),
+                        revenue_rupees: paiseToRupeesInput(m.revenue_cents),
                         active_centers: String(m.active_centers),
                       });
                     }}
@@ -419,10 +419,11 @@ export function RevenuePage() {
                       type="number"
                     />
                     <Input
-                      label="Revenue (paise)"
-                      value={editMetric.revenue_cents}
-                      onChange={(v) => setEditMetric((f) => ({ ...f, revenue_cents: v }))}
+                      label="Revenue (₹)"
+                      value={editMetric.revenue_rupees}
+                      onChange={(v) => setEditMetric((f) => ({ ...f, revenue_rupees: v }))}
                       type="number"
+                      step="0.01"
                     />
                     <Input
                       label="Active centers"
@@ -433,7 +434,7 @@ export function RevenuePage() {
                   </div>
                 ) : (
                   <span>
-                    {m.brands?.name ?? "Brand"} · {m.metric_date} — {formatCents(m.revenue_cents)}, {m.enrollments_count}{" "}
+                    {m.brands?.name ?? "Brand"} · {m.metric_date} — {formatInrFromPaise(m.revenue_cents)}, {m.enrollments_count}{" "}
                     enrollments
                   </span>
                 )}

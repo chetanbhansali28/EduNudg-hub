@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useId, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { IconEye, IconEyeOff } from "./icons";
 
@@ -102,6 +102,7 @@ export function Input({
   type = "text",
   placeholder,
   autoComplete,
+  step,
 }: {
   label: string;
   value: string;
@@ -109,6 +110,7 @@ export function Input({
   type?: string;
   placeholder?: string;
   autoComplete?: string;
+  step?: string;
 }) {
   return (
     <label className="ed-field">
@@ -119,6 +121,7 @@ export function Input({
         value={value}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        step={step}
         onChange={(e) => onChange(e.target.value)}
       />
     </label>
@@ -322,5 +325,66 @@ export function Textarea({
         onChange={(e) => onChange(e.target.value)}
       />
     </label>
+  );
+}
+
+/** Responsive grid for boolean toggle fields: 2 columns mobile/tablet, 3 on desktop. */
+export function ToggleGrid({ children }: { children: ReactNode }) {
+  return <div className="ed-toggle-grid">{children}</div>;
+}
+
+export function Toggle({
+  checked,
+  onChange,
+  disabled,
+  id,
+  "aria-label": ariaLabel,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+  id?: string;
+  "aria-label"?: string;
+}) {
+  return (
+    <button
+      id={id}
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      disabled={disabled}
+      className={["ed-toggle", checked ? "ed-toggle--on" : ""].filter(Boolean).join(" ")}
+      onClick={() => onChange(!checked)}
+    >
+      <span className="ed-toggle__thumb" aria-hidden />
+    </button>
+  );
+}
+
+export function ToggleField({
+  label,
+  description,
+  checked,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  description?: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
+  const id = useId();
+  return (
+    <div className="ed-toggle-field">
+      <div className="ed-toggle-field__body">
+        <label className="ed-toggle-field__label" htmlFor={id}>
+          {label}
+        </label>
+        {description ? <p className="ed-toggle-field__description">{description}</p> : null}
+      </div>
+      <Toggle id={id} checked={checked} onChange={onChange} disabled={disabled} aria-label={label} />
+    </div>
   );
 }

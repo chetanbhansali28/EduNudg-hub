@@ -1,16 +1,15 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Badge, Button, Card, DataList, ListRow, MutationError, PageTitle } from "@edunudg/ui";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
+import { formatInrFromPaise } from "@/lib/inrCurrency";
+import { usePlatformIntegration } from "@/hooks/usePlatformIntegration";
 import { fetchBrandBillingSummary } from "@/lib/brandBillingApi";
 import { createBrandSubscriptionCheckout } from "@/services/payments/brandSubscriptionCheckout";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 
-function formatMoney(cents: number, currency: string) {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: currency || "INR" }).format(cents / 100);
-}
-
 export function BrandBillingPage() {
   const { brandId, missingBrand } = useBrandScope();
+  const paymentGatewayEnabled = usePlatformIntegration("payment_gateway");
   const { error, clear, capture } = useMutationError();
 
   const billing = useQuery({
@@ -25,6 +24,9 @@ export function BrandBillingPage() {
       clear();
       const { data, error: err } = await createBrandSubscriptionCheckout(brandId);
       if (err) throw new Error(err);
+      if (data?.status === "disabled") {
+        throw new Error(String(data.message ?? "Payment gateway is disabled by platform admin."));
+      }
       if (data?.status === "stub") {
         throw new Error(
           String(data.message ?? "Payment gateway not configured. Contact EduNudg to enable Razorpay.")
@@ -52,13 +54,19 @@ export function BrandBillingPage() {
           <p>
             Plan: <strong>{plan?.name ?? "—"}</strong> · Status: <Badge>{sub.status}</Badge>
             {plan && (
-              <span className="ed-text-sm ed-muted"> · {formatMoney(plan.price_cents, plan.currency)}/month</span>
+              <span className="ed-text-sm ed-muted"> · {formatInrFromPaise(plan.price_cents, plan.currency)}/month</span>
             )}
           </p>
         )}
-        <Button onClick={() => checkout.mutate()} disabled={checkout.isPending}>
-          Pay platform subscription
-        </Button>
+        {paymentGatewayEnabled ? (
+          <Button onClick={() => checkout.mutate()} disabled={checkout.isPending}>
+            Pay platform subscription
+          </Button>
+        ) : (
+          <p className="ed-text-sm ed-muted">
+            Payment checkout is disabled platform-wide. Your subscription and invoice history are unchanged.
+          </p>
+        )}
       </Card>
 
       <Card title="Invoices">
@@ -68,7 +76,7 @@ export function BrandBillingPage() {
           render={(inv) => (
             <ListRow>
               <div>
-                <strong>{formatMoney(inv.amount_cents, inv.currency)}</strong>
+                <strong>{formatInrFromPaise(inv.amount_cents, inv.currency)}</strong>
                 <div className="ed-text-sm ed-muted">{new Date(inv.created_at).toLocaleDateString()}</div>
                 <Badge>{inv.status}</Badge>
                 {inv.due_at && <div className="ed-text-sm">Due {new Date(inv.due_at).toLocaleDateString()}</div>}

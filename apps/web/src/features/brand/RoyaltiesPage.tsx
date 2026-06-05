@@ -10,8 +10,10 @@ import {
   MutationError,
   PageTitle,
   Select,
+  ToggleField,
 } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
+import { formatInrFromPaise, paiseToRupeesInput, rupeesToPaise } from "@/lib/inrCurrency";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -154,7 +156,6 @@ export function RoyaltiesPage() {
 
   const deleteRule = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Delete this royalty rule?")) return;
       clear();
       const { error: mErr } = await getSupabase().from("royalty_rules").delete().eq("id", id);
       if (mErr) throw mErr;
@@ -167,7 +168,7 @@ export function RoyaltiesPage() {
     mutationFn: async () => {
       if (!brandId) throw new Error("Brand required");
       clear();
-      const amount = Math.round(parseFloat(settlementForm.amount_inr) * 100);
+      const amount = rupeesToPaise(settlementForm.amount_inr);
       if (Number.isNaN(amount)) throw new Error("Enter a valid amount");
       const { error: mErr } = await getSupabase().from("royalty_settlements").insert({
         brand_id: brandId,
@@ -190,7 +191,7 @@ export function RoyaltiesPage() {
   const updateSettlement = useMutation({
     mutationFn: async (id: string) => {
       clear();
-      const amount = Math.round(parseFloat(editSettlement.amount_inr) * 100);
+      const amount = rupeesToPaise(editSettlement.amount_inr);
       if (Number.isNaN(amount)) throw new Error("Enter a valid amount");
       const { error: mErr } = await getSupabase()
         .from("royalty_settlements")
@@ -213,7 +214,6 @@ export function RoyaltiesPage() {
 
   const deleteSettlement = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Delete this settlement record?")) return;
       clear();
       const { error: mErr } = await getSupabase().from("royalty_settlements").delete().eq("id", id);
       if (mErr) throw mErr;
@@ -240,6 +240,11 @@ export function RoyaltiesPage() {
             <>
               <Input label="Name" value={ruleForm.name} onChange={(v) => setRuleForm((f) => ({ ...f, name: v }))} />
               <Select label="Type" value={ruleForm.rule_type} onChange={(v) => setRuleForm((f) => ({ ...f, rule_type: v }))} options={RULE_TYPES} />
+              <ToggleField
+                label="Active"
+                checked={ruleForm.is_active}
+                onChange={(checked) => setRuleForm((f) => ({ ...f, is_active: checked }))}
+              />
               <Button onClick={() => createRule.mutate()} disabled={!ruleForm.name.trim() || createRule.isPending}>
                 Create rule
               </Button>
@@ -274,6 +279,11 @@ export function RoyaltiesPage() {
                   <div className="ed-form-section">
                     <Input label="Name" value={editRule.name} onChange={(v) => setEditRule((f) => ({ ...f, name: v }))} />
                     <Select label="Type" value={editRule.rule_type} onChange={(v) => setEditRule((f) => ({ ...f, rule_type: v }))} options={RULE_TYPES} />
+                    <ToggleField
+                      label="Active"
+                      checked={editRule.is_active}
+                      onChange={(checked) => setEditRule((f) => ({ ...f, is_active: checked }))}
+                    />
                   </div>
                 ) : (
                   <span>
@@ -333,7 +343,7 @@ export function RoyaltiesPage() {
                         center_id: s.center_id ?? "",
                         period_start: s.period_start,
                         period_end: s.period_end,
-                        amount_inr: String(s.amount_cents / 100),
+                        amount_inr: paiseToRupeesInput(s.amount_cents),
                         status: s.status,
                       });
                     }}
@@ -354,7 +364,7 @@ export function RoyaltiesPage() {
                   </div>
                 ) : (
                   <span>
-                    ₹{(s.amount_cents / 100).toLocaleString()} — {s.period_start} → {s.period_end}{" "}
+                    {formatInrFromPaise(s.amount_cents)} — {s.period_start} → {s.period_end}{" "}
                     <Badge>{s.status}</Badge>
                   </span>
                 )}

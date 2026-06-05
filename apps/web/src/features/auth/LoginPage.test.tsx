@@ -30,6 +30,19 @@ vi.mock("@/hooks/usePortalBranding", () => ({
   usePortalBranding: () => ({ data: undefined }),
 }));
 
+vi.mock("@/hooks/usePlatformIntegration", () => ({
+  usePlatformIntegrations: () => ({
+    auth_email: true,
+    auth_google: true,
+    auth_facebook: true,
+    auth_whatsapp_otp: true,
+    passkeys: false,
+    payment_gateway: false,
+    platform_brand_signup: true,
+    public_pricing: true,
+  }),
+}));
+
 vi.mock("@/lib/homepageApi", () => ({
   fetchHomepageConfig: vi.fn().mockResolvedValue({
     footer: { privacyHref: "/privacy", termsHref: "/terms" },

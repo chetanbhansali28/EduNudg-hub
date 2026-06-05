@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button, IconGoogle, Input, LoginLayout, PasswordInput, ThemeProvider } from "@edunudg/ui";
 import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
+import { usePlatformIntegrations } from "@/hooks/usePlatformIntegration";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
 import { resolveLoginBranding } from "@/lib/portalBranding";
@@ -16,6 +17,7 @@ export function LoginPage() {
   const tenant = useTenant();
   const navigate = useNavigate();
   const brandingQuery = usePortalBranding();
+  const integrations = usePlatformIntegrations();
   const homepageQuery = useQuery({
     queryKey: ["marketing-homepage"],
     queryFn: fetchHomepageConfig,
@@ -115,6 +117,12 @@ export function LoginPage() {
     </>
   ) : null;
 
+  const showEmailAuth = integrations.auth_email;
+  const showGoogleAuth = integrations.auth_google;
+  const showFacebookAuth = integrations.auth_facebook;
+  const showWhatsappAuth = integrations.auth_whatsapp_otp;
+  const showAlternateAuth = showGoogleAuth || showFacebookAuth || showWhatsappAuth;
+
   return (
     <ThemeProvider>
       <LoginLayout
@@ -128,33 +136,39 @@ export function LoginPage() {
         }
         legal={legal}
       >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void handleEmailSignIn();
-          }}
-        >
-          <Input label="Email" value={email} onChange={setEmail} type="email" autoComplete="username" />
-          <PasswordInput label="Password" value={password} onChange={setPassword} />
+        {!showEmailAuth && !showAlternateAuth ? (
+          <p className="ed-text-sm ed-muted">Sign-in is temporarily unavailable. Contact your administrator.</p>
+        ) : null}
 
-          <div className="ed-login-split__remember">
-            <label>
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-              />
-              Remember me for 1 week
-            </label>
-            <a className="ed-login-split__forgot" href="#reset">
-              Forgot password? <u>Reset it</u>
-            </a>
-          </div>
+        {showEmailAuth ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void handleEmailSignIn();
+            }}
+          >
+            <Input label="Email" value={email} onChange={setEmail} type="email" autoComplete="username" />
+            <PasswordInput label="Password" value={password} onChange={setPassword} />
 
-          <Button type="submit" disabled={submitting || !email.trim() || !password} block>
-            {submitting ? "Signing in…" : "Log in"}
-          </Button>
-        </form>
+            <div className="ed-login-split__remember">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                />
+                Remember me for 1 week
+              </label>
+              <a className="ed-login-split__forgot" href="#reset">
+                Forgot password? <u>Reset it</u>
+              </a>
+            </div>
+
+            <Button type="submit" disabled={submitting || !email.trim() || !password} block>
+              {submitting ? "Signing in…" : "Log in"}
+            </Button>
+          </form>
+        ) : null}
 
         {error && (
           <p role="alert" className="ed-login__error">
@@ -162,34 +176,44 @@ export function LoginPage() {
           </p>
         )}
 
-        <div className="ed-login-split__divider">or continue with</div>
+        {showEmailAuth && showAlternateAuth ? <div className="ed-login-split__divider">or continue with</div> : null}
 
-        {!showAltSignIn ? (
-          <Button variant="ghost" block onClick={() => setShowAltSignIn(true)}>
-            More sign-in options
-          </Button>
-        ) : (
-          <div className="ed-login-split__oauth">
-            <Button onClick={() => signInWithOAuth("google").catch((e) => setError(e.message))}>
-              <IconGoogle aria-hidden />
-              Google
+        {showAlternateAuth ? (
+          !showAltSignIn ? (
+            <Button variant="ghost" block onClick={() => setShowAltSignIn(true)}>
+              More sign-in options
             </Button>
-            <Button variant="ghost" onClick={() => signInWithOAuth("facebook").catch((e) => setError(e.message))}>
-              Facebook
-            </Button>
-            <Input label="Mobile (+91…)" value={phone} onChange={setPhone} placeholder="+919876543210" />
-            <Button
-              variant="ghost"
-              block
-              onClick={async () => {
-                const { error: err } = await signInWithOtpPhone(phone);
-                setError(err?.message ?? "OTP sent — check WhatsApp");
-              }}
-            >
-              Send OTP via WhatsApp
-            </Button>
-          </div>
-        )}
+          ) : (
+            <div className="ed-login-split__oauth">
+              {showGoogleAuth ? (
+                <Button onClick={() => signInWithOAuth("google").catch((e) => setError(e.message))}>
+                  <IconGoogle aria-hidden />
+                  Google
+                </Button>
+              ) : null}
+              {showFacebookAuth ? (
+                <Button variant="ghost" onClick={() => signInWithOAuth("facebook").catch((e) => setError(e.message))}>
+                  Facebook
+                </Button>
+              ) : null}
+              {showWhatsappAuth ? (
+                <>
+                  <Input label="Mobile (+91…)" value={phone} onChange={setPhone} placeholder="+919876543210" />
+                  <Button
+                    variant="ghost"
+                    block
+                    onClick={async () => {
+                      const { error: err } = await signInWithOtpPhone(phone);
+                      setError(err?.message ?? "OTP sent — check WhatsApp");
+                    }}
+                  >
+                    Send OTP via WhatsApp
+                  </Button>
+                </>
+              ) : null}
+            </div>
+          )
+        ) : null}
 
         {tenant.portalType === "platform" && (
           <p className="ed-login-split__subtitle" style={{ marginTop: "1.25rem" }}>

@@ -3,6 +3,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SubscriptionsPage } from "./SubscriptionsPage";
 
+import { STARTER_PLAN_FEATURES } from "@/lib/subscriptionPlanFeatures";
+
 const fromMock = vi.fn();
 
 vi.mock("@/lib/supabase", () => ({
@@ -39,7 +41,19 @@ describe("SubscriptionsPage", () => {
     fromMock.mockImplementation((table: string) => {
       if (table === "subscription_plans") {
         return chain({
-          data: [{ id: "p1", code: "starter", name: "Starter", price_cents: 999900, billing_interval: "month", is_active: true }],
+          data: [
+            {
+              id: "p1",
+              code: "starter",
+              name: "Starter",
+              price_cents: 999900,
+              currency: "INR",
+              billing_interval: "month",
+              is_active: true,
+              is_default: true,
+              features: STARTER_PLAN_FEATURES,
+            },
+          ],
           error: null,
         });
       }
@@ -59,6 +73,9 @@ describe("SubscriptionsPage", () => {
     expect(screen.getByText("Plans")).toBeDefined();
     await screen.findByRole("button", { name: "Edit" });
     expect(screen.getAllByRole("button", { name: "Edit" }).length).toBeGreaterThan(0);
+    expect(screen.getByText(/₹9,999\.00/)).toBeDefined();
+    expect(document.querySelector(".ed-plan-cards")).toBeTruthy();
+    expect(screen.getAllByText(/default plan/i).length).toBeGreaterThan(0);
   });
 
   it("regression_subscriptions_page_has_assign_subscription_form", async () => {

@@ -98,7 +98,6 @@ export function CentersPage() {
 
   const deleteCenter = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Remove this center from active lists? Historical data is kept.")) return;
       clear();
       const { error: mErr } = await getSupabase()
         .from("franchise_centers")
@@ -166,6 +165,7 @@ export function CentersPage() {
                       onSave={() => updateCenter.mutate(c.id)}
                       onCancel={() => setEditingId(null)}
                       onDelete={() => deleteCenter.mutate(c.id)}
+                      deleteDescription="The center will be removed from active lists. Historical data is kept."
                       saveDisabled={!editForm.slug.trim() || !editForm.name.trim() || updateCenter.isPending}
                     />
                   </div>

@@ -18,6 +18,7 @@ import {
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
+import { DeleteConfirmButton } from "@/features/shared/DeleteConfirmButton";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
@@ -227,7 +228,6 @@ export function CurriculumPage() {
 
   const deleteProgram = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Archive this program?")) return;
       clear();
       const { error: mErr } = await getSupabase()
         .from("programs")
@@ -264,7 +264,6 @@ export function CurriculumPage() {
 
   const deleteVersion = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Delete this curriculum version and all nested content?")) return;
       clear();
       const { error: mErr } = await getSupabase().from("curriculum_versions").delete().eq("id", id);
       if (mErr) throw mErr;
@@ -349,7 +348,6 @@ export function CurriculumPage() {
 
   const deleteLevel = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Delete this level and nested modules?")) return;
       clear();
       const { error: mErr } = await getSupabase().from("levels").delete().eq("id", id);
       if (mErr) throw mErr;
@@ -384,7 +382,6 @@ export function CurriculumPage() {
 
   const deleteModule = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Delete this module and lessons?")) return;
       clear();
       const { error: mErr } = await getSupabase().from("modules").delete().eq("id", id);
       if (mErr) throw mErr;
@@ -423,7 +420,6 @@ export function CurriculumPage() {
 
   const deleteLesson = useMutation({
     mutationFn: async (id: string) => {
-      if (!confirm("Delete this lesson?")) return;
       clear();
       const { error: mErr } = await getSupabase().from("lessons").delete().eq("id", id);
       if (mErr) throw mErr;
@@ -487,6 +483,8 @@ export function CurriculumPage() {
                     onSave={() => updateProgram.mutate(p.id)}
                     onCancel={() => setEditingProgramId(null)}
                     onDelete={() => deleteProgram.mutate(p.id)}
+                    deleteTitle="Archive this program?"
+                    deleteDescription="The program will be archived and hidden from active curriculum lists."
                     saveDisabled={!editProgram.name.trim() || updateProgram.isPending}
                   />
                 }
@@ -546,9 +544,10 @@ export function CurriculumPage() {
                       onChange={(status) => updateVersionStatus.mutate({ id: v.id, status })}
                       options={VERSION_STATUS}
                     />
-                    <Button variant="danger" onClick={() => deleteVersion.mutate(v.id)}>
-                      Delete
-                    </Button>
+                    <DeleteConfirmButton
+                      onConfirm={() => deleteVersion.mutate(v.id)}
+                      description="This will delete the curriculum version and all nested levels, modules, and lessons."
+                    />
                   </>
                 }
               >
@@ -595,7 +594,14 @@ export function CurriculumPage() {
           <DataList
             items={levels.data ?? []}
             render={(l) => (
-              <ListRow aside={<Button variant="danger" onClick={() => deleteLevel.mutate(l.id)}>Delete</Button>}>
+              <ListRow
+                aside={
+                  <DeleteConfirmButton
+                    onConfirm={() => deleteLevel.mutate(l.id)}
+                    description="This will delete the level and all nested modules."
+                  />
+                }
+              >
                 <button
                   type="button"
                   className="ed-link-button"
@@ -643,7 +649,14 @@ export function CurriculumPage() {
           <DataList
             items={modules.data ?? []}
             render={(m) => (
-              <ListRow aside={<Button variant="danger" onClick={() => deleteModule.mutate(m.id)}>Delete</Button>}>
+              <ListRow
+                aside={
+                  <DeleteConfirmButton
+                    onConfirm={() => deleteModule.mutate(m.id)}
+                    description="This will delete the module and all nested lessons."
+                  />
+                }
+              >
                 <button
                   type="button"
                   className="ed-link-button"
@@ -677,7 +690,9 @@ export function CurriculumPage() {
           <DataList
             items={lessons.data ?? []}
             render={(l) => (
-              <ListRow aside={<Button variant="danger" onClick={() => deleteLesson.mutate(l.id)}>Delete</Button>}>
+              <ListRow
+                aside={<DeleteConfirmButton onConfirm={() => deleteLesson.mutate(l.id)} />}
+              >
                 <span>
                   {l.title}
                   {l.duration_minutes != null && <small className="ed-muted"> · {l.duration_minutes} min</small>}

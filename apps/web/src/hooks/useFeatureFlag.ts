@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
+import { usePlatformIntegrations } from "@/hooks/usePlatformIntegration";
 import { getSupabase } from "@/lib/supabase";
 
 export const FEATURE_FLAG_DEFAULTS: Record<string, boolean> = {
@@ -51,6 +52,11 @@ export function useBrandFeatureFlags(): Record<string, boolean> {
 export function useFeatureFlag(key: string): boolean {
   const tenant = useTenant();
   const flags = useBrandFeatureFlags();
+  const platformIntegrations = usePlatformIntegrations();
+
+  if (key === "platform_brand_signup") {
+    return platformIntegrations.platform_brand_signup;
+  }
 
   if (tenant.portalType === "platform") {
     return FEATURE_FLAG_DEFAULTS[key] ?? true;

@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Button } from "@edunudg/ui";
+import { ConfirmDeleteDialog } from "@/features/shared/ConfirmDeleteDialog";
 
 export function CrudRowActions({
   editing,
@@ -6,6 +8,8 @@ export function CrudRowActions({
   onSave,
   onCancel,
   onDelete,
+  deleteDescription,
+  deleteTitle,
   saveDisabled,
   saveLabel = "Save",
 }: {
@@ -14,9 +18,13 @@ export function CrudRowActions({
   onSave: () => void;
   onCancel: () => void;
   onDelete?: () => void;
+  deleteDescription?: string;
+  deleteTitle?: string;
   saveDisabled?: boolean;
   saveLabel?: string;
 }) {
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
   if (editing) {
     return (
       <>
@@ -29,15 +37,28 @@ export function CrudRowActions({
       </>
     );
   }
+
   return (
     <>
       <Button variant="ghost" onClick={onEdit}>
         Edit
       </Button>
       {onDelete && (
-        <Button variant="danger" onClick={onDelete}>
-          Delete
-        </Button>
+        <>
+          <Button variant="danger" onClick={() => setDeleteOpen(true)}>
+            Delete
+          </Button>
+          <ConfirmDeleteDialog
+            open={deleteOpen}
+            onClose={() => setDeleteOpen(false)}
+            onConfirm={() => {
+              onDelete();
+              setDeleteOpen(false);
+            }}
+            title={deleteTitle}
+            description={deleteDescription}
+          />
+        </>
       )}
     </>
   );

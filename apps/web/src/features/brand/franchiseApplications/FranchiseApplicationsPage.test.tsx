@@ -70,7 +70,7 @@ describe("FranchiseApplicationsPage", () => {
     expect(screen.getByText("42 FC Road")).toBeDefined();
     expect(screen.getByText("Ran a tutoring center for 3 years.")).toBeDefined();
     expect(screen.getByText("Looking to open in Q3.")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Approve" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Approve & create center" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Reject" })).toBeDefined();
   });
 });

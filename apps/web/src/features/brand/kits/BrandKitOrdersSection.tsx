@@ -7,6 +7,7 @@ import {
   type KitOrderStatus,
   updateKitOrderStatus,
 } from "@/lib/kitOrdersApi";
+import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 
 type Props = { brandId: string };
@@ -20,7 +21,7 @@ function centerLabel(order: KitOrderRow): string {
 
 function lineLabel(line: KitOrderRow["kit_order_lines"][number]): string {
   const catalog = Array.isArray(line.kit_catalog) ? line.kit_catalog[0] : line.kit_catalog;
-  return `${catalog?.name ?? "Item"} × ${line.quantity} (₹${(line.unit_price_cents / 100).toFixed(0)} each)`;
+  return `${catalog?.name ?? "Item"} × ${line.quantity} (${formatInrFromPaise(line.unit_price_cents)} each)`;
 }
 
 export function BrandKitOrdersSection({ brandId }: Props) {
