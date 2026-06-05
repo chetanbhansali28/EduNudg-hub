@@ -15,12 +15,13 @@ describe("HomepageEditorForm", () => {
     expect(container.querySelector(".ed-homepage-editor-shell")).toBeTruthy();
 
     const accordions = container.querySelectorAll("details.ed-editor-accordion");
-    expect(accordions.length).toBeGreaterThanOrEqual(7);
+    expect(accordions.length).toBeGreaterThanOrEqual(8);
     accordions.forEach((el) => {
       expect(el.hasAttribute("open")).toBe(false);
     });
 
     expect(screen.getByText("Site")).toBeDefined();
+    expect(screen.getByText("Navigation")).toBeDefined();
     expect(screen.getByText("Hero")).toBeDefined();
     expect(screen.queryByLabelText("Hero background image URL")).toBeNull();
     expect(screen.getByLabelText("Hero background image")).toBeDefined();

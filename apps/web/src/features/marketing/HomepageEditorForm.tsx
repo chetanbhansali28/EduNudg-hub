@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Button, Input } from "@edunudg/ui";
-import type { HomepageConfig, HomepageFaq, HomepageFeatureSection } from "@/types/homepage";
+import type { HomepageConfig, HomepageFaq, HomepageFeatureSection, HomepageLink } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import { EditorAccordion } from "./EditorAccordion";
 import { MarketingMediaField } from "./MarketingMediaField";
@@ -35,6 +35,10 @@ export function HomepageEditorForm({
     });
   };
 
+  const updateNavLinks = (links: HomepageLink[]) => {
+    onChange({ ...config, nav: { ...config.nav, links } });
+  };
+
   return (
     <div className="ed-homepage-editor">
       <EditorAccordion title="Site">
@@ -43,6 +47,49 @@ export function HomepageEditorForm({
           value={config.meta.siteName}
           onChange={(v) => onChange({ ...config, meta: { ...config.meta, siteName: v } })}
         />
+      </EditorAccordion>
+
+      <EditorAccordion title="Navigation">
+        <p className="ed-text-sm ed-muted">
+          Main menu links in the top bar. Use anchors like <code>#faq</code> for on-page sections, or paths like{" "}
+          <code>/login</code> for other routes. The primary CTA button is edited under Hero.
+        </p>
+        {config.nav.links.map((link, i) => (
+          <div key={`nav-link-${i}`} className="ed-form-section ed-nav-link-editor">
+            <Input
+              label={`Menu item ${i + 1} label`}
+              value={link.label}
+              onChange={(v) => {
+                const links = [...config.nav.links];
+                links[i] = { ...link, label: v };
+                updateNavLinks(links);
+              }}
+            />
+            <Input
+              label={`Menu item ${i + 1} link`}
+              value={link.href}
+              onChange={(v) => {
+                const links = [...config.nav.links];
+                links[i] = { ...link, href: v };
+                updateNavLinks(links);
+              }}
+            />
+            <Button
+              variant="ghost"
+              onClick={() => updateNavLinks(config.nav.links.filter((_, idx) => idx !== i))}
+            >
+              Remove menu item
+            </Button>
+          </div>
+        ))}
+        <Button
+          variant="ghost"
+          onClick={() =>
+            updateNavLinks([...config.nav.links, { label: "New item", href: "#" } satisfies HomepageLink])
+          }
+        >
+          Add menu item
+        </Button>
       </EditorAccordion>
 
       <EditorAccordion title="Hero">

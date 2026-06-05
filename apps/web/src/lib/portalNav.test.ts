@@ -62,7 +62,7 @@ describe("portalNav", () => {
 
   it("includes brand marketing pages nav item", () => {
     const sections = brandNavSections("/app/homepage");
-    const marketing = sections[2]?.items.find((i) => i.label === "Marketing pages");
+    const marketing = sections[2]?.items.find((i) => i.label === "Homepage");
     expect(marketing?.href).toBe("/app/homepage");
     expect(marketing?.active).toBe(true);
   });

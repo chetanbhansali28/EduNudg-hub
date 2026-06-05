@@ -71,9 +71,9 @@ export function MarketingNav({ config }: Props) {
 
           {menuOpen ? (
             <div id={menuId} className="novu-nav-bar__dropdown" role="menu">
-              {config.nav.links.map((l) => (
+              {config.nav.links.map((l, i) => (
                 <a
-                  key={l.href}
+                  key={`${l.label}-${l.href}-${i}`}
                   href={l.href}
                   className="novu-nav-bar__dropdown-link"
                   role="menuitem"
@@ -98,8 +98,8 @@ export function MarketingNav({ config }: Props) {
         </div>
 
         <div className={`novu-nav-bar__pill ${isLight ? "novu-nav-bar__pill--light" : ""}`}>
-          {config.nav.links.map((l) => (
-            <a key={l.href} href={l.href} className="novu-nav-bar__link">
+          {config.nav.links.map((l, i) => (
+            <a key={`${l.label}-${l.href}-${i}`} href={l.href} className="novu-nav-bar__link">
               {l.label}
             </a>
           ))}

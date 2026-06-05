@@ -80,7 +80,11 @@ export function mergeHomepageConfig(partial: Partial<HomepageConfig>): HomepageC
     ...partial,
     meta: { ...DEFAULT_HOMEPAGE_CONFIG.meta, ...partial.meta },
     theme: { ...DEFAULT_HOMEPAGE_CONFIG.theme, ...partial.theme },
-    nav: { ...DEFAULT_HOMEPAGE_CONFIG.nav, ...partial.nav },
+    nav: {
+      ...DEFAULT_HOMEPAGE_CONFIG.nav,
+      ...partial.nav,
+      links: partial.nav?.links ?? DEFAULT_HOMEPAGE_CONFIG.nav.links,
+    },
     hero,
     featureSections,
     showcaseCards:

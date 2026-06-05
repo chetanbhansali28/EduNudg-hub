@@ -17,9 +17,10 @@ describe("landingConfigToPartial", () => {
     expect(partial.testimonials?.title).toBeTruthy();
   });
 
-  it("regression_brand_landing_partial_omits_nav", () => {
+  it("regression_brand_landing_partial_includes_nav_links", () => {
     const config = buildBrandLandingConfig("Demo Brand");
+    config.nav.links.push({ label: "Pricing", href: "#pricing" });
     const partial = landingConfigToPartial(config);
-    expect("nav" in partial).toBe(false);
+    expect(partial.nav?.links?.some((l) => l.label === "Pricing")).toBe(true);
   });
 });

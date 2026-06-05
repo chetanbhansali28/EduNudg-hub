@@ -19,6 +19,12 @@ export type BrandMarketingEditorData = {
 export function landingConfigToPartial(config: HomepageConfig): Partial<HomepageConfig> {
   return {
     meta: { ...config.meta },
+    nav: {
+      links: config.nav.links.map((link) => ({ ...link })),
+      ctaLabel: config.nav.ctaLabel,
+      ctaHref: config.nav.ctaHref,
+      adminHref: config.nav.adminHref,
+    },
     hero: { ...config.hero },
     featureSections: config.featureSections.map((section) => ({ ...section })),
     showcaseCards: config.showcaseCards.map((card) => ({ ...card })),

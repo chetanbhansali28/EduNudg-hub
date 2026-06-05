@@ -36,11 +36,11 @@ export function marketingMediaObjectPath(
   const ext = mediaExtension(file);
   const stem = sanitizeFileStem(file.name);
   const fileName = `${Date.now()}-${stem}.${ext}`;
-  const folder =
-    scope.kind === "platform"
-      ? `platform/marketing/${subdir}`
-      : `${scope.brandId}/marketing/${subdir}`;
-  return `${folder}/${fileName}`;
+  if (scope.kind === "platform") {
+    // Platform homepage editor (/admin/homepage): flat objects in brand-assets root.
+    return fileName;
+  }
+  return `${scope.brandId}/marketing/${subdir}/${fileName}`;
 }
 
 export function marketingMediaPublicUrl(path: string): string {

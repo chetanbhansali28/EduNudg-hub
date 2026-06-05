@@ -109,7 +109,7 @@ export function brandNavSections(pathname: string): ShellNavSection[] {
     section(
       "General",
       [
-        { path: "/app/homepage", label: "Marketing pages", icon: <IconBook /> },
+        { path: "/app/homepage", label: "Homepage", icon: <IconBook /> },
         { path: "/app/billing", label: "Billing", icon: <IconWallet /> },
         { path: "/app/settings", label: "Settings", icon: <IconSettings /> },
       ],
