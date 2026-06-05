@@ -1347,6 +1347,8 @@
     overflow: visible;
     align-items: stretch;
     padding-bottom: 0;
+    /* Keep inset card frames inside overflow-x: clip on .marketing-page */
+    padding-inline: 2px;
   }
 }
 
@@ -1358,10 +1360,12 @@
   scroll-snap-align: start;
   padding: 1.75rem 1.5rem;
   border-radius: 16px;
-  border: 1px solid rgb(0 0 0 / 0.08);
+  border: none;
   background: var(--novu-white);
   color: var(--novu-black);
-  box-shadow: 0 8px 32px -24px rgb(0 0 0 / 0.25);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.12),
+    0 8px 32px -24px rgb(0 0 0 / 0.25);
 }
 
 @media (min-width: 1024px) {
@@ -1372,8 +1376,9 @@
 }
 
 .novu-pricing-card--highlight {
-  border-color: var(--novu-black);
-  box-shadow: 0 16px 48px -28px rgb(0 0 0 / 0.35);
+  box-shadow:
+    inset 0 0 0 2px var(--novu-black),
+    0 16px 48px -28px rgb(0 0 0 / 0.35);
 }
 
 .novu-pricing-card__badge {

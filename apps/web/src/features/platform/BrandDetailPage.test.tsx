@@ -120,4 +120,43 @@ describe("BrandDetailPage", () => {
     renderDetail("a0000000-0000-4000-8000-000000000001");
     expect(await screen.findByText("Performance (last 30 days)")).toBeDefined();
   });
+
+  it("regression_brand_detail_omits_overview_metadata", async () => {
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brands") {
+        return chain({
+          data: {
+            id: "b1",
+            slug: "abacusworld",
+            name: "Abacus World",
+            status: "active",
+            logo_url: "https://example.com/logo.png",
+            created_at: "2026-06-02T00:19:17.000Z",
+            updated_at: "2026-06-05T09:06:45.000Z",
+          },
+          error: null,
+        });
+      }
+      if (table === "franchise_centers") {
+        return chain({ data: [], error: null });
+      }
+      if (table === "domain_mappings") {
+        return chain({
+          data: [{ hostname: "abacusworld.localhost", portal_type: "brand", is_primary: true }],
+          error: null,
+        });
+      }
+      if (table === "brand_subscriptions") {
+        return chain({ data: null, error: null });
+      }
+      return countChain(0);
+    });
+
+    renderDetail("abacusworld");
+    expect(await screen.findByText("Performance (last 30 days)")).toBeDefined();
+    expect(screen.queryByText("Overview")).toBeNull();
+    expect(screen.queryByText(/Created /)).toBeNull();
+    expect(screen.queryByText(/Backend URL:/)).toBeNull();
+    expect(document.querySelector(".ed-brand-detail__logo")?.getAttribute("src")).toBe("https://example.com/logo.png");
+  });
 });

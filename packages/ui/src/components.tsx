@@ -103,6 +103,7 @@ export function Input({
   placeholder,
   autoComplete,
   step,
+  editable = false,
 }: {
   label: string;
   value: string;
@@ -111,9 +112,10 @@ export function Input({
   placeholder?: string;
   autoComplete?: string;
   step?: string;
+  editable?: boolean;
 }) {
   return (
-    <label className="ed-field">
+    <label className={`ed-field${editable ? " ed-field--editable" : ""}`}>
       <span className="ed-field__label">{label}</span>
       <input
         className="ed-field__input"
@@ -174,15 +176,17 @@ export function Select<T extends string>({
   onChange,
   options,
   placeholder,
+  editable = false,
 }: {
   label: string;
   value: T | "";
   onChange: (v: T) => void;
   options: { value: T; label: string }[];
   placeholder?: string;
+  editable?: boolean;
 }) {
   return (
-    <label className="ed-field">
+    <label className={`ed-field${editable ? " ed-field--editable" : ""}`}>
       <span className="ed-field__label">{label}</span>
       <select
         className="ed-field__input"
@@ -296,9 +300,11 @@ export function PageGridFull({ children, className }: { children: ReactNode; cla
   return <div className={["ed-page-grid__full", className].filter(Boolean).join(" ")}>{children}</div>;
 }
 
-/** Two-column form fields from tablet up. */
-export function FormGrid({ children }: { children: ReactNode }) {
-  return <div className="ed-form-grid">{children}</div>;
+/** Two-column form fields from tablet up; pass columns={3} for three fields on desktop. */
+export function FormGrid({ children, columns }: { children: ReactNode; columns?: 2 | 3 }) {
+  return (
+    <div className={`ed-form-grid${columns === 3 ? " ed-form-grid--3" : ""}`}>{children}</div>
+  );
 }
 
 export function Textarea({

@@ -50,4 +50,42 @@ describe("PlatformPricingSection", () => {
     expect(document.querySelector(".novu-pricing-card__cta")?.className).toContain("novu-marketing-cta--on-light");
     expect(screen.queryByText("Default for new brands")).toBeNull();
   });
+
+  it("regression_all_pricing_cards_include_frame_class", async () => {
+    fetchPublicSubscriptionPlans.mockResolvedValue([
+      {
+        code: "starter",
+        name: "Starter",
+        price_cents: 0,
+        currency: "INR",
+        billing_interval: "month",
+        features: STARTER_PLAN_FEATURES,
+        is_default: false,
+      },
+      {
+        code: "growth",
+        name: "Growth",
+        price_cents: 99900,
+        currency: "INR",
+        billing_interval: "month",
+        features: STARTER_PLAN_FEATURES,
+        is_default: false,
+      },
+      {
+        code: "enterprise",
+        name: "Enterprise",
+        price_cents: 799900,
+        currency: "INR",
+        billing_interval: "month",
+        features: STARTER_PLAN_FEATURES,
+        is_default: false,
+      },
+    ]);
+    renderPricing();
+    await screen.findByText("Enterprise");
+    const cards = document.querySelectorAll(".novu-pricing-card");
+    expect(cards.length).toBe(3);
+    expect(cards[2]?.className).toContain("novu-pricing-card");
+    expect(cards[2]?.className).not.toContain("novu-pricing-card--highlight");
+  });
 });

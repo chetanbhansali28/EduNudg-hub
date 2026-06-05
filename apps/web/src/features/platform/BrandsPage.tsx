@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { brandAdminPath } from "@/lib/adminPaths";
 import { brandPortalUrl } from "@/lib/brandPortalUrl";
 import { uniqueBrandSlug } from "@/lib/brandSlug";
-import { Badge, Button, Card, DataList, Input, ListRow, MutationError, PageTitle, Select } from "@edunudg/ui";
+import { Badge, Button, Card, DataList, FormGrid, Input, ListRow, MutationError, PageTitle, Select } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
@@ -30,7 +30,7 @@ const STATUS_OPTIONS: { value: BrandStatus; label: string }[] = [
   { value: "archived", label: "Archived" },
 ];
 
-const emptyEditForm = { slug: "", name: "", status: "draft" as BrandStatus };
+const emptyEditForm = { name: "", status: "draft" as BrandStatus };
 
 export function BrandsPage() {
   const qc = useQueryClient();
@@ -53,14 +53,12 @@ export function BrandsPage() {
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["brands"] });
     qc.invalidateQueries({ queryKey: ["platform-stats"] });
-    qc.invalidateQueries({ queryKey: ["brand-landing"] });
-    qc.invalidateQueries({ queryKey: ["portal-branding"] });
   };
 
   const updateBrand = useMutation({
     mutationFn: async (id: string) => {
       clear();
-      const slug = await uniqueBrandSlug(editForm.slug.trim() || editForm.name.trim(), { excludeBrandId: id });
+      const slug = await uniqueBrandSlug(editForm.name.trim(), { excludeBrandId: id });
       const { error: mErr } = await getSupabase()
         .from("brands")
         .update({
@@ -95,7 +93,6 @@ export function BrandsPage() {
     clear();
     setEditingId(b.id);
     setEditForm({
-      slug: b.slug,
       name: b.name,
       status: b.status,
     });
@@ -137,26 +134,33 @@ export function BrandsPage() {
                       onDelete={() => deleteBrand.mutate(b.id)}
                       deleteDescription="Related data remains but the brand is hidden from lists."
                       deleteTitle="Archive this brand?"
-                      saveDisabled={!editForm.slug.trim() || !editForm.name.trim() || updateBrand.isPending}
+                      saveDisabled={!editForm.name.trim() || updateBrand.isPending}
                     />
                   </>
                 }
               >
                 {editing ? (
-                  <div className="ed-form-section">
-                    <Input label="Name" value={editForm.name} onChange={(v) => setEditForm((f) => ({ ...f, name: v }))} />
-                    <Input label="Slug" value={editForm.slug} onChange={(v) => setEditForm((f) => ({ ...f, slug: v }))} />
-                    <BrandLogoUpload
-                      brandId={b.id}
-                      currentLogoUrl={editingBrand?.logo_url}
-                      onUploaded={() => invalidate()}
-                    />
-                    <Select
-                      label="Status"
-                      value={editForm.status}
-                      onChange={(v) => setEditForm((f) => ({ ...f, status: v }))}
-                      options={STATUS_OPTIONS}
-                    />
+                  <div className="ed-editable-form">
+                    <FormGrid columns={3}>
+                      <Input
+                        label="Name"
+                        value={editForm.name}
+                        onChange={(v) => setEditForm((f) => ({ ...f, name: v }))}
+                        editable
+                      />
+                      <Select
+                        label="Status"
+                        value={editForm.status}
+                        onChange={(v) => setEditForm((f) => ({ ...f, status: v }))}
+                        options={STATUS_OPTIONS}
+                        editable
+                      />
+                      <BrandLogoUpload
+                        brandId={b.id}
+                        currentLogoUrl={editingBrand?.logo_url}
+                        editable
+                      />
+                    </FormGrid>
                   </div>
                 ) : (
                   <div>

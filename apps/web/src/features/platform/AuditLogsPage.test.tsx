@@ -16,14 +16,16 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 describe("AuditLogsPage", () => {
-  it("regression_audit_logs_read_only_no_create_form", () => {
+  it("regression_audit_logs_read_only_no_create_form", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
         <AuditLogsPage />
       </QueryClientProvider>
     );
-    expect(screen.getByText(/Append-only system events/)).toBeDefined();
+    expect(screen.getByText(/Append-only record of platform admin actions/)).toBeDefined();
+    expect(await screen.findByText(/No audit events yet/)).toBeDefined();
+    expect(screen.getByText(/Brand signup approved or rejected/)).toBeDefined();
     expect(screen.queryByText("Log event")).toBeNull();
     expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
   });

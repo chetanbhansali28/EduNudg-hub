@@ -140,7 +140,12 @@ export function BrandDetailPage() {
   return (
     <>
       <PageToolbar
-        title={b.name}
+        title={
+          <h2 className="ed-page-title ed-page-title--with-sub ed-brand-detail__title">
+            {b.logo_url ? <img src={b.logo_url} alt="" className="ed-brand-detail__logo" /> : null}
+            <span>{b.name}</span>
+          </h2>
+        }
         subtitle={
           <>
             <span className="ed-muted">{b.slug}</span> ·{" "}
@@ -244,27 +249,12 @@ export function BrandDetailPage() {
 
       <KpiGrid>
         <KpiCard label="Centers listed" value={centers.data?.length ?? 0} />
-        <KpiCard label="Brand portal" value={primaryBrandHost ?? `${b.slug}.localhost`} hint="Primary hostname" />
+        <KpiCard
+          label="Brand portal"
+          value={primaryBrandHost ?? `${b.slug}.localhost`}
+          hint="Primary hostname"
+        />
       </KpiGrid>
-
-      <Card title="Overview">
-        {b.logo_url && (
-          <p className="ed-text-sm">
-            Logo:{" "}
-            <a href={b.logo_url} target="_blank" rel="noreferrer">
-              {b.logo_url}
-            </a>
-          </p>
-        )}
-        <p className="ed-text-sm ed-muted">Created {new Date(b.created_at).toLocaleString()}</p>
-        <p className="ed-text-sm ed-muted">Updated {new Date(b.updated_at).toLocaleString()}</p>
-        <p className="ed-text-sm">
-          Backend URL:{" "}
-          <a href={backendUrl} target="_blank" rel="noreferrer">
-            {backendUrl}
-          </a>
-        </p>
-      </Card>
 
       <Card title="Domains">
         <DataList

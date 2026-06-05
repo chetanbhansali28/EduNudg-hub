@@ -85,4 +85,37 @@ describe("SubscriptionsPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Assign subscription" }));
     expect(screen.getByRole("button", { name: "Assign plan" })).toBeDefined();
   });
+
+  it("regression_brand_subscriptions_use_table_layout", async () => {
+    fromMock.mockImplementation((table: string) => {
+      if (table === "subscription_plans") {
+        return chain({ data: [], error: null });
+      }
+      if (table === "brand_subscriptions") {
+        return chain({
+          data: [
+            {
+              id: "s1",
+              brand_id: "b1",
+              plan_id: "p1",
+              status: "active",
+              brands: { name: "Demo Brand" },
+              subscription_plans: { name: "Growth" },
+            },
+          ],
+          error: null,
+        });
+      }
+      if (table === "brands") {
+        return chain({ data: [{ id: "b1", name: "Demo Brand" }], error: null });
+      }
+      return chain({ data: [], error: null });
+    });
+    renderSubs();
+    expect(await screen.findByText("Demo Brand")).toBeDefined();
+    expect(document.querySelector(".ed-brand-subs-table")).toBeTruthy();
+    expect(screen.getByRole("columnheader", { name: "Brand" })).toBeDefined();
+    expect(screen.getByRole("columnheader", { name: "Plan" })).toBeDefined();
+    expect(screen.getByRole("columnheader", { name: "Status" })).toBeDefined();
+  });
 });

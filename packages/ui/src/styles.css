@@ -712,12 +712,34 @@
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.2;
 }
 
 .ed-kpi__hint {
   font-size: 0.75rem;
   color: var(--ed-muted);
   margin-top: 0.5rem;
+}
+
+.ed-brand-detail__title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.ed-brand-detail__logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: var(--ed-radius-md);
+  border: 1px solid var(--ed-border);
+  flex-shrink: 0;
+  background: var(--ed-card);
 }
 
 .ed-btn {
@@ -801,6 +823,45 @@
 .ed-field__input:focus {
   outline: 2px solid var(--ed-primary-soft);
   border-color: var(--ed-primary);
+}
+
+.ed-field--editable .ed-field__label {
+  color: var(--ed-editable-label, #1d4ed8);
+  font-weight: 600;
+}
+
+.ed-field--editable .ed-field__input {
+  background: var(--ed-editable-bg, #eff6ff);
+  border-color: var(--ed-editable-border, #93c5fd);
+}
+
+.ed-field--editable .ed-field__input:focus {
+  background: var(--ed-editable-bg-focus, #dbeafe);
+  border-color: var(--ed-primary);
+}
+
+.ed-editable-form .ed-form-grid .ed-field {
+  margin-bottom: 0;
+}
+
+.ed-brand-logo-preview {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: var(--ed-radius);
+  border: 1px solid var(--ed-border);
+  margin-bottom: 0.5rem;
+}
+
+.ed-brand-logo-upload__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ed-brand-logo-upload__row .ed-brand-logo-preview {
+  margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .ed-field--password .ed-field__input-wrap {
@@ -1084,6 +1145,18 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.ed-brand-subs-table td:last-child,
+.ed-brand-subs-table th:last-child {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.ed-brand-subs-table__edit-row td {
+  padding-top: 0;
+  border-bottom: 1px solid var(--ed-border);
 }
 
 .ed-link-button {
@@ -1496,6 +1569,10 @@
 
 @media (min-width: 1024px) {
   .ed-page-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ed-form-grid--3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

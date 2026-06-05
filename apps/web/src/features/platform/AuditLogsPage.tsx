@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, DataList, ListRow, PageTitle } from "@edunudg/ui";
+import { Badge, Card, PageTitle } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 
@@ -11,6 +11,12 @@ interface AuditLog {
   payload: Record<string, unknown> | null;
   created_at: string;
 }
+
+const AUDIT_EVENT_HINTS = [
+  "Brand signup approved or rejected",
+  "Subscription plan created, updated, or deleted",
+  "Brand subscription assigned, updated, or removed",
+];
 
 export function AuditLogsPage() {
   const logs = useQuery({
@@ -25,23 +31,56 @@ export function AuditLogsPage() {
     },
   });
 
+  const items = logs.data ?? [];
+
   return (
     <>
       <PageTitle>Audit Logs</PageTitle>
-      <p className="ed-text-sm ed-muted">Append-only system events. Entries cannot be edited from the admin UI.</p>
+      <p className="ed-text-sm ed-muted">
+        Append-only record of platform admin actions. Entries cannot be edited from this UI.
+      </p>
       <Card title="Recent events">
-        <DataList
-          items={logs.data ?? []}
-          empty="No audit events."
-          render={(l) => (
-            <ListRow>
-              <span>
-                {l.action} on {l.resource_type}
-                {l.resource_id ? ` (${l.resource_id.slice(0, 8)}…)` : ""} — {new Date(l.created_at).toLocaleString()}
-              </span>
-            </ListRow>
-          )}
-        />
+        {logs.isLoading ? (
+          <p className="ed-text-sm ed-muted">Loading audit events…</p>
+        ) : items.length === 0 ? (
+          <div className="ed-empty">
+            <p>No audit events yet.</p>
+            <p className="ed-text-sm ed-muted" style={{ marginTop: "0.5rem" }}>
+              Events appear when platform admins perform actions such as:
+            </p>
+            <ul className="ed-text-sm ed-muted" style={{ margin: "0.5rem 0 0", paddingLeft: "1.25rem" }}>
+              {AUDIT_EVENT_HINTS.map((hint) => (
+                <li key={hint}>{hint}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="ed-monitoring-table-wrap">
+            <table className="ed-monitoring-table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Action</th>
+                  <th>Resource</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((l) => (
+                  <tr key={l.id}>
+                    <td>{new Date(l.created_at).toLocaleString()}</td>
+                    <td>
+                      <Badge tone="default">{l.action}</Badge>
+                    </td>
+                    <td>
+                      {l.resource_type.replace(/_/g, " ")}
+                      {l.resource_id ? ` (${l.resource_id.slice(0, 8)}…)` : ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
     </>
   );

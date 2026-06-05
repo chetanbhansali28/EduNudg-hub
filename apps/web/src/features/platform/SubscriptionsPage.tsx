@@ -1,13 +1,11 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, Fragment, type Dispatch, type SetStateAction } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
   Button,
   Card,
-  DataList,
   FormGrid,
   Input,
-  ListRow,
   MutationError,
   PageTitle,
   Select,
@@ -30,6 +28,7 @@ import { useMutationError } from "./hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { PlanFeaturesEditor } from "./subscriptions/PlanFeaturesEditor";
+import { logPlatformAudit } from "@/lib/platformAuditApi";
 
 interface Plan {
   id: string;
@@ -175,9 +174,11 @@ export function SubscriptionsPage() {
       if (mErr) throw mErr;
     },
     onSuccess: () => {
+      const code = planForm.code.trim();
       invalidatePlans();
       setPlanForm(emptyPlanForm());
       planCloser.closeAddForm();
+      void logPlatformAudit({ action: "create", resource_type: "subscription_plan", payload: { code } });
     },
     onError: capture,
   });
@@ -188,9 +189,10 @@ export function SubscriptionsPage() {
       const { error: mErr } = await getSupabase().from("subscription_plans").update(formToPayload(editPlan)).eq("id", id);
       if (mErr) throw mErr;
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       invalidatePlans();
       setEditingPlanId(null);
+      void logPlatformAudit({ action: "update", resource_type: "subscription_plan", resource_id: id });
     },
     onError: capture,
   });
@@ -201,7 +203,10 @@ export function SubscriptionsPage() {
       const { error: mErr } = await getSupabase().from("subscription_plans").delete().eq("id", id);
       if (mErr) throw mErr;
     },
-    onSuccess: invalidatePlans,
+    onSuccess: (_data, id) => {
+      invalidatePlans();
+      void logPlatformAudit({ action: "delete", resource_type: "subscription_plan", resource_id: id });
+    },
     onError: capture,
   });
 
@@ -216,9 +221,16 @@ export function SubscriptionsPage() {
       if (mErr) throw mErr;
     },
     onSuccess: () => {
+      const { brand_id, plan_id, status } = subForm;
       invalidateSubs();
       setSubForm({ brand_id: "", plan_id: "", status: "active" });
       subCloser.closeAddForm();
+      void logPlatformAudit({
+        action: "assign",
+        resource_type: "brand_subscription",
+        brand_id,
+        payload: { plan_id, status },
+      });
     },
     onError: capture,
   });
@@ -236,9 +248,16 @@ export function SubscriptionsPage() {
         .eq("id", id);
       if (mErr) throw mErr;
     },
-    onSuccess: () => {
+    onSuccess: (_data, id) => {
       invalidateSubs();
       setEditingSubId(null);
+      void logPlatformAudit({
+        action: "update",
+        resource_type: "brand_subscription",
+        resource_id: id,
+        brand_id: editSub.brand_id,
+        payload: { plan_id: editSub.plan_id, status: editSub.status },
+      });
     },
     onError: capture,
   });
@@ -249,7 +268,10 @@ export function SubscriptionsPage() {
       const { error: mErr } = await getSupabase().from("brand_subscriptions").delete().eq("id", id);
       if (mErr) throw mErr;
     },
-    onSuccess: invalidateSubs,
+    onSuccess: (_data, id) => {
+      invalidateSubs();
+      void logPlatformAudit({ action: "delete", resource_type: "brand_subscription", resource_id: id });
+    },
     onError: capture,
   });
 
@@ -392,21 +414,28 @@ export function SubscriptionsPage() {
           subCloser.bindClose(close);
           return (
             <>
-              <Select
-                label="Brand"
-                value={subForm.brand_id}
-                onChange={(v) => setSubForm((f) => ({ ...f, brand_id: v }))}
-                options={brandOptions}
-                placeholder="Select brand"
-              />
-              <Select
-                label="Plan"
-                value={subForm.plan_id}
-                onChange={(v) => setSubForm((f) => ({ ...f, plan_id: v }))}
-                options={planOptions}
-                placeholder="Select plan"
-              />
-              <Select label="Status" value={subForm.status} onChange={(v) => setSubForm((f) => ({ ...f, status: v }))} options={SUB_STATUS_OPTIONS} />
+              <FormGrid columns={3}>
+                <Select
+                  label="Brand"
+                  value={subForm.brand_id}
+                  onChange={(v) => setSubForm((f) => ({ ...f, brand_id: v }))}
+                  options={brandOptions}
+                  placeholder="Select brand"
+                />
+                <Select
+                  label="Plan"
+                  value={subForm.plan_id}
+                  onChange={(v) => setSubForm((f) => ({ ...f, plan_id: v }))}
+                  options={planOptions}
+                  placeholder="Select plan"
+                />
+                <Select
+                  label="Status"
+                  value={subForm.status}
+                  onChange={(v) => setSubForm((f) => ({ ...f, status: v }))}
+                  options={SUB_STATUS_OPTIONS}
+                />
+              </FormGrid>
               <Button
                 onClick={() => createSub.mutate()}
                 disabled={!subForm.brand_id || !subForm.plan_id || createSub.isPending}
@@ -419,50 +448,79 @@ export function SubscriptionsPage() {
       </AddFormSection>
 
       <Card title="Brand subscriptions">
-        <DataList
-          items={subs.data ?? []}
-          empty="No brand subscriptions."
-          render={(s) => {
-            const editing = editingSubId === s.id;
-            return (
-              <ListRow
-                aside={
-                  <CrudRowActions
-                    editing={editing}
-                    onEdit={() => {
-                      clear();
-                      setEditingSubId(s.id);
-                      setEditSub({ brand_id: s.brand_id, plan_id: s.plan_id, status: s.status as SubStatus });
-                    }}
-                    onSave={() => updateSub.mutate(s.id)}
-                    onCancel={() => setEditingSubId(null)}
-                    onDelete={() => deleteSub.mutate(s.id)}
-                    deleteDescription="This removes the brand's platform subscription assignment."
-                    saveDisabled={!editSub.brand_id || !editSub.plan_id}
-                  />
-                }
-              >
-                {editing ? (
-                  <div className="ed-form-section">
-                    <Select label="Brand" value={editSub.brand_id} onChange={(v) => setEditSub((f) => ({ ...f, brand_id: v }))} options={brandOptions} />
-                    <Select label="Plan" value={editSub.plan_id} onChange={(v) => setEditSub((f) => ({ ...f, plan_id: v }))} options={planOptions} />
-                    <Select
-                      label="Status"
-                      value={editSub.status}
-                      onChange={(v) => setEditSub((f) => ({ ...f, status: v }))}
-                      options={SUB_STATUS_OPTIONS}
-                    />
-                  </div>
-                ) : (
-                  <span>
-                    {s.brands?.name ?? "Brand"} — {s.subscription_plans?.name ?? "Plan"}{" "}
-                    <Badge tone={s.status === "active" ? "success" : "default"}>{s.status}</Badge>
-                  </span>
-                )}
-              </ListRow>
-            );
-          }}
-        />
+        {(subs.data ?? []).length === 0 ? (
+          <p className="ed-empty">No brand subscriptions.</p>
+        ) : (
+          <div className="ed-monitoring-table-wrap">
+            <table className="ed-monitoring-table ed-brand-subs-table">
+              <thead>
+                <tr>
+                  <th>Brand</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th aria-label="Actions" />
+                </tr>
+              </thead>
+              <tbody>
+                {(subs.data ?? []).map((s) => {
+                  const editing = editingSubId === s.id;
+                  return (
+                    <Fragment key={s.id}>
+                      <tr>
+                        <td>{s.brands?.name ?? "Brand"}</td>
+                        <td>{s.subscription_plans?.name ?? "Plan"}</td>
+                        <td>
+                          <Badge tone={s.status === "active" ? "success" : "default"}>{s.status}</Badge>
+                        </td>
+                        <td>
+                          <CrudRowActions
+                            editing={editing}
+                            onEdit={() => {
+                              clear();
+                              setEditingSubId(s.id);
+                              setEditSub({ brand_id: s.brand_id, plan_id: s.plan_id, status: s.status as SubStatus });
+                            }}
+                            onSave={() => updateSub.mutate(s.id)}
+                            onCancel={() => setEditingSubId(null)}
+                            onDelete={() => deleteSub.mutate(s.id)}
+                            deleteDescription="This removes the brand's platform subscription assignment."
+                            saveDisabled={!editSub.brand_id || !editSub.plan_id}
+                          />
+                        </td>
+                      </tr>
+                      {editing ? (
+                        <tr className="ed-brand-subs-table__edit-row">
+                          <td colSpan={4}>
+                            <FormGrid columns={3}>
+                              <Select
+                                label="Brand"
+                                value={editSub.brand_id}
+                                onChange={(v) => setEditSub((f) => ({ ...f, brand_id: v }))}
+                                options={brandOptions}
+                              />
+                              <Select
+                                label="Plan"
+                                value={editSub.plan_id}
+                                onChange={(v) => setEditSub((f) => ({ ...f, plan_id: v }))}
+                                options={planOptions}
+                              />
+                              <Select
+                                label="Status"
+                                value={editSub.status}
+                                onChange={(v) => setEditSub((f) => ({ ...f, status: v }))}
+                                options={SUB_STATUS_OPTIONS}
+                              />
+                            </FormGrid>
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Card>
     </>
   );

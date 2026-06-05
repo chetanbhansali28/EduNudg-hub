@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { withLogoCacheBust } from "@/lib/brandLogoCache";
 
 export const BRAND_ASSETS_BUCKET = "brand-assets";
 
@@ -50,10 +51,14 @@ export async function uploadBrandLogo(brandId: string, file: File): Promise<stri
   const path = brandLogoObjectPath(brandId, ext);
   const { error: uploadErr } = await getSupabase()
     .storage.from(BRAND_ASSETS_BUCKET)
-    .upload(path, file, { upsert: true, contentType: file.type || undefined });
+    .upload(path, file, {
+      upsert: true,
+      contentType: file.type || undefined,
+      cacheControl: "300",
+    });
   if (uploadErr) throw uploadErr;
 
-  const publicUrl = brandLogoPublicUrl(brandId, ext);
+  const publicUrl = withLogoCacheBust(brandLogoPublicUrl(brandId, ext));
   const { error: updateErr } = await getSupabase().from("brands").update({ logo_url: publicUrl }).eq("id", brandId);
   if (updateErr) throw updateErr;
 

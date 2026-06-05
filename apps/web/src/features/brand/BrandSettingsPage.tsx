@@ -124,15 +124,7 @@ export function BrandSettingsPage() {
       <MutationError message={error} />
 
       <Card title="Brand logo">
-        <BrandLogoUpload
-          brandId={brandId}
-          currentLogoUrl={brandRow.data?.logo_url}
-          onUploaded={() => {
-            void qc.invalidateQueries({ queryKey: ["brand-row", brandId] });
-            void qc.invalidateQueries({ queryKey: ["brand-landing"] });
-            void qc.invalidateQueries({ queryKey: ["portal-branding"] });
-          }}
-        />
+        <BrandLogoUpload brandId={brandId} currentLogoUrl={brandRow.data?.logo_url} />
       </Card>
 
       <Card title="White-label & login copy">

@@ -88,6 +88,20 @@ describe("BrandsPage", () => {
     });
   });
 
+  it("regression_brand_edit_hides_slug_and_highlights_editable_fields", async () => {
+    renderBrands();
+    await screen.findByText("Demo Brand");
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await waitFor(() => {
+      expect(screen.getByLabelText("Name")).toBeDefined();
+      expect(screen.getByLabelText("Status")).toBeDefined();
+    });
+    expect(screen.queryByLabelText("Slug")).toBeNull();
+    expect(document.querySelector(".ed-editable-form")).toBeTruthy();
+    expect(document.querySelectorAll(".ed-field--editable").length).toBeGreaterThanOrEqual(3);
+    expect(document.querySelector(".ed-form-grid--3")).toBeTruthy();
+  });
+
   it("regression_brand_name_links_to_detail_page", async () => {
     renderBrands();
     const link = await screen.findByRole("link", { name: "Demo Brand" });
