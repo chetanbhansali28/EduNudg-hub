@@ -30,7 +30,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.reject_platform_brand_signup(uuid, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.reject_platform_brand_signup(uuid, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.reject_platform_brand_signup(uuid, text) TO authenticated;
 
 CREATE OR REPLACE FUNCTION public.update_lead_status(p_lead_id uuid, p_status public.lead_status)
@@ -130,6 +130,12 @@ BEGIN
   RETURN v_student_id;
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.convert_lead_to_student(uuid, jsonb) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.convert_lead_to_student(uuid, jsonb) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.update_lead_status(uuid, public.lead_status) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.update_lead_status(uuid, public.lead_status) TO authenticated;
 
 DROP POLICY IF EXISTS kit_order_lines_access ON public.kit_order_lines;
 CREATE POLICY kit_order_lines_access ON public.kit_order_lines FOR ALL TO authenticated

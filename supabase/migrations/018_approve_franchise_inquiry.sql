@@ -121,7 +121,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.approve_franchise_inquiry(uuid, text, text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.reject_franchise_inquiry(uuid, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.approve_franchise_inquiry(uuid, text, text) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.reject_franchise_inquiry(uuid, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.approve_franchise_inquiry(uuid, text, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.reject_franchise_inquiry(uuid, text) TO authenticated;

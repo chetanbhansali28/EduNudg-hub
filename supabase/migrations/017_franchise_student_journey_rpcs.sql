@@ -683,19 +683,47 @@ BEGIN
 END;
 $$;
 
--- Grants
-REVOKE ALL ON FUNCTION public.upsert_lead_by_whatsapp(uuid, text, jsonb) FROM PUBLIC;
+-- Grants: revoke default PUBLIC execute before role-specific grants
+REVOKE ALL ON FUNCTION public.upsert_lead_by_whatsapp(uuid, text, jsonb) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.upsert_lead_by_whatsapp(uuid, text, jsonb) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.submit_platform_brand_signup(text, text, text, text, text, text, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.submit_platform_brand_signup(text, text, text, text, text, text, text) TO anon, authenticated;
+
+REVOKE ALL ON FUNCTION public.approve_platform_brand_signup(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.approve_platform_brand_signup(uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.submit_brand_student_application(text, text, text, text, text, text, text, date, text, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.submit_brand_student_application(text, text, text, text, text, text, text, date, text, text) TO anon, authenticated;
+
+REVOKE ALL ON FUNCTION public.submit_center_student_registration(text, text, text, text, text, text, text, text, date, text, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.submit_center_student_registration(text, text, text, text, text, text, text, text, date, text, text) TO anon, authenticated;
+
+REVOKE ALL ON FUNCTION public.submit_franchise_inquiry_v2(text, text, text, text, text, text, text, text, text, text, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.submit_franchise_inquiry_v2(text, text, text, text, text, text, text, text, text, text, text) TO anon, authenticated;
+
+REVOKE ALL ON FUNCTION public.suggest_centers_for_lead(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.suggest_centers_for_lead(uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.assign_lead_to_center(uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.assign_lead_to_center(uuid, uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.reassign_lead(uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.reassign_lead(uuid, uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.update_lead_status(uuid, public.lead_status) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.update_lead_status(uuid, public.lead_status) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.mark_lead_lost(uuid, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.mark_lead_lost(uuid, text) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.reopen_lead(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.reopen_lead(uuid) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.convert_lead_to_student(uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.convert_lead_to_student(uuid) FROM PUBLIC, anon;
+
+REVOKE ALL ON FUNCTION public.create_brand_subscription_checkout(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.create_brand_subscription_checkout(uuid) TO authenticated;
+
+REVOKE ALL ON FUNCTION public.record_platform_payment(uuid, text, bigint) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.record_platform_payment(uuid, text, bigint) TO authenticated;

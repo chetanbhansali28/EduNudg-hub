@@ -14,6 +14,7 @@ CREATE OR REPLACE FUNCTION public.is_lead_stale(
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SET search_path = public
 AS $$
   SELECT p_center_id IS NOT NULL
     AND p_status NOT IN ('converted', 'lost')
@@ -46,7 +47,7 @@ AS $$
     );
 $$;
 
-REVOKE ALL ON FUNCTION public.count_stale_brand_leads(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.count_stale_brand_leads(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.count_stale_brand_leads(uuid) TO authenticated;
 
 -- ---------------------------------------------------------------------------

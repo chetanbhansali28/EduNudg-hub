@@ -4,7 +4,7 @@
 -- Center assessments
 -- ---------------------------------------------------------------------------
 
-CREATE TABLE public.student_assessments (
+CREATE TABLE IF NOT EXISTS public.student_assessments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id uuid NOT NULL REFERENCES public.brands(id) ON DELETE CASCADE,
   center_id uuid NOT NULL REFERENCES public.franchise_centers(id) ON DELETE CASCADE,
@@ -20,14 +20,16 @@ CREATE TABLE public.student_assessments (
   updated_by uuid REFERENCES auth.users(id)
 );
 
-CREATE INDEX idx_student_assessments_center ON public.student_assessments (center_id, assessed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_student_assessments_center ON public.student_assessments (center_id, assessed_at DESC);
 
+DROP TRIGGER IF EXISTS student_assessments_audit ON public.student_assessments;
 CREATE TRIGGER student_assessments_audit
   BEFORE INSERT OR UPDATE ON public.student_assessments
   FOR EACH ROW EXECUTE FUNCTION public.set_row_audit();
 
 ALTER TABLE public.student_assessments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS student_assessments_select ON public.student_assessments;
 CREATE POLICY student_assessments_select ON public.student_assessments FOR SELECT TO authenticated
   USING (
     public.has_center_access(center_id)
@@ -519,29 +521,29 @@ END;
 $$;
 
 -- Grants
-REVOKE ALL ON FUNCTION public.upsert_brand_campaign(uuid, text, text, text, timestamptz, timestamptz, boolean, uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.upsert_brand_campaign(uuid, text, text, text, timestamptz, timestamptz, boolean, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_brand_campaign(uuid, text, text, text, timestamptz, timestamptz, boolean, uuid) TO authenticated;
-REVOKE ALL ON FUNCTION public.delete_brand_campaign(uuid, uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.delete_brand_campaign(uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.delete_brand_campaign(uuid, uuid) TO authenticated;
-REVOKE ALL ON FUNCTION public.list_active_brand_campaigns(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.list_active_brand_campaigns(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.list_active_brand_campaigns(uuid) TO authenticated;
-REVOKE ALL ON FUNCTION public.upsert_kit_catalog_item(uuid, text, text, bigint, text, boolean, uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.upsert_kit_catalog_item(uuid, text, text, bigint, text, boolean, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_kit_catalog_item(uuid, text, text, bigint, text, boolean, uuid) TO authenticated;
-REVOKE ALL ON FUNCTION public.delete_kit_catalog_item(uuid, uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.delete_kit_catalog_item(uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.delete_kit_catalog_item(uuid, uuid) TO authenticated;
-REVOKE ALL ON FUNCTION public.create_center_kit_order_rpc(uuid, uuid, uuid, integer, bigint) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.create_center_kit_order_rpc(uuid, uuid, uuid, integer, bigint) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.create_center_kit_order_rpc(uuid, uuid, uuid, integer, bigint) TO authenticated;
-REVOKE ALL ON FUNCTION public.update_kit_order_status_rpc(uuid, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.update_kit_order_status_rpc(uuid, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.update_kit_order_status_rpc(uuid, text) TO authenticated;
-REVOKE ALL ON FUNCTION public.upsert_brand_competition(uuid, text, date, text, boolean, uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.upsert_brand_competition(uuid, text, date, text, boolean, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.upsert_brand_competition(uuid, text, date, text, boolean, uuid) TO authenticated;
-REVOKE ALL ON FUNCTION public.record_student_level_progress(uuid, uuid, text, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.record_student_level_progress(uuid, uuid, text, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.record_student_level_progress(uuid, uuid, text, text) TO authenticated;
-REVOKE ALL ON FUNCTION public.record_student_competition_entry(uuid, uuid, uuid, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.record_student_competition_entry(uuid, uuid, uuid, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.record_student_competition_entry(uuid, uuid, uuid, text) TO authenticated;
-REVOKE ALL ON FUNCTION public.record_student_assessment(uuid, uuid, text, numeric, numeric, date, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.record_student_assessment(uuid, uuid, text, numeric, numeric, date, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.record_student_assessment(uuid, uuid, text, numeric, numeric, date, text) TO authenticated;
-REVOKE ALL ON FUNCTION public.get_center_ops_report(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_center_ops_report(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_center_ops_report(uuid) TO authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -549,6 +551,7 @@ GRANT EXECUTE ON FUNCTION public.get_center_ops_report(uuid) TO authenticated;
 -- ---------------------------------------------------------------------------
 
 DROP POLICY IF EXISTS leads_center_mutate ON public.leads;
+DROP POLICY IF EXISTS leads_center_select ON public.leads;
 CREATE POLICY leads_center_select ON public.leads FOR SELECT TO authenticated
   USING (
     public.is_platform_admin()
@@ -560,14 +563,17 @@ DROP POLICY IF EXISTS franchise_inquiries_brand_update ON public.franchise_inqui
 DROP POLICY IF EXISTS franchise_inquiries_brand_delete ON public.franchise_inquiries;
 
 DROP POLICY IF EXISTS brand_campaigns_brand ON public.brand_campaigns;
+DROP POLICY IF EXISTS brand_campaigns_select ON public.brand_campaigns;
 CREATE POLICY brand_campaigns_select ON public.brand_campaigns FOR SELECT TO authenticated
   USING (public.has_brand_access(brand_id) OR public.is_platform_admin());
 
 DROP POLICY IF EXISTS kit_catalog_brand ON public.kit_catalog;
+DROP POLICY IF EXISTS kit_catalog_select ON public.kit_catalog;
 CREATE POLICY kit_catalog_select ON public.kit_catalog FOR SELECT TO authenticated
   USING (public.has_brand_access(brand_id) OR public.is_platform_admin());
 
 DROP POLICY IF EXISTS kit_orders_center ON public.kit_orders;
+DROP POLICY IF EXISTS kit_orders_select ON public.kit_orders;
 CREATE POLICY kit_orders_select ON public.kit_orders FOR SELECT TO authenticated
   USING (
     public.has_center_access(center_id)
@@ -576,6 +582,7 @@ CREATE POLICY kit_orders_select ON public.kit_orders FOR SELECT TO authenticated
   );
 
 DROP POLICY IF EXISTS kit_order_lines_access ON public.kit_order_lines;
+DROP POLICY IF EXISTS kit_order_lines_select ON public.kit_order_lines;
 CREATE POLICY kit_order_lines_select ON public.kit_order_lines FOR SELECT TO authenticated
   USING (
     EXISTS (
@@ -590,6 +597,7 @@ CREATE POLICY kit_order_lines_select ON public.kit_order_lines FOR SELECT TO aut
   );
 
 DROP POLICY IF EXISTS student_kit_allocations_access ON public.student_kit_allocations;
+DROP POLICY IF EXISTS student_kit_allocations_select ON public.student_kit_allocations;
 CREATE POLICY student_kit_allocations_select ON public.student_kit_allocations FOR SELECT TO authenticated
   USING (
     public.has_center_access(center_id)
@@ -598,6 +606,7 @@ CREATE POLICY student_kit_allocations_select ON public.student_kit_allocations F
   );
 
 DROP POLICY IF EXISTS brand_competitions_access ON public.brand_competitions;
+DROP POLICY IF EXISTS brand_competitions_select ON public.brand_competitions;
 CREATE POLICY brand_competitions_select ON public.brand_competitions FOR SELECT TO authenticated
   USING (
     public.has_brand_access(brand_id)
@@ -611,6 +620,7 @@ CREATE POLICY brand_competitions_select ON public.brand_competitions FOR SELECT 
   );
 
 DROP POLICY IF EXISTS student_level_progress_access ON public.student_level_progress;
+DROP POLICY IF EXISTS student_level_progress_select ON public.student_level_progress;
 CREATE POLICY student_level_progress_select ON public.student_level_progress FOR SELECT TO authenticated
   USING (
     public.has_center_access(center_id)
@@ -619,6 +629,7 @@ CREATE POLICY student_level_progress_select ON public.student_level_progress FOR
   );
 
 DROP POLICY IF EXISTS student_competition_entries_access ON public.student_competition_entries;
+DROP POLICY IF EXISTS student_competition_entries_select ON public.student_competition_entries;
 CREATE POLICY student_competition_entries_select ON public.student_competition_entries FOR SELECT TO authenticated
   USING (
     public.has_center_access(center_id)

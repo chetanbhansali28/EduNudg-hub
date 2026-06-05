@@ -112,6 +112,9 @@ CREATE POLICY memberships_platform ON public.memberships FOR ALL TO authenticate
   USING (public.is_platform_admin())
   WITH CHECK (public.is_platform_admin());
 
+REVOKE ALL ON FUNCTION public.is_platform_admin() FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.has_brand_access(uuid) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.has_center_access(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.is_platform_admin() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.has_brand_access(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.has_center_access(uuid) TO authenticated;

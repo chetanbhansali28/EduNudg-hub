@@ -262,10 +262,10 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.create_platform_brand_signup_staff(text, text, text, text, text, text, text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.create_franchise_inquiry_staff(uuid, text, text, text, text, text, text, text, text, text, text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.create_brand_student_lead_staff(uuid, text, text, text, text, text, text, date, text, text) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.create_center_student_lead_staff(uuid, text, text, text, text, text, text, date, text, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.create_platform_brand_signup_staff(text, text, text, text, text, text, text) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.create_franchise_inquiry_staff(uuid, text, text, text, text, text, text, text, text, text, text) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.create_brand_student_lead_staff(uuid, text, text, text, text, text, text, date, text, text) FROM PUBLIC, anon;
+REVOKE ALL ON FUNCTION public.create_center_student_lead_staff(uuid, text, text, text, text, text, text, date, text, text) FROM PUBLIC, anon;
 
 GRANT EXECUTE ON FUNCTION public.create_platform_brand_signup_staff(text, text, text, text, text, text, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.create_franchise_inquiry_staff(uuid, text, text, text, text, text, text, text, text, text, text) TO authenticated;

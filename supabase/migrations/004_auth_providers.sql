@@ -79,4 +79,4 @@ CREATE POLICY auth_audit_own ON public.auth_audit_logs FOR SELECT TO authenticat
   USING (user_id = auth.uid() OR public.is_platform_admin());
 
 CREATE POLICY auth_audit_insert ON public.auth_audit_logs FOR INSERT TO authenticated
-  WITH CHECK (true);
+  WITH CHECK (user_id = auth.uid());

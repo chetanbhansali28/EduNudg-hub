@@ -61,8 +61,7 @@ CREATE POLICY financial_events_read ON public.financial_events FOR SELECT TO aut
     OR (center_id IS NOT NULL AND public.has_center_access(center_id))
   );
 
-CREATE POLICY financial_events_insert ON public.financial_events FOR INSERT TO authenticated
-  WITH CHECK (true);
+-- Append-only ledger: inserts via SECURITY DEFINER RPC / service role only (no direct client INSERT policy)
 
 CREATE POLICY analytics_brand ON public.analytics_daily_brand FOR SELECT TO authenticated
   USING (public.has_brand_access(brand_id));

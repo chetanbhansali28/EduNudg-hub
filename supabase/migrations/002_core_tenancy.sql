@@ -11,7 +11,10 @@ CREATE TABLE public.profiles (
 );
 
 CREATE OR REPLACE FUNCTION public.profiles_touch_updated()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
 BEGIN
   NEW.updated_at := now();
   RETURN NEW;

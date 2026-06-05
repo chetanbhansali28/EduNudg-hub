@@ -8,6 +8,7 @@ CREATE OR REPLACE FUNCTION public.slugify_text(p_input text)
 RETURNS text
 LANGUAGE sql
 IMMUTABLE
+SET search_path = public
 AS $$
   SELECT trim(both '-' FROM regexp_replace(lower(coalesce(p_input, '')), '[^a-z0-9]+', '-', 'g'));
 $$;
@@ -16,6 +17,7 @@ CREATE OR REPLACE FUNCTION public.normalize_phone_e164(p_raw text)
 RETURNS text
 LANGUAGE plpgsql
 IMMUTABLE
+SET search_path = public
 AS $$
 DECLARE
   v_digits text;
@@ -47,6 +49,7 @@ CREATE OR REPLACE FUNCTION public.brand_settings_timezone(p_brand_id uuid)
 RETURNS text
 LANGUAGE sql
 STABLE
+SET search_path = public
 AS $$
   SELECT COALESCE(
     (SELECT bs.settings ->> 'timezone' FROM public.brand_settings bs WHERE bs.brand_id = p_brand_id),
@@ -59,6 +62,7 @@ CREATE OR REPLACE FUNCTION public.brand_lead_stale_days(p_brand_id uuid)
 RETURNS integer
 LANGUAGE sql
 STABLE
+SET search_path = public
 AS $$
   SELECT COALESCE(
     (SELECT (bs.settings ->> 'lead_stale_days')::integer FROM public.brand_settings bs WHERE bs.brand_id = p_brand_id),
@@ -70,6 +74,7 @@ CREATE OR REPLACE FUNCTION public.compute_lead_stale_at(p_brand_id uuid, p_assig
 RETURNS timestamptz
 LANGUAGE sql
 STABLE
+SET search_path = public
 AS $$
   SELECT (
     (p_assigned_at AT TIME ZONE public.brand_settings_timezone(p_brand_id))
@@ -81,6 +86,7 @@ CREATE OR REPLACE FUNCTION public.brand_feature_enabled(p_brand_id uuid, p_key t
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SET search_path = public
 AS $$
   SELECT COALESCE(
     (SELECT (bs.settings -> 'features' ->> p_key)::boolean FROM public.brand_settings bs WHERE bs.brand_id = p_brand_id),

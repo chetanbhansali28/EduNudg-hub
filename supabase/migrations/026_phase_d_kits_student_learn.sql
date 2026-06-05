@@ -4,7 +4,7 @@
 -- Student level progress (center staff records; parents see via learn RPC)
 -- ---------------------------------------------------------------------------
 
-CREATE TABLE public.student_level_progress (
+CREATE TABLE IF NOT EXISTS public.student_level_progress (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id uuid NOT NULL REFERENCES public.brands(id) ON DELETE CASCADE,
   center_id uuid NOT NULL REFERENCES public.franchise_centers(id) ON DELETE CASCADE,
@@ -23,8 +23,9 @@ CREATE TABLE public.student_level_progress (
   UNIQUE (student_id, level_name)
 );
 
-CREATE INDEX idx_student_level_progress_student ON public.student_level_progress (student_id, status);
+CREATE INDEX IF NOT EXISTS idx_student_level_progress_student ON public.student_level_progress (student_id, status);
 
+DROP TRIGGER IF EXISTS student_level_progress_audit ON public.student_level_progress;
 CREATE TRIGGER student_level_progress_audit
   BEFORE INSERT OR UPDATE ON public.student_level_progress
   FOR EACH ROW EXECUTE FUNCTION public.set_row_audit();
@@ -33,7 +34,7 @@ CREATE TRIGGER student_level_progress_audit
 -- Brand competitions (visible to linked parents on learn dashboard)
 -- ---------------------------------------------------------------------------
 
-CREATE TABLE public.brand_competitions (
+CREATE TABLE IF NOT EXISTS public.brand_competitions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id uuid NOT NULL REFERENCES public.brands(id) ON DELETE CASCADE,
   name text NOT NULL,
@@ -47,11 +48,12 @@ CREATE TABLE public.brand_competitions (
   updated_by uuid REFERENCES auth.users(id)
 );
 
+DROP TRIGGER IF EXISTS brand_competitions_audit ON public.brand_competitions;
 CREATE TRIGGER brand_competitions_audit
   BEFORE INSERT OR UPDATE ON public.brand_competitions
   FOR EACH ROW EXECUTE FUNCTION public.set_row_audit();
 
-CREATE TABLE public.student_competition_entries (
+CREATE TABLE IF NOT EXISTS public.student_competition_entries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   brand_id uuid NOT NULL REFERENCES public.brands(id) ON DELETE CASCADE,
   center_id uuid NOT NULL REFERENCES public.franchise_centers(id) ON DELETE CASCADE,
@@ -66,6 +68,7 @@ CREATE TABLE public.student_competition_entries (
   UNIQUE (student_id, competition_id)
 );
 
+DROP TRIGGER IF EXISTS student_competition_entries_audit ON public.student_competition_entries;
 CREATE TRIGGER student_competition_entries_audit
   BEFORE INSERT OR UPDATE ON public.student_competition_entries
   FOR EACH ROW EXECUTE FUNCTION public.set_row_audit();
@@ -78,6 +81,7 @@ ALTER TABLE public.student_level_progress ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.brand_competitions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.student_competition_entries ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS student_level_progress_access ON public.student_level_progress;
 CREATE POLICY student_level_progress_access ON public.student_level_progress FOR ALL TO authenticated
   USING (
     public.has_center_access(center_id)
@@ -90,10 +94,12 @@ CREATE POLICY student_level_progress_access ON public.student_level_progress FOR
     OR public.is_platform_admin()
   );
 
+DROP POLICY IF EXISTS brand_competitions_access ON public.brand_competitions;
 CREATE POLICY brand_competitions_access ON public.brand_competitions FOR ALL TO authenticated
   USING (public.has_brand_access(brand_id) OR public.is_platform_admin())
   WITH CHECK (public.has_brand_access(brand_id) OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS student_competition_entries_access ON public.student_competition_entries;
 CREATE POLICY student_competition_entries_access ON public.student_competition_entries FOR ALL TO authenticated
   USING (
     public.has_center_access(center_id)
@@ -127,7 +133,7 @@ AS $$
   );
 $$;
 
-REVOKE ALL ON FUNCTION public.is_parent_of_student(uuid, uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.is_parent_of_student(uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.is_parent_of_student(uuid, uuid) TO authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -220,7 +226,7 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.get_student_learn_dashboard(uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.get_student_learn_dashboard(uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_student_learn_dashboard(uuid) TO authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -284,5 +290,5 @@ BEGIN
 END;
 $$;
 
-REVOKE ALL ON FUNCTION public.allocate_student_kit(uuid, uuid, uuid) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.allocate_student_kit(uuid, uuid, uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.allocate_student_kit(uuid, uuid, uuid) TO authenticated;
