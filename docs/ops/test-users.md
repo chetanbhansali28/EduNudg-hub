@@ -41,6 +41,14 @@ pnpm dlx supabase@2.104.0 functions deploy brand-owner-credentials
 
 Seeded demo brand login remains `owner@edunudg.com` / `admin` at http://abacusworld.localhost:9000/login when `test-users.sql` has been applied.
 
+## Brand marketing QA (feature phone blocks)
+
+After editing **Brand → Marketing pages → Feature sections (phone blocks)**:
+
+1. Remove blocks 3 & 4 (or any subset) and **Save**.
+2. Open `{slug}.localhost:9000/` at desktop width (≥1024px).
+3. Confirm the page loads and only your remaining blocks appear in the phone stage.
+
 ## Alternative: Dashboard + SQL (no auth insert)
 
 If `test-users.sql` fails on `auth.users` (schema drift):

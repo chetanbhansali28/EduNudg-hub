@@ -1,12 +1,28 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { HomepageFeatureSection } from "@/types/homepage";
+
+/** Desktop phone-stage columns: first half left, remainder right (matches legacy 4-block layout). */
+export function splitFeatureSectionIndices(count: number): { left: number[]; right: number[] } {
+  if (count <= 0) return { left: [], right: [] };
+  const splitAt = Math.ceil(count / 2);
+  const left = Array.from({ length: splitAt }, (_, i) => i);
+  const right = Array.from({ length: count - splitAt }, (_, i) => i + splitAt);
+  return { left, right };
+}
 
 type Props = {
   sections: HomepageFeatureSection[];
   phoneFrameUrl: string;
 };
 
-function FeatureCopy({ section, visible }: { section: HomepageFeatureSection; visible: boolean }) {
+function FeatureCopy({
+  section,
+  visible,
+}: {
+  section: HomepageFeatureSection | undefined;
+  visible: boolean;
+}) {
+  if (!section) return null;
   return (
     <div className={`novu-feature-copy ${visible ? "novu-feature-copy--visible" : ""}`}>
       <h2 className="novu-feature-copy__title">
@@ -121,14 +137,52 @@ function PhoneStageSingle({
   );
 }
 
+function scrollSpacer(key: string) {
+  return <div key={key} className="novu-features-scroll__slot novu-features-scroll__slot--spacer" />;
+}
+
+function DesktopFeatureColumn({
+  indices,
+  sections,
+  activeIndex,
+  variant,
+}: {
+  indices: number[];
+  sections: HomepageFeatureSection[];
+  activeIndex: number;
+  variant: "left" | "right";
+}) {
+  const slots: ReactNode[] = [];
+
+  if (variant === "right" && indices.length > 0) {
+    slots.push(scrollSpacer("lead"));
+  }
+
+  indices.forEach((sectionIndex, i) => {
+    slots.push(
+      <div key={sectionIndex} className="novu-features-scroll__slot">
+        <FeatureCopy section={sections[sectionIndex]} visible={activeIndex === sectionIndex} />
+      </div>
+    );
+    const needsSpacer =
+      variant === "left" || (variant === "right" && i < indices.length - 1);
+    if (needsSpacer) {
+      slots.push(scrollSpacer(`after-${sectionIndex}`));
+    }
+  });
+
+  return <>{slots}</>;
+}
+
 export function FeatureScrollSection({ sections, phoneFrameUrl }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const stackItemRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const { left, right } = splitFeatureSectionIndices(sections.length);
 
   const updateIndex = useCallback(() => {
     const el = wrapRef.current;
-    if (!el) return;
+    if (!el || sections.length === 0) return;
     const rect = el.getBoundingClientRect();
     const scrollable = el.offsetHeight - window.innerHeight;
     if (scrollable <= 0) return;
@@ -136,6 +190,12 @@ export function FeatureScrollSection({ sections, phoneFrameUrl }: Props) {
     const idx = Math.min(sections.length - 1, Math.floor(progress * sections.length));
     setActiveIndex(idx);
   }, [sections.length]);
+
+  useEffect(() => {
+    if (activeIndex >= sections.length && sections.length > 0) {
+      setActiveIndex(sections.length - 1);
+    }
+  }, [activeIndex, sections.length]);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
@@ -193,8 +253,16 @@ export function FeatureScrollSection({ sections, phoneFrameUrl }: Props) {
     };
   }, [sections.length, updateIndex]);
 
+  if (sections.length === 0) return null;
+
   return (
-    <section id="features" data-nav-theme="light" className="novu-features-panel" ref={wrapRef}>
+    <section
+      id="features"
+      data-nav-theme="light"
+      className="novu-features-panel"
+      ref={wrapRef}
+      style={{ ["--feature-section-count" as string]: String(sections.length) }}
+    >
       <div className="novu-features-stack">
         {sections.map((section, i) => (
           <article
@@ -218,14 +286,12 @@ export function FeatureScrollSection({ sections, phoneFrameUrl }: Props) {
       <div className="novu-features-scroll">
         <div className="novu-features-scroll__grid">
           <div className="novu-features-scroll__col novu-features-scroll__col--left">
-            <div className="novu-features-scroll__slot">
-              <FeatureCopy section={sections[0]} visible={activeIndex === 0} />
-            </div>
-            <div className="novu-features-scroll__slot novu-features-scroll__slot--spacer" />
-            <div className="novu-features-scroll__slot">
-              <FeatureCopy section={sections[1]} visible={activeIndex === 1} />
-            </div>
-            <div className="novu-features-scroll__slot novu-features-scroll__slot--spacer" />
+            <DesktopFeatureColumn
+              indices={left}
+              sections={sections}
+              activeIndex={activeIndex}
+              variant="left"
+            />
           </div>
 
           <div className="novu-features-scroll__col novu-features-scroll__col--center">
@@ -235,14 +301,12 @@ export function FeatureScrollSection({ sections, phoneFrameUrl }: Props) {
           </div>
 
           <div className="novu-features-scroll__col novu-features-scroll__col--right">
-            <div className="novu-features-scroll__slot novu-features-scroll__slot--spacer" />
-            <div className="novu-features-scroll__slot">
-              <FeatureCopy section={sections[2]} visible={activeIndex === 2} />
-            </div>
-            <div className="novu-features-scroll__slot novu-features-scroll__slot--spacer" />
-            <div className="novu-features-scroll__slot">
-              <FeatureCopy section={sections[3]} visible={activeIndex === 3} />
-            </div>
+            <DesktopFeatureColumn
+              indices={right}
+              sections={sections}
+              activeIndex={activeIndex}
+              variant="right"
+            />
           </div>
         </div>
       </div>

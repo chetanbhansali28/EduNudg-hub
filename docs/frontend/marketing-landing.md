@@ -39,10 +39,12 @@ Staff apps live under `/login` (public) and `/app` (authenticated) for brand and
 
 ## Feature section (product / phone stage)
 
+Brand and center marketing editors (**Feature sections (phone blocks)**) support **any number of blocks** (minimum 1 when the section is enabled). Removing extra blocks no longer breaks the public site.
+
 ### Desktop (≥1024px)
 
-- Tall scroll region (`min-height: 400svh`) with sticky center phone.
-- Copy in left/right columns advances with scroll progress.
+- Tall scroll region (`min-height: N × 100svh`, `N` = block count) with sticky center phone.
+- Copy in left/right columns advances with scroll progress (first half of blocks left, remainder right).
 - Section videos from `HomepageConfig.featureSections[].videoUrl`.
 
 ### Mobile / tablet (&lt;1024px)

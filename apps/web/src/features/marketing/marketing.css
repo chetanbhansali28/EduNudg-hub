@@ -680,7 +680,7 @@
 
   .novu-features-scroll {
     display: block;
-    min-height: 400svh;
+    min-height: calc(var(--feature-section-count, 4) * 100svh);
     padding: 0 2.5rem;
     max-width: 80rem;
     margin: 0 auto;

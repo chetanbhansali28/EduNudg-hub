@@ -173,7 +173,7 @@ export function HomepageEditorForm({
         onEnabledChange={(enabled) => setSection("featureScroll", enabled)}
       >
         <p className="ed-text-sm ed-muted">
-          Remove blocks you do not need. At least one block is recommended when this section is enabled.
+          Remove blocks you do not need. Keep at least one when this section is enabled — the public site supports any count.
         </p>
         {config.featureSections.map((section, i) => (
           <div key={section.id} className="ed-form-section">
@@ -218,6 +218,7 @@ export function HomepageEditorForm({
             />
             <Button
               variant="ghost"
+              disabled={config.featureSections.length <= 1}
               onClick={() =>
                 commit({
                   ...config,
