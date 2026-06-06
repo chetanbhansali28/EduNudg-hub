@@ -516,7 +516,8 @@
   inset: 0;
 }
 
-.novu-hero__bg img {
+.novu-hero__bg img,
+.novu-hero__bg video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -2142,7 +2143,8 @@
   inset: 0;
 }
 
-.novu-footer-section__bg img {
+.novu-footer-section__bg img,
+.novu-footer-section__bg video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -2729,7 +2731,8 @@
 @media (prefers-reduced-motion: reduce) {
   .novu-hero__line-inner,
   .novu-testimonials-section__marquee,
-  .novu-footer-section__bg img {
+  .novu-footer-section__bg img,
+  .novu-footer-section__bg video {
     animation: none;
   }
 

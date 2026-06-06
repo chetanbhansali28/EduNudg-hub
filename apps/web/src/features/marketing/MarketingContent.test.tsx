@@ -1,10 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
+import { setSectionEnabled } from "@/lib/homepageSections";
+import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { MarketingContent } from "./MarketingContent";
 
 vi.mock("./useScrollReveal", () => ({
   useScrollReveal: vi.fn(),
+}));
+
+vi.mock("./MarketingCtaLink", () => ({
+  MarketingCtaLink: ({ label }: { label: string }) => <a href="#cta">{label}</a>,
 }));
 
 vi.mock("./FeatureScrollSection", () => ({
@@ -12,7 +18,7 @@ vi.mock("./FeatureScrollSection", () => ({
 }));
 
 vi.mock("./HighlightsScroller", () => ({
-  HighlightsScroller: () => null,
+  HighlightsScroller: () => <div data-testid="highlights" />,
 }));
 
 vi.mock("./PrivacySection", () => ({
@@ -23,8 +29,12 @@ vi.mock("./TestimonialsCarousel", () => ({
   TestimonialsCarousel: () => null,
 }));
 
-vi.mock("./FranchiseSignupSection", () => ({
-  FranchiseSignupSection: () => null,
+vi.mock("./PlatformPricingSection", () => ({
+  PlatformPricingSection: () => null,
+}));
+
+vi.mock("@/features/platform/brandSignups/PlatformBrandSignupSection", () => ({
+  PlatformBrandSignupSection: () => null,
 }));
 
 vi.mock("./BrandStudentApplicationSection", () => ({
@@ -92,5 +102,11 @@ describe("MarketingContent", () => {
 
     expect(document.getElementById("curriculum")).toBeTruthy();
     expect(screen.getByText("Build focus")).toBeDefined();
+  });
+
+  it("regression_hides_highlights_when_section_disabled", () => {
+    const config = setSectionEnabled(DEFAULT_HOMEPAGE_CONFIG, "highlights", false);
+    render(<MarketingContent config={config} portalMode="platform" />);
+    expect(screen.queryByTestId("highlights")).toBeNull();
   });
 });

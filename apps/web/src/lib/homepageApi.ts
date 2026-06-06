@@ -1,5 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
+import { mergeSectionVisibility } from "@/lib/homepageSections";
 import type { HomepageConfig, HomepageShowcaseCard, HomepageTestimonial } from "@/types/homepage";
 
 const HOMEPAGE_KEY = "marketing_homepage";
@@ -101,5 +102,6 @@ export function mergeHomepageConfig(partial: Partial<HomepageConfig>): HomepageC
     faq: partial.faq ?? DEFAULT_HOMEPAGE_CONFIG.faq,
     footerCta: { ...DEFAULT_HOMEPAGE_CONFIG.footerCta, ...partial.footerCta },
     footer: { ...DEFAULT_HOMEPAGE_CONFIG.footer, ...partial.footer },
+    sections: mergeSectionVisibility(partial.sections),
   };
 }

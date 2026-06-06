@@ -42,6 +42,10 @@ export interface HomepageFaq {
   answer: string;
 }
 
+import type { HomepageSectionVisibility } from "@/lib/homepageSections";
+
+export type { HomepageSectionKey, HomepageSectionVisibility } from "@/lib/homepageSections";
+
 export interface HomepageConfig {
   meta: {
     siteName: string;
@@ -101,4 +105,6 @@ export interface HomepageConfig {
     privacyHref: string;
     termsHref: string;
   };
+  /** Show/hide major page sections on the public marketing site. */
+  sections?: HomepageSectionVisibility;
 }

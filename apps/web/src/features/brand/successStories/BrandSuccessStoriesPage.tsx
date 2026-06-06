@@ -20,7 +20,7 @@ import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
-import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
 
 interface Story {
   id: string;
@@ -148,9 +148,16 @@ export function BrandSuccessStoriesPage() {
                   <Input label="Author name" value={form.authorName} onChange={(v) => setForm((f) => ({ ...f, authorName: v }))} />
                   <Input label="Author role" value={form.authorRole} onChange={(v) => setForm((f) => ({ ...f, authorRole: v }))} />
                   <Input label="Rating (1–5)" value={form.rating} onChange={(v) => setForm((f) => ({ ...f, rating: v }))} />
-                  <Input label="Image URL" value={form.imageUrl} onChange={(v) => setForm((f) => ({ ...f, imageUrl: v }))} />
                   <Input label="Sort order" value={form.sortOrder} onChange={(v) => setForm((f) => ({ ...f, sortOrder: v }))} />
                 </FormGrid>
+                <MarketingMediaField
+                  label="Story image"
+                  value={form.imageUrl}
+                  onChange={(v) => setForm((f) => ({ ...f, imageUrl: v }))}
+                  mediaType="image"
+                  uploadSubdir="success-stories/new"
+                  uploadScope={{ kind: "brand", brandId: brandId! }}
+                />
                 <Textarea label="Quote" value={form.quote} onChange={(v) => setForm((f) => ({ ...f, quote: v }))} rows={4} />
                 <ToggleField
                   label="Published"
@@ -203,7 +210,17 @@ export function BrandSuccessStoriesPage() {
                   }
                 >
                   {editing ? (
-                    <Textarea label="Quote" value={editForm.quote} onChange={(v) => setEditForm((f) => ({ ...f, quote: v }))} />
+                    <>
+                      <Textarea label="Quote" value={editForm.quote} onChange={(v) => setEditForm((f) => ({ ...f, quote: v }))} />
+                      <MarketingMediaField
+                        label="Story image"
+                        value={editForm.imageUrl}
+                        onChange={(v) => setEditForm((f) => ({ ...f, imageUrl: v }))}
+                        mediaType="image"
+                        uploadSubdir={`success-stories/${s.id}`}
+                        uploadScope={{ kind: "brand", brandId: brandId! }}
+                      />
+                    </>
                   ) : (
                     <div>
                       <strong>{s.title}</strong>

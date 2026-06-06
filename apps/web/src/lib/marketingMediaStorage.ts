@@ -1,6 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
 import { BRAND_ASSETS_BUCKET } from "@/lib/brandLogoStorage";
-import { withLogoCacheBust } from "@/lib/brandLogoCache";
+import { withMediaCacheBust } from "@/lib/mediaUrl";
 
 export type MarketingUploadScope =
   | { kind: "platform" }
@@ -8,6 +8,7 @@ export type MarketingUploadScope =
   | { kind: "brand"; brandId: string };
 
 const PLATFORM_LOGO_PREFIX = "platform-logo.";
+const STABLE_BASENAME = "asset";
 
 function mediaExtension(file: File): string {
   const fromName = file.name.split(".").pop()?.toLowerCase();
@@ -25,13 +26,15 @@ function mediaExtension(file: File): string {
   return byType[file.type] ?? "bin";
 }
 
-function sanitizeFileStem(name: string): string {
-  const stem = name.replace(/\.[^.]+$/, "").toLowerCase();
-  const safe = stem.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  return safe.slice(0, 48) || "asset";
+/** Folder prefix in `brand-assets` for a marketing media slot (one image/video per slot). */
+export function marketingMediaFolder(scope: MarketingUploadScope, subdir: string): string | null {
+  if (scope.kind === "platform-logo") return null;
+  const slot = subdir.trim() || "misc";
+  if (scope.kind === "platform") return `platform/marketing/${slot}`;
+  return `${scope.brandId}/marketing/${slot}`;
 }
 
-/** Object path under `brand-assets` for a marketing image or video. */
+/** Object path under `brand-assets` — stable name so re-upload replaces the slot. */
 export function marketingMediaObjectPath(
   scope: MarketingUploadScope,
   subdir: string,
@@ -41,12 +44,33 @@ export function marketingMediaObjectPath(
   if (scope.kind === "platform-logo") {
     return `${PLATFORM_LOGO_PREFIX}${ext}`;
   }
-  const stem = sanitizeFileStem(file.name);
-  const fileName = `${Date.now()}-${stem}.${ext}`;
-  if (scope.kind === "platform") {
-    return fileName;
+  const folder = marketingMediaFolder(scope, subdir);
+  if (!folder) throw new Error("Invalid marketing media scope");
+  return `${folder}/${STABLE_BASENAME}.${ext}`;
+}
+
+/** Removes prior files in a marketing media slot (any extension). */
+export async function removeExistingMarketingMediaInSlot(
+  scope: MarketingUploadScope,
+  subdir: string
+): Promise<void> {
+  if (scope.kind === "platform-logo") {
+    await removeExistingPlatformSiteLogos();
+    return;
   }
-  return `${scope.brandId}/marketing/${subdir}/${fileName}`;
+
+  const folder = marketingMediaFolder(scope, subdir);
+  if (!folder) return;
+
+  const supabase = getSupabase();
+  const { data: files, error } = await supabase.storage.from(BRAND_ASSETS_BUCKET).list(folder, { limit: 100 });
+  if (error) throw error;
+
+  const paths = (files ?? []).map((f) => `${folder}/${f.name}`);
+  if (paths.length === 0) return;
+
+  const { error: removeErr } = await supabase.storage.from(BRAND_ASSETS_BUCKET).remove(paths);
+  if (removeErr) throw removeErr;
 }
 
 /** Removes prior `platform-logo.*` objects at the bucket root. */
@@ -69,15 +93,13 @@ export function marketingMediaPublicUrl(path: string): string {
   return data.publicUrl;
 }
 
-/** Upload marketing media to public `brand-assets` storage; returns the public URL. */
+/** Upload marketing media; replaces prior slot file and returns a cache-busted public URL. */
 export async function uploadMarketingMedia(
   scope: MarketingUploadScope,
   subdir: string,
   file: File
 ): Promise<string> {
-  if (scope.kind === "platform-logo") {
-    await removeExistingPlatformSiteLogos();
-  }
+  await removeExistingMarketingMediaInSlot(scope, subdir);
 
   const path = marketingMediaObjectPath(scope, subdir, file);
   const { error: uploadErr } = await getSupabase()
@@ -89,6 +111,5 @@ export async function uploadMarketingMedia(
     });
   if (uploadErr) throw uploadErr;
 
-  const publicUrl = marketingMediaPublicUrl(path);
-  return scope.kind === "platform-logo" ? withLogoCacheBust(publicUrl) : publicUrl;
+  return withMediaCacheBust(marketingMediaPublicUrl(path));
 }

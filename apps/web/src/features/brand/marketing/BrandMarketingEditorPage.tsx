@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
 import { HomepageEditorPanel, HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
-import { fetchBrandMarketingEditor, saveBrandMarketingLanding } from "@/lib/brandLandingEditorApi";
+import { fetchBrandMarketingEditor, landingConfigToPartial, saveBrandMarketingLanding } from "@/lib/brandLandingEditorApi";
 import type { HomepageConfig } from "@/types/homepage";
 
 export function BrandMarketingEditorPage() {
@@ -12,6 +12,8 @@ export function BrandMarketingEditorPage() {
   const qc = useQueryClient();
   const [brandConfig, setBrandConfig] = useState<HomepageConfig | null>(null);
   const [centerConfig, setCenterConfig] = useState<HomepageConfig | null>(null);
+  const [existingSettings, setExistingSettings] = useState<Record<string, unknown>>({});
+  const [settingsId, setSettingsId] = useState<string | null>(null);
   const [brandSaved, setBrandSaved] = useState(false);
   const [centerSaved, setCenterSaved] = useState(false);
 
@@ -25,20 +27,27 @@ export function BrandMarketingEditorPage() {
     if (!editor.data) return;
     setBrandConfig(editor.data.landingConfig);
     setCenterConfig(editor.data.centerLandingConfig);
+    setExistingSettings(editor.data.existingSettings);
+    setSettingsId(editor.data.settingsId);
   }, [editor.data]);
 
   const saveBrand = useMutation({
-    mutationFn: async () => {
-      if (!brandId || !editor.data || !brandConfig) throw new Error("Brand required");
+    mutationFn: async (override?: HomepageConfig) => {
+      const payload = override ?? brandConfig;
+      if (!brandId || !payload) throw new Error("Brand required");
       await saveBrandMarketingLanding(
         brandId,
-        editor.data.settingsId,
-        editor.data.existingSettings,
+        settingsId,
+        existingSettings,
         "landing",
-        brandConfig
+        payload
       );
     },
-    onSuccess: () => {
+    onSuccess: (_data, override) => {
+      const payload = override ?? brandConfig;
+      if (payload) {
+        setExistingSettings((prev) => ({ ...prev, landing: landingConfigToPartial(payload) }));
+      }
       void qc.invalidateQueries({ queryKey: ["brand-marketing-editor", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
       setBrandSaved(true);
@@ -47,17 +56,25 @@ export function BrandMarketingEditorPage() {
   });
 
   const saveCenter = useMutation({
-    mutationFn: async () => {
-      if (!brandId || !editor.data || !centerConfig) throw new Error("Brand required");
+    mutationFn: async (override?: HomepageConfig) => {
+      const payload = override ?? centerConfig;
+      if (!brandId || !payload) throw new Error("Brand required");
       await saveBrandMarketingLanding(
         brandId,
-        editor.data.settingsId,
-        editor.data.existingSettings,
+        settingsId,
+        existingSettings,
         "center_landing",
-        centerConfig
+        payload
       );
     },
-    onSuccess: () => {
+    onSuccess: (_data, override) => {
+      const payload = override ?? centerConfig;
+      if (payload) {
+        setExistingSettings((prev) => ({
+          ...prev,
+          center_landing: landingConfigToPartial(payload),
+        }));
+      }
       void qc.invalidateQueries({ queryKey: ["brand-marketing-editor", brandId] });
       void qc.invalidateQueries({ queryKey: ["center-landing"] });
       setCenterSaved(true);
@@ -95,6 +112,10 @@ export function BrandMarketingEditorPage() {
             config={brandConfig}
             onChange={setBrandConfig}
             uploadScope={{ kind: "brand", brandId: brandId! }}
+            onPersist={(next) => {
+              setBrandConfig(next);
+              saveBrand.mutate(next);
+            }}
             testimonialsManagedExternally
             testimonialsExternalHint={
               <p className="ed-text-sm ed-muted">
@@ -115,6 +136,10 @@ export function BrandMarketingEditorPage() {
             config={centerConfig}
             onChange={setCenterConfig}
             uploadScope={{ kind: "brand", brandId: brandId! }}
+            onPersist={(next) => {
+              setCenterConfig(next);
+              saveCenter.mutate(next);
+            }}
           />
         </HomepageEditorPanel>
       </div>

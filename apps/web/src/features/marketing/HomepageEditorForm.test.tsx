@@ -24,6 +24,6 @@ describe("HomepageEditorForm", () => {
     expect(screen.getByText("Navigation")).toBeDefined();
     expect(screen.getByText("Hero")).toBeDefined();
     expect(screen.queryByLabelText("Hero background image URL")).toBeNull();
-    expect(screen.getByLabelText("Hero background image")).toBeDefined();
+    expect(screen.getByLabelText("Hero background image or video")).toBeDefined();
   });
 });

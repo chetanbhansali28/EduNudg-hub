@@ -23,4 +23,17 @@ describe("landingConfigToPartial", () => {
     const partial = landingConfigToPartial(config);
     expect(partial.nav?.links?.some((l) => l.label === "Pricing")).toBe(true);
   });
+
+  it("regression_brand_landing_partial_includes_section_visibility", () => {
+    const config = buildBrandLandingConfig("Demo Brand");
+    config.sections = {
+      ...config.sections!,
+      highlights: false,
+      faq: false,
+    };
+    const partial = landingConfigToPartial(config);
+    expect(partial.sections?.highlights).toBe(false);
+    expect(partial.sections?.faq).toBe(false);
+    expect(partial.sections?.hero).toBe(true);
+  });
 });

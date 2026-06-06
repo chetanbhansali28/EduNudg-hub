@@ -1,7 +1,18 @@
 import type { ReactNode } from "react";
-import { Button, Input } from "@edunudg/ui";
-import type { HomepageConfig, HomepageFaq, HomepageFeatureSection, HomepageLink } from "@/types/homepage";
+import { Button, Input, ToggleField } from "@edunudg/ui";
+import type {
+  HomepageConfig,
+  HomepageFaq,
+  HomepageFeatureSection,
+  HomepageLink,
+  HomepageShowcaseCard,
+} from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
+import {
+  mergeSectionVisibility,
+  setSectionEnabled,
+  type HomepageSectionKey,
+} from "@/lib/homepageSections";
 import { EditorAccordion } from "./EditorAccordion";
 import { MarketingMediaField } from "./MarketingMediaField";
 
@@ -10,6 +21,8 @@ export type HomepageEditorFormProps = {
   onChange: (config: HomepageConfig) => void;
   /** Where uploaded images/videos are stored in Supabase Storage. */
   uploadScope?: MarketingUploadScope;
+  /** Persist config after a media upload (e.g. save to database immediately). */
+  onPersist?: (config: HomepageConfig) => void | Promise<void>;
   /** When true, testimonial quotes are managed elsewhere (e.g. success stories). */
   testimonialsManagedExternally?: boolean;
   testimonialsExternalHint?: ReactNode;
@@ -19,9 +32,25 @@ export function HomepageEditorForm({
   config,
   onChange,
   uploadScope = { kind: "platform" },
+  onPersist,
   testimonialsManagedExternally = false,
   testimonialsExternalHint,
 }: HomepageEditorFormProps) {
+  const sections = mergeSectionVisibility(config.sections);
+
+  const commit = (next: HomepageConfig) => {
+    onChange(next);
+    void onPersist?.(next);
+  };
+
+  const commitMedia = (next: HomepageConfig) => {
+    commit(next);
+  };
+
+  const setSection = (key: HomepageSectionKey, enabled: boolean) => {
+    commit(setSectionEnabled(config, key, enabled));
+  };
+
   const updateHero = (field: keyof HomepageConfig["hero"], value: string) => {
     onChange({ ...config, hero: { ...config.hero, [field]: value } });
   };
@@ -50,7 +79,7 @@ export function HomepageEditorForm({
         <MarketingMediaField
           label="Site logo"
           value={config.meta.logoUrl ?? ""}
-          onChange={(v) => onChange({ ...config, meta: { ...config.meta, logoUrl: v || null } })}
+          onChange={(v) => commitMedia({ ...config, meta: { ...config.meta, logoUrl: v || null } })}
           mediaType="image"
           uploadSubdir=""
           uploadScope={{ kind: "platform-logo" }}
@@ -100,7 +129,11 @@ export function HomepageEditorForm({
         </Button>
       </EditorAccordion>
 
-      <EditorAccordion title="Hero">
+      <EditorAccordion
+        title="Hero"
+        enabled={sections.hero}
+        onEnabledChange={(enabled) => setSection("hero", enabled)}
+      >
         <Input label="Line 1 (sans)" value={config.hero.line1} onChange={(v) => updateHero("line1", v)} />
         <Input label="Line 1 (serif)" value={config.hero.line1Serif} onChange={(v) => updateHero("line1Serif", v)} />
         <Input label="Line 2 (sans)" value={config.hero.line2} onChange={(v) => updateHero("line2", v)} />
@@ -117,9 +150,9 @@ export function HomepageEditorForm({
           onChange={(v) => updatePrimaryCta("ctaHref", v)}
         />
         <MarketingMediaField
-          label="Hero background image"
+          label="Hero background image or video"
           value={config.hero.backgroundImageUrl}
-          onChange={(v) => updateHero("backgroundImageUrl", v)}
+          onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, backgroundImageUrl: v } })}
           mediaType="image"
           uploadSubdir="hero-background"
           uploadScope={uploadScope}
@@ -127,14 +160,21 @@ export function HomepageEditorForm({
         <MarketingMediaField
           label="Phone frame image"
           value={config.hero.phoneFrameUrl}
-          onChange={(v) => updateHero("phoneFrameUrl", v)}
+          onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, phoneFrameUrl: v } })}
           mediaType="image"
           uploadSubdir="hero-phone-frame"
           uploadScope={uploadScope}
         />
       </EditorAccordion>
 
-      <EditorAccordion title="Feature sections (phone blocks)">
+      <EditorAccordion
+        title="Feature sections (phone blocks)"
+        enabled={sections.featureScroll}
+        onEnabledChange={(enabled) => setSection("featureScroll", enabled)}
+      >
+        <p className="ed-text-sm ed-muted">
+          Remove blocks you do not need. At least one block is recommended when this section is enabled.
+        </p>
         {config.featureSections.map((section, i) => (
           <div key={section.id} className="ed-form-section">
             <Input
@@ -170,22 +210,38 @@ export function HomepageEditorForm({
               onChange={(v) => {
                 const featureSections = [...config.featureSections];
                 featureSections[i] = { ...section, videoUrl: v || undefined };
-                onChange({ ...config, featureSections });
+                commitMedia({ ...config, featureSections });
               }}
               mediaType="video"
               uploadSubdir={`feature-${section.id}`}
               uploadScope={uploadScope}
             />
+            <Button
+              variant="ghost"
+              onClick={() =>
+                commit({
+                  ...config,
+                  featureSections: config.featureSections.filter((_, idx) => idx !== i),
+                })
+              }
+            >
+              Remove this block
+            </Button>
           </div>
         ))}
         <Button
           variant="ghost"
           onClick={() =>
-            onChange({
+            commit({
               ...config,
               featureSections: [
                 ...config.featureSections,
-                { id: `section-${Date.now()}`, title: "New", titleSerif: "section.", body: "Description" } satisfies HomepageFeatureSection,
+                {
+                  id: `section-${Date.now()}`,
+                  title: "New",
+                  titleSerif: "section.",
+                  body: "Description",
+                } satisfies HomepageFeatureSection,
               ],
             })
           }
@@ -194,11 +250,18 @@ export function HomepageEditorForm({
         </Button>
       </EditorAccordion>
 
-      <EditorAccordion title="Highlight cards (horizontal scroller)">
+      <EditorAccordion
+        title="Highlight cards (horizontal scroller)"
+        enabled={sections.highlights}
+        onEnabledChange={(enabled) => setSection("highlights", enabled)}
+      >
+        <p className="ed-text-sm ed-muted">
+          Each card appears in the horizontal scroller. Remove cards to show fewer items (e.g. 3 instead of 5).
+        </p>
         {config.showcaseCards.map((card, i) => (
           <div key={card.id} className="ed-form-section">
             <Input
-              label="Title"
+              label={`Card ${i + 1} title`}
               value={card.title}
               onChange={(v) => {
                 const showcaseCards = [...config.showcaseCards];
@@ -225,12 +288,12 @@ export function HomepageEditorForm({
               }}
             />
             <MarketingMediaField
-              label="Background image"
+              label="Background image or video"
               value={card.imageUrl ?? ""}
               onChange={(v) => {
                 const showcaseCards = [...config.showcaseCards];
                 showcaseCards[i] = { ...card, imageUrl: v || undefined };
-                onChange({ ...config, showcaseCards });
+                commitMedia({ ...config, showcaseCards });
               }}
               mediaType="image"
               uploadSubdir={`showcase-${card.id}-bg`}
@@ -242,17 +305,52 @@ export function HomepageEditorForm({
               onChange={(v) => {
                 const showcaseCards = [...config.showcaseCards];
                 showcaseCards[i] = { ...card, phoneImageUrl: v || undefined };
-                onChange({ ...config, showcaseCards });
+                commitMedia({ ...config, showcaseCards });
               }}
               mediaType="image"
               uploadSubdir={`showcase-${card.id}-phone`}
               uploadScope={uploadScope}
             />
+            <Button
+              variant="ghost"
+              onClick={() =>
+                commit({
+                  ...config,
+                  showcaseCards: config.showcaseCards.filter((_, idx) => idx !== i),
+                })
+              }
+            >
+              Remove this card
+            </Button>
           </div>
         ))}
+        <Button
+          variant="ghost"
+          onClick={() =>
+            commit({
+              ...config,
+              showcaseCards: [
+                ...config.showcaseCards,
+                {
+                  id: `showcase-${Date.now()}`,
+                  title: "New",
+                  titleItalic: "highlight",
+                  body: "Description",
+                  layout: "image-dark",
+                } satisfies HomepageShowcaseCard,
+              ],
+            })
+          }
+        >
+          Add highlight card
+        </Button>
       </EditorAccordion>
 
-      <EditorAccordion title="Testimonials">
+      <EditorAccordion
+        title="Testimonials"
+        enabled={sections.testimonials}
+        onEnabledChange={(enabled) => setSection("testimonials", enabled)}
+      >
         <Input
           label="Section title"
           value={config.testimonials.title}
@@ -288,14 +386,48 @@ export function HomepageEditorForm({
                   onChange({ ...config, testimonials: { ...config.testimonials, items } });
                 }}
               />
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  commit({
+                    ...config,
+                    testimonials: {
+                      ...config.testimonials,
+                      items: config.testimonials.items.filter((_, idx) => idx !== i),
+                    },
+                  })
+                }
+              >
+                Remove testimonial
+              </Button>
             </div>
           ))
         )}
+        {!testimonialsManagedExternally && (
+          <Button
+            variant="ghost"
+            onClick={() =>
+              commit({
+                ...config,
+                testimonials: {
+                  ...config.testimonials,
+                  items: [...config.testimonials.items, { quote: "New quote", author: "Author name" }],
+                },
+              })
+            }
+          >
+            Add testimonial
+          </Button>
+        )}
       </EditorAccordion>
 
-      <EditorAccordion title="FAQ">
+      <EditorAccordion
+        title="FAQ"
+        enabled={sections.faq}
+        onEnabledChange={(enabled) => setSection("faq", enabled)}
+      >
         {config.faq.map((f, i) => (
-          <div key={i} className="ed-form-section">
+          <div key={`${f.question}-${i}`} className="ed-form-section">
             <Input
               label="Question"
               value={f.question}
@@ -314,12 +446,18 @@ export function HomepageEditorForm({
                 onChange({ ...config, faq });
               }}
             />
+            <Button
+              variant="ghost"
+              onClick={() => commit({ ...config, faq: config.faq.filter((_, idx) => idx !== i) })}
+            >
+              Remove FAQ item
+            </Button>
           </div>
         ))}
         <Button
           variant="ghost"
           onClick={() =>
-            onChange({
+            commit({
               ...config,
               faq: [...config.faq, { question: "New question?", answer: "Answer here." } satisfies HomepageFaq],
             })
@@ -330,6 +468,18 @@ export function HomepageEditorForm({
       </EditorAccordion>
 
       <EditorAccordion title="Privacy & footer">
+        <ToggleField
+          label="Show privacy section"
+          description="Trust / security copy block on the public homepage."
+          checked={sections.privacy}
+          onChange={(enabled) => setSection("privacy", enabled)}
+        />
+        <ToggleField
+          label="Show site footer"
+          description="Footer CTA banner, link columns, and copyright."
+          checked={sections.footer}
+          onChange={(enabled) => setSection("footer", enabled)}
+        />
         <Input
           label="Privacy title"
           value={config.privacy.title}
@@ -346,10 +496,10 @@ export function HomepageEditorForm({
           onChange={(v) => onChange({ ...config, footerCta: { ...config.footerCta, title: v } })}
         />
         <MarketingMediaField
-          label="Footer CTA background image"
+          label="Footer CTA background image or video"
           value={config.footerCta.backgroundImageUrl ?? ""}
           onChange={(v) =>
-            onChange({
+            commitMedia({
               ...config,
               footerCta: { ...config.footerCta, backgroundImageUrl: v || undefined },
             })

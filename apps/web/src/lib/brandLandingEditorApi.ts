@@ -1,6 +1,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
 import { buildCenterLandingConfig } from "@/lib/centerLandingDefaults";
+import { mergeSectionVisibility } from "@/lib/homepageSections";
 import type { HomepageConfig } from "@/types/homepage";
 
 export type BrandMarketingSettingsKey = "landing" | "center_landing";
@@ -36,6 +37,7 @@ export function landingConfigToPartial(config: HomepageConfig): Partial<Homepage
     privacy: { ...config.privacy },
     footerCta: { ...config.footerCta },
     footer: { ...config.footer },
+    sections: { ...mergeSectionVisibility(config.sections) },
   };
 }
 

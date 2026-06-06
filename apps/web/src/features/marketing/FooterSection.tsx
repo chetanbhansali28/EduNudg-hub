@@ -1,12 +1,18 @@
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { MarketingCtaLink } from "./MarketingCtaLink";
+import { MarketingBackgroundMedia } from "./MarketingBackgroundMedia";
+import { isSectionEnabled } from "@/lib/homepageSections";
 
 type Props = {
   config: HomepageConfig;
 };
 
 export function FooterSection({ config }: Props) {
+  if (!isSectionEnabled(config, "footer")) {
+    return null;
+  }
+
   const cta = config.footerCta;
   const titleParts = cta.title.match(/^(.+?)(\s*)(\S+\.?)$/);
   const titleMain = titleParts?.[1] ?? cta.title;
@@ -15,7 +21,7 @@ export function FooterSection({ config }: Props) {
   return (
     <section data-nav-theme="dark" className="novu-footer-section">
       <div className="novu-footer-section__bg">
-        <img src={cta.backgroundImageUrl ?? config.hero.backgroundImageUrl} alt="" />
+        <MarketingBackgroundMedia src={cta.backgroundImageUrl ?? config.hero.backgroundImageUrl} />
       </div>
       <div className="novu-footer-section__overlay" />
 

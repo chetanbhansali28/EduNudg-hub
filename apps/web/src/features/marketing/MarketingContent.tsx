@@ -13,7 +13,9 @@ import { PlatformPricingSection } from "./PlatformPricingSection";
 import { PrivacySection } from "./PrivacySection";
 import { TestimonialsCarousel } from "./TestimonialsCarousel";
 import { CurriculumPublicSection } from "./CurriculumPublicSection";
+import { MarketingBackgroundMedia } from "./MarketingBackgroundMedia";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
+import { isSectionEnabled } from "@/lib/homepageSections";
 import { useScrollReveal } from "./useScrollReveal";
 
 function FaqList({ items }: { items: { question: string; answer: string }[] }) {
@@ -58,11 +60,19 @@ function MarketingContentView({
 }: Props) {
   useScrollReveal(true);
 
+  const showHero = isSectionEnabled(config, "hero");
+  const showFeatures = isSectionEnabled(config, "featureScroll") && config.featureSections.length > 0;
+  const showHighlights = isSectionEnabled(config, "highlights") && config.showcaseCards.length > 0;
+  const showPrivacy = isSectionEnabled(config, "privacy");
+  const showTestimonials = isSectionEnabled(config, "testimonials");
+  const showFaq = isSectionEnabled(config, "faq") && config.faq.length > 0;
+
   return (
     <div className="novu-hero-wrap">
+      {showHero ? (
       <section data-nav-theme="hero" className="novu-hero">
         <div className="novu-hero__bg">
-          <img src={config.hero.backgroundImageUrl} alt="" />
+          <MarketingBackgroundMedia src={config.hero.backgroundImageUrl} />
           <div className="novu-hero__overlay" />
           <div className="novu-hero__noise" aria-hidden />
         </div>
@@ -88,14 +98,17 @@ function MarketingContentView({
           />
         </div>
       </section>
+      ) : null}
 
       <main data-nav-theme="light" className="novu-main">
+        {showFeatures ? (
         <FeatureScrollSection
           sections={config.featureSections}
           phoneFrameUrl={config.hero.phoneFrameUrl}
         />
+        ) : null}
 
-        <HighlightsScroller cards={config.showcaseCards} />
+        {showHighlights ? <HighlightsScroller cards={config.showcaseCards} /> : null}
 
         {(portalMode === "brand" || portalMode === "center") && (
           <CurriculumPublicSection programs={publicCurriculum} />
@@ -105,9 +118,9 @@ function MarketingContentView({
           <PlatformPricingSection ctaHref={config.nav.ctaHref} ctaLabel={config.nav.ctaLabel} />
         )}
 
-        <PrivacySection privacy={config.privacy} />
+        {showPrivacy ? <PrivacySection privacy={config.privacy} /> : null}
 
-        <TestimonialsCarousel testimonials={config.testimonials} />
+        {showTestimonials ? <TestimonialsCarousel testimonials={config.testimonials} /> : null}
 
         {portalMode === "platform" && <PlatformBrandSignupSection />}
         {portalMode === "brand" && brandSlug && (
@@ -123,10 +136,12 @@ function MarketingContentView({
           </>
         )}
 
+        {showFaq ? (
         <section id="faq" data-nav-theme="light" className="novu-faq">
           <h2 className="novu-reveal">Got questions?</h2>
           <FaqList items={config.faq} />
         </section>
+        ) : null}
       </main>
     </div>
   );

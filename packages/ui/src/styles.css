@@ -1372,10 +1372,26 @@
 }
 
 .ed-editor-accordion__summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   padding: 0.875rem 1rem;
   font-weight: 600;
   cursor: pointer;
   list-style: none;
+}
+
+.ed-editor-accordion__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.ed-editor-accordion__toggle {
+  flex-shrink: 0;
+}
+
+.ed-editor-accordion--section-off .ed-editor-accordion__body {
+  opacity: 0.55;
 }
 
 .ed-editor-accordion__summary::-webkit-details-marker {
@@ -1384,7 +1400,7 @@
 
 .ed-editor-accordion__summary::after {
   content: "+";
-  float: right;
+  flex-shrink: 0;
   font-weight: 400;
   color: var(--ed-muted);
 }

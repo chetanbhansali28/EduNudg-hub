@@ -17,9 +17,9 @@ export function HomepageEditorPage() {
   }, [data]);
 
   const save = useMutation({
-    mutationFn: () => saveHomepageConfig(config),
+    mutationFn: (override?: HomepageConfig) => saveHomepageConfig(override ?? config),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["marketing-homepage"] });
+      void qc.invalidateQueries({ queryKey: ["marketing-homepage"] });
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     },
@@ -35,7 +35,12 @@ export function HomepageEditorPage() {
       savePending={save.isPending}
       saved={saved}
     >
-      <HomepageEditorForm config={config} onChange={setConfig} uploadScope={{ kind: "platform" }} />
+      <HomepageEditorForm
+        config={config}
+        onChange={setConfig}
+        uploadScope={{ kind: "platform" }}
+        onPersist={(next) => save.mutate(next)}
+      />
     </HomepageEditorShell>
   );
 }

@@ -1,4 +1,5 @@
 import type { HomepageConfig } from "@/types/homepage";
+import { DEFAULT_HOMEPAGE_SECTION_VISIBILITY } from "@/lib/homepageSections";
 
 /** Stock placeholders until admins upload assets via the homepage editor. */
 const DEFAULT_HERO_IMAGE =
@@ -207,4 +208,5 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
     privacyHref: "#",
     termsHref: "#",
   },
+  sections: { ...DEFAULT_HOMEPAGE_SECTION_VISIBILITY },
 };
