@@ -6,6 +6,7 @@ EduNudg functions live in [`supabase/functions/`](../../supabase/functions/):
 |----------|---------|
 | `whatsapp-otp` | Send/verify WhatsApp OTP (stub — wire Twilio/Gupshup later) |
 | `passkey-verify` | WebAuthn verify (stub — wire `@simplewebauthn/server` later) |
+| `brand-owner-credentials` | Platform admin: create/update brand owner Auth user + membership |
 
 No Docker required. Deploy with the **Supabase CLI** against your linked cloud project.
 

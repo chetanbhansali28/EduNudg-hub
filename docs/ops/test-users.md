@@ -28,6 +28,19 @@ Add to `/etc/hosts` if needed:
 
 Optional: run [`supabase/seed/seed.sql`](../../supabase/seed/seed.sql) first for subscription plans (not required for login).
 
+## Brand login credentials (platform admin)
+
+On **Platform → Brands**, click **Edit** on a brand to set **Login email** and **Password** for the franchisor (`brand_owner`). Password is required only when creating a new login; leave it blank on edit to keep the existing password.
+
+The brand signs in at `{slug}.localhost:9000/login` (dev) using that email and password. This provisions Supabase Auth + `memberships` via the `brand-owner-credentials` Edge Function — deploy after schema push:
+
+```bash
+pnpm dlx supabase@2.104.0 db push
+pnpm dlx supabase@2.104.0 functions deploy brand-owner-credentials
+```
+
+Seeded demo brand login remains `owner@edunudg.com` / `admin` at http://abacusworld.localhost:9000/login when `test-users.sql` has been applied.
+
 ## Alternative: Dashboard + SQL (no auth insert)
 
 If `test-users.sql` fails on `auth.users` (schema drift):
@@ -62,5 +75,6 @@ DELETE FROM auth.users WHERE email LIKE '%@edunudg.com';
 | Sign in succeeds but page stays on `/login` | Fixed in app: redirects to `/admin` (platform) or `/` (brand/center). Restart `pnpm dev`. |
 | `ERR_NAME_NOT_RESOLVED` / `your_project_ref.supabase.co` | Set real `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `apps/web/.env`, restart dev server |
 | Login "Invalid credentials" | Re-run `test-users.sql` or reset password in Dashboard; use `admin@edunudg.com` / `admin` |
+| Brand login not working after platform edit | Deploy `brand-owner-credentials` Edge Function; set login email + password on Brands → Edit |
 | No data after login | Check `memberships.status = 'active'` |
 | Brand/center portal wrong | Use subdomain hosts above; run `test-users.sql` for `domain_mappings` |

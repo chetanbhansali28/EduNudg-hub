@@ -10,7 +10,13 @@ vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({
     from: fromMock,
     rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+    functions: { invoke: vi.fn().mockResolvedValue({ data: { ok: true }, error: null }) },
   }),
+}));
+
+vi.mock("@/lib/brandOwnerCredentialsApi", () => ({
+  fetchBrandOwnerLoginEmail: vi.fn().mockResolvedValue("owner@demo.com"),
+  upsertBrandOwnerCredentials: vi.fn().mockResolvedValue({ error: null }),
 }));
 
 function chain(result: { data: unknown; error: unknown }) {
@@ -95,11 +101,23 @@ describe("BrandsPage", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("Name")).toBeDefined();
       expect(screen.getByLabelText("Status")).toBeDefined();
+      expect(screen.getByLabelText("Login email")).toBeDefined();
+      expect(screen.getByLabelText("Password")).toBeDefined();
     });
     expect(screen.queryByLabelText("Slug")).toBeNull();
     expect(document.querySelector(".ed-editable-form")).toBeTruthy();
     expect(document.querySelectorAll(".ed-field--editable").length).toBeGreaterThanOrEqual(3);
     expect(document.querySelector(".ed-form-grid--3")).toBeTruthy();
+  });
+
+  it("regression_brand_edit_shows_login_credentials", async () => {
+    renderBrands();
+    await screen.findByText("Demo Brand");
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await waitFor(() => {
+      expect(screen.getByLabelText("Login email")).toBeDefined();
+    });
+    expect((screen.getByLabelText("Login email") as HTMLInputElement).value).toBe("owner@demo.com");
   });
 
   it("regression_brand_name_links_to_detail_page", async () => {

@@ -14,7 +14,8 @@
     "db:push": "supabase db push",
     "functions:deploy": "supabase functions deploy",
     "functions:deploy:whatsapp": "supabase functions deploy whatsapp-otp",
-    "functions:deploy:passkey": "supabase functions deploy passkey-verify"
+    "functions:deploy:passkey": "supabase functions deploy passkey-verify",
+    "functions:deploy:brand-owner": "supabase functions deploy brand-owner-credentials"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",

@@ -4,12 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { brandAdminPath } from "@/lib/adminPaths";
 import { brandPortalUrl } from "@/lib/brandPortalUrl";
 import { uniqueBrandSlug } from "@/lib/brandSlug";
-import { Badge, Button, Card, DataList, FormGrid, Input, ListRow, MutationError, PageTitle, Select } from "@edunudg/ui";
+import { Badge, Button, Card, DataList, FormGrid, Input, ListRow, MutationError, PageTitle, PasswordInput, Select } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
 import { PlatformSignupRequestsPanel } from "@/features/platform/brandSignups/PlatformSignupRequestsPanel";
 import { ManualPlatformBrandSignupCard } from "@/features/platform/brandSignups/ManualPlatformBrandSignupCard";
+import { fetchBrandOwnerLoginEmail, upsertBrandOwnerCredentials } from "@/lib/brandOwnerCredentialsApi";
 import { CrudRowActions } from "./components/CrudRowActions";
 import { useMutationError } from "./hooks/useMutationError";
 
@@ -30,13 +31,14 @@ const STATUS_OPTIONS: { value: BrandStatus; label: string }[] = [
   { value: "archived", label: "Archived" },
 ];
 
-const emptyEditForm = { name: "", status: "draft" as BrandStatus };
+const emptyEditForm = { name: "", status: "draft" as BrandStatus, loginEmail: "", password: "" };
 
 export function BrandsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyEditForm);
+  const [originalLoginEmail, setOriginalLoginEmail] = useState<string | null>(null);
 
   const brands = useQuery({
     queryKey: ["brands"],
@@ -68,10 +70,25 @@ export function BrandsPage() {
         })
         .eq("id", id);
       if (mErr) throw mErr;
+
+      const loginEmail = editForm.loginEmail.trim();
+      if (loginEmail) {
+        if (!originalLoginEmail && !editForm.password.trim()) {
+          throw new Error("Password required for a new brand login");
+        }
+        const { error: credErr } = await upsertBrandOwnerCredentials({
+          brandId: id,
+          email: loginEmail,
+          password: editForm.password.trim() || undefined,
+          fullName: editForm.name.trim(),
+        });
+        if (credErr) throw new Error(credErr);
+      }
     },
     onSuccess: () => {
       invalidate();
       setEditingId(null);
+      setOriginalLoginEmail(null);
     },
     onError: capture,
   });
@@ -89,12 +106,21 @@ export function BrandsPage() {
     onError: capture,
   });
 
-  const startEdit = (b: Brand) => {
+  const startEdit = async (b: Brand) => {
     clear();
     setEditingId(b.id);
+    let loginEmail = "";
+    try {
+      loginEmail = (await fetchBrandOwnerLoginEmail(b.id)) ?? "";
+    } catch {
+      loginEmail = "";
+    }
+    setOriginalLoginEmail(loginEmail || null);
     setEditForm({
       name: b.name,
       status: b.status,
+      loginEmail,
+      password: "",
     });
   };
 
@@ -130,7 +156,10 @@ export function BrandsPage() {
                       editing={editing}
                       onEdit={() => startEdit(b)}
                       onSave={() => updateBrand.mutate(b.id)}
-                      onCancel={() => setEditingId(null)}
+                      onCancel={() => {
+                        setEditingId(null);
+                        setOriginalLoginEmail(null);
+                      }}
                       onDelete={() => deleteBrand.mutate(b.id)}
                       deleteDescription="Related data remains but the brand is hidden from lists."
                       deleteTitle="Archive this brand?"
@@ -159,6 +188,19 @@ export function BrandsPage() {
                         brandId={b.id}
                         currentLogoUrl={editingBrand?.logo_url}
                         editable
+                      />
+                      <Input
+                        label="Login email"
+                        value={editForm.loginEmail}
+                        onChange={(v) => setEditForm((f) => ({ ...f, loginEmail: v }))}
+                        type="email"
+                        editable
+                      />
+                      <PasswordInput
+                        label="Password"
+                        value={editForm.password}
+                        onChange={(v) => setEditForm((f) => ({ ...f, password: v }))}
+                        placeholder={originalLoginEmail ? "Leave blank to keep current password" : "Required for new login"}
                       />
                     </FormGrid>
                   </div>

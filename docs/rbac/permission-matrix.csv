@@ -2,6 +2,7 @@ resource,action,platform_super_admin,platform_ops,brand_owner,brand_admin,center
 brands,create,y,y,n,n,n,n,n,n
 brands,read,y,y,y,y,y,y,y,y
 brands,update,y,y,y,y,n,n,n,n
+brands,manage_owner_credentials,y,y,n,n,n,n,n,n
 brands,suspend,y,y,y,n,n,n,n,n
 centers,create,y,y,y,y,n,n,n,n
 centers,read,y,y,y,y,y,y,y,y
