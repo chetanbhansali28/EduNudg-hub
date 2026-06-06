@@ -67,7 +67,7 @@ export function PlatformBrandSignupSection() {
               <Input label="Work email" value={email} onChange={setEmail} type="email" />
               <Input label="City" value={city} onChange={setCity} placeholder="Mumbai" />
             </div>
-            <Input label="Phone" value={phone} onChange={setPhone} placeholder="+91…" />
+            <Input label="Phone" value={phone} onChange={setPhone} placeholder="9890200000" />
             <Input label="Message (optional)" value={message} onChange={setMessage} />
             <Button type="submit" block disabled={submitting || !requestedName.trim() || !email.trim() || !city.trim()}>
               {submitting ? "Submitting…" : "Submit signup request"}

@@ -1,20 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
-import { fetchBrandLandingConfig } from "@/lib/brandLandingApi";
+import { fetchBrandLandingBundle } from "@/lib/brandLandingApi";
+import { isBrandLandingBundleReady, normalizeBrandLandingBundle } from "@/lib/brandLandingBundle";
 import { MarketingContent } from "@/features/marketing/MarketingContent";
 
 export function BrandLandingPage() {
   const tenant = useTenant();
   const brandSlug = tenant.brandSlug ?? "brand";
 
-  const { data: config, isLoading } = useQuery({
+  const { data: bundle, isLoading } = useQuery({
     queryKey: ["brand-landing", brandSlug],
-    queryFn: () => fetchBrandLandingConfig(brandSlug),
+    queryFn: () => fetchBrandLandingBundle(brandSlug),
+    select: normalizeBrandLandingBundle,
   });
 
-  if (isLoading || !config) {
+  if (isLoading || !isBrandLandingBundleReady(bundle)) {
     return <p className="marketing-page--loading-inline">Loading…</p>;
   }
 
-  return <MarketingContent config={config} portalMode="brand" brandSlug={brandSlug} />;
+  return (
+    <MarketingContent
+      config={bundle.config}
+      portalMode="brand"
+      brandSlug={brandSlug}
+      publicCurriculum={bundle.publicCurriculum}
+    />
+  );
 }

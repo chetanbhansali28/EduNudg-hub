@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { Button } from "@edunudg/ui";
 import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
 import { HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
 import { fetchHomepageConfig, saveHomepageConfig } from "@/lib/homepageApi";
@@ -32,21 +30,10 @@ export function HomepageEditorPage() {
   return (
     <HomepageEditorShell
       title="Marketing homepage"
-      subtitle={
-        <a href="/" target="_blank" rel="noreferrer">
-          Preview live site
-        </a>
-      }
-      actions={
-        <>
-          <Link to="/">
-            <Button variant="ghost">Preview</Button>
-          </Link>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            {save.isPending ? "Saving…" : saved ? "Saved" : "Save changes"}
-          </Button>
-        </>
-      }
+      subtitle="Edit the public EduNudg marketing site."
+      onSave={() => save.mutate()}
+      savePending={save.isPending}
+      saved={saved}
     >
       <HomepageEditorForm config={config} onChange={setConfig} uploadScope={{ kind: "platform" }} />
     </HomepageEditorShell>

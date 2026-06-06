@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
-  Button,
   Card,
   DataList,
+  FormGrid,
   Input,
   ListRow,
   MutationError,
@@ -233,22 +233,41 @@ export function RoyaltiesPage() {
       <PageTitle>Royalties & Finance</PageTitle>
       <MutationError message={error} />
 
-      <AddFormSection buttonLabel="Add royalty rule" panelTitle="Add royalty rule">
+      <AddFormSection
+        buttonLabel="Add royalty rule"
+        panelTitle="Add royalty rule"
+        primaryAction={{
+          label: "Create rule",
+          onClick: () => createRule.mutate(),
+          pending: createRule.isPending,
+          disabled: !ruleForm.name.trim(),
+        }}
+      >
         {({ close }) => {
           ruleCloser.bindClose(close);
           return (
-            <>
-              <Input label="Name" value={ruleForm.name} onChange={(v) => setRuleForm((f) => ({ ...f, name: v }))} />
-              <Select label="Type" value={ruleForm.rule_type} onChange={(v) => setRuleForm((f) => ({ ...f, rule_type: v }))} options={RULE_TYPES} />
-              <ToggleField
-                label="Active"
-                checked={ruleForm.is_active}
-                onChange={(checked) => setRuleForm((f) => ({ ...f, is_active: checked }))}
-              />
-              <Button onClick={() => createRule.mutate()} disabled={!ruleForm.name.trim() || createRule.isPending}>
-                Create rule
-              </Button>
-            </>
+            <div className="ed-editable-form">
+              <FormGrid columns={3}>
+                <Input
+                  label="Name"
+                  value={ruleForm.name}
+                  onChange={(v) => setRuleForm((f) => ({ ...f, name: v }))}
+                  editable
+                />
+                <Select
+                  label="Type"
+                  value={ruleForm.rule_type}
+                  onChange={(v) => setRuleForm((f) => ({ ...f, rule_type: v }))}
+                  options={RULE_TYPES}
+                  editable
+                />
+                <ToggleField
+                  label="Active"
+                  checked={ruleForm.is_active}
+                  onChange={(checked) => setRuleForm((f) => ({ ...f, is_active: checked }))}
+                />
+              </FormGrid>
+            </div>
           );
         }}
       </AddFormSection>
@@ -276,14 +295,27 @@ export function RoyaltiesPage() {
                 }
               >
                 {editing ? (
-                  <div className="ed-form-section">
-                    <Input label="Name" value={editRule.name} onChange={(v) => setEditRule((f) => ({ ...f, name: v }))} />
-                    <Select label="Type" value={editRule.rule_type} onChange={(v) => setEditRule((f) => ({ ...f, rule_type: v }))} options={RULE_TYPES} />
-                    <ToggleField
-                      label="Active"
-                      checked={editRule.is_active}
-                      onChange={(checked) => setEditRule((f) => ({ ...f, is_active: checked }))}
-                    />
+                  <div className="ed-editable-form">
+                    <FormGrid columns={3}>
+                      <Input
+                        label="Name"
+                        value={editRule.name}
+                        onChange={(v) => setEditRule((f) => ({ ...f, name: v }))}
+                        editable
+                      />
+                      <Select
+                        label="Type"
+                        value={editRule.rule_type}
+                        onChange={(v) => setEditRule((f) => ({ ...f, rule_type: v }))}
+                        options={RULE_TYPES}
+                        editable
+                      />
+                      <ToggleField
+                        label="Active"
+                        checked={editRule.is_active}
+                        onChange={(checked) => setEditRule((f) => ({ ...f, is_active: checked }))}
+                      />
+                    </FormGrid>
                   </div>
                 ) : (
                   <span>
@@ -297,31 +329,58 @@ export function RoyaltiesPage() {
         />
       </Card>
 
-      <AddFormSection buttonLabel="Record settlement" panelTitle="Record settlement">
+      <AddFormSection
+        buttonLabel="Record settlement"
+        panelTitle="Record settlement"
+        primaryAction={{
+          label: "Add settlement",
+          onClick: () => createSettlement.mutate(),
+          pending: createSettlement.isPending,
+          disabled:
+            !settlementForm.period_start || !settlementForm.period_end || !settlementForm.amount_inr,
+        }}
+      >
         {({ close }) => {
           settlementCloser.bindClose(close);
           return (
-            <>
-              <Select
-                label="Center (optional)"
-                value={settlementForm.center_id}
-                onChange={(v) => setSettlementForm((f) => ({ ...f, center_id: v }))}
-                options={centerOptions}
-                placeholder="Brand-wide"
-              />
-              <Input label="Period start" value={settlementForm.period_start} onChange={(v) => setSettlementForm((f) => ({ ...f, period_start: v }))} placeholder="YYYY-MM-DD" />
-              <Input label="Period end" value={settlementForm.period_end} onChange={(v) => setSettlementForm((f) => ({ ...f, period_end: v }))} placeholder="YYYY-MM-DD" />
-              <Input label="Amount (INR)" value={settlementForm.amount_inr} onChange={(v) => setSettlementForm((f) => ({ ...f, amount_inr: v }))} />
-              <Input label="Status" value={settlementForm.status} onChange={(v) => setSettlementForm((f) => ({ ...f, status: v }))} />
-              <Button
-                onClick={() => createSettlement.mutate()}
-                disabled={
-                  !settlementForm.period_start || !settlementForm.period_end || !settlementForm.amount_inr || createSettlement.isPending
-                }
-              >
-                Add settlement
-              </Button>
-            </>
+            <div className="ed-editable-form">
+              <FormGrid columns={3}>
+                <Select
+                  label="Center (optional)"
+                  value={settlementForm.center_id}
+                  onChange={(v) => setSettlementForm((f) => ({ ...f, center_id: v }))}
+                  options={centerOptions}
+                  placeholder="Brand-wide"
+                  editable
+                />
+                <Input
+                  label="Period start"
+                  value={settlementForm.period_start}
+                  onChange={(v) => setSettlementForm((f) => ({ ...f, period_start: v }))}
+                  placeholder="YYYY-MM-DD"
+                  editable
+                />
+                <Input
+                  label="Period end"
+                  value={settlementForm.period_end}
+                  onChange={(v) => setSettlementForm((f) => ({ ...f, period_end: v }))}
+                  placeholder="YYYY-MM-DD"
+                  editable
+                />
+                <Input
+                  label="Amount (INR)"
+                  value={settlementForm.amount_inr}
+                  onChange={(v) => setSettlementForm((f) => ({ ...f, amount_inr: v }))}
+                  editable
+                />
+                <Input
+                  label="Status"
+                  value={settlementForm.status}
+                  onChange={(v) => setSettlementForm((f) => ({ ...f, status: v }))}
+                  editable
+                />
+              </FormGrid>
+            </div>
           );
         }}
       </AddFormSection>
@@ -355,12 +414,41 @@ export function RoyaltiesPage() {
                 }
               >
                 {editing ? (
-                  <div className="ed-form-section">
-                    <Select label="Center" value={editSettlement.center_id} onChange={(v) => setEditSettlement((f) => ({ ...f, center_id: v }))} options={centerOptions} placeholder="Brand-wide" />
-                    <Input label="Period start" value={editSettlement.period_start} onChange={(v) => setEditSettlement((f) => ({ ...f, period_start: v }))} />
-                    <Input label="Period end" value={editSettlement.period_end} onChange={(v) => setEditSettlement((f) => ({ ...f, period_end: v }))} />
-                    <Input label="Amount (INR)" value={editSettlement.amount_inr} onChange={(v) => setEditSettlement((f) => ({ ...f, amount_inr: v }))} />
-                    <Input label="Status" value={editSettlement.status} onChange={(v) => setEditSettlement((f) => ({ ...f, status: v }))} />
+                  <div className="ed-editable-form">
+                    <FormGrid columns={3}>
+                      <Select
+                        label="Center"
+                        value={editSettlement.center_id}
+                        onChange={(v) => setEditSettlement((f) => ({ ...f, center_id: v }))}
+                        options={centerOptions}
+                        placeholder="Brand-wide"
+                        editable
+                      />
+                      <Input
+                        label="Period start"
+                        value={editSettlement.period_start}
+                        onChange={(v) => setEditSettlement((f) => ({ ...f, period_start: v }))}
+                        editable
+                      />
+                      <Input
+                        label="Period end"
+                        value={editSettlement.period_end}
+                        onChange={(v) => setEditSettlement((f) => ({ ...f, period_end: v }))}
+                        editable
+                      />
+                      <Input
+                        label="Amount (INR)"
+                        value={editSettlement.amount_inr}
+                        onChange={(v) => setEditSettlement((f) => ({ ...f, amount_inr: v }))}
+                        editable
+                      />
+                      <Input
+                        label="Status"
+                        value={editSettlement.status}
+                        onChange={(v) => setEditSettlement((f) => ({ ...f, status: v }))}
+                        editable
+                      />
+                    </FormGrid>
                   </div>
                 ) : (
                   <span>

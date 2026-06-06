@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
-import { fetchBrandLandingConfig } from "@/lib/brandLandingApi";
+import { fetchBrandLandingBundle } from "@/lib/brandLandingApi";
+import { isBrandLandingBundleReady, normalizeBrandLandingBundle } from "@/lib/brandLandingBundle";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
 import "@/features/marketing/marketing.css";
@@ -15,19 +16,20 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
   const tenant = useTenant();
   const brandSlug = tenant.brandSlug ?? "brand";
 
-  const { data: config, isLoading } = useQuery({
+  const { data: bundle, isLoading } = useQuery({
     queryKey: ["brand-landing", brandSlug],
-    queryFn: () => fetchBrandLandingConfig(brandSlug),
+    queryFn: () => fetchBrandLandingBundle(brandSlug),
+    select: normalizeBrandLandingBundle,
   });
 
   useEffect(() => {
-    if (config) {
-      document.documentElement.style.setProperty("--novu-yellow", config.theme.yellowGlow);
-      document.documentElement.style.setProperty("--novu-radius-section", config.theme.radiusSection);
+    if (bundle?.config) {
+      document.documentElement.style.setProperty("--novu-yellow", bundle.config.theme.yellowGlow);
+      document.documentElement.style.setProperty("--novu-radius-section", bundle.config.theme.radiusSection);
     }
-  }, [config]);
+  }, [bundle?.config]);
 
-  if (isLoading || !config) {
+  if (isLoading || !isBrandLandingBundleReady(bundle)) {
     return (
       <div className="marketing-page marketing-page--loading">
         <p>Loading…</p>
@@ -37,9 +39,9 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
 
   return (
     <div className="marketing-page">
-      <MarketingNav config={config} />
-      <Outlet context={{ config, brandSlug }} />
-      {showFooter && <FooterSection config={config} />}
+      <MarketingNav config={bundle.config} />
+      <Outlet context={{ config: bundle.config, brandSlug }} />
+      {showFooter && <FooterSection config={bundle.config} />}
     </div>
   );
 }

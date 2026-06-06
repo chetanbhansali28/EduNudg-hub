@@ -25,28 +25,8 @@ vi.mock("@/features/marketing/HomepageEditorForm", () => ({
   HomepageEditorForm: () => <div>Editor form</div>,
 }));
 
-vi.mock("@/lib/supabase", () => ({
-  getSupabase: () => ({
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          is: () => ({
-            eq: () => ({
-              order: () => ({
-                limit: () => ({
-                  maybeSingle: () => Promise.resolve({ data: null, error: null }),
-                }),
-              }),
-            }),
-          }),
-        }),
-      }),
-    }),
-  }),
-}));
-
 describe("BrandMarketingEditorPage", () => {
-  it("regression_stacked_sections_no_tabs", async () => {
+  it("regression_stacked_sections_no_tabs_or_preview", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <MemoryRouter>
@@ -57,8 +37,8 @@ describe("BrandMarketingEditorPage", () => {
     );
     expect(await screen.findByText("Brand site (franchise recruitment)")).toBeDefined();
     expect(screen.getByText("Center sites (parent enrollment template)")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Save brand site" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Save center template" })).toBeDefined();
+    expect(screen.getAllByRole("button", { name: "Save" })).toHaveLength(2);
+    expect(screen.queryByRole("link", { name: /preview/i })).toBeNull();
     expect(screen.queryByRole("tab")).toBeNull();
     expect(screen.queryByRole("tablist")).toBeNull();
   });

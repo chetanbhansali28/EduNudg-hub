@@ -3,15 +3,27 @@ import { BrandFeatureTogglesCard } from "@/features/brand/settings/BrandFeatureT
 import { BrandLogoUpload } from "./BrandLogoUpload";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, Input, MutationError, PageTitle } from "@edunudg/ui";
+import { Card, Input, MutationError, PageToolbar, SaveButton } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseMaybe } from "@/lib/supabaseResult";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+
+function useSavedFlash() {
+  const [saved, setSaved] = useState(false);
+  const flash = () => {
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 3000);
+  };
+  return { saved, flash };
+}
 
 export function BrandSettingsPage() {
   const { brandId, missingBrand } = useBrandScope();
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const loginSaved = useSavedFlash();
+  const slaSaved = useSavedFlash();
+  const themeSaved = useSavedFlash();
 
   const [loginHeadline, setLoginHeadline] = useState("");
   const [loginSubtext, setLoginSubtext] = useState("");
@@ -120,30 +132,53 @@ export function BrandSettingsPage() {
 
   return (
     <>
-      <PageTitle>Brand Settings</PageTitle>
+      <PageToolbar title="Brand Settings" />
       <MutationError message={error} />
 
       <Card title="Brand logo">
         <BrandLogoUpload brandId={brandId} currentLogoUrl={brandRow.data?.logo_url} />
       </Card>
 
-      <Card title="White-label & login copy">
+      <Card
+        title="White-label & login copy"
+        actions={
+          <SaveButton
+            onClick={() =>
+              saveSettings.mutate(
+                {
+                  login_headline: loginHeadline.trim() || null,
+                  login_subtext: loginSubtext.trim() || null,
+                },
+                { onSuccess: () => loginSaved.flash() }
+              )
+            }
+            pending={saveSettings.isPending}
+            saved={loginSaved.saved}
+          />
+        }
+      >
         <Input label="Login headline" value={loginHeadline} onChange={setLoginHeadline} />
         <Input label="Login subtext" value={loginSubtext} onChange={setLoginSubtext} />
-        <Button
-          onClick={() =>
-            saveSettings.mutate({
-              login_headline: loginHeadline.trim() || null,
-              login_subtext: loginSubtext.trim() || null,
-            })
-          }
-          disabled={saveSettings.isPending}
-        >
-          Save login copy
-        </Button>
       </Card>
 
-      <Card title="Lead SLA & timezone">
+      <Card
+        title="Lead SLA & timezone"
+        actions={
+          <SaveButton
+            onClick={() =>
+              saveSettings.mutate(
+                {
+                  lead_stale_days: Number.isFinite(staleDaysNum) && staleDaysNum > 0 ? staleDaysNum : 15,
+                  timezone: timezone.trim() || "Asia/Kolkata",
+                },
+                { onSuccess: () => slaSaved.flash() }
+              )
+            }
+            pending={saveSettings.isPending}
+            saved={slaSaved.saved}
+          />
+        }
+      >
         <Input
           label="Stale lead days after assign"
           value={leadStaleDays}
@@ -151,17 +186,6 @@ export function BrandSettingsPage() {
           placeholder="15"
         />
         <Input label="Timezone (IANA)" value={timezone} onChange={setTimezone} placeholder="Asia/Kolkata" />
-        <Button
-          onClick={() =>
-            saveSettings.mutate({
-              lead_stale_days: Number.isFinite(staleDaysNum) && staleDaysNum > 0 ? staleDaysNum : 15,
-              timezone: timezone.trim() || "Asia/Kolkata",
-            })
-          }
-          disabled={saveSettings.isPending}
-        >
-          Save SLA settings
-        </Button>
       </Card>
 
       {brandId && settings.data && (
@@ -176,11 +200,17 @@ export function BrandSettingsPage() {
         />
       )}
 
-      <Card title="Theme">
+      <Card
+        title="Theme"
+        actions={
+          <SaveButton
+            onClick={() => saveTheme.mutate(undefined, { onSuccess: () => themeSaved.flash() })}
+            pending={saveTheme.isPending}
+            saved={themeSaved.saved}
+          />
+        }
+      >
         <Input label="Primary color" value={primaryColor} onChange={setPrimaryColor} placeholder="#2563eb" />
-        <Button onClick={() => saveTheme.mutate()} disabled={saveTheme.isPending}>
-          Save theme
-        </Button>
       </Card>
     </>
   );

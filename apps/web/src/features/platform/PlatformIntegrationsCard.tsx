@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, MutationError, ToggleField, ToggleGrid } from "@edunudg/ui";
+import { Card, MutationError, SaveButton, ToggleField, ToggleGrid } from "@edunudg/ui";
 import {
   integrationsByCategory,
   mergePlatformIntegrations,
@@ -12,6 +12,7 @@ import { useMutationError } from "@/features/platform/hooks/useMutationError";
 export function PlatformIntegrationsCard() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const [saved, setSaved] = useState(false);
   const integrations = useQuery({
     queryKey: ["platform-integrations"],
     queryFn: fetchPlatformIntegrations,
@@ -29,6 +30,8 @@ export function PlatformIntegrationsCard() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform-integrations"] });
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 3000);
     },
     onError: capture,
   });
@@ -36,7 +39,10 @@ export function PlatformIntegrationsCard() {
   const grouped = integrationsByCategory();
 
   return (
-    <Card title="Integrations">
+    <Card
+      title="Integrations"
+      actions={<SaveButton onClick={() => save.mutate()} pending={save.isPending} saved={saved} />}
+    >
       <p className="ed-text-sm ed-muted">
         Turn integrations and public website features on or off. When off, the app skips the related flows — no data is
         deleted.
@@ -64,9 +70,6 @@ export function PlatformIntegrationsCard() {
               </ToggleGrid>
             </div>
           ))}
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            Save integrations
-          </Button>
           <p className="ed-text-sm ed-muted">
             {PLATFORM_INTEGRATION_CATALOG.length} integrations configured platform-wide.
           </p>

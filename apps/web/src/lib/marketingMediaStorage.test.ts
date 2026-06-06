@@ -10,6 +10,12 @@ describe("marketingMediaObjectPath", () => {
     expect(/^\d+-hero-bg\.png$/.test(path)).toBe(true);
   });
 
+  it("regression_platform_logo_uses_fixed_root_path", () => {
+    const file = new File(["x"], "logo.svg", { type: "image/svg+xml" });
+    const path = marketingMediaObjectPath({ kind: "platform-logo" }, "", file);
+    expect(path).toBe("platform-logo.svg");
+  });
+
   it("regression_brand_scope_uses_brand_uuid_folder", () => {
     const file = new File(["x"], "clip.mp4", { type: "video/mp4" });
     const path = marketingMediaObjectPath(

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Card, MutationError, ToggleField, ToggleGrid } from "@edunudg/ui";
+import { Card, MutationError, SaveButton, ToggleField, ToggleGrid } from "@edunudg/ui";
 import { FEATURE_FLAG_DEFAULTS, resolveFeatureFlags } from "@/hooks/useFeatureFlag";
 import { getSupabase } from "@/lib/supabase";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -29,6 +29,7 @@ export function BrandFeatureTogglesCard({ brandId, settingsId, settings, onSaved
     }
     return initial;
   });
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const next: Record<string, boolean> = {};
@@ -59,12 +60,19 @@ export function BrandFeatureTogglesCard({ brandId, settingsId, settings, onSaved
         if (mErr) throw mErr;
       }
     },
-    onSuccess: onSaved,
+    onSuccess: () => {
+      onSaved();
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 3000);
+    },
     onError: capture,
   });
 
   return (
-    <Card title="Features">
+    <Card
+      title="Features"
+      actions={<SaveButton onClick={() => save.mutate()} pending={save.isPending} saved={saved} />}
+    >
       <p className="ed-text-sm ed-muted">Turn modules on or off for this brand portal and center sites.</p>
       <MutationError message={error} />
       <ToggleGrid>
@@ -77,9 +85,6 @@ export function BrandFeatureTogglesCard({ brandId, settingsId, settings, onSaved
           />
         ))}
       </ToggleGrid>
-      <Button onClick={() => save.mutate()} disabled={save.isPending}>
-        Save features
-      </Button>
     </Card>
   );
 }

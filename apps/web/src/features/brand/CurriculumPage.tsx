@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
@@ -9,11 +9,12 @@ import {
   Input,
   ListRow,
   MutationError,
-  PageGrid,
-  PageGridFull,
   PageTitle,
-  Select,
+  SaveButton,
+  DraftPublishedToggle,
   Textarea,
+  FormActions,
+  Select,
 } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
@@ -23,6 +24,7 @@ import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { useBrandScope } from "./hooks/useBrandScope";
+import { versionPublishValue } from "@/lib/curriculumVersionStatus";
 
 type CurriculumStatus = "draft" | "published" | "archived";
 
@@ -68,11 +70,18 @@ interface Lesson {
   sort_order: number;
 }
 
-const VERSION_STATUS: { value: CurriculumStatus; label: string }[] = [
-  { value: "draft", label: "Draft" },
-  { value: "published", label: "Published" },
-  { value: "archived", label: "Archived" },
-];
+const LESSON_CONTENT_TYPES = [
+  { value: "article", label: "Article" },
+  { value: "video", label: "Video" },
+  { value: "quiz", label: "Quiz" },
+  { value: "worksheet", label: "Worksheet" },
+] as const;
+
+type LessonContentType = (typeof LESSON_CONTENT_TYPES)[number]["value"];
+
+function topicsToString(topics: string[] | unknown): string {
+  return Array.isArray(topics) ? (topics as string[]).join(", ") : "";
+}
 
 export function CurriculumPage() {
   const { brandId, missingBrand } = useBrandScope();
@@ -104,9 +113,16 @@ export function CurriculumPage() {
   const [selectedModuleId, setSelectedModuleId] = useState("");
 
   const [levelName, setLevelName] = useState("");
+  const [editLevelName, setEditLevelName] = useState("");
   const [moduleTitle, setModuleTitle] = useState("");
+  const [editModuleTitle, setEditModuleTitle] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
   const [lessonDuration, setLessonDuration] = useState("");
+  const [lessonContentType, setLessonContentType] = useState<LessonContentType>("article");
+  const [editLessonTitle, setEditLessonTitle] = useState("");
+  const [editLessonDuration, setEditLessonDuration] = useState("");
+  const [editLessonContentType, setEditLessonContentType] = useState<LessonContentType>("article");
+  const [editingLessonId, setEditingLessonId] = useState("");
   const programCloser = useAddFormCloser();
   const levelCloser = useAddFormCloser();
   const moduleCloser = useAddFormCloser();
@@ -179,26 +195,90 @@ export function CurriculumPage() {
     },
   });
 
+  const loadLevelIntoEditForm = (l: Level) => {
+    setEditLevelName(l.name);
+    setLevelAbacusCode(l.abacus_level_code ?? "");
+    setLevelTopics(topicsToString(l.topics_covered));
+    setLevelWhyTake(l.why_take ?? "");
+    setLevelWhatLearn(l.what_you_learn ?? "");
+    setLevelVideoUrl(l.marketing_video_url ?? "");
+  };
+
+  const selectedProgram = (programs.data ?? []).find((p) => p.id === selectedProgramId);
+  const selectedVersion = (versions.data ?? []).find((v) => v.id === selectedVersionId);
+  const selectedLevel = (levels.data ?? []).find((l) => l.id === selectedLevelId);
+  const selectedModule = (modules.data ?? []).find((m) => m.id === selectedModuleId);
+
+  useEffect(() => {
+    const list = programs.data;
+    if (!selectedProgramId && list?.length) {
+      setSelectedProgramId(list[0].id);
+    }
+  }, [programs.data, selectedProgramId]);
+
+  useEffect(() => {
+    const list = versions.data;
+    if (selectedProgramId && !selectedVersionId && list?.length) {
+      setSelectedVersionId(list[0].id);
+      setSelectedLevelId("");
+      setSelectedModuleId("");
+    }
+  }, [versions.data, selectedProgramId, selectedVersionId]);
+
+  useEffect(() => {
+    const list = levels.data;
+    if (selectedVersionId && !selectedLevelId && list?.length) {
+      const first = list[0];
+      setSelectedLevelId(first.id);
+      setSelectedModuleId("");
+      loadLevelIntoEditForm(first);
+    }
+  }, [levels.data, selectedVersionId, selectedLevelId]);
+
+  useEffect(() => {
+    const list = modules.data;
+    if (selectedLevelId && !selectedModuleId && list?.length) {
+      const first = list[0];
+      setSelectedModuleId(first.id);
+      setEditModuleTitle(first.title);
+    }
+  }, [modules.data, selectedLevelId, selectedModuleId]);
+
   const invalidatePrograms = () => qc.invalidateQueries({ queryKey: ["programs", brandId] });
 
   const createProgram = useMutation({
     mutationFn: async () => {
       if (!brandId) throw new Error("Brand required");
       clear();
-      const { error: mErr } = await getSupabase().from("programs").insert({
+      const { data: created, error: mErr } = await getSupabase()
+        .from("programs")
+        .insert({
+          brand_id: brandId,
+          name: programName.trim(),
+          description: programDesc.trim() || null,
+          why_take: programWhyTake.trim() || null,
+          what_you_learn: programWhatLearn.trim() || null,
+          marketing_video_url: programVideoUrl.trim() || null,
+        })
+        .select("id")
+        .single();
+      if (mErr || !created?.id) throw mErr ?? new Error("Program not created");
+
+      const { error: versionErr } = await getSupabase().from("curriculum_versions").insert({
         brand_id: brandId,
-        name: programName.trim(),
-        description: programDesc.trim() || null,
-        why_take: programWhyTake.trim() || null,
-        what_you_learn: programWhatLearn.trim() || null,
-        marketing_video_url: programVideoUrl.trim() || null,
+        program_id: created.id,
+        version_number: 1,
+        status: "draft",
       });
-      if (mErr) throw mErr;
+      if (versionErr) throw versionErr;
     },
     onSuccess: () => {
       invalidatePrograms();
       setProgramName("");
       setProgramDesc("");
+      setProgramWhyTake("");
+      setProgramWhatLearn("");
+      setProgramVideoUrl("");
       programCloser.closeAddForm();
     },
     onError: capture,
@@ -333,6 +413,7 @@ export function CurriculumPage() {
       const { error: mErr } = await getSupabase()
         .from("levels")
         .update({
+          name: editLevelName.trim(),
           abacus_level_code: levelAbacusCode.trim() || null,
           topics_covered: topics,
           why_take: levelWhyTake.trim() || null,
@@ -389,7 +470,21 @@ export function CurriculumPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["modules", selectedLevelId] });
       setSelectedModuleId("");
+      setEditModuleTitle("");
     },
+    onError: capture,
+  });
+
+  const updateModule = useMutation({
+    mutationFn: async (id: string) => {
+      clear();
+      const { error: mErr } = await getSupabase()
+        .from("modules")
+        .update({ title: editModuleTitle.trim() })
+        .eq("id", id);
+      if (mErr) throw mErr;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["modules", selectedLevelId] }),
     onError: capture,
   });
 
@@ -405,7 +500,7 @@ export function CurriculumPage() {
         title: lessonTitle.trim(),
         sort_order: order,
         duration_minutes: duration,
-        content_type: "article",
+        content_type: lessonContentType,
       });
       if (mErr) throw mErr;
     },
@@ -413,6 +508,7 @@ export function CurriculumPage() {
       qc.invalidateQueries({ queryKey: ["lessons", selectedModuleId] });
       setLessonTitle("");
       setLessonDuration("");
+      setLessonContentType("article");
       lessonCloser.closeAddForm();
     },
     onError: capture,
@@ -428,35 +524,94 @@ export function CurriculumPage() {
     onError: capture,
   });
 
+  const updateLesson = useMutation({
+    mutationFn: async (id: string) => {
+      clear();
+      const duration = editLessonDuration.trim() ? parseInt(editLessonDuration, 10) : null;
+      const { error: mErr } = await getSupabase()
+        .from("lessons")
+        .update({
+          title: editLessonTitle.trim(),
+          duration_minutes: duration,
+          content_type: editLessonContentType,
+        })
+        .eq("id", id);
+      if (mErr) throw mErr;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["lessons", selectedModuleId] }),
+    onError: capture,
+  });
+
   if (missingBrand) {
     return <p className="ed-empty">Brand context not found.</p>;
   }
 
-  const programOptions = (programs.data ?? []).map((p) => ({ value: p.id, label: p.name }));
+  const versionOptions = (versions.data ?? []).map((v) => ({
+    value: v.id,
+    label: `v${v.version_number} (${v.status})`,
+  }));
+  const levelOptions = (levels.data ?? []).map((l) => ({
+    value: l.id,
+    label: l.abacus_level_code ? `${l.name} · ${l.abacus_level_code}` : l.name,
+  }));
+  const moduleOptions = (modules.data ?? []).map((m) => ({ value: m.id, label: m.title }));
 
   return (
     <>
       <PageTitle>Curriculum</PageTitle>
       <MutationError message={error} />
 
-      <PageGridFull>
-      <Card title="Programs">
-        <AddFormSection buttonLabel="Add program" panelTitle="Add program">
+      <p className="ed-text-sm ed-muted ed-curriculum-intro">
+        Manage the full curriculum tree in five layers: <strong>programs</strong> (marketing overview) →{" "}
+        <strong>curriculum_versions</strong> (draft / published snapshots) → <strong>levels</strong> →{" "}
+        <strong>modules</strong> → <strong>lessons</strong>. Select a program below, then work through versions,
+        levels, modules, and lessons in order. A draft version v1 is created automatically with each new program.
+      </p>
+
+      <Card title="Programs (programs)">
+        <AddFormSection
+          buttonLabel="Add program"
+          panelTitle="Add program"
+          actionsPlacement="footer"
+          primaryAction={{
+            label: "Add program",
+            onClick: () => createProgram.mutate(),
+            pending: createProgram.isPending,
+            disabled: !programName.trim(),
+          }}
+        >
           {({ close }) => {
             programCloser.bindClose(close);
             return (
-              <>
-                <FormGrid>
-                  <Input label="Program name" value={programName} onChange={setProgramName} />
-                  <Input label="Marketing video URL" value={programVideoUrl} onChange={setProgramVideoUrl} placeholder="https://…" />
+              <div className="ed-editable-form">
+                <FormGrid columns={2}>
+                  <Input label="Program name" value={programName} onChange={setProgramName} editable />
+                  <Input
+                    label="Marketing video URL"
+                    value={programVideoUrl}
+                    onChange={setProgramVideoUrl}
+                    placeholder="https://…"
+                    editable
+                  />
                 </FormGrid>
-                <Input label="Description" value={programDesc} onChange={setProgramDesc} />
-                <Textarea label="Why take abacus (program overview)" value={programWhyTake} onChange={setProgramWhyTake} rows={3} />
-                <Textarea label="What you will learn" value={programWhatLearn} onChange={setProgramWhatLearn} rows={3} />
-                <Button onClick={() => createProgram.mutate()} disabled={!programName.trim() || createProgram.isPending}>
-                  Add program
-                </Button>
-              </>
+                <Textarea
+                  label="Description"
+                  value={programDesc}
+                  onChange={setProgramDesc}
+                  rows={6}
+                  editable
+                />
+                <FormGrid columns={2}>
+                  <Textarea
+                    label="Why take this program (overview)"
+                    value={programWhyTake}
+                    onChange={setProgramWhyTake}
+                    rows={3}
+                    editable
+                  />
+                  <Textarea label="What you will learn" value={programWhatLearn} onChange={setProgramWhatLearn} rows={3} editable />
+                </FormGrid>
+              </div>
             );
           }}
         </AddFormSection>
@@ -467,41 +622,80 @@ export function CurriculumPage() {
             const editing = editingProgramId === p.id;
             return (
               <ListRow
+                className={editing ? "ed-list-row--edit-full" : undefined}
                 aside={
-                  <CrudRowActions
-                    editing={editing}
-                    onEdit={() => {
-                      setEditingProgramId(p.id);
-                      setEditProgram({
-                        name: p.name,
-                        description: p.description ?? "",
-                        whyTake: p.why_take ?? "",
-                        whatYouLearn: p.what_you_learn ?? "",
-                        marketingVideoUrl: p.marketing_video_url ?? "",
-                      });
-                    }}
-                    onSave={() => updateProgram.mutate(p.id)}
-                    onCancel={() => setEditingProgramId(null)}
-                    onDelete={() => deleteProgram.mutate(p.id)}
-                    deleteTitle="Archive this program?"
-                    deleteDescription="The program will be archived and hidden from active curriculum lists."
-                    saveDisabled={!editProgram.name.trim() || updateProgram.isPending}
-                  />
+                  editing ? undefined : (
+                    <CrudRowActions
+                      editing={false}
+                      onEdit={() => {
+                        setEditingProgramId(p.id);
+                        setEditProgram({
+                          name: p.name,
+                          description: p.description ?? "",
+                          whyTake: p.why_take ?? "",
+                          whatYouLearn: p.what_you_learn ?? "",
+                          marketingVideoUrl: p.marketing_video_url ?? "",
+                        });
+                      }}
+                      onSave={() => updateProgram.mutate(p.id)}
+                      onCancel={() => setEditingProgramId(null)}
+                      onDelete={() => deleteProgram.mutate(p.id)}
+                      deleteTitle="Archive this program?"
+                      deleteDescription="The program will be archived and hidden from active curriculum lists."
+                      saveDisabled={!editProgram.name.trim() || updateProgram.isPending}
+                    />
+                  )
                 }
               >
                 {editing ? (
-                  <div className="ed-form-section">
-                    <FormGrid>
-                      <Input label="Name" value={editProgram.name} onChange={(v) => setEditProgram((f) => ({ ...f, name: v }))} />
+                  <div className="ed-editable-form">
+                    <FormGrid columns={2}>
+                      <Input
+                        label="Name"
+                        value={editProgram.name}
+                        onChange={(v) => setEditProgram((f) => ({ ...f, name: v }))}
+                        editable
+                      />
                       <Input
                         label="Marketing video URL"
                         value={editProgram.marketingVideoUrl}
                         onChange={(v) => setEditProgram((f) => ({ ...f, marketingVideoUrl: v }))}
+                        editable
                       />
                     </FormGrid>
-                    <Textarea label="Why take abacus" value={editProgram.whyTake} onChange={(v) => setEditProgram((f) => ({ ...f, whyTake: v }))} rows={2} />
-                    <Textarea label="What you will learn" value={editProgram.whatYouLearn} onChange={(v) => setEditProgram((f) => ({ ...f, whatYouLearn: v }))} rows={2} />
-                    <Input label="Description" value={editProgram.description} onChange={(v) => setEditProgram((f) => ({ ...f, description: v }))} />
+                    <Textarea
+                      label="Description"
+                      value={editProgram.description}
+                      onChange={(v) => setEditProgram((f) => ({ ...f, description: v }))}
+                      rows={6}
+                      editable
+                    />
+                    <FormGrid columns={2}>
+                      <Textarea
+                        label="Why take this program"
+                        value={editProgram.whyTake}
+                        onChange={(v) => setEditProgram((f) => ({ ...f, whyTake: v }))}
+                        rows={4}
+                        editable
+                      />
+                      <Textarea
+                        label="What you will learn"
+                        value={editProgram.whatYouLearn}
+                        onChange={(v) => setEditProgram((f) => ({ ...f, whatYouLearn: v }))}
+                        rows={4}
+                        editable
+                      />
+                    </FormGrid>
+                    <FormActions>
+                      <SaveButton
+                        onClick={() => updateProgram.mutate(p.id)}
+                        pending={updateProgram.isPending}
+                        disabled={!editProgram.name.trim()}
+                      />
+                      <Button variant="ghost" onClick={() => setEditingProgramId(null)}>
+                        Cancel
+                      </Button>
+                    </FormActions>
                   </div>
                 ) : (
                   <button
@@ -512,6 +706,7 @@ export function CurriculumPage() {
                       setSelectedVersionId("");
                       setSelectedLevelId("");
                       setSelectedModuleId("");
+                      setEditingLessonId("");
                     }}
                   >
                     <strong>{p.name}</strong>
@@ -523,11 +718,87 @@ export function CurriculumPage() {
           }}
         />
       </Card>
-      </PageGridFull>
 
-      <PageGrid cols={3}>
+      {selectedProgramId && selectedProgram && (
+        <Card title="Curriculum structure">
+          <p className="ed-text-sm ed-muted">
+            Use the selectors to jump between items, or click a row in each section to edit details.
+          </p>
+          <div className="ed-curriculum-structure" aria-label="Current curriculum path">
+            <span className="ed-curriculum-structure__step">
+              <Badge tone="success">Program</Badge> {selectedProgram.name}
+            </span>
+            {selectedVersion && (
+              <>
+                <span className="ed-curriculum-structure__sep">→</span>
+                <span className="ed-curriculum-structure__step">
+                  <Badge>Version</Badge> v{selectedVersion.version_number} ({selectedVersion.status})
+                </span>
+              </>
+            )}
+            {selectedLevel && (
+              <>
+                <span className="ed-curriculum-structure__sep">→</span>
+                <span className="ed-curriculum-structure__step">
+                  <Badge>Level</Badge> {selectedLevel.name}
+                </span>
+              </>
+            )}
+            {selectedModule && (
+              <>
+                <span className="ed-curriculum-structure__sep">→</span>
+                <span className="ed-curriculum-structure__step">
+                  <Badge>Module</Badge> {selectedModule.title}
+                </span>
+              </>
+            )}
+          </div>
+          <FormGrid columns={3}>
+            <Select
+              label="Version (curriculum_versions)"
+              value={selectedVersionId}
+              onChange={(id) => {
+                setSelectedVersionId(id);
+                setSelectedLevelId("");
+                setSelectedModuleId("");
+              }}
+              options={versionOptions}
+              placeholder="Select version"
+              editable
+            />
+            <Select
+              label="Level (levels)"
+              value={selectedLevelId}
+              onChange={(id) => {
+                setSelectedLevelId(id);
+                setSelectedModuleId("");
+                const level = (levels.data ?? []).find((l) => l.id === id);
+                if (level) loadLevelIntoEditForm(level);
+              }}
+              options={levelOptions}
+              placeholder={selectedVersionId ? "Select level" : "Select a version first"}
+              editable
+            />
+            <Select
+              label="Module (modules)"
+              value={selectedModuleId}
+              onChange={(id) => {
+                setSelectedModuleId(id);
+                setEditingLessonId("");
+                const mod = (modules.data ?? []).find((m) => m.id === id);
+                setEditModuleTitle(mod?.title ?? "");
+              }}
+              options={moduleOptions}
+              placeholder={selectedLevelId ? "Select module" : "Select a level first"}
+              editable
+            />
+          </FormGrid>
+        </Card>
+      )}
+
       {selectedProgramId && (
-        <Card title="Versions">
+        <div className="ed-curriculum-stack">
+        <Card title="Versions (curriculum_versions)">
           <Button onClick={() => createVersion.mutate()} disabled={createVersion.isPending}>
             New version
           </Button>
@@ -538,11 +809,12 @@ export function CurriculumPage() {
               <ListRow
                 aside={
                   <>
-                    <Select
-                      label=""
-                      value={v.status}
+                    {v.status === "archived" && <Badge tone="warning">Archived</Badge>}
+                    <DraftPublishedToggle
+                      value={versionPublishValue(v.status)}
                       onChange={(status) => updateVersionStatus.mutate({ id: v.id, status })}
-                      options={VERSION_STATUS}
+                      disabled={updateVersionStatus.isPending}
+                      aria-label={`Version ${v.version_number} publication status`}
                     />
                     <DeleteConfirmButton
                       onConfirm={() => deleteVersion.mutate(v.id)}
@@ -567,27 +839,51 @@ export function CurriculumPage() {
             )}
           />
         </Card>
-      )}
 
       {selectedVersionId && (
-        <Card title="Levels">
-          <AddFormSection buttonLabel="Add level" panelTitle="Add level">
+        <Card
+          title="Levels (levels)"
+        >
+          <AddFormSection
+            buttonLabel="Add level"
+            panelTitle="Add level"
+            actionsPlacement="footer"
+            primaryAction={{
+              label: "Add level",
+              onClick: () => createLevel.mutate(),
+              pending: createLevel.isPending,
+              disabled: !levelName.trim(),
+            }}
+          >
             {({ close }) => {
               levelCloser.bindClose(close);
               return (
-                <>
-                  <FormGrid>
-                    <Input label="Level name" value={levelName} onChange={setLevelName} placeholder="Level 1 — Foundations" />
-                    <Input label="Abacus level code" value={levelAbacusCode} onChange={setLevelAbacusCode} placeholder="L1" />
+                <div className="ed-editable-form">
+                  <FormGrid columns={3}>
+                    <Input
+                      label="Level name"
+                      value={levelName}
+                      onChange={setLevelName}
+                      placeholder="Level 1 — Foundations"
+                      editable
+                    />
+                    <Input label="Level code" value={levelAbacusCode} onChange={setLevelAbacusCode} placeholder="L1" editable />
+                    <Input
+                      label="Topics covered (comma-separated)"
+                      value={levelTopics}
+                      onChange={setLevelTopics}
+                      placeholder="Finger basics, Small friends, …"
+                      editable
+                    />
                   </FormGrid>
-                  <Input label="Topics covered (comma-separated)" value={levelTopics} onChange={setLevelTopics} placeholder="Finger basics, Small friends, …" />
-                  <Textarea label="Why this level" value={levelWhyTake} onChange={setLevelWhyTake} rows={2} />
-                  <Textarea label="What you will learn" value={levelWhatLearn} onChange={setLevelWhatLearn} rows={2} />
-                  <Input label="Level marketing video URL" value={levelVideoUrl} onChange={setLevelVideoUrl} />
-                  <Button onClick={() => createLevel.mutate()} disabled={!levelName.trim() || createLevel.isPending}>
-                    Add level
-                  </Button>
-                </>
+                  <FormGrid columns={2}>
+                    <Textarea label="Why this level" value={levelWhyTake} onChange={setLevelWhyTake} rows={2} editable />
+                    <Textarea label="What you will learn" value={levelWhatLearn} onChange={setLevelWhatLearn} rows={2} editable />
+                  </FormGrid>
+                  <FormGrid columns={3}>
+                    <Input label="Level marketing video URL" value={levelVideoUrl} onChange={setLevelVideoUrl} editable />
+                  </FormGrid>
+                </div>
               );
             }}
           </AddFormSection>
@@ -608,12 +904,7 @@ export function CurriculumPage() {
                   onClick={() => {
                     setSelectedLevelId(l.id);
                     setSelectedModuleId("");
-                    const topics = Array.isArray(l.topics_covered) ? (l.topics_covered as string[]).join(", ") : "";
-                    setLevelAbacusCode(l.abacus_level_code ?? "");
-                    setLevelTopics(topics);
-                    setLevelWhyTake(l.why_take ?? "");
-                    setLevelWhatLearn(l.what_you_learn ?? "");
-                    setLevelVideoUrl(l.marketing_video_url ?? "");
+                    loadLevelIntoEditForm(l);
                   }}
                 >
                   {l.name}
@@ -624,25 +915,56 @@ export function CurriculumPage() {
             )}
           />
           {selectedLevelId && (
-            <Button variant="ghost" onClick={() => updateLevelDetails.mutate(selectedLevelId)} disabled={updateLevelDetails.isPending}>
-              Save level details
-            </Button>
+            <div className="ed-editable-form">
+              <FormGrid columns={3}>
+                <Input label="Level name" value={editLevelName} onChange={setEditLevelName} editable />
+                <Input label="Level code" value={levelAbacusCode} onChange={setLevelAbacusCode} placeholder="L1" editable />
+                <Input
+                  label="Topics covered (comma-separated)"
+                  value={levelTopics}
+                  onChange={setLevelTopics}
+                  placeholder="Finger basics, Small friends, …"
+                  editable
+                />
+              </FormGrid>
+              <FormGrid columns={2}>
+                <Textarea label="Why this level" value={levelWhyTake} onChange={setLevelWhyTake} rows={3} editable />
+                <Textarea label="What you will learn" value={levelWhatLearn} onChange={setLevelWhatLearn} rows={3} editable />
+              </FormGrid>
+              <Input label="Level marketing video URL" value={levelVideoUrl} onChange={setLevelVideoUrl} editable />
+              <FormActions>
+                <SaveButton
+                  onClick={() => updateLevelDetails.mutate(selectedLevelId)}
+                  pending={updateLevelDetails.isPending}
+                  disabled={!editLevelName.trim()}
+                />
+              </FormActions>
+            </div>
           )}
         </Card>
       )}
 
       {selectedLevelId && (
-        <Card title="Modules">
-          <AddFormSection buttonLabel="Add module" panelTitle="Add module">
+        <Card title="Modules (modules)">
+          <AddFormSection
+            buttonLabel="Add module"
+            panelTitle="Add module"
+            actionsPlacement="footer"
+            primaryAction={{
+              label: "Add module",
+              onClick: () => createModule.mutate(),
+              pending: createModule.isPending,
+              disabled: !moduleTitle.trim(),
+            }}
+          >
             {({ close }) => {
               moduleCloser.bindClose(close);
               return (
-                <>
-                  <Input label="Module title" value={moduleTitle} onChange={setModuleTitle} />
-                  <Button onClick={() => createModule.mutate()} disabled={!moduleTitle.trim() || createModule.isPending}>
-                    Add module
-                  </Button>
-                </>
+                <div className="ed-editable-form">
+                  <FormGrid columns={3}>
+                    <Input label="Module title" value={moduleTitle} onChange={setModuleTitle} editable />
+                  </FormGrid>
+                </div>
               );
             }}
           </AddFormSection>
@@ -660,7 +982,10 @@ export function CurriculumPage() {
                 <button
                   type="button"
                   className="ed-link-button"
-                  onClick={() => setSelectedModuleId(m.id)}
+                  onClick={() => {
+                    setSelectedModuleId(m.id);
+                    setEditModuleTitle(m.title);
+                  }}
                 >
                   {m.title}
                   {selectedModuleId === m.id && <Badge tone="success"> Selected</Badge>}
@@ -668,41 +993,106 @@ export function CurriculumPage() {
               </ListRow>
             )}
           />
+          {selectedModuleId && (
+            <div className="ed-editable-form">
+              <FormGrid columns={3}>
+                <Input label="Module title" value={editModuleTitle} onChange={setEditModuleTitle} editable />
+              </FormGrid>
+              <FormActions>
+                <SaveButton
+                  onClick={() => updateModule.mutate(selectedModuleId)}
+                  pending={updateModule.isPending}
+                  disabled={!editModuleTitle.trim()}
+                />
+              </FormActions>
+            </div>
+          )}
         </Card>
       )}
 
       {selectedModuleId && (
-        <Card title="Lessons">
-          <AddFormSection buttonLabel="Add lesson" panelTitle="Add lesson">
+        <Card title="Lessons (lessons)">
+          <AddFormSection
+            buttonLabel="Add lesson"
+            panelTitle="Add lesson"
+            actionsPlacement="footer"
+            primaryAction={{
+              label: "Add lesson",
+              onClick: () => createLesson.mutate(),
+              pending: createLesson.isPending,
+              disabled: !lessonTitle.trim(),
+            }}
+          >
             {({ close }) => {
               lessonCloser.bindClose(close);
               return (
-                <>
-                  <Input label="Lesson title" value={lessonTitle} onChange={setLessonTitle} />
-                  <Input label="Duration (minutes)" value={lessonDuration} onChange={setLessonDuration} />
-                  <Button onClick={() => createLesson.mutate()} disabled={!lessonTitle.trim() || createLesson.isPending}>
-                    Add lesson
-                  </Button>
-                </>
+                <div className="ed-editable-form">
+                  <FormGrid columns={3}>
+                    <Input label="Lesson title" value={lessonTitle} onChange={setLessonTitle} editable />
+                    <Input label="Duration (minutes)" value={lessonDuration} onChange={setLessonDuration} editable />
+                    <Select
+                      label="Content type"
+                      value={lessonContentType}
+                      onChange={setLessonContentType}
+                      options={[...LESSON_CONTENT_TYPES]}
+                      editable
+                    />
+                  </FormGrid>
+                </div>
               );
             }}
           </AddFormSection>
           <DataList
             items={lessons.data ?? []}
+            empty="No lessons yet."
             render={(l) => (
               <ListRow
                 aside={<DeleteConfirmButton onConfirm={() => deleteLesson.mutate(l.id)} />}
               >
-                <span>
+                <button
+                  type="button"
+                  className="ed-link-button"
+                  onClick={() => {
+                    setEditingLessonId(l.id);
+                    setEditLessonTitle(l.title);
+                    setEditLessonDuration(l.duration_minutes != null ? String(l.duration_minutes) : "");
+                    setEditLessonContentType((l.content_type as LessonContentType) ?? "article");
+                  }}
+                >
                   {l.title}
                   {l.duration_minutes != null && <small className="ed-muted"> · {l.duration_minutes} min</small>}
-                </span>
+                  {l.content_type && <small className="ed-muted"> · {l.content_type}</small>}
+                  {editingLessonId === l.id && <Badge tone="success"> Selected</Badge>}
+                </button>
               </ListRow>
             )}
           />
+          {editingLessonId && (
+            <div className="ed-editable-form">
+              <FormGrid columns={3}>
+                <Input label="Lesson title" value={editLessonTitle} onChange={setEditLessonTitle} editable />
+                <Input label="Duration (minutes)" value={editLessonDuration} onChange={setEditLessonDuration} editable />
+                <Select
+                  label="Content type"
+                  value={editLessonContentType}
+                  onChange={setEditLessonContentType}
+                  options={[...LESSON_CONTENT_TYPES]}
+                  editable
+                />
+              </FormGrid>
+              <FormActions>
+                <SaveButton
+                  onClick={() => updateLesson.mutate(editingLessonId)}
+                  pending={updateLesson.isPending}
+                  disabled={!editLessonTitle.trim()}
+                />
+              </FormActions>
+            </div>
+          )}
         </Card>
       )}
-      </PageGrid>
+        </div>
+      )}
     </>
   );
 }

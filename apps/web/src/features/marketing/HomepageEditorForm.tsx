@@ -43,9 +43,17 @@ export function HomepageEditorForm({
     <div className="ed-homepage-editor">
       <EditorAccordion title="Site">
         <Input
-          label="Site name (logo)"
+          label="Site name"
           value={config.meta.siteName}
           onChange={(v) => onChange({ ...config, meta: { ...config.meta, siteName: v } })}
+        />
+        <MarketingMediaField
+          label="Site logo"
+          value={config.meta.logoUrl ?? ""}
+          onChange={(v) => onChange({ ...config, meta: { ...config.meta, logoUrl: v || null } })}
+          mediaType="image"
+          uploadSubdir=""
+          uploadScope={{ kind: "platform-logo" }}
         />
       </EditorAccordion>
 

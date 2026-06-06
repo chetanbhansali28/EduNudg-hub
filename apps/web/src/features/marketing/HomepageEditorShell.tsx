@@ -1,19 +1,35 @@
 import type { ReactNode } from "react";
-import { Button, PageToolbar } from "@edunudg/ui";
+import { PageToolbar, SaveButton } from "@edunudg/ui";
 
 type ShellProps = {
   title: string;
   subtitle?: ReactNode;
+  /** Extra toolbar actions; when omitted, `onSave` renders a Save button in the toolbar. */
   actions?: ReactNode;
+  onSave?: () => void;
+  savePending?: boolean;
+  saved?: boolean;
   children: ReactNode;
 };
 
 /** Shared layout wrapper for platform and brand homepage editors. */
-export function HomepageEditorShell({ title, subtitle, actions, children }: ShellProps) {
+export function HomepageEditorShell({
+  title,
+  subtitle,
+  actions,
+  onSave,
+  savePending,
+  saved,
+  children,
+}: ShellProps) {
+  const toolbarActions =
+    actions ??
+    (onSave ? <SaveButton onClick={onSave} pending={savePending} saved={saved} /> : undefined);
+
   return (
     <div className="ed-homepage-editor-shell">
       <PageToolbar title={title} subtitle={subtitle}>
-        {actions}
+        {toolbarActions}
       </PageToolbar>
       {children}
     </div>
@@ -23,7 +39,6 @@ export function HomepageEditorShell({ title, subtitle, actions, children }: Shel
 type PanelProps = {
   title: string;
   description?: ReactNode;
-  saveLabel: string;
   onSave: () => void;
   savePending?: boolean;
   saved?: boolean;
@@ -34,7 +49,6 @@ type PanelProps = {
 export function HomepageEditorPanel({
   title,
   description,
-  saveLabel,
   onSave,
   savePending,
   saved,
@@ -47,9 +61,7 @@ export function HomepageEditorPanel({
           <h3 className="ed-homepage-editor-panel__title">{title}</h3>
           {description ? <div className="ed-homepage-editor-panel__desc">{description}</div> : null}
         </div>
-        <Button onClick={onSave} disabled={savePending}>
-          {savePending ? "Saving…" : saved ? "Saved" : saveLabel}
-        </Button>
+        <SaveButton onClick={onSave} pending={savePending} saved={saved} />
       </div>
       {children}
     </section>

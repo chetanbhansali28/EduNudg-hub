@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@edunudg/ui";
+import { Button, SaveButton } from "@edunudg/ui";
 import { ConfirmDeleteDialog } from "@/features/shared/ConfirmDeleteDialog";
 
 export function CrudRowActions({
@@ -28,9 +28,7 @@ export function CrudRowActions({
   if (editing) {
     return (
       <>
-        <Button onClick={onSave} disabled={saveDisabled}>
-          {saveLabel}
-        </Button>
+        <SaveButton onClick={onSave} disabled={saveDisabled} label={saveLabel} />
         <Button variant="ghost" onClick={onCancel}>
           Cancel
         </Button>
@@ -40,7 +38,7 @@ export function CrudRowActions({
 
   return (
     <>
-      <Button variant="ghost" onClick={onEdit}>
+      <Button variant="primary" onClick={onEdit}>
         Edit
       </Button>
       {onDelete && (

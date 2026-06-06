@@ -194,7 +194,7 @@ export function FeatureScrollSection({ sections, phoneFrameUrl }: Props) {
   }, [sections.length, updateIndex]);
 
   return (
-    <section id="features" className="novu-features-panel" ref={wrapRef}>
+    <section id="features" data-nav-theme="light" className="novu-features-panel" ref={wrapRef}>
       <div className="novu-features-stack">
         {sections.map((section, i) => (
           <article

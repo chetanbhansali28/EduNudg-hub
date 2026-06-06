@@ -77,7 +77,7 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
             <div className="novu-franchise-apply__grid">
               <Input label="Full name" value={fullName} onChange={setFullName} autoComplete="name" />
               <Input label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" />
-              <Input label="Phone" value={phone} onChange={setPhone} placeholder="+91…" autoComplete="tel" />
+              <Input label="Phone" value={phone} onChange={setPhone} placeholder="9890200000" autoComplete="tel" />
               <Input label="Preferred city" value={city} onChange={setCity} autoComplete="address-level2" />
               <Input label="Proposed franchise name" value={proposedName} onChange={setProposedName} />
               <Input label="Pincode" value={pincode} onChange={setPincode} />

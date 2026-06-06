@@ -30,7 +30,7 @@ describe("ManualFranchiseInquiryCard", () => {
     expect(screen.getByLabelText("Pincode")).toBeDefined();
     expect(screen.getByLabelText("State")).toBeDefined();
     expect(screen.getByLabelText("Address")).toBeDefined();
-    expect(screen.getByLabelText("Prior experience")).toBeDefined();
+    expect(screen.getByLabelText("Phone").getAttribute("placeholder")).toBe("9890200000");
     expect(screen.getByLabelText("Message (optional)")).toBeDefined();
 
     fireEvent.change(screen.getByLabelText("Full name"), { target: { value: "Asha Rao" } });

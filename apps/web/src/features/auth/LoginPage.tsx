@@ -198,7 +198,7 @@ export function LoginPage() {
               ) : null}
               {showWhatsappAuth ? (
                 <>
-                  <Input label="Mobile (+91…)" value={phone} onChange={setPhone} placeholder="+919876543210" />
+                  <Input label="Mobile number" value={phone} onChange={setPhone} placeholder="9890200000" />
                   <Button
                     variant="ghost"
                     block

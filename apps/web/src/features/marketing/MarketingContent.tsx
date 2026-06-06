@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { FeatureScrollSection } from "./FeatureScrollSection";
@@ -13,6 +12,8 @@ import { HighlightsScroller } from "./HighlightsScroller";
 import { PlatformPricingSection } from "./PlatformPricingSection";
 import { PrivacySection } from "./PrivacySection";
 import { TestimonialsCarousel } from "./TestimonialsCarousel";
+import { CurriculumPublicSection } from "./CurriculumPublicSection";
+import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { useScrollReveal } from "./useScrollReveal";
 
 function FaqList({ items }: { items: { question: string; answer: string }[] }) {
@@ -37,9 +38,24 @@ type Props = {
   brandSlug?: string | null;
   centerSlug?: string | null;
   centerProfile?: CenterPublicProfile | null;
+  publicCurriculum?: PublicCurriculumProgram[];
 };
 
-export function MarketingContent({ config, portalMode, brandSlug, centerSlug, centerProfile }: Props) {
+export function MarketingContent(props: Props) {
+  if (!props.config?.hero) {
+    return <p className="marketing-page--loading-inline">Loading…</p>;
+  }
+  return <MarketingContentView {...props} config={props.config} />;
+}
+
+function MarketingContentView({
+  config,
+  portalMode,
+  brandSlug,
+  centerSlug,
+  centerProfile,
+  publicCurriculum = [],
+}: Props) {
   useScrollReveal(true);
 
   return (
@@ -80,6 +96,10 @@ export function MarketingContent({ config, portalMode, brandSlug, centerSlug, ce
         />
 
         <HighlightsScroller cards={config.showcaseCards} />
+
+        {(portalMode === "brand" || portalMode === "center") && (
+          <CurriculumPublicSection programs={publicCurriculum} />
+        )}
 
         {portalMode === "platform" && (
           <PlatformPricingSection ctaHref={config.nav.ctaHref} ctaLabel={config.nav.ctaLabel} />

@@ -73,7 +73,7 @@ export function CenterStudentRegistrationSection({ brandSlug, centerSlug }: Prop
             <MutationError message={error} />
             <div className="novu-franchise-apply__grid">
               <Input label="Parent name" value={parentName} onChange={setParentName} />
-              <Input label="WhatsApp number" value={whatsapp} onChange={setWhatsapp} placeholder="+91…" />
+              <Input label="WhatsApp number" value={whatsapp} onChange={setWhatsapp} placeholder="9890200000" />
               <Input label="Email" value={email} onChange={setEmail} type="email" />
               <Input label="Child name" value={childName} onChange={setChildName} />
               <Input label="City (optional)" value={city} onChange={setCity} />

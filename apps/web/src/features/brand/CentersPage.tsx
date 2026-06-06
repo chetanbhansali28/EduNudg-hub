@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   DataList,
+  FormGrid,
   Input,
   ListRow,
   MutationError,
@@ -153,10 +154,10 @@ export function CentersPage() {
             return (
               <ListRow
                 aside={
-                  <div className="ed-form-section">
+                  <>
                     {!editing && (
                       <Link to={`/app/centers/${c.slug}`}>
-                        <Button variant="ghost">View</Button>
+                        <Button variant="primary">View</Button>
                       </Link>
                     )}
                     <CrudRowActions
@@ -168,16 +169,50 @@ export function CentersPage() {
                       deleteDescription="The center will be removed from active lists. Historical data is kept."
                       saveDisabled={!editForm.slug.trim() || !editForm.name.trim() || updateCenter.isPending}
                     />
-                  </div>
+                  </>
                 }
               >
                 {editing ? (
-                  <div className="ed-form-section">
-                    <Input label="Name" value={editForm.name} onChange={(v) => setEditForm((f) => ({ ...f, name: v }))} />
-                    <Input label="Slug" value={editForm.slug} onChange={(v) => setEditForm((f) => ({ ...f, slug: v }))} />
-                    <Select label="Status" value={editForm.status} onChange={(v) => setEditForm((f) => ({ ...f, status: v }))} options={STATUS_OPTIONS} />
-                    <Input label="City" value={editForm.city} onChange={(v) => setEditForm((f) => ({ ...f, city: v }))} />
-                    <Input label="Address" value={editForm.address_line1} onChange={(v) => setEditForm((f) => ({ ...f, address_line1: v }))} />
+                  <div className="ed-editable-form">
+                    <FormGrid columns={3}>
+                      <Input
+                        label="Name"
+                        value={editForm.name}
+                        onChange={(v) => setEditForm((f) => ({ ...f, name: v }))}
+                        editable
+                      />
+                      <Input
+                        label="Slug"
+                        value={editForm.slug}
+                        onChange={(v) => setEditForm((f) => ({ ...f, slug: v }))}
+                        editable
+                      />
+                      <Select
+                        label="Status"
+                        value={editForm.status}
+                        onChange={(v) => setEditForm((f) => ({ ...f, status: v }))}
+                        options={STATUS_OPTIONS}
+                        editable
+                      />
+                      <Input
+                        label="City"
+                        value={editForm.city}
+                        onChange={(v) => setEditForm((f) => ({ ...f, city: v }))}
+                        editable
+                      />
+                      <Input
+                        label="Address"
+                        value={editForm.address_line1}
+                        onChange={(v) => setEditForm((f) => ({ ...f, address_line1: v }))}
+                        editable
+                      />
+                      <Input
+                        label="Region"
+                        value={editForm.region}
+                        onChange={(v) => setEditForm((f) => ({ ...f, region: v }))}
+                        editable
+                      />
+                    </FormGrid>
                   </div>
                 ) : (
                   <div>

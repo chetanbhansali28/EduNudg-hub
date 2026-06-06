@@ -72,7 +72,7 @@ export function platformNavSections(pathname: string): ShellNavSection[] {
       [
         { path: "/admin/brands", label: "Brands", icon: <IconBuilding /> },
         { path: "/admin/subscriptions", label: "Subscriptions", icon: <IconWallet /> },
-        { path: "/admin/revenue", label: "Revenue & Usage", icon: <IconChart />, badge: 20 },
+        { path: "/admin/revenue", label: "Revenue & Usage", icon: <IconChart /> },
         { path: "/admin/audit", label: "Audit Logs", icon: <IconClipboard /> },
       ],
       pathname
@@ -92,10 +92,16 @@ export function brandNavSections(pathname: string): ShellNavSection[] {
   return [
     section("Main menu", [{ path: "/app", label: "Home", icon: <IconHome /> }], pathname),
     section(
+      "Leads",
+      [
+        { path: "/app/franchise-applications", label: "Franchise leads", icon: <IconClipboard /> },
+        { path: "/app/leads", label: "Student leads", icon: <IconUsers /> },
+      ],
+      pathname
+    ),
+    section(
       "Features",
       [
-        { path: "/app/leads", label: "Student Leads", icon: <IconUsers /> },
-        { path: "/app/franchise-applications", label: "Franchise Applications", icon: <IconClipboard /> },
         { path: "/app/curriculum", label: "Curriculum", icon: <IconBook /> },
         { path: "/app/centers", label: "Franchise Centers", icon: <IconBuilding /> },
         { path: "/app/royalties", label: "Royalties", icon: <IconWallet /> },

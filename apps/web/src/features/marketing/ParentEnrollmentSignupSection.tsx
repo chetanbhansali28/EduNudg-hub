@@ -72,7 +72,7 @@ export function ParentEnrollmentSignupSection({ brandSlug, centerSlug }: Props) 
                 autoComplete="name"
               />
               <Input label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" />
-              <Input label="Phone" value={phone} onChange={setPhone} placeholder="+91…" autoComplete="tel" />
+              <Input label="Phone" value={phone} onChange={setPhone} placeholder="9890200000" autoComplete="tel" />
               <Input label="Child's name" value={childName} onChange={setChildName} autoComplete="off" />
               <Input
                 label="Child's age"

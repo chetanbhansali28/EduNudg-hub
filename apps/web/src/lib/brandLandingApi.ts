@@ -1,8 +1,13 @@
 import { getSupabase } from "@/lib/supabase";
 import { buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
+import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
+import type { BrandLandingBundle } from "@/lib/brandLandingBundle";
+import { applyCanonicalSiteName, applyCurriculumNavLink } from "@/lib/marketingPublicSite";
 import type { HomepageConfig } from "@/types/homepage";
+
+export type { PublicCurriculumProgram, BrandLandingBundle };
 
 type BrandLandingRow = {
   brand_id?: string;
@@ -11,9 +16,35 @@ type BrandLandingRow = {
   brand_logo_url?: string | null;
   landing?: Partial<HomepageConfig>;
   success_stories?: unknown;
+  curriculum?: unknown;
 };
 
-export async function fetchBrandLandingConfig(brandSlug: string): Promise<HomepageConfig | null> {
+function buildBundle(
+  brandName: string,
+  row: BrandLandingRow | null,
+  stories: ReturnType<typeof parsePublicSuccessStories>,
+  curriculum: PublicCurriculumProgram[]
+): BrandLandingBundle {
+  const canonicalName = row?.brand_name ?? brandName;
+  const config = buildBrandLandingConfig(
+    canonicalName,
+    row?.landing ?? undefined,
+    row?.brand_logo_url ?? null
+  );
+  const merged = applyCanonicalSiteName(
+    {
+      ...config,
+      testimonials: mergePublishedSuccessStories(config.testimonials, stories),
+    },
+    canonicalName
+  );
+  return {
+    config: applyCurriculumNavLink(merged, curriculum.length > 0),
+    publicCurriculum: curriculum,
+  };
+}
+
+export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandLandingBundle | null> {
   if (!brandSlug) return null;
 
   const fallbackName = brandSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -23,33 +54,55 @@ export async function fetchBrandLandingConfig(brandSlug: string): Promise<Homepa
     const stories = parsePublicSuccessStories(
       data && typeof data === "object" ? (data as BrandLandingRow).success_stories : undefined
     );
+    const curriculum = parsePublicCurriculum(
+      data && typeof data === "object" ? (data as BrandLandingRow).curriculum : undefined
+    );
 
     if (error || !data || typeof data !== "object") {
       const config = buildBrandLandingConfig(fallbackName);
+      const merged = applyCanonicalSiteName(
+        {
+          ...config,
+          testimonials: mergePublishedSuccessStories(config.testimonials, stories),
+        },
+        fallbackName
+      );
       return {
-        ...config,
-        testimonials: mergePublishedSuccessStories(config.testimonials, stories),
+        config: applyCurriculumNavLink(merged, curriculum.length > 0),
+        publicCurriculum: curriculum,
       };
     }
 
     const row = data as BrandLandingRow;
     if (!row.brand_name) {
       const config = buildBrandLandingConfig(fallbackName);
+      const merged = applyCanonicalSiteName(
+        {
+          ...config,
+          testimonials: mergePublishedSuccessStories(config.testimonials, stories),
+        },
+        fallbackName
+      );
       return {
-        ...config,
-        testimonials: mergePublishedSuccessStories(config.testimonials, stories),
+        config: applyCurriculumNavLink(merged, curriculum.length > 0),
+        publicCurriculum: curriculum,
       };
     }
 
-    const config = buildBrandLandingConfig(row.brand_name, row.landing ?? undefined, row.brand_logo_url ?? null);
-    return {
-      ...config,
-      testimonials: mergePublishedSuccessStories(config.testimonials, stories),
-    };
+    return buildBundle(fallbackName, row, stories, curriculum);
   } catch {
     const config = buildBrandLandingConfig(fallbackName);
-    return config;
+    return {
+      config: applyCurriculumNavLink(applyCanonicalSiteName(config, fallbackName), false),
+      publicCurriculum: [],
+    };
   }
+}
+
+/** @deprecated Use fetchBrandLandingBundle */
+export async function fetchBrandLandingConfig(brandSlug: string): Promise<HomepageConfig | null> {
+  const bundle = await fetchBrandLandingBundle(brandSlug);
+  return bundle?.config ?? null;
 }
 
 export type FranchiseInquiryInput = {

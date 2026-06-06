@@ -5,7 +5,6 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconMenu,
-  IconSearch,
   IconShield,
   IconX,
 } from "./icons";
@@ -156,14 +155,6 @@ function SidebarPanel({
           )}
         </div>
       </div>
-
-      <label className="ed-sidebar__search">
-        <IconSearch width={16} height={16} aria-hidden />
-        <input type="search" placeholder="Search" aria-label="Search" />
-        <span className="ed-sidebar__search-kbd" aria-hidden>
-          ⌘K
-        </span>
-      </label>
 
       <nav className="ed-sidebar__nav" aria-label="Main navigation">
         {navSections.map((section) => (

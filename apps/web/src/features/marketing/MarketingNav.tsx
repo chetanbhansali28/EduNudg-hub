@@ -22,8 +22,8 @@ function MenuIcon({ open }: { open: boolean }) {
 export function MarketingNav({ config }: Props) {
   const theme = useNavTheme();
   const heroIntroComplete = useHeroIntroComplete();
-  const isLight = theme === "light";
-  const navCtaVariant = isLight ? "on-dark" : "on-light";
+  const isLightBg = theme === "light";
+  const navCtaVariant = isLightBg ? "on-light" : "on-dark";
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const menuWrapRef = useRef<HTMLDivElement>(null);
@@ -90,14 +90,14 @@ export function MarketingNav({ config }: Props) {
               <img src={logoUrl} alt="" className="novu-nav-bar__logo-img" width={40} height={40} />
             ) : (
               <span className="novu-nav-bar__logo-mark" aria-hidden>
-                {config.meta.siteName.charAt(0).toUpperCase()}
+                {config.meta.siteName.charAt(0)}
               </span>
             )}
-            <span className="novu-nav-bar__wordmark">{config.meta.siteName.toLowerCase()}</span>
+            <span className="novu-nav-bar__wordmark">{config.meta.siteName}</span>
           </Link>
         </div>
 
-        <div className={`novu-nav-bar__pill ${isLight ? "novu-nav-bar__pill--light" : ""}`}>
+        <div className={`novu-nav-bar__pill ${isLightBg ? "novu-nav-bar__pill--on-white" : ""}`}>
           {config.nav.links.map((l, i) => (
             <a key={`${l.label}-${l.href}-${i}`} href={l.href} className="novu-nav-bar__link">
               {l.label}

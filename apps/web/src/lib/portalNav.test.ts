@@ -20,7 +20,7 @@ describe("portalNav", () => {
 
   it("marks brand analytics inactive on dashboard", () => {
     const sections = brandNavSections("/app");
-    const analytics = sections[1]?.items.find((i) => i.label === "Analytics");
+    const analytics = sections.find((s) => s.title === "Features")?.items.find((i) => i.label === "Analytics");
     expect(analytics?.active).toBe(false);
   });
 
@@ -30,20 +30,30 @@ describe("portalNav", () => {
     expect(sections[0]?.items[0]?.href).toBe("/app");
   });
 
-  it("regression_platform_revenue_badge_matches_fundora_nav", () => {
+  it("regression_platform_revenue_has_no_placeholder_badge", () => {
     const sections = platformNavSections("/admin/revenue");
     const revenue = sections[1]?.items.find((i) => i.label === "Revenue & Usage");
-    expect(revenue?.badge).toBe(20);
+    expect(revenue?.badge).toBeUndefined();
     expect(revenue?.active).toBe(true);
   });
 
-  it("includes brand student leads and franchise applications", () => {
+  it("regression_brand_leads_section_groups_franchise_and_student", () => {
     const sections = brandNavSections("/app/leads");
-    const leads = sections[1]?.items.find((i) => i.label === "Student Leads");
-    const franchise = sections[1]?.items.find((i) => i.label === "Franchise Applications");
-    expect(leads?.href).toBe("/app/leads");
-    expect(leads?.active).toBe(true);
-    expect(franchise?.href).toBe("/app/franchise-applications");
+    const leadsSection = sections.find((s) => s.title === "Leads");
+    const featuresSection = sections.find((s) => s.title === "Features");
+
+    expect(leadsSection?.items.map((i) => i.label)).toEqual(["Franchise leads", "Student leads"]);
+    expect(leadsSection?.items.find((i) => i.href === "/app/leads")?.active).toBe(true);
+    expect(leadsSection?.items.find((i) => i.href === "/app/franchise-applications")?.active).toBe(false);
+
+    expect(featuresSection?.items.some((i) => i.href === "/app/leads")).toBe(false);
+    expect(featuresSection?.items.some((i) => i.href === "/app/franchise-applications")).toBe(false);
+  });
+
+  it("regression_brand_franchise_leads_active_under_leads_section", () => {
+    const sections = brandNavSections("/app/franchise-applications");
+    const leadsSection = sections.find((s) => s.title === "Leads");
+    expect(leadsSection?.items.find((i) => i.label === "Franchise leads")?.active).toBe(true);
   });
 
   it("center nav uses leads instead of admissions", () => {
@@ -55,14 +65,14 @@ describe("portalNav", () => {
 
   it("includes brand success stories nav item", () => {
     const sections = brandNavSections("/app/success-stories");
-    const stories = sections[1]?.items.find((i) => i.label === "Success stories");
+    const stories = sections.find((s) => s.title === "Features")?.items.find((i) => i.label === "Success stories");
     expect(stories?.href).toBe("/app/success-stories");
     expect(stories?.active).toBe(true);
   });
 
   it("includes brand marketing pages nav item", () => {
     const sections = brandNavSections("/app/homepage");
-    const marketing = sections[2]?.items.find((i) => i.label === "Homepage");
+    const marketing = sections.find((s) => s.title === "General")?.items.find((i) => i.label === "Homepage");
     expect(marketing?.href).toBe("/app/homepage");
     expect(marketing?.active).toBe(true);
   });
@@ -94,8 +104,18 @@ describe("portalNav", () => {
       BRAND_FEATURE_FLAGS
     );
     const features = sections.find((s) => s.title === "Features");
+    const leads = sections.find((s) => s.title === "Leads");
     expect(features?.items.some((i) => i.href === "/app/campaigns")).toBe(false);
-    expect(features?.items.some((i) => i.href === "/app/leads")).toBe(true);
+    expect(leads?.items.some((i) => i.href === "/app/leads")).toBe(true);
+  });
+
+  it("regression_filterNav_hides_leads_section_when_both_lead_flags_off", () => {
+    const sections = filterNavByFeatureFlags(
+      brandNavSections("/app"),
+      { ...FEATURE_FLAG_DEFAULTS, student_leads: false, franchise_applications: false },
+      BRAND_FEATURE_FLAGS
+    );
+    expect(sections.some((s) => s.title === "Leads")).toBe(false);
   });
 
   it("student learn nav has dashboard and profile", () => {

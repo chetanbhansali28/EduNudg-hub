@@ -24,6 +24,7 @@ export function CenterLandingPage() {
       brandSlug={brandSlug}
       centerSlug={centerSlug}
       centerProfile={bundle.profile}
+      publicCurriculum={bundle.publicCurriculum}
     />
   );
 }

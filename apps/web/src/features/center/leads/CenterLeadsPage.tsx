@@ -249,7 +249,7 @@ export function CenterLeadsPage() {
                   <Button onClick={() => setConvertTarget(selected)} disabled={convert.isPending}>
                     Convert to student
                   </Button>
-                  <Button variant="ghost" onClick={() => setLostMode(true)}>
+                  <Button variant="danger" onClick={() => setLostMode(true)}>
                     Mark lost
                   </Button>
                 </div>

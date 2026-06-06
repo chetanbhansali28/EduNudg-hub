@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, DataList, FormGrid, Input, ListRow, MutationError, Select } from "@edunudg/ui";
+import { Card, DataList, FormGrid, Input, ListRow, MutationError, Select } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -104,7 +104,15 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
     <Card title="Student progress & competitions">
       <p className="ed-text-sm ed-muted">Records appear on the student learn dashboard for linked parent accounts.</p>
       <MutationError message={error} />
-      <AddFormSection buttonLabel="Record progress" panelTitle="Record progress">
+      <AddFormSection
+        buttonLabel="Record progress"
+        panelTitle="Record progress"
+        primaryAction={{
+          onClick: () => saveProgress.mutate(),
+          pending: saveProgress.isPending,
+          disabled: !studentId || !levelName.trim(),
+        }}
+      >
         {({ close }) => {
           progressCloser.bindClose(close);
           return (
@@ -128,15 +136,21 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
                   ]}
                 />
               </FormGrid>
-              <Button onClick={() => saveProgress.mutate()} disabled={!studentId || !levelName.trim() || saveProgress.isPending}>
-                Save progress
-              </Button>
             </>
           );
         }}
       </AddFormSection>
 
-      <AddFormSection buttonLabel="Record competition entry" panelTitle="Record competition entry">
+      <AddFormSection
+        buttonLabel="Record competition entry"
+        panelTitle="Record competition entry"
+        primaryAction={{
+          label: "Save",
+          onClick: () => saveCompetition.mutate(),
+          pending: saveCompetition.isPending,
+          disabled: !studentId || !competitionId,
+        }}
+      >
         {({ close }) => {
           competitionCloser.bindClose(close);
           return (
@@ -158,12 +172,6 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
                 />
                 <Input label="Result / rank" value={resultRank} onChange={setResultRank} placeholder="e.g. 2nd place" />
               </FormGrid>
-              <Button
-                onClick={() => saveCompetition.mutate()}
-                disabled={!studentId || !competitionId || saveCompetition.isPending}
-              >
-                Record competition entry
-              </Button>
             </>
           );
         }}

@@ -1,5 +1,9 @@
 import { getSupabase } from "@/lib/supabase";
 import { buildCenterLandingConfig } from "@/lib/centerLandingDefaults";
+import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
+import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
+import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
+import { applyCanonicalSiteName, applyCurriculumNavLink } from "@/lib/marketingPublicSite";
 import type { HomepageConfig } from "@/types/homepage";
 
 export type CenterPublicProfile = {
@@ -19,6 +23,7 @@ export type CenterPublicProfile = {
 export type CenterLandingBundle = {
   config: HomepageConfig;
   profile: CenterPublicProfile;
+  publicCurriculum: PublicCurriculumProgram[];
 };
 
 type CenterLandingRow = {
@@ -35,11 +40,17 @@ type CenterLandingRow = {
   center_contact_phone?: string | null;
   center_short_description?: string | null;
   landing?: Partial<HomepageConfig>;
+  success_stories?: unknown;
+  curriculum?: unknown;
 };
 
+function slugFallbackLabel(slug: string): string {
+  return slug.replace(/-/g, " ");
+}
+
 function fallbackProfile(brandSlug: string, centerSlug: string): CenterPublicProfile {
-  const fallbackCenter = centerSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  const fallbackBrand = brandSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const fallbackCenter = slugFallbackLabel(centerSlug);
+  const fallbackBrand = slugFallbackLabel(brandSlug);
   return {
     centerId: "",
     centerSlug,
@@ -55,42 +66,92 @@ function fallbackProfile(brandSlug: string, centerSlug: string): CenterPublicPro
   };
 }
 
+function applyCanonicalCenterName(
+  config: HomepageConfig,
+  centerName: string,
+  brandName: string
+): HomepageConfig {
+  const year = new Date().getFullYear();
+  return applyCanonicalSiteName(
+    {
+      ...config,
+      footer: {
+        ...config.footer,
+        copyright: `© ${year} ${centerName}. Part of ${brandName}.`,
+      },
+    },
+    centerName
+  );
+}
+
+function buildConfigWithStories(
+  centerName: string,
+  brandName: string,
+  city: string | null,
+  landing: Partial<HomepageConfig> | undefined,
+  logoUrl: string | null,
+  stories: ReturnType<typeof parsePublicSuccessStories>,
+  curriculumCount: number
+): HomepageConfig {
+  const config = buildCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
+  const merged = applyCanonicalCenterName(
+    {
+      ...config,
+      testimonials: mergePublishedSuccessStories(config.testimonials, stories),
+    },
+    centerName,
+    brandName
+  );
+  return applyCurriculumNavLink(merged, curriculumCount > 0);
+}
+
 export async function fetchCenterLandingBundle(
   brandSlug: string,
   centerSlug: string
 ): Promise<CenterLandingBundle | null> {
   if (!brandSlug || !centerSlug) return null;
 
-  const fallbackCenter = centerSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-  const fallbackBrand = brandSlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const fallbackCenter = slugFallbackLabel(centerSlug);
+  const fallbackBrand = slugFallbackLabel(brandSlug);
 
   try {
     const { data, error } = await getSupabase().rpc("get_center_landing_public", {
       p_brand_slug: brandSlug,
       p_center_slug: centerSlug,
     });
+    const stories = parsePublicSuccessStories(
+      data && typeof data === "object" ? (data as CenterLandingRow).success_stories : undefined
+    );
+    const curriculum = parsePublicCurriculum(
+      data && typeof data === "object" ? (data as CenterLandingRow).curriculum : undefined
+    );
+
     if (error || !data || typeof data !== "object") {
       return {
-        config: buildCenterLandingConfig(fallbackCenter, fallbackBrand, null),
+        config: buildConfigWithStories(fallbackCenter, fallbackBrand, null, undefined, null, stories, curriculum.length),
         profile: fallbackProfile(brandSlug, centerSlug),
+        publicCurriculum: curriculum,
       };
     }
 
     const row = data as CenterLandingRow;
     if (!row.center_name || !row.brand_name) {
       return {
-        config: buildCenterLandingConfig(fallbackCenter, fallbackBrand, null),
+        config: buildConfigWithStories(fallbackCenter, fallbackBrand, null, undefined, null, stories, curriculum.length),
         profile: fallbackProfile(brandSlug, centerSlug),
+        publicCurriculum: curriculum,
       };
     }
 
     return {
-      config: buildCenterLandingConfig(
+      config: buildConfigWithStories(
         row.center_name,
         row.brand_name,
         row.center_city ?? null,
         row.landing ?? undefined,
-        row.brand_logo_url ?? null
+        row.brand_logo_url ?? null,
+        stories,
+        curriculum.length
       ),
       profile: {
         centerId: row.center_id ?? "",
@@ -105,11 +166,17 @@ export async function fetchCenterLandingBundle(
         brandName: row.brand_name,
         brandSlug: row.brand_slug ?? brandSlug,
       },
+      publicCurriculum: curriculum,
     };
   } catch {
+    const config = buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
     return {
-      config: buildCenterLandingConfig(fallbackCenter, fallbackBrand, null),
+      config: applyCurriculumNavLink(
+        applyCanonicalCenterName(config, fallbackCenter, fallbackBrand),
+        false
+      ),
       profile: fallbackProfile(brandSlug, centerSlug),
+      publicCurriculum: [],
     };
   }
 }

@@ -51,14 +51,12 @@ function SuggestionButton({
       : `Nearby in ${center.city ?? "city"} — ${center.name} (Δ${center.distance_last3 ?? 0})`;
 
   return (
-    <li>
-      <button type="button" className="ed-text-sm" onClick={() => onSelect(center.center_id)}>
+    <li className="ed-suggestion-list__item">
+      <Button onClick={() => onSelect(center.center_id)}>
         {label}
-        {center.address_line1 && (
-          <span className="ed-muted"> · {center.address_line1}</span>
-        )}
+        {center.address_line1 && <span className="ed-muted"> · {center.address_line1}</span>}
         {center.pincode && <span className="ed-muted"> · {center.pincode}</span>}
-      </button>
+      </Button>
     </li>
   );
 }
@@ -295,12 +293,11 @@ export function StudentLeadsPage() {
             ) : (
               <div className="ed-form-section">
                 {selected.status === "lost" ? (
-                  <Button variant="ghost" onClick={() => reopen.mutate(selected.id)} disabled={reopen.isPending}>
+                  <Button onClick={() => reopen.mutate(selected.id)} disabled={reopen.isPending}>
                     Reopen
                   </Button>
                 ) : selected.status !== "converted" ? (
                   <Button
-                    variant="ghost"
                     onClick={() => {
                       setAssignMode(true);
                       setIsReallocate(showReassign);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, DataList, FormGrid, Input, ListRow, MutationError, PageTitle, Select, Textarea } from "@edunudg/ui";
+import { Card, DataList, FormGrid, Input, ListRow, MutationError, PageTitle, Select, Textarea } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useTenant } from "@/bootstrap/TenantProvider";
@@ -75,7 +75,15 @@ export function CenterAssessmentsPage() {
     <>
       <PageTitle>Assessments</PageTitle>
       <MutationError message={error} />
-      <AddFormSection buttonLabel="Record assessment" panelTitle="Record assessment">
+      <AddFormSection
+        buttonLabel="Record assessment"
+        panelTitle="Record assessment"
+        primaryAction={{
+          onClick: () => save.mutate(),
+          pending: save.isPending,
+          disabled: !studentId,
+        }}
+      >
         {({ close }) => {
           bindClose(close);
           return (
@@ -93,9 +101,6 @@ export function CenterAssessmentsPage() {
                 <Input label="Max score" value={maxScore} onChange={setMaxScore} type="number" />
               </FormGrid>
               <Textarea label="Notes" value={notes} onChange={setNotes} rows={2} />
-              <Button onClick={() => save.mutate()} disabled={!studentId || save.isPending}>
-                Save assessment
-              </Button>
             </>
           );
         }}

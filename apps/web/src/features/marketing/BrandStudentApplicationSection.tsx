@@ -75,7 +75,7 @@ export function BrandStudentApplicationSection({ brandSlug }: Props) {
             <MutationError message={error} />
             <div className="novu-franchise-apply__grid">
               <Input label="Parent name" value={parentName} onChange={setParentName} />
-              <Input label="WhatsApp number" value={whatsapp} onChange={setWhatsapp} placeholder="+91…" />
+              <Input label="WhatsApp number" value={whatsapp} onChange={setWhatsapp} placeholder="9890200000" />
               <Input label="Email" value={email} onChange={setEmail} type="email" />
               <Input label="City" value={city} onChange={setCity} />
               <Input label="Pincode" value={pincode} onChange={setPincode} placeholder="6 digits" />

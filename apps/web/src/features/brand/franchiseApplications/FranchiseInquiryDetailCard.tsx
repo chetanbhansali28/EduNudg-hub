@@ -107,7 +107,7 @@ export function FranchiseInquiryDetailCard({
           <div className="ed-inquiry-detail__actions">
             <Input label="Rejection reason (required)" value={rejectReason} onChange={onRejectReasonChange} />
             <div className="ed-form-section">
-              <Button onClick={onConfirmReject} disabled={!rejectReason.trim() || rejectPending}>
+              <Button variant="danger" onClick={onConfirmReject} disabled={!rejectReason.trim() || rejectPending}>
                 {rejectPending ? "Rejecting…" : "Confirm reject"}
               </Button>
               <Button variant="ghost" onClick={onCancelAction}>
@@ -128,7 +128,7 @@ export function FranchiseInquiryDetailCard({
                 <Button onClick={onApprove} disabled={approvePending}>
                   {approvePending ? "Provisioning…" : "Approve & create center"}
                 </Button>
-                <Button variant="ghost" onClick={onReject}>
+                <Button variant="danger" onClick={onReject}>
                   Reject
                 </Button>
               </>

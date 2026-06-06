@@ -81,6 +81,70 @@ export function Button({
   );
 }
 
+/** Primary save action with consistent pending / saved labels for admin forms. */
+export function SaveButton({
+  onClick,
+  pending = false,
+  saved = false,
+  disabled,
+  label = "Save",
+}: {
+  onClick: () => void;
+  pending?: boolean;
+  saved?: boolean;
+  disabled?: boolean;
+  label?: string;
+}) {
+  return (
+    <Button onClick={onClick} disabled={disabled ?? pending}>
+      {pending ? "Saving…" : saved ? "Saved" : label}
+    </Button>
+  );
+}
+
+/** Right-aligned row for form submit actions (Save, etc.). */
+export function FormActions({ children }: { children: ReactNode }) {
+  return <div className="ed-form-actions">{children}</div>;
+}
+
+export type DraftPublishedValue = "draft" | "published";
+
+/** Adjacent Draft / Published controls using primary + ghost button styles. */
+export function DraftPublishedToggle({
+  value,
+  onChange,
+  disabled,
+  "aria-label": ariaLabel = "Publication status",
+}: {
+  value: DraftPublishedValue;
+  onChange: (value: DraftPublishedValue) => void;
+  disabled?: boolean;
+  "aria-label"?: string;
+}) {
+  return (
+    <div className="ed-toggle-choice" role="group" aria-label={ariaLabel}>
+      <button
+        type="button"
+        className={`ed-btn ed-toggle-choice__btn${value === "draft" ? " ed-btn--primary" : " ed-btn--ghost"}`}
+        aria-pressed={value === "draft"}
+        disabled={disabled}
+        onClick={() => onChange("draft")}
+      >
+        Draft
+      </button>
+      <button
+        type="button"
+        className={`ed-btn ed-toggle-choice__btn${value === "published" ? " ed-btn--primary" : " ed-btn--ghost"}`}
+        aria-pressed={value === "published"}
+        disabled={disabled}
+        onClick={() => onChange("published")}
+      >
+        Published
+      </button>
+    </div>
+  );
+}
+
 export function Card({ title, children, actions }: { title?: string; children: ReactNode; actions?: ReactNode }) {
   return (
     <div className="ed-card">
@@ -272,9 +336,17 @@ export function PageToolbar({
   );
 }
 
-export function ListRow({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
+export function ListRow({
+  children,
+  aside,
+  className,
+}: {
+  children: ReactNode;
+  aside?: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="ed-list-row">
+    <div className={["ed-list-row", className].filter(Boolean).join(" ")}>
       <div className="ed-list-row__main">{children}</div>
       {aside ? <div className="ed-list-row__aside">{aside}</div> : null}
     </div>
@@ -313,15 +385,17 @@ export function Textarea({
   onChange,
   rows = 4,
   placeholder,
+  editable = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   rows?: number;
   placeholder?: string;
+  editable?: boolean;
 }) {
   return (
-    <label className="ed-field">
+    <label className={`ed-field${editable ? " ed-field--editable" : ""}`}>
       <span className="ed-field__label">{label}</span>
       <textarea
         className="ed-field__input"

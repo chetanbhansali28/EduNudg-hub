@@ -20,7 +20,7 @@ export function buildCenterLandingConfig(
     },
     nav: {
       links: [
-        { label: "Why abacus", href: "#features" },
+        { label: "Why us", href: "#features" },
         { label: "Parent stories", href: "#testimonials" },
         { label: "FAQ", href: "#faq" },
         { label: "Enroll", href: "#enroll" },
