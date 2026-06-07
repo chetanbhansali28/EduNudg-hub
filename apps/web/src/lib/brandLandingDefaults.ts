@@ -1,5 +1,6 @@
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
+import { ABACUS_CLASSIC_SECTION_DEFAULTS, mergeSectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig } from "@/types/homepage";
 
@@ -137,4 +138,198 @@ export function buildBrandLandingConfig(
     ...merged,
     featureSections: withDefaultFeatureVideos(merged.featureSections),
   };
+}
+
+/** Default landing content for Abacus Classic theme brands. */
+export function buildAbacusClassicLandingPartial(brandName: string): Partial<HomepageConfig> {
+  return {
+    meta: {
+      siteName: brandName,
+      fontSans: "Inter",
+      fontSerif: "Instrument Serif",
+    },
+    theme: {
+      bgColor: "#f5f7fb",
+      accent: "#1e40af",
+      muted: "#64748b",
+      ctaBg: "#facc15",
+      ctaFg: "#1a1a1a",
+      yellowGlow: "#facc15",
+      radiusSection: "1rem",
+    },
+    nav: {
+      links: [
+        { label: "Programs", href: "#programs" },
+        { label: "Why us", href: "#features" },
+        { label: "Leadership", href: "#founders" },
+        { label: "FAQ", href: "#faq" },
+      ],
+      ctaLabel: "Book free demo",
+      ctaHref: "enroll",
+      secondaryCtaLabel: "Apply franchise",
+      secondaryCtaHref: "apply",
+      adminHref: "/login",
+    },
+    hero: {
+      line1: "Make children super fast in",
+      line1Serif: "maths.",
+      line2: "",
+      line2Serif: "",
+      subtitle: `Start your own educational center with low investment and build a trusted ${brandName} learning community.`,
+      ctaLabel: "Book free demo",
+      ctaHref: "enroll",
+      secondaryCtaLabel: "Apply franchise",
+      secondaryCtaHref: "apply",
+      badge: "FOR AGED 6–14 YEARS",
+      backgroundImageUrl: "",
+      phoneFrameUrl: "",
+    },
+    featureSections: [
+      {
+        id: "levels",
+        title: "Complete abacus in",
+        titleSerif: "4 levels.",
+        body: "Structured progression from foundations to competition-ready mental math.",
+      },
+      {
+        id: "vedic",
+        title: "Vedic maths techniques",
+        titleSerif: "included.",
+        body: "Speed tricks and tables mastery bundled with the abacus program.",
+      },
+      {
+        id: "competition",
+        title: "National level",
+        titleSerif: "competitions.",
+        body: "Students compete annually with scholarships and recognition.",
+      },
+      {
+        id: "franchise",
+        title: "Low investment",
+        titleSerif: "franchise.",
+        body: "Teacher training, business training, and lifetime support from launch to success.",
+      },
+    ],
+    trustMedia: {
+      eyebrow: "MEDIA RECOGNITION",
+      title: "Why families trust",
+      titleHighlight: brandName,
+      intro: `${brandName} delivers holistic cognitive development with certified instructors and a proven curriculum.`,
+      youtubeUrl: "",
+      cards: [
+        {
+          title: "50,000+ students trained",
+          subtitle: "Growing network of learners across India.",
+          accentColor: "#2563eb",
+        },
+        {
+          title: "Lightning fast calculations",
+          subtitle: "Students solve complex sums mentally in seconds.",
+          accentColor: "#eab308",
+        },
+        {
+          title: "National competitions",
+          subtitle: "Prestigious prizes and scholarships for top rankers.",
+          accentColor: "#22c55e",
+        },
+      ],
+    },
+    founders: [
+      {
+        roleBadge: "FOUNDER & CEO",
+        name: "Founder name",
+        title: `${brandName} Education Pvt. Ltd.`,
+        bio: `Share your story — how ${brandName} started and the impact you create for children and franchise partners.`,
+        photoUrl: "",
+        statBadge: { value: "12+", label: "YEARS OF LEGACY" },
+      },
+    ],
+    gallery: {
+      title: "Moments from our journey",
+      images: [],
+    },
+    testimonials: {
+      title: "Success stories",
+      subtitle: "Parents and partners who chose our program.",
+      items: [],
+    },
+    faq: [
+      {
+        question: "What age group is suitable for abacus?",
+        answer: "Abacus learning is suitable for children aged 4–14, with structured levels for every stage.",
+      },
+      {
+        question: "Do you offer online classes?",
+        answer: "Yes — many centers offer online and offline batches. Submit a demo request to find a center near you.",
+      },
+      {
+        question: "What investment is required for a franchise?",
+        answer: "Investment varies by city and format. Apply for franchise and our team will share the latest kit and fee structure.",
+      },
+    ],
+    footer: {
+      productLinks: [
+        { label: "Programs", href: "#programs" },
+        { label: "Why us", href: "#features" },
+        { label: "FAQ", href: "#faq" },
+      ],
+      companyLinks: [
+        { label: "Partner login", href: "/login" },
+        { label: "Brand portal", href: "/app" },
+      ],
+      connectLinks: [],
+      copyright: `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`,
+      privacyHref: "#faq",
+      termsHref: "#faq",
+      rich: {
+        description: `${brandName} is a premier education institute delivering abacus, Vedic maths, and handwriting programs.`,
+        badges: [{ label: "ISO 9001:2015 Certified" }, { label: "Est. 2013" }],
+        customStats: [],
+        showLiveStats: true,
+        presence: [{ region: "Maharashtra & Goa", cities: ["Pune", "Satara", "Sangli"] }],
+        headOffice: {
+          address: "Head office address",
+          phone: "+91 00000 00000",
+          website: "www.example.com",
+        },
+        socialLinks: [],
+      },
+    },
+    sections: mergeSectionVisibility(undefined, ABACUS_CLASSIC_SECTION_DEFAULTS),
+  };
+}
+
+export function mergeAbacusClassicLandingConfig(
+  brandName: string,
+  partial?: Partial<HomepageConfig>,
+  logoUrl?: string | null
+): HomepageConfig {
+  const base = buildAbacusClassicLandingPartial(brandName);
+  return mergeHomepageConfig({
+    ...base,
+    ...partial,
+    meta: {
+      siteName: partial?.meta?.siteName ?? base.meta!.siteName,
+      fontSans: partial?.meta?.fontSans ?? base.meta!.fontSans,
+      fontSerif: partial?.meta?.fontSerif ?? base.meta!.fontSerif,
+      themeNote: partial?.meta?.themeNote ?? base.meta!.themeNote,
+      logoUrl: partial?.meta?.logoUrl ?? logoUrl ?? null,
+    },
+    nav: { ...base.nav!, ...partial?.nav, links: partial?.nav?.links ?? base.nav!.links },
+    hero: { ...base.hero!, ...partial?.hero },
+    featureSections: partial?.featureSections ?? base.featureSections,
+    trustMedia: {
+      ...base.trustMedia!,
+      ...partial?.trustMedia,
+      cards: partial?.trustMedia?.cards ?? base.trustMedia!.cards,
+    },
+    founders: partial?.founders ?? base.founders,
+    gallery: { ...base.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? base.gallery!.images },
+    footer: {
+      ...base.footer!,
+      ...partial?.footer,
+      rich: { ...base.footer!.rich, ...partial?.footer?.rich },
+    },
+    sections: mergeSectionVisibility(partial?.sections, ABACUS_CLASSIC_SECTION_DEFAULTS),
+  });
 }

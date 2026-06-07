@@ -28,6 +28,7 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | http://localhost:9000/admin | Platform app |
 | http://localhost:9000/admin/homepage | Homepage editor (platform admin) |
 | http://abacusworld.localhost:9000/ | Abacus World franchise landing (public) |
+| http://smart-brain-abacus.localhost:9000/ | Smart Brain Abacus (Abacus Classic theme) |
 | http://abacusworld.localhost:9000/login | Brand staff login |
 | http://abacusworld.localhost:9000/app | Brand operator backend |
 | http://koramangala.abacusworld.localhost:9000/ | Center parent enrollment landing (public) |
@@ -42,7 +43,7 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 Hosts (add to `/etc/hosts`):
 
 ```
-127.0.0.1 localhost admin.localhost abacusworld.localhost koramangala.abacusworld.localhost
+127.0.0.1 localhost admin.localhost abacusworld.localhost koramangala.abacusworld.localhost smart-brain-abacus.localhost
 ```
 
 ### Supabase Dashboard (Auth)

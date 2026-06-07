@@ -8,11 +8,17 @@ export type HomepageSectionKey =
   | "privacy"
   | "testimonials"
   | "faq"
-  | "footer";
+  | "footer"
+  | "programsMarquee"
+  | "featureGrid"
+  | "founders"
+  | "trustMedia"
+  | "gallery"
+  | "footerRich";
 
-export type HomepageSectionVisibility = Record<HomepageSectionKey, boolean>;
+export type HomepageSectionVisibility = Partial<Record<HomepageSectionKey, boolean>>;
 
-export const DEFAULT_HOMEPAGE_SECTION_VISIBILITY: HomepageSectionVisibility = {
+export const DEFAULT_HOMEPAGE_SECTION_VISIBILITY: Record<HomepageSectionKey, boolean> = {
   hero: true,
   featureScroll: true,
   highlights: true,
@@ -20,16 +26,43 @@ export const DEFAULT_HOMEPAGE_SECTION_VISIBILITY: HomepageSectionVisibility = {
   testimonials: true,
   faq: true,
   footer: true,
+  programsMarquee: true,
+  featureGrid: true,
+  founders: true,
+  trustMedia: true,
+  gallery: true,
+  footerRich: true,
+};
+
+export const ABACUS_CLASSIC_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean> = {
+  hero: true,
+  featureScroll: false,
+  highlights: false,
+  privacy: false,
+  testimonials: true,
+  faq: true,
+  footer: false,
+  programsMarquee: true,
+  featureGrid: true,
+  founders: true,
+  trustMedia: true,
+  gallery: true,
+  footerRich: true,
 };
 
 export function mergeSectionVisibility(
-  partial?: Partial<HomepageSectionVisibility>
-): HomepageSectionVisibility {
-  return { ...DEFAULT_HOMEPAGE_SECTION_VISIBILITY, ...partial };
+  partial?: HomepageSectionVisibility,
+  themeDefaults: Record<HomepageSectionKey, boolean> = DEFAULT_HOMEPAGE_SECTION_VISIBILITY
+): Record<HomepageSectionKey, boolean> {
+  return { ...themeDefaults, ...partial };
 }
 
 export function isSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {
   return mergeSectionVisibility(config.sections)[key];
+}
+
+export function isAbacusSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {
+  return mergeSectionVisibility(config.sections, ABACUS_CLASSIC_SECTION_DEFAULTS)[key];
 }
 
 export function setSectionEnabled(

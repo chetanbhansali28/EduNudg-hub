@@ -1,16 +1,28 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandDetailPage } from "./BrandDetailPage";
 
 const fromMock = vi.fn();
 
+const { updateBrandMarketingThemeMock } = vi.hoisted(() => ({
+  updateBrandMarketingThemeMock: vi.fn(),
+}));
+
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({
     from: fromMock,
   }),
 }));
+
+vi.mock("@/lib/brandLandingApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/brandLandingApi")>();
+  return {
+    ...actual,
+    updateBrandMarketingTheme: (...args: unknown[]) => updateBrandMarketingThemeMock(...args),
+  };
+});
 
 function chain(result: { data: unknown; error: unknown; count?: number }) {
   const c = {
@@ -52,6 +64,8 @@ function renderDetail(slug = "demo") {
 describe("BrandDetailPage", () => {
   beforeEach(() => {
     fromMock.mockReset();
+    updateBrandMarketingThemeMock.mockReset();
+    updateBrandMarketingThemeMock.mockResolvedValue(undefined);
     fromMock.mockImplementation((table: string) => {
       if (table === "brands") {
         return chain({
@@ -61,6 +75,7 @@ describe("BrandDetailPage", () => {
             name: "Demo Brand",
             status: "active",
             logo_url: null,
+            marketing_theme: "novu",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
@@ -158,5 +173,28 @@ describe("BrandDetailPage", () => {
     expect(screen.queryByText(/Created /)).toBeNull();
     expect(screen.queryByText(/Backend URL:/)).toBeNull();
     expect(document.querySelector(".ed-brand-detail__logo")?.getAttribute("src")).toBe("https://example.com/logo.png");
+  });
+
+  it("sprint1_renders_marketing_theme_selector", async () => {
+    renderDetail("demo");
+    expect(await screen.findByText("Marketing theme")).toBeDefined();
+    expect(screen.getByLabelText("Website theme")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Save theme" })).toHaveProperty("disabled", true);
+  });
+
+  it("sprint1_saves_marketing_theme_when_changed", async () => {
+    renderDetail("demo");
+
+    const select = await screen.findByLabelText("Website theme");
+    fireEvent.change(select, { target: { value: "abacus-classic" } });
+
+    const saveButton = screen.getByRole("button", { name: "Save theme" });
+    expect(saveButton).toHaveProperty("disabled", false);
+
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(updateBrandMarketingThemeMock).toHaveBeenCalledWith("b1", "abacus-classic");
+    });
   });
 });

@@ -8,6 +8,23 @@ Public marketing landings share one UI kit under `apps/web/src/features/marketin
 | Brand | `BrandPublicLayout` | RPC `get_brand_landing_public` + `buildBrandLandingConfig` |
 | Center | `CenterPublicLayout` | RPC `get_center_landing_public` + `buildCenterLandingConfig` |
 
+## Brand marketing themes
+
+Platform admins assign a theme per brand at `/admin/brands/:slug` (`brands.marketing_theme`):
+
+| Theme | Layout | Editor |
+|-------|--------|--------|
+| `novu` (default) | Phone-scroll features, Novu nav | `HomepageEditorForm` |
+| `abacus-classic` | Success Abacus-style sections, dual CTAs, modals | `AbacusClassicEditorForm` |
+
+Brand owners edit content at `{brand}.localhost:9000/app/homepage`. Theme selection is platform-only.
+
+Abacus Classic sections (in order): hero → programs marquee (from curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → rich footer (live center/student counts + custom stats).
+
+See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
+
+See `apps/web/src/features/marketing/abacus-classic/`.
+
 Staff apps live under `/login` (public) and `/app` (authenticated) for brand and center portals.
 
 ## Components
@@ -60,7 +77,7 @@ Brand and center marketing editors (**Feature sections (phone blocks)**) support
 
 ## Related code
 
-- `apps/web/src/lib/marketingFeatureSections.ts` — default phone videos for brand/center
+- `apps/web/src/lib/marketingFeatureSections.ts` — default phone videos; Abacus program marquee palette
 - `apps/web/src/types/homepage.ts` — `HomepageConfig` including `meta.logoUrl`
 - `apps/web/src/routes/AppRoutes.tsx` — public `/` vs staff `/app`
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
+import { AbacusClassicEditorForm } from "@/features/marketing/AbacusClassicEditorForm";
 import { HomepageEditorPanel, HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { fetchBrandMarketingEditor, landingConfigToPartial, saveBrandMarketingLanding } from "@/lib/brandLandingEditorApi";
@@ -16,6 +17,7 @@ export function BrandMarketingEditorPage() {
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const [brandSaved, setBrandSaved] = useState(false);
   const [centerSaved, setCenterSaved] = useState(false);
+  const [marketingTheme, setMarketingTheme] = useState<import("@/types/homepage").MarketingTheme>("novu");
 
   const editor = useQuery({
     queryKey: ["brand-marketing-editor", brandId],
@@ -29,6 +31,7 @@ export function BrandMarketingEditorPage() {
     setCenterConfig(editor.data.centerLandingConfig);
     setExistingSettings(editor.data.existingSettings);
     setSettingsId(editor.data.settingsId);
+    setMarketingTheme(editor.data.marketingTheme);
   }, [editor.data]);
 
   const saveBrand = useMutation({
@@ -98,7 +101,7 @@ export function BrandMarketingEditorPage() {
       <div className="ed-homepage-editor-pages">
         <HomepageEditorPanel
           title="Brand site (franchise recruitment)"
-          onSave={() => saveBrand.mutate()}
+          onSave={() => saveBrand.mutate(brandConfig)}
           savePending={saveBrand.isPending}
           saved={brandSaved}
           description={
@@ -108,26 +111,44 @@ export function BrandMarketingEditorPage() {
             </>
           }
         >
-          <HomepageEditorForm
-            config={brandConfig}
-            onChange={setBrandConfig}
-            uploadScope={{ kind: "brand", brandId: brandId! }}
-            onPersist={(next) => {
-              setBrandConfig(next);
-              saveBrand.mutate(next);
-            }}
-            testimonialsManagedExternally
-            testimonialsExternalHint={
-              <p className="ed-text-sm ed-muted">
-                Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page.
-              </p>
-            }
-          />
+          {marketingTheme === "abacus-classic" ? (
+            <AbacusClassicEditorForm
+              config={brandConfig}
+              marketingTheme={marketingTheme}
+              onChange={setBrandConfig}
+              uploadScope={{ kind: "brand", brandId: brandId! }}
+              onPersist={(next) => {
+                setBrandConfig(next);
+                saveBrand.mutate(next);
+              }}
+              testimonialsExternalHint={
+                <p className="ed-text-sm ed-muted">
+                  Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page.
+                </p>
+              }
+            />
+          ) : (
+            <HomepageEditorForm
+              config={brandConfig}
+              onChange={setBrandConfig}
+              uploadScope={{ kind: "brand", brandId: brandId! }}
+              onPersist={(next) => {
+                setBrandConfig(next);
+                saveBrand.mutate(next);
+              }}
+              testimonialsManagedExternally
+              testimonialsExternalHint={
+                <p className="ed-text-sm ed-muted">
+                  Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page.
+                </p>
+              }
+            />
+          )}
         </HomepageEditorPanel>
 
         <HomepageEditorPanel
           title="Center sites (parent enrollment template)"
-          onSave={() => saveCenter.mutate()}
+          onSave={() => saveCenter.mutate(centerConfig)}
           savePending={saveCenter.isPending}
           saved={centerSaved}
           description="Template for every center hostname. Center name and city are filled in per location."

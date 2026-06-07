@@ -1,26 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom";
-import { buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
+import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModalContext";
+import type { BrandLandingOutletContext } from "./BrandPublicLayout";
 import { BrandLandingPage } from "./BrandLandingPage";
-
-vi.mock("@/bootstrap/TenantProvider", () => ({
-  useTenant: () => ({
-    portalType: "brand",
-    hostname: "abacusworld.localhost",
-    brandSlug: "abacusworld",
-    brandId: null,
-    centerId: null,
-    centerSlug: null,
-  }),
-}));
-
-const fetchBrandLandingBundle = vi.fn();
-
-vi.mock("@/lib/brandLandingApi", () => ({
-  fetchBrandLandingBundle: (...args: unknown[]) => fetchBrandLandingBundle(...args),
-}));
 
 vi.mock("@/features/marketing/MarketingContent", () => ({
   MarketingContent: ({ config, brandSlug }: { config?: { hero?: { line1: string } }; brandSlug?: string }) => {
@@ -29,7 +13,7 @@ vi.mock("@/features/marketing/MarketingContent", () => ({
     }
     return (
       <div>
-        Franchise landing
+        Novu landing
         <span>{config.hero.line1}</span>
         {brandSlug && <span>{brandSlug}</span>}
       </div>
@@ -37,40 +21,62 @@ vi.mock("@/features/marketing/MarketingContent", () => ({
   },
 }));
 
+function renderWithOutlet(context: BrandLandingOutletContext) {
+  const page = (
+    <MemoryRouter>
+      <Routes>
+        <Route path="/" element={<Outlet context={context} />}>
+          <Route index element={<BrandLandingPage />} />
+        </Route>
+      </Routes>
+    </MemoryRouter>
+  );
+
+  if (context.marketingTheme === "abacus-classic") {
+    return render(<LeadModalProvider>{page}</LeadModalProvider>);
+  }
+
+  return render(page);
+}
+
 describe("BrandLandingPage", () => {
-  it("regression_loads_brand_slug_into_marketing_content", async () => {
-    fetchBrandLandingBundle.mockResolvedValue({
-      config: buildBrandLandingConfig("Abacus World"),
+  it("renders Novu MarketingContent when marketingTheme is novu", () => {
+    const config = buildBrandLandingConfig("Abacus World");
+    renderWithOutlet({
+      config,
+      brandSlug: "abacusworld",
+      marketingTheme: "novu",
       publicCurriculum: [],
+      publicStats: { centersCount: 0, studentsCount: 0 },
     });
 
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={qc}>
-        <MemoryRouter>
-          <BrandLandingPage />
-        </MemoryRouter>
-      </QueryClientProvider>
-    );
-
-    expect(await screen.findByText("Franchise landing")).toBeDefined();
+    expect(screen.getByText("Novu landing")).toBeDefined();
+    expect(screen.getByText("Own an")).toBeDefined();
     expect(screen.getByText("abacusworld")).toBeDefined();
   });
 
-  it("regression_legacy_cached_homepage_config_does_not_crash_marketing_content", async () => {
-    const legacyConfig = buildBrandLandingConfig("Abacus World");
-    fetchBrandLandingBundle.mockResolvedValue(legacyConfig);
+  it("renders AbacusClassicContent when marketingTheme is abacus-classic", () => {
+    const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
+    renderWithOutlet({
+      config,
+      brandSlug: "smart-brain-abacus",
+      marketingTheme: "abacus-classic",
+      publicCurriculum: [
+        {
+          name: "Abacus Junior",
+          description: "Foundations",
+          whyTake: null,
+          whatYouLearn: null,
+          marketingVideoUrl: null,
+          versionNumber: 1,
+          levels: [],
+        },
+      ],
+      publicStats: { centersCount: 12, studentsCount: 5000 },
+    });
 
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={qc}>
-        <MemoryRouter>
-          <BrandLandingPage />
-        </MemoryRouter>
-      </QueryClientProvider>
-    );
-
-    expect(await screen.findByText("Franchise landing")).toBeDefined();
-    expect(screen.getByText("Own an")).toBeDefined();
+    expect(screen.getByRole("main")).toBeDefined();
+    expect(screen.getByText(/Make children super fast in/)).toBeDefined();
+    expect(screen.getAllByRole("heading", { level: 3, name: "Abacus Junior" })).toHaveLength(2);
   });
 });

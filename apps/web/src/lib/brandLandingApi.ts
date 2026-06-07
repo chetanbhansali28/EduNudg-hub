@@ -1,36 +1,60 @@
 import { getSupabase } from "@/lib/supabase";
-import { buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
-import type { BrandLandingBundle } from "@/lib/brandLandingBundle";
+import type { BrandLandingBundle, BrandPublicStats } from "@/lib/brandLandingBundle";
 import { applyCanonicalSiteName, applyCurriculumNavLink } from "@/lib/marketingPublicSite";
-import type { HomepageConfig } from "@/types/homepage";
+import type { MarketingTheme, HomepageConfig } from "@/types/homepage";
+import { MARKETING_THEMES, parseMarketingTheme } from "@/types/homepage";
 
-export type { PublicCurriculumProgram, BrandLandingBundle };
+export type { PublicCurriculumProgram, BrandLandingBundle, BrandPublicStats };
 
 type BrandLandingRow = {
   brand_id?: string;
   brand_slug?: string;
   brand_name?: string;
   brand_logo_url?: string | null;
+  marketing_theme?: string;
+  public_stats?: unknown;
   landing?: Partial<HomepageConfig>;
   success_stories?: unknown;
   curriculum?: unknown;
 };
 
+function parsePublicStats(raw: unknown): BrandPublicStats {
+  if (typeof raw !== "object" || raw === null) {
+    return { centersCount: 0, studentsCount: 0 };
+  }
+  const row = raw as Record<string, unknown>;
+  return {
+    centersCount: typeof row.centers_count === "number" ? row.centers_count : 0,
+    studentsCount: typeof row.students_count === "number" ? row.students_count : 0,
+  };
+}
+
+function buildConfigForTheme(
+  theme: MarketingTheme,
+  brandName: string,
+  partial: Partial<HomepageConfig> | undefined,
+  logoUrl: string | null | undefined
+): HomepageConfig {
+  if (theme === "abacus-classic") {
+    return mergeAbacusClassicLandingConfig(brandName, partial, logoUrl);
+  }
+  return buildBrandLandingConfig(brandName, partial, logoUrl);
+}
+
 function buildBundle(
   brandName: string,
   row: BrandLandingRow | null,
   stories: ReturnType<typeof parsePublicSuccessStories>,
-  curriculum: PublicCurriculumProgram[]
+  curriculum: PublicCurriculumProgram[],
+  theme: MarketingTheme,
+  publicStats: BrandPublicStats
 ): BrandLandingBundle {
   const canonicalName = row?.brand_name ?? brandName;
-  const config = buildBrandLandingConfig(
-    canonicalName,
-    row?.landing ?? undefined,
-    row?.brand_logo_url ?? null
-  );
+  const config = buildConfigForTheme(theme, canonicalName, row?.landing ?? undefined, row?.brand_logo_url ?? null);
   const merged = applyCanonicalSiteName(
     {
       ...config,
@@ -41,6 +65,31 @@ function buildBundle(
   return {
     config: applyCurriculumNavLink(merged, curriculum.length > 0),
     publicCurriculum: curriculum,
+    marketingTheme: theme,
+    publicStats,
+  };
+}
+
+function fallbackBundle(
+  fallbackName: string,
+  stories: ReturnType<typeof parsePublicSuccessStories>,
+  curriculum: PublicCurriculumProgram[],
+  theme: MarketingTheme = "novu",
+  publicStats: BrandPublicStats = { centersCount: 0, studentsCount: 0 }
+): BrandLandingBundle {
+  const config = buildConfigForTheme(theme, fallbackName, undefined, undefined);
+  const merged = applyCanonicalSiteName(
+    {
+      ...config,
+      testimonials: mergePublishedSuccessStories(config.testimonials, stories),
+    },
+    fallbackName
+  );
+  return {
+    config: applyCurriculumNavLink(merged, curriculum.length > 0),
+    publicCurriculum: curriculum,
+    marketingTheme: theme,
+    publicStats,
   };
 }
 
@@ -59,42 +108,25 @@ export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandL
     );
 
     if (error || !data || typeof data !== "object") {
-      const config = buildBrandLandingConfig(fallbackName);
-      const merged = applyCanonicalSiteName(
-        {
-          ...config,
-          testimonials: mergePublishedSuccessStories(config.testimonials, stories),
-        },
-        fallbackName
-      );
-      return {
-        config: applyCurriculumNavLink(merged, curriculum.length > 0),
-        publicCurriculum: curriculum,
-      };
+      return fallbackBundle(fallbackName, stories, curriculum);
     }
 
     const row = data as BrandLandingRow;
+    const theme = parseMarketingTheme(row.marketing_theme);
+    const publicStats = parsePublicStats(row.public_stats);
+
     if (!row.brand_name) {
-      const config = buildBrandLandingConfig(fallbackName);
-      const merged = applyCanonicalSiteName(
-        {
-          ...config,
-          testimonials: mergePublishedSuccessStories(config.testimonials, stories),
-        },
-        fallbackName
-      );
-      return {
-        config: applyCurriculumNavLink(merged, curriculum.length > 0),
-        publicCurriculum: curriculum,
-      };
+      return fallbackBundle(fallbackName, stories, curriculum, theme, publicStats);
     }
 
-    return buildBundle(fallbackName, row, stories, curriculum);
+    return buildBundle(fallbackName, row, stories, curriculum, theme, publicStats);
   } catch {
     const config = buildBrandLandingConfig(fallbackName);
     return {
       config: applyCurriculumNavLink(applyCanonicalSiteName(config, fallbackName), false),
       publicCurriculum: [],
+      marketingTheme: "novu",
+      publicStats: { centersCount: 0, studentsCount: 0 },
     };
   }
 }
@@ -103,6 +135,14 @@ export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandL
 export async function fetchBrandLandingConfig(brandSlug: string): Promise<HomepageConfig | null> {
   const bundle = await fetchBrandLandingBundle(brandSlug);
   return bundle?.config ?? null;
+}
+
+export async function updateBrandMarketingTheme(brandId: string, theme: MarketingTheme): Promise<void> {
+  if (!MARKETING_THEMES.includes(theme)) {
+    throw new Error("Invalid marketing theme");
+  }
+  const { error } = await getSupabase().from("brands").update({ marketing_theme: theme }).eq("id", brandId);
+  if (error) throw new Error(error.message);
 }
 
 export type FranchiseInquiryInput = {

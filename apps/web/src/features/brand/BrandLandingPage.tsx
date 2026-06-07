@@ -1,29 +1,26 @@
-import { useQuery } from "@tanstack/react-query";
-import { useTenant } from "@/bootstrap/TenantProvider";
-import { fetchBrandLandingBundle } from "@/lib/brandLandingApi";
-import { isBrandLandingBundleReady, normalizeBrandLandingBundle } from "@/lib/brandLandingBundle";
+import { useOutletContext } from "react-router-dom";
+import { AbacusClassicContent } from "@/features/marketing/abacus-classic";
 import { MarketingContent } from "@/features/marketing/MarketingContent";
+import type { BrandLandingOutletContext } from "@/features/brand/BrandPublicLayout";
 
 export function BrandLandingPage() {
-  const tenant = useTenant();
-  const brandSlug = tenant.brandSlug ?? "brand";
+  const ctx = useOutletContext<BrandLandingOutletContext>();
 
-  const { data: bundle, isLoading } = useQuery({
-    queryKey: ["brand-landing", brandSlug],
-    queryFn: () => fetchBrandLandingBundle(brandSlug),
-    select: normalizeBrandLandingBundle,
-  });
-
-  if (isLoading || !isBrandLandingBundleReady(bundle)) {
-    return <p className="marketing-page--loading-inline">Loading…</p>;
+  if (ctx.marketingTheme === "abacus-classic") {
+    return (
+      <AbacusClassicContent
+        config={ctx.config}
+        publicCurriculum={ctx.publicCurriculum}
+      />
+    );
   }
 
   return (
     <MarketingContent
-      config={bundle.config}
+      config={ctx.config}
       portalMode="brand"
-      brandSlug={brandSlug}
-      publicCurriculum={bundle.publicCurriculum}
+      brandSlug={ctx.brandSlug}
+      publicCurriculum={ctx.publicCurriculum}
     />
   );
 }

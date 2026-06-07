@@ -42,6 +42,67 @@ export interface HomepageFaq {
   answer: string;
 }
 
+export interface HomepageFounderProfile {
+  roleBadge: string;
+  name: string;
+  title: string;
+  bio: string;
+  photoUrl: string;
+  statBadge?: { value: string; label: string };
+}
+
+export interface HomepageTrustCard {
+  title: string;
+  subtitle: string;
+  accentColor?: string;
+}
+
+export interface HomepageTrustMedia {
+  eyebrow?: string;
+  title: string;
+  titleHighlight?: string;
+  intro: string;
+  youtubeUrl: string;
+  cards: HomepageTrustCard[];
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+export interface HomepageGalleryImage {
+  url: string;
+  alt?: string;
+}
+
+export interface HomepageGallery {
+  title?: string;
+  images: HomepageGalleryImage[];
+}
+
+export interface HomepageFooterStat {
+  value: string;
+  label: string;
+}
+
+export interface HomepageFooterPresence {
+  region: string;
+  cities: string[];
+}
+
+export interface HomepageFooterSocial {
+  platform: string;
+  url: string;
+}
+
+export interface HomepageRichFooter {
+  description?: string;
+  badges?: { label: string }[];
+  customStats?: HomepageFooterStat[];
+  showLiveStats?: boolean;
+  presence?: HomepageFooterPresence[];
+  headOffice?: { address: string; phone: string; website: string };
+  socialLinks?: HomepageFooterSocial[];
+}
+
 import type { HomepageSectionVisibility } from "@/lib/homepageSections";
 
 export type { HomepageSectionKey, HomepageSectionVisibility } from "@/lib/homepageSections";
@@ -68,6 +129,8 @@ export interface HomepageConfig {
     links: HomepageLink[];
     ctaLabel: string;
     ctaHref: string;
+    secondaryCtaLabel?: string;
+    secondaryCtaHref?: string;
     adminHref: string;
   };
   hero: {
@@ -78,6 +141,9 @@ export interface HomepageConfig {
     subtitle: string;
     ctaLabel: string;
     ctaHref: string;
+    secondaryCtaLabel?: string;
+    secondaryCtaHref?: string;
+    badge?: string;
     backgroundImageUrl: string;
     phoneFrameUrl: string;
   };
@@ -104,7 +170,26 @@ export interface HomepageConfig {
     copyright: string;
     privacyHref: string;
     termsHref: string;
+    rich?: HomepageRichFooter;
   };
+  /** Abacus Classic theme sections (ignored by Novu layout). */
+  founders?: HomepageFounderProfile[];
+  trustMedia?: HomepageTrustMedia;
+  gallery?: HomepageGallery;
   /** Show/hide major page sections on the public marketing site. */
   sections?: HomepageSectionVisibility;
+}
+
+/** Platform-assigned public marketing layout (see brands.marketing_theme). */
+export const MARKETING_THEMES = ["novu", "abacus-classic"] as const;
+export type MarketingTheme = (typeof MARKETING_THEMES)[number];
+
+export const MARKETING_THEME_LABELS: Record<MarketingTheme, string> = {
+  novu: "Novu (default)",
+  "abacus-classic": "Abacus Classic",
+};
+
+export function parseMarketingTheme(value: unknown): MarketingTheme {
+  if (value === "abacus-classic") return "abacus-classic";
+  return "novu";
 }

@@ -24,3 +24,34 @@ export function applyCanonicalSiteName(config: HomepageConfig, siteName: string)
     meta: { ...config.meta, siteName },
   };
 }
+
+/** Converts common YouTube watch/share URLs to embed URL. */
+export function toYoutubeEmbedUrl(url: string): string | null {
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+
+  try {
+    const parsed = new URL(trimmed);
+    const host = parsed.hostname.replace(/^www\./, "");
+
+    if (host === "youtu.be") {
+      const id = parsed.pathname.slice(1).split("/")[0];
+      return id ? `https://www.youtube.com/embed/${id}` : null;
+    }
+
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      if (parsed.pathname === "/watch") {
+        const id = parsed.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}` : null;
+      }
+      const embedMatch = parsed.pathname.match(/^\/embed\/([^/?]+)/);
+      if (embedMatch?.[1]) return `https://www.youtube.com/embed/${embedMatch[1]}`;
+      const shortsMatch = parsed.pathname.match(/^\/shorts\/([^/?]+)/);
+      if (shortsMatch?.[1]) return `https://www.youtube.com/embed/${shortsMatch[1]}`;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}

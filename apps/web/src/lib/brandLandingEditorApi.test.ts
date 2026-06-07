@@ -1,6 +1,36 @@
-import { describe, expect, it } from "vitest";
-import { buildBrandLandingConfig } from "./brandLandingDefaults";
-import { landingConfigToPartial } from "./brandLandingEditorApi";
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "./brandLandingDefaults";
+import { fetchBrandMarketingEditor, landingConfigToPartial } from "./brandLandingEditorApi";
+
+const fromMock = vi.fn();
+
+vi.mock("@/lib/supabase", () => ({
+  getSupabase: () => ({ from: fromMock }),
+}));
+
+function brandsAndSettingsChain(brand: Record<string, unknown>, settings: Record<string, unknown> | null) {
+  return (table: string) => {
+    if (table === "brands") {
+      return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            single: vi.fn(() => Promise.resolve({ data: brand, error: null })),
+          })),
+        })),
+      };
+    }
+    if (table === "brand_settings") {
+      return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn(() => Promise.resolve({ data: settings, error: null })),
+          })),
+        })),
+      };
+    }
+    throw new Error(`Unexpected table ${table}`);
+  };
+}
 
 describe("landingConfigToPartial", () => {
   it("serializes editable homepage sections for brand_settings", () => {
@@ -35,5 +65,88 @@ describe("landingConfigToPartial", () => {
     expect(partial.sections?.highlights).toBe(false);
     expect(partial.sections?.faq).toBe(false);
     expect(partial.sections?.hero).toBe(true);
+  });
+
+  it("sprint3_serializes_abacus_classic_sections_for_brand_settings", () => {
+    const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
+    config.founders = [
+      {
+        roleBadge: "CEO",
+        name: "Jane Doe",
+        title: "Smart Brain",
+        bio: "Bio",
+        photoUrl: "",
+      },
+    ];
+    config.gallery = {
+      title: "Gallery",
+      images: [{ url: "https://example.com/photo.jpg", alt: "Event" }],
+    };
+    config.trustMedia = {
+      eyebrow: "TRUST",
+      title: "Why us",
+      titleHighlight: "Brand",
+      intro: "Intro",
+      youtubeUrl: "https://youtu.be/abc12345678",
+      cards: [{ title: "Card", subtitle: "Sub", accentColor: "#000" }],
+    };
+    config.footer.rich = {
+      description: "Footer blurb",
+      customStats: [{ value: "10+", label: "Centers" }],
+      showLiveStats: true,
+    };
+
+    const partial = landingConfigToPartial(config);
+
+    expect(partial.founders).toHaveLength(1);
+    expect(partial.gallery?.images).toHaveLength(1);
+    expect(partial.trustMedia?.youtubeUrl).toContain("youtu.be");
+    expect(partial.footer?.rich?.description).toBe("Footer blurb");
+    expect(partial.footer?.rich?.customStats?.[0]?.label).toBe("Centers");
+  });
+});
+
+describe("fetchBrandMarketingEditor", () => {
+  beforeEach(() => {
+    fromMock.mockReset();
+  });
+
+  it("sprint1_loads_abacus_classic_landing_config_when_theme_is_abacus_classic", async () => {
+    fromMock.mockImplementation(
+      brandsAndSettingsChain(
+        {
+          name: "Smart Brain Abacus",
+          slug: "smart-brain-abacus",
+          logo_url: null,
+          marketing_theme: "abacus-classic",
+        },
+        { id: "settings-1", settings: {} }
+      )
+    );
+
+    const editor = await fetchBrandMarketingEditor("brand-1");
+    expect(editor.marketingTheme).toBe("abacus-classic");
+    expect(editor.landingConfig.hero.badge).toBe("FOR AGED 6–14 YEARS");
+    expect(editor.landingConfig.sections?.featureScroll).toBe(false);
+    expect(editor.landingConfig.featureSections).toHaveLength(4);
+  });
+
+  it("sprint1_loads_novu_landing_config_when_theme_is_novu", async () => {
+    fromMock.mockImplementation(
+      brandsAndSettingsChain(
+        {
+          name: "Abacus World",
+          slug: "abacusworld",
+          logo_url: null,
+          marketing_theme: "novu",
+        },
+        null
+      )
+    );
+
+    const editor = await fetchBrandMarketingEditor("brand-2");
+    expect(editor.marketingTheme).toBe("novu");
+    expect(editor.landingConfig.hero.line1).toBe("Own an");
+    expect(editor.landingConfig.sections?.featureScroll).toBe(true);
   });
 });

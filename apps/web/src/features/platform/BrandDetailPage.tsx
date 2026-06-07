@@ -1,12 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Badge, Button, Card, DataList, KpiCard, KpiGrid, ListRow, PageToolbar } from "@edunudg/ui";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Badge, Button, Card, DataList, KpiCard, KpiGrid, ListRow, PageToolbar, Select } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { brandAdminPath, isUuid } from "@/lib/adminPaths";
 import { brandPortalUrl } from "@/lib/brandPortalUrl";
+import { updateBrandMarketingTheme } from "@/lib/brandLandingApi";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
 import { formatInrFromPaise, useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
+import { MARKETING_THEME_LABELS, MARKETING_THEMES, parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
 
 interface BrandRow {
   id: string;
@@ -14,6 +16,7 @@ interface BrandRow {
   name: string;
   status: string;
   logo_url: string | null;
+  marketing_theme: string;
   created_at: string;
   updated_at: string;
 }
@@ -36,6 +39,8 @@ export function BrandDetailPage() {
   const { brandSlug: brandSlugParam } = useParams<{ brandSlug: string }>();
   const brandSlug = brandSlugParam?.trim() ?? "";
   const lookupById = isUuid(brandSlug);
+  const qc = useQueryClient();
+  const [themeDraft, setThemeDraft] = useState<MarketingTheme>("novu");
 
   const brand = useQuery({
     queryKey: ["brand", lookupById ? "id" : "slug", brandSlug],
@@ -43,7 +48,7 @@ export function BrandDetailPage() {
     queryFn: async () => {
       const q = getSupabase()
         .from("brands")
-        .select("id, slug, name, status, logo_url, created_at, updated_at")
+        .select("id, slug, name, status, logo_url, marketing_theme, created_at, updated_at")
         .is("deleted_at", null);
       const { data, error } = lookupById
         ? await q.eq("id", brandSlug).maybeSingle()
@@ -106,6 +111,23 @@ export function BrandDetailPage() {
     };
   }, [brand.data?.name]);
 
+  useEffect(() => {
+    if (brand.data?.marketing_theme) {
+      setThemeDraft(parseMarketingTheme(brand.data.marketing_theme));
+    }
+  }, [brand.data?.marketing_theme]);
+
+  const saveTheme = useMutation({
+    mutationFn: async () => {
+      if (!brandId) throw new Error("Brand required");
+      await updateBrandMarketingTheme(brandId, themeDraft);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["brand", lookupById ? "id" : "slug", brandSlug] });
+      void qc.invalidateQueries({ queryKey: ["brand-landing"] });
+    },
+  });
+
   if (brand.isLoading) return <p className="ed-empty">Loading brand…</p>;
 
   if (brand.data && lookupById && brand.data.slug !== brandSlug) {
@@ -160,6 +182,27 @@ export function BrandDetailPage() {
         </Link>
         <Button onClick={() => window.open(backendUrl, "_blank", "noopener,noreferrer")}>Open brand backend</Button>
       </PageToolbar>
+
+      <Card title="Marketing theme">
+        <p className="ed-text-sm ed-muted" style={{ marginBottom: "0.75rem" }}>
+          Controls the public brand website layout. Brand owners edit content in their portal; only EduNudg admins
+          can change the theme here.
+        </p>
+        <Select
+          label="Website theme"
+          value={themeDraft}
+          onChange={(v) => setThemeDraft(parseMarketingTheme(v))}
+          options={MARKETING_THEMES.map((theme) => ({ value: theme, label: MARKETING_THEME_LABELS[theme] }))}
+        />
+        <div style={{ marginTop: "0.75rem" }}>
+          <Button
+            onClick={() => saveTheme.mutate()}
+            disabled={saveTheme.isPending || themeDraft === parseMarketingTheme(b.marketing_theme)}
+          >
+            {saveTheme.isPending ? "Saving…" : "Save theme"}
+          </Button>
+        </div>
+      </Card>
 
       <Card title="Performance (last 30 days)">
         {monitoring.isLoading ? (

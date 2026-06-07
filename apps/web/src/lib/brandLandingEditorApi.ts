@@ -1,7 +1,8 @@
 import { getSupabase } from "@/lib/supabase";
-import { buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
 import { buildCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import { mergeSectionVisibility } from "@/lib/homepageSections";
+import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
 import type { HomepageConfig } from "@/types/homepage";
 
 export type BrandMarketingSettingsKey = "landing" | "center_landing";
@@ -12,6 +13,7 @@ export type BrandMarketingEditorData = {
   brandName: string;
   brandSlug: string;
   brandLogoUrl: string | null;
+  marketingTheme: MarketingTheme;
   landingConfig: HomepageConfig;
   centerLandingConfig: HomepageConfig;
 };
@@ -38,12 +40,22 @@ export function landingConfigToPartial(config: HomepageConfig): Partial<Homepage
     footerCta: { ...config.footerCta },
     footer: { ...config.footer },
     sections: { ...mergeSectionVisibility(config.sections) },
+    founders: config.founders?.map((f) => ({ ...f, statBadge: f.statBadge ? { ...f.statBadge } : undefined })),
+    trustMedia: config.trustMedia
+      ? {
+          ...config.trustMedia,
+          cards: config.trustMedia.cards.map((c) => ({ ...c })),
+        }
+      : undefined,
+    gallery: config.gallery
+      ? { ...config.gallery, images: config.gallery.images.map((img) => ({ ...img })) }
+      : undefined,
   };
 }
 
 export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandMarketingEditorData> {
   const [brandRes, settingsRes] = await Promise.all([
-    getSupabase().from("brands").select("name, slug, logo_url").eq("id", brandId).single(),
+    getSupabase().from("brands").select("name, slug, logo_url, marketing_theme").eq("id", brandId).single(),
     getSupabase().from("brand_settings").select("id, settings").eq("brand_id", brandId).maybeSingle(),
   ]);
 
@@ -54,6 +66,12 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
   const existingSettings = (settings?.settings ?? {}) as Record<string, unknown>;
   const landingPartial = (existingSettings.landing ?? {}) as Partial<HomepageConfig>;
   const centerLandingPartial = (existingSettings.center_landing ?? {}) as Partial<HomepageConfig>;
+  const marketingTheme = parseMarketingTheme(brand.marketing_theme);
+
+  const landingConfig =
+    marketingTheme === "abacus-classic"
+      ? mergeAbacusClassicLandingConfig(brand.name, landingPartial, brand.logo_url)
+      : buildBrandLandingConfig(brand.name, landingPartial, brand.logo_url);
 
   return {
     settingsId: settings?.id ?? null,
@@ -61,7 +79,8 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
     brandName: brand.name,
     brandSlug: brand.slug,
     brandLogoUrl: brand.logo_url,
-    landingConfig: buildBrandLandingConfig(brand.name, landingPartial, brand.logo_url),
+    marketingTheme,
+    landingConfig,
     centerLandingConfig: buildCenterLandingConfig(
       "Sample Center",
       brand.name,
