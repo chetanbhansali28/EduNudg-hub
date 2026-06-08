@@ -5,6 +5,15 @@ import {
 } from "@/lib/marketingMediaStorage";
 import { isVideoMediaUrl } from "@/lib/mediaUrl";
 
+function fieldNameFromLabel(label: string): string {
+  const slug = label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || "field";
+}
+
 /** Images and videos accepted in marketing media pickers. */
 export const MARKETING_MEDIA_ACCEPT =
   "image/png,image/jpeg,image/webp,image/svg+xml,image/gif,video/mp4,video/webm,video/quicktime";
@@ -74,6 +83,7 @@ export function MarketingMediaField({
       <input
         ref={inputRef}
         id={inputId}
+        name={fieldNameFromLabel(label)}
         className="ed-field__input"
         type="file"
         accept={MARKETING_MEDIA_ACCEPT}

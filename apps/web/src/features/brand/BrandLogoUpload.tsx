@@ -55,6 +55,7 @@ export function BrandLogoUpload({
         {preview ? <img src={preview} alt="" className="ed-brand-logo-preview" width={40} height={40} /> : null}
         <input
           id={inputId}
+          name="brand-logo"
           className="ed-field__input"
           type="file"
           accept={ACCEPT}

@@ -1,5 +1,6 @@
 import type { PortalType } from "@edunudg/tenant";
 import { getSupabase } from "@/lib/supabase";
+import { logPortalDebug } from "@/lib/portalDebug";
 
 export type PortalBranding = {
   brandId: string | null;
@@ -37,12 +38,14 @@ const EMPTY: PortalBranding = {
   loginSubtext: null,
 };
 
-function mapRow(row: BrandingRow | null): PortalBranding {
-  if (!row?.brand_name) return EMPTY;
+export function parsePortalBrandingRpc(data: unknown): PortalBranding {
+  if (!data || typeof data !== "object") return EMPTY;
+  const row = data as BrandingRow;
+  if (!row.brand_id && !row.brand_name && !row.brand_slug) return EMPTY;
   return {
     brandId: row.brand_id ?? null,
     brandSlug: row.brand_slug ?? null,
-    brandName: row.brand_name ?? null,
+    brandName: row.brand_name ?? row.brand_slug ?? null,
     brandLogoUrl: row.brand_logo_url ?? null,
     centerId: row.center_id ?? null,
     centerSlug: row.center_slug ?? null,
@@ -63,9 +66,29 @@ export async function fetchPortalBranding(
       p_brand_slug: brandSlug,
       p_center_slug: centerSlug,
     });
-    if (error) return EMPTY;
-    return mapRow((data as BrandingRow | null) ?? null);
-  } catch {
+    if (error) {
+      logPortalDebug("branding.fetch.error", {
+        brandSlug,
+        centerSlug,
+        message: error.message,
+      });
+      return EMPTY;
+    }
+    const branding = parsePortalBrandingRpc(data);
+    logPortalDebug("branding.fetch", {
+      brandSlug,
+      centerSlug,
+      brandId: branding.brandId,
+      centerId: branding.centerId,
+      brandLogoUrl: branding.brandLogoUrl,
+    });
+    return branding;
+  } catch (err) {
+    logPortalDebug("branding.fetch.exception", {
+      brandSlug,
+      centerSlug,
+      message: err instanceof Error ? err.message : String(err),
+    });
     return EMPTY;
   }
 }

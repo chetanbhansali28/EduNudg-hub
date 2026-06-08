@@ -5,6 +5,7 @@ import { HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
 import { fetchHomepageConfig, saveHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import type { HomepageConfig } from "@/types/homepage";
+import { BrandMarketingThemesPanel } from "./BrandMarketingThemesPanel";
 
 export function HomepageEditorPage() {
   const qc = useQueryClient();
@@ -28,19 +29,22 @@ export function HomepageEditorPage() {
   if (isLoading) return <p>Loading homepage config…</p>;
 
   return (
-    <HomepageEditorShell
-      title="Marketing homepage"
-      subtitle="Edit the public EduNudg marketing site."
-      onSave={() => save.mutate()}
-      savePending={save.isPending}
-      saved={saved}
-    >
-      <HomepageEditorForm
-        config={config}
-        onChange={setConfig}
-        uploadScope={{ kind: "platform" }}
-        onPersist={(next) => save.mutate(next)}
-      />
-    </HomepageEditorShell>
+    <>
+      <HomepageEditorShell
+        title="Marketing & theming"
+        subtitle="Edit the public EduNudg marketing site and brand website themes."
+        onSave={() => save.mutate()}
+        savePending={save.isPending}
+        saved={saved}
+      >
+        <HomepageEditorForm
+          config={config}
+          onChange={setConfig}
+          uploadScope={{ kind: "platform" }}
+          onPersist={(next) => save.mutate(next)}
+        />
+      </HomepageEditorShell>
+      <BrandMarketingThemesPanel />
+    </>
   );
 }

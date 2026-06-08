@@ -4,6 +4,7 @@ import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { FeatureFlagRoute } from "@/features/auth/FeatureFlagRoute";
 import { RequireMembership } from "@/features/auth/RequireMembership";
+import { AuthHandoffPage } from "@/features/auth/AuthHandoffPage";
 import { LoginPage } from "@/features/auth/LoginPage";
 import { PlatformLayout } from "@/features/platform/PlatformLayout";
 import { CommandCenter } from "@/features/platform/CommandCenter";
@@ -75,6 +76,7 @@ export function AppRoutes() {
   if (tenant.portalType === "learn") {
     return (
       <Routes>
+        <Route path="/auth/handoff" element={<AuthHandoffPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/"
@@ -95,6 +97,7 @@ export function AppRoutes() {
   if (tenant.portalType === "parents") {
     return (
       <Routes>
+        <Route path="/auth/handoff" element={<AuthHandoffPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="*" element={<ParentPortalPage />} />
       </Routes>
@@ -103,6 +106,7 @@ export function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/auth/handoff" element={<AuthHandoffPage />} />
       <Route path="/login" element={<LoginPage />} />
 
       {tenant.portalType === "platform" && (

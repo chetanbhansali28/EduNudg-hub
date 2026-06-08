@@ -24,6 +24,17 @@ vi.mock("@/lib/brandLandingApi", async (importOriginal) => {
   };
 });
 
+vi.mock("@/lib/brandOwnerCredentialsApi", () => ({
+  fetchBrandOwnerLoginEmail: vi.fn().mockResolvedValue("owner@demo.com"),
+  upsertBrandOwnerCredentials: vi.fn().mockResolvedValue({ error: null }),
+}));
+
+vi.mock("./PortalOpenButton", () => ({
+  PortalOpenButton: ({ label = "Open" }: { label?: string }) => (
+    <button type="button">{label}</button>
+  ),
+}));
+
 function chain(result: { data: unknown; error: unknown; count?: number }) {
   const c = {
     select: vi.fn(() => c),
@@ -31,7 +42,7 @@ function chain(result: { data: unknown; error: unknown; count?: number }) {
     is: vi.fn(() => c),
     in: vi.fn(() => c),
     gte: vi.fn(() => c),
-    order: vi.fn(() => c),
+    order: vi.fn(() => Promise.resolve(result)),
     limit: vi.fn(() => c),
     maybeSingle: vi.fn(() => Promise.resolve(result)),
   };
@@ -129,6 +140,8 @@ describe("BrandDetailPage", () => {
     renderDetail("demo");
     expect(await screen.findByText("Performance (last 30 days)")).toBeDefined();
     expect(screen.getByRole("button", { name: "Open brand backend" })).toBeDefined();
+    expect(screen.getByText("Brand settings")).toBeDefined();
+    expect(screen.queryByText("Marketing theme")).toBeNull();
   });
 
   it("regression_uuid_brand_url_redirects_to_slug_path", async () => {
@@ -175,26 +188,57 @@ describe("BrandDetailPage", () => {
     expect(document.querySelector(".ed-brand-detail__logo")?.getAttribute("src")).toBe("https://example.com/logo.png");
   });
 
-  it("sprint1_renders_marketing_theme_selector", async () => {
+  it("regression_brand_settings_form_on_detail_page", async () => {
     renderDetail("demo");
-    expect(await screen.findByText("Marketing theme")).toBeDefined();
-    expect(screen.getByLabelText("Website theme")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Save theme" })).toHaveProperty("disabled", true);
+    expect(await screen.findByText("Brand settings")).toBeDefined();
+    expect(screen.getByLabelText("Name")).toBeDefined();
+    expect(screen.getByLabelText("Status")).toBeDefined();
+    expect(screen.getByLabelText("Login email")).toBeDefined();
+    expect(screen.getByLabelText("Password")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Save changes" })).toBeDefined();
+    expect(screen.queryByLabelText("Slug")).toBeNull();
   });
 
-  it("sprint1_saves_marketing_theme_when_changed", async () => {
-    renderDetail("demo");
+  it("regression_domains_section_shows_open_for_all_portal_types", async () => {
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brands") {
+        return chain({
+          data: {
+            id: "b1",
+            slug: "smart-brain-abacus",
+            name: "Smart Brain Abacus",
+            status: "active",
+            logo_url: null,
+            marketing_theme: "novu",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          error: null,
+        });
+      }
+      if (table === "franchise_centers") {
+        return chain({ data: [], error: null });
+      }
+      if (table === "domain_mappings") {
+        return chain({
+          data: [
+            { hostname: "smart-brain-abacus.localhost", portal_type: "brand", is_primary: true },
+            { hostname: "koramangala.smart-brain-abacus.localhost", portal_type: "center", is_primary: true },
+            { hostname: "learn.smart-brain-abacus.localhost", portal_type: "learn", is_primary: false },
+          ],
+          error: null,
+        });
+      }
+      if (table === "brand_subscriptions") {
+        return chain({ data: null, error: null });
+      }
+      return countChain(0);
+    });
 
-    const select = await screen.findByLabelText("Website theme");
-    fireEvent.change(select, { target: { value: "abacus-classic" } });
-
-    const saveButton = screen.getByRole("button", { name: "Save theme" });
-    expect(saveButton).toHaveProperty("disabled", false);
-
-    fireEvent.click(saveButton);
-
+    renderDetail("smart-brain-abacus");
+    expect(await screen.findByText(/learn\.smart-brain-abacus\.localhost/)).toBeDefined();
     await waitFor(() => {
-      expect(updateBrandMarketingThemeMock).toHaveBeenCalledWith("b1", "abacus-classic");
+      expect(screen.getAllByRole("button", { name: "Open" })).toHaveLength(3);
     });
   });
 });

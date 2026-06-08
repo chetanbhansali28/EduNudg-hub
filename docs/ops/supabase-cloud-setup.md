@@ -44,8 +44,14 @@ In **Authentication → URL configuration**:
 
 | Setting | Value |
 |---------|--------|
-| Site URL | `http://localhost:9000` |
+| Site URL | `http://localhost:9000` (not `localhost:3000`) |
 | Redirect URLs | `http://localhost:9000/**` |
+
+Platform-admin **Open** / **Brand backend** uses `/auth/handoff` on each portal host with `verifyOtp` — it does **not** rely on per-subdomain redirect allowlists. Deploy `platform-portal-handoff` after changes:
+
+```bash
+pnpm dlx supabase functions deploy platform-portal-handoff
+```
 
 Add production URLs when you deploy.
 

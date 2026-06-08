@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, DataList, KpiCard, KpiGrid, ListRow, PageToolbar, Select } from "@edunudg/ui";
+import { useQuery } from "@tanstack/react-query";
+import { Badge, Button, Card, DataList, KpiCard, KpiGrid, ListRow, PageToolbar } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { brandAdminPath, isUuid } from "@/lib/adminPaths";
-import { brandPortalUrl } from "@/lib/brandPortalUrl";
-import { updateBrandMarketingTheme } from "@/lib/brandLandingApi";
+import { portalTargetFromDomain } from "@/lib/brandPortalUrl";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
 import { formatInrFromPaise, useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
-import { MARKETING_THEME_LABELS, MARKETING_THEMES, parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
+import { BrandEditForm } from "./BrandEditForm";
+import { PortalOpenButton } from "./PortalOpenButton";
 
 interface BrandRow {
   id: string;
@@ -39,8 +39,6 @@ export function BrandDetailPage() {
   const { brandSlug: brandSlugParam } = useParams<{ brandSlug: string }>();
   const brandSlug = brandSlugParam?.trim() ?? "";
   const lookupById = isUuid(brandSlug);
-  const qc = useQueryClient();
-  const [themeDraft, setThemeDraft] = useState<MarketingTheme>("novu");
 
   const brand = useQuery({
     queryKey: ["brand", lookupById ? "id" : "slug", brandSlug],
@@ -111,23 +109,6 @@ export function BrandDetailPage() {
     };
   }, [brand.data?.name]);
 
-  useEffect(() => {
-    if (brand.data?.marketing_theme) {
-      setThemeDraft(parseMarketingTheme(brand.data.marketing_theme));
-    }
-  }, [brand.data?.marketing_theme]);
-
-  const saveTheme = useMutation({
-    mutationFn: async () => {
-      if (!brandId) throw new Error("Brand required");
-      await updateBrandMarketingTheme(brandId, themeDraft);
-    },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["brand", lookupById ? "id" : "slug", brandSlug] });
-      void qc.invalidateQueries({ queryKey: ["brand-landing"] });
-    },
-  });
-
   if (brand.isLoading) return <p className="ed-empty">Loading brand…</p>;
 
   if (brand.data && lookupById && brand.data.slug !== brandSlug) {
@@ -152,7 +133,7 @@ export function BrandDetailPage() {
   const primaryBrandHost =
     domains.data?.find((d) => d.portal_type === "brand" && d.is_primary)?.hostname ??
     domains.data?.find((d) => d.portal_type === "brand")?.hostname;
-  const backendUrl = brandPortalUrl(b.slug, primaryBrandHost);
+  const brandBackendTarget = portalTargetFromDomain("brand", primaryBrandHost ?? `${b.slug}.localhost`, b.slug);
 
   const sub = subscription.data as
     | { status: string; subscription_plans?: { name: string; code: string } | null }
@@ -180,29 +161,8 @@ export function BrandDetailPage() {
         <Link to="/admin/brands">
           <Button variant="ghost">All brands</Button>
         </Link>
-        <Button onClick={() => window.open(backendUrl, "_blank", "noopener,noreferrer")}>Open brand backend</Button>
+        {brandBackendTarget ? <PortalOpenButton target={brandBackendTarget} label="Open brand backend" /> : null}
       </PageToolbar>
-
-      <Card title="Marketing theme">
-        <p className="ed-text-sm ed-muted" style={{ marginBottom: "0.75rem" }}>
-          Controls the public brand website layout. Brand owners edit content in their portal; only EduNudg admins
-          can change the theme here.
-        </p>
-        <Select
-          label="Website theme"
-          value={themeDraft}
-          onChange={(v) => setThemeDraft(parseMarketingTheme(v))}
-          options={MARKETING_THEMES.map((theme) => ({ value: theme, label: MARKETING_THEME_LABELS[theme] }))}
-        />
-        <div style={{ marginTop: "0.75rem" }}>
-          <Button
-            onClick={() => saveTheme.mutate()}
-            disabled={saveTheme.isPending || themeDraft === parseMarketingTheme(b.marketing_theme)}
-          >
-            {saveTheme.isPending ? "Saving…" : "Save theme"}
-          </Button>
-        </div>
-      </Card>
 
       <Card title="Performance (last 30 days)">
         {monitoring.isLoading ? (
@@ -299,31 +259,30 @@ export function BrandDetailPage() {
         />
       </KpiGrid>
 
+      <Card title="Brand settings">
+        <BrandEditForm
+          brandId={b.id}
+          name={b.name}
+          status={b.status as "draft" | "active" | "suspended" | "archived"}
+          logoUrl={b.logo_url}
+        />
+      </Card>
+
       <Card title="Domains">
         <DataList
           items={(domains.data ?? []).map((d, i) => ({ ...d, id: `${d.hostname}-${i}` }))}
           empty="No domain mappings for this brand."
-          render={(d) => (
-            <ListRow
-              aside={
-                d.portal_type === "brand" ? (
-                  <Button
-                    variant="ghost"
-                    onClick={() =>
-                      window.open(brandPortalUrl(b.slug, d.hostname), "_blank", "noopener,noreferrer")
-                    }
-                  >
-                    Open
-                  </Button>
-                ) : undefined
-              }
-            >
-              <span>
-                {d.hostname} — {d.portal_type}
-                {d.is_primary ? " (primary)" : ""}
-              </span>
-            </ListRow>
-          )}
+          render={(d) => {
+            const target = portalTargetFromDomain(d.portal_type, d.hostname, b.slug);
+            return (
+              <ListRow aside={target ? <PortalOpenButton target={target} /> : undefined}>
+                <span>
+                  {d.hostname} — {d.portal_type}
+                  {d.is_primary ? " (primary)" : ""}
+                </span>
+              </ListRow>
+            );
+          }}
         />
       </Card>
 
@@ -331,18 +290,25 @@ export function BrandDetailPage() {
         <DataList
           items={centers.data ?? []}
           empty="No centers yet."
-          render={(c) => (
-            <ListRow>
-              <div>
-                <strong>{c.name}</strong>
-                <div className="ed-text-sm ed-muted">
-                  {c.slug}
-                  {c.city ? ` · ${c.city}` : ""}
+          render={(c) => {
+            const centerHost =
+              domains.data?.find(
+                (d) => d.portal_type === "center" && d.hostname.toLowerCase().startsWith(`${c.slug}.`)
+              )?.hostname ?? `${c.slug}.${b.slug}.localhost`;
+            const target = portalTargetFromDomain("center", centerHost, b.slug);
+            return (
+              <ListRow aside={target ? <PortalOpenButton target={target} label="Open center" /> : undefined}>
+                <div>
+                  <strong>{c.name}</strong>
+                  <div className="ed-text-sm ed-muted">
+                    {c.slug}
+                    {c.city ? ` · ${c.city}` : ""}
+                  </div>
+                  <Badge tone={c.status === "active" ? "success" : "default"}>{c.status}</Badge>
                 </div>
-                <Badge tone={c.status === "active" ? "success" : "default"}>{c.status}</Badge>
-              </div>
-            </ListRow>
-          )}
+              </ListRow>
+            );
+          }}
         />
       </Card>
     </>

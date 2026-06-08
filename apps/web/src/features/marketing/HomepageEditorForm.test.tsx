@@ -26,4 +26,18 @@ describe("HomepageEditorForm", () => {
     expect(screen.queryByLabelText("Hero background image URL")).toBeNull();
     expect(screen.getByLabelText("Hero background image or video")).toBeDefined();
   });
+
+  it("regression_form_fields_expose_id_and_name_for_autofill", () => {
+    const { container } = render(
+      <HomepageEditorShell title="Marketing homepage">
+        <HomepageEditorForm config={DEFAULT_HOMEPAGE_CONFIG} onChange={() => undefined} />
+      </HomepageEditorShell>
+    );
+
+    const fields = container.querySelectorAll("input.ed-field__input, select.ed-field__input, textarea.ed-field__input");
+    expect(fields.length).toBeGreaterThan(0);
+    fields.forEach((field) => {
+      expect(field.getAttribute("id") || field.getAttribute("name")).toBeTruthy();
+    });
+  });
 });

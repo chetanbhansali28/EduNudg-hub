@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button, IconGoogle, Input, LoginLayout, PasswordInput, ThemeProvider } from "@edunudg/ui";
 import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
+import { useMembership } from "@/hooks/useMembership";
 import { usePlatformIntegrations } from "@/hooks/usePlatformIntegration";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
+import { useResolvedPortalTenant } from "@/hooks/useResolvedPortalTenant";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
+import { hasPortalMembership } from "@/lib/portalMembership";
+import { logPortalDebug } from "@/lib/portalDebug";
 import { resolveLoginBranding } from "@/lib/portalBranding";
 import { postLoginPath } from "./postLoginPath";
 
@@ -15,7 +19,11 @@ const REMEMBER_KEY = "edunudg_remember_email";
 export function LoginPage() {
   const { session, signInWithOAuth, signInWithEmail, signInWithOtpPhone } = useAuth();
   const tenant = useTenant();
+  const { tenant: portalTenant, isResolving: portalTenantResolving } = useResolvedPortalTenant();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const { data: memberships, isLoading: membershipsLoading } = useMembership();
   const brandingQuery = usePortalBranding();
   const integrations = usePlatformIntegrations();
   const homepageQuery = useQuery({
@@ -66,14 +74,55 @@ export function LoginPage() {
   );
 
   const homepage = homepageQuery.data;
+  const portalType = tenant.portalType;
+  const accessPending = membershipsLoading || portalTenantResolving;
+  const hasAccess =
+    !session || accessPending ? false : hasPortalMembership(memberships, portalTenant);
 
   const goAfterLogin = useCallback(() => {
-    navigate(postLoginPath(tenant), { replace: true });
-  }, [navigate, tenant]);
+    const next = searchParams.get("next");
+    const path = next?.startsWith("/") ? next : postLoginPath({ portalType });
+    navigate(path, { replace: true });
+  }, [navigate, portalType, searchParams]);
 
   useEffect(() => {
-    if (session) goAfterLogin();
-  }, [session, goAfterLogin]);
+    if (!session || location.pathname !== "/login" || accessPending || !hasAccess) return;
+    goAfterLogin();
+  }, [session, location.pathname, accessPending, hasAccess, goAfterLogin]);
+
+  useEffect(() => {
+    if (!session) return;
+    logPortalDebug("login.access", {
+      portalType: tenant.portalType,
+      hostname: tenant.hostname,
+      brandSlug: tenant.brandSlug,
+      centerSlug: tenant.centerSlug,
+      tenantBrandId: tenant.brandId,
+      tenantCenterId: tenant.centerId,
+      resolvedBrandId: portalTenant.brandId,
+      resolvedCenterId: portalTenant.centerId,
+      accessPending,
+      hasAccess,
+      membershipsLoading,
+      portalTenantResolving,
+      membershipCount: memberships?.length ?? 0,
+      membershipScopes: memberships?.map((m) => ({
+        scope: m.scope_type,
+        brandId: m.brand_id,
+        centerId: m.center_id,
+        role: m.role_key,
+      })),
+    });
+  }, [
+    session,
+    tenant,
+    portalTenant,
+    accessPending,
+    hasAccess,
+    membershipsLoading,
+    portalTenantResolving,
+    memberships,
+  ]);
 
   const handleEmailSignIn = async () => {
     const trimmedEmail = email.trim();
@@ -96,7 +145,6 @@ export function LoginPage() {
         setError(err.message || "Sign in failed. Check email and password.");
         return;
       }
-      goAfterLogin();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Sign in failed unexpectedly.");
     } finally {
@@ -151,8 +199,10 @@ export function LoginPage() {
             <PasswordInput label="Password" value={password} onChange={setPassword} />
 
             <div className="ed-login-split__remember">
-              <label>
+              <label htmlFor="login-remember">
                 <input
+                  id="login-remember"
+                  name="remember"
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
@@ -168,6 +218,12 @@ export function LoginPage() {
               {submitting ? "Signing in…" : "Log in"}
             </Button>
           </form>
+        ) : null}
+
+        {session && !accessPending && !hasAccess ? (
+          <p role="alert" className="ed-login__error">
+            You are signed in but do not have access to this portal. Contact your administrator.
+          </p>
         ) : null}
 
         {error && (

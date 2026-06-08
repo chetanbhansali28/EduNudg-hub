@@ -1,4 +1,13 @@
 import { useState, useId, type ReactNode } from "react";
+
+function fieldNameFromLabel(label: string): string {
+  const slug = label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || "field";
+}
 import { Link } from "react-router-dom";
 import { IconEye, IconEyeOff } from "./icons";
 
@@ -168,6 +177,8 @@ export function Input({
   autoComplete,
   step,
   editable = false,
+  id,
+  name,
 }: {
   label: string;
   value: string;
@@ -177,11 +188,18 @@ export function Input({
   autoComplete?: string;
   step?: string;
   editable?: boolean;
+  id?: string;
+  name?: string;
 }) {
+  const autoId = useId();
+  const inputId = id ?? autoId;
+  const inputName = name ?? fieldNameFromLabel(label);
   return (
-    <label className={`ed-field${editable ? " ed-field--editable" : ""}`}>
+    <label className={`ed-field${editable ? " ed-field--editable" : ""}`} htmlFor={inputId}>
       <span className="ed-field__label">{label}</span>
       <input
+        id={inputId}
+        name={inputName}
         className="ed-field__input"
         type={type}
         value={value}
@@ -200,20 +218,29 @@ export function PasswordInput({
   onChange,
   placeholder = "Enter a password",
   autoComplete = "current-password",
+  id,
+  name,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   autoComplete?: string;
+  id?: string;
+  name?: string;
 }) {
   const [visible, setVisible] = useState(false);
+  const autoId = useId();
+  const inputId = id ?? autoId;
+  const inputName = name ?? fieldNameFromLabel(label);
 
   return (
-    <label className="ed-field ed-field--password">
+    <label className="ed-field ed-field--password" htmlFor={inputId}>
       <span className="ed-field__label">{label}</span>
       <div className="ed-field__input-wrap">
         <input
+          id={inputId}
+          name={inputName}
           className="ed-field__input"
           type={visible ? "text" : "password"}
           value={value}
@@ -241,6 +268,8 @@ export function Select<T extends string>({
   options,
   placeholder,
   editable = false,
+  id,
+  name,
 }: {
   label: string;
   value: T | "";
@@ -248,11 +277,18 @@ export function Select<T extends string>({
   options: { value: T; label: string }[];
   placeholder?: string;
   editable?: boolean;
+  id?: string;
+  name?: string;
 }) {
+  const autoId = useId();
+  const inputId = id ?? autoId;
+  const inputName = name ?? fieldNameFromLabel(label);
   return (
-    <label className={`ed-field${editable ? " ed-field--editable" : ""}`}>
+    <label className={`ed-field${editable ? " ed-field--editable" : ""}`} htmlFor={inputId}>
       <span className="ed-field__label">{label}</span>
       <select
+        id={inputId}
+        name={inputName}
         className="ed-field__input"
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
@@ -386,6 +422,8 @@ export function Textarea({
   rows = 4,
   placeholder,
   editable = false,
+  id,
+  name,
 }: {
   label: string;
   value: string;
@@ -393,11 +431,18 @@ export function Textarea({
   rows?: number;
   placeholder?: string;
   editable?: boolean;
+  id?: string;
+  name?: string;
 }) {
+  const autoId = useId();
+  const inputId = id ?? autoId;
+  const inputName = name ?? fieldNameFromLabel(label);
   return (
-    <label className={`ed-field${editable ? " ed-field--editable" : ""}`}>
+    <label className={`ed-field${editable ? " ed-field--editable" : ""}`} htmlFor={inputId}>
       <span className="ed-field__label">{label}</span>
       <textarea
+        id={inputId}
+        name={inputName}
         className="ed-field__input"
         rows={rows}
         value={value}

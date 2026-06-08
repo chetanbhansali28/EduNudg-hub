@@ -3,6 +3,7 @@ import { BrowserRouter, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@edunudg/ui";
 import { AuthProvider } from "@/bootstrap/AuthProvider";
 import { TenantProvider } from "@/bootstrap/TenantProvider";
+import { PortalDocumentHead } from "@/components/PortalDocumentHead";
 import { AppRoutes } from "@/routes/AppRoutes";
 
 function AppShell({ children }: { children: ReactNode }) {
@@ -16,6 +17,7 @@ function AppShell({ children }: { children: ReactNode }) {
 export function App() {
   return (
     <TenantProvider>
+      <PortalDocumentHead />
       <AuthProvider>
         <BrowserRouter>
           <AppShell>

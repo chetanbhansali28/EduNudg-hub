@@ -1,4 +1,4 @@
-import type { ReactNode, MouseEvent } from "react";
+import type { ReactNode } from "react";
 import { Toggle } from "@edunudg/ui";
 
 type Props = {
@@ -13,15 +13,11 @@ type Props = {
 export function EditorAccordion({ title, children, enabled = true, onEnabledChange }: Props) {
   const showToggle = onEnabledChange != null;
 
-  const stopToggleClick = (event: MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
   return (
     <details
       className={[
         "ed-editor-accordion",
+        showToggle ? "ed-editor-accordion--has-toolbar" : "",
         showToggle && !enabled ? "ed-editor-accordion--section-off" : "",
       ]
         .filter(Boolean)
@@ -29,16 +25,16 @@ export function EditorAccordion({ title, children, enabled = true, onEnabledChan
     >
       <summary className="ed-editor-accordion__summary">
         <span className="ed-editor-accordion__title">{title}</span>
-        {showToggle ? (
-          <span className="ed-editor-accordion__toggle" onClick={stopToggleClick}>
-            <Toggle
-              checked={enabled}
-              onChange={onEnabledChange}
-              aria-label={`Show ${title} on public site`}
-            />
-          </span>
-        ) : null}
       </summary>
+      {showToggle ? (
+        <div className="ed-editor-accordion__toolbar">
+          <Toggle
+            checked={enabled}
+            onChange={onEnabledChange}
+            aria-label={`Show ${title} on public site`}
+          />
+        </div>
+      ) : null}
       <div className="ed-editor-accordion__body">{children}</div>
     </details>
   );
