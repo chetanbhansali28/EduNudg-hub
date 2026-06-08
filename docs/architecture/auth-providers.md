@@ -21,6 +21,18 @@ Supabase `signInWithOAuth({ provider: 'google' | 'facebook' })`. Link row in `au
 
 Staff fallback: `signInWithPassword` / magic link invites.
 
+Post-login redirect honors `?next=` on `/login` (used after platform-admin handoff).
+
+## Platform admin cross-portal handoff
+
+Platform admins open brand/center/learn/parents hosts without a separate password:
+
+1. Edge Function `platform-portal-handoff` returns `{origin}/auth/handoff?token_hash=…&next=…`
+2. `AuthHandoffPage` calls `verifyOtp` on the **target host** (session is per-origin)
+3. Platform `memberships` row grants access on brand/center staff routes
+
+Does not use Supabase `action_link` redirects to subdomains. Details: [platform-admin-portal-handoff.md](../ops/platform-admin-portal-handoff.md).
+
 All events → `auth_audit_logs`.
 
-OAuth redirect URLs (local dev): set in **Supabase Dashboard → Authentication → URL configuration** — Site URL `http://localhost:9000`, redirects `http://localhost:9000/**`.
+OAuth redirect URLs (local dev): set in **Supabase Dashboard → Authentication → URL configuration** — Site URL `http://localhost:9000` (not `3000`), redirects `http://localhost:9000/**`.

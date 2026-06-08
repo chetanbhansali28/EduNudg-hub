@@ -197,6 +197,7 @@ export function AppShell({
   navSections,
   footerItems = [],
   showUpgradeCard = true,
+  surface = "backend",
   children,
 }: {
   productName?: string;
@@ -207,6 +208,8 @@ export function AppShell({
   navSections: ShellNavSection[];
   footerItems?: ShellNavItem[];
   showUpgradeCard?: boolean;
+  /** Staff portal chrome (admin / brand / center). Applies compact dashboard KPI styling. */
+  surface?: "backend" | "marketing";
   children: ReactNode;
 }) {
   const [navOpen, setNavOpen] = useState(false);
@@ -254,6 +257,7 @@ export function AppShell({
 
   const shellClass = [
     "ed-shell",
+    surface === "backend" ? "ed-shell--backend" : "",
     navOpen ? "ed-shell--nav-open" : "",
     sidebarCollapsed ? "ed-shell--sidebar-collapsed" : "",
   ]

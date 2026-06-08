@@ -2,6 +2,20 @@
 
 Applies to authenticated **app** layouts (`/admin`, `/app`), not marketing pages.
 
+## Backend shell & KPI dashboards
+
+Staff portals use `AppShell` with `surface="backend"` (default) → class `ed-shell--backend` on the root shell.
+
+All `KpiGrid` / `KpiCard` inside the backend shell use the **compact dashboard** layout automatically (~1.5 rows on desktop, room for more metrics):
+
+- Smaller padding and type
+- 5 columns from 1024px, 6 from 1280px
+- Applies to platform `/admin`, `/admin/revenue`, brand `/app`, `/app/analytics`, center `/app`, and brand detail performance KPIs when viewed inside platform admin chrome
+
+No per-page `className` on `KpiGrid` is required. Marketing/public pages do not use this shell.
+
+Tests: `apps/web/src/features/shared/backendKpiTheme.test.tsx`.
+
 ## Sidebar
 
 - **Desktop:** collapsible left panel ([`packages/ui/src/shell.tsx`](../../packages/ui/src/shell.tsx)); state in `localStorage`
@@ -39,9 +53,14 @@ Do not stack many full-width `Card`s in a single column on laptop viewports.
 - Dual forms on brand host stack vertically on narrow viewports
 - Center registration: single column form under brand nav
 
+## Form fields (`@edunudg/ui`)
+
+`Input`, `PasswordInput`, `Select`, and `Textarea` generate stable `id` and `name` from labels (for autofill and a11y). Labels use `htmlFor`. Override with optional `id` / `name` props when needed.
+
 ## Accessibility
 
-- File inputs labeled (`htmlFor`)
+- File inputs labeled (`htmlFor`) with `name` where applicable
+- Marketing editor `EditorAccordion`: visibility toggles live **outside** `<summary>` (no interactive controls inside summary)
 - Stale / lost lead states use text + icon, not color alone
 
 ## Related

@@ -149,6 +149,14 @@ describe("BrandDetailPage", () => {
     expect(await screen.findByText("Performance (last 30 days)")).toBeDefined();
   });
 
+  it("regression_brand_detail_omits_duplicate_summary_kpis", async () => {
+    renderDetail("demo");
+    expect(await screen.findByText("Performance (last 30 days)")).toBeDefined();
+    expect(await screen.findByText("Centers")).toBeDefined();
+    expect(screen.queryByText("Centers listed")).toBeNull();
+    expect(screen.queryByText("Brand portal")).toBeNull();
+  });
+
   it("regression_brand_detail_omits_overview_metadata", async () => {
     fromMock.mockImplementation((table: string) => {
       if (table === "brands") {

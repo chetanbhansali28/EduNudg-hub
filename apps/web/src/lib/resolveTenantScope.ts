@@ -5,7 +5,6 @@ import {
   type TenantContext,
 } from "@edunudg/tenant";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { logPortalDebug } from "@/lib/portalDebug";
 import { parsePortalBrandingRpc, type PortalBranding } from "@/lib/portalBranding";
 
 function slugMatches(actual: string | null | undefined, expected: string | null | undefined): boolean {
@@ -39,36 +38,6 @@ export function mergePortalBrandingScope(tenant: TenantContext, branding: Portal
       ? branding.centerId
       : null;
 
-  if (
-    import.meta.env.DEV &&
-    tenant.brandId &&
-    brandFromSlug &&
-    tenant.brandId !== brandFromSlug
-  ) {
-    logPortalDebug("tenant.scope.brand_id_mismatch", {
-      hostname: tenant.hostname,
-      brandSlug: tenant.brandSlug,
-      domainMappingBrandId: tenant.brandId,
-      slugResolvedBrandId: brandFromSlug,
-      using: "slug_resolved",
-    });
-  }
-
-  if (
-    import.meta.env.DEV &&
-    tenant.centerId &&
-    centerFromSlug &&
-    tenant.centerId !== centerFromSlug
-  ) {
-    logPortalDebug("tenant.scope.center_id_mismatch", {
-      hostname: tenant.hostname,
-      centerSlug: tenant.centerSlug,
-      domainMappingCenterId: tenant.centerId,
-      slugResolvedCenterId: centerFromSlug,
-      using: "slug_resolved",
-    });
-  }
-
   return {
     ...tenant,
     brandId: brandFromSlug ?? tenant.brandId ?? branding.brandId ?? null,
@@ -93,22 +62,6 @@ export async function resolveTenantScope(
     ? base
     : mergeDomainMapping(base, mapping as DomainMappingRow | null);
 
-  if (mappingError) {
-    logPortalDebug("tenant.domain_mapping.error", {
-      hostname: base.hostname,
-      message: mappingError.message,
-    });
-  } else {
-    logPortalDebug("tenant.domain_mapping", {
-      hostname: base.hostname,
-      portalType: tenant.portalType,
-      brandId: tenant.brandId,
-      centerId: tenant.centerId,
-      brandSlug: tenant.brandSlug,
-      centerSlug: tenant.centerSlug,
-    });
-  }
-
   if (!tenant.brandSlug || !isBrandOrCenterPortal(tenant)) return tenant;
 
   const { data, error } = await supabase.rpc("get_portal_branding", {
@@ -116,27 +69,10 @@ export async function resolveTenantScope(
     p_center_slug: tenant.centerSlug,
   });
 
-  if (error) {
-    logPortalDebug("tenant.scope.rpc.error", {
-      brandSlug: tenant.brandSlug,
-      centerSlug: tenant.centerSlug,
-      message: error.message,
-    });
-    return tenant;
-  }
+  if (error) return tenant;
 
   const branding = parsePortalBrandingRpc(data);
   tenant = mergePortalBrandingScope(tenant, branding);
-
-  logPortalDebug("tenant.scope.resolved", {
-    hostname: base.hostname,
-    portalType: tenant.portalType,
-    brandId: tenant.brandId,
-    centerId: tenant.centerId,
-    brandSlug: tenant.brandSlug,
-    centerSlug: tenant.centerSlug,
-    brandLogoUrl: branding.brandLogoUrl,
-  });
 
   return tenant;
 }

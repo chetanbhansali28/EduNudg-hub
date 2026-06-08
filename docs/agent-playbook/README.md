@@ -13,6 +13,14 @@ Instructions for humans and AI agents working on EduNudg.
 ## Frontend docs
 
 - [Marketing landing pages](../frontend/marketing-landing.md) — platform / brand / center public `/` theme
+- [Abacus Classic theme](../frontend/abacus-classic.md) — brand marketing theme variant
+- [UI shell standards](../spec/ui-shell-standards.md) — backend KPI grid, forms, accessibility
+
+## Operations
+
+- [Runbook](../ops/runbook.md) — local URLs (port 9000)
+- [Platform admin portal handoff](../ops/platform-admin-portal-handoff.md) — cross-host support login
+- [Test users](../ops/test-users.md) — seeded accounts and troubleshooting
 
 ## Project stack
 

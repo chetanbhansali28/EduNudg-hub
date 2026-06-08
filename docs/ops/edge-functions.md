@@ -7,6 +7,7 @@ EduNudg functions live in [`supabase/functions/`](../../supabase/functions/):
 | `whatsapp-otp` | Send/verify WhatsApp OTP (stub — wire Twilio/Gupshup later) |
 | `passkey-verify` | WebAuthn verify (stub — wire `@simplewebauthn/server` later) |
 | `brand-owner-credentials` | Platform admin: create/update brand owner Auth user + membership |
+| `platform-portal-handoff` | Platform admin: one-time `hashed_token` for cross-host `/auth/handoff` sign-in |
 
 No Docker required. Deploy with the **Supabase CLI** against your linked cloud project.
 
@@ -28,6 +29,8 @@ supabase link --project-ref YOUR_PROJECT_REF
 ```bash
 supabase functions deploy whatsapp-otp
 supabase functions deploy passkey-verify
+supabase functions deploy platform-portal-handoff
+supabase functions deploy brand-owner-credentials
 ```
 
 ## Deploy all functions
@@ -123,4 +126,5 @@ supabase functions deploy whatsapp-otp --no-verify-jwt
 ## Related
 
 - [supabase-cloud-setup.md](./supabase-cloud-setup.md) — database + env
+- [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md) — cross-portal support login
 - [auth-providers.md](../architecture/auth-providers.md) — auth design

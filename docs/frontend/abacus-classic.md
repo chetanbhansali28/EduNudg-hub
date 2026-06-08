@@ -2,7 +2,7 @@
 
 Success Abacus–style public brand sites (`marketing_theme = 'abacus-classic'`). Reference layout: [Success Abacus](https://successabacus.com).
 
-Platform admins assign the theme at `/admin/brands/:slug`. Brand owners edit copy and media at `{brand}.localhost:9000/app/homepage` via `AbacusClassicEditorForm`.
+Platform admins assign the theme at **Platform → Homepage** (`/admin/homepage`) → **Brand marketing themes**. Brand owners edit copy and media at `{brand}.localhost:9000/app/homepage` via `AbacusClassicEditorForm`.
 
 Local demo brand: `smart-brain-abacus.localhost:9000` (see [Operations runbook](../ops/runbook.md#urls-port-9000)).
 
@@ -17,7 +17,7 @@ Sprint 1 establishes the **theme infrastructure** — database column, RPC paylo
 | 3 | Public RPC returns theme + stats + curriculum | `get_brand_landing_public` (migration 039) |
 | 4 | `MarketingTheme` type + `parseMarketingTheme()` | `apps/web/src/types/homepage.ts` |
 | 5 | Bundle includes `marketingTheme` + `publicStats` | `brandLandingApi.ts`, `brandLandingBundle.ts` |
-| 6 | Platform admin theme selector | `/admin/brands/:slug` → `BrandDetailPage` |
+| 6 | Platform admin theme selector | `/admin/homepage` → `BrandMarketingThemesPanel` |
 | 7 | Theme-aware public layout | `BrandPublicLayout` → Novu vs Abacus nav/footer |
 | 8 | Theme-aware landing route | `BrandLandingPage` → `MarketingContent` vs `AbacusClassicContent` |
 | 9 | Theme-aware brand editor | `BrandMarketingEditorPage` → `HomepageEditorForm` vs `AbacusClassicEditorForm` |
@@ -35,7 +35,7 @@ Add to hosts file:
 127.0.0.1 smart-brain-abacus.localhost
 ```
 
-Assign theme: **Platform admin** → Brands → select brand → **Marketing theme** card → choose *Abacus Classic* → **Save theme**.
+Assign theme: **Platform admin** → **Homepage** (`/admin/homepage`) → **Brand marketing themes** → choose *Abacus Classic* for the brand → **Save**.
 
 Brand owners cannot change the theme; they only edit content at `{brand}.localhost:9000/app/homepage`.
 
@@ -87,6 +87,7 @@ Toggle sections in the brand homepage editor: **Leadership profiles**, **Trust &
 | Defaults | `apps/web/src/lib/brandLandingDefaults.ts` → `mergeAbacusClassicLandingConfig` |
 | Program card colors | `apps/web/src/lib/marketingFeatureSections.ts` → `programCardPalette` |
 | Types | `apps/web/src/types/homepage.ts` |
+| Platform theme admin | `apps/web/src/features/platform/BrandMarketingThemesPanel.tsx` on `/admin/homepage` |
 | Migration | `supabase/migrations/039_brand_marketing_theme.sql` |
 | Seed | `supabase/seed/seed.sql` (`smart-brain-abacus`) |
 
@@ -108,7 +109,8 @@ Toggle sections in the brand homepage editor: **Leadership profiles**, **Trust &
 | `lib/brandLandingBundle.test.ts` | Bundle normalization with `marketingTheme` / `publicStats` |
 | `lib/brandLandingEditorApi.test.ts` | `fetchBrandMarketingEditor` Novu vs Abacus config |
 | `lib/homepageSections.test.ts` | `ABACUS_CLASSIC_SECTION_DEFAULTS`, `isAbacusSectionEnabled` |
-| `features/platform/BrandDetailPage.test.tsx` | Marketing theme selector + save |
+| `features/platform/HomepageEditorPage.test.tsx` | Brand marketing themes panel on homepage admin |
+| `features/platform/BrandDetailPage.test.tsx` | Brand settings, domains Open, no duplicate KPIs |
 | `features/brand/BrandPublicLayout.test.tsx` | Novu vs Abacus layout branch |
 | `features/brand/BrandLandingPage.test.tsx` | Theme branch via outlet context |
 | `features/brand/marketing/BrandMarketingEditorPage.test.tsx` | Abacus editor when theme is abacus-classic |
@@ -116,7 +118,7 @@ Toggle sections in the brand homepage editor: **Leadership profiles**, **Trust &
 Run Sprint 1 tests:
 
 ```bash
-pnpm --filter web test -- homepage.test brandLandingApi brandLandingBundle brandLandingEditorApi homepageSections BrandDetailPage BrandPublicLayout BrandLandingPage BrandMarketingEditorPage
+pnpm --filter web test -- homepage.test brandLandingApi brandLandingBundle brandLandingEditorApi homepageSections HomepageEditorPage BrandDetailPage BrandPublicLayout BrandLandingPage BrandMarketingEditorPage
 ```
 
 ### Sprint 2
@@ -163,10 +165,11 @@ Prerequisites: migration `039` applied, dev server on port 9000.
 
 ### Platform admin
 
-- [ ] `/admin/brands/:slug` shows **Marketing theme** card with Novu and Abacus Classic options
-- [ ] **Save theme** is disabled until the selection changes
+- [ ] `/admin/homepage` shows **Brand marketing themes** with Novu and Abacus Classic per brand
+- [ ] **Save** is disabled until the selection changes
 - [ ] Saving Abacus Classic persists and survives page refresh
 - [ ] Public site for that brand switches layout after save (may need cache refresh)
+- [ ] `/admin/brands/:slug` does **not** show marketing theme (settings + domains only)
 
 ### Public layout routing
 
@@ -212,7 +215,7 @@ Prerequisites: migration `039` applied, seed run, hosts entry for `smart-brain-a
 
 ### Theme routing
 
-- [ ] Platform admin can set theme to `abacus-classic` on brand detail
+- [ ] Platform admin can set theme to `abacus-classic` on `/admin/homepage`
 - [ ] `novu` brands still use phone-scroll `MarketingContent` layout
 
 ## Manual QA checklist (Sprint 3)

@@ -30,7 +30,7 @@ Optional: run [`supabase/seed/seed.sql`](../../supabase/seed/seed.sql) first for
 
 ## Brand login credentials (platform admin)
 
-On **Platform → Brands**, click **Edit** on a brand to set **Login email** and **Password** for the franchisor (`brand_owner`). Password is required only when creating a new login; leave it blank on edit to keep the existing password.
+On **Platform → Brands**, click **Edit** (or open the brand name) to go to **brand detail** (`/admin/brands/:slug`) and set **Login email** and **Password** for the franchisor (`brand_owner`). Password is required only when creating a new login; leave it blank on edit to keep the existing password.
 
 The brand signs in at `{slug}.localhost:9000/login` (dev) using that email and password. This provisions Supabase Auth + `memberships` via the `brand-owner-credentials` Edge Function — deploy after schema push:
 
@@ -40,6 +40,18 @@ pnpm dlx supabase@2.104.0 functions deploy brand-owner-credentials
 ```
 
 Seeded demo brand login remains `owner@edunudg.com` / `admin` at http://abacusworld.localhost:9000/login when `test-users.sql` has been applied.
+
+## Platform admin cross-portal handoff
+
+As `admin@edunudg.com` on http://localhost:9000/admin/brands:
+
+1. Click **Brand backend** on a row (or **Open** on brand detail → Domains) — should open `{slug}.localhost:9000/app` signed in as platform admin.
+2. Requires Edge Function `platform-portal-handoff` deployed (see [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md)).
+
+| Issue | Fix |
+|-------|-----|
+| Redirect to `localhost:3000` / connection refused | Set Supabase Site URL to `http://localhost:9000`; redeploy `platform-portal-handoff` |
+| Stays on login after handoff | Check function logs; confirm `/auth/handoff?token_hash=…` URL on correct host |
 
 ## Brand marketing QA (feature phone blocks)
 
@@ -86,3 +98,5 @@ DELETE FROM auth.users WHERE email LIKE '%@edunudg.com';
 | Brand login not working after platform edit | Deploy `brand-owner-credentials` Edge Function; set login email + password on Brands → Edit |
 | No data after login | Check `memberships.status = 'active'` |
 | Brand/center portal wrong | Use subdomain hosts above; run `test-users.sql` for `domain_mappings` |
+| Brand login access denied (owner) | App resolves brand via slug + `get_portal_branding`; ensure `test-users.sql` brand id matches domain slug |
+| Platform admin **Open** fails | Deploy `platform-portal-handoff`; see [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md) |

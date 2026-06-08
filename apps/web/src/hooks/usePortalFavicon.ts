@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
-import { logPortalDebug } from "@/lib/portalDebug";
-
 const DEFAULT_FAVICON = "/favicon.svg";
 const ICON_SELECTOR = 'link[rel="icon"], link[rel="shortcut icon"]';
 
@@ -39,7 +37,7 @@ function applyFavicon(href: string) {
 /** Sets document favicon from platform/brand logos; falls back to app default. */
 export function usePortalFavicon() {
   const tenant = useTenant();
-  const { data: branding, isFetched: brandingFetched } = usePortalBranding();
+  const { data: branding } = usePortalBranding();
   const homepageQuery = useQuery({
     queryKey: ["marketing-homepage"],
     queryFn: fetchHomepageConfig,
@@ -59,20 +57,5 @@ export function usePortalFavicon() {
 
   useEffect(() => {
     applyFavicon(href);
-    logPortalDebug("favicon.applied", {
-      portalType: tenant.portalType,
-      href,
-      platformLogoUrl,
-      brandLogoUrl,
-      brandingFetched,
-      homepageFetched: homepageQuery.isFetched,
-    });
-  }, [
-    href,
-    tenant.portalType,
-    platformLogoUrl,
-    brandLogoUrl,
-    brandingFetched,
-    homepageQuery.isFetched,
-  ]);
+  }, [href]);
 }

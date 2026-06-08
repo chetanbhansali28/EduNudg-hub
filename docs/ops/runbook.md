@@ -25,12 +25,17 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 |-----|--------|
 | http://localhost:9000/ | Platform marketing homepage (shared nav + footer) |
 | http://localhost:9000/login | Platform admin / staff login (split-screen UI) |
-| http://localhost:9000/admin | Platform app |
-| http://localhost:9000/admin/homepage | Homepage editor (platform admin) |
+| http://localhost:9000/admin | Platform app (Command Center KPIs) |
+| http://localhost:9000/admin/brands | Brands list — **Brand backend** opens target brand `/app` |
+| http://localhost:9000/admin/brands/:slug | Brand detail — performance KPIs, settings, domains, centers |
+| http://localhost:9000/admin/revenue | Revenue & usage KPIs |
+| http://localhost:9000/admin/homepage | Marketing & theming — EduNudg homepage + **brand marketing themes** |
 | http://abacusworld.localhost:9000/ | Abacus World franchise landing (public) |
 | http://smart-brain-abacus.localhost:9000/ | Smart Brain Abacus (Abacus Classic theme) |
 | http://abacusworld.localhost:9000/login | Brand staff login |
-| http://abacusworld.localhost:9000/app | Brand operator backend |
+| http://abacusworld.localhost:9000/app | Brand operator backend (compact KPI dashboard) |
+| http://abacusworld.localhost:9000/app/analytics | Brand analytics KPIs |
+| http://{brand}.localhost:9000/auth/handoff | Platform-admin cross-portal sign-in (token in query) |
 | http://koramangala.abacusworld.localhost:9000/ | Center parent enrollment landing (public) |
 | http://koramangala.abacusworld.localhost:9000/login | Center staff login |
 | http://koramangala.abacusworld.localhost:9000/app | Center operations dashboard |
@@ -46,11 +51,15 @@ Hosts (add to `/etc/hosts`):
 127.0.0.1 localhost admin.localhost abacusworld.localhost koramangala.abacusworld.localhost smart-brain-abacus.localhost
 ```
 
+### Platform admin cross-portal access
+
+Signed-in platform admin can open **Brand backend** or **Open** on brand detail domains to land on another host’s `/app` (or learn/parents `/`). Uses Edge Function `platform-portal-handoff` and `/auth/handoff` — see [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md).
+
 ### Supabase Dashboard (Auth)
 
 **Authentication → URL configuration**
 
-- Site URL: `http://localhost:9000`
+- Site URL: `http://localhost:9000` (not `localhost:3000`)
 - Redirect URLs: `http://localhost:9000/**`
 
 ## Deploy (Vercel)
@@ -81,12 +90,14 @@ export DATABASE_URL="postgresql://..."   # from Dashboard → Database
 pnpm test:rls
 ```
 
-## Marketing homepage
+## Marketing homepage & brand themes
 
 - Public config key: `platform_settings.marketing_homepage` (migration `009_marketing_homepage.sql`)
 - Anonymous users can **read**; platform admins can **read/write** via RLS
 - Edit at **Platform → Homepage** (`/admin/homepage`) after signing in as `admin@edunudg.com`
+- **Brand marketing themes** (Novu vs Abacus Classic) are assigned on the same page — not on brand detail
 - Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
+- Brand owners edit page **content** at `{brand}.localhost:9000/app/homepage`
 
 ```bash
 supabase db push   # applies 009 if not yet applied

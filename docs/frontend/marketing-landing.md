@@ -10,14 +10,16 @@ Public marketing landings share one UI kit under `apps/web/src/features/marketin
 
 ## Brand marketing themes
 
-Platform admins assign a theme per brand at `/admin/brands/:slug` (`brands.marketing_theme`):
+Platform admins assign a theme per brand at **Platform → Homepage** (`/admin/homepage`) in the **Brand marketing themes** panel (`BrandMarketingThemesPanel`). Stored on `brands.marketing_theme`.
 
-| Theme | Layout | Editor |
-|-------|--------|--------|
-| `novu` (default) | Phone-scroll features, Novu nav | `HomepageEditorForm` |
-| `abacus-classic` | Success Abacus-style sections, dual CTAs, modals | `AbacusClassicEditorForm` |
+| Theme | Layout | Editor (brand owners) |
+|-------|--------|------------------------|
+| `novu` (default) | Phone-scroll features, Novu nav | `HomepageEditorForm` at `/app/homepage` |
+| `abacus-classic` | Success Abacus-style sections, dual CTAs, modals | `AbacusClassicEditorForm` at `/app/homepage` |
 
-Brand owners edit content at `{brand}.localhost:9000/app/homepage`. Theme selection is platform-only.
+Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme selection is platform-only (homepage admin screen, not brand detail).
+
+Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, domains, and franchise centers — not marketing theme.
 
 Abacus Classic sections (in order): hero → programs marquee (from curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → rich footer (live center/student counts + custom stats).
 
@@ -79,7 +81,9 @@ Brand and center marketing editors (**Feature sections (phone blocks)**) support
 
 - `apps/web/src/lib/marketingFeatureSections.ts` — default phone videos; Abacus program marquee palette
 - `apps/web/src/types/homepage.ts` — `HomepageConfig` including `meta.logoUrl`
-- `apps/web/src/routes/AppRoutes.tsx` — public `/` vs staff `/app`
+- `apps/web/src/features/platform/BrandMarketingThemesPanel.tsx` — platform admin theme picker
+- `apps/web/src/features/platform/HomepageEditorPage.tsx` — `/admin/homepage`
+- `apps/web/src/routes/AppRoutes.tsx` — public `/` vs staff `/app`; `/auth/handoff` on all portal hosts
 
 ## Local URLs
 

@@ -13,6 +13,15 @@
 
 Every feature and bugfix includes tests in the same PR.
 
+### Critical regression suites
+
+| Area | Test file(s) |
+|------|----------------|
+| Platform admin cross-portal handoff | `platformAdminPortalAccess.critical.test.tsx`, `AuthHandoffPage.test.tsx`, `portalHandoffUrl.test.ts` |
+| Backend KPI theme (all staff dashboards) | `backendKpiTheme.test.tsx` |
+| Brand portal login / tenant scope | `LoginPage.brandPortal.test.tsx`, `resolveTenantScope.test.ts` |
+| Brand success stories page | `BrandSuccessStoriesPage.test.tsx` |
+
 ## CI
 
 - `pnpm test`

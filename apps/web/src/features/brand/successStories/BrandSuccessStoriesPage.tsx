@@ -20,6 +20,7 @@ import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
+import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
 
 interface Story {

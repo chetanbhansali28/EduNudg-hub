@@ -68,13 +68,16 @@ Open http://localhost:9000/admin
 
 ## Edge Functions
 
-Deploy `whatsapp-otp` and `passkey-verify` (no Docker):
+Deploy all functions (no Docker), including **`platform-portal-handoff`** for platform-admin cross-portal login:
 
 ```bash
 supabase functions deploy
+# or individually:
+pnpm dlx supabase functions deploy platform-portal-handoff
+pnpm dlx supabase functions deploy brand-owner-credentials
 ```
 
-Details: [edge-functions.md](./edge-functions.md)
+Details: [edge-functions.md](./edge-functions.md), [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md)
 
 ## Migrations (ongoing)
 

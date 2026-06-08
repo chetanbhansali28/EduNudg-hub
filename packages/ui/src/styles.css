@@ -716,6 +716,33 @@
   margin-bottom: 2rem;
 }
 
+/* Backend staff portals: denser KPI strips (~1.5 rows, room for more metrics). */
+.ed-shell--backend .ed-kpi-grid {
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: 0.625rem;
+  margin-bottom: 1rem;
+}
+
+.ed-shell--backend .ed-kpi {
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--ed-radius);
+}
+
+.ed-shell--backend .ed-kpi__label {
+  font-size: 0.6875rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.25;
+}
+
+.ed-shell--backend .ed-kpi__value {
+  font-size: 1.125rem;
+}
+
+.ed-shell--backend .ed-kpi__hint {
+  font-size: 0.6875rem;
+  margin-top: 0.25rem;
+}
+
 .ed-kpi {
   background: var(--ed-card);
   border: 1px solid var(--ed-border);
@@ -1831,6 +1858,10 @@ body.ed-nav-open {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .ed-shell--backend .ed-kpi-grid {
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  }
+
   .ed-list-row {
     flex-direction: row;
     align-items: center;
@@ -1847,6 +1878,18 @@ body.ed-nav-open {
 
   .ed-header__profile-email {
     max-width: 14rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ed-shell--backend .ed-kpi-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .ed-shell--backend .ed-kpi-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 

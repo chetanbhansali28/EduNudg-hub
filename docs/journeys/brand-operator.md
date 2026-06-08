@@ -6,7 +6,7 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 
 | Menu | Purpose |
 |------|---------|
-| Home | KPIs: unassigned leads, stale leads, new franchise applications |
+| Home | Compact KPI grid: unassigned leads, stale leads, new franchise applications |
 | **Student Leads** | Assign, reallocate, view lost with reasons |
 | **Franchise Applications** | Approve/reject; provisions center + domain |
 | Franchise Centers | List/edit centers; pincode required for suggestions |

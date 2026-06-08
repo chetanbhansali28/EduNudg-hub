@@ -10,7 +10,6 @@ import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { useResolvedPortalTenant } from "@/hooks/useResolvedPortalTenant";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
 import { hasPortalMembership } from "@/lib/portalMembership";
-import { logPortalDebug } from "@/lib/portalDebug";
 import { resolveLoginBranding } from "@/lib/portalBranding";
 import { postLoginPath } from "./postLoginPath";
 
@@ -89,40 +88,6 @@ export function LoginPage() {
     if (!session || location.pathname !== "/login" || accessPending || !hasAccess) return;
     goAfterLogin();
   }, [session, location.pathname, accessPending, hasAccess, goAfterLogin]);
-
-  useEffect(() => {
-    if (!session) return;
-    logPortalDebug("login.access", {
-      portalType: tenant.portalType,
-      hostname: tenant.hostname,
-      brandSlug: tenant.brandSlug,
-      centerSlug: tenant.centerSlug,
-      tenantBrandId: tenant.brandId,
-      tenantCenterId: tenant.centerId,
-      resolvedBrandId: portalTenant.brandId,
-      resolvedCenterId: portalTenant.centerId,
-      accessPending,
-      hasAccess,
-      membershipsLoading,
-      portalTenantResolving,
-      membershipCount: memberships?.length ?? 0,
-      membershipScopes: memberships?.map((m) => ({
-        scope: m.scope_type,
-        brandId: m.brand_id,
-        centerId: m.center_id,
-        role: m.role_key,
-      })),
-    });
-  }, [
-    session,
-    tenant,
-    portalTenant,
-    accessPending,
-    hasAccess,
-    membershipsLoading,
-    portalTenantResolving,
-    memberships,
-  ]);
 
   const handleEmailSignIn = async () => {
     const trimmedEmail = email.trim();

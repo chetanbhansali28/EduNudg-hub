@@ -57,8 +57,8 @@ export function KpiCard({
   );
 }
 
-export function KpiGrid({ children }: { children: ReactNode }) {
-  return <div className="ed-kpi-grid">{children}</div>;
+export function KpiGrid({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={["ed-kpi-grid", className].filter(Boolean).join(" ")}>{children}</div>;
 }
 
 export function Button({

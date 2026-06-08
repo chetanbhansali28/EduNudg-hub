@@ -11,7 +11,9 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [rpc-catalog.md](./rpc-catalog.md) | Supabase RPC signatures |
 | [data-model-extensions.md](./data-model-extensions.md) | Migration 016+ tables/columns |
 | [technical-architecture.md](./technical-architecture.md) | Stack, timezone, security |
-| [ui-shell-standards.md](./ui-shell-standards.md) | Responsive app layout |
+| [ui-shell-standards.md](./ui-shell-standards.md) | Responsive app layout, compact backend KPIs |
+| [../dashboards/kpi-spec.md](../dashboards/kpi-spec.md) | Dashboard metrics by portal |
+| [../ops/platform-admin-portal-handoff.md](../ops/platform-admin-portal-handoff.md) | Platform admin cross-portal sign-in |
 | [services-layer.md](./services-layer.md) | Auth, DB, payments, integrations as services |
 | [feature-flags.md](./feature-flags.md) | Module/integration ON/OFF |
 | [manual-leads.md](./manual-leads.md) | Staff manual lead / signup entry by portal |

@@ -250,15 +250,6 @@ export function BrandDetailPage() {
         )}
       </Card>
 
-      <KpiGrid>
-        <KpiCard label="Centers listed" value={centers.data?.length ?? 0} />
-        <KpiCard
-          label="Brand portal"
-          value={primaryBrandHost ?? `${b.slug}.localhost`}
-          hint="Primary hostname"
-        />
-      </KpiGrid>
-
       <Card title="Brand settings">
         <BrandEditForm
           brandId={b.id}

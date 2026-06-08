@@ -10,10 +10,11 @@ Details: [Portal host matrix](../spec/portal-host-matrix.md), [Platform brand on
 
 See [Navigation spec](../spec/navigation-spec.md).
 
-- Command Center (Home)
-- Brands — manual signup, pending approvals, and brand list on one page
+- Command Center (Home) — compact KPI grid
+- Brands — manual signup, pending approvals, brand list; **Brand backend** / **Edit** → `/admin/brands/:slug`
+- Brand detail — performance KPIs, brand settings, domains (**Open** handoff), franchise centers
 - Subscriptions & Billing
-- Revenue & Usage
+- Revenue & Usage — compact KPI grid
 - Audit Logs
 - Platform Settings (default timezone IST)
-- Homepage editor (EduNudg marketing)
+- Homepage — EduNudg marketing editor + **brand marketing themes** (Novu / Abacus Classic)

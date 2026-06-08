@@ -1,7 +1,5 @@
 import type { PortalType } from "@edunudg/tenant";
 import { getSupabase } from "@/lib/supabase";
-import { logPortalDebug } from "@/lib/portalDebug";
-
 export type PortalBranding = {
   brandId: string | null;
   brandSlug: string | null;
@@ -66,29 +64,9 @@ export async function fetchPortalBranding(
       p_brand_slug: brandSlug,
       p_center_slug: centerSlug,
     });
-    if (error) {
-      logPortalDebug("branding.fetch.error", {
-        brandSlug,
-        centerSlug,
-        message: error.message,
-      });
-      return EMPTY;
-    }
-    const branding = parsePortalBrandingRpc(data);
-    logPortalDebug("branding.fetch", {
-      brandSlug,
-      centerSlug,
-      brandId: branding.brandId,
-      centerId: branding.centerId,
-      brandLogoUrl: branding.brandLogoUrl,
-    });
-    return branding;
-  } catch (err) {
-    logPortalDebug("branding.fetch.exception", {
-      brandSlug,
-      centerSlug,
-      message: err instanceof Error ? err.message : String(err),
-    });
+    if (error) return EMPTY;
+    return parsePortalBrandingRpc(data);
+  } catch {
     return EMPTY;
   }
 }
