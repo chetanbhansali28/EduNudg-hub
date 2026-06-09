@@ -44,7 +44,9 @@ export function HomepageEditorPage() {
           onPersist={(next) => save.mutate(next)}
         />
       </HomepageEditorShell>
-      <BrandMarketingThemesPanel />
+      <div className="ed-homepage-admin__themes">
+        <BrandMarketingThemesPanel />
+      </div>
     </>
   );
 }

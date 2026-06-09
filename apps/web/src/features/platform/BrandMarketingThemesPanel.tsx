@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, DataList, ListRow, MutationError, Select } from "@edunudg/ui";
+import { Badge, Button, MutationError, Select } from "@edunudg/ui";
 import { updateBrandMarketingTheme } from "@/lib/brandLandingApi";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
@@ -18,6 +18,7 @@ export function BrandMarketingThemesPanel() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [drafts, setDrafts] = useState<Record<string, MarketingTheme>>({});
+  const [savingBrandId, setSavingBrandId] = useState<string | null>(null);
 
   const brands = useQuery({
     queryKey: ["brands", "marketing-themes"],
@@ -43,6 +44,7 @@ export function BrandMarketingThemesPanel() {
   const saveTheme = useMutation({
     mutationFn: async ({ brandId, theme }: { brandId: string; theme: MarketingTheme }) => {
       clear();
+      setSavingBrandId(brandId);
       await updateBrandMarketingTheme(brandId, theme);
     },
     onSuccess: () => {
@@ -51,47 +53,83 @@ export function BrandMarketingThemesPanel() {
       void qc.invalidateQueries({ queryKey: ["center-landing"] });
     },
     onError: capture,
+    onSettled: () => setSavingBrandId(null),
   });
 
+  const items = brands.data ?? [];
+
   return (
-    <Card title="Brand marketing themes">
-      <p className="ed-text-sm ed-muted" style={{ marginBottom: "0.75rem" }}>
-        Choose the public website layout for each brand. Brand owners edit page content in their portal; themes are
-        managed here alongside the platform homepage.
-      </p>
+    <section className="ed-brand-marketing-themes" aria-labelledby="brand-marketing-themes-title">
+      <header className="ed-brand-marketing-themes__header">
+        <div>
+          <h2 id="brand-marketing-themes-title" className="ed-brand-marketing-themes__title">
+            Brand marketing themes
+          </h2>
+          <p className="ed-brand-marketing-themes__desc">
+            Choose the public website layout for each brand. Brand owners edit page content in their portal; themes
+            are managed here alongside the platform homepage.
+          </p>
+        </div>
+        {items.length > 0 ? (
+          <Badge tone="default">{items.length} brand{items.length === 1 ? "" : "s"}</Badge>
+        ) : null}
+      </header>
+
       <MutationError message={error} />
-      <DataList
-        items={brands.data ?? []}
-        empty="No brands yet."
-        render={(b) => {
-          const draft = drafts[b.id] ?? parseMarketingTheme(b.marketing_theme);
-          const saved = parseMarketingTheme(b.marketing_theme);
-          const dirty = draft !== saved;
-          return (
-            <ListRow
-              aside={
-                <Button
-                  onClick={() => saveTheme.mutate({ brandId: b.id, theme: draft })}
-                  disabled={!dirty || saveTheme.isPending}
-                >
-                  {saveTheme.isPending ? "Saving…" : "Save"}
-                </Button>
-              }
-            >
-              <div style={{ minWidth: "12rem" }}>
-                <strong>{b.name}</strong>
-                <div className="ed-text-sm ed-muted">{b.slug}</div>
-              </div>
-              <Select
-                label="Website theme"
-                value={draft}
-                onChange={(v) => setDrafts((prev) => ({ ...prev, [b.id]: parseMarketingTheme(v) }))}
-                options={MARKETING_THEMES.map((theme) => ({ value: theme, label: MARKETING_THEME_LABELS[theme] }))}
-              />
-            </ListRow>
-          );
-        }}
-      />
-    </Card>
+
+      {brands.isLoading ? (
+        <p className="ed-muted ed-text-sm">Loading brands…</p>
+      ) : items.length === 0 ? (
+        <p className="ed-empty">No brands yet.</p>
+      ) : (
+        <ul className="ed-brand-marketing-themes__list">
+          {items.map((brand) => {
+            const draft = drafts[brand.id] ?? parseMarketingTheme(brand.marketing_theme);
+            const saved = parseMarketingTheme(brand.marketing_theme);
+            const dirty = draft !== saved;
+            const isSaving = savingBrandId === brand.id;
+
+            return (
+              <li key={brand.id} className="ed-brand-marketing-themes__item">
+                <div className="ed-brand-marketing-themes__brand">
+                  <strong className="ed-brand-marketing-themes__name">{brand.name}</strong>
+                  <span className="ed-brand-marketing-themes__slug">{brand.slug}</span>
+                  {!dirty ? (
+                    <Badge tone="success">{MARKETING_THEME_LABELS[saved]}</Badge>
+                  ) : (
+                    <Badge tone="warning">Unsaved changes</Badge>
+                  )}
+                </div>
+
+                <div className="ed-brand-marketing-themes__field">
+                  <Select
+                    label="Website theme"
+                    value={draft}
+                    onChange={(value) =>
+                      setDrafts((prev) => ({ ...prev, [brand.id]: parseMarketingTheme(value) }))
+                    }
+                    options={MARKETING_THEMES.map((theme) => ({
+                      value: theme,
+                      label: MARKETING_THEME_LABELS[theme],
+                    }))}
+                  />
+                </div>
+
+                <div className="ed-brand-marketing-themes__actions">
+                  <Button
+                    variant={dirty ? "primary" : "ghost"}
+                    block
+                    onClick={() => saveTheme.mutate({ brandId: brand.id, theme: draft })}
+                    disabled={!dirty || isSaving}
+                  >
+                    {isSaving ? "Saving…" : dirty ? "Save theme" : "Saved"}
+                  </Button>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
