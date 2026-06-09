@@ -1,5 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
-import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { buildCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import { mergeSectionVisibility } from "@/lib/homepageSections";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
@@ -71,7 +71,9 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
   const landingConfig =
     marketingTheme === "abacus-classic"
       ? mergeAbacusClassicLandingConfig(brand.name, landingPartial, brand.logo_url)
-      : buildBrandLandingConfig(brand.name, landingPartial, brand.logo_url);
+      : marketingTheme === "spark-academy"
+        ? mergeSparkAcademyLandingConfig(brand.name, landingPartial, brand.logo_url)
+        : buildBrandLandingConfig(brand.name, landingPartial, brand.logo_url);
 
   return {
     settingsId: settings?.id ?? null,

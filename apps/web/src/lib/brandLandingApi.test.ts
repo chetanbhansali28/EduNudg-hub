@@ -75,6 +75,25 @@ describe("fetchBrandLandingBundle", () => {
     expect(bundle?.config.sections?.featureScroll).toBe(false);
   });
 
+  it("sprint1_parses_spark_academy_theme_and_defaults", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Educat Demo",
+        marketing_theme: "spark-academy",
+        public_stats: { centers_count: 4, students_count: 800 },
+        landing: {},
+        success_stories: [],
+        curriculum: [],
+      },
+      error: null,
+    });
+
+    const bundle = await fetchBrandLandingBundle("educat-demo");
+    expect(bundle?.marketingTheme).toBe("spark-academy");
+    expect(bundle?.config.hero.line1).toBe("Shape your future with");
+    expect(bundle?.config.sections?.featureScroll).toBe(false);
+  });
+
   it("sprint1_defaults_marketing_theme_when_rpc_omits_theme", async () => {
     rpc.mockResolvedValue({
       data: {
@@ -94,14 +113,35 @@ describe("fetchBrandLandingBundle", () => {
 
 describe("updateBrandMarketingTheme", () => {
   beforeEach(() => {
+    rpc.mockReset();
     fromMock.mockReset();
   });
 
-  it("sprint1_updates_brands_marketing_theme", async () => {
-    const eq = vi.fn(() => Promise.resolve({ error: null }));
-    fromMock.mockReturnValue({ update: vi.fn(() => ({ eq })) });
+  it("sprint1_updates_brands_marketing_theme_via_rpc", async () => {
+    rpc.mockResolvedValue({ data: "abacus-classic", error: null });
 
     await updateBrandMarketingTheme("brand-123", "abacus-classic");
+
+    expect(rpc).toHaveBeenCalledWith("set_brand_marketing_theme", {
+      p_brand_id: "brand-123",
+      p_theme: "abacus-classic",
+    });
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it("regression_falls_back_to_direct_update_when_rpc_missing", async () => {
+    rpc.mockResolvedValue({
+      data: null,
+      error: { message: "Could not find the function public.set_brand_marketing_theme" },
+    });
+    const maybeSingle = vi.fn(() =>
+      Promise.resolve({ data: { marketing_theme: "spark-academy" }, error: null })
+    );
+    const select = vi.fn(() => ({ maybeSingle }));
+    const eq = vi.fn(() => ({ select }));
+    fromMock.mockReturnValue({ update: vi.fn(() => ({ eq })) });
+
+    await updateBrandMarketingTheme("brand-123", "spark-academy");
 
     expect(fromMock).toHaveBeenCalledWith("brands");
     expect(eq).toHaveBeenCalledWith("id", "brand-123");

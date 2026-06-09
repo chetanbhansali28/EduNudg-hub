@@ -1,5 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
-import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
@@ -41,6 +41,9 @@ function buildConfigForTheme(
 ): HomepageConfig {
   if (theme === "abacus-classic") {
     return mergeAbacusClassicLandingConfig(brandName, partial, logoUrl);
+  }
+  if (theme === "spark-academy") {
+    return mergeSparkAcademyLandingConfig(brandName, partial, logoUrl);
   }
   return buildBrandLandingConfig(brandName, partial, logoUrl);
 }
@@ -141,8 +144,45 @@ export async function updateBrandMarketingTheme(brandId: string, theme: Marketin
   if (!MARKETING_THEMES.includes(theme)) {
     throw new Error("Invalid marketing theme");
   }
-  const { error } = await getSupabase().from("brands").update({ marketing_theme: theme }).eq("id", brandId);
-  if (error) throw new Error(error.message);
+
+  const { data: rpcTheme, error: rpcError } = await getSupabase().rpc("set_brand_marketing_theme", {
+    p_brand_id: brandId,
+    p_theme: theme,
+  });
+
+  if (!rpcError && typeof rpcTheme === "string") {
+    if (parseMarketingTheme(rpcTheme) !== theme) {
+      throw new Error("Marketing theme was not saved correctly");
+    }
+    return;
+  }
+
+  // Fallback for environments that have not applied migration 041 yet.
+  if (rpcError && !rpcError.message.includes("Could not find the function")) {
+    throw new Error(formatMarketingThemeUpdateError(rpcError.message));
+  }
+
+  const { data, error } = await getSupabase()
+    .from("brands")
+    .update({ marketing_theme: theme })
+    .eq("id", brandId)
+    .select("marketing_theme")
+    .maybeSingle();
+
+  if (error) throw new Error(formatMarketingThemeUpdateError(error.message));
+  if (!data) {
+    throw new Error("Brand not found or you do not have permission to update its marketing theme");
+  }
+  if (parseMarketingTheme(data.marketing_theme) !== theme) {
+    throw new Error("Marketing theme was not saved correctly");
+  }
+}
+
+function formatMarketingThemeUpdateError(message: string): string {
+  if (message.includes("brands_marketing_theme_check")) {
+    return "Spark Academy requires the latest database migration. Ask your platform admin to run: supabase db push";
+  }
+  return message;
 }
 
 export type FranchiseInquiryInput = {

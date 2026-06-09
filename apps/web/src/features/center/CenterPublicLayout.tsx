@@ -3,12 +3,34 @@ import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchCenterLandingBundle } from "@/lib/centerLandingApi";
+import { marketingPageClassName, themeUsesLeadModals } from "@/lib/marketingThemeLayout";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
+import {
+  AbacusClassicNav,
+  AbacusClassicFooter,
+  LeadModalProvider,
+  MarketingLeadModals,
+} from "@/features/marketing/abacus-classic";
+import {
+  SparkAcademyNav,
+  SparkAcademyFooter,
+} from "@/features/marketing/spark-academy";
 import "@/features/marketing/marketing.css";
+import "@/features/marketing/spark-academy/spark-academy.css";
 
 type Props = {
   showFooter?: boolean;
+};
+
+export type CenterLandingOutletContext = {
+  config: import("@/types/homepage").HomepageConfig;
+  profile: import("@/lib/centerLandingApi").CenterPublicProfile;
+  brandSlug: string;
+  centerSlug: string;
+  marketingTheme: import("@/types/homepage").MarketingTheme;
+  publicCurriculum: import("@/lib/brandCurriculumPublic").PublicCurriculumProgram[];
+  publicStats: import("@/lib/brandLandingBundle").BrandPublicStats;
 };
 
 export function CenterPublicLayout({ showFooter = true }: Props) {
@@ -20,6 +42,10 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
     queryKey: ["center-landing", brandSlug, centerSlug],
     queryFn: () => fetchCenterLandingBundle(brandSlug, centerSlug),
   });
+
+  const theme = bundle?.marketingTheme ?? "novu";
+  const isAbacusClassic = theme === "abacus-classic";
+  const isSparkAcademy = theme === "spark-academy";
 
   useEffect(() => {
     if (bundle?.config) {
@@ -36,11 +62,40 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
     );
   }
 
-  return (
-    <div className="marketing-page">
-      <MarketingNav config={bundle.config} />
-      <Outlet context={{ config: bundle.config, profile: bundle.profile, brandSlug, centerSlug }} />
-      {showFooter && <FooterSection config={bundle.config} />}
+  const layoutInner = (
+    <div className={marketingPageClassName(theme)}>
+      {isAbacusClassic ? (
+        <AbacusClassicNav config={bundle.config} />
+      ) : isSparkAcademy ? (
+        <SparkAcademyNav config={bundle.config} />
+      ) : (
+        <MarketingNav config={bundle.config} />
+      )}
+      <Outlet
+        context={{
+          config: bundle.config,
+          profile: bundle.profile,
+          brandSlug,
+          centerSlug,
+          marketingTheme: bundle.marketingTheme,
+          publicCurriculum: bundle.publicCurriculum,
+          publicStats: bundle.publicStats,
+        }}
+      />
+      {showFooter && !isAbacusClassic && !isSparkAcademy ? <FooterSection config={bundle.config} /> : null}
+      {showFooter && isAbacusClassic ? (
+        <AbacusClassicFooter config={bundle.config} publicStats={bundle.publicStats} />
+      ) : null}
+      {showFooter && isSparkAcademy ? (
+        <SparkAcademyFooter config={bundle.config} />
+      ) : null}
+      {themeUsesLeadModals(theme) ? <MarketingLeadModals brandSlug={brandSlug} /> : null}
     </div>
   );
+
+  if (themeUsesLeadModals(theme)) {
+    return <LeadModalProvider>{layoutInner}</LeadModalProvider>;
+  }
+
+  return layoutInner;
 }

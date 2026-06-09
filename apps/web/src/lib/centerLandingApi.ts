@@ -1,10 +1,12 @@
 import { getSupabase } from "@/lib/supabase";
-import { buildCenterLandingConfig } from "@/lib/centerLandingDefaults";
+import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
 import { applyCanonicalSiteName, applyCurriculumNavLink } from "@/lib/marketingPublicSite";
-import type { HomepageConfig } from "@/types/homepage";
+import type { BrandPublicStats } from "@/lib/brandLandingBundle";
+import type { HomepageConfig, MarketingTheme } from "@/types/homepage";
+import { parseMarketingTheme } from "@/types/homepage";
 
 export type CenterPublicProfile = {
   centerId: string;
@@ -24,12 +26,16 @@ export type CenterLandingBundle = {
   config: HomepageConfig;
   profile: CenterPublicProfile;
   publicCurriculum: PublicCurriculumProgram[];
+  marketingTheme: MarketingTheme;
+  publicStats: BrandPublicStats;
 };
 
 type CenterLandingRow = {
   brand_slug?: string;
   brand_name?: string;
   brand_logo_url?: string | null;
+  marketing_theme?: string;
+  public_stats?: unknown;
   center_id?: string;
   center_slug?: string;
   center_name?: string;
@@ -66,6 +72,31 @@ function fallbackProfile(brandSlug: string, centerSlug: string): CenterPublicPro
   };
 }
 
+function parsePublicStats(raw: unknown): BrandPublicStats {
+  if (typeof raw !== "object" || raw === null) {
+    return { centersCount: 0, studentsCount: 0 };
+  }
+  const row = raw as Record<string, unknown>;
+  return {
+    centersCount: typeof row.centers_count === "number" ? row.centers_count : 0,
+    studentsCount: typeof row.students_count === "number" ? row.students_count : 0,
+  };
+}
+
+function buildCenterConfigForTheme(
+  theme: MarketingTheme,
+  centerName: string,
+  brandName: string,
+  city: string | null,
+  landing: Partial<HomepageConfig> | undefined,
+  logoUrl: string | null
+): HomepageConfig {
+  if (theme === "spark-academy") {
+    return mergeSparkAcademyCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
+  }
+  return buildCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
+}
+
 function applyCanonicalCenterName(
   config: HomepageConfig,
   centerName: string,
@@ -91,9 +122,10 @@ function buildConfigWithStories(
   landing: Partial<HomepageConfig> | undefined,
   logoUrl: string | null,
   stories: ReturnType<typeof parsePublicSuccessStories>,
-  curriculumCount: number
+  curriculumCount: number,
+  theme: MarketingTheme = "novu"
 ): HomepageConfig {
-  const config = buildCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
+  const config = buildCenterConfigForTheme(theme, centerName, brandName, city, landing, logoUrl);
   const merged = applyCanonicalCenterName(
     {
       ...config,
@@ -131,15 +163,31 @@ export async function fetchCenterLandingBundle(
         config: buildConfigWithStories(fallbackCenter, fallbackBrand, null, undefined, null, stories, curriculum.length),
         profile: fallbackProfile(brandSlug, centerSlug),
         publicCurriculum: curriculum,
+        marketingTheme: "novu",
+        publicStats: { centersCount: 0, studentsCount: 0 },
       };
     }
 
     const row = data as CenterLandingRow;
+    const theme = parseMarketingTheme(row.marketing_theme);
+    const publicStats = parsePublicStats(row.public_stats);
+
     if (!row.center_name || !row.brand_name) {
       return {
-        config: buildConfigWithStories(fallbackCenter, fallbackBrand, null, undefined, null, stories, curriculum.length),
+        config: buildConfigWithStories(
+          fallbackCenter,
+          fallbackBrand,
+          null,
+          undefined,
+          null,
+          stories,
+          curriculum.length,
+          theme
+        ),
         profile: fallbackProfile(brandSlug, centerSlug),
         publicCurriculum: curriculum,
+        marketingTheme: theme,
+        publicStats,
       };
     }
 
@@ -151,7 +199,8 @@ export async function fetchCenterLandingBundle(
         row.landing ?? undefined,
         row.brand_logo_url ?? null,
         stories,
-        curriculum.length
+        curriculum.length,
+        theme
       ),
       profile: {
         centerId: row.center_id ?? "",
@@ -167,6 +216,8 @@ export async function fetchCenterLandingBundle(
         brandSlug: row.brand_slug ?? brandSlug,
       },
       publicCurriculum: curriculum,
+      marketingTheme: theme,
+      publicStats,
     };
   } catch {
     const config = buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
@@ -177,6 +228,8 @@ export async function fetchCenterLandingBundle(
       ),
       profile: fallbackProfile(brandSlug, centerSlug),
       publicCurriculum: [],
+      marketingTheme: "novu",
+      publicStats: { centersCount: 0, studentsCount: 0 },
     };
   }
 }

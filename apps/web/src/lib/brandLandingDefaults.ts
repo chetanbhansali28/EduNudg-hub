@@ -1,8 +1,10 @@
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
-import { ABACUS_CLASSIC_SECTION_DEFAULTS, mergeSectionVisibility } from "@/lib/homepageSections";
+import { ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeSectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig } from "@/types/homepage";
+
+const SPARK_FOOTER_PHONE = "(222) 545-4543";
 
 /** Franchise-recruitment landing defaults for a brand hostname (e.g. abacusworld.localhost). */
 export function buildBrandLandingConfig(
@@ -331,5 +333,300 @@ export function mergeAbacusClassicLandingConfig(
       rich: { ...base.footer!.rich, ...partial?.footer?.rich },
     },
     sections: mergeSectionVisibility(partial?.sections, ABACUS_CLASSIC_SECTION_DEFAULTS),
+  });
+}
+
+/** Default landing content for Spark Academy (Educat-style) theme brands. */
+export function buildSparkAcademyLandingPartial(brandName: string): Partial<HomepageConfig> {
+  return {
+    meta: {
+      siteName: brandName,
+      fontSans: "Inter",
+      fontSerif: "Inter",
+    },
+    theme: {
+      bgColor: "#ffffff",
+      accent: "#3b82f6",
+      muted: "#64748b",
+      ctaBg: "#0f172a",
+      ctaFg: "#ffffff",
+      yellowGlow: "#facc15",
+      radiusSection: "1rem",
+    },
+    nav: {
+      links: [
+        { label: "Programs", href: "#programs" },
+        { label: "About us", href: "#features" },
+        { label: "FAQ", href: "#faq" },
+        { label: "Contact", href: "#apply" },
+      ],
+      ctaLabel: "Get started",
+      ctaHref: "enroll",
+      secondaryCtaLabel: "Apply franchise",
+      secondaryCtaHref: "apply",
+      adminHref: "/login",
+    },
+    hero: {
+      line1: "Shape your future with",
+      line1Serif: "the right knowledge.",
+      line2: "",
+      line2Serif: "",
+      subtitle: `Join ${brandName} — proven curriculum, expert mentors, and a learning path designed for real outcomes.`,
+      ctaLabel: "Get started",
+      ctaHref: "enroll",
+      secondaryCtaLabel: "Apply franchise",
+      secondaryCtaHref: "apply",
+      backgroundImageUrl: DEFAULT_HOMEPAGE_CONFIG.hero.backgroundImageUrl,
+      phoneFrameUrl: DEFAULT_HOMEPAGE_CONFIG.hero.phoneFrameUrl,
+    },
+    featureSections: [
+      {
+        id: "curriculum",
+        title: "Structured curriculum",
+        titleSerif: "parents trust.",
+        body: "Level-based progression with assessments and instructor guides—consistent quality at every center.",
+      },
+      {
+        id: "mentors",
+        title: "Expert mentors",
+        titleSerif: "every step.",
+        body: "Certified instructors who combine teaching skill with the patience children need to thrive.",
+      },
+      {
+        id: "flexible",
+        title: "Flexible learning",
+        titleSerif: "formats.",
+        body: "Online and in-center batches so families can choose what fits their schedule.",
+      },
+      {
+        id: "progress",
+        title: "Progress you",
+        titleSerif: "can see.",
+        body: "Clear milestones, competitions, and parent updates—so improvement never feels invisible.",
+      },
+    ],
+    trustMedia: {
+      eyebrow: "Our Success",
+      title: "Our Journey to",
+      titleHighlight: "Excellence",
+      intro:
+        "At the core of our platform is a commitment to helping each student succeed. We take pride in the tangible results our learners achieve.",
+      youtubeUrl: "",
+      cards: [
+        {
+          title: "2 Million Learners",
+          subtitle:
+            "With over 2 million learners worldwide, our platform has become a trusted destination for individuals.",
+          accentColor: "#3b82f6",
+        },
+        {
+          title: "500k+ 5 Star Feedbacks",
+          subtitle:
+            "With an outstanding 5-star rating across our courses, our learners consistently praise the quality and impact of our content.",
+          accentColor: "#3b82f6",
+        },
+        {
+          title: "40+ Awards Won Globally",
+          subtitle:
+            "With over 40 prestigious awards to our name, we are recognized for excellence in education and innovation.",
+          accentColor: "#3b82f6",
+        },
+      ],
+    },
+    founders: [
+      {
+        roleBadge: "Mentor",
+        name: "Sarah Johnson",
+        title: "AI Expert & Data Scientist",
+        bio: "",
+        photoUrl:
+          "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=480&h=600&q=80",
+      },
+      {
+        roleBadge: "Mentor",
+        name: "Michael Brown",
+        title: "Cybersecurity Specialist",
+        bio: "",
+        photoUrl:
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=480&h=600&q=80",
+      },
+      {
+        roleBadge: "Mentor",
+        name: "Rachel Adams",
+        title: "Financial Analyst",
+        bio: "",
+        photoUrl:
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=480&h=600&q=80",
+      },
+      {
+        roleBadge: "Mentor",
+        name: "Maria Lopez",
+        title: "UX/UI Mentor",
+        bio: "",
+        photoUrl:
+          "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=480&h=600&q=80",
+      },
+      {
+        roleBadge: "Mentor",
+        name: "David Chen",
+        title: "Product Strategy Lead",
+        bio: "",
+        photoUrl:
+          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=480&h=600&q=80",
+      },
+    ],
+    gallery: {
+      title: "Our partners",
+      images: [],
+    },
+    testimonials: {
+      title: "What Our Learners Are Saying",
+      subtitle:
+        "Hear directly from our students about how our courses have transformed their careers and lives.",
+      items: [
+        {
+          quote:
+            "This platform helped me land my dream job in data science. The courses were practical and easy",
+          author: "John Matthews",
+          role: "Product Designer",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+        {
+          quote:
+            "I never thought I could start a business, but the entrepreneurship course gave me the confidence",
+          author: "Sarah Lee",
+          role: "Product Manager",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+        {
+          quote:
+            "The flexibility of the courses allowed me to learn at my own pace while managing my job. Highly recommend",
+          author: "Michael Davis",
+          role: "Marketer",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+        {
+          quote:
+            "I gained valuable insights into digital marketing that helped me grow my online business. Thank you",
+          author: "David Harris",
+          role: "Graphics Designer",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+        {
+          quote:
+            "The UX/UI design course was fantastic! It gave me the skills I needed to advance in my career.",
+          author: "Jessica Wilson",
+          role: "UI/UX Designer",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+        {
+          quote:
+            "This platform not only taught me new skills but also inspired me to keep learning and growing every day.",
+          author: "Laura Martinez",
+          role: "Data Scientist",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+      ],
+    },
+    faq: [
+      {
+        question: "What age group is suitable?",
+        answer: "Programs are designed for children aged 4–14, with structured levels for every stage.",
+      },
+      {
+        question: "Do you offer online classes?",
+        answer: "Yes — many centers offer online and offline batches. Book a demo to find a center near you.",
+      },
+      {
+        question: "What investment is required for a franchise?",
+        answer: "Investment varies by city and format. Apply and our team will share the latest kit and fee structure.",
+      },
+    ],
+    footerCta: {
+      title: "Start Your Learning Journey Today!",
+      subtitle: "Browse courses and unlock new skills to reach your goals.",
+      ctaLabel: "Login",
+      ctaHref: "enroll",
+    },
+    footer: {
+      productLinks: [
+        { label: "Courses", href: "#programs" },
+        { label: "Shop", href: "#programs" },
+        { label: "Contact Us", href: "#apply" },
+      ],
+      companyLinks: [
+        { label: "Partner login", href: "/login" },
+        { label: "Brand portal", href: "/app" },
+      ],
+      connectLinks: [{ label: "Contact", href: "#apply" }],
+      copyright: `Copyright © ${new Date().getFullYear()} ${brandName}, All Rights Reserved.`,
+      privacyHref: "#faq",
+      termsHref: "#faq",
+      rich: {
+        description: `${brandName} delivers structured learning programs with certified instructors and proven outcomes.`,
+        badges: [{ label: "Trusted partner" }],
+        customStats: [
+          { value: "100%", label: "Satisfaction rate" },
+          { value: "12+", label: "Years of experience" },
+          { value: "20k+", label: "Total Courses" },
+          { value: "90+", label: "Course Category" },
+        ],
+        showLiveStats: true,
+        headOffice: {
+          address: "Head office address",
+          phone: SPARK_FOOTER_PHONE,
+          website: "www.example.com",
+        },
+        socialLinks: [
+          { platform: "Facebook", url: "https://facebook.com" },
+          { platform: "Instagram", url: "https://instagram.com" },
+          { platform: "X", url: "https://x.com" },
+          { platform: "YouTube", url: "https://youtube.com" },
+        ],
+      },
+    },
+    sections: mergeSectionVisibility(undefined, SPARK_ACADEMY_SECTION_DEFAULTS),
+  };
+}
+
+export function mergeSparkAcademyLandingConfig(
+  brandName: string,
+  partial?: Partial<HomepageConfig>,
+  logoUrl?: string | null
+): HomepageConfig {
+  const base = buildSparkAcademyLandingPartial(brandName);
+  return mergeHomepageConfig({
+    ...base,
+    ...partial,
+    meta: {
+      siteName: partial?.meta?.siteName ?? base.meta!.siteName,
+      fontSans: partial?.meta?.fontSans ?? base.meta!.fontSans,
+      fontSerif: partial?.meta?.fontSerif ?? base.meta!.fontSerif,
+      themeNote: partial?.meta?.themeNote ?? base.meta!.themeNote,
+      logoUrl: partial?.meta?.logoUrl ?? logoUrl ?? null,
+    },
+    nav: { ...base.nav!, ...partial?.nav, links: partial?.nav?.links ?? base.nav!.links },
+    hero: { ...base.hero!, ...partial?.hero },
+    featureSections: partial?.featureSections ?? base.featureSections,
+    trustMedia: {
+      ...base.trustMedia!,
+      ...partial?.trustMedia,
+      cards: partial?.trustMedia?.cards ?? base.trustMedia!.cards,
+    },
+    founders: partial?.founders ?? base.founders,
+    gallery: { ...base.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? base.gallery!.images },
+    footerCta: { ...base.footerCta!, ...partial?.footerCta },
+    footer: {
+      ...base.footer!,
+      ...partial?.footer,
+      rich: { ...base.footer!.rich, ...partial?.footer?.rich },
+    },
+    sections: mergeSectionVisibility(partial?.sections, SPARK_ACADEMY_SECTION_DEFAULTS),
   });
 }

@@ -16,6 +16,7 @@ Platform admins assign a theme per brand at **Platform → Homepage** (`/admin/h
 |-------|--------|------------------------|
 | `novu` (default) | Phone-scroll features, Novu nav | `HomepageEditorForm` at `/app/homepage` |
 | `abacus-classic` | Success Abacus-style sections, dual CTAs, modals | `AbacusClassicEditorForm` at `/app/homepage` |
+| `spark-academy` | Educat-style courses grid, mentors, journey stats | `AbacusClassicEditorForm` at `/app/homepage` |
 
 Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme selection is platform-only (homepage admin screen, not brand detail).
 

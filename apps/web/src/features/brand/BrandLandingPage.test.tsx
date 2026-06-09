@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
-import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModalContext";
 import type { BrandLandingOutletContext } from "./BrandPublicLayout";
 import { BrandLandingPage } from "./BrandLandingPage";
@@ -32,7 +32,7 @@ function renderWithOutlet(context: BrandLandingOutletContext) {
     </MemoryRouter>
   );
 
-  if (context.marketingTheme === "abacus-classic") {
+  if (context.marketingTheme === "abacus-classic" || context.marketingTheme === "spark-academy") {
     return render(<LeadModalProvider>{page}</LeadModalProvider>);
   }
 
@@ -78,5 +78,29 @@ describe("BrandLandingPage", () => {
     expect(screen.getByRole("main")).toBeDefined();
     expect(screen.getByText(/Make children super fast in/)).toBeDefined();
     expect(screen.getAllByRole("heading", { level: 3, name: "Abacus Junior" })).toHaveLength(2);
+  });
+
+  it("renders SparkAcademyContent when marketingTheme is spark-academy", () => {
+    const config = mergeSparkAcademyLandingConfig("Educat Demo");
+    renderWithOutlet({
+      config,
+      brandSlug: "educat-demo",
+      marketingTheme: "spark-academy",
+      publicCurriculum: [
+        {
+          name: "Abacus Junior",
+          description: "Foundations",
+          whyTake: null,
+          whatYouLearn: null,
+          marketingVideoUrl: null,
+          versionNumber: 1,
+          levels: [],
+        },
+      ],
+      publicStats: { centersCount: 3, studentsCount: 200 },
+    });
+
+    expect(screen.getByRole("main")).toBeDefined();
+    expect(screen.getByText(/Shape your future with/)).toBeDefined();
   });
 });

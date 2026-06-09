@@ -111,7 +111,7 @@ export function BrandMarketingEditorPage() {
             </>
           }
         >
-          {marketingTheme === "abacus-classic" ? (
+          {marketingTheme === "abacus-classic" || marketingTheme === "spark-academy" ? (
             <AbacusClassicEditorForm
               config={brandConfig}
               marketingTheme={marketingTheme}

@@ -35,6 +35,8 @@ export interface HomepageShowcaseCard {
 export interface HomepageTestimonial {
   quote: string;
   author: string;
+  role?: string;
+  avatarUrl?: string;
 }
 
 export interface HomepageFaq {
@@ -181,15 +183,17 @@ export interface HomepageConfig {
 }
 
 /** Platform-assigned public marketing layout (see brands.marketing_theme). */
-export const MARKETING_THEMES = ["novu", "abacus-classic"] as const;
+export const MARKETING_THEMES = ["novu", "abacus-classic", "spark-academy"] as const;
 export type MarketingTheme = (typeof MARKETING_THEMES)[number];
 
 export const MARKETING_THEME_LABELS: Record<MarketingTheme, string> = {
   novu: "Novu (default)",
   "abacus-classic": "Abacus Classic",
+  "spark-academy": "Spark Academy",
 };
 
 export function parseMarketingTheme(value: unknown): MarketingTheme {
   if (value === "abacus-classic") return "abacus-classic";
+  if (value === "spark-academy") return "spark-academy";
   return "novu";
 }

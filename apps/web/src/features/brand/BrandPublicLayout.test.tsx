@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { mergeAbacusClassicLandingConfig, buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
+import { mergeAbacusClassicLandingConfig, buildBrandLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { BrandPublicLayout } from "./BrandPublicLayout";
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
@@ -86,5 +86,33 @@ describe("BrandPublicLayout", () => {
     expect(screen.queryByTestId("novu-footer")).toBeNull();
     expect(screen.getByText("Franchises")).toBeDefined();
     expect(screen.getByText("5+")).toBeDefined();
+  });
+
+  it("sprint1_renders_spark_academy_layout_for_spark_theme", async () => {
+    const { fetchBrandLandingBundle } = await import("@/lib/brandLandingApi");
+    vi.mocked(fetchBrandLandingBundle).mockResolvedValue({
+      config: mergeSparkAcademyLandingConfig("Educat Demo"),
+      publicCurriculum: [],
+      marketingTheme: "spark-academy",
+      publicStats: { centersCount: 2, studentsCount: 400 },
+    });
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route element={<BrandPublicLayout />}>
+              <Route path="/" element={<div>Page body</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText("Page body")).toBeDefined();
+    expect(document.querySelector(".marketing-page--spark-academy")).toBeDefined();
+    expect(screen.getByRole("banner")).toBeDefined();
+    expect(screen.getByText("Start your learning journey today!")).toBeDefined();
   });
 });

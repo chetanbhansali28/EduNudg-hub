@@ -6,6 +6,10 @@ describe("parseMarketingTheme", () => {
     expect(parseMarketingTheme("abacus-classic")).toBe("abacus-classic");
   });
 
+  it("returns spark-academy for valid theme value", () => {
+    expect(parseMarketingTheme("spark-academy")).toBe("spark-academy");
+  });
+
   it("defaults unknown values to novu", () => {
     expect(parseMarketingTheme("novu")).toBe("novu");
     expect(parseMarketingTheme(null)).toBe("novu");
@@ -14,7 +18,7 @@ describe("parseMarketingTheme", () => {
     expect(parseMarketingTheme("")).toBe("novu");
   });
 
-  it("exports both marketing themes", () => {
-    expect(MARKETING_THEMES).toEqual(["novu", "abacus-classic"]);
+  it("exports all marketing themes", () => {
+    expect(MARKETING_THEMES).toEqual(["novu", "abacus-classic", "spark-academy"]);
   });
 });

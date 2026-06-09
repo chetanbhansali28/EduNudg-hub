@@ -4,16 +4,21 @@ import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchBrandLandingBundle } from "@/lib/brandLandingApi";
 import { isBrandLandingBundleReady, normalizeBrandLandingBundle } from "@/lib/brandLandingBundle";
+import { marketingPageClassName, themeUsesLeadModals } from "@/lib/marketingThemeLayout";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
 import {
   AbacusClassicNav,
   AbacusClassicFooter,
-  AbacusClassicContent,
   LeadModalProvider,
   MarketingLeadModals,
 } from "@/features/marketing/abacus-classic";
+import {
+  SparkAcademyNav,
+  SparkAcademyFooter,
+} from "@/features/marketing/spark-academy";
 import "@/features/marketing/marketing.css";
+import "@/features/marketing/spark-academy/spark-academy.css";
 
 type Props = {
   showFooter?: boolean;
@@ -29,7 +34,9 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
     select: normalizeBrandLandingBundle,
   });
 
-  const isAbacusClassic = bundle?.marketingTheme === "abacus-classic";
+  const theme = bundle?.marketingTheme ?? "novu";
+  const isAbacusClassic = theme === "abacus-classic";
+  const isSparkAcademy = theme === "spark-academy";
 
   useEffect(() => {
     if (bundle?.config) {
@@ -46,11 +53,15 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
     );
   }
 
-  const pageClass = isAbacusClassic ? "marketing-page marketing-page--abacus-classic" : "marketing-page";
-
   const layoutInner = (
-    <div className={pageClass}>
-      {isAbacusClassic ? <AbacusClassicNav config={bundle.config} /> : <MarketingNav config={bundle.config} />}
+    <div className={marketingPageClassName(theme)}>
+      {isAbacusClassic ? (
+        <AbacusClassicNav config={bundle.config} />
+      ) : isSparkAcademy ? (
+        <SparkAcademyNav config={bundle.config} />
+      ) : (
+        <MarketingNav config={bundle.config} />
+      )}
       <Outlet
         context={{
           config: bundle.config,
@@ -60,15 +71,18 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
           publicStats: bundle.publicStats,
         }}
       />
-      {showFooter && !isAbacusClassic ? <FooterSection config={bundle.config} /> : null}
+      {showFooter && !isAbacusClassic && !isSparkAcademy ? <FooterSection config={bundle.config} /> : null}
       {showFooter && isAbacusClassic ? (
         <AbacusClassicFooter config={bundle.config} publicStats={bundle.publicStats} />
       ) : null}
-      {isAbacusClassic ? <MarketingLeadModals brandSlug={brandSlug} /> : null}
+      {showFooter && isSparkAcademy ? (
+        <SparkAcademyFooter config={bundle.config} />
+      ) : null}
+      {themeUsesLeadModals(theme) ? <MarketingLeadModals brandSlug={brandSlug} /> : null}
     </div>
   );
 
-  if (isAbacusClassic) {
+  if (themeUsesLeadModals(theme)) {
     return <LeadModalProvider>{layoutInner}</LeadModalProvider>;
   }
 

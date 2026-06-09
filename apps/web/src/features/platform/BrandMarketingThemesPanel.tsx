@@ -48,6 +48,7 @@ export function BrandMarketingThemesPanel() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["brands"] });
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
+      void qc.invalidateQueries({ queryKey: ["center-landing"] });
     },
     onError: capture,
   });

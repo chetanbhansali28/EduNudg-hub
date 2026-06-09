@@ -1,30 +1,43 @@
-import { useQuery } from "@tanstack/react-query";
-import { useTenant } from "@/bootstrap/TenantProvider";
-import { fetchCenterLandingBundle } from "@/lib/centerLandingApi";
+import { useOutletContext } from "react-router-dom";
+import { AbacusClassicContent } from "@/features/marketing/abacus-classic";
+import { SparkAcademyContent } from "@/features/marketing/spark-academy";
 import { MarketingContent } from "@/features/marketing/MarketingContent";
+import type { CenterLandingOutletContext } from "@/features/center/CenterPublicLayout";
 
 export function CenterLandingPage() {
-  const tenant = useTenant();
-  const brandSlug = tenant.brandSlug ?? "brand";
-  const centerSlug = tenant.centerSlug ?? "center";
+  const ctx = useOutletContext<CenterLandingOutletContext>();
 
-  const { data: bundle, isLoading } = useQuery({
-    queryKey: ["center-landing", brandSlug, centerSlug],
-    queryFn: () => fetchCenterLandingBundle(brandSlug, centerSlug),
-  });
+  if (ctx.marketingTheme === "abacus-classic") {
+    return (
+      <AbacusClassicContent
+        config={ctx.config}
+        publicCurriculum={ctx.publicCurriculum}
+      />
+    );
+  }
 
-  if (isLoading || !bundle) {
-    return <p className="marketing-page--loading-inline">Loading…</p>;
+  if (ctx.marketingTheme === "spark-academy") {
+    return (
+      <SparkAcademyContent
+        config={ctx.config}
+        portalMode="center"
+        brandSlug={ctx.brandSlug}
+        centerSlug={ctx.centerSlug}
+        centerProfile={ctx.profile}
+        publicCurriculum={ctx.publicCurriculum}
+        publicStats={ctx.publicStats}
+      />
+    );
   }
 
   return (
     <MarketingContent
-      config={bundle.config}
+      config={ctx.config}
       portalMode="center"
-      brandSlug={brandSlug}
-      centerSlug={centerSlug}
-      centerProfile={bundle.profile}
-      publicCurriculum={bundle.publicCurriculum}
+      brandSlug={ctx.brandSlug}
+      centerSlug={ctx.centerSlug}
+      centerProfile={ctx.profile}
+      publicCurriculum={ctx.publicCurriculum}
     />
   );
 }

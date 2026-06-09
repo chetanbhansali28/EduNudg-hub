@@ -16,6 +16,7 @@ export function mergePublishedSuccessStories(
   const items: HomepageTestimonial[] = stories.map((s) => ({
     quote: s.quote,
     author: s.author,
+    role: s.title?.trim() || undefined,
   }));
 
   return { ...testimonials, items };

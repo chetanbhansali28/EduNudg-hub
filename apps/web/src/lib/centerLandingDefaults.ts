@@ -1,7 +1,9 @@
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
+import { SPARK_ACADEMY_SECTION_DEFAULTS, mergeSectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig } from "@/types/homepage";
+import { buildSparkAcademyLandingPartial } from "@/lib/brandLandingDefaults";
 
 /** Parent-facing enrollment landing for a center hostname (e.g. koramangala.abacusworld.localhost). */
 export function buildCenterLandingConfig(
@@ -140,4 +142,62 @@ export function buildCenterLandingConfig(
     ...merged,
     featureSections: withDefaultFeatureVideos(merged.featureSections),
   };
+}
+
+/** Center enrollment landing merged with Spark Academy theme defaults. */
+export function mergeSparkAcademyCenterLandingConfig(
+  centerName: string,
+  brandName: string,
+  city: string | null,
+  partial?: Partial<HomepageConfig>,
+  logoUrl?: string | null
+): HomepageConfig {
+  const centerBase = buildCenterLandingConfig(centerName, brandName, city, partial, logoUrl);
+  const sparkBase = buildSparkAcademyLandingPartial(centerName);
+
+  return mergeHomepageConfig({
+    ...sparkBase,
+    ...centerBase,
+    meta: {
+      ...centerBase.meta,
+      siteName: partial?.meta?.siteName ?? centerBase.meta.siteName,
+      logoUrl: partial?.meta?.logoUrl ?? logoUrl ?? centerBase.meta.logoUrl ?? null,
+    },
+    nav: {
+      ...sparkBase.nav!,
+      ...centerBase.nav,
+      links: partial?.nav?.links ?? centerBase.nav.links,
+      ctaLabel: partial?.nav?.ctaLabel ?? centerBase.nav.ctaLabel,
+      ctaHref: partial?.nav?.ctaHref ?? centerBase.nav.ctaHref,
+    },
+    hero: {
+      ...sparkBase.hero!,
+      ...centerBase.hero,
+      line1: centerBase.hero.line1,
+      line1Serif: centerBase.hero.line1Serif,
+      line2: centerBase.hero.line2,
+      line2Serif: centerBase.hero.line2Serif,
+      subtitle: centerBase.hero.subtitle,
+      ctaLabel: centerBase.hero.ctaLabel,
+      ctaHref: centerBase.hero.ctaHref,
+    },
+    featureSections: partial?.featureSections ?? centerBase.featureSections,
+    trustMedia: {
+      ...sparkBase.trustMedia!,
+      ...partial?.trustMedia,
+      title: partial?.trustMedia?.title ?? `Why families choose ${centerName}`,
+      titleHighlight: partial?.trustMedia?.titleHighlight ?? brandName,
+      intro: partial?.trustMedia?.intro ?? centerBase.hero.subtitle,
+      cards: partial?.trustMedia?.cards ?? sparkBase.trustMedia!.cards,
+    },
+    founders: partial?.founders ?? sparkBase.founders,
+    gallery: { ...sparkBase.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? sparkBase.gallery!.images },
+    footerCta: { ...centerBase.footerCta, ...partial?.footerCta },
+    footer: {
+      ...centerBase.footer,
+      ...partial?.footer,
+      rich: { ...sparkBase.footer!.rich, ...partial?.footer?.rich, ...centerBase.footer.rich },
+    },
+    sections: mergeSectionVisibility(partial?.sections, SPARK_ACADEMY_SECTION_DEFAULTS),
+  });
 }
