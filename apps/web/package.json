@@ -7,8 +7,8 @@
     "dev": "vite --port 9000 --strictPort",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "tsc -b --noEmit",
-    "typecheck": "tsc -b --noEmit",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {

@@ -66,9 +66,14 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   footerRich: true,
 };
 
+export type HomepageSectionVisibilityInput = HomepageSectionVisibility & {
+  /** @deprecated Renamed to programsGrid — still read from saved brand_settings JSON. */
+  programsMarquee?: boolean;
+};
+
 /** Map legacy `programsMarquee` toggle from saved brand_settings JSON. */
 function normalizeSectionPartial(
-  partial?: HomepageSectionVisibility & { programsMarquee?: boolean }
+  partial?: HomepageSectionVisibilityInput
 ): HomepageSectionVisibility | undefined {
   if (!partial) return partial;
   const legacy = partial.programsMarquee;
@@ -78,7 +83,7 @@ function normalizeSectionPartial(
 }
 
 export function mergeSectionVisibility(
-  partial?: HomepageSectionVisibility & { programsMarquee?: boolean },
+  partial?: HomepageSectionVisibilityInput,
   themeDefaults: Record<HomepageSectionKey, boolean> = DEFAULT_HOMEPAGE_SECTION_VISIBILITY
 ): Record<HomepageSectionKey, boolean> {
   const normalized = normalizeSectionPartial(partial);

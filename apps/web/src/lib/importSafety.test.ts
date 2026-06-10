@@ -47,6 +47,6 @@ describe("importSafety", () => {
 
   it("regression_web_app_typechecks", () => {
     const webRoot = path.resolve(srcRoot, "..");
-    execSync("pnpm exec tsc -b --noEmit", { cwd: webRoot, stdio: "pipe" });
+    execSync("pnpm run typecheck", { cwd: webRoot, stdio: "pipe" });
   });
 });
