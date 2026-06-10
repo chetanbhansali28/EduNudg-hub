@@ -9,7 +9,7 @@ type Props = {
   brandSlug: string;
 };
 
-function ModalShell({
+export function AcModalShell({
   title,
   open,
   onClose,
@@ -188,12 +188,12 @@ export function MarketingLeadModals({ brandSlug }: Props) {
 
   return (
     <>
-      <ModalShell title={MODAL_TITLES.enroll} open={activeModal === "enroll"} onClose={closeModal}>
+      <AcModalShell title={MODAL_TITLES.enroll} open={activeModal === "enroll"} onClose={closeModal}>
         <EnrollForm brandSlug={brandSlug} onSuccess={() => setTimeout(closeModal, 2000)} />
-      </ModalShell>
-      <ModalShell title={MODAL_TITLES.apply} open={activeModal === "apply"} onClose={closeModal}>
+      </AcModalShell>
+      <AcModalShell title={MODAL_TITLES.apply} open={activeModal === "apply"} onClose={closeModal}>
         <FranchiseForm brandSlug={brandSlug} onSuccess={() => setTimeout(closeModal, 2000)} />
-      </ModalShell>
+      </AcModalShell>
     </>
   );
 }

@@ -19,7 +19,7 @@ import {
   moveItem,
   testimonialQuoteLengthHint,
 } from "@/lib/testimonialEditorHelpers";
-import { EditorAccordion, HomepageEditorSections } from "./HomepageEditorShell";
+import { EditorAccordion, EditorFieldSpan, EditorFieldsGrid, EditorItemList, EditorItemPanel, EditorSectionNote, HomepageEditorSections } from "./HomepageEditorShell";
 import { MarketingMediaField } from "./MarketingMediaField";
 
 export type HomepageEditorFormProps = {
@@ -77,62 +77,66 @@ export function HomepageEditorForm({
   return (
     <HomepageEditorSections>
       <EditorAccordion sectionId="site" title="Site">
-        <Input
-          label="Site name"
-          value={config.meta.siteName}
-          onChange={(v) => onChange({ ...config, meta: { ...config.meta, siteName: v } })}
-        />
-        <MarketingMediaField
-          label="Site logo"
-          value={config.meta.logoUrl ?? ""}
-          onChange={(v) => commitMedia({ ...config, meta: { ...config.meta, logoUrl: v || null } })}
-          mediaType="image"
-          uploadSubdir=""
-          uploadScope={{ kind: "platform-logo" }}
-        />
+        <EditorFieldsGrid>
+          <Input
+            label="Site name"
+            value={config.meta.siteName}
+            onChange={(v) => onChange({ ...config, meta: { ...config.meta, siteName: v } })}
+          />
+          <EditorFieldSpan>
+            <MarketingMediaField
+              label="Site logo"
+              value={config.meta.logoUrl ?? ""}
+              onChange={(v) => commitMedia({ ...config, meta: { ...config.meta, logoUrl: v || null } })}
+              mediaType="image"
+              uploadSubdir=""
+              uploadScope={{ kind: "platform-logo" }}
+            />
+          </EditorFieldSpan>
+        </EditorFieldsGrid>
       </EditorAccordion>
 
       <EditorAccordion sectionId="navigation" title="Navigation">
-        <p className="ed-text-sm ed-muted">
+        <EditorSectionNote>
           Main menu links in the top bar. Use anchors like <code>#faq</code> for on-page sections, or paths like{" "}
           <code>/login</code> for other routes. The primary CTA button is edited under Hero.
-        </p>
-        {config.nav.links.map((link, i) => (
-          <div key={`nav-link-${i}`} className="ed-form-section ed-nav-link-editor">
-            <Input
-              label={`Menu item ${i + 1} label`}
-              value={link.label}
-              onChange={(v) => {
-                const links = [...config.nav.links];
-                links[i] = { ...link, label: v };
-                updateNavLinks(links);
-              }}
-            />
-            <Input
-              label={`Menu item ${i + 1} link`}
-              value={link.href}
-              onChange={(v) => {
-                const links = [...config.nav.links];
-                links[i] = { ...link, href: v };
-                updateNavLinks(links);
-              }}
-            />
-            <Button
-              variant="ghost"
-              onClick={() => updateNavLinks(config.nav.links.filter((_, idx) => idx !== i))}
-            >
-              Remove menu item
-            </Button>
-          </div>
-        ))}
-        <Button
-          variant="ghost"
-          onClick={() =>
+        </EditorSectionNote>
+        <EditorItemList
+          onAdd={() =>
             updateNavLinks([...config.nav.links, { label: "New item", href: "#" } satisfies HomepageLink])
           }
+          addLabel="+ Add menu item"
         >
-          Add menu item
-        </Button>
+          {config.nav.links.map((link, i) => (
+            <EditorItemPanel
+              key={`nav-link-${i}`}
+              title={`Menu item ${i + 1}`}
+              onRemove={() => updateNavLinks(config.nav.links.filter((_, idx) => idx !== i))}
+              removeLabel="Remove menu item"
+            >
+              <EditorFieldsGrid>
+                <Input
+                  label="Label"
+                  value={link.label}
+                  onChange={(v) => {
+                    const links = [...config.nav.links];
+                    links[i] = { ...link, label: v };
+                    updateNavLinks(links);
+                  }}
+                />
+                <Input
+                  label="Link"
+                  value={link.href}
+                  onChange={(v) => {
+                    const links = [...config.nav.links];
+                    links[i] = { ...link, href: v };
+                    updateNavLinks(links);
+                  }}
+                />
+              </EditorFieldsGrid>
+            </EditorItemPanel>
+          ))}
+        </EditorItemList>
       </EditorAccordion>
 
       <EditorAccordion
@@ -141,37 +145,43 @@ export function HomepageEditorForm({
         enabled={sections.hero}
         onEnabledChange={(enabled) => setSection("hero", enabled)}
       >
-        <Input label="Line 1 (sans)" value={config.hero.line1} onChange={(v) => updateHero("line1", v)} />
-        <Input label="Line 1 (serif)" value={config.hero.line1Serif} onChange={(v) => updateHero("line1Serif", v)} />
-        <Input label="Line 2 (sans)" value={config.hero.line2} onChange={(v) => updateHero("line2", v)} />
-        <Input label="Line 2 (serif)" value={config.hero.line2Serif} onChange={(v) => updateHero("line2Serif", v)} />
-        <Input label="Subtitle" value={config.hero.subtitle} onChange={(v) => updateHero("subtitle", v)} />
-        <Input
-          label="Primary CTA label (nav, hero, footer)"
-          value={config.nav.ctaLabel}
-          onChange={(v) => updatePrimaryCta("ctaLabel", v)}
-        />
-        <Input
-          label="Primary CTA link"
-          value={config.nav.ctaHref}
-          onChange={(v) => updatePrimaryCta("ctaHref", v)}
-        />
-        <MarketingMediaField
-          label="Hero background image or video"
-          value={config.hero.backgroundImageUrl}
-          onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, backgroundImageUrl: v } })}
-          mediaType="image"
-          uploadSubdir="hero-background"
-          uploadScope={uploadScope}
-        />
-        <MarketingMediaField
-          label="Phone frame image"
-          value={config.hero.phoneFrameUrl}
-          onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, phoneFrameUrl: v } })}
-          mediaType="image"
-          uploadSubdir="hero-phone-frame"
-          uploadScope={uploadScope}
-        />
+        <EditorFieldsGrid>
+          <Input label="Line 1 (sans)" value={config.hero.line1} onChange={(v) => updateHero("line1", v)} />
+          <Input label="Line 1 (serif)" value={config.hero.line1Serif} onChange={(v) => updateHero("line1Serif", v)} />
+          <Input label="Line 2 (sans)" value={config.hero.line2} onChange={(v) => updateHero("line2", v)} />
+          <Input label="Line 2 (serif)" value={config.hero.line2Serif} onChange={(v) => updateHero("line2Serif", v)} />
+          <Input label="Subtitle" value={config.hero.subtitle} onChange={(v) => updateHero("subtitle", v)} />
+          <Input
+            label="Primary CTA label (nav, hero, footer)"
+            value={config.nav.ctaLabel}
+            onChange={(v) => updatePrimaryCta("ctaLabel", v)}
+          />
+          <Input
+            label="Primary CTA link"
+            value={config.nav.ctaHref}
+            onChange={(v) => updatePrimaryCta("ctaHref", v)}
+          />
+          <EditorFieldSpan>
+            <MarketingMediaField
+              label="Hero background image or video"
+              value={config.hero.backgroundImageUrl}
+              onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, backgroundImageUrl: v } })}
+              mediaType="image"
+              uploadSubdir="hero-background"
+              uploadScope={uploadScope}
+            />
+          </EditorFieldSpan>
+          <EditorFieldSpan>
+            <MarketingMediaField
+              label="Phone frame image"
+              value={config.hero.phoneFrameUrl}
+              onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, phoneFrameUrl: v } })}
+              mediaType="image"
+              uploadSubdir="hero-phone-frame"
+              uploadScope={uploadScope}
+            />
+          </EditorFieldSpan>
+        </EditorFieldsGrid>
       </EditorAccordion>
 
       <EditorAccordion
@@ -180,67 +190,11 @@ export function HomepageEditorForm({
         enabled={sections.featureScroll}
         onEnabledChange={(enabled) => setSection("featureScroll", enabled)}
       >
-        <p className="ed-text-sm ed-muted">
+        <EditorSectionNote>
           Remove blocks you do not need. Keep at least one when this section is enabled — the public site supports any count.
-        </p>
-        {config.featureSections.map((section, i) => (
-          <div key={section.id} className="ed-form-section">
-            <Input
-              label={`Section ${i + 1} title`}
-              value={section.title}
-              onChange={(v) => {
-                const featureSections = [...config.featureSections];
-                featureSections[i] = { ...section, title: v };
-                onChange({ ...config, featureSections });
-              }}
-            />
-            <Input
-              label="Serif phrase"
-              value={section.titleSerif}
-              onChange={(v) => {
-                const featureSections = [...config.featureSections];
-                featureSections[i] = { ...section, titleSerif: v };
-                onChange({ ...config, featureSections });
-              }}
-            />
-            <Input
-              label="Body"
-              value={section.body}
-              onChange={(v) => {
-                const featureSections = [...config.featureSections];
-                featureSections[i] = { ...section, body: v };
-                onChange({ ...config, featureSections });
-              }}
-            />
-            <MarketingMediaField
-              label="Phone screen video"
-              value={section.videoUrl ?? ""}
-              onChange={(v) => {
-                const featureSections = [...config.featureSections];
-                featureSections[i] = { ...section, videoUrl: v || undefined };
-                commitMedia({ ...config, featureSections });
-              }}
-              mediaType="video"
-              uploadSubdir={`feature-${section.id}`}
-              uploadScope={uploadScope}
-            />
-            <Button
-              variant="ghost"
-              disabled={config.featureSections.length <= 1}
-              onClick={() =>
-                commit({
-                  ...config,
-                  featureSections: config.featureSections.filter((_, idx) => idx !== i),
-                })
-              }
-            >
-              Remove this block
-            </Button>
-          </div>
-        ))}
-        <Button
-          variant="ghost"
-          onClick={() =>
+        </EditorSectionNote>
+        <EditorItemList
+          onAdd={() =>
             commit({
               ...config,
               featureSections: [
@@ -254,9 +208,71 @@ export function HomepageEditorForm({
               ],
             })
           }
+          addLabel="+ Add feature section"
         >
-          Add feature section
-        </Button>
+          {config.featureSections.map((section, i) => (
+            <EditorItemPanel
+              key={section.id}
+              title={`Feature block ${i + 1}`}
+              onRemove={
+                config.featureSections.length <= 1
+                  ? undefined
+                  : () =>
+                      commit({
+                        ...config,
+                        featureSections: config.featureSections.filter((_, idx) => idx !== i),
+                      })
+              }
+              removeLabel="Remove this block"
+            >
+              <EditorFieldsGrid>
+                <Input
+                  label="Title"
+                  value={section.title}
+                  onChange={(v) => {
+                    const featureSections = [...config.featureSections];
+                    featureSections[i] = { ...section, title: v };
+                    onChange({ ...config, featureSections });
+                  }}
+                />
+                <Input
+                  label="Serif phrase"
+                  value={section.titleSerif}
+                  onChange={(v) => {
+                    const featureSections = [...config.featureSections];
+                    featureSections[i] = { ...section, titleSerif: v };
+                    onChange({ ...config, featureSections });
+                  }}
+                />
+                <EditorFieldSpan>
+                  <Input
+                    label="Body"
+                    value={section.body}
+                    onChange={(v) => {
+                      const featureSections = [...config.featureSections];
+                      featureSections[i] = { ...section, body: v };
+                      onChange({ ...config, featureSections });
+                    }}
+                  />
+                </EditorFieldSpan>
+                <EditorFieldSpan>
+                  <MarketingMediaField
+                    label="Phone screen video"
+                    value={section.videoUrl ?? ""}
+                    onChange={(v) => {
+                      const featureSections = [...config.featureSections];
+                      featureSections[i] = { ...section, videoUrl: v || undefined };
+                      commitMedia({ ...config, featureSections });
+                    }}
+                    mediaType="video"
+                    uploadSubdir={`feature-${section.id}`}
+                    uploadScope={uploadScope}
+                  />
+                </EditorFieldSpan>
+              </EditorFieldsGrid>
+            </EditorItemPanel>
+          ))}
+        </EditorItemList>
       </EditorAccordion>
 
       <EditorAccordion
@@ -265,78 +281,11 @@ export function HomepageEditorForm({
         enabled={sections.highlights}
         onEnabledChange={(enabled) => setSection("highlights", enabled)}
       >
-        <p className="ed-text-sm ed-muted">
+        <EditorSectionNote>
           Each card appears in the horizontal scroller. Remove cards to show fewer items (e.g. 3 instead of 5).
-        </p>
-        {config.showcaseCards.map((card, i) => (
-          <div key={card.id} className="ed-form-section">
-            <Input
-              label={`Card ${i + 1} title`}
-              value={card.title}
-              onChange={(v) => {
-                const showcaseCards = [...config.showcaseCards];
-                showcaseCards[i] = { ...card, title: v };
-                onChange({ ...config, showcaseCards });
-              }}
-            />
-            <Input
-              label="Italic phrase"
-              value={card.titleItalic}
-              onChange={(v) => {
-                const showcaseCards = [...config.showcaseCards];
-                showcaseCards[i] = { ...card, titleItalic: v };
-                onChange({ ...config, showcaseCards });
-              }}
-            />
-            <Input
-              label="Body"
-              value={card.body}
-              onChange={(v) => {
-                const showcaseCards = [...config.showcaseCards];
-                showcaseCards[i] = { ...card, body: v };
-                onChange({ ...config, showcaseCards });
-              }}
-            />
-            <MarketingMediaField
-              label="Background image or video"
-              value={card.imageUrl ?? ""}
-              onChange={(v) => {
-                const showcaseCards = [...config.showcaseCards];
-                showcaseCards[i] = { ...card, imageUrl: v || undefined };
-                commitMedia({ ...config, showcaseCards });
-              }}
-              mediaType="image"
-              uploadSubdir={`showcase-${card.id}-bg`}
-              uploadScope={uploadScope}
-            />
-            <MarketingMediaField
-              label="Phone image (white-phone layout)"
-              value={card.phoneImageUrl ?? ""}
-              onChange={(v) => {
-                const showcaseCards = [...config.showcaseCards];
-                showcaseCards[i] = { ...card, phoneImageUrl: v || undefined };
-                commitMedia({ ...config, showcaseCards });
-              }}
-              mediaType="image"
-              uploadSubdir={`showcase-${card.id}-phone`}
-              uploadScope={uploadScope}
-            />
-            <Button
-              variant="ghost"
-              onClick={() =>
-                commit({
-                  ...config,
-                  showcaseCards: config.showcaseCards.filter((_, idx) => idx !== i),
-                })
-              }
-            >
-              Remove this card
-            </Button>
-          </div>
-        ))}
-        <Button
-          variant="ghost"
-          onClick={() =>
+        </EditorSectionNote>
+        <EditorItemList
+          onAdd={() =>
             commit({
               ...config,
               showcaseCards: [
@@ -351,9 +300,82 @@ export function HomepageEditorForm({
               ],
             })
           }
+          addLabel="+ Add highlight card"
         >
-          Add highlight card
-        </Button>
+          {config.showcaseCards.map((card, i) => (
+            <EditorItemPanel
+              key={card.id}
+              title={`Highlight card ${i + 1}`}
+              onRemove={() =>
+                commit({
+                  ...config,
+                  showcaseCards: config.showcaseCards.filter((_, idx) => idx !== i),
+                })
+              }
+              removeLabel="Remove this card"
+            >
+              <EditorFieldsGrid>
+                <Input
+                  label="Title"
+                  value={card.title}
+                  onChange={(v) => {
+                    const showcaseCards = [...config.showcaseCards];
+                    showcaseCards[i] = { ...card, title: v };
+                    onChange({ ...config, showcaseCards });
+                  }}
+                />
+                <Input
+                  label="Italic phrase"
+                  value={card.titleItalic}
+                  onChange={(v) => {
+                    const showcaseCards = [...config.showcaseCards];
+                    showcaseCards[i] = { ...card, titleItalic: v };
+                    onChange({ ...config, showcaseCards });
+                  }}
+                />
+                <EditorFieldSpan>
+                  <Input
+                    label="Body"
+                    value={card.body}
+                    onChange={(v) => {
+                      const showcaseCards = [...config.showcaseCards];
+                      showcaseCards[i] = { ...card, body: v };
+                      onChange({ ...config, showcaseCards });
+                    }}
+                  />
+                </EditorFieldSpan>
+                <EditorFieldSpan>
+                  <MarketingMediaField
+                    label="Background image or video"
+                    value={card.imageUrl ?? ""}
+                    onChange={(v) => {
+                      const showcaseCards = [...config.showcaseCards];
+                      showcaseCards[i] = { ...card, imageUrl: v || undefined };
+                      commitMedia({ ...config, showcaseCards });
+                    }}
+                    mediaType="image"
+                    uploadSubdir={`showcase-${card.id}-bg`}
+                    uploadScope={uploadScope}
+                  />
+                </EditorFieldSpan>
+                <EditorFieldSpan>
+                  <MarketingMediaField
+                    label="Phone image (white-phone layout)"
+                    value={card.phoneImageUrl ?? ""}
+                    onChange={(v) => {
+                      const showcaseCards = [...config.showcaseCards];
+                      showcaseCards[i] = { ...card, phoneImageUrl: v || undefined };
+                      commitMedia({ ...config, showcaseCards });
+                    }}
+                    mediaType="image"
+                    uploadSubdir={`showcase-${card.id}-phone`}
+                    uploadScope={uploadScope}
+                  />
+                </EditorFieldSpan>
+              </EditorFieldsGrid>
+            </EditorItemPanel>
+          ))}
+        </EditorItemList>
       </EditorAccordion>
 
       <EditorAccordion
@@ -362,7 +384,7 @@ export function HomepageEditorForm({
         enabled={sections.testimonials}
         onEnabledChange={(enabled) => setSection("testimonials", enabled)}
         splitAside={
-          <>
+          <EditorFieldsGrid>
             <Input
               label="Section title"
               value={config.testimonials.title}
@@ -373,18 +395,20 @@ export function HomepageEditorForm({
               value={config.testimonials.subtitle}
               onChange={(v) => onChange({ ...config, testimonials: { ...config.testimonials, subtitle: v } })}
             />
-            <div className="ed-testimonial-editor__tip">
-              <p className="ed-testimonial-editor__tip-title">
-                <span className="material-symbols-outlined ed-ms-icon" aria-hidden>
-                  info
-                </span>
-                Editor tip
-              </p>
-              <p className="ed-text-sm ed-muted">
-                Keep testimonial quotes between 50–100 characters for optimal readability on mobile devices.
-              </p>
-            </div>
-          </>
+            <EditorFieldSpan>
+              <div className="ed-testimonial-editor__tip">
+                <p className="ed-testimonial-editor__tip-title">
+                  <span className="material-symbols-outlined ed-ms-icon" aria-hidden>
+                    info
+                  </span>
+                  Editor tip
+                </p>
+                <p className="ed-text-sm ed-muted">
+                  Keep testimonial quotes between 50–100 characters for optimal readability on mobile devices.
+                </p>
+              </div>
+            </EditorFieldSpan>
+          </EditorFieldsGrid>
         }
       >
         {testimonialsManagedExternally ? (
@@ -406,93 +430,101 @@ export function HomepageEditorForm({
         enabled={sections.faq}
         onEnabledChange={(enabled) => setSection("faq", enabled)}
       >
-        {config.faq.map((f, i) => (
-          <div key={`${f.question}-${i}`} className="ed-form-section">
-            <Input
-              label="Question"
-              value={f.question}
-              onChange={(v) => {
-                const faq = [...config.faq];
-                faq[i] = { ...f, question: v };
-                onChange({ ...config, faq });
-              }}
-            />
-            <Input
-              label="Answer"
-              value={f.answer}
-              onChange={(v) => {
-                const faq = [...config.faq];
-                faq[i] = { ...f, answer: v };
-                onChange({ ...config, faq });
-              }}
-            />
-            <Button
-              variant="ghost"
-              onClick={() => commit({ ...config, faq: config.faq.filter((_, idx) => idx !== i) })}
-            >
-              Remove FAQ item
-            </Button>
-          </div>
-        ))}
-        <Button
-          variant="ghost"
-          onClick={() =>
+        <EditorItemList
+          onAdd={() =>
             commit({
               ...config,
               faq: [...config.faq, { question: "New question?", answer: "Answer here." } satisfies HomepageFaq],
             })
           }
+          addLabel="+ Add FAQ"
         >
-          Add FAQ
-        </Button>
+          {config.faq.map((f, i) => (
+            <EditorItemPanel
+              key={`${f.question}-${i}`}
+              title={`FAQ ${i + 1}`}
+              onRemove={() => commit({ ...config, faq: config.faq.filter((_, idx) => idx !== i) })}
+              removeLabel="Remove FAQ item"
+            >
+              <EditorFieldsGrid>
+                <Input
+                  label="Question"
+                  value={f.question}
+                  onChange={(v) => {
+                    const faq = [...config.faq];
+                    faq[i] = { ...f, question: v };
+                    onChange({ ...config, faq });
+                  }}
+                />
+                <Input
+                  label="Answer"
+                  value={f.answer}
+                  onChange={(v) => {
+                    const faq = [...config.faq];
+                    faq[i] = { ...f, answer: v };
+                    onChange({ ...config, faq });
+                  }}
+                />
+              </EditorFieldsGrid>
+            </EditorItemPanel>
+          ))}
+        </EditorItemList>
       </EditorAccordion>
 
       <EditorAccordion sectionId="privacyFooter" title="Privacy & footer">
-        <ToggleField
-          label="Show privacy section"
-          description="Trust / security copy block on the public homepage."
-          checked={sections.privacy}
-          onChange={(enabled) => setSection("privacy", enabled)}
-        />
-        <ToggleField
-          label="Show site footer"
-          description="Footer CTA banner, link columns, and copyright."
-          checked={sections.footer}
-          onChange={(enabled) => setSection("footer", enabled)}
-        />
-        <Input
-          label="Privacy title"
-          value={config.privacy.title}
-          onChange={(v) => onChange({ ...config, privacy: { ...config.privacy, title: v } })}
-        />
-        <Input
-          label="Privacy body"
-          value={config.privacy.body}
-          onChange={(v) => onChange({ ...config, privacy: { ...config.privacy, body: v } })}
-        />
-        <Input
-          label="Footer CTA title"
-          value={config.footerCta.title}
-          onChange={(v) => onChange({ ...config, footerCta: { ...config.footerCta, title: v } })}
-        />
-        <MarketingMediaField
-          label="Footer CTA background image or video"
-          value={config.footerCta.backgroundImageUrl ?? ""}
-          onChange={(v) =>
-            commitMedia({
-              ...config,
-              footerCta: { ...config.footerCta, backgroundImageUrl: v || undefined },
-            })
-          }
-          mediaType="image"
-          uploadSubdir="footer-background"
-          uploadScope={uploadScope}
-        />
-        <Input
-          label="Copyright"
-          value={config.footer.copyright}
-          onChange={(v) => onChange({ ...config, footer: { ...config.footer, copyright: v } })}
-        />
+        <EditorFieldsGrid>
+          <EditorFieldSpan>
+            <ToggleField
+              label="Show privacy section"
+              description="Trust / security copy block on the public homepage."
+              checked={sections.privacy}
+              onChange={(enabled) => setSection("privacy", enabled)}
+            />
+          </EditorFieldSpan>
+          <EditorFieldSpan>
+            <ToggleField
+              label="Show site footer"
+              description="Footer CTA banner, link columns, and copyright."
+              checked={sections.footer}
+              onChange={(enabled) => setSection("footer", enabled)}
+            />
+          </EditorFieldSpan>
+          <Input
+            label="Privacy title"
+            value={config.privacy.title}
+            onChange={(v) => onChange({ ...config, privacy: { ...config.privacy, title: v } })}
+          />
+          <Input
+            label="Privacy body"
+            value={config.privacy.body}
+            onChange={(v) => onChange({ ...config, privacy: { ...config.privacy, body: v } })}
+          />
+          <Input
+            label="Footer CTA title"
+            value={config.footerCta.title}
+            onChange={(v) => onChange({ ...config, footerCta: { ...config.footerCta, title: v } })}
+          />
+          <Input
+            label="Copyright"
+            value={config.footer.copyright}
+            onChange={(v) => onChange({ ...config, footer: { ...config.footer, copyright: v } })}
+          />
+          <EditorFieldSpan>
+            <MarketingMediaField
+              label="Footer CTA background image or video"
+              value={config.footerCta.backgroundImageUrl ?? ""}
+              onChange={(v) =>
+                commitMedia({
+                  ...config,
+                  footerCta: { ...config.footerCta, backgroundImageUrl: v || undefined },
+                })
+              }
+              mediaType="image"
+              uploadSubdir="footer-background"
+              uploadScope={uploadScope}
+            />
+          </EditorFieldSpan>
+        </EditorFieldsGrid>
       </EditorAccordion>
     </HomepageEditorSections>
   );
@@ -549,71 +581,75 @@ function TestimonialsEditorSection({
   };
 
   return (
-    <div className="ed-testimonial-editor">
+    <EditorItemList
+      onAdd={() =>
+        onCommit([
+          ...items,
+          {
+            quote: "Add a testimonial quote between 50 and 100 characters for best results.",
+            author: "Author name",
+          },
+        ])
+      }
+      addLabel="+ Add testimonial"
+      className="ed-testimonial-editor"
+    >
       {items.map((t, i) => {
         const quoteStatus = testimonialQuoteLengthHint(t.quote.trim().length);
         return (
-          <div
+          <EditorItemPanel
             key={`testimonial-${i}-${t.author}`}
+            title={`Testimonial ${i + 1}`}
+            onRemove={() => removeItem(i)}
+            removeLabel="Remove testimonial"
             className={[
               "ed-testimonial-editor__item",
-              "ed-form-section",
               dragIndex === i ? "ed-testimonial-editor__item--dragging" : "",
               dragOverIndex === i && dragIndex !== i ? "ed-testimonial-editor__item--drop-target" : "",
             ]
               .filter(Boolean)
               .join(" ")}
-            draggable
-            onDragStart={onDragStart(i)}
-            onDragOver={onDragOver(i)}
-            onDrop={onDrop(i)}
-            onDragEnd={onDragEnd}
           >
-            <div className="ed-testimonial-editor__toolbar">
-              <span className="ed-testimonial-editor__handle" aria-hidden>
-                ⋮⋮ Drag
-              </span>
-              <Button variant="ghost" onClick={() => move(i, i - 1)} disabled={i === 0}>
-                Move up
-              </Button>
-              <Button variant="ghost" onClick={() => move(i, i + 1)} disabled={i === items.length - 1}>
-                Move down
-              </Button>
-            </div>
-            <Input label="Quote" value={t.quote} onChange={(v) => updateItem(i, { quote: v })} />
-            <p
-              className={[
-                "ed-testimonial-editor__char-hint",
-                quoteStatus !== "ok" ? "ed-testimonial-editor__char-hint--warn" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+            <div
+              draggable
+              onDragStart={onDragStart(i)}
+              onDragOver={onDragOver(i)}
+              onDrop={onDrop(i)}
+              onDragEnd={onDragEnd}
             >
-              {formatTestimonialQuoteCount(t.quote.trim().length)}
-              {quoteStatus === "short" ? " — quote is shorter than recommended." : null}
-              {quoteStatus === "long" ? " — quote exceeds recommended length." : null}
-            </p>
-            <Input label="Author" value={t.author} onChange={(v) => updateItem(i, { author: v })} />
-            <Button variant="danger" onClick={() => removeItem(i)}>
-              Remove testimonial
-            </Button>
-          </div>
+              <div className="ed-testimonial-editor__toolbar">
+                <span className="ed-testimonial-editor__handle" aria-hidden>
+                  ⋮⋮ Drag
+                </span>
+                <Button variant="ghost" onClick={() => move(i, i - 1)} disabled={i === 0}>
+                  Move up
+                </Button>
+                <Button variant="ghost" onClick={() => move(i, i + 1)} disabled={i === items.length - 1}>
+                  Move down
+                </Button>
+              </div>
+              <EditorFieldsGrid>
+                <EditorFieldSpan>
+                  <Input label="Quote" value={t.quote} onChange={(v) => updateItem(i, { quote: v })} />
+                  <p
+                    className={[
+                      "ed-testimonial-editor__char-hint",
+                      quoteStatus !== "ok" ? "ed-testimonial-editor__char-hint--warn" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    {formatTestimonialQuoteCount(t.quote.trim().length)}
+                    {quoteStatus === "short" ? " — quote is shorter than recommended." : null}
+                    {quoteStatus === "long" ? " — quote exceeds recommended length." : null}
+                  </p>
+                </EditorFieldSpan>
+                <Input label="Author" value={t.author} onChange={(v) => updateItem(i, { author: v })} />
+              </EditorFieldsGrid>
+            </div>
+          </EditorItemPanel>
         );
       })}
-      <Button
-        variant="ghost"
-        onClick={() =>
-          onCommit([
-            ...items,
-            {
-              quote: "Add a testimonial quote between 50 and 100 characters for best results.",
-              author: "Author name",
-            },
-          ])
-        }
-      >
-        Add testimonial
-      </Button>
-    </div>
+    </EditorItemList>
   );
 }

@@ -250,6 +250,40 @@ export function buildAbacusClassicLandingPartial(brandName: string): Partial<Hom
       title: "Moments from our journey",
       images: [],
     },
+    programsSection: {
+      eyebrow: "WHAT WE TEACH",
+      title: "World-Class Brain Development",
+      defaultScholarshipHighlight: "1 Lakh Success Scholarship!",
+      cards: [
+        {
+          id: "program-abacus",
+          name: "Abacus (Mental Math)",
+          description: "Make children super fast in maths and boost their memory and confidence.",
+          ageLabel: "Age 6–14",
+          benefits: [
+            "Kids become superfast in math",
+            "Recite tables 2 to 99 without memorising",
+            "Stay ahead in the subject of math",
+            "Better focus, memory and confidence",
+            "Excel in competitive exams",
+          ],
+        },
+        {
+          id: "program-vedic",
+          name: "Vedic Mathematics",
+          description: "10x faster maths techniques using ancient tricks and shortcuts.",
+          ageLabel: "8th to 10th Std",
+          benefits: ["Speed tricks for board exams", "Pattern-based problem solving", "Stronger number sense"],
+        },
+        {
+          id: "program-handwriting",
+          name: "Handwriting",
+          description: "Marathi and English handwriting improvement for better academic performance.",
+          ageLabel: "Age 6–14",
+          benefits: ["Neater notebooks and exams", "Marathi and English scripts", "Better teacher feedback"],
+        },
+      ],
+    },
     testimonials: {
       title: "Success stories",
       subtitle: "Parents and partners who chose our program.",
@@ -327,6 +361,11 @@ export function mergeAbacusClassicLandingConfig(
     },
     founders: partial?.founders ?? base.founders,
     gallery: { ...base.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? base.gallery!.images },
+    programsSection: {
+      ...base.programsSection!,
+      ...partial?.programsSection,
+      cards: partial?.programsSection?.cards ?? base.programsSection!.cards,
+    },
     footer: {
       ...base.footer!,
       ...partial?.footer,

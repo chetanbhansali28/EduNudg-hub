@@ -26,14 +26,19 @@ describe("homepageSections", () => {
   it("sprint1_abacus_defaults_disable_novu_phone_scroll_sections", () => {
     expect(ABACUS_CLASSIC_SECTION_DEFAULTS.featureScroll).toBe(false);
     expect(ABACUS_CLASSIC_SECTION_DEFAULTS.highlights).toBe(false);
-    expect(ABACUS_CLASSIC_SECTION_DEFAULTS.programsMarquee).toBe(true);
+    expect(ABACUS_CLASSIC_SECTION_DEFAULTS.programsGrid).toBe(true);
     expect(ABACUS_CLASSIC_SECTION_DEFAULTS.featureGrid).toBe(true);
   });
 
   it("sprint1_isAbacusSectionEnabled_uses_abacus_theme_defaults", () => {
     const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
     expect(isAbacusSectionEnabled(config, "featureScroll")).toBe(false);
-    expect(isAbacusSectionEnabled(config, "programsMarquee")).toBe(true);
+    expect(isAbacusSectionEnabled(config, "programsGrid")).toBe(true);
     expect(isAbacusSectionEnabled(setSectionEnabled(config, "gallery", false), "gallery")).toBe(false);
+  });
+
+  it("maps legacy programsMarquee toggle to programsGrid", () => {
+    expect(mergeSectionVisibility({ programsMarquee: false }).programsGrid).toBe(false);
+    expect(mergeSectionVisibility({ programsMarquee: true, programsGrid: false }).programsGrid).toBe(false);
   });
 });

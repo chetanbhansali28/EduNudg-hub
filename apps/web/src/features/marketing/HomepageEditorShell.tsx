@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { SaveButton, Toggle } from "@edunudg/ui";
+import { Button, FormGrid, SaveButton, Toggle } from "@edunudg/ui";
 
 type ShellProps = {
   title: string;
@@ -41,6 +41,7 @@ export const HOMEPAGE_EDITOR_SECTION_META: Record<string, EditorSectionMeta> = {
   founders: { icon: "groups", tone: "primary", description: "Leadership profiles" },
   trustMedia: { icon: "play_circle", tone: "primary", description: "Trust stats and video" },
   gallery: { icon: "photo_library", tone: "neutral", description: "Photo gallery images" },
+  programsGrid: { icon: "school", tone: "primary", description: "Program cards and Know More details" },
   footerRich: { icon: "call_to_action", tone: "neutral", description: "Rich footer and contact info" },
 };
 
@@ -174,6 +175,137 @@ type AccordionGroupContextValue = {
 };
 
 const AccordionGroupContext = createContext<AccordionGroupContextValue | null>(null);
+
+/** Two-column field grid used inside homepage editor accordions (tablet+). */
+export function EditorFieldsGrid({ children }: { children: ReactNode }) {
+  return (
+    <div className="ed-editable-form">
+      <FormGrid columns={2}>{children}</FormGrid>
+    </div>
+  );
+}
+
+/** Span both columns inside {@link EditorFieldsGrid}. */
+export function EditorFieldSpan({ children }: { children: ReactNode }) {
+  return <div className="ed-form-grid__full">{children}</div>;
+}
+
+/** Muted helper copy above repeatable editor blocks. */
+export function EditorSectionNote({ children }: { children: ReactNode }) {
+  return <p className="ed-text-sm ed-muted ed-editor-section-note">{children}</p>;
+}
+
+type EditorItemPanelProps = {
+  title: string;
+  children: ReactNode;
+  onRemove?: () => void;
+  removeLabel?: string;
+  className?: string;
+};
+
+/** Card panel for one repeatable homepage item (nav link, FAQ, program card, etc.). */
+export function EditorItemPanel({
+  title,
+  children,
+  onRemove,
+  removeLabel = "Remove item",
+  className,
+}: EditorItemPanelProps) {
+  return (
+    <div className={["ed-editor-item-panel", className].filter(Boolean).join(" ")}>
+      <h4 className="ed-editor-item-panel__title">{title}</h4>
+      {children}
+      {onRemove ? (
+        <div className="ed-editor-item-panel__remove">
+          <Button variant="danger" onClick={onRemove}>
+            {removeLabel}
+          </Button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+type EditorItemListProps = {
+  children: ReactNode;
+  onAdd: () => void;
+  addLabel: string;
+  className?: string;
+};
+
+/** Vertical stack of {@link EditorItemPanel} rows with a primary add action. */
+export function EditorItemList({ children, onAdd, addLabel, className }: EditorItemListProps) {
+  return (
+    <div className={["ed-editor-item-list", className].filter(Boolean).join(" ")}>
+      {children}
+      <div className="ed-editor-item-list__add">
+        <Button variant="primary" onClick={onAdd}>
+          {addLabel}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+type EditorGroupedPanelProps = {
+  title: string;
+  note?: ReactNode;
+  children: ReactNode;
+  onAdd?: () => void;
+  addLabel?: string;
+  emptyLabel?: string;
+  isEmpty?: boolean;
+  actions?: ReactNode;
+};
+
+/** Dashed inset group (e.g. program benefits) with optional empty state and add action. */
+export function EditorGroupedPanel({
+  title,
+  note,
+  children,
+  onAdd,
+  addLabel,
+  emptyLabel,
+  isEmpty,
+  actions,
+}: EditorGroupedPanelProps) {
+  return (
+    <div className="ed-editor-grouped-panel">
+      <p className="ed-editor-grouped-panel__head">{title}</p>
+      {note ? <p className="ed-text-sm ed-muted ed-editor-grouped-panel__note">{note}</p> : null}
+      {isEmpty && emptyLabel ? (
+        <p className="ed-text-sm ed-muted ed-editor-grouped-panel__empty">{emptyLabel}</p>
+      ) : null}
+      {children}
+      {actions ??
+        (onAdd && addLabel ? (
+          <div className="ed-editor-grouped-panel__actions">
+            <Button variant="primary" onClick={onAdd}>
+              {addLabel}
+            </Button>
+          </div>
+        ) : null)}
+    </div>
+  );
+}
+
+type EditorSubItemProps = {
+  children: ReactNode;
+  onRemove: () => void;
+  removeLabel?: string;
+};
+
+/** Nested item inside a grouped panel (e.g. one benefit bullet). */
+export function EditorSubItem({ children, onRemove, removeLabel = "Remove" }: EditorSubItemProps) {
+  return (
+    <div className="ed-editor-sub-item">
+      {children}
+      <Button variant="danger" onClick={onRemove}>
+        {removeLabel}
+      </Button>
+    </div>
+  );
+}
 
 /** Single-open accordion list wrapper for homepage editor forms. */
 export function HomepageEditorSections({ children }: { children: ReactNode }) {

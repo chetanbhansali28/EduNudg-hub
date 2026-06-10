@@ -1,5 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
-import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig } from "@/lib/centerLandingDefaults";
+import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
@@ -93,6 +93,9 @@ function buildCenterConfigForTheme(
 ): HomepageConfig {
   if (theme === "spark-academy") {
     return mergeSparkAcademyCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
+  }
+  if (theme === "abacus-classic") {
+    return mergeAbacusClassicCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
   }
   return buildCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
 }

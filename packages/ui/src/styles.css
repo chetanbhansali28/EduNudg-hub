@@ -1907,6 +1907,124 @@
   border-bottom: none;
 }
 
+.ed-editor-section-note {
+  margin: 0 0 1rem;
+}
+
+.ed-editor-item-panel,
+.ed-program-card-editor {
+  margin-top: 1rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--ed-border);
+  border-radius: calc(var(--ed-radius) + 2px);
+  background: linear-gradient(180deg, var(--ed-card) 0%, var(--ed-bg) 100%);
+  box-shadow: var(--ed-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+
+.ed-editor-item-panel__title,
+.ed-program-card-editor__title {
+  margin: 0 0 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ed-border);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ed-fg);
+}
+
+.ed-editor-item-list,
+.ed-program-cards-editor {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ed-editor-item-list__add,
+.ed-program-cards-editor__add {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 0.25rem;
+}
+
+.ed-editor-item-list__add .ed-btn,
+.ed-program-cards-editor__add .ed-btn {
+  min-width: 14rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.ed-editor-grouped-panel,
+.ed-program-card-editor__benefits {
+  margin: 1.25rem 0;
+  padding: 1rem 1.125rem;
+  border: 1px dashed color-mix(in srgb, var(--ed-primary) 35%, var(--ed-border));
+  border-radius: var(--ed-radius);
+  background: color-mix(in srgb, var(--ed-primary) 4%, var(--ed-card));
+}
+
+.ed-editor-grouped-panel__head,
+.ed-program-card-editor__benefits-head {
+  margin: 0 0 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ed-fg);
+}
+
+.ed-editor-grouped-panel__note,
+.ed-program-card-editor__benefits-note {
+  margin: 0 0 0.875rem;
+}
+
+.ed-editor-grouped-panel__empty,
+.ed-program-card-editor__benefits-empty {
+  margin: 0 0 0.75rem;
+  font-style: italic;
+}
+
+.ed-editor-sub-item,
+.ed-program-card-editor__benefit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  background: var(--ed-card);
+}
+
+.ed-editor-sub-item .ed-btn--danger,
+.ed-program-card-editor__benefit .ed-btn--danger {
+  align-self: flex-start;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8125rem;
+}
+
+.ed-editor-grouped-panel__actions,
+.ed-program-card-editor__benefit-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 0.875rem;
+}
+
+.ed-editor-grouped-panel__actions .ed-btn--primary,
+.ed-program-card-editor__benefit-actions .ed-btn--primary {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.ed-editor-item-panel__remove,
+.ed-program-card-editor__remove {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ed-border);
+}
+
+.ed-editor-item-panel__remove .ed-btn--danger,
+.ed-program-card-editor__remove .ed-btn--danger {
+  min-width: 11rem;
+}
+
 .ed-inquiry-list__link {
   display: inline;
   padding: 0;
@@ -1999,6 +2117,10 @@
   display: grid;
   gap: 0 1rem;
   grid-template-columns: 1fr;
+}
+
+.ed-form-grid__full {
+  grid-column: 1 / -1;
 }
 
 .ed-form-grid .ed-field {

@@ -3018,6 +3018,190 @@
   gap: 0.75rem;
 }
 
+.ac-programs-grid {
+  padding: 4rem 1.25rem;
+  background-color: #f8fafc;
+  background-image:
+    linear-gradient(45deg, rgba(148, 163, 184, 0.08) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(148, 163, 184, 0.08) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(148, 163, 184, 0.08) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(148, 163, 184, 0.08) 75%);
+  background-size: 24px 24px;
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+}
+
+.ac-programs-grid__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ac-programs-grid__head {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.ac-programs-grid__eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ac-blue, #2563eb);
+}
+
+.ac-programs-grid__title {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  color: #0f172a;
+}
+
+.ac-programs-grid__accent {
+  display: block;
+  width: 4rem;
+  height: 0.25rem;
+  margin: 0.75rem auto 0;
+  border-radius: 999px;
+  background: var(--ac-yellow, #facc15);
+}
+
+.ac-programs-grid__cards {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.ac-programs-grid__card {
+  background: #fff;
+  border-radius: var(--ac-radius, 1rem);
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.ac-programs-grid__media {
+  position: relative;
+  min-height: 11rem;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ac-programs-grid__media-icon {
+  font-size: 2.5rem;
+}
+
+.ac-programs-grid__badge {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  background: #f59e0b;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+}
+
+.ac-programs-grid__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.ac-programs-grid__name {
+  margin: 0;
+  font-size: 1.125rem;
+  color: #0f172a;
+}
+
+.ac-programs-grid__desc {
+  margin: 0;
+  font-size: 0.925rem;
+  color: #475569;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.ac-programs-grid__know-more {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--ac-blue, #2563eb);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.ac-programs-grid__know-more:hover {
+  text-decoration: underline;
+}
+
+.ac-program-details__intro {
+  margin: 0 0 1rem;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.ac-program-details__benefits-title {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ac-program-details__benefits-list {
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.ac-program-details__benefits-list li {
+  position: relative;
+  padding-left: 1.75rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.ac-program-details__benefits-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: #22c55e;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ac-program-details__scholarship {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.ac-program-details__scholarship-icon {
+  font-size: 1.25rem;
+}
+
 .ac-programs {
   background: var(--ac-navy);
   color: #fff;

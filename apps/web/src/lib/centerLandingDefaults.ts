@@ -1,9 +1,9 @@
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
-import { SPARK_ACADEMY_SECTION_DEFAULTS, mergeSectionVisibility } from "@/lib/homepageSections";
+import { SPARK_ACADEMY_SECTION_DEFAULTS, ABACUS_CLASSIC_SECTION_DEFAULTS, mergeSectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig } from "@/types/homepage";
-import { buildSparkAcademyLandingPartial } from "@/lib/brandLandingDefaults";
+import { buildSparkAcademyLandingPartial, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
 
 /** Parent-facing enrollment landing for a center hostname (e.g. koramangala.abacusworld.localhost). */
 export function buildCenterLandingConfig(
@@ -199,5 +199,65 @@ export function mergeSparkAcademyCenterLandingConfig(
       rich: { ...sparkBase.footer!.rich, ...partial?.footer?.rich, ...centerBase.footer.rich },
     },
     sections: mergeSectionVisibility(partial?.sections, SPARK_ACADEMY_SECTION_DEFAULTS),
+  });
+}
+
+/** Center enrollment landing merged with Abacus Classic theme defaults. */
+export function mergeAbacusClassicCenterLandingConfig(
+  centerName: string,
+  brandName: string,
+  city: string | null,
+  partial?: Partial<HomepageConfig>,
+  logoUrl?: string | null
+): HomepageConfig {
+  const centerBase = buildCenterLandingConfig(centerName, brandName, city, partial, logoUrl);
+  const abacusBase = mergeAbacusClassicLandingConfig(centerName, partial, logoUrl);
+
+  return mergeHomepageConfig({
+    ...abacusBase,
+    meta: {
+      ...abacusBase.meta,
+      siteName: partial?.meta?.siteName ?? centerName,
+      logoUrl: partial?.meta?.logoUrl ?? logoUrl ?? abacusBase.meta.logoUrl ?? null,
+    },
+    nav: {
+      ...abacusBase.nav,
+      links: partial?.nav?.links ?? centerBase.nav.links,
+      ctaLabel: partial?.nav?.ctaLabel ?? centerBase.nav.ctaLabel,
+      ctaHref: partial?.nav?.ctaHref ?? centerBase.nav.ctaHref,
+      secondaryCtaLabel: partial?.nav?.secondaryCtaLabel ?? abacusBase.nav.secondaryCtaLabel,
+      secondaryCtaHref: partial?.nav?.secondaryCtaHref ?? abacusBase.nav.secondaryCtaHref,
+    },
+    hero: {
+      ...abacusBase.hero,
+      line1: centerBase.hero.line1,
+      line1Serif: centerBase.hero.line1Serif,
+      line2: centerBase.hero.line2,
+      line2Serif: centerBase.hero.line2Serif,
+      subtitle: centerBase.hero.subtitle,
+      ctaLabel: centerBase.hero.ctaLabel,
+      ctaHref: centerBase.hero.ctaHref,
+      badge: partial?.hero?.badge ?? abacusBase.hero.badge,
+    },
+    featureSections: partial?.featureSections ?? centerBase.featureSections,
+    programsSection: {
+      ...abacusBase.programsSection,
+      ...partial?.programsSection,
+      cards: partial?.programsSection?.cards ?? abacusBase.programsSection?.cards,
+    },
+    testimonials: {
+      ...abacusBase.testimonials,
+      ...partial?.testimonials,
+      title: partial?.testimonials?.title ?? centerBase.testimonials.title,
+      subtitle: partial?.testimonials?.subtitle ?? centerBase.testimonials.subtitle,
+    },
+    faq: partial?.faq ?? centerBase.faq,
+    footer: {
+      ...abacusBase.footer,
+      ...partial?.footer,
+      copyright: partial?.footer?.copyright ?? `© ${new Date().getFullYear()} ${centerName}. Part of ${brandName}.`,
+      rich: { ...abacusBase.footer.rich, ...partial?.footer?.rich },
+    },
+    sections: mergeSectionVisibility(partial?.sections, ABACUS_CLASSIC_SECTION_DEFAULTS),
   });
 }

@@ -73,7 +73,7 @@ describe("BrandMarketingEditorPage", () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findByText("Abacus Classic editor form")).toBeDefined();
-    expect(screen.getAllByText("Novu editor form")).toHaveLength(1);
+    expect(await screen.findAllByText("Abacus Classic editor form")).toHaveLength(2);
+    expect(screen.queryByText("Novu editor form")).toBeNull();
   });
 });

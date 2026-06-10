@@ -6,7 +6,7 @@ Public marketing landings share one UI kit under `apps/web/src/features/marketin
 |------|-----------|---------------|
 | Platform | `MarketingPublicLayout` | `platform_settings` key `marketing_homepage` |
 | Brand | `BrandPublicLayout` | RPC `get_brand_landing_public` + `buildBrandLandingConfig` |
-| Center | `CenterPublicLayout` | RPC `get_center_landing_public` + `buildCenterLandingConfig` |
+| Center | `CenterPublicLayout` | RPC `get_center_landing_public` + theme-aware merge (`mergeAbacusClassicCenterLandingConfig`, `mergeSparkAcademyCenterLandingConfig`, or `buildCenterLandingConfig`) |
 
 ## Brand marketing themes
 
@@ -22,7 +22,11 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme se
 
 Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, domains, and franchise centers — not marketing theme.
 
-Abacus Classic sections (in order): hero → programs marquee (from curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → rich footer (live center/student counts + custom stats).
+Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → rich footer (live center/student counts + custom stats).
+
+Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_theme` and show the same programs grid from brand curriculum. Center copy (hero, city) comes from `mergeAbacusClassicCenterLandingConfig()` merged with `brand_settings.center_landing`.
+
+Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). When no named homepage cards exist, the grid falls back to published curriculum programs.
 
 See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
 
@@ -30,7 +34,7 @@ See `apps/web/src/features/marketing/abacus-classic/`.
 
 Staff apps live under `/login` (public) and `/app` (authenticated) for brand and center portals.
 
-Admin portal styling (Vivid Logic): shared shell, dark mode toggle, homepage editor UX, and center detail layout — see [Vivid Logic admin UX](./vivid-logic-admin.md).
+Admin portal styling (Vivid Logic): shared shell, dark mode toggle, uniform two-column homepage editor UX (`EditorFieldsGrid`, card panels, primary/danger buttons), and center detail layout — see [Vivid Logic admin UX](./vivid-logic-admin.md).
 
 ## Components
 

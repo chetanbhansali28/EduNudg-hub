@@ -9,7 +9,7 @@ export type HomepageSectionKey =
   | "testimonials"
   | "faq"
   | "footer"
-  | "programsMarquee"
+  | "programsGrid"
   | "featureGrid"
   | "founders"
   | "trustMedia"
@@ -26,7 +26,7 @@ export const DEFAULT_HOMEPAGE_SECTION_VISIBILITY: Record<HomepageSectionKey, boo
   testimonials: true,
   faq: true,
   footer: true,
-  programsMarquee: true,
+  programsGrid: true,
   featureGrid: true,
   founders: true,
   trustMedia: true,
@@ -42,7 +42,7 @@ export const ABACUS_CLASSIC_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean
   testimonials: true,
   faq: true,
   footer: false,
-  programsMarquee: true,
+  programsGrid: true,
   featureGrid: true,
   founders: true,
   trustMedia: true,
@@ -58,7 +58,7 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   testimonials: true,
   faq: true,
   footer: true,
-  programsMarquee: true,
+  programsGrid: true,
   featureGrid: true,
   founders: true,
   trustMedia: true,
@@ -66,11 +66,23 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   footerRich: true,
 };
 
+/** Map legacy `programsMarquee` toggle from saved brand_settings JSON. */
+function normalizeSectionPartial(
+  partial?: HomepageSectionVisibility & { programsMarquee?: boolean }
+): HomepageSectionVisibility | undefined {
+  if (!partial) return partial;
+  const legacy = partial.programsMarquee;
+  if (legacy === undefined || partial.programsGrid !== undefined) return partial;
+  const { programsMarquee: _removed, ...rest } = partial;
+  return { ...rest, programsGrid: legacy };
+}
+
 export function mergeSectionVisibility(
   partial?: HomepageSectionVisibility,
   themeDefaults: Record<HomepageSectionKey, boolean> = DEFAULT_HOMEPAGE_SECTION_VISIBILITY
 ): Record<HomepageSectionKey, boolean> {
-  return { ...themeDefaults, ...partial };
+  const normalized = normalizeSectionPartial(partial as HomepageSectionVisibility & { programsMarquee?: boolean });
+  return { ...themeDefaults, ...normalized };
 }
 
 export function isSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {

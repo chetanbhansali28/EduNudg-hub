@@ -3,10 +3,14 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import {
   EditorAccordion,
+  EditorFieldsGrid,
+  EditorItemList,
+  EditorItemPanel,
   HomepageEditorPanel,
   HomepageEditorSections,
   HomepageEditorShell,
 } from "./HomepageEditorShell";
+import { Input } from "@edunudg/ui";
 
 describe("HomepageEditorShell", () => {
   it("regression_save_button_lives_in_hero_card", () => {
@@ -90,5 +94,26 @@ describe("EditorAccordion", () => {
     fireEvent.click(screen.getByRole("button", { name: /FAQ/i }));
     expect(screen.getByText("Visible on site")).toBeDefined();
     expect(container.querySelector(".ed-editor-accordion--open")).toBeTruthy();
+  });
+});
+
+describe("Homepage editor layout helpers", () => {
+  it("regression_editor_fields_grid_and_item_panel_render_shared_classes", () => {
+    const { container } = render(
+      <EditorItemList onAdd={vi.fn()} addLabel="+ Add item">
+        <EditorItemPanel title="Item 1" onRemove={vi.fn()} removeLabel="Remove item">
+          <EditorFieldsGrid>
+            <Input label="Field A" value="" onChange={() => undefined} />
+            <Input label="Field B" value="" onChange={() => undefined} />
+          </EditorFieldsGrid>
+        </EditorItemPanel>
+      </EditorItemList>
+    );
+
+    expect(container.querySelector(".ed-editable-form .ed-form-grid")).toBeTruthy();
+    expect(container.querySelector(".ed-editor-item-panel")).toBeTruthy();
+    expect(container.querySelector(".ed-editor-item-list__add .ed-btn--primary")).toBeTruthy();
+    expect(container.querySelector(".ed-editor-item-panel__remove .ed-btn--danger")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "+ Add item" })).toBeDefined();
   });
 });

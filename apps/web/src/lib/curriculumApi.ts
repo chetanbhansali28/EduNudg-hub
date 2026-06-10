@@ -14,6 +14,10 @@ export interface CurriculumProgram {
   why_take: string | null;
   what_you_learn: string | null;
   marketing_video_url: string | null;
+  marketing_image_url: string | null;
+  age_label: string | null;
+  marketing_benefits: string[] | unknown;
+  scholarship_highlight: string | null;
   is_active: boolean;
 }
 
@@ -52,7 +56,9 @@ function client(): SupabaseClient {
 export async function fetchPrograms(brandId: string): Promise<CurriculumProgram[]> {
   const { data, error } = await client()
     .from("programs")
-    .select("id, name, description, why_take, what_you_learn, marketing_video_url, is_active")
+    .select(
+      "id, name, description, why_take, what_you_learn, marketing_video_url, marketing_image_url, age_label, marketing_benefits, scholarship_highlight, is_active",
+    )
     .eq("brand_id", brandId)
     .is("deleted_at", null)
     .order("name");
@@ -108,25 +114,42 @@ export async function fetchLevelUnits(levelId: string): Promise<CurriculumUnit[]
   return units.sort((a, b) => a.sort_order - b.sort_order);
 }
 
+export type ProgramMarketingInput = {
+  name: string;
+  description: string;
+  whyTake: string;
+  whatYouLearn: string;
+  videoUrl: string;
+  ageLabel: string;
+  marketingImageUrl: string;
+  benefits: string[];
+  scholarshipHighlight: string;
+};
+
+function programRow(input: ProgramMarketingInput) {
+  const benefits = input.benefits.map((b) => b.trim()).filter(Boolean);
+  return {
+    name: input.name.trim(),
+    description: input.description.trim() || null,
+    why_take: input.whyTake.trim() || null,
+    what_you_learn: input.whatYouLearn.trim() || null,
+    marketing_video_url: input.videoUrl.trim() || null,
+    marketing_image_url: input.marketingImageUrl.trim() || null,
+    age_label: input.ageLabel.trim() || null,
+    marketing_benefits: benefits,
+    scholarship_highlight: input.scholarshipHighlight.trim() || null,
+  };
+}
+
 export async function createProgram(
   brandId: string,
-  input: {
-    name: string;
-    description: string;
-    whyTake: string;
-    whatYouLearn: string;
-    videoUrl: string;
-  },
+  input: ProgramMarketingInput,
 ): Promise<string> {
   const { data: created, error } = await client()
     .from("programs")
     .insert({
       brand_id: brandId,
-      name: input.name.trim(),
-      description: input.description.trim() || null,
-      why_take: input.whyTake.trim() || null,
-      what_you_learn: input.whatYouLearn.trim() || null,
-      marketing_video_url: input.videoUrl.trim() || null,
+      ...programRow(input),
     })
     .select("id")
     .single();
@@ -142,25 +165,10 @@ export async function createProgram(
   return created.id;
 }
 
-export async function updateProgram(
-  id: string,
-  input: {
-    name: string;
-    description: string;
-    whyTake: string;
-    whatYouLearn: string;
-    videoUrl: string;
-  },
-): Promise<void> {
+export async function updateProgram(id: string, input: ProgramMarketingInput): Promise<void> {
   const { error } = await client()
     .from("programs")
-    .update({
-      name: input.name.trim(),
-      description: input.description.trim() || null,
-      why_take: input.whyTake.trim() || null,
-      what_you_learn: input.whatYouLearn.trim() || null,
-      marketing_video_url: input.videoUrl.trim() || null,
-    })
+    .update(programRow(input))
     .eq("id", id);
   if (error) throw error;
 }

@@ -7,7 +7,7 @@ import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { AbacusClassicNav } from "./AbacusClassicNav";
 import { AbacusClassicHero } from "./AbacusClassicHero";
 import { AbacusClassicContent } from "./AbacusClassicContent";
-import { ProgramsMarqueeSection } from "./ProgramsMarqueeSection";
+import { ProgramsGridSection } from "./ProgramsMarqueeSection";
 import { FeatureGridSection } from "./FeatureGridSection";
 import { LeadModalProvider } from "./LeadModalContext";
 import { AbacusCtaButton, MarketingLeadModals } from "./MarketingLeadModals";
@@ -19,6 +19,10 @@ function sampleProgram(name: string, description = "Program overview"): PublicCu
     whyTake: null,
     whatYouLearn: null,
     marketingVideoUrl: null,
+    marketingImageUrl: null,
+    ageLabel: "Age 6–14",
+    marketingBenefits: ["Kids become superfast in math"],
+    scholarshipHighlight: null,
     versionNumber: 1,
     levels: [],
   };
@@ -101,20 +105,52 @@ describe("Abacus Classic Sprint 2 — lead modals", () => {
   });
 });
 
-describe("Abacus Classic Sprint 2 — programs marquee", () => {
-  const programs = [sampleProgram("Abacus Level 1"), sampleProgram("Vedic Maths")];
+describe("Abacus Classic — programs grid", () => {
+  beforeEach(() => {
+    polyfillDialog();
+  });
 
-  it("returns null when curriculum is empty", () => {
-    const { container } = render(<ProgramsMarqueeSection programs={[]} />);
+  const programs = [sampleProgram("Abacus Level 1"), sampleProgram("Vedic Maths")];
+  const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
+
+  it("returns null when curriculum is empty and no homepage cards", () => {
+    const { container } = render(
+      <ProgramsGridSection programs={[]} programsSection={{ cards: [] }} />
+    );
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders program cards and duplicates list for marquee loop", () => {
-    render(<ProgramsMarqueeSection programs={programs} />);
+  it("renders homepage program cards with editable section headings", () => {
+    render(<ProgramsGridSection programs={programs} programsSection={config.programsSection} />);
 
-    expect(screen.getByRole("heading", { level: 2, name: "Explore Our Core Learning Programs" })).toBeDefined();
-    expect(screen.getAllByRole("heading", { level: 3, name: "Abacus Level 1" })).toHaveLength(2);
-    expect(screen.getAllByRole("heading", { level: 3, name: "Vedic Maths" })).toHaveLength(2);
+    expect(screen.getByText("WHAT WE TEACH")).toBeDefined();
+    expect(screen.getByRole("heading", { level: 2, name: "World-Class Brain Development" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 3, name: "Abacus (Mental Math)" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 3, name: "Vedic Mathematics" })).toBeDefined();
+    expect(screen.getAllByText("Age 6–14")).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "Know More →" })).toHaveLength(3);
+  });
+
+  it("opens program details modal with benefits and brand scholarship default", () => {
+    render(<ProgramsGridSection programs={programs} programsSection={config.programsSection} />);
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Know More →" })[0]!);
+
+    expect(screen.getByRole("heading", { level: 2, name: "Abacus (Mental Math) Course Details" })).toBeDefined();
+    expect(screen.getByText("Kids become superfast in math")).toBeDefined();
+    expect(screen.getByText("1 Lakh Success Scholarship!")).toBeDefined();
+  });
+
+  it("falls back to curriculum programs when homepage cards are not configured", () => {
+    render(
+      <ProgramsGridSection
+        programs={programs}
+        programsSection={{ eyebrow: "WHAT WE TEACH", title: "Programs", cards: [] }}
+      />
+    );
+
+    expect(screen.getByRole("heading", { level: 3, name: "Abacus Level 1" })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 3, name: "Vedic Maths" })).toBeDefined();
   });
 });
 
@@ -150,6 +186,6 @@ describe("Abacus Classic Sprint 2 — content section order", () => {
 
     expect(sectionIds.indexOf("hero")).toBeLessThan(sectionIds.indexOf("programs"));
     expect(sectionIds.indexOf("programs")).toBeLessThan(sectionIds.indexOf("features"));
-    expect(screen.getAllByRole("heading", { level: 3, name: "Junior Abacus" })).toHaveLength(2);
+    expect(screen.getByRole("heading", { level: 3, name: "Abacus (Mental Math)" })).toBeDefined();
   });
 });

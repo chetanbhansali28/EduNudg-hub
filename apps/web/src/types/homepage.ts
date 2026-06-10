@@ -80,6 +80,28 @@ export interface HomepageGallery {
   images: HomepageGalleryImage[];
 }
 
+/** Single program card in the Abacus Classic programs grid (homepage editor). */
+export interface HomepageProgramCard {
+  id: string;
+  name: string;
+  description?: string;
+  /** Optional modal intro (why parents choose this). */
+  intro?: string;
+  ageLabel?: string;
+  imageUrl?: string;
+  benefits?: string[];
+  scholarshipHighlight?: string;
+}
+
+/** Abacus Classic programs grid section headings and brand-wide scholarship default. */
+export interface HomepageProgramsSection {
+  eyebrow?: string;
+  title?: string;
+  defaultScholarshipHighlight?: string;
+  /** When set, these cards render instead of brand curriculum programs. */
+  cards?: HomepageProgramCard[];
+}
+
 export interface HomepageFooterStat {
   value: string;
   label: string;
@@ -178,6 +200,7 @@ export interface HomepageConfig {
   founders?: HomepageFounderProfile[];
   trustMedia?: HomepageTrustMedia;
   gallery?: HomepageGallery;
+  programsSection?: HomepageProgramsSection;
   /** Show/hide major page sections on the public marketing site. */
   sections?: HomepageSectionVisibility;
 }

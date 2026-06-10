@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCenterLandingConfig } from "./centerLandingDefaults";
+import { buildCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "./centerLandingDefaults";
 
 describe("buildCenterLandingConfig", () => {
   it("regression_parent_focused_enrollment_cta", () => {
@@ -14,5 +14,21 @@ describe("buildCenterLandingConfig", () => {
     expect(config.footerCta.ctaLabel).toBe(config.nav.ctaLabel);
     expect(config.hero.subtitle).toContain("Abacus World Koramangala");
     expect(config.faq.some((f) => f.question.toLowerCase().includes("trial"))).toBe(true);
+  });
+});
+
+describe("mergeAbacusClassicCenterLandingConfig", () => {
+  it("uses abacus sections with center-local hero copy", () => {
+    const config = mergeAbacusClassicCenterLandingConfig(
+      "Smart Brain Pune",
+      "Smart Brain Abacus",
+      "Pune"
+    );
+    expect(config.sections?.programsGrid).toBe(true);
+    expect(config.sections?.featureScroll).toBe(false);
+    expect(config.hero.subtitle).toContain("Smart Brain Pune");
+    expect(config.hero.subtitle).toContain("Pune");
+    expect(config.programsSection?.eyebrow).toBe("WHAT WE TEACH");
+    expect(config.trustMedia?.cards).toHaveLength(3);
   });
 });

@@ -28,10 +28,14 @@ describe("mergeAbacusClassicLandingConfig", () => {
     expect(config.featureSections.map((s) => s.id)).toEqual(["levels", "vedic", "competition", "franchise"]);
   });
 
-  it("sprint2_enables_programs_marquee_section", () => {
+  it("sprint2_enables_programs_grid_section", () => {
     const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
-    expect(config.sections?.programsMarquee).toBe(true);
+    expect(config.sections?.programsGrid).toBe(true);
     expect(config.sections?.hero).toBe(true);
+    expect(config.programsSection?.title).toBe("World-Class Brain Development");
+    expect(config.programsSection?.defaultScholarshipHighlight).toContain("Scholarship");
+    expect(config.programsSection?.cards).toHaveLength(3);
+    expect(config.programsSection?.cards?.[0]?.name).toBe("Abacus (Mental Math)");
   });
 
   it("sprint3_includes_founders_trust_gallery_and_rich_footer_defaults", () => {

@@ -28,7 +28,7 @@ export function SparkAcademyContent({
   publicStats = { centersCount: 0, studentsCount: 0 },
 }: Props) {
   const showHero = isSparkSectionEnabled(config, "hero");
-  const showPrograms = isSparkSectionEnabled(config, "programsMarquee");
+  const showPrograms = isSparkSectionEnabled(config, "programsGrid");
   const showFeatures = isSparkSectionEnabled(config, "featureGrid") && config.featureSections.length > 0;
   const showJourney = isSparkSectionEnabled(config, "trustMedia") && config.trustMedia;
   const showFounders = isSparkSectionEnabled(config, "founders") && (config.founders?.length ?? 0) > 0;

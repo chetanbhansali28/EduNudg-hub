@@ -153,15 +153,28 @@ export function BrandMarketingEditorPage() {
           saved={centerSaved}
           description="Template for every center hostname. Center name and city are filled in per location."
         >
-          <HomepageEditorForm
-            config={centerConfig}
-            onChange={setCenterConfig}
-            uploadScope={{ kind: "brand", brandId: brandId! }}
-            onPersist={(next) => {
-              setCenterConfig(next);
-              saveCenter.mutate(next);
-            }}
-          />
+          {marketingTheme === "abacus-classic" ? (
+            <AbacusClassicEditorForm
+              config={centerConfig}
+              marketingTheme={marketingTheme}
+              onChange={setCenterConfig}
+              uploadScope={{ kind: "brand", brandId: brandId! }}
+              onPersist={(next) => {
+                setCenterConfig(next);
+                saveCenter.mutate(next);
+              }}
+            />
+          ) : (
+            <HomepageEditorForm
+              config={centerConfig}
+              onChange={setCenterConfig}
+              uploadScope={{ kind: "brand", brandId: brandId! }}
+              onPersist={(next) => {
+                setCenterConfig(next);
+                saveCenter.mutate(next);
+              }}
+            />
+          )}
         </HomepageEditorPanel>
       </div>
     </HomepageEditorShell>

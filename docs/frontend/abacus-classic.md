@@ -48,7 +48,7 @@ Sprint 2 covers the top-of-page conversion flow and curriculum-driven programs s
 | 1 | Sticky nav with dual CTAs | `AbacusClassicNav` | `config.nav.ctaLabel/Href`, `secondaryCtaLabel/Href` |
 | 2 | Hero with badge + dual CTAs | `AbacusClassicHero` | `config.hero.*` |
 | 3 | Enroll + franchise lead modals | `MarketingLeadModals`, `AbacusCtaButton` | Hrefs `enroll` / `apply` open modals; other hrefs render anchors |
-| 4 | Programs auto-scroll marquee | `ProgramsMarqueeSection` | `publicCurriculum` from RPC `get_brand_landing_public` |
+| 4 | Programs card grid + Know More modal | `ProgramsGridSection` (`ProgramsMarqueeSection.tsx`) | `publicCurriculum` + `config.programsSection`; section toggle `programsGrid` |
 | 5 | Why-us feature grid (4 blocks) | `FeatureGridSection` | `config.featureSections`; heading uses `Why {siteName}` |
 | 6 | Smart Brain default copy | `mergeAbacusClassicLandingConfig()` | Seed + editor defaults in `brandLandingDefaults.ts` |
 
@@ -75,7 +75,36 @@ Sprint 3 covers social proof, media, gallery, and the rich footer with live data
 
 YouTube URLs are normalized via `toYoutubeEmbedUrl()` in `marketingPublicSite.ts`.
 
-Toggle sections in the brand homepage editor: **Leadership profiles**, **Trust & video**, **Photo gallery**, **Footer**.
+Toggle sections in the brand homepage editor: **Programs grid**, **Leadership profiles**, **Trust & video**, **Photo gallery**, **Footer**.
+
+## Sprint 4 (delivered) — Programs grid & curriculum marketing
+
+Card-based programs section (replacing the auto-scroll marquee) with curriculum-driven content and center theme inheritance.
+
+| # | Feature | Where | Config / data |
+|---|---------|-------|---------------|
+| 1 | Programs card grid | `ProgramsGridSection` | Image or gradient fallback, age badge, blurb, **Know More →** |
+| 2 | Program details modal | `AcModalShell` in `MarketingLeadModals.tsx` | Benefits list + scholarship banner |
+| 3 | Section headings + program cards (editable) | `AbacusClassicEditorForm` → **Programs grid** | Shared `EditorFieldsGrid` / `EditorItemPanel` helpers from `HomepageEditorShell.tsx` (same UX as Novu admin editor) |
+| 4 | Homepage program cards | `programsSection.cards[]` → `resolveProgramsGridItems()` | Name, image, age badge, blurb, benefits, scholarship; **Add program card** in homepage editor |
+| 5 | Curriculum marketing fields (fallback) | `/app/curriculum` → `CurriculumWorkspace` | Used when no named homepage cards are configured |
+| 6 | Public curriculum JSON | `brand_public_curriculum_json()` | Migration `042_program_marketing_fields.sql` |
+| 7 | Center sites inherit Abacus theme | `mergeAbacusClassicCenterLandingConfig()` | Brand + center `{center}.{brand}` use Abacus layout, sections, and programs grid |
+| 8 | Center template editor | `BrandMarketingEditorPage` panel 2 | `AbacusClassicEditorForm` when `marketing_theme = abacus-classic` |
+
+**Card source priority:** If `programsSection.cards` contains at least one card with a name, those cards render on the public site. Otherwise the grid falls back to published **Curriculum** programs.
+
+**Scholarship banner:** program-level `scholarshipHighlight` (homepage card or curriculum) overrides the brand-wide default from `programsSection.defaultScholarshipHighlight`.
+
+**Benefits:** homepage card `benefits[]` or curriculum `marketing_benefits[]`; curriculum falls back to newline-separated `what_you_learn` if empty.
+
+**Section toggle:** `config.sections.programsGrid` (legacy saved `programsMarquee` is mapped automatically).
+
+Run migration:
+
+```bash
+supabase db push   # applies 042_program_marketing_fields.sql
+```
 
 ## File map
 
@@ -86,9 +115,10 @@ Toggle sections in the brand homepage editor: **Leadership profiles**, **Trust &
 | Main sections | `apps/web/src/features/marketing/abacus-classic/` |
 | Defaults | `apps/web/src/lib/brandLandingDefaults.ts` → `mergeAbacusClassicLandingConfig` |
 | Program card colors | `apps/web/src/lib/marketingFeatureSections.ts` → `programCardPalette` |
+| Card source resolution | `apps/web/src/lib/programsGridItems.ts` → `resolveProgramsGridItems()` |
 | Types | `apps/web/src/types/homepage.ts` |
 | Platform theme admin | `apps/web/src/features/platform/BrandMarketingThemesPanel.tsx` on `/admin/homepage` |
-| Migration | `supabase/migrations/039_brand_marketing_theme.sql` |
+| Migration | `supabase/migrations/039_brand_marketing_theme.sql`, `042_program_marketing_fields.sql` |
 | Seed | `supabase/seed/seed.sql` (`smart-brain-abacus`) |
 
 ## Lead modal behavior
@@ -125,7 +155,10 @@ pnpm --filter web test -- homepage.test brandLandingApi brandLandingBundle brand
 
 | Test file | Coverage |
 |-----------|----------|
-| `abacus-classic/AbacusClassicSprint2.test.tsx` | Nav/hero dual CTAs, modal open, programs marquee, feature grid, section order |
+| `abacus-classic/AbacusClassicSprint2.test.tsx` | Nav/hero dual CTAs, modal open, programs grid + detail modal, feature grid, section order |
+| `lib/programsGridItems.test.ts` | Homepage cards vs curriculum fallback |
+| `lib/brandCurriculumPublic.test.ts` | Marketing fields parser, `programMarketingBenefits()` |
+| `lib/centerLandingDefaults.test.ts` | `mergeAbacusClassicCenterLandingConfig` |
 | `abacus-classic/MarketingLeadModals.test.ts` | `resolveLeadModalKind` href mapping |
 | `lib/brandLandingDefaults.test.ts` | Abacus defaults: dual CTAs, 4 features, section toggles |
 | `lib/marketingFeatureSections.test.ts` | `programCardPalette` cycling |
@@ -181,6 +214,7 @@ Prerequisites: migration `039` applied, dev server on port 9000.
 
 - [ ] `/app/homepage` on an Abacus-themed brand shows `AbacusClassicEditorForm`
 - [ ] Theme label shows “managed by EduNudg platform admin”
+- [ ] All accordion sections use two-column field grids and card-style add/remove buttons (same as platform `/admin/homepage`)
 - [ ] Novu-themed brands still show `HomepageEditorForm`
 
 ## Manual QA checklist (Sprint 2)

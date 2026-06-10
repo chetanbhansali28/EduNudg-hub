@@ -27,6 +27,7 @@ import {
   updateProgram,
   type CurriculumLevel,
   type CurriculumProgram,
+  type ProgramMarketingInput,
 } from "@/lib/curriculumApi";
 import { parseTopicsComma, pickWorkingVersion, topicsToString } from "@/lib/curriculumHelpers";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
@@ -34,14 +35,38 @@ import { DeleteConfirmButton } from "@/features/shared/DeleteConfirmButton";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
 
-const EMPTY_PROGRAM_FORM = {
+const EMPTY_PROGRAM_FORM: ProgramMarketingInput = {
   name: "",
   description: "",
   whyTake: "",
   whatYouLearn: "",
   videoUrl: "",
+  ageLabel: "",
+  marketingImageUrl: "",
+  benefits: [],
+  scholarshipHighlight: "",
 };
+
+function parseProgramBenefits(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((item): item is string => typeof item === "string");
+}
+
+function programToForm(program: CurriculumProgram): ProgramMarketingInput {
+  return {
+    name: program.name,
+    description: program.description ?? "",
+    whyTake: program.why_take ?? "",
+    whatYouLearn: program.what_you_learn ?? "",
+    videoUrl: program.marketing_video_url ?? "",
+    ageLabel: program.age_label ?? "",
+    marketingImageUrl: program.marketing_image_url ?? "",
+    benefits: parseProgramBenefits(program.marketing_benefits),
+    scholarshipHighlight: program.scholarship_highlight ?? "",
+  };
+}
 
 const EMPTY_LEVEL_FORM = {
   name: "",
@@ -235,13 +260,13 @@ export function CurriculumWorkspace({ brandId }: CurriculumWorkspaceProps) {
         >
           {({ close }) => {
             programCloser.bindClose(close);
-            return <ProgramFields value={addProgram} onChange={setAddProgram} />;
+            return <ProgramFields brandId={brandId} value={addProgram} onChange={setAddProgram} />;
           }}
         </AddFormSection>
 
         {selectedProgram && editingProgramId === selectedProgram.id ? (
           <div className="ed-editable-form">
-            <ProgramFields value={editProgram} onChange={setEditProgram} />
+            <ProgramFields brandId={brandId} value={editProgram} onChange={setEditProgram} />
             <FormActions>
               <SaveButton
                 onClick={() => updateProgramMutation.mutate(selectedProgram.id)}
@@ -265,13 +290,7 @@ export function CurriculumWorkspace({ brandId }: CurriculumWorkspaceProps) {
               editing={false}
               onEdit={() => {
                 setEditingProgramId(selectedProgram.id);
-                setEditProgram({
-                  name: selectedProgram.name,
-                  description: selectedProgram.description ?? "",
-                  whyTake: selectedProgram.why_take ?? "",
-                  whatYouLearn: selectedProgram.what_you_learn ?? "",
-                  videoUrl: selectedProgram.marketing_video_url ?? "",
-                });
+                setEditProgram(programToForm(selectedProgram));
               }}
               onSave={() => updateProgramMutation.mutate(selectedProgram.id)}
               onCancel={() => setEditingProgramId(null)}
@@ -311,12 +330,22 @@ export function CurriculumWorkspace({ brandId }: CurriculumWorkspaceProps) {
 }
 
 function ProgramFields({
+  brandId,
   value,
   onChange,
 }: {
-  value: typeof EMPTY_PROGRAM_FORM;
-  onChange: (v: typeof EMPTY_PROGRAM_FORM) => void;
+  brandId: string;
+  value: ProgramMarketingInput;
+  onChange: (v: ProgramMarketingInput) => void;
 }) {
+  const uploadScope = { kind: "brand" as const, brandId };
+
+  const updateBenefit = (index: number, text: string) => {
+    const benefits = [...value.benefits];
+    benefits[index] = text;
+    onChange({ ...value, benefits });
+  };
+
   return (
     <div className="ed-editable-form">
       <FormGrid columns={2}>
@@ -327,21 +356,65 @@ function ProgramFields({
           editable
         />
         <Input
+          label="Age / grade badge"
+          value={value.ageLabel}
+          onChange={(ageLabel) => onChange({ ...value, ageLabel })}
+          placeholder="Age 6–14"
+          editable
+        />
+      </FormGrid>
+      <MarketingMediaField
+        label="Card image"
+        value={value.marketingImageUrl}
+        onChange={(marketingImageUrl) => onChange({ ...value, marketingImageUrl })}
+        mediaType="image"
+        uploadSubdir="program-marketing"
+        uploadScope={uploadScope}
+      />
+      <Textarea
+        label="Short description (card blurb)"
+        value={value.description}
+        onChange={(description) => onChange({ ...value, description })}
+        rows={3}
+        editable
+      />
+      <p className="ed-text-sm ed-muted">Benefits appear as bullet points in the public &quot;Know More&quot; popup.</p>
+      {value.benefits.map((benefit, index) => (
+        <div key={`benefit-${index}`} className="ed-form-section">
+          <Input
+            label={`Benefit ${index + 1}`}
+            value={benefit}
+            onChange={(v) => updateBenefit(index, v)}
+            editable
+          />
+          <Button
+            variant="ghost"
+            onClick={() =>
+              onChange({ ...value, benefits: value.benefits.filter((_, idx) => idx !== index) })
+            }
+          >
+            Remove benefit
+          </Button>
+        </div>
+      ))}
+      <Button variant="ghost" onClick={() => onChange({ ...value, benefits: [...value.benefits, ""] })}>
+        Add benefit
+      </Button>
+      <Input
+        label="Scholarship highlight (optional)"
+        value={value.scholarshipHighlight}
+        onChange={(scholarshipHighlight) => onChange({ ...value, scholarshipHighlight })}
+        placeholder="1 Lakh Success Scholarship!"
+        editable
+      />
+      <FormGrid columns={2}>
+        <Input
           label="Overview video"
           value={value.videoUrl}
           onChange={(videoUrl) => onChange({ ...value, videoUrl })}
           placeholder="https://…"
           editable
         />
-      </FormGrid>
-      <Textarea
-        label="Description"
-        value={value.description}
-        onChange={(description) => onChange({ ...value, description })}
-        rows={4}
-        editable
-      />
-      <FormGrid columns={2}>
         <Textarea
           label="Why parents choose this"
           value={value.whyTake}
@@ -349,14 +422,14 @@ function ProgramFields({
           rows={3}
           editable
         />
-        <Textarea
-          label="Skills and outcomes"
-          value={value.whatYouLearn}
-          onChange={(whatYouLearn) => onChange({ ...value, whatYouLearn })}
-          rows={3}
-          editable
-        />
       </FormGrid>
+      <Textarea
+        label="Skills and outcomes (legacy fallback)"
+        value={value.whatYouLearn}
+        onChange={(whatYouLearn) => onChange({ ...value, whatYouLearn })}
+        rows={3}
+        editable
+      />
     </div>
   );
 }

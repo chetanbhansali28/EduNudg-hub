@@ -5,7 +5,7 @@ import { HomepageEditorForm } from "./HomepageEditorForm";
 import { HomepageEditorShell } from "./HomepageEditorShell";
 
 describe("HomepageEditorForm", () => {
-  it("regression_sections_use_collapsed_accordions_in_single_column_stack", () => {
+  it("regression_sections_use_collapsed_accordions_with_two_column_fields", () => {
     const { container } = render(
       <HomepageEditorShell title="Marketing homepage">
         <HomepageEditorForm config={DEFAULT_HOMEPAGE_CONFIG} onChange={() => undefined} />
@@ -26,6 +26,7 @@ describe("HomepageEditorForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /Hero/i }));
     expect(screen.queryByLabelText("Hero background image URL")).toBeNull();
     expect(screen.getByLabelText("Hero background image or video")).toBeDefined();
+    expect(container.querySelector(".ed-editable-form .ed-form-grid")).toBeTruthy();
   });
 
   it("regression_form_fields_expose_id_and_name_for_autofill", () => {

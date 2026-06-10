@@ -3,7 +3,8 @@ import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { isAbacusSectionEnabled } from "@/lib/homepageSections";
 import { TestimonialsCarousel } from "../TestimonialsCarousel";
 import { AbacusClassicHero } from "./AbacusClassicHero";
-import { ProgramsMarqueeSection } from "./ProgramsMarqueeSection";
+import { ProgramsGridSection } from "./ProgramsMarqueeSection";
+import { programsGridHasContent } from "@/lib/programsGridItems";
 import { FeatureGridSection } from "./FeatureGridSection";
 import { FoundersSection } from "./FoundersSection";
 import { TrustMediaSection } from "./TrustMediaSection";
@@ -29,7 +30,9 @@ type Props = {
 
 export function AbacusClassicContent({ config, publicCurriculum }: Props) {
   const showHero = isAbacusSectionEnabled(config, "hero");
-  const showPrograms = isAbacusSectionEnabled(config, "programsMarquee");
+  const showPrograms =
+    isAbacusSectionEnabled(config, "programsGrid") &&
+    programsGridHasContent(config.programsSection, publicCurriculum);
   const showFeatures = isAbacusSectionEnabled(config, "featureGrid") && config.featureSections.length > 0;
   const showFounders = isAbacusSectionEnabled(config, "founders") && (config.founders?.length ?? 0) > 0;
   const showTrust = isAbacusSectionEnabled(config, "trustMedia") && config.trustMedia;
@@ -40,7 +43,9 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
   return (
     <main className="ac-main">
       {showHero ? <AbacusClassicHero config={config} /> : null}
-      {showPrograms ? <ProgramsMarqueeSection programs={publicCurriculum} /> : null}
+      {showPrograms ? (
+        <ProgramsGridSection programs={publicCurriculum} programsSection={config.programsSection} />
+      ) : null}
       {showFeatures ? <FeatureGridSection siteName={config.meta.siteName} sections={config.featureSections} /> : null}
       {showFounders && config.founders ? <FoundersSection founders={config.founders} /> : null}
       {showTrust && config.trustMedia ? <TrustMediaSection trust={config.trustMedia} /> : null}

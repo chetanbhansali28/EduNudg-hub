@@ -46,6 +46,22 @@ Users choose light or dark in the **AppShell header** (`ThemeToggle`). Preferenc
 - Section metadata in `HOMEPAGE_EDITOR_SECTION_META` (`HomepageEditorShell.tsx`)
 - Active open section: primary border + elevated shadow
 
+### Two-column field layout (all accordion sections)
+
+Every homepage editor section (Novu `HomepageEditorForm` and theme editors such as `AbacusClassicEditorForm`) uses shared layout helpers exported from `HomepageEditorShell.tsx`:
+
+| Helper | Purpose |
+|--------|---------|
+| `EditorFieldsGrid` | Two-column `FormGrid` from tablet up; wraps fields in `ed-editable-form` |
+| `EditorFieldSpan` | Full-width row for media uploads, long copy, or toggles |
+| `EditorSectionNote` | Muted intro copy above repeatable blocks |
+| `EditorItemPanel` | Card panel for one list item (nav link, FAQ, program card, etc.) with red **Remove** |
+| `EditorItemList` | Stack of panels + centered blue **+ Add** button |
+| `EditorGroupedPanel` | Dashed inset group (e.g. program benefits in Know More modal) |
+| `EditorSubItem` | Nested row inside a grouped panel with inline remove |
+
+Styles live in `packages/ui/src/styles.css` under `.ed-editor-item-panel`, `.ed-editor-item-list`, `.ed-editor-grouped-panel` (legacy `.ed-program-card-editor*` aliases remain for compatibility).
+
 ### Testimonials (split layout in `HomepageEditorForm.tsx`)
 
 When testimonials are managed inline (Novu theme):
@@ -70,6 +86,7 @@ Platform-only bento grid at `/admin/homepage`:
 | Theme preference | `apps/web/src/lib/adminThemePreference.test.ts` |
 | App shell + theme toggle | `apps/web/src/features/auth/AppShell.responsive.test.tsx` |
 | Editor shell + accordion | `apps/web/src/features/marketing/HomepageEditorShell.test.tsx` |
+| Two-column layout helpers | `HomepageEditorShell.test.tsx` (`Homepage editor layout helpers`) |
 | Testimonials + section toggles | `apps/web/src/features/marketing/HomepageEditorForm.sections.test.tsx` |
 | Quote helpers | `apps/web/src/lib/testimonialEditorHelpers.test.ts` |
 | Themes panel | `apps/web/src/features/platform/BrandMarketingThemesPanel.test.tsx` |
@@ -95,6 +112,9 @@ pnpm --filter web test -- HomepageEditorShell HomepageEditorForm BrandMarketingT
 - [ ] Mobile: sticky bottom save bar; desktop: hero save only
 - [ ] Accordions: icon + subtitle when collapsed; only one open at a time
 - [ ] Visible on site toggle appears when section is expanded
+- [ ] All accordion bodies use two-column field grids on tablet+ (Site, Hero, Navigation items, FAQ, etc.)
+- [ ] Repeatable items use card panels with blue **+ Add** and red **Remove** buttons
+- [ ] Programs grid benefits use dashed grouped panel (Abacus Classic)
 - [ ] Testimonials split layout on tablet/desktop; stacked on mobile
 - [ ] Abacus Classic: same accordion chrome; success stories hint only
 

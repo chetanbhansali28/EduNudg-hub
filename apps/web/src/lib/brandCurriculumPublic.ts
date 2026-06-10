@@ -25,11 +25,20 @@ export type PublicCurriculumProgram = {
   whyTake: string | null;
   whatYouLearn: string | null;
   marketingVideoUrl: string | null;
+  marketingImageUrl: string | null;
+  ageLabel: string | null;
+  marketingBenefits: string[];
+  scholarshipHighlight: string | null;
   versionNumber: number;
   levels: PublicCurriculumLevel[];
 };
 
 function parseTopics(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((t): t is string => typeof t === "string" && t.trim().length > 0);
+}
+
+function parseBenefits(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter((t): t is string => typeof t === "string" && t.trim().length > 0);
 }
@@ -85,9 +94,23 @@ function parseProgram(raw: unknown): PublicCurriculumProgram | null {
     whyTake: typeof row.why_take === "string" ? row.why_take : null,
     whatYouLearn: typeof row.what_you_learn === "string" ? row.what_you_learn : null,
     marketingVideoUrl: typeof row.marketing_video_url === "string" ? row.marketing_video_url : null,
+    marketingImageUrl: typeof row.marketing_image_url === "string" ? row.marketing_image_url : null,
+    ageLabel: typeof row.age_label === "string" ? row.age_label : null,
+    marketingBenefits: parseBenefits(row.marketing_benefits),
+    scholarshipHighlight: typeof row.scholarship_highlight === "string" ? row.scholarship_highlight : null,
     versionNumber,
     levels,
   };
+}
+
+/** Benefit bullets for program detail modal — dedicated list first, then legacy fallback. */
+export function programMarketingBenefits(program: PublicCurriculumProgram): string[] {
+  if (program.marketingBenefits.length > 0) return program.marketingBenefits;
+  if (!program.whatYouLearn) return [];
+  return program.whatYouLearn
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^[-•*]\s*/, "").trim())
+    .filter(Boolean);
 }
 
 export function parsePublicCurriculum(raw: unknown): PublicCurriculumProgram[] {

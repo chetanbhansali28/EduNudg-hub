@@ -1,6 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
 import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
-import { buildCenterLandingConfig } from "@/lib/centerLandingDefaults";
+import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import { mergeSectionVisibility } from "@/lib/homepageSections";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
 import type { HomepageConfig } from "@/types/homepage";
@@ -50,6 +50,15 @@ export function landingConfigToPartial(config: HomepageConfig): Partial<Homepage
     gallery: config.gallery
       ? { ...config.gallery, images: config.gallery.images.map((img) => ({ ...img })) }
       : undefined,
+    programsSection: config.programsSection
+      ? {
+          ...config.programsSection,
+          cards: config.programsSection.cards?.map((card) => ({
+            ...card,
+            benefits: card.benefits ? [...card.benefits] : undefined,
+          })),
+        }
+      : undefined,
   };
 }
 
@@ -83,13 +92,30 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
     brandLogoUrl: brand.logo_url,
     marketingTheme,
     landingConfig,
-    centerLandingConfig: buildCenterLandingConfig(
-      "Sample Center",
-      brand.name,
-      "your city",
-      centerLandingPartial,
-      brand.logo_url
-    ),
+    centerLandingConfig:
+      marketingTheme === "abacus-classic"
+        ? mergeAbacusClassicCenterLandingConfig(
+            "Sample Center",
+            brand.name,
+            "your city",
+            centerLandingPartial,
+            brand.logo_url
+          )
+        : marketingTheme === "spark-academy"
+          ? mergeSparkAcademyCenterLandingConfig(
+              "Sample Center",
+              brand.name,
+              "your city",
+              centerLandingPartial,
+              brand.logo_url
+            )
+          : buildCenterLandingConfig(
+              "Sample Center",
+              brand.name,
+              "your city",
+              centerLandingPartial,
+              brand.logo_url
+            ),
   };
 }
 
