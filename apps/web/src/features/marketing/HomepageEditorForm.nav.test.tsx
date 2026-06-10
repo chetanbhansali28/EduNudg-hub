@@ -18,6 +18,7 @@ describe("HomepageEditorForm navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: /Add menu item/i }));
     expect(onChange).toHaveBeenCalled();
     const lastCall = onChange.mock.calls.at(-1)?.[0];
-    expect(lastCall.nav.links.length).toBe(DEFAULT_HOMEPAGE_CONFIG.nav.links.length + 1);
+    expect(lastCall).toBeDefined();
+    expect(lastCall!.nav.links.length).toBe(DEFAULT_HOMEPAGE_CONFIG.nav.links.length + 1);
   });
 });

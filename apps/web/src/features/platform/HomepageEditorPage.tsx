@@ -33,7 +33,7 @@ export function HomepageEditorPage() {
       <HomepageEditorShell
         title="Marketing & theming"
         subtitle="Edit the public EduNudg marketing site and brand website themes."
-        onSave={() => save.mutate()}
+        onSave={() => save.mutate(undefined)}
         savePending={save.isPending}
         saved={saved}
       >

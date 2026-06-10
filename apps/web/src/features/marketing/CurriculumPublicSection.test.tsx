@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { CurriculumPublicSection } from "./CurriculumPublicSection";
 
-const sampleProgram = {
+const sampleProgram = createPublicCurriculumProgram({
   name: "Junior Track",
   description: "Foundations for ages 4–7",
   whyTake: "Build confidence early",
@@ -25,7 +26,7 @@ const sampleProgram = {
       ],
     },
   ],
-};
+});
 
 describe("CurriculumPublicSection", () => {
   it("renders nothing when no published programs", () => {

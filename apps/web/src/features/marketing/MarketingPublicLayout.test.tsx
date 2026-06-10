@@ -2,31 +2,18 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { MarketingPublicLayout } from "./MarketingPublicLayout";
 
-vi.mock("@/lib/homepageApi", () => ({
-  fetchHomepageConfig: vi.fn().mockResolvedValue({
-    meta: { siteName: "EduNudg" },
-    theme: { yellowGlow: "#f5e6a8", radiusSection: "48px" },
-    nav: { links: [], ctaLabel: "Get started", ctaHref: "/login" },
-    footer: {
-      productLinks: [],
-      companyLinks: [],
-      connectLinks: [],
-      copyright: "© Test",
-      privacyHref: "/privacy",
-      termsHref: "/terms",
-    },
-    footerCta: {
-      title: "Start",
-      subtitle: "Sub",
-      ctaLabel: "Go",
-      ctaHref: "/login",
-      backgroundImageUrl: null,
-    },
-    hero: { backgroundImageUrl: "https://example.com/hero.jpg" },
-  }),
-}));
+vi.mock("@/lib/homepageApi", async () => {
+  const { DEFAULT_HOMEPAGE_CONFIG } = await import("@/lib/homepageDefaults");
+  return {
+    fetchHomepageConfig: vi.fn().mockResolvedValue({
+      ...DEFAULT_HOMEPAGE_CONFIG,
+      meta: { ...DEFAULT_HOMEPAGE_CONFIG.meta, siteName: "EduNudg" },
+    }),
+  };
+});
 
 describe("MarketingPublicLayout", () => {
   it("regression_renders_shared_nav_and_footer", async () => {
@@ -45,33 +32,16 @@ describe("MarketingPublicLayout", () => {
 
     expect(await screen.findByText("Page body")).toBeDefined();
     expect(screen.getByLabelText("Site")).toBeDefined();
-    expect(screen.getByText("© Test")).toBeDefined();
+    expect(screen.getByText(DEFAULT_HOMEPAGE_CONFIG.footer.copyright)).toBeDefined();
     expect(document.querySelector(".novu-site-footer__qr")).toBeNull();
   });
 
   it("regression_renders_site_logo_when_configured", async () => {
     const { fetchHomepageConfig } = await import("@/lib/homepageApi");
     vi.mocked(fetchHomepageConfig).mockResolvedValueOnce({
-      meta: { siteName: "EduNudg", logoUrl: "https://cdn.example/platform-logo.png?v=1" },
-      theme: { yellowGlow: "#f5e6a8", radiusSection: "48px" },
-      nav: { links: [], ctaLabel: "Get started", ctaHref: "/login" },
-      footer: {
-        productLinks: [],
-        companyLinks: [],
-        connectLinks: [],
-        copyright: "© Test",
-        privacyHref: "/privacy",
-        termsHref: "/terms",
-      },
-      footerCta: {
-        title: "Start",
-        subtitle: "Sub",
-        ctaLabel: "Go",
-        ctaHref: "/login",
-        backgroundImageUrl: null,
-      },
-      hero: { backgroundImageUrl: "https://example.com/hero.jpg" },
-    } as Awaited<ReturnType<typeof fetchHomepageConfig>>);
+      ...DEFAULT_HOMEPAGE_CONFIG,
+      meta: { ...DEFAULT_HOMEPAGE_CONFIG.meta, siteName: "EduNudg", logoUrl: "https://cdn.example/platform-logo.png?v=1" },
+    });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(

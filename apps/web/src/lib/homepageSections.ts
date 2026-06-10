@@ -78,10 +78,10 @@ function normalizeSectionPartial(
 }
 
 export function mergeSectionVisibility(
-  partial?: HomepageSectionVisibility,
+  partial?: HomepageSectionVisibility & { programsMarquee?: boolean },
   themeDefaults: Record<HomepageSectionKey, boolean> = DEFAULT_HOMEPAGE_SECTION_VISIBILITY
 ): Record<HomepageSectionKey, boolean> {
-  const normalized = normalizeSectionPartial(partial as HomepageSectionVisibility & { programsMarquee?: boolean });
+  const normalized = normalizeSectionPartial(partial);
   return { ...themeDefaults, ...normalized };
 }
 

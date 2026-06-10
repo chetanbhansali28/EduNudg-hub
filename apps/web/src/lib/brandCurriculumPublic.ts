@@ -117,3 +117,23 @@ export function parsePublicCurriculum(raw: unknown): PublicCurriculumProgram[] {
   if (!Array.isArray(raw)) return [];
   return raw.map(parseProgram).filter((p): p is PublicCurriculumProgram => p !== null);
 }
+
+const PUBLIC_CURRICULUM_PROGRAM_DEFAULTS: Omit<PublicCurriculumProgram, "name"> = {
+  description: null,
+  whyTake: null,
+  whatYouLearn: null,
+  marketingVideoUrl: null,
+  marketingImageUrl: null,
+  ageLabel: null,
+  marketingBenefits: [],
+  scholarshipHighlight: null,
+  versionNumber: 1,
+  levels: [],
+};
+
+/** Build a typed program fixture (tests, story data). */
+export function createPublicCurriculumProgram(
+  overrides: Partial<PublicCurriculumProgram> & Pick<PublicCurriculumProgram, "name">
+): PublicCurriculumProgram {
+  return { ...PUBLIC_CURRICULUM_PROGRAM_DEFAULTS, ...overrides };
+}

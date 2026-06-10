@@ -205,6 +205,7 @@ export function Input({
   autoComplete,
   step,
   editable = false,
+  disabled,
   id,
   name,
 }: {
@@ -216,6 +217,7 @@ export function Input({
   autoComplete?: string;
   step?: string;
   editable?: boolean;
+  disabled?: boolean;
   id?: string;
   name?: string;
 }) {
@@ -234,6 +236,7 @@ export function Input({
         placeholder={placeholder}
         autoComplete={autoComplete}
         step={step}
+        disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
       />
     </label>
@@ -246,6 +249,7 @@ export function PasswordInput({
   onChange,
   placeholder = "Enter a password",
   autoComplete = "current-password",
+  disabled,
   id,
   name,
 }: {
@@ -254,6 +258,7 @@ export function PasswordInput({
   onChange: (v: string) => void;
   placeholder?: string;
   autoComplete?: string;
+  disabled?: boolean;
   id?: string;
   name?: string;
 }) {
@@ -274,6 +279,7 @@ export function PasswordInput({
           value={value}
           placeholder={placeholder}
           autoComplete={autoComplete}
+          disabled={disabled}
           onChange={(e) => onChange(e.target.value)}
         />
         <button

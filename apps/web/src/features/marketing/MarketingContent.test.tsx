@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
+import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { setSectionEnabled } from "@/lib/homepageSections";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { MarketingContent } from "./MarketingContent";
@@ -61,15 +62,10 @@ describe("MarketingContent", () => {
         portalMode="brand"
         brandSlug="abacusworld"
         publicCurriculum={[
-          {
+          createPublicCurriculumProgram({
             name: "Junior Track",
             description: "Foundations",
-            whyTake: null,
-            whatYouLearn: null,
-            marketingVideoUrl: null,
-            versionNumber: 1,
-            levels: [],
-          },
+          }),
         ]}
       />
     );
@@ -87,15 +83,12 @@ describe("MarketingContent", () => {
         brandSlug="abacusworld"
         centerSlug="koramangala"
         publicCurriculum={[
-          {
+          createPublicCurriculumProgram({
             name: "Core Program",
             description: null,
             whyTake: "Build focus",
-            whatYouLearn: null,
-            marketingVideoUrl: null,
             versionNumber: 0,
-            levels: [],
-          },
+          }),
         ]}
       />
     );

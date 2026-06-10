@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModalContext";
 import { mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
+import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { SparkAcademyContent } from "./SparkAcademyContent";
 
 describe("SparkAcademyContent", () => {
@@ -14,15 +15,21 @@ describe("SparkAcademyContent", () => {
           portalMode="brand"
           brandSlug="educat-demo"
           publicCurriculum={[
-            {
+            createPublicCurriculumProgram({
               name: "Abacus Junior",
               description: "Foundations for young learners",
-              whyTake: null,
-              whatYouLearn: null,
-              marketingVideoUrl: null,
-              versionNumber: 1,
-              levels: [{ name: "Level 1", levelCode: "L1", topicsCovered: [], whyTake: null, whatYouLearn: null, marketingVideoUrl: null, modules: [] }],
-            },
+              levels: [
+                {
+                  name: "Level 1",
+                  levelCode: "L1",
+                  topicsCovered: [],
+                  whyTake: null,
+                  whatYouLearn: null,
+                  marketingVideoUrl: null,
+                  modules: [],
+                },
+              ],
+            }),
           ]}
           publicStats={{ centersCount: 10, studentsCount: 5000 }}
         />

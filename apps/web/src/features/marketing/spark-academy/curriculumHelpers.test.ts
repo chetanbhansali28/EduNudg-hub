@@ -1,14 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { countProgramLessons, programLessonLabel } from "./curriculumHelpers";
-import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
+import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 
-const sampleProgram: PublicCurriculumProgram = {
+const sampleProgram = createPublicCurriculumProgram({
   name: "Core Program",
-  description: null,
-  whyTake: null,
-  whatYouLearn: null,
-  marketingVideoUrl: null,
-  versionNumber: 1,
   levels: [
     {
       name: "Level 1",
@@ -25,7 +20,7 @@ const sampleProgram: PublicCurriculumProgram = {
       ],
     },
   ],
-};
+});
 
 describe("curriculumHelpers", () => {
   it("counts lessons across modules", () => {
