@@ -35,6 +35,19 @@ describe("AuthHandoffPage", () => {
     expect(verifyOtpMock).toHaveBeenCalledWith({ token_hash: "test-hash", type: "magiclink" });
   });
 
+  it("regression_shows_error_when_verify_otp_fails", async () => {
+    verifyOtpMock.mockResolvedValue({ error: { message: "Token expired" } });
+
+    const router = createMemoryRouter([{ path: "/auth/handoff", element: <AuthHandoffPage /> }], {
+      initialEntries: ["/auth/handoff?token_hash=expired-hash&next=/app"],
+    });
+
+    render(<RouterProvider router={router} />);
+
+    expect((await screen.findByRole("alert")).textContent).toMatch(/token expired/i);
+    expect(screen.queryByText("Staff backend")).toBeNull();
+  });
+
   it("regression_shows_error_when_token_hash_missing", async () => {
     const router = createMemoryRouter([{ path: "/auth/handoff", element: <AuthHandoffPage /> }], {
       initialEntries: ["/auth/handoff?next=/app"],

@@ -37,7 +37,31 @@ vi.mock("@/hooks/usePortalBranding", () => ({
       loginHeadline: null,
       loginSubtext: null,
     },
+    isLoading: false,
+    isFetched: true,
+    isFetching: false,
   }),
+}));
+
+vi.mock("@/hooks/useMembership", () => ({
+  useMembership: () => ({ data: [], isLoading: false }),
+}));
+
+vi.mock("@/hooks/usePlatformIntegration", () => ({
+  usePlatformIntegrations: () => ({
+    auth_email: true,
+    auth_google: false,
+    auth_facebook: false,
+    auth_whatsapp_otp: false,
+    passkeys: false,
+    payment_gateway: false,
+    platform_brand_signup: true,
+    public_pricing: true,
+  }),
+}));
+
+vi.mock("@/lib/homepageApi", () => ({
+  fetchHomepageConfig: vi.fn(),
 }));
 
 describe("LoginPage Fundora theme", () => {

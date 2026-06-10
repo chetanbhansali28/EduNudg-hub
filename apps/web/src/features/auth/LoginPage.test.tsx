@@ -76,18 +76,6 @@ vi.mock("@/hooks/usePortalBranding", () => ({
   usePortalBranding: () => portalBrandingState,
 }));
 
-vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
-  const { resolvePortalTenantIds } = await importOriginal<
-    typeof import("@/hooks/useResolvedPortalTenant")
-  >();
-  return {
-    useResolvedPortalTenant: () => ({
-      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
-      isResolving: false,
-    }),
-  };
-});
-
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
     auth_email: true,
@@ -204,6 +192,27 @@ describe("LoginPage", () => {
     );
 
     expect(await screen.findByText("Brand app home")).toBeDefined();
+  });
+
+  it("regression_platform_redirect_does_not_wait_on_unfetched_branding", async () => {
+    portalBrandingState.isFetched = false;
+    portalBrandingState.isFetching = true;
+
+    authState.session = { user: { id: "user-1" } };
+    authState.user = { id: "user-1" };
+    membershipState.data = [
+      {
+        id: "1",
+        role_key: "platform_admin",
+        scope_type: "platform",
+        brand_id: null,
+        center_id: null,
+      },
+    ];
+
+    renderLogin("/login");
+
+    expect(await screen.findByText("Admin home")).toBeDefined();
   });
 
   it("shows validation error when email or password is empty", async () => {

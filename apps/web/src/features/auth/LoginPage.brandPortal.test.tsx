@@ -89,18 +89,6 @@ vi.mock("@/hooks/usePortalBranding", () => ({
   usePortalBranding: () => portalBrandingState,
 }));
 
-vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
-  const { resolvePortalTenantIds } = await importOriginal<
-    typeof import("@/hooks/useResolvedPortalTenant")
-  >();
-  return {
-    useResolvedPortalTenant: () => ({
-      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
-      isResolving: false,
-    }),
-  };
-});
-
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
     auth_email: true,
@@ -152,6 +140,9 @@ describe("LoginPage brand portal", () => {
     membershipState.data = [];
     membershipState.isLoading = false;
     tenantState.brandId = ABACUSWORLD_BRAND_ID;
+    portalBrandingState.isFetched = true;
+    portalBrandingState.isFetching = false;
+    portalBrandingState.isLoading = false;
   });
 
   it("regression_brand_owner_can_sign_in_on_brand_host", async () => {
@@ -245,6 +236,29 @@ describe("LoginPage brand portal", () => {
     renderBrandLogin("/login");
 
     expect(await screen.findByText("Brand app home")).toBeDefined();
+    expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
+  });
+
+  it("regression_does_not_redirect_while_branding_unfetched_on_brand_host", async () => {
+    portalBrandingState.isFetched = false;
+    portalBrandingState.isFetching = true;
+
+    authState.session = { user: { id: "f0000000-0000-4000-8000-000000000002" } };
+    authState.user = { id: "f0000000-0000-4000-8000-000000000002" };
+    membershipState.data = [
+      {
+        id: "c0000000-0000-4000-8000-000000000002",
+        role_key: "brand_owner",
+        scope_type: "brand",
+        brand_id: ABACUSWORLD_BRAND_ID,
+        center_id: null,
+      },
+    ];
+
+    renderBrandLogin("/login");
+
+    expect(screen.getByText("Welcome back!")).toBeDefined();
+    expect(screen.queryByText("Brand app home")).toBeNull();
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
   });
 });

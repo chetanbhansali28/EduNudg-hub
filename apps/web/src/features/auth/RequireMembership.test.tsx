@@ -56,18 +56,6 @@ vi.mock("@/hooks/usePortalBranding", () => ({
   usePortalBranding: () => portalBrandingState,
 }));
 
-vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
-  const { resolvePortalTenantIds } = await importOriginal<
-    typeof import("@/hooks/useResolvedPortalTenant")
-  >();
-  return {
-    useResolvedPortalTenant: () => ({
-      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
-      isResolving: false,
-    }),
-  };
-});
-
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
     auth_email: true,

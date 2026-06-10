@@ -89,18 +89,6 @@ vi.mock("@/hooks/usePortalBranding", () => ({
   usePortalBranding: () => portalBrandingState,
 }));
 
-vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
-  const { resolvePortalTenantIds } = await importOriginal<
-    typeof import("@/hooks/useResolvedPortalTenant")
-  >();
-  return {
-    useResolvedPortalTenant: () => ({
-      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
-      isResolving: false,
-    }),
-  };
-});
-
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
     auth_email: true,
@@ -151,6 +139,9 @@ describe("LoginPage center portal", () => {
     authState.user = null;
     membershipState.data = [];
     membershipState.isLoading = false;
+    portalBrandingState.isFetched = true;
+    portalBrandingState.isFetching = false;
+    portalBrandingState.isLoading = false;
   });
 
   it("regression_center_owner_can_sign_in_on_franchise_host", async () => {
@@ -164,6 +155,48 @@ describe("LoginPage center portal", () => {
     expect(await screen.findByText("Center app home")).toBeDefined();
     expect(signInWithEmail).toHaveBeenCalledWith("center@edunudg.com", "admin");
 
+    expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
+  });
+
+  it("regression_existing_center_owner_session_redirects_to_app", async () => {
+    authState.session = { user: { id: "f0000000-0000-4000-8000-000000000003" } };
+    authState.user = { id: "f0000000-0000-4000-8000-000000000003" };
+    membershipState.data = [
+      {
+        id: "c0000000-0000-4000-8000-000000000003",
+        role_key: "center_owner",
+        scope_type: "center",
+        brand_id: ABACUSWORLD_BRAND_ID,
+        center_id: KORAMANGALA_CENTER_ID,
+      },
+    ];
+
+    renderCenterLogin("/login");
+
+    expect(await screen.findByText("Center app home")).toBeDefined();
+    expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
+  });
+
+  it("regression_does_not_redirect_while_branding_unfetched_on_center_host", async () => {
+    portalBrandingState.isFetched = false;
+    portalBrandingState.isFetching = true;
+
+    authState.session = { user: { id: "f0000000-0000-4000-8000-000000000003" } };
+    authState.user = { id: "f0000000-0000-4000-8000-000000000003" };
+    membershipState.data = [
+      {
+        id: "c0000000-0000-4000-8000-000000000003",
+        role_key: "center_owner",
+        scope_type: "center",
+        brand_id: ABACUSWORLD_BRAND_ID,
+        center_id: KORAMANGALA_CENTER_ID,
+      },
+    ];
+
+    renderCenterLogin("/login");
+
+    expect(screen.getByText("Welcome back!")).toBeDefined();
+    expect(screen.queryByText("Center app home")).toBeNull();
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
   });
 });
