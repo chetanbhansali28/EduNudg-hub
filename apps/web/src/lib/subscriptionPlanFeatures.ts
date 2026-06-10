@@ -9,7 +9,7 @@ export type SubscriptionPlanFeatures = {
   franchise_applications: boolean;
   brand_billing: boolean;
   campaigns: boolean;
-  kits: boolean;
+  merchandise: boolean;
   custom_domain: boolean;
   priority_support: boolean;
 };
@@ -33,7 +33,7 @@ export const DEFAULT_PLAN_FEATURES: SubscriptionPlanFeatures = {
   franchise_applications: true,
   brand_billing: true,
   campaigns: false,
-  kits: false,
+  merchandise: false,
   custom_domain: false,
   priority_support: false,
 };
@@ -62,7 +62,7 @@ export const ENTERPRISE_PLAN_FEATURES: SubscriptionPlanFeatures = {
   franchise_applications: true,
   brand_billing: true,
   campaigns: true,
-  kits: true,
+  merchandise: true,
   custom_domain: true,
   priority_support: true,
 };
@@ -81,7 +81,7 @@ export const PLAN_FEATURE_META: {
   { key: "franchise_applications", label: "Franchise applications", kind: "boolean" },
   { key: "brand_billing", label: "Platform billing", kind: "boolean" },
   { key: "campaigns", label: "Campaigns module", kind: "boolean" },
-  { key: "kits", label: "Kits & inventory", kind: "boolean" },
+  { key: "merchandise", label: "Merchandise & orders", kind: "boolean" },
   { key: "custom_domain", label: "Custom domain", kind: "boolean" },
   { key: "priority_support", label: "Priority support", kind: "boolean" },
 ];
@@ -107,7 +107,11 @@ export function parsePlanFeatures(raw: unknown): SubscriptionPlanFeatures {
     franchise_applications: bool("franchise_applications", DEFAULT_PLAN_FEATURES.franchise_applications),
     brand_billing: bool("brand_billing", DEFAULT_PLAN_FEATURES.brand_billing),
     campaigns: bool("campaigns", DEFAULT_PLAN_FEATURES.campaigns),
-    kits: bool("kits", DEFAULT_PLAN_FEATURES.kits),
+    merchandise: typeof obj.merchandise === "boolean"
+      ? obj.merchandise
+      : typeof obj.kits === "boolean"
+        ? obj.kits
+        : DEFAULT_PLAN_FEATURES.merchandise,
     custom_domain: bool("custom_domain", DEFAULT_PLAN_FEATURES.custom_domain),
     priority_support: bool("priority_support", DEFAULT_PLAN_FEATURES.priority_support),
   };
@@ -124,7 +128,7 @@ export function emptyPlanFeaturesForm(): Record<keyof SubscriptionPlanFeatures, 
     franchise_applications: String(f.franchise_applications),
     brand_billing: String(f.brand_billing),
     campaigns: String(f.campaigns),
-    kits: String(f.kits),
+    merchandise: String(f.merchandise),
     custom_domain: String(f.custom_domain),
     priority_support: String(f.priority_support),
   };
@@ -147,7 +151,7 @@ export function planFeaturesFromForm(form: Record<keyof SubscriptionPlanFeatures
     franchise_applications: flag(form.franchise_applications),
     brand_billing: flag(form.brand_billing),
     campaigns: flag(form.campaigns),
-    kits: flag(form.kits),
+    merchandise: flag(form.merchandise),
     custom_domain: flag(form.custom_domain),
     priority_support: flag(form.priority_support),
   };
@@ -163,7 +167,7 @@ export function planFeaturesToForm(features: SubscriptionPlanFeatures): Record<k
     franchise_applications: String(features.franchise_applications),
     brand_billing: String(features.brand_billing),
     campaigns: String(features.campaigns),
-    kits: String(features.kits),
+    merchandise: String(features.merchandise),
     custom_domain: String(features.custom_domain),
     priority_support: String(features.priority_support),
   };

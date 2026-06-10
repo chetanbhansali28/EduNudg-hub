@@ -6,6 +6,7 @@ import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { CenterStudentLearnRecordsCard } from "@/features/center/learn/CenterStudentLearnRecordsCard";
+import { CenterStudentProfileAddressCard } from "@/features/center/merchandise/CenterStudentProfileAddressCard";
 
 export function StudentsPage() {
   const tenant = useTenant();
@@ -69,7 +70,10 @@ export function StudentsPage() {
       </Card>
 
       {tenant.brandId && tenant.centerId && (
-        <CenterStudentLearnRecordsCard brandId={tenant.brandId} centerId={tenant.centerId} />
+        <>
+          <CenterStudentProfileAddressCard brandId={tenant.brandId} centerId={tenant.centerId} />
+          <CenterStudentLearnRecordsCard brandId={tenant.brandId} centerId={tenant.centerId} />
+        </>
       )}
     </>
   );

@@ -18,11 +18,13 @@ export const BRAND_FEATURE_FLAGS: Record<string, string> = {
   "/app/franchise-applications": "franchise_applications",
   "/app/billing": "brand_billing",
   "/app/campaigns": "campaigns",
-  "/app/kits": "kits",
+  "/app/merchandise": "merchandise",
+  "/app/kits": "merchandise",
 };
 
 export const CENTER_FEATURE_FLAGS: Record<string, string> = {
-  "/app/kits": "kits",
+  "/app/merchandise": "merchandise",
+  "/app/kits": "merchandise",
   "/app/campaigns": "campaigns",
 };
 
@@ -108,7 +110,7 @@ export function brandNavSections(pathname: string): ShellNavSection[] {
         { path: "/app/analytics", label: "Analytics", icon: <IconChart /> },
         { path: "/app/campaigns", label: "Campaigns", icon: <IconChart /> },
         { path: "/app/success-stories", label: "Success stories", icon: <IconUsers /> },
-        { path: "/app/kits", label: "Kit catalog", icon: <IconBook /> },
+        { path: "/app/merchandise", label: "Merchandise", icon: <IconBook /> },
       ],
       pathname
     ),
@@ -136,7 +138,7 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
         { path: "/app/attendance", label: "Attendance", icon: <IconChart /> },
         { path: "/app/fees", label: "Fees & Payments", icon: <IconWallet /> },
         { path: "/app/inventory", label: "Inventory", icon: <IconBuilding /> },
-        { path: "/app/kits", label: "Kit orders", icon: <IconBook /> },
+        { path: "/app/merchandise", label: "Merchandise orders", icon: <IconBook /> },
         { path: "/app/campaigns", label: "Campaigns", icon: <IconChart /> },
         { path: "/app/assessments", label: "Assessments", icon: <IconClipboard /> },
         { path: "/app/reports", label: "Reports", icon: <IconChart /> },

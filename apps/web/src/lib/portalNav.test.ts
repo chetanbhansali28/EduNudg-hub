@@ -77,10 +77,10 @@ describe("portalNav", () => {
     expect(marketing?.active).toBe(true);
   });
 
-  it("center nav includes kit orders", () => {
-    const sections = centerNavSections("/app/kits");
-    const kits = sections[1]?.items.find((i) => i.label === "Kit orders");
-    expect(kits?.href).toBe("/app/kits");
+  it("center nav includes merchandise orders", () => {
+    const sections = centerNavSections("/app/merchandise");
+    const merchandise = sections[1]?.items.find((i) => i.label === "Merchandise orders");
+    expect(merchandise?.href).toBe("/app/merchandise");
   });
 
   it("center nav includes assessments and reports", () => {

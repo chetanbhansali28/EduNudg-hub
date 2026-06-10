@@ -46,6 +46,15 @@ export function CenterDashboard() {
             }
           />
           <KpiCard label="Low stock items" value={s?.lowStockItems ?? "—"} hint="Qty ≤ 5" />
+          <KpiCard
+            label="Unpaid merchandise"
+            value={s?.unpaidMerchandiseCount ?? "—"}
+            hint={
+              s && s.unpaidMerchandiseCents > 0
+                ? `${formatInrFromPaise(s.unpaidMerchandiseCents)} due${s.overdueMerchandiseCount > 0 ? ` · ${s.overdueMerchandiseCount} overdue` : ""}`
+                : "Orders awaiting payment"
+            }
+          />
         </KpiGrid>
       )}
     </>

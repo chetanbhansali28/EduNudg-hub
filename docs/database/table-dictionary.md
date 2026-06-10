@@ -43,14 +43,18 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `students` | brand | `source_lead_id` optional lineage |
 | `student_profiles` | brand | Extended profile JSON/columns |
 
-## Kits (Phase D)
+## Merchandise (Phase D)
 
 | Table | Scope | Description |
 |-------|-------|-------------|
-| `kit_catalog` | brand | SKUs centers can order |
-| `kit_orders` | center | Orders to brand |
-| `kit_order_lines` | center | Line items |
-| `student_kit_allocations` | center | Hidden from student portal |
+| `merchandise_catalog` | brand | SKUs centers can order |
+| `merchandise_orders` | center | Orders to brand |
+| `merchandise_order_lines` | center | Line items (optional `student_id`) |
+| `student_merchandise_allocations` | center | Hidden from student portal |
+| `merchandise_promo_codes` | brand | Checkout promo codes |
+| `merchandise_invoices` | center | Per-order invoices |
+| `merchandise_payments` | center | Payment records |
+| `merchandise_reminder_log` | center | Payment reminder audit |
 | `student_level_progress` | center | Level progress shown on learn dashboard |
 | `brand_competitions` | brand | Competition calendar |
 | `student_competition_entries` | center | Student competition results |

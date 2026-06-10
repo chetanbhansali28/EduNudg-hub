@@ -35,7 +35,7 @@ describe("subscriptionPlanFeatures", () => {
       franchise_applications: "true",
       brand_billing: "true",
       campaigns: "false",
-      kits: "false",
+      merchandise: "false",
       custom_domain: "false",
       priority_support: "false",
     });

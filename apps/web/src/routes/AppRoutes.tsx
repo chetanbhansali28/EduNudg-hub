@@ -29,14 +29,14 @@ import { FranchiseApplicationsPage } from "@/features/brand/franchiseApplication
 import { BrandBillingPage } from "@/features/brand/billing/BrandBillingPage";
 import { BrandCampaignsPage } from "@/features/brand/campaigns/BrandCampaignsPage";
 import { BrandSuccessStoriesPage } from "@/features/brand/successStories/BrandSuccessStoriesPage";
-import { KitCatalogPage } from "@/features/brand/kits/KitCatalogPage";
+import { BrandMerchandisePage } from "@/features/brand/merchandise/BrandMerchandisePage";
 import { BrandMarketingEditorPage } from "@/features/brand/marketing/BrandMarketingEditorPage";
 import { CenterLandingPage } from "@/features/center/CenterLandingPage";
 import { CenterPublicLayout } from "@/features/center/CenterPublicLayout";
 import { CenterLayout } from "@/features/center/CenterLayout";
 import { CenterDashboard } from "@/features/center/CenterDashboard";
 import { CenterLeadsPage } from "@/features/center/leads/CenterLeadsPage";
-import { CenterKitOrdersPage } from "@/features/center/kits/CenterKitOrdersPage";
+import { CenterMerchandiseOrdersPage } from "@/features/center/merchandise/CenterMerchandiseOrdersPage";
 import { CenterCampaignsPage } from "@/features/center/campaigns/CenterCampaignsPage";
 import { CenterAssessmentsPage } from "@/features/center/assessments/CenterAssessmentsPage";
 import { CenterReportsPage } from "@/features/center/reports/CenterReportsPage";
@@ -191,13 +191,14 @@ export function AppRoutes() {
             />
             <Route path="success-stories" element={<BrandSuccessStoriesPage />} />
             <Route
-              path="kits"
+              path="merchandise"
               element={
-                <FeatureFlagRoute flag="kits">
-                  <KitCatalogPage />
+                <FeatureFlagRoute flag="merchandise">
+                  <BrandMerchandisePage />
                 </FeatureFlagRoute>
               }
             />
+            <Route path="kits" element={<Navigate to="/app/merchandise" replace />} />
             <Route path="homepage" element={<BrandMarketingEditorPage />} />
             <Route path="settings" element={<BrandSettingsPage />} />
           </Route>
@@ -224,13 +225,14 @@ export function AppRoutes() {
             <Route path="students" element={<StudentsPage />} />
             <Route path="settings" element={<CenterSettingsPage />} />
             <Route
-              path="kits"
+              path="merchandise"
               element={
-                <FeatureFlagRoute flag="kits">
-                  <CenterKitOrdersPage />
+                <FeatureFlagRoute flag="merchandise">
+                  <CenterMerchandiseOrdersPage />
                 </FeatureFlagRoute>
               }
             />
+            <Route path="kits" element={<Navigate to="/app/merchandise" replace />} />
             <Route
               path="campaigns"
               element={

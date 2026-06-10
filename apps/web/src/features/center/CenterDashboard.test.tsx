@@ -22,6 +22,9 @@ vi.mock("@/lib/centerDashboardStats", () => ({
       feeCollectionRate: 75,
       overdueFeesCents: 500000,
       lowStockItems: 1,
+      unpaidMerchandiseCount: 2,
+      unpaidMerchandiseCents: 150000,
+      overdueMerchandiseCount: 1,
     }),
 }));
 

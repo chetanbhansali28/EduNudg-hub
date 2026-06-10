@@ -8,7 +8,8 @@ describe("resolveFeatureFlags", () => {
 
   it("regression_falls_back_to_defaults", () => {
     expect(resolveFeatureFlags({}, "student_leads")).toBe(FEATURE_FLAG_DEFAULTS.student_leads);
-    expect(resolveFeatureFlags(undefined, "kits")).toBe(false);
+    expect(resolveFeatureFlags(undefined, "merchandise")).toBe(false);
+    expect(resolveFeatureFlags({ kits: true }, "merchandise")).toBe(true);
   });
 
   it("regression_empty_features_object_not_undefined", () => {

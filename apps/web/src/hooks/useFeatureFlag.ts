@@ -7,6 +7,7 @@ export const FEATURE_FLAG_DEFAULTS: Record<string, boolean> = {
   student_leads: true,
   franchise_applications: true,
   brand_billing: true,
+  merchandise: false,
   kits: false,
   campaigns: false,
   platform_brand_signup: true,
@@ -16,6 +17,11 @@ export function resolveFeatureFlags(
   stored: Record<string, boolean> | undefined,
   key: string
 ): boolean {
+  if (key === "merchandise" || key === "kits") {
+    if (stored && "merchandise" in stored) return Boolean(stored.merchandise);
+    if (stored && "kits" in stored) return Boolean(stored.kits);
+    return FEATURE_FLAG_DEFAULTS.merchandise ?? false;
+  }
   if (stored && key in stored) return Boolean(stored[key]);
   return FEATURE_FLAG_DEFAULTS[key] ?? false;
 }
@@ -63,6 +69,8 @@ export function useFeatureFlag(key: string): boolean {
   }
 
   if (tenant.portalType === "brand" || tenant.portalType === "center") {
+    if (key === "kits") return flags.merchandise ?? flags.kits ?? false;
+    if (key === "merchandise") return flags.merchandise ?? flags.kits ?? false;
     return flags[key] ?? FEATURE_FLAG_DEFAULTS[key] ?? false;
   }
 

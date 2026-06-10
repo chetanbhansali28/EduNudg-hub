@@ -10,22 +10,21 @@ import {
   ListRow,
   MutationError,
   PageGridFull,
-  PageTitle,
   ToggleField,
 } from "@edunudg/ui";
-import { deleteKitCatalogItem, upsertKitCatalogItem } from "@/lib/kitOrdersApi";
+import {
+  deleteMerchandiseCatalogItem,
+  upsertMerchandiseCatalogItem,
+} from "@/lib/merchandiseOrdersApi";
 import { formatInrFromPaise, paiseToRupeesInput, rupeesToPaise } from "@/lib/inrCurrency";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
-import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
-import { BrandCompetitionsSection } from "./BrandCompetitionsSection";
-import { BrandKitOrdersSection } from "./BrandKitOrdersSection";
 
-interface KitItem {
+interface CatalogItem {
   id: string;
   sku: string;
   name: string;
@@ -36,8 +35,9 @@ interface KitItem {
 
 const emptyForm = { sku: "", name: "", priceRupees: "", currency: "INR", isActive: true };
 
-export function KitCatalogPage() {
-  const { brandId, missingBrand } = useBrandScope();
+type Props = { brandId: string };
+
+export function BrandMerchandiseCatalogSection({ brandId }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [form, setForm] = useState(emptyForm);
@@ -46,25 +46,24 @@ export function KitCatalogPage() {
   const { bindClose, closeAddForm } = useAddFormCloser();
 
   const catalog = useQuery({
-    queryKey: ["kit-catalog", brandId],
+    queryKey: ["merchandise-catalog", brandId],
     enabled: !!brandId,
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
-        .from("kit_catalog")
+        .from("merchandise_catalog")
         .select("id, sku, name, price_cents, currency, is_active")
-        .eq("brand_id", brandId!)
+        .eq("brand_id", brandId)
         .order("name");
-      return supabaseList(data, qErr) as KitItem[];
+      return supabaseList(data, qErr) as CatalogItem[];
     },
   });
 
-  const invalidate = () => void qc.invalidateQueries({ queryKey: ["kit-catalog", brandId] });
+  const invalidate = () => void qc.invalidateQueries({ queryKey: ["merchandise-catalog", brandId] });
 
   const create = useMutation({
     mutationFn: async () => {
-      if (!brandId) throw new Error("Brand required");
       clear();
-      await upsertKitCatalogItem(brandId, {
+      await upsertMerchandiseCatalogItem(brandId, {
         sku: form.sku,
         name: form.name,
         priceCents: rupeesToPaise(form.priceRupees),
@@ -82,9 +81,8 @@ export function KitCatalogPage() {
 
   const update = useMutation({
     mutationFn: async (id: string) => {
-      if (!brandId) throw new Error("Brand required");
       clear();
-      await upsertKitCatalogItem(brandId, {
+      await upsertMerchandiseCatalogItem(brandId, {
         id,
         sku: editForm.sku,
         name: editForm.name,
@@ -102,23 +100,19 @@ export function KitCatalogPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      if (!brandId) throw new Error("Brand required");
       clear();
-      await deleteKitCatalogItem(brandId, id);
+      await deleteMerchandiseCatalogItem(brandId, id);
     },
     onSuccess: invalidate,
     onError: capture,
   });
 
-  if (missingBrand) return <p className="ed-empty">Brand context not found.</p>;
-
   return (
     <>
-      <PageTitle>Kit catalog</PageTitle>
       <MutationError message={error} />
 
       <PageGridFull>
-        <AddFormSection buttonLabel="Add kit item" panelTitle="Add kit item">
+        <AddFormSection buttonLabel="Add catalog item" panelTitle="Add catalog item">
           {({ close }) => {
             bindClose(close);
             return (
@@ -133,7 +127,11 @@ export function KitCatalogPage() {
                     type="number"
                     placeholder="0.00"
                   />
-                  <Input label="Currency" value={form.currency} onChange={(v) => setForm((f) => ({ ...f, currency: v }))} />
+                  <Input
+                    label="Currency"
+                    value={form.currency}
+                    onChange={(v) => setForm((f) => ({ ...f, currency: v }))}
+                  />
                 </FormGrid>
                 <ToggleField
                   label="Active"
@@ -141,7 +139,10 @@ export function KitCatalogPage() {
                   checked={form.isActive}
                   onChange={(checked) => setForm((f) => ({ ...f, isActive: checked }))}
                 />
-                <Button onClick={() => create.mutate()} disabled={!form.sku.trim() || !form.name.trim() || create.isPending}>
+                <Button
+                  onClick={() => create.mutate()}
+                  disabled={!form.sku.trim() || !form.name.trim() || create.isPending}
+                >
                   Add item
                 </Button>
               </>
@@ -151,20 +152,10 @@ export function KitCatalogPage() {
       </PageGridFull>
 
       <PageGridFull>
-        <Card title="Center kit orders">
-          <BrandKitOrdersSection brandId={brandId!} />
-        </Card>
-      </PageGridFull>
-
-      <PageGridFull>
-        <BrandCompetitionsSection brandId={brandId!} />
-      </PageGridFull>
-
-      <PageGridFull>
         <Card title="Catalog items">
           <DataList
             items={catalog.data ?? []}
-            empty="No kit items in catalog yet."
+            empty="No merchandise items in catalog yet."
             render={(item) => {
               const editing = editingId === item.id;
               return (
@@ -192,8 +183,16 @@ export function KitCatalogPage() {
                   {editing ? (
                     <div className="ed-form-section">
                       <FormGrid>
-                        <Input label="SKU" value={editForm.sku} onChange={(v) => setEditForm((f) => ({ ...f, sku: v }))} />
-                        <Input label="Name" value={editForm.name} onChange={(v) => setEditForm((f) => ({ ...f, name: v }))} />
+                        <Input
+                          label="SKU"
+                          value={editForm.sku}
+                          onChange={(v) => setEditForm((f) => ({ ...f, sku: v }))}
+                        />
+                        <Input
+                          label="Name"
+                          value={editForm.name}
+                          onChange={(v) => setEditForm((f) => ({ ...f, name: v }))}
+                        />
                         <Input
                           label="Price (₹)"
                           value={editForm.priceRupees}

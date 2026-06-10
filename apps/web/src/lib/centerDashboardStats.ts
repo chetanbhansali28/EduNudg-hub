@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { listCenterMerchandisePaymentAlerts } from "@/lib/merchandiseRemindersApi";
 
 export const LOW_STOCK_THRESHOLD = 5;
 
@@ -12,6 +13,9 @@ export interface CenterDashboardStats {
   feeCollectionRate: number | null;
   overdueFeesCents: number;
   lowStockItems: number;
+  unpaidMerchandiseCount: number;
+  unpaidMerchandiseCents: number;
+  overdueMerchandiseCount: number;
 }
 
 function sevenDaysAgoDate(): string {
@@ -102,6 +106,13 @@ export async function fetchCenterDashboardStats(centerId: string): Promise<Cente
   const feeStats = computeFeeCollectionRate(invoices.data ?? []);
   const lowStockItems = (stock.data ?? []).filter((row) => (row.quantity ?? 0) <= LOW_STOCK_THRESHOLD).length;
 
+  let merchandiseAlerts = { unpaid_count: 0, unpaid_total_cents: 0, overdue_count: 0 };
+  try {
+    merchandiseAlerts = await listCenterMerchandisePaymentAlerts(centerId);
+  } catch {
+    // merchandise feature may be off or RPC unavailable in tests
+  }
+
   return {
     batchCount: batches.count ?? 0,
     sessionsToday: sessionsToday.count ?? 0,
@@ -112,5 +123,8 @@ export async function fetchCenterDashboardStats(centerId: string): Promise<Cente
     feeCollectionRate: feeStats.rate,
     overdueFeesCents: feeStats.overdueCents,
     lowStockItems,
+    unpaidMerchandiseCount: merchandiseAlerts.unpaid_count,
+    unpaidMerchandiseCents: merchandiseAlerts.unpaid_total_cents,
+    overdueMerchandiseCount: merchandiseAlerts.overdue_count,
   };
 }

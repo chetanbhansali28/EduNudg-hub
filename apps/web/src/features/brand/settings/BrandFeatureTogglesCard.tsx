@@ -10,7 +10,7 @@ const BRAND_TOGGLES: { key: string; label: string }[] = [
   { key: "franchise_applications", label: "Franchise applications" },
   { key: "brand_billing", label: "Platform billing" },
   { key: "campaigns", label: "Campaigns" },
-  { key: "kits", label: "Kit catalog & orders" },
+  { key: "merchandise", label: "Merchandise catalog & orders" },
 ];
 
 type Props = {

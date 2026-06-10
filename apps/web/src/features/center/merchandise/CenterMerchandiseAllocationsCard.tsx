@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, DataList, FormGrid, Input, ListRow, MutationError, Select } from "@edunudg/ui";
+import { Button, Card, DataList, FormGrid, ListRow, MutationError, Select } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import {
-  allocateStudentKit,
-  listCenterKitAllocations,
-  listFulfillableOrderLines,
-} from "@/lib/kitOrdersApi";
+  allocateStudentMerchandise,
+  listCenterMerchandiseAllocations,
+  listFulfillableMerchandiseOrderLines,
+} from "@/lib/merchandiseOrdersApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
 type Props = { brandId: string; centerId: string };
 
-export function CenterKitAllocationsCard({ brandId, centerId }: Props) {
+export function CenterMerchandiseAllocationsCard({ brandId, centerId }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [studentId, setStudentId] = useState("");
@@ -22,7 +22,7 @@ export function CenterKitAllocationsCard({ brandId, centerId }: Props) {
   const { bindClose, closeAddForm } = useAddFormCloser();
 
   const students = useQuery({
-    queryKey: ["center-students-for-kits", brandId, centerId],
+    queryKey: ["center-students-for-merchandise", brandId, centerId],
     enabled: !!brandId && !!centerId,
     queryFn: async () => {
       const { data: enrollments, error: eErr } = await getSupabase()
@@ -43,25 +43,26 @@ export function CenterKitAllocationsCard({ brandId, centerId }: Props) {
   });
 
   const orderLines = useQuery({
-    queryKey: ["fulfillable-kit-lines", centerId],
+    queryKey: ["fulfillable-merchandise-lines", centerId],
     enabled: !!centerId,
-    queryFn: () => listFulfillableOrderLines(centerId),
+    queryFn: () => listFulfillableMerchandiseOrderLines(centerId),
   });
 
   const allocations = useQuery({
-    queryKey: ["center-kit-allocations", centerId],
+    queryKey: ["center-merchandise-allocations", centerId],
     enabled: !!centerId,
-    queryFn: () => listCenterKitAllocations(centerId),
+    queryFn: () => listCenterMerchandiseAllocations(centerId),
   });
 
   const allocate = useMutation({
     mutationFn: async () => {
-      if (!studentId || !orderLineId) throw new Error("Select student and kit line");
+      if (!studentId || !orderLineId) throw new Error("Select student and order line");
       clear();
-      await allocateStudentKit(centerId, studentId, orderLineId);
+      await allocateStudentMerchandise(centerId, studentId, orderLineId);
     },
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["center-kit-allocations", centerId] });
+      void qc.invalidateQueries({ queryKey: ["center-merchandise-allocations", centerId] });
+      void qc.invalidateQueries({ queryKey: ["fulfillable-merchandise-lines", centerId] });
       setStudentId("");
       setOrderLineId("");
       closeAddForm();
@@ -70,10 +71,13 @@ export function CenterKitAllocationsCard({ brandId, centerId }: Props) {
   });
 
   return (
-    <Card title="Allocate kits to students">
-      <p className="ed-text-sm ed-muted">Assign fulfilled kit order lines to enrolled students. Kits are hidden from the student portal.</p>
+    <Card title="Allocate stock to students">
+      <p className="ed-text-sm ed-muted">
+        Assign bulk merchandise order lines to enrolled students after delivery. Per-student order lines are already
+        linked and do not appear here.
+      </p>
       <MutationError message={error} />
-      <AddFormSection buttonLabel="Allocate kit" panelTitle="Allocate kit to student">
+      <AddFormSection buttonLabel="Allocate item" panelTitle="Allocate merchandise to student">
         {({ close }) => {
           bindClose(close);
           return (
@@ -87,18 +91,18 @@ export function CenterKitAllocationsCard({ brandId, centerId }: Props) {
                   options={(students.data ?? []).map((s) => ({ value: s.id, label: s.full_name }))}
                 />
                 <Select
-                  label="Kit order line"
+                  label="Bulk order line"
                   value={orderLineId}
                   onChange={setOrderLineId}
                   placeholder="Select line"
                   options={(orderLines.data ?? []).map((l) => ({
                     value: l.orderLineId,
-                    label: `${l.catalogName ?? "Kit"} × ${l.quantity} (${l.orderStatus})`,
+                    label: `${l.catalogName ?? "Item"} × ${l.quantity} (${l.orderStatus})`,
                   }))}
                 />
               </FormGrid>
               <Button onClick={() => allocate.mutate()} disabled={!studentId || !orderLineId || allocate.isPending}>
-                Allocate kit
+                Allocate merchandise
               </Button>
             </>
           );
@@ -107,17 +111,20 @@ export function CenterKitAllocationsCard({ brandId, centerId }: Props) {
 
       <DataList
         items={allocations.data ?? []}
-        empty="No kit allocations yet."
+        empty="No merchandise allocations yet."
         render={(row) => {
           const student = Array.isArray(row.students) ? row.students[0] : row.students;
-          const line = Array.isArray(row.kit_order_lines) ? row.kit_order_lines[0] : row.kit_order_lines;
-          const catalog = line && (Array.isArray(line.kit_catalog) ? line.kit_catalog[0] : line.kit_catalog);
+          const line = Array.isArray(row.merchandise_order_lines)
+            ? row.merchandise_order_lines[0]
+            : row.merchandise_order_lines;
+          const catalog =
+            line && (Array.isArray(line.merchandise_catalog) ? line.merchandise_catalog[0] : line.merchandise_catalog);
           return (
             <ListRow>
               <div>
                 <strong>{student?.full_name ?? "Student"}</strong>
                 <div className="ed-text-sm ed-muted">
-                  {catalog?.name ?? "Kit"} · {new Date(row.created_at).toLocaleDateString()}
+                  {catalog?.name ?? "Item"} · {new Date(row.created_at).toLocaleDateString()}
                 </div>
               </div>
             </ListRow>
