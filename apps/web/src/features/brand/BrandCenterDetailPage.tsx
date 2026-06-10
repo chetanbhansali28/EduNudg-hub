@@ -96,12 +96,14 @@ export function BrandCenterDetailPage() {
 
   if (!center.data) {
     return (
-      <>
+      <div className="ed-detail-page">
         <PageTitle>Center not found</PageTitle>
-        <Link to="/app/centers">
-          <Button variant="ghost">Back to centers</Button>
-        </Link>
-      </>
+        <div className="ed-detail-page__toolbar">
+          <Link to="/app/centers">
+            <Button variant="ghost">Back to centers</Button>
+          </Link>
+        </div>
+      </div>
     );
   }
 
@@ -110,15 +112,15 @@ export function BrandCenterDetailPage() {
   const portalUrl = brandSlug ? centerPortalUrl(brandSlug, c.slug) : null;
 
   return (
-    <>
+    <div className="ed-detail-page">
       <PageTitle>{c.display_name ?? c.name}</PageTitle>
-      <p className="ed-text-sm ed-muted">
+      <p className="ed-detail-page__subtitle">
         Read-only 360° view · {c.slug}
         {c.city ? ` · ${c.city}` : ""}{" "}
         <Badge tone={c.status === "active" ? "success" : "default"}>{c.status}</Badge>
       </p>
 
-      <div className="ed-form-section">
+      <div className="ed-detail-page__toolbar">
         <Link to="/app/centers">
           <Button variant="ghost">← All centers</Button>
         </Link>
@@ -164,6 +166,6 @@ export function BrandCenterDetailPage() {
           )}
         />
       </Card>
-    </>
+    </div>
   );
 }

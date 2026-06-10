@@ -41,7 +41,7 @@ export function PlatformIntegrationsCard() {
   return (
     <Card
       title="Integrations"
-      actions={<SaveButton onClick={() => save.mutate()} pending={save.isPending} saved={saved} />}
+      actions={<SaveButton onClick={() => save.mutate()} pending={save.isPending} saved={saved} label="Save integrations" />}
     >
       <p className="ed-text-sm ed-muted">
         Turn integrations and public website features on or off. When off, the app skips the related flows — no data is

@@ -30,6 +30,8 @@ See `apps/web/src/features/marketing/abacus-classic/`.
 
 Staff apps live under `/login` (public) and `/app` (authenticated) for brand and center portals.
 
+Admin portal styling (Vivid Logic): shared shell, dark mode toggle, homepage editor UX, and center detail layout — see [Vivid Logic admin UX](./vivid-logic-admin.md).
+
 ## Components
 
 | Piece | File | Notes |

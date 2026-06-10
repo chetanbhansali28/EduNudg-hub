@@ -5,7 +5,7 @@ import { HomepageEditorForm } from "./HomepageEditorForm";
 import { HomepageEditorShell } from "./HomepageEditorShell";
 
 describe("HomepageEditorForm", () => {
-  it("regression_sections_use_collapsed_accordions_and_two_column_grid", () => {
+  it("regression_sections_use_collapsed_accordions_in_single_column_stack", () => {
     const { container } = render(
       <HomepageEditorShell title="Marketing homepage">
         <HomepageEditorForm config={DEFAULT_HOMEPAGE_CONFIG} onChange={() => undefined} />
@@ -13,6 +13,7 @@ describe("HomepageEditorForm", () => {
     );
 
     expect(container.querySelector(".ed-homepage-editor-shell")).toBeTruthy();
+    expect(container.querySelector(".ed-homepage-editor")?.className).not.toContain("grid");
 
     const accordions = container.querySelectorAll("details.ed-editor-accordion");
     expect(accordions.length).toBeGreaterThanOrEqual(8);

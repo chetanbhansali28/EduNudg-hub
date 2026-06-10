@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   IconBolt,
@@ -9,6 +9,9 @@ import {
   IconX,
 } from "./icons";
 import { readSidebarCollapsed, writeSidebarCollapsed } from "./shellSidebarState";
+import { readAdminTheme, writeAdminTheme, type AdminTheme } from "./themePreference";
+
+export { readAdminTheme, writeAdminTheme, type AdminTheme } from "./themePreference";
 
 export type ShellNavItem = {
   href: string;
@@ -27,17 +30,68 @@ export type ShellNavSection = {
 
 const DESKTOP_NAV_MQ = "(min-width: 1024px)";
 
+type ThemeContextValue = {
+  theme: AdminTheme;
+  setTheme: (theme: AdminTheme) => void;
+  toggleTheme: () => void;
+};
+
+const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+export function useAdminTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useAdminTheme must be used within ThemeProvider");
+  return ctx;
+}
+
 export function ThemeProvider({
   children,
-  theme = "light",
+  theme: themeOverride,
 }: {
   children: ReactNode;
-  theme?: "light" | "dark";
+  theme?: AdminTheme;
 }) {
+  const [theme, setThemeState] = useState<AdminTheme>(() => themeOverride ?? readAdminTheme());
+
+  useEffect(() => {
+    if (themeOverride) setThemeState(themeOverride);
+  }, [themeOverride]);
+
+  const setTheme = useCallback((next: AdminTheme) => {
+    setThemeState(next);
+    writeAdminTheme(next);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setThemeState((current) => {
+      const next = current === "light" ? "dark" : "light";
+      writeAdminTheme(next);
+      return next;
+    });
+  }, []);
+
+  const value = useMemo(() => ({ theme, setTheme, toggleTheme }), [theme, setTheme, toggleTheme]);
+
   return (
-    <div data-theme={theme} className="ed-theme">
-      {children}
-    </div>
+    <ThemeContext.Provider value={value}>
+      <div data-theme={theme} className="ed-theme">
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
+}
+
+export function ThemeToggle() {
+  const { theme, toggleTheme } = useAdminTheme();
+  return (
+    <button
+      type="button"
+      className="ed-theme-toggle"
+      onClick={toggleTheme}
+      aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+    >
+      {theme === "light" ? "Dark mode" : "Light mode"}
+    </button>
   );
 }
 
@@ -318,6 +372,7 @@ export function AppShell({
           </div>
           {user && (
             <div className="ed-header__actions">
+              <ThemeToggle />
               <div className="ed-header__profile">
                 <span className="ed-header__avatar" aria-hidden>
                   {initials}

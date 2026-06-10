@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type DragEvent, type ReactNode } from "react";
 import { Button, Input, ToggleField } from "@edunudg/ui";
 import type {
   HomepageConfig,
@@ -6,6 +6,7 @@ import type {
   HomepageFeatureSection,
   HomepageLink,
   HomepageShowcaseCard,
+  HomepageTestimonial,
 } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import {
@@ -13,7 +14,12 @@ import {
   setSectionEnabled,
   type HomepageSectionKey,
 } from "@/lib/homepageSections";
-import { EditorAccordion } from "./EditorAccordion";
+import {
+  formatTestimonialQuoteCount,
+  moveItem,
+  testimonialQuoteLengthHint,
+} from "@/lib/testimonialEditorHelpers";
+import { EditorAccordion } from "./HomepageEditorShell";
 import { MarketingMediaField } from "./MarketingMediaField";
 
 export type HomepageEditorFormProps = {
@@ -367,58 +373,11 @@ export function HomepageEditorForm({
             <p className="ed-text-sm ed-muted">Published success stories appear on the live site automatically.</p>
           )
         ) : (
-          config.testimonials.items.map((t, i) => (
-            <div key={i} className="ed-form-section">
-              <Input
-                label="Quote"
-                value={t.quote}
-                onChange={(v) => {
-                  const items = [...config.testimonials.items];
-                  items[i] = { ...t, quote: v };
-                  onChange({ ...config, testimonials: { ...config.testimonials, items } });
-                }}
-              />
-              <Input
-                label="Author"
-                value={t.author}
-                onChange={(v) => {
-                  const items = [...config.testimonials.items];
-                  items[i] = { ...t, author: v };
-                  onChange({ ...config, testimonials: { ...config.testimonials, items } });
-                }}
-              />
-              <Button
-                variant="ghost"
-                onClick={() =>
-                  commit({
-                    ...config,
-                    testimonials: {
-                      ...config.testimonials,
-                      items: config.testimonials.items.filter((_, idx) => idx !== i),
-                    },
-                  })
-                }
-              >
-                Remove testimonial
-              </Button>
-            </div>
-          ))
-        )}
-        {!testimonialsManagedExternally && (
-          <Button
-            variant="ghost"
-            onClick={() =>
-              commit({
-                ...config,
-                testimonials: {
-                  ...config.testimonials,
-                  items: [...config.testimonials.items, { quote: "New quote", author: "Author name" }],
-                },
-              })
-            }
-          >
-            Add testimonial
-          </Button>
+          <TestimonialsEditorSection
+            items={config.testimonials.items}
+            onChange={(items) => onChange({ ...config, testimonials: { ...config.testimonials, items } })}
+            onCommit={(items) => commit({ ...config, testimonials: { ...config.testimonials, items } })}
+          />
         )}
       </EditorAccordion>
 
@@ -515,6 +474,126 @@ export function HomepageEditorForm({
           onChange={(v) => onChange({ ...config, footer: { ...config.footer, copyright: v } })}
         />
       </EditorAccordion>
+    </div>
+  );
+}
+
+function TestimonialsEditorSection({
+  items,
+  onChange,
+  onCommit,
+}: {
+  items: HomepageTestimonial[];
+  onChange: (items: HomepageTestimonial[]) => void;
+  onCommit: (items: HomepageTestimonial[]) => void;
+}) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const updateItem = (index: number, patch: Partial<HomepageTestimonial>) => {
+    const next = items.map((item, i) => (i === index ? { ...item, ...patch } : item));
+    onChange(next);
+  };
+
+  const removeItem = (index: number) => {
+    onCommit(items.filter((_, i) => i !== index));
+  };
+
+  const move = (from: number, to: number) => {
+    onCommit(moveItem(items, from, to));
+  };
+
+  const onDragStart = (index: number) => (e: DragEvent) => {
+    setDragIndex(index);
+    setDragOverIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDragOver = (index: number) => (e: DragEvent) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const onDrop = (index: number) => (e: DragEvent) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    onCommit(moveItem(items, dragIndex, index));
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const onDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  return (
+    <div className="ed-testimonial-editor">
+      {items.map((t, i) => {
+        const quoteStatus = testimonialQuoteLengthHint(t.quote.trim().length);
+        return (
+          <div
+            key={`testimonial-${i}-${t.author}`}
+            className={[
+              "ed-testimonial-editor__item",
+              "ed-form-section",
+              dragIndex === i ? "ed-testimonial-editor__item--dragging" : "",
+              dragOverIndex === i && dragIndex !== i ? "ed-testimonial-editor__item--drop-target" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            draggable
+            onDragStart={onDragStart(i)}
+            onDragOver={onDragOver(i)}
+            onDrop={onDrop(i)}
+            onDragEnd={onDragEnd}
+          >
+            <div className="ed-testimonial-editor__toolbar">
+              <span className="ed-testimonial-editor__handle" aria-hidden>
+                ⋮⋮ Drag
+              </span>
+              <Button variant="ghost" onClick={() => move(i, i - 1)} disabled={i === 0}>
+                Move up
+              </Button>
+              <Button variant="ghost" onClick={() => move(i, i + 1)} disabled={i === items.length - 1}>
+                Move down
+              </Button>
+            </div>
+            <Input label="Quote" value={t.quote} onChange={(v) => updateItem(i, { quote: v })} />
+            <p
+              className={[
+                "ed-testimonial-editor__char-hint",
+                quoteStatus !== "ok" ? "ed-testimonial-editor__char-hint--warn" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {formatTestimonialQuoteCount(t.quote.trim().length)}
+              {quoteStatus === "short" ? " — quote is shorter than recommended." : null}
+              {quoteStatus === "long" ? " — quote exceeds recommended length." : null}
+            </p>
+            <Input label="Author" value={t.author} onChange={(v) => updateItem(i, { author: v })} />
+            <Button variant="danger" onClick={() => removeItem(i)}>
+              Remove testimonial
+            </Button>
+          </div>
+        );
+      })}
+      <Button
+        variant="ghost"
+        onClick={() =>
+          onCommit([
+            ...items,
+            {
+              quote: "Add a testimonial quote between 50 and 100 characters for best results.",
+              author: "Author name",
+            },
+          ])
+        }
+      >
+        Add testimonial
+      </Button>
     </div>
   );
 }

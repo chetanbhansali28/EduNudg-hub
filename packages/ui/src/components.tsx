@@ -13,6 +13,10 @@ import { IconEye, IconEyeOff } from "./icons";
 
 export {
   ThemeProvider,
+  ThemeToggle,
+  useAdminTheme,
+  readAdminTheme,
+  writeAdminTheme,
   AppShell,
   LoginLayout,
   ComingSoonPage,
@@ -97,15 +101,17 @@ export function SaveButton({
   saved = false,
   disabled,
   label = "Save",
+  block,
 }: {
   onClick: () => void;
   pending?: boolean;
   saved?: boolean;
   disabled?: boolean;
   label?: string;
+  block?: boolean;
 }) {
   return (
-    <Button onClick={onClick} disabled={disabled ?? pending}>
+    <Button onClick={onClick} disabled={disabled ?? pending} block={block}>
       {pending ? "Saving…" : saved ? "Saved" : label}
     </Button>
   );

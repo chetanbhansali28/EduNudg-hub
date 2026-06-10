@@ -75,6 +75,6 @@ describe("BrandMarketingThemesPanel", () => {
     fireEvent.change(selects[0]!, { target: { value: "spark-academy" } });
 
     expect(screen.getByText("Unsaved changes")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Save theme" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Update theme" })).toBeDefined();
   });
 });

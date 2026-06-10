@@ -60,7 +60,7 @@ Do not stack many full-width `Card`s in a single column on laptop viewports.
 ## Accessibility
 
 - File inputs labeled (`htmlFor`) with `name` where applicable
-- Marketing editor `EditorAccordion`: visibility toggles live **outside** `<summary>` (no interactive controls inside summary)
+- Marketing editor `EditorAccordion` (`HomepageEditorShell.tsx`): title + collapse control in `<summary>` only; **Visible on site** toggle lives in the accordion body
 - Stale / lost lead states use text + icon, not color alone
 
 ## Related

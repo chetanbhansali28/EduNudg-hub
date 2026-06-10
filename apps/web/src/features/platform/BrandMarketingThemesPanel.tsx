@@ -122,7 +122,7 @@ export function BrandMarketingThemesPanel() {
                     onClick={() => saveTheme.mutate({ brandId: brand.id, theme: draft })}
                     disabled={!dirty || isSaving}
                   >
-                    {isSaving ? "Saving…" : dirty ? "Save theme" : "Saved"}
+                    {isSaving ? "Saving…" : dirty ? "Update theme" : "Saved"}
                   </Button>
                 </div>
               </li>

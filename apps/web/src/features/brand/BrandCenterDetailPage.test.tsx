@@ -90,6 +90,8 @@ describe("BrandCenterDetailPage", () => {
     );
     expect(await screen.findByText("Koramangala Center")).toBeDefined();
     expect(screen.getByText(/Read-only 360° view/)).toBeDefined();
+    expect(document.querySelector(".ed-detail-page")).toBeTruthy();
+    expect(document.querySelector(".ed-detail-page__toolbar")).toBeTruthy();
     expect(screen.getByText("Center profile")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
   });

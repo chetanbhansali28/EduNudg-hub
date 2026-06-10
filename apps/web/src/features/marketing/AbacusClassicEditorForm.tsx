@@ -11,7 +11,7 @@ import type {
 } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import { isAbacusSectionEnabled, setSectionEnabled, type HomepageSectionKey } from "@/lib/homepageSections";
-import { EditorAccordion } from "./EditorAccordion";
+import { EditorAccordion } from "./HomepageEditorShell";
 import { MarketingMediaField } from "./MarketingMediaField";
 import { MARKETING_THEME_LABELS, type MarketingTheme } from "@/types/homepage";
 

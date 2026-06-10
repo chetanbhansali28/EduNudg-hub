@@ -88,4 +88,24 @@ describe("AppShell responsive", () => {
     expect(document.querySelector(".ed-header__collapse")).toBeNull();
     expect(screen.getByText("Welcome back, Platform Admin 👋")).toBeDefined();
   });
+
+  it("regression_header_includes_theme_toggle", () => {
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <AppShell
+            portalLabel="Platform Owner"
+            welcomeName="Platform Admin"
+            user={{ name: "Platform Admin", email: "admin@edunudg.com" }}
+            navSections={[{ title: "Main menu", items: [{ href: "/admin", label: "Home", active: true }] }]}
+            showUpgradeCard={false}
+          >
+            <p>Page body</p>
+          </AppShell>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("button", { name: /switch to dark mode/i })).toBeDefined();
+  });
 });

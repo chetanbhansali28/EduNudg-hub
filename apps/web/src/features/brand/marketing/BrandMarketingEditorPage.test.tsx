@@ -47,7 +47,7 @@ describe("BrandMarketingEditorPage", () => {
     );
     expect(await screen.findByText("Brand site (franchise recruitment)")).toBeDefined();
     expect(screen.getByText("Center sites (parent enrollment template)")).toBeDefined();
-    expect(screen.getAllByRole("button", { name: "Save" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "Save changes" })).toHaveLength(2);
     expect(screen.queryByRole("link", { name: /preview/i })).toBeNull();
     expect(screen.queryByRole("tab")).toBeNull();
     expect(screen.queryByRole("tablist")).toBeNull();
