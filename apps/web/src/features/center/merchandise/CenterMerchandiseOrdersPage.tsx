@@ -1,26 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  Badge,
-  Button,
-  Card,
-  DataList,
-  FormGrid,
-  Input,
-  ListRow,
-  MutationError,
-  PageTitle,
-  Select,
-} from "@edunudg/ui";
+import { Card, FormGrid, Input, MutationError, PageTitle, Select } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import {
   createCenterMerchandiseOrder,
   listActiveMerchandiseCatalog,
-  listCenterMerchandiseOrders,
-  markMerchandiseOrderReceived,
   validateMerchandisePromoCode,
-  type MerchandiseOrderRow,
   type MerchandisePaymentMethod,
   type MerchandiseShippingMode,
 } from "@/lib/merchandiseOrdersApi";
@@ -41,29 +27,19 @@ import {
 } from "@/services/payments/merchandiseCheckout";
 import { openRazorpayCheckout } from "@/services/payments/razorpayGateway";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
-import { AddFormSection } from "@/features/shared/AddFormSection";
-import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { CenterMerchandiseAllocationsCard } from "./CenterMerchandiseAllocationsCard";
+import { CenterMerchandiseOrderHistory } from "./CenterMerchandiseOrderHistory";
 import { CenterStudentProfileAddressCard } from "./CenterStudentProfileAddressCard";
+import { MerchandiseCheckoutPanel } from "./MerchandiseCheckoutPanel";
+import { MerchandiseProductGrid } from "./MerchandiseProductGrid";
+import {
+  cartTotalQuantity,
+  shopLinesFromCart,
+  type MerchandiseShopLine,
+} from "./merchandiseShopTypes";
+import "./merchandiseShop.css";
 
-type OrderMode = "stock-up" | "per-student";
-
-type CartLine = {
-  id: string;
-  catalogItemId: string;
-  quantity: number;
-};
-
-const ORDER_MODE_OPTIONS = [
-  { value: "stock-up" as const, label: "Stock up (center bulk)" },
-  { value: "per-student" as const, label: "Per student" },
-];
-
-const SHIPPING_MODE_OPTIONS = [
-  { value: "franchise" as const, label: "Ship to franchise center" },
-  { value: "student" as const, label: "Ship to student address" },
-  { value: "custom" as const, label: "Custom address" },
-];
+type ShopTab = "shop" | "orders";
 
 const emptyCustomAddress = {
   name: "",
@@ -86,40 +62,18 @@ function formatAddressPreview(address: ShippingAddressSnapshot | null): string {
   return parts.join(" · ") || "Incomplete address.";
 }
 
-function paymentBadgeTone(status: string): "default" | "success" | "warning" {
-  if (status === "paid") return "success";
-  if (status === "unpaid" || status === "pending" || status === "failed") return "warning";
-  return "default";
-}
-
-function orderInvoice(order: MerchandiseOrderRow) {
-  const inv = order.merchandise_invoices;
-  if (!inv) return null;
-  return Array.isArray(inv) ? inv[0] : inv;
-}
-
-function orderTracking(order: MerchandiseOrderRow): Record<string, unknown> | null {
-  const t = order.shipping_tracking;
-  if (!t || typeof t !== "object") return null;
-  return t as Record<string, unknown>;
-}
-
 export function CenterMerchandiseOrdersPage() {
   const tenant = useTenant();
   const brandId = tenant.brandId;
   const centerId = tenant.centerId;
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
-  const { bindClose, closeAddForm } = useAddFormCloser();
 
-  const [orderMode, setOrderMode] = useState<OrderMode>("stock-up");
-  const [orderStudentId, setOrderStudentId] = useState("");
+  const [tab, setTab] = useState<ShopTab>("shop");
+  const [cart, setCart] = useState<Record<string, MerchandiseShopLine>>({});
   const [shippingStudentId, setShippingStudentId] = useState("");
   const [shippingMode, setShippingMode] = useState<MerchandiseShippingMode>("franchise");
   const [customAddress, setCustomAddress] = useState(emptyCustomAddress);
-  const [catalogItemId, setCatalogItemId] = useState("");
-  const [lineQuantity, setLineQuantity] = useState("1");
-  const [cart, setCart] = useState<CartLine[]>([]);
   const [promoCode, setPromoCode] = useState("");
   const [promoMessage, setPromoMessage] = useState<string | null>(null);
   const [promoValid, setPromoValid] = useState(false);
@@ -174,12 +128,19 @@ export function CenterMerchandiseOrdersPage() {
     },
   });
 
-  const shippingStudentTarget =
-    shippingMode === "student"
-      ? orderMode === "per-student"
-        ? orderStudentId
-        : shippingStudentId
-      : "";
+  const cartStudentIds = useMemo(() => {
+    const ids = new Set<string>();
+    shopLinesFromCart(cart).forEach((line) => {
+      if (line.studentId) ids.add(line.studentId);
+    });
+    return [...ids];
+  }, [cart]);
+
+  const shippingStudentTarget = useMemo(() => {
+    if (shippingMode !== "student") return "";
+    if (cartStudentIds.length === 1) return cartStudentIds[0]!;
+    return shippingStudentId;
+  }, [shippingMode, cartStudentIds, shippingStudentId]);
 
   const resolvedAddress = useQuery({
     queryKey: ["merchandise-shipping-preview", shippingMode, centerId, brandId, shippingStudentTarget],
@@ -200,17 +161,8 @@ export function CenterMerchandiseOrdersPage() {
     return resolvedAddress.data ?? null;
   }, [shippingMode, customAddress, resolvedAddress.data]);
 
-  const cartTotalQty = cart.reduce((sum, line) => sum + line.quantity, 0);
-  const cartSubtotalCents = cart.reduce((sum, line) => {
-    const item = catalog.data?.find((c) => c.id === line.catalogItemId);
-    return sum + (item ? item.price_cents * line.quantity : 0);
-  }, 0);
-
-  const orders = useQuery({
-    queryKey: ["center-merchandise-orders", centerId],
-    enabled: !!centerId,
-    queryFn: () => listCenterMerchandiseOrders(centerId!),
-  });
+  const shippingComplete = isShippingAddressComplete(shippingMode, shippingSnapshot);
+  const cartQty = cartTotalQuantity(cart);
 
   const paymentAlerts = useQuery({
     queryKey: ["center-merchandise-payment-alerts", centerId],
@@ -222,7 +174,7 @@ export function CenterMerchandiseOrdersPage() {
     mutationFn: async () => {
       if (!brandId || !promoCode.trim()) throw new Error("Enter a promo code");
       clear();
-      const result = await validateMerchandisePromoCode(brandId, promoCode, Math.max(cartTotalQty, 1));
+      const result = await validateMerchandisePromoCode(brandId, promoCode, Math.max(cartQty, 1));
       if (!result.valid) {
         setPromoValid(false);
         setPromoMessage(result.message ?? "Invalid promo code");
@@ -263,27 +215,29 @@ export function CenterMerchandiseOrdersPage() {
 
   const placeOrder = useMutation({
     mutationFn: async () => {
-      if (!brandId || !centerId || cart.length === 0) throw new Error("Add at least one item to the cart");
-      if (orderMode === "per-student" && !orderStudentId) throw new Error("Select a student for per-student orders");
-      if (shippingMode === "student" && !shippingStudentTarget) throw new Error("Select a student for shipping");
-      if (!isShippingAddressComplete(shippingMode, shippingSnapshot)) {
+      const lines = shopLinesFromCart(cart);
+      if (!brandId || !centerId || lines.length === 0) throw new Error("Add at least one item to your order");
+      if (shippingMode === "student" && !shippingStudentTarget) {
+        throw new Error("Select a student for shipping or assign items to one student");
+      }
+      if (!shippingComplete) {
         throw new Error("Shipping address is incomplete. Update the address or choose a different shipping mode.");
       }
       clear();
 
-      const lines = cart.map((line) => {
+      const orderLines = lines.map((line) => {
         const item = catalog.data?.find((c) => c.id === line.catalogItemId);
         if (!item) throw new Error("Catalog item not found");
         return {
           catalogItemId: item.id,
           quantity: line.quantity,
           unitPriceCents: item.price_cents,
-          studentId: orderMode === "per-student" ? orderStudentId : undefined,
+          studentId: line.studentId || undefined,
         };
       });
 
       const orderId = await createCenterMerchandiseOrder(brandId, centerId, {
-        lines,
+        lines: orderLines,
         shippingMode,
         shippingAddress: shippingSnapshot as Record<string, unknown>,
         promoCode: promoValid ? promoCode : undefined,
@@ -304,60 +258,84 @@ export function CenterMerchandiseOrdersPage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["center-merchandise-orders", centerId] });
       void qc.invalidateQueries({ queryKey: ["center-merchandise-payment-alerts", centerId] });
-      setCart([]);
-      setCatalogItemId("");
-      setLineQuantity("1");
+      setCart({});
       setPromoCode("");
       setPromoMessage(null);
       setPromoValid(false);
-      closeAddForm();
+      setTab("orders");
     },
     onError: capture,
   });
 
-  const markReceived = useMutation({
-    mutationFn: (orderId: string) => markMerchandiseOrderReceived(orderId),
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["center-merchandise-orders", centerId] });
-    },
-    onError: capture,
-  });
-
-  const retryPayment = useMutation({
-    mutationFn: async (order: MerchandiseOrderRow) => {
-      clear();
-      await payWithRazorpay(order.id, order.total_cents);
-    },
-    onError: capture,
-  });
-
-  const addToCart = () => {
-    if (!catalogItemId) return;
-    const qty = Math.max(1, parseInt(lineQuantity, 10) || 1);
+  const updateCartLine = (catalogItemId: string, patch: Partial<MerchandiseShopLine>) => {
     setCart((prev) => {
-      const existing = prev.find((l) => l.catalogItemId === catalogItemId);
-      if (existing) {
-        return prev.map((l) =>
-          l.catalogItemId === catalogItemId ? { ...l, quantity: l.quantity + qty } : l
-        );
+      const existing = prev[catalogItemId] ?? { catalogItemId, quantity: 0, studentId: "" };
+      const next = { ...existing, ...patch };
+      if (next.quantity <= 0) {
+        const { [catalogItemId]: _removed, ...rest } = prev;
+        return rest;
       }
-      return [...prev, { id: `${catalogItemId}-${Date.now()}`, catalogItemId, quantity: qty }];
+      return { ...prev, [catalogItemId]: next };
     });
-    setCatalogItemId("");
-    setLineQuantity("1");
-  };
-
-  const removeCartLine = (id: string) => {
-    setCart((prev) => prev.filter((l) => l.id !== id));
+    setPromoValid(false);
+    setPromoMessage(null);
   };
 
   if (!centerId || !brandId) return <p className="ed-empty">Center context not found.</p>;
 
   const alerts = paymentAlerts.data;
+  const catalogItems = catalog.data ?? [];
+  const studentOptions = students.data ?? [];
+  const needsShippingStudentPick = shippingMode === "student" && cartStudentIds.length !== 1;
+
+  const customAddressFields = (
+    <FormGrid>
+      <Input
+        label="Recipient name"
+        value={customAddress.name}
+        onChange={(v) => setCustomAddress((a) => ({ ...a, name: v }))}
+      />
+      <Input
+        label="Phone"
+        value={customAddress.phone}
+        onChange={(v) => setCustomAddress((a) => ({ ...a, phone: v }))}
+      />
+      <Input
+        label="Address line 1"
+        value={customAddress.addressLine1}
+        onChange={(v) => setCustomAddress((a) => ({ ...a, addressLine1: v }))}
+      />
+      <Input
+        label="City"
+        value={customAddress.city}
+        onChange={(v) => setCustomAddress((a) => ({ ...a, city: v }))}
+      />
+      <Input
+        label="State"
+        value={customAddress.state}
+        onChange={(v) => setCustomAddress((a) => ({ ...a, state: v }))}
+      />
+      <Input
+        label="Pincode"
+        value={customAddress.pincode}
+        onChange={(v) => setCustomAddress((a) => ({ ...a, pincode: v }))}
+      />
+    </FormGrid>
+  );
+
+  const shippingStudentFields = needsShippingStudentPick ? (
+    <Select
+      label="Ship to student"
+      value={shippingStudentId}
+      onChange={setShippingStudentId}
+      placeholder="Select student"
+      options={studentOptions.map((s) => ({ value: s.id, label: s.full_name }))}
+    />
+  ) : null;
 
   return (
     <>
-      <PageTitle>Merchandise orders</PageTitle>
+      <PageTitle>Merchandise</PageTitle>
       <MutationError message={error} />
 
       {alerts && alerts.unpaid_count > 0 ? (
@@ -372,265 +350,63 @@ export function CenterMerchandiseOrdersPage() {
         </Card>
       ) : null}
 
-      <AddFormSection buttonLabel="Place order" panelTitle="New merchandise order">
-        {({ close }) => {
-          bindClose(close);
-          return (
-            <>
-              <FormGrid>
-                <Select
-                  label="Order mode"
-                  value={orderMode}
-                  onChange={(v) => {
-                    setOrderMode(v as OrderMode);
-                    if (v === "stock-up") setOrderStudentId("");
-                  }}
-                  options={ORDER_MODE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                />
-                {orderMode === "per-student" ? (
-                  <Select
-                    label="Student"
-                    value={orderStudentId}
-                    onChange={setOrderStudentId}
-                    placeholder="Select student"
-                    options={(students.data ?? []).map((s) => ({ value: s.id, label: s.full_name }))}
-                  />
-                ) : null}
-              </FormGrid>
+      <nav className="ed-merch-tabs" aria-label="Merchandise sections">
+        <button type="button" aria-selected={tab === "shop"} onClick={() => setTab("shop")}>
+          Shop
+        </button>
+        <button type="button" aria-selected={tab === "orders"} onClick={() => setTab("orders")}>
+          My orders
+        </button>
+      </nav>
 
-              <FormGrid>
-                <Select
-                  label="Add SKU"
-                  value={catalogItemId}
-                  onChange={setCatalogItemId}
-                  placeholder="Select item"
-                  options={(catalog.data ?? []).map((c) => ({
-                    value: c.id,
-                    label: `${c.sku} — ${c.name} (${formatInrFromPaise(c.price_cents, c.currency)})`,
-                  }))}
-                />
-                <Input label="Quantity" value={lineQuantity} onChange={setLineQuantity} type="number" />
-              </FormGrid>
-              <Button onClick={addToCart} disabled={!catalogItemId}>
-                Add to cart
-              </Button>
-
-              {cart.length > 0 ? (
-                <Card title={`Cart (${cartTotalQty} items)`}>
-                  <DataList
-                    items={cart}
-                    render={(line) => {
-                      const item = catalog.data?.find((c) => c.id === line.catalogItemId);
-                      return (
-                        <ListRow
-                          aside={
-                            <Button variant="ghost" onClick={() => removeCartLine(line.id)}>
-                              Remove
-                            </Button>
-                          }
-                        >
-                          <div>
-                            <strong>{item?.name ?? "Item"}</strong>
-                            <div className="ed-text-sm ed-muted">
-                              {item?.sku} × {line.quantity} —{" "}
-                              {formatInrFromPaise((item?.price_cents ?? 0) * line.quantity, item?.currency)}
-                            </div>
-                          </div>
-                        </ListRow>
-                      );
-                    }}
-                  />
-                  <p className="ed-text-sm">
-                    Subtotal: <strong>{formatInrFromPaise(cartSubtotalCents)}</strong>
-                  </p>
-                </Card>
-              ) : (
-                <p className="ed-text-sm ed-muted">Cart is empty. Add SKUs before submitting.</p>
-              )}
-
-              <FormGrid>
-                <Select
-                  label="Shipping mode"
-                  value={shippingMode}
-                  onChange={(v) => setShippingMode(v as MerchandiseShippingMode)}
-                  options={SHIPPING_MODE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-                />
-                {shippingMode === "student" && orderMode === "stock-up" ? (
-                  <Select
-                    label="Ship to student"
-                    value={shippingStudentId}
-                    onChange={setShippingStudentId}
-                    placeholder="Select student"
-                    options={(students.data ?? []).map((s) => ({ value: s.id, label: s.full_name }))}
-                  />
-                ) : null}
-              </FormGrid>
-
-              {shippingMode === "custom" ? (
-                <FormGrid>
-                  <Input
-                    label="Recipient name"
-                    value={customAddress.name}
-                    onChange={(v) => setCustomAddress((a) => ({ ...a, name: v }))}
-                  />
-                  <Input
-                    label="Phone"
-                    value={customAddress.phone}
-                    onChange={(v) => setCustomAddress((a) => ({ ...a, phone: v }))}
-                  />
-                  <Input
-                    label="Address line 1"
-                    value={customAddress.addressLine1}
-                    onChange={(v) => setCustomAddress((a) => ({ ...a, addressLine1: v }))}
-                  />
-                  <Input
-                    label="City"
-                    value={customAddress.city}
-                    onChange={(v) => setCustomAddress((a) => ({ ...a, city: v }))}
-                  />
-                  <Input
-                    label="State"
-                    value={customAddress.state}
-                    onChange={(v) => setCustomAddress((a) => ({ ...a, state: v }))}
-                  />
-                  <Input
-                    label="Pincode"
-                    value={customAddress.pincode}
-                    onChange={(v) => setCustomAddress((a) => ({ ...a, pincode: v }))}
-                  />
-                </FormGrid>
-              ) : (
-                <p className="ed-text-sm ed-muted">
-                  Shipping preview: {formatAddressPreview(resolvedAddress.data ?? null)}
-                  {!isShippingAddressComplete(shippingMode, resolvedAddress.data ?? null) ? (
-                    <span> — address incomplete.</span>
-                  ) : null}
-                </p>
-              )}
-
-              <FormGrid>
-                <Input
-                  label="Promo code"
-                  value={promoCode}
-                  onChange={(v) => {
-                    setPromoCode(v);
-                    setPromoValid(false);
-                    setPromoMessage(null);
-                  }}
-                />
-              </FormGrid>
-              <Button
-                variant="ghost"
-                onClick={() => validatePromo.mutate()}
-                disabled={!promoCode.trim() || validatePromo.isPending || cart.length === 0}
-              >
-                Validate promo
-              </Button>
-              {promoMessage ? (
-                <p className={`ed-text-sm ${promoValid ? "" : "ed-muted"}`}>{promoMessage}</p>
-              ) : null}
-
-              <Select
-                label="Payment method"
-                value={paymentMethod}
-                onChange={(v) => setPaymentMethod(v as MerchandisePaymentMethod)}
-                options={paymentOptions.map((o) => ({ value: o.value, label: o.label }))}
-              />
-
-              <Button
-                onClick={() => placeOrder.mutate()}
-                disabled={cart.length === 0 || placeOrder.isPending}
-              >
-                Submit order
-              </Button>
-            </>
-          );
-        }}
-      </AddFormSection>
-
-      <Card title="Order history">
-        <DataList
-          items={orders.data ?? []}
-          empty="No merchandise orders yet."
-          render={(o) => {
-            const invoice = orderInvoice(o);
-            const tracking = orderTracking(o);
-            const canMarkReceived = o.status === "shipped";
-            const canPay =
-              o.payment_method === "razorpay" &&
-              (o.payment_status === "unpaid" || o.payment_status === "pending" || o.status === "awaiting_payment");
-
-            return (
-              <ListRow
-                aside={
-                  <>
-                    {canPay ? (
-                      <Button
-                        variant="ghost"
-                        onClick={() => retryPayment.mutate(o)}
-                        disabled={retryPayment.isPending}
-                      >
-                        Pay now
-                      </Button>
-                    ) : null}
-                    {canMarkReceived ? (
-                      <Button
-                        variant="ghost"
-                        onClick={() => markReceived.mutate(o.id)}
-                        disabled={markReceived.isPending}
-                      >
-                        Mark received
-                      </Button>
-                    ) : null}
-                  </>
-                }
-              >
-                <div>
-                  <strong>Order {o.id.slice(0, 8)}</strong>
-                  <div className="ed-text-sm ed-muted">{new Date(o.created_at).toLocaleString()}</div>
-                  <div className="ed-text-sm">
-                    <Badge>{o.status}</Badge>{" "}
-                    <Badge tone={paymentBadgeTone(o.payment_status)}>{o.payment_status}</Badge>
-                    {o.shipping_mode ? <Badge>{o.shipping_mode} shipping</Badge> : null}
-                  </div>
-                  <ul className="ed-text-sm">
-                    {o.merchandise_order_lines?.map((line) => {
-                      const catalogItem = Array.isArray(line.merchandise_catalog)
-                        ? line.merchandise_catalog[0]
-                        : line.merchandise_catalog;
-                      return (
-                        <li key={line.id}>
-                          {catalogItem?.sku ?? catalogItem?.name ?? "Item"} × {line.quantity}
-                          {line.student_id ? " (per student)" : " (bulk)"}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                  <p className="ed-text-sm ed-muted">
-                    Total: {formatInrFromPaise(o.total_cents)}
-                    {o.discount_cents > 0 ? ` (discount ${formatInrFromPaise(o.discount_cents)})` : null}
-                  </p>
-                  {tracking?.tracking_number ? (
-                    <p className="ed-text-sm ed-muted">
-                      Tracking: {String(tracking.tracking_number)}
-                      {tracking.carrier ? ` · ${String(tracking.carrier)}` : null}
-                    </p>
-                  ) : null}
-                  {invoice ? (
-                    <p className="ed-text-sm ed-muted">
-                      Invoice {invoice.invoice_number} — {invoice.status}, due{" "}
-                      {new Date(invoice.due_at).toLocaleDateString()}
-                    </p>
-                  ) : null}
-                </div>
-              </ListRow>
-            );
-          }}
-        />
-      </Card>
-
-      <CenterMerchandiseAllocationsCard brandId={brandId} centerId={centerId} />
-      <CenterStudentProfileAddressCard brandId={brandId} centerId={centerId} />
+      {tab === "shop" ? (
+        <div className="ed-merch-shop">
+          <section aria-label="Product catalog">
+            <MerchandiseProductGrid
+              catalog={catalogItems}
+              cart={cart}
+              students={studentOptions}
+              onUpdateLine={updateCartLine}
+            />
+          </section>
+          <MerchandiseCheckoutPanel
+            cart={cart}
+            catalog={catalogItems}
+            shippingMode={shippingMode}
+            onShippingModeChange={setShippingMode}
+            shippingPreview={`Shipping preview: ${formatAddressPreview(resolvedAddress.data ?? null)}`}
+            shippingComplete={shippingComplete}
+            customAddressFields={customAddressFields}
+            shippingStudentFields={shippingStudentFields}
+            promoCode={promoCode}
+            onPromoCodeChange={(v) => {
+              setPromoCode(v);
+              setPromoValid(false);
+              setPromoMessage(null);
+            }}
+            promoMessage={promoMessage}
+            promoValid={promoValid}
+            onValidatePromo={() => validatePromo.mutate()}
+            promoValidating={validatePromo.isPending}
+            paymentMethod={paymentMethod}
+            onPaymentMethodChange={setPaymentMethod}
+            paymentOptions={paymentOptions}
+            onPlaceOrder={() => placeOrder.mutate()}
+            placing={placeOrder.isPending}
+            error={error}
+          />
+        </div>
+      ) : (
+        <>
+          <CenterMerchandiseOrderHistory
+            centerId={centerId}
+            brandId={brandId}
+            brandSlug={tenant.brandSlug}
+          />
+          <CenterMerchandiseAllocationsCard brandId={brandId} centerId={centerId} />
+          <CenterStudentProfileAddressCard brandId={brandId} centerId={centerId} />
+        </>
+      )}
     </>
   );
 }

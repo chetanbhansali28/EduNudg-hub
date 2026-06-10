@@ -8,16 +8,24 @@ import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import type { HomepageConfig, MarketingTheme } from "@/types/homepage";
 import { parseMarketingTheme } from "@/types/homepage";
 
+export type CenterSocialLink = {
+  platform: string;
+  url: string;
+};
+
 export type CenterPublicProfile = {
   centerId: string;
   centerSlug: string;
   centerName: string;
   displayName: string | null;
   city: string | null;
+  region: string | null;
   pincode: string | null;
   addressLine1: string | null;
   contactPhone: string | null;
+  photoUrl: string | null;
   shortDescription: string | null;
+  socialLinks: CenterSocialLink[];
   brandName: string;
   brandSlug: string;
 };
@@ -41,10 +49,13 @@ type CenterLandingRow = {
   center_name?: string;
   center_display_name?: string | null;
   center_city?: string | null;
+  center_region?: string | null;
   center_pincode?: string | null;
   center_address_line1?: string | null;
   center_contact_phone?: string | null;
+  center_photo_url?: string | null;
   center_short_description?: string | null;
+  center_social_links?: CenterSocialLink[] | null;
   landing?: Partial<HomepageConfig>;
   success_stories?: unknown;
   curriculum?: unknown;
@@ -63,13 +74,30 @@ function fallbackProfile(brandSlug: string, centerSlug: string): CenterPublicPro
     centerName: fallbackCenter,
     displayName: null,
     city: null,
+    region: null,
     pincode: null,
     addressLine1: null,
     contactPhone: null,
+    photoUrl: null,
     shortDescription: null,
+    socialLinks: [],
     brandName: fallbackBrand,
     brandSlug,
   };
+}
+
+function parseCenterSocialLinks(raw: unknown): CenterSocialLink[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const row = entry as Record<string, unknown>;
+      const platform = String(row.platform ?? "").trim();
+      const url = String(row.url ?? "").trim();
+      if (!platform || !url) return null;
+      return { platform, url };
+    })
+    .filter((x): x is CenterSocialLink => x !== null);
 }
 
 function parsePublicStats(raw: unknown): BrandPublicStats {
@@ -211,10 +239,13 @@ export async function fetchCenterLandingBundle(
         centerName: row.center_name,
         displayName: row.center_display_name ?? null,
         city: row.center_city ?? null,
+        region: row.center_region ?? null,
         pincode: row.center_pincode ?? null,
         addressLine1: row.center_address_line1 ?? null,
         contactPhone: row.center_contact_phone ?? null,
+        photoUrl: row.center_photo_url ?? null,
         shortDescription: row.center_short_description ?? null,
+        socialLinks: parseCenterSocialLinks(row.center_social_links),
         brandName: row.brand_name,
         brandSlug: row.brand_slug ?? brandSlug,
       },

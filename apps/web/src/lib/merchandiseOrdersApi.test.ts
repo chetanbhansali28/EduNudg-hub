@@ -2,12 +2,19 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
   allocateStudentMerchandise,
   createCenterMerchandiseOrder,
+  deleteMerchandiseCatalogItem,
+  listActiveMerchandiseCatalog,
   recordMerchandisePayment,
   updateMerchandiseOrderStatus,
 } from "./merchandiseOrdersApi";
 
 const rpc = vi.fn();
 const from = vi.fn();
+const removeAllPhotos = vi.fn();
+
+vi.mock("@/lib/merchandiseProductPhotoStorage", () => ({
+  removeAllMerchandiseProductPhotos: (...args: unknown[]) => removeAllPhotos(...args),
+}));
 
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({ rpc, from }),
@@ -17,6 +24,8 @@ describe("merchandiseOrdersApi", () => {
   beforeEach(() => {
     rpc.mockReset();
     from.mockReset();
+    removeAllPhotos.mockReset();
+    removeAllPhotos.mockResolvedValue(undefined);
   });
 
   it("regression_update_merchandise_order_status", async () => {
@@ -65,5 +74,31 @@ describe("merchandiseOrdersApi", () => {
       p_method: "manual",
       p_reference_notes: "Bank ref 123",
     });
+  });
+
+  it("regression_delete_merchandise_catalog_item_removes_storage_photos", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    await deleteMerchandiseCatalogItem("brand-1", "item-1");
+    expect(removeAllPhotos).toHaveBeenCalledWith("brand-1", "item-1");
+    expect(rpc).toHaveBeenCalledWith("delete_merchandise_catalog_item", {
+      p_brand_id: "brand-1",
+      p_id: "item-1",
+    });
+  });
+
+  it("regression_list_active_merchandise_catalog_includes_photo_urls", async () => {
+    const eq = vi.fn();
+    const order = vi.fn();
+    const select = vi.fn(() => ({ eq }));
+    eq.mockReturnValueOnce({ eq }).mockReturnValueOnce({ order });
+    order.mockResolvedValue({
+      data: [{ id: "item-1", sku: "A", name: "Kit", price_cents: 100, currency: "INR", photo_urls: ["https://x/1.jpg"] }],
+      error: null,
+    });
+    from.mockReturnValue({ select });
+
+    const rows = await listActiveMerchandiseCatalog("brand-1");
+    expect(select).toHaveBeenCalledWith("id, sku, name, price_cents, currency, photo_urls");
+    expect(rows[0]?.photo_urls).toEqual(["https://x/1.jpg"]);
   });
 });

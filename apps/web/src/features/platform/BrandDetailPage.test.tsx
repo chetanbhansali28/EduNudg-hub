@@ -105,6 +105,15 @@ describe("BrandDetailPage", () => {
       if (table === "brand_subscriptions") {
         return chain({ data: null, error: null });
       }
+      if (table === "brand_settings") {
+        return chain({
+          data: {
+            id: "settings-1",
+            settings: { features: { student_leads: true, merchandise: false } },
+          },
+          error: null,
+        });
+      }
       if (table === "students") {
         return countChain(12);
       }
@@ -205,6 +214,15 @@ describe("BrandDetailPage", () => {
     expect(screen.getByLabelText("Password")).toBeDefined();
     expect(screen.getByRole("button", { name: "Save changes" })).toBeDefined();
     expect(screen.queryByLabelText("Slug")).toBeNull();
+  });
+
+  it("regression_platform_brand_detail_includes_features_section", async () => {
+    renderDetail("demo");
+    expect(await screen.findByText("Features")).toBeDefined();
+    expect(screen.getByText("Merchandise catalog & orders")).toBeDefined();
+    expect(
+      screen.getByText("Control which modules are active for this brand's portal and franchise centers.")
+    ).toBeDefined();
   });
 
   it("regression_domains_section_shows_open_for_all_portal_types", async () => {

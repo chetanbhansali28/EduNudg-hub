@@ -35,11 +35,19 @@
 - Public writes only through RPC
 - `has_brand_access`, `has_center_access`, `is_platform_admin` helpers
 
-## Branding
+## Branding & brand-assets storage
+
+Public bucket: **`brand-assets`** (migration `015_brand_assets_storage.sql`). RLS: brand staff with `has_brand_access(brand_id)` manage objects under `{brand_id}/…`; anon/authenticated read.
+
+| Asset | DB field / table | Object path |
+|-------|------------------|-------------|
+| Brand logo | `brands.logo_url` | `{brand_id}/logo.{ext}` |
+| Merchandise product photo (×5 per SKU) | `merchandise_catalog.photo_urls` | `{brand_id}/merchandise/{catalog_item_id}/photo-{1-5}.{ext}` |
+| Marketing videos | editor config | under `{brand_id}/…` (see runbook) |
 
 | Host | Nav logo |
 |------|----------|
-| Brand public | `brands.logo_url` → brand-assets bucket |
+| Brand public | `brands.logo_url` |
 | Center public | Same brand logo; center facts from DB text fields |
 | Platform | EduNudg marketing assets |
 

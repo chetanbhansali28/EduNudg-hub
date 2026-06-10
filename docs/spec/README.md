@@ -16,6 +16,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [../ops/platform-admin-portal-handoff.md](../ops/platform-admin-portal-handoff.md) | Platform admin cross-portal sign-in |
 | [services-layer.md](./services-layer.md) | Auth, DB, payments, integrations as services |
 | [feature-flags.md](./feature-flags.md) | Module/integration ON/OFF |
+| [merchandise.md](./merchandise.md) | Catalog, photos, center shop, orders, payments |
 | [manual-leads.md](./manual-leads.md) | Staff manual lead / signup entry by portal |
 
 ## Journeys

@@ -1,5 +1,4 @@
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
-import { BrandFeatureTogglesCard } from "@/features/brand/settings/BrandFeatureTogglesCard";
 import { BrandLogoUpload } from "./BrandLogoUpload";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -187,18 +186,6 @@ export function BrandSettingsPage() {
         />
         <Input label="Timezone (IANA)" value={timezone} onChange={setTimezone} placeholder="Asia/Kolkata" />
       </Card>
-
-      {brandId && settings.data && (
-        <BrandFeatureTogglesCard
-          brandId={brandId}
-          settingsId={settings.data.id}
-          settings={settings.data.settings}
-          onSaved={() => {
-            void qc.invalidateQueries({ queryKey: ["brand-settings", brandId] });
-            void qc.invalidateQueries({ queryKey: ["brand-features", brandId] });
-          }}
-        />
-      )}
 
       <Card
         title="Theme"

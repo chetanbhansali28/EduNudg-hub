@@ -99,6 +99,23 @@ pnpm test:rls
 - Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
 - Brand owners edit page **content** at `{brand}.localhost:9000/app/homepage`
 
+## Merchandise product photos
+
+- Enable **`merchandise`** on platform **Brand detail** → Features (or `brand_settings.settings.features.merchandise`).
+- Apply migration `045_merchandise_catalog_photos.sql`: `supabase db push`
+- Brand staff: **Brand portal → Merchandise → Catalog** — add SKUs, then upload up to **5 photos per product** (PNG/JPEG/WebP/GIF, 5 MB).
+- Storage path: `{brand_id}/merchandise/{catalog_item_id}/photo-{1-5}.{ext}` in the **`brand-assets`** bucket (re-upload to a slot replaces that slot).
+- Franchise centers see photos on **Center portal → Merchandise → Shop**.
+
+See [merchandise spec](../spec/merchandise.md).
+
+## Center public profile (franchise settings)
+
+- Apply migration `046_center_public_profile.sql`: `supabase db push`
+- Franchise staff: **Center portal → Settings** (`/app/settings`) — update photo, address, phone, and social links. Sign-in email comes from Google/social auth; public site URL is the center marketing host (no separate website field).
+- Center photo storage: `{brand_id}/centers/{center_id}/photo.{ext}` in **`brand-assets`** bucket.
+- Changes appear on the center public site (`{center}.{brand}.localhost:9000`) via `get_center_landing_public`.
+
 ```bash
 supabase db push   # applies 009 if not yet applied
 ```

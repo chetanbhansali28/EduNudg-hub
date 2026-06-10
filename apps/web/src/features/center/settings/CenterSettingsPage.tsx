@@ -1,37 +1,24 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge, Card, PageTitle } from "@edunudg/ui";
-import { getSupabase } from "@/lib/supabase";
-import { supabaseMaybe } from "@/lib/supabaseResult";
+import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
-
-interface CenterProfile {
-  name: string;
-  display_name: string | null;
-  slug: string;
-  city: string | null;
-  pincode: string | null;
-  address_line1: string | null;
-  contact_phone: string | null;
-  short_description: string | null;
-  status: string;
-}
+import { centerPortalUrl } from "@/lib/brandPortalUrl";
+import { fetchCenterPublicProfile } from "@/lib/centerProfileApi";
+import { CenterPublicProfileForm } from "./CenterPublicProfileForm";
 
 export function CenterSettingsPage() {
   const tenant = useTenant();
+  const { user } = useAuth();
+  const publicSiteUrl = useMemo(() => {
+    if (!tenant.brandSlug || !tenant.centerSlug) return null;
+    return centerPortalUrl(tenant.brandSlug, tenant.centerSlug, tenant.hostname);
+  }, [tenant.brandSlug, tenant.centerSlug, tenant.hostname]);
 
   const profile = useQuery({
-    queryKey: ["center-profile", tenant.centerId],
+    queryKey: ["center-public-profile", tenant.centerId],
     enabled: !!tenant.centerId,
-    queryFn: async () => {
-      const { data, error } = await getSupabase()
-        .from("franchise_centers")
-        .select(
-          "name, display_name, slug, city, pincode, address_line1, contact_phone, short_description, status"
-        )
-        .eq("id", tenant.centerId!)
-        .maybeSingle();
-      return supabaseMaybe(data, error) as CenterProfile | null;
-    },
+    queryFn: () => fetchCenterPublicProfile(tenant.centerId!),
   });
 
   const p = profile.data;
@@ -39,33 +26,38 @@ export function CenterSettingsPage() {
   return (
     <>
       <PageTitle>Settings</PageTitle>
-      <Card title="Center profile">
-        <p className="ed-text-sm ed-muted">
-          Public blurb and contact on your center site are managed by the brand. Contact your brand admin to update
-          display name, address, or phone.
-        </p>
-        {profile.isLoading ? (
+
+      {profile.isLoading ? (
+        <Card title="Center profile">
           <p className="ed-text-sm ed-muted">Loading…</p>
-        ) : p ? (
-          <>
+        </Card>
+      ) : !p || !tenant.brandId || !tenant.centerId ? (
+        <Card title="Center profile">
+          <p className="ed-text-sm ed-muted">Center profile not found.</p>
+        </Card>
+      ) : (
+        <>
+          <Card title="Account">
             <p className="ed-text-sm">
-              <strong>{p.display_name ?? p.name}</strong>{" "}
+              <strong>{p.displayName || p.name}</strong>{" "}
               <Badge tone={p.status === "active" ? "success" : "default"}>{p.status}</Badge>
             </p>
-            <p className="ed-text-sm ed-muted">Slug: {p.slug}</p>
-            {p.short_description && <p className="ed-text-sm">{p.short_description}</p>}
-            {p.city && (
+            <p className="ed-text-sm ed-muted">Center URL slug: {p.slug}</p>
+            {user?.email ? (
+              <p className="ed-text-sm ed-muted">Sign-in email: {user.email}</p>
+            ) : null}
+            {publicSiteUrl ? (
               <p className="ed-text-sm ed-muted">
-                {p.city} {p.pincode}
+                Your public website:{" "}
+                <a href={publicSiteUrl} target="_blank" rel="noreferrer">
+                  {publicSiteUrl}
+                </a>
               </p>
-            )}
-            {p.address_line1 && <p className="ed-text-sm ed-muted">{p.address_line1}</p>}
-            {p.contact_phone && <p className="ed-text-sm ed-muted">Contact: {p.contact_phone}</p>}
-          </>
-        ) : (
-          <p className="ed-text-sm ed-muted">Center profile not found.</p>
-        )}
-      </Card>
+            ) : null}
+          </Card>
+          <CenterPublicProfileForm brandId={tenant.brandId} centerId={tenant.centerId} profile={p} />
+        </>
+      )}
     </>
   );
 }

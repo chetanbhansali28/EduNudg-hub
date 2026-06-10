@@ -21,7 +21,7 @@ Default for **new** keys: `false` until explicitly enabled in Settings UI or see
 | `franchise_applications` | true | Franchise Applications nav, franchise form |
 | `brand_billing` | true | Settings/Billing — pay platform subscription |
 | `campaigns` | false | Phase E |
-| `merchandise` | false | Phase D — catalog, orders, payments |
+| `merchandise` | false | Phase D — catalog (incl. product photos), center shop, orders, payments |
 
 ## Integration flags
 
@@ -47,7 +47,8 @@ export function useFeatureFlag(key: string): boolean {
 ## Admin UI (phased)
 
 - Platform `/admin/settings` — platform flags + gateway credentials (secrets via env/Edge only).
-- Brand `/app/settings` — Features & Integrations toggles (brand_owner only).
+- Platform `/admin/brands/:slug` — per-brand feature toggles (platform admin).
+- Brand `/app/settings` — white-label, SLA, theme (feature toggles are platform-admin only).
 
 ## RPC guard
 

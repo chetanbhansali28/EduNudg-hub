@@ -42,7 +42,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | | Analytics | `/app/analytics` | Exists |
 | | Campaigns | `/app/campaigns` | Exists — CRUD |
 | | **Success stories** | `/app/success-stories` | Exists — CRUD |
-| | Kit catalog | `/app/kits` | Exists — CRUD |
+| | Merchandise | `/app/merchandise` | Exists — catalog (photos), promos, orders |
 | General | Settings | `/app/settings` | Exists |
 | | **Billing** | `/app/billing` | Exists — subscription checkout stub |
 | Footer | Log out | — | Exists |
@@ -61,11 +61,13 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | | Batches | `/app/batches` | Exists |
 | | Attendance | `/app/attendance` | Exists |
 | | Fees & Payments | `/app/fees` | Exists |
-| | Inventory / Kits | `/app/inventory` | Exists → kit orders Phase D |
+| | Merchandise | `/app/merchandise` | Exists — shop, checkout, order history |
 | | Assessments | `/app/assessments` | Phase D |
 | | Reports | `/app/reports` | Phase D |
-| General | Settings | `/app/settings` | Exists |
+| General | Settings | `/app/settings` | Exists — public profile (photo, address, phone, social) |
 | Footer | Log out | — | Exists |
+
+**Center `/app/settings`:** franchise staff edit display name, description, address, photo, phone, and social links. Login email is read-only from auth; public marketing URL is the center website.
 
 **Center `/app/leads`:** assigned leads + direct `lead_source = center`; status changes reset SLA; **Convert** action.
 

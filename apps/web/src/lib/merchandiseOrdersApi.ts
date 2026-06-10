@@ -172,6 +172,8 @@ export async function upsertMerchandiseCatalogItem(
 }
 
 export async function deleteMerchandiseCatalogItem(brandId: string, itemId: string): Promise<void> {
+  const { removeAllMerchandiseProductPhotos } = await import("@/lib/merchandiseProductPhotoStorage");
+  await removeAllMerchandiseProductPhotos(brandId, itemId).catch(() => undefined);
   const { error } = await getSupabase().rpc("delete_merchandise_catalog_item", {
     p_brand_id: brandId,
     p_id: itemId,
@@ -182,7 +184,7 @@ export async function deleteMerchandiseCatalogItem(brandId: string, itemId: stri
 export async function listActiveMerchandiseCatalog(brandId: string) {
   const { data, error } = await getSupabase()
     .from("merchandise_catalog")
-    .select("id, sku, name, price_cents, currency")
+    .select("id, sku, name, price_cents, currency, photo_urls")
     .eq("brand_id", brandId)
     .eq("is_active", true)
     .order("name");
@@ -193,6 +195,7 @@ export async function listActiveMerchandiseCatalog(brandId: string) {
     name: string;
     price_cents: number;
     currency: string;
+    photo_urls: string[] | null;
   }[];
 }
 

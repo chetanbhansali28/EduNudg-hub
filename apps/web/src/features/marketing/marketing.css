@@ -2750,6 +2750,29 @@
   background: rgb(255 255 255 / 0.92);
 }
 
+.novu-center-blurb__photo {
+  width: 7.5rem;
+  height: 7.5rem;
+  object-fit: cover;
+  border-radius: var(--ed-radius-lg, 0.75rem);
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.novu-center-blurb__social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.novu-center-blurb__social a {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .novu-center-blurb__inner {
   max-width: 42rem;
   margin: 0 auto;

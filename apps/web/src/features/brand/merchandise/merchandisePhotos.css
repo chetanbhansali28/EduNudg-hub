@@ -1,0 +1,51 @@
+.ed-merch-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.ed-merch-photos__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+}
+
+.ed-merch-photos__slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border: 1px dashed var(--ed-border);
+  border-radius: var(--ed-radius);
+  background: var(--ed-surface-container-low);
+}
+
+.ed-merch-photos__slot-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ed-muted);
+}
+
+.ed-merch-photos__thumb {
+  width: 100%;
+  max-width: 5rem;
+  height: 5rem;
+  object-fit: cover;
+  border-radius: var(--ed-radius);
+  border: 1px solid var(--ed-border);
+}
+
+.ed-merch-photos__placeholder {
+  width: 100%;
+  max-width: 5rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--ed-muted);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  background: var(--ed-card);
+}

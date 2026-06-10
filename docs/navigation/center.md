@@ -18,5 +18,5 @@ See [Navigation spec](../spec/navigation-spec.md).
 - Fees & Payments
 - Inventory (kits Phase D)
 - **Kit orders** (`/app/kits`) — when brand enables `kits` feature
-- Settings — read-only center profile (brand-managed public blurb)
+- **Settings** (`/app/settings`) — edit public center profile (photo, address, phone, social links); login email from auth
 - Assessments / Reports — Phase D

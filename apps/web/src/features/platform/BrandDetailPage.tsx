@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge, Button, Card, DataList, KpiCard, KpiGrid, ListRow, PageToolbar } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { brandAdminPath, isUuid } from "@/lib/adminPaths";
@@ -8,6 +8,7 @@ import { portalTargetFromDomain } from "@/lib/brandPortalUrl";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
 import { formatInrFromPaise, useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
 import { BrandEditForm } from "./BrandEditForm";
+import { BrandFeatureTogglesCard } from "./BrandFeatureTogglesCard";
 import { PortalOpenButton } from "./PortalOpenButton";
 
 interface BrandRow {
@@ -39,6 +40,7 @@ export function BrandDetailPage() {
   const { brandSlug: brandSlugParam } = useParams<{ brandSlug: string }>();
   const brandSlug = brandSlugParam?.trim() ?? "";
   const lookupById = isUuid(brandSlug);
+  const qc = useQueryClient();
 
   const brand = useQuery({
     queryKey: ["brand", lookupById ? "id" : "slug", brandSlug],
@@ -97,6 +99,19 @@ export function BrandDetailPage() {
         .limit(1)
         .maybeSingle();
       return supabaseMaybe(data, error);
+    },
+  });
+
+  const brandSettings = useQuery({
+    queryKey: ["brand-settings", brandId],
+    enabled: !!brandId,
+    queryFn: async () => {
+      const { data, error } = await getSupabase()
+        .from("brand_settings")
+        .select("id, settings")
+        .eq("brand_id", brandId!)
+        .maybeSingle();
+      return supabaseMaybe(data, error) as { id: string; settings: Record<string, unknown> } | null;
     },
   });
 
@@ -258,6 +273,18 @@ export function BrandDetailPage() {
           logoUrl={b.logo_url}
         />
       </Card>
+
+      {brandId && !brandSettings.isLoading && (
+        <BrandFeatureTogglesCard
+          brandId={brandId}
+          settingsId={brandSettings.data?.id ?? null}
+          settings={brandSettings.data?.settings ?? {}}
+          onSaved={() => {
+            void qc.invalidateQueries({ queryKey: ["brand-settings", brandId] });
+            void qc.invalidateQueries({ queryKey: ["brand-features", brandId] });
+          }}
+        />
+      )}
 
       <Card title="Domains">
         <DataList

@@ -5,7 +5,7 @@ import { FEATURE_FLAG_DEFAULTS, resolveFeatureFlags } from "@/hooks/useFeatureFl
 import { getSupabase } from "@/lib/supabase";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 
-const BRAND_TOGGLES: { key: string; label: string }[] = [
+export const BRAND_FEATURE_TOGGLES: { key: string; label: string }[] = [
   { key: "student_leads", label: "Student leads" },
   { key: "franchise_applications", label: "Franchise applications" },
   { key: "brand_billing", label: "Platform billing" },
@@ -24,7 +24,7 @@ export function BrandFeatureTogglesCard({ brandId, settingsId, settings, onSaved
   const stored = (settings.features ?? {}) as Record<string, boolean>;
   const [flags, setFlags] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
-    for (const { key } of BRAND_TOGGLES) {
+    for (const { key } of BRAND_FEATURE_TOGGLES) {
       initial[key] = resolveFeatureFlags(stored, key);
     }
     return initial;
@@ -33,7 +33,7 @@ export function BrandFeatureTogglesCard({ brandId, settingsId, settings, onSaved
 
   useEffect(() => {
     const next: Record<string, boolean> = {};
-    for (const { key } of BRAND_TOGGLES) {
+    for (const { key } of BRAND_FEATURE_TOGGLES) {
       next[key] = resolveFeatureFlags(stored, key);
     }
     setFlags(next);
@@ -73,10 +73,12 @@ export function BrandFeatureTogglesCard({ brandId, settingsId, settings, onSaved
       title="Features"
       actions={<SaveButton onClick={() => save.mutate()} pending={save.isPending} saved={saved} />}
     >
-      <p className="ed-text-sm ed-muted">Turn modules on or off for this brand portal and center sites.</p>
+      <p className="ed-text-sm ed-muted">
+        Control which modules are active for this brand&apos;s portal and franchise centers.
+      </p>
       <MutationError message={error} />
       <ToggleGrid>
-        {BRAND_TOGGLES.map(({ key, label }) => (
+        {BRAND_FEATURE_TOGGLES.map(({ key, label }) => (
           <ToggleField
             key={key}
             label={label}

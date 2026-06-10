@@ -22,10 +22,22 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 |-------|-------|-------------|
 | `profiles` | user | Extended auth user profile |
 | `brands` | platform | Franchise brand tenant |
-| `franchise_centers` | brand | Physical center / franchise |
+| `franchise_centers` | brand | Physical center / franchise; public profile fields below |
 | `memberships` | auth | User role per scope |
 | `domain_mappings` | routing | Hostname → portal |
 | `platform_brand_signups` | platform | Self-serve EduNudg brand signup queue |
+
+### `franchise_centers` public profile (migration `046`)
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `display_name`, `short_description` | text | Shown on center public site |
+| `address_line1`, `city`, `region`, `pincode`, `country` | text | Location |
+| `contact_phone` | text | Phone / WhatsApp on public site; staff email from auth (Google/social login) |
+| `photo_url` | text | `brand-assets` path `{brand_id}/centers/{center_id}/photo.{ext}` |
+| `social_links` | jsonb | Array of `{platform, url}` (max 6) |
+
+Center staff update via RPC `update_center_public_profile_rpc` (requires `has_center_access`).
 
 ## Leads & recruitment
 
@@ -47,7 +59,7 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 
 | Table | Scope | Description |
 |-------|-------|-------------|
-| `merchandise_catalog` | brand | SKUs centers can order |
+| `merchandise_catalog` | brand | SKUs centers can order (see columns below) |
 | `merchandise_orders` | center | Orders to brand |
 | `merchandise_order_lines` | center | Line items (optional `student_id`) |
 | `student_merchandise_allocations` | center | Hidden from student portal |
@@ -58,6 +70,14 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `student_level_progress` | center | Level progress shown on learn dashboard |
 | `brand_competitions` | brand | Competition calendar |
 | `student_competition_entries` | center | Student competition results |
+
+### `merchandise_catalog` columns (notable)
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `photo_urls` | `text[]` | Up to 5 public image URLs; slot *n* stored at index *n−1*. Files live in `brand-assets` at `{brand_id}/merchandise/{id}/photo-{1-5}.{ext}`. Re-upload replaces same slot. |
+
+Centers with `merchandise` enabled can **SELECT** active rows for their brand (policy `merchandise_catalog_center_read`, migration `045`).
 
 ## Campaigns & ops (Phase E)
 

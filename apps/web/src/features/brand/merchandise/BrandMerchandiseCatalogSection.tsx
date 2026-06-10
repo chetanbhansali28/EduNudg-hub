@@ -23,6 +23,9 @@ import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { activeMerchandisePhotoUrls } from "@/lib/merchandiseProductPhotoStorage";
+import { MerchandiseProductPhotos } from "./MerchandiseProductPhotos";
+import "./merchandisePhotos.css";
 
 interface CatalogItem {
   id: string;
@@ -31,6 +34,7 @@ interface CatalogItem {
   price_cents: number;
   currency: string;
   is_active: boolean;
+  photo_urls: string[] | null;
 }
 
 const emptyForm = { sku: "", name: "", priceRupees: "", currency: "INR", isActive: true };
@@ -51,7 +55,7 @@ export function BrandMerchandiseCatalogSection({ brandId }: Props) {
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("merchandise_catalog")
-        .select("id, sku, name, price_cents, currency, is_active")
+        .select("id, sku, name, price_cents, currency, is_active, photo_urls")
         .eq("brand_id", brandId)
         .order("name");
       return supabaseList(data, qErr) as CatalogItem[];
@@ -219,7 +223,16 @@ export function BrandMerchandiseCatalogSection({ brandId }: Props) {
                       </Badge>
                       <div className="ed-text-sm ed-muted">
                         {item.sku} · {formatInrFromPaise(item.price_cents, item.currency)}
+                        {activeMerchandisePhotoUrls(item.photo_urls).length > 0
+                          ? ` · ${activeMerchandisePhotoUrls(item.photo_urls).length} photo(s)`
+                          : ""}
                       </div>
+                      <MerchandiseProductPhotos
+                        brandId={brandId}
+                        catalogItemId={item.id}
+                        photoUrls={item.photo_urls}
+                        onChange={() => invalidate()}
+                      />
                     </div>
                   )}
                 </ListRow>
