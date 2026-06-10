@@ -1885,7 +1885,7 @@
   position: relative;
   z-index: 10;
   background: var(--novu-white);
-  padding-top: 6rem;
+  padding-top: 3rem;
 }
 
 .novu-testimonials-section__header {
@@ -1898,7 +1898,6 @@
 @media (min-width: 768px) {
   .novu-testimonials-section__header {
     padding: 0 2.5rem;
-    padding-top: 2rem;
   }
 }
 
@@ -1917,7 +1916,7 @@
 }
 
 .novu-testimonials-section__header p {
-  margin: 1.25rem auto 0;
+  margin: 0.75rem auto 0;
   max-width: 36rem;
   font-size: 1.0625rem;
   line-height: 1.625;
@@ -1931,9 +1930,9 @@
 }
 
 .novu-testimonials-section__marquee-wrap {
-  margin-top: 4rem;
+  margin-top: 1.75rem;
   overflow-x: clip;
-  padding-bottom: 6rem;
+  padding-bottom: 2.5rem;
   -webkit-mask-image: linear-gradient(
     90deg,
     transparent 0%,
@@ -1946,13 +1945,14 @@
 
 @media (min-width: 768px) {
   .novu-testimonials-section__marquee-wrap {
-    padding-bottom: 8rem;
+    padding-bottom: 3rem;
   }
 }
 
 .novu-testimonials-section__marquee {
   display: flex;
-  gap: 1.5rem;
+  align-items: flex-start;
+  gap: 1.25rem;
   width: max-content;
   animation: novu-marquee 50s linear infinite;
   padding-left: 1.25rem;
@@ -1974,12 +1974,11 @@
 .novu-testimonial-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 0.875rem;
   flex-shrink: 0;
   width: min(340px, calc(100vw - var(--novu-page-gutter) * 2));
-  min-height: 280px;
-  padding: 1.5rem;
-  border-radius: 40px;
+  padding: 1.25rem;
+  border-radius: 28px;
   background: var(--novu-white);
   box-shadow:
     0 -4px 32px -12px rgb(0 0 0 / 0.035),
@@ -1991,8 +1990,8 @@
 @media (min-width: 768px) {
   .novu-testimonial-card {
     width: min(420px, calc(100vw - var(--novu-page-gutter) * 2));
-    min-height: 320px;
-    padding: 2rem;
+    padding: 1.5rem;
+    border-radius: 32px;
   }
 }
 
@@ -2008,16 +2007,15 @@
 }
 
 .novu-testimonial-card p {
-  flex: 1;
-  margin: 1.5rem 0;
-  font-size: 1.1875rem;
+  margin: 0;
+  font-size: 1.0625rem;
   line-height: 1.45;
   color: rgb(0 0 0 / 0.85);
 }
 
 @media (min-width: 768px) {
   .novu-testimonial-card p {
-    font-size: 1.3125rem;
+    font-size: 1.1875rem;
   }
 }
 
@@ -2384,7 +2382,7 @@
   }
 
   .novu-testimonials-section {
-    padding-top: 4rem;
+    padding-top: 2.25rem;
   }
 
   .novu-testimonials-section__header h2 {
@@ -2393,11 +2391,12 @@
 
   .novu-testimonials-section__header p {
     font-size: 0.9375rem;
+    margin-top: 0.5rem;
   }
 
   .novu-testimonials-section__marquee-wrap {
-    margin-top: 2.5rem;
-    padding-bottom: 4rem;
+    margin-top: 1.25rem;
+    padding-bottom: 2rem;
     -webkit-mask-image: linear-gradient(
       90deg,
       transparent 0%,
@@ -2409,14 +2408,12 @@
   }
 
   .novu-testimonial-card {
-    padding: 1.25rem;
-    border-radius: 28px;
-    min-height: 260px;
+    padding: 1.125rem;
+    border-radius: 24px;
   }
 
   .novu-testimonial-card p {
     font-size: 1rem;
-    margin: 1rem 0;
   }
 
   .novu-faq {
@@ -3019,15 +3016,30 @@
 }
 
 .ac-programs-grid {
+  position: relative;
   padding: 4rem 1.25rem;
-  background-color: #f8fafc;
+  background-color: #eff6ff;
   background-image:
-    linear-gradient(45deg, rgba(148, 163, 184, 0.08) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(148, 163, 184, 0.08) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgba(148, 163, 184, 0.08) 75%),
-    linear-gradient(-45deg, transparent 75%, rgba(148, 163, 184, 0.08) 75%);
-  background-size: 24px 24px;
-  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(37, 99, 235, 0.14) 0%, transparent 65%),
+    radial-gradient(circle at 0% 100%, rgba(250, 204, 21, 0.1) 0%, transparent 45%),
+    radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.08) 0%, transparent 40%),
+    linear-gradient(180deg, #eff6ff 0%, #f8fafc 55%, #ffffff 100%);
+}
+
+.ac-programs-grid::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--ac-blue, #2563eb) 0%,
+    var(--ac-yellow, #facc15) 50%,
+    var(--ac-blue, #2563eb) 100%
+  );
+  opacity: 0.9;
 }
 
 .ac-programs-grid__inner {
@@ -3422,6 +3434,12 @@
 
 .ac-trust .novu-testimonials-section {
   background: transparent;
+  padding-top: 2rem;
+}
+
+.ac-trust .novu-testimonials-section__marquee-wrap {
+  margin-top: 1.25rem;
+  padding-bottom: 2rem;
 }
 
 .ac-faq {

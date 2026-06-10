@@ -121,8 +121,11 @@ describe("Abacus Classic — programs grid", () => {
   });
 
   it("renders homepage program cards with editable section headings", () => {
-    render(<ProgramsGridSection programs={programs} programsSection={config.programsSection} />);
+    const { container } = render(
+      <ProgramsGridSection programs={programs} programsSection={config.programsSection} />
+    );
 
+    expect(container.querySelector("#programs.ac-programs-grid")).toBeTruthy();
     expect(screen.getByText("WHAT WE TEACH")).toBeDefined();
     expect(screen.getByRole("heading", { level: 2, name: "World-Class Brain Development" })).toBeDefined();
     expect(screen.getByRole("heading", { level: 3, name: "Abacus (Mental Math)" })).toBeDefined();
