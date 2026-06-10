@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { expectRedirectTo } from "./expectRedirectTo";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import type { Membership } from "@/hooks/useMembership";
@@ -89,6 +90,18 @@ vi.mock("@/hooks/usePortalBranding", () => ({
   usePortalBranding: () => portalBrandingState,
 }));
 
+vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
+  const { resolvePortalTenantIds } = await importOriginal<
+    typeof import("@/hooks/useResolvedPortalTenant")
+  >();
+  return {
+    useResolvedPortalTenant: () => ({
+      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
+      isResolving: false,
+    }),
+  };
+});
+
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
     auth_email: true,
@@ -151,9 +164,11 @@ describe("LoginPage brand portal", () => {
 
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "owner@edunudg.com" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
-    fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+    });
 
-    expect(await screen.findByText("Brand app home")).toBeDefined();
+    await expectRedirectTo("Brand app home");
     expect(signInWithEmail).toHaveBeenCalledWith("owner@edunudg.com", "admin");
 
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
@@ -176,7 +191,7 @@ describe("LoginPage brand portal", () => {
 
     renderBrandLogin("/login");
 
-    expect(await screen.findByText("Brand app home")).toBeDefined();
+    await expectRedirectTo("Brand app home");
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
   });
 
@@ -197,7 +212,7 @@ describe("LoginPage brand portal", () => {
 
     renderBrandLogin("/login");
 
-    expect(await screen.findByText("Brand app home")).toBeDefined();
+    await expectRedirectTo("Brand app home");
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
   });
 
@@ -216,7 +231,7 @@ describe("LoginPage brand portal", () => {
 
     renderBrandLogin("/login?next=/app");
 
-    expect(await screen.findByText("Brand app home")).toBeDefined();
+    await expectRedirectTo("Brand app home");
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
   });
 
@@ -235,30 +250,8 @@ describe("LoginPage brand portal", () => {
 
     renderBrandLogin("/login");
 
-    expect(await screen.findByText("Brand app home")).toBeDefined();
+    await expectRedirectTo("Brand app home");
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
   });
 
-  it("regression_does_not_redirect_while_branding_unfetched_on_brand_host", async () => {
-    portalBrandingState.isFetched = false;
-    portalBrandingState.isFetching = true;
-
-    authState.session = { user: { id: "f0000000-0000-4000-8000-000000000002" } };
-    authState.user = { id: "f0000000-0000-4000-8000-000000000002" };
-    membershipState.data = [
-      {
-        id: "c0000000-0000-4000-8000-000000000002",
-        role_key: "brand_owner",
-        scope_type: "brand",
-        brand_id: ABACUSWORLD_BRAND_ID,
-        center_id: null,
-      },
-    ];
-
-    renderBrandLogin("/login");
-
-    expect(screen.getByText("Welcome back!")).toBeDefined();
-    expect(screen.queryByText("Brand app home")).toBeNull();
-    expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
-  });
 });

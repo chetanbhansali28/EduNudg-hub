@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { expectRedirectTo } from "./expectRedirectTo";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import type { Membership } from "@/hooks/useMembership";
@@ -76,6 +77,18 @@ vi.mock("@/hooks/usePortalBranding", () => ({
   usePortalBranding: () => portalBrandingState,
 }));
 
+vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
+  const { resolvePortalTenantIds } = await importOriginal<
+    typeof import("@/hooks/useResolvedPortalTenant")
+  >();
+  return {
+    useResolvedPortalTenant: () => ({
+      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
+      isResolving: false,
+    }),
+  };
+});
+
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
     auth_email: true,
@@ -124,6 +137,9 @@ describe("LoginPage", () => {
     authState.user = null;
     membershipState.data = [];
     membershipState.isLoading = false;
+    portalBrandingState.isFetched = true;
+    portalBrandingState.isFetching = false;
+    portalBrandingState.isLoading = false;
   });
 
   it("renders email login form", () => {
@@ -138,9 +154,11 @@ describe("LoginPage", () => {
 
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "admin@edunudg.com" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
-    fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+    });
 
-    expect(await screen.findByText("Admin home")).toBeDefined();
+    await expectRedirectTo("Admin home");
     expect(signInWithEmail).toHaveBeenCalledWith("admin@edunudg.com", "admin");
   });
 
@@ -191,7 +209,7 @@ describe("LoginPage", () => {
       </QueryClientProvider>
     );
 
-    expect(await screen.findByText("Brand app home")).toBeDefined();
+    await expectRedirectTo("Brand app home");
   });
 
   it("regression_platform_redirect_does_not_wait_on_unfetched_branding", async () => {
@@ -212,7 +230,7 @@ describe("LoginPage", () => {
 
     renderLogin("/login");
 
-    expect(await screen.findByText("Admin home")).toBeDefined();
+    await expectRedirectTo("Admin home");
   });
 
   it("shows validation error when email or password is empty", async () => {

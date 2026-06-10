@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { AuthHandoffPage } from "./AuthHandoffPage";
+import { expectRedirectTo } from "./expectRedirectTo";
 
 const { verifyOtpMock } = vi.hoisted(() => ({
   verifyOtpMock: vi.fn(),
@@ -31,7 +32,7 @@ describe("AuthHandoffPage", () => {
 
     render(<RouterProvider router={router} />);
 
-    expect(await screen.findByText("Staff backend")).toBeDefined();
+    await expectRedirectTo("Staff backend");
     expect(verifyOtpMock).toHaveBeenCalledWith({ token_hash: "test-hash", type: "magiclink" });
   });
 

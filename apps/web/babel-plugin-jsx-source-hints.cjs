@@ -35,6 +35,11 @@ function jsxSourceHintsPlugin(babel, options = {}) {
         if (!elementPath.node.loc) return;
 
         const opening = elementPath.node.openingElement;
+
+        // Fragment only accepts `key` and `children`; skip shorthand <> and <Fragment>.
+        if (t.isJSXOpeningFragment(opening)) return;
+        if (t.isJSXIdentifier(opening.name) && opening.name.name === "Fragment") return;
+
         if (
           opening.attributes.some(
             (attr) => t.isJSXAttribute(attr) && t.isJSXIdentifier(attr.name) && attr.name.name === "data-at"
