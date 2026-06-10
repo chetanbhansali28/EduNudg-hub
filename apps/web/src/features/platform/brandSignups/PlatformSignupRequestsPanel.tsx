@@ -1,12 +1,24 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Card, DataList, ListRow, MutationError } from "@edunudg/ui";
+import {
+  Badge,
+  Card,
+  DataList,
+  KpiCard,
+  KpiGrid,
+  MutationError,
+  PipelineDetailPlaceholder,
+  PipelineEmptyState,
+  PipelineListItem,
+  PipelineMasterDetail,
+} from "@edunudg/ui";
 import {
   approvePlatformBrandSignup,
   listPendingPlatformSignups,
   rejectPlatformBrandSignup,
 } from "@/lib/platformBrandSignupApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { formatRelativeWhen, initialsFromName } from "@/lib/welcomeMessage";
 import { PlatformSignupDetailCard, signupListTitle } from "./PlatformSignupDetailCard";
 
 export function PlatformSignupRequestsPanel() {
@@ -21,7 +33,10 @@ export function PlatformSignupRequestsPanel() {
     queryFn: listPendingPlatformSignups,
   });
 
-  const selected = (signups.data ?? []).find((row) => row.id === selectedId) ?? null;
+  const all = signups.data ?? [];
+  const selected = all.find((row) => row.id === selectedId) ?? null;
+
+  const counts = useMemo(() => ({ pending: all.length }), [all.length]);
 
   const resetActionState = () => {
     setRejectMode(false);
@@ -47,6 +62,7 @@ export function PlatformSignupRequestsPanel() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform-brand-signups"] });
       void qc.invalidateQueries({ queryKey: ["brands"] });
+      void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
       closeDetail();
     },
     onError: capture,
@@ -61,62 +77,75 @@ export function PlatformSignupRequestsPanel() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform-brand-signups"] });
+      void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
       closeDetail();
     },
     onError: capture,
   });
 
+  const now = Date.now();
+
   return (
     <>
-      <Card title="Signup requests">
-        <MutationError message={error} />
-        <p className="ed-text-sm ed-muted">
-          Select a brand name to open the full signup request before approving or rejecting.
-        </p>
-        <DataList
-          items={signups.data ?? []}
-          empty="No pending brand signups."
-          render={(row) => {
-            const isSelected = row.id === selectedId;
-            return (
-              <ListRow>
-                <div>
-                  <button
-                    type="button"
-                    className={`ed-inquiry-list__link${isSelected ? " ed-inquiry-list__link--active" : ""}`}
-                    onClick={() => selectSignup(row.id)}
-                  >
-                    {signupListTitle(row)}
-                  </button>
-                  <div className="ed-text-sm ed-muted">
-                    {row.admin_full_name} · {row.email} · {row.city}
-                  </div>
-                  <Badge>{row.status}</Badge>
-                </div>
-              </ListRow>
-            );
-          }}
-        />
-      </Card>
+      <KpiGrid>
+        <KpiCard label="Pending review" value={counts.pending} active />
+      </KpiGrid>
 
-      {selected && (
-        <PlatformSignupDetailCard
-          signup={selected}
-          onClose={closeDetail}
-          onApprove={() => approve.mutate(selected.id)}
-          onReject={() => {
-            setRejectMode(true);
-            setRejectReason("");
-          }}
-          rejectMode={rejectMode}
-          rejectReason={rejectReason}
-          onRejectReasonChange={setRejectReason}
-          onConfirmReject={() => reject.mutate()}
-          onCancelAction={resetActionState}
-          approvePending={approve.isPending}
-          rejectPending={reject.isPending}
-        />
-      )}
+      <PipelineMasterDetail
+        list={
+          <Card title="Signup requests">
+            <MutationError message={error} />
+            <p className="ed-text-sm ed-muted ed-pipeline-card-intro">
+              {counts.pending} pending brand signup{counts.pending === 1 ? "" : "s"} awaiting review.
+            </p>
+            <DataList
+              variant="pipeline"
+              items={all}
+              empty={
+                <PipelineEmptyState message="No pending brand signups." />
+              }
+              render={(row) => {
+                const isSelected = row.id === selectedId;
+                const title = signupListTitle(row);
+                return (
+                  <PipelineListItem
+                    title={title}
+                    meta={`${row.admin_full_name} · ${row.email}`}
+                    lines={[row.city].filter(Boolean)}
+                    initials={initialsFromName(title)}
+                    when={formatRelativeWhen(row.created_at, now)}
+                    selected={isSelected}
+                    onSelect={() => selectSignup(row.id)}
+                    badges={<Badge tone="warning">{row.status}</Badge>}
+                  />
+                );
+              }}
+            />
+          </Card>
+        }
+        detail={
+          selected ? (
+            <PlatformSignupDetailCard
+              signup={selected}
+              onClose={closeDetail}
+              onApprove={() => approve.mutate(selected.id)}
+              onReject={() => {
+                setRejectMode(true);
+                setRejectReason("");
+              }}
+              rejectMode={rejectMode}
+              rejectReason={rejectReason}
+              onRejectReasonChange={setRejectReason}
+              onConfirmReject={() => reject.mutate()}
+              onCancelAction={resetActionState}
+              approvePending={approve.isPending}
+              rejectPending={reject.isPending}
+            />
+          ) : (
+            <PipelineDetailPlaceholder message="Select a brand signup to review details and approve or reject." />
+          )
+        }
+      />
     </>
   );
 }

@@ -1,12 +1,27 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, DataList, ListRow, MutationError, PageGridFull, PageTitle, Select } from "@edunudg/ui";
+import {
+  Badge,
+  Card,
+  DataList,
+  FilterTabs,
+  KpiCard,
+  KpiGrid,
+  MutationError,
+  PageGridFull,
+  PageToolbar,
+  PipelineDetailPlaceholder,
+  PipelineEmptyState,
+  PipelineListItem,
+  PipelineMasterDetail,
+} from "@edunudg/ui";
 import { ManualFranchiseInquiryCard } from "@/features/shared/manualLeads/ManualFranchiseInquiryCard";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { approveFranchiseInquiry, rejectFranchiseInquiry } from "@/lib/franchiseInquiriesApi";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { formatRelativeWhen, initialsFromName } from "@/lib/welcomeMessage";
 import {
   FranchiseInquiryDetailCard,
   inquiryListTitle,
@@ -16,9 +31,9 @@ import {
 type InquiryFilter = "all" | "pending" | "decided";
 
 const FILTER_OPTIONS: { value: InquiryFilter; label: string }[] = [
-  { value: "all", label: "All applications" },
   { value: "pending", label: "Pending review" },
-  { value: "decided", label: "Approved / rejected / converted" },
+  { value: "decided", label: "Decided" },
+  { value: "all", label: "All" },
 ];
 
 const INQUIRY_SELECT =
@@ -77,6 +92,7 @@ export function FranchiseApplicationsPage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
       void qc.invalidateQueries({ queryKey: ["centers", brandId] });
+      void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
       closeDetail();
     },
     onError: capture,
@@ -91,6 +107,7 @@ export function FranchiseApplicationsPage() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
+      void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
       closeDetail();
     },
     onError: capture,
@@ -99,77 +116,127 @@ export function FranchiseApplicationsPage() {
   if (missingBrand) return <p className="ed-empty">Brand context not found.</p>;
 
   const all = inquiries.data ?? [];
+  const counts = useMemo(
+    () => ({
+      pending: all.filter(isPending).length,
+      decided: all.filter((row) => !isPending(row)).length,
+      all: all.length,
+    }),
+    [all]
+  );
+
   const filtered = all.filter((row) => {
     if (filter === "pending") return isPending(row);
     if (filter === "decided") return !isPending(row);
     return true;
   });
 
+  const filterTabs = FILTER_OPTIONS.map((option) => ({
+    ...option,
+    count: counts[option.value],
+  }));
+
+  const now = Date.now();
+
   return (
     <>
-      <PageTitle>Franchise Applications</PageTitle>
+      <PageToolbar
+        title="Franchise Applications"
+        subtitle="Review franchise partner applications before approving or rejecting."
+      />
       <MutationError message={error} />
 
       <PageGridFull>
         {brandId && <ManualFranchiseInquiryCard brandId={brandId} />}
       </PageGridFull>
 
-      <Card title="Applications">
-        <p className="ed-text-sm ed-muted">Select a franchise name to open the full application before approving or rejecting.</p>
-        <Select label="Show" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
-        <DataList
-          items={filtered}
-          empty="No franchise applications in this view."
-          render={(row) => {
-            const pending = isPending(row);
-            const isSelected = row.id === selectedId;
-            return (
-              <ListRow>
-                <div>
-                  <button
-                    type="button"
-                    className={`ed-inquiry-list__link${isSelected ? " ed-inquiry-list__link--active" : ""}`}
-                    onClick={() => selectInquiry(row.id)}
-                  >
-                    {inquiryListTitle(row)}
-                  </button>
-                  <div className="ed-text-sm ed-muted">{row.full_name} · {row.email}</div>
-                  {row.city && (
-                    <div className="ed-text-sm ed-muted">
-                      {row.city}
-                      {row.pincode ? ` · ${row.pincode}` : ""}
-                    </div>
-                  )}
-                  <Badge>{row.status}</Badge>
-                  {!pending && row.converted_center_id && (
-                    <span className="ed-text-sm ed-muted"> · Center provisioned</span>
-                  )}
-                </div>
-              </ListRow>
-            );
-          }}
+      <KpiGrid>
+        <KpiCard
+          label="Pending review"
+          value={counts.pending}
+          active={filter === "pending"}
+          onClick={() => setFilter("pending")}
         />
-      </Card>
+        <KpiCard
+          label="Decided"
+          value={counts.decided}
+          active={filter === "decided"}
+          onClick={() => setFilter("decided")}
+        />
+        <KpiCard label="All applications" value={counts.all} active={filter === "all"} onClick={() => setFilter("all")} />
+      </KpiGrid>
 
-      {selected && (
-        <FranchiseInquiryDetailCard
-          inquiry={selected}
-          pending={isPending(selected)}
-          onClose={closeDetail}
-          onApprove={() => approve.mutate()}
-          onReject={() => {
-            setRejectMode(true);
-            setRejectReason("");
-          }}
-          rejectMode={rejectMode}
-          rejectReason={rejectReason}
-          onRejectReasonChange={setRejectReason}
-          onConfirmReject={() => reject.mutate()}
-          onCancelAction={resetActionState}
-          approvePending={approve.isPending}
-          rejectPending={reject.isPending}
-        />
-      )}
+      <PipelineMasterDetail
+        list={
+          <Card title="Applications">
+            <FilterTabs options={filterTabs} value={filter} onChange={setFilter} aria-label="Application filter" />
+            <DataList
+              variant="pipeline"
+              items={filtered}
+              empty={
+                <PipelineEmptyState
+                  message="No franchise applications in this view."
+                  actionLabel={filter !== "pending" ? "Show pending review" : undefined}
+                  onAction={filter !== "pending" ? () => setFilter("pending") : undefined}
+                />
+              }
+              render={(row) => {
+                const pending = isPending(row);
+                const isSelected = row.id === selectedId;
+                const title = inquiryListTitle(row);
+                return (
+                  <PipelineListItem
+                    title={title}
+                    meta={`${row.full_name} · ${row.email}`}
+                    lines={
+                      row.city
+                        ? [`${row.city}${row.pincode ? ` · ${row.pincode}` : ""}`]
+                        : undefined
+                    }
+                    initials={initialsFromName(title)}
+                    when={formatRelativeWhen(row.created_at, now)}
+                    selected={isSelected}
+                    onSelect={() => selectInquiry(row.id)}
+                    badges={
+                      <>
+                        <Badge tone={pending ? "warning" : row.converted_center_id ? "success" : "default"}>
+                          {row.status}
+                        </Badge>
+                        {!pending && row.converted_center_id && (
+                          <Badge tone="success">Center provisioned</Badge>
+                        )}
+                      </>
+                    }
+                  />
+                );
+              }}
+            />
+          </Card>
+        }
+        detail={
+          selected ? (
+            <FranchiseInquiryDetailCard
+              inquiry={selected}
+              pending={isPending(selected)}
+              onClose={closeDetail}
+              onApprove={() => approve.mutate()}
+              onReject={() => {
+                setRejectMode(true);
+                setRejectReason("");
+              }}
+              rejectMode={rejectMode}
+              rejectReason={rejectReason}
+              onRejectReasonChange={setRejectReason}
+              onConfirmReject={() => reject.mutate()}
+              onCancelAction={resetActionState}
+              approvePending={approve.isPending}
+              rejectPending={reject.isPending}
+            />
+          ) : (
+            <PipelineDetailPlaceholder message="Select a franchise application to review details and take action." />
+          )
+        }
+      />
     </>
   );
 }

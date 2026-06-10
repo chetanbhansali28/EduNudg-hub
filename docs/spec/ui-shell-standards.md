@@ -63,6 +63,35 @@ Do not stack many full-width `Card`s in a single column on laptop viewports.
 - Marketing editor `EditorAccordion` (`HomepageEditorShell.tsx`): title + collapse control in `<summary>` only; **Visible on site** toggle lives in the accordion body
 - Stale / lost lead states use text + icon, not color alone
 
+## Personalized welcome (staff shells)
+
+Brand, center, platform, and learn layouts use `useStaffShellWelcome()`:
+
+- **Display name:** `profiles.full_name` when available, else auth metadata / email local-part (`resolveStaffDisplayName` in `portalUser.ts`).
+- **Greeting:** time-of-day + first name (`buildWelcomeHeading` in `welcomeMessage.ts`).
+- **Subtitle:** `{portalLabel} · {action hints}` when counts are non-zero (`useShellContextCounts` + `shellActionHints`).
+
+Pass `welcomeHeading` and `welcomeSubtitle` into `AppShell`; the legacy `Welcome back, {name}` string remains the fallback when those props are omitted.
+
+## Lead / application pipelines
+
+Franchise applications, student leads (brand + center), and platform brand signups share the **pipeline** pattern from `@edunudg/ui`:
+
+| Primitive | Use |
+|-----------|-----|
+| `PipelineMasterDetail` | List column + sticky detail column from 1024px |
+| `FilterTabs` | Pill filters with optional counts (replaces lone `Select`) |
+| `PipelineListItem` | Avatar, title, meta, badges, relative time |
+| `KpiCard` + `onClick` | KPI strip doubles as filter shortcuts |
+| `PipelineEmptyState` | Compact empty message + optional CTA |
+| `PipelineDetailPlaceholder` | Desktop hint when no row is selected |
+
+Styles use admin theme tokens (`--ed-primary-soft`, `--ed-card`, etc.) for light and dark mode.
+
+Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `PlatformSignupRequestsPanel`.
+
+Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `PlatformSignupRequestsPanel.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`.
+
 ## Related
 
 - [Navigation spec](./navigation-spec.md)

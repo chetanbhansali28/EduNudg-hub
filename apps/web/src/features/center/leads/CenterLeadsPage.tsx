@@ -5,11 +5,17 @@ import {
   Button,
   Card,
   DataList,
+  FilterTabs,
   Input,
-  ListRow,
+  KpiCard,
+  KpiGrid,
   MutationError,
   PageGridFull,
-  PageTitle,
+  PageToolbar,
+  PipelineDetailPlaceholder,
+  PipelineEmptyState,
+  PipelineListItem,
+  PipelineMasterDetail,
   Select,
 } from "@edunudg/ui";
 import { ConvertLeadDialog } from "@/features/center/convertStudent/ConvertLeadDialog";
@@ -27,6 +33,7 @@ import {
 } from "@/lib/leadsApi";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { formatRelativeWhen, initialsFromName } from "@/lib/welcomeMessage";
 
 const STATUS_OPTIONS: { value: LeadStatus; label: string }[] = [
   { value: "new", label: "New" },
@@ -73,6 +80,7 @@ export function CenterLeadsPage() {
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ["center-leads", centerId] });
     void qc.invalidateQueries({ queryKey: ["center-dashboard", centerId] });
+    void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
   };
 
   const leads = useQuery({
@@ -155,6 +163,17 @@ export function CenterLeadsPage() {
   const now = Date.now();
   const allLeads = leads.data ?? [];
 
+  const counts = useMemo(
+    () => ({
+      open: allLeads.filter((l) => ["new", "contacted", "qualified"].includes(l.status)).length,
+      lost: allLeads.filter((l) => l.status === "lost").length,
+      converted: allLeads.filter((l) => l.status === "converted").length,
+      all: allLeads.length,
+      stale: allLeads.filter((l) => isLeadStale(l, now)).length,
+    }),
+    [allLeads, now]
+  );
+
   const filtered = useMemo(() => {
     return allLeads.filter((l) => {
       if (filter === "open") return ["new", "contacted", "qualified"].includes(l.status);
@@ -163,6 +182,11 @@ export function CenterLeadsPage() {
       return true;
     });
   }, [allLeads, filter]);
+
+  const filterTabs = FILTER_OPTIONS.map((option) => ({
+    ...option,
+    count: counts[option.value],
+  }));
 
   if (!centerId) return <p className="ed-empty">Center context not found.</p>;
 
@@ -173,91 +197,124 @@ export function CenterLeadsPage() {
 
   return (
     <>
-      <PageTitle>Leads</PageTitle>
-      <p className="ed-text-sm ed-muted">
-        Assigned and direct center registrations. Call parents on WhatsApp, update status after each contact, then
-        convert when enrolled (staff-only — FR-C12).
-      </p>
+      <PageToolbar
+        title="Leads"
+        subtitle="Call parents on WhatsApp, update status after each contact, then convert when enrolled (staff-only — FR-C12)."
+      />
       <MutationError message={error} />
 
       <PageGridFull>
         <ManualStudentLeadCard scope="center" centerId={centerId} invalidateKey={["center-leads", centerId]} />
       </PageGridFull>
 
-      <Card title="Lead pipeline">
-        <p className="ed-text-sm ed-muted">Select a parent name to open the full lead before updating status or converting.</p>
-        <Select label="Show" value={filter} onChange={setFilter} options={FILTER_OPTIONS} />
-        <DataList
-          items={filtered}
-          empty="No leads in this view."
-          render={(l) => {
-            const stale = isLeadStale(l, now);
-            const hint = slaHint(l, now);
-            const isSelected = l.id === selectedId;
-            return (
-              <ListRow>
-                <div>
-                  <button
-                    type="button"
-                    className={`ed-inquiry-list__link${isSelected ? " ed-inquiry-list__link--active" : ""}`}
-                    onClick={() => selectLead(l.id)}
-                  >
-                    {leadListTitle(l)}
-                  </button>
-                  <div className="ed-text-sm ed-muted">{l.whatsapp_e164}</div>
-                  {l.child_name && <div className="ed-text-sm">Child: {l.child_name}</div>}
-                  <Badge>{l.status}</Badge>{" "}
-                  <Badge>{l.lead_source === "center" ? "Direct registration" : "Brand assigned"}</Badge>
-                  {stale && <Badge tone="warning">Brand SLA expired</Badge>}
-                  {hint && <p className="ed-text-sm ed-muted">{hint}</p>}
-                </div>
-              </ListRow>
-            );
-          }}
+      <KpiGrid>
+        <KpiCard label="Open pipeline" value={counts.open} active={filter === "open"} onClick={() => setFilter("open")} />
+        <KpiCard
+          label="Needs attention"
+          value={counts.stale}
+          hint="Brand SLA expired"
+          active={filter === "open"}
+          onClick={() => setFilter("open")}
         />
-      </Card>
+        <KpiCard label="Lost" value={counts.lost} active={filter === "lost"} onClick={() => setFilter("lost")} />
+        <KpiCard
+          label="Converted"
+          value={counts.converted}
+          active={filter === "converted"}
+          onClick={() => setFilter("converted")}
+        />
+      </KpiGrid>
 
-      {selected && (
-        <StudentLeadDetailCard
-          lead={selected}
-          stale={selectedStale}
-          onClose={closeDetail}
-          actions={
-            <>
-              {selectedHint && <p className="ed-text-sm ed-muted">{selectedHint}</p>}
-              {lostMode ? (
-                <>
-                  <p className="ed-text-sm ed-muted">Reason is required and visible to the brand (FR-C11b).</p>
-                  <Input label="Reason (required)" value={lostReason} onChange={setLostReason} />
-                  <div className="ed-form-section">
-                    <Button onClick={() => markLost.mutate()} disabled={!lostReason.trim() || markLost.isPending}>
-                      Confirm lost
-                    </Button>
-                    <Button variant="ghost" onClick={() => setLostMode(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </>
-              ) : selectedPipeline ? (
-                <div className="ed-form-section">
-                  <Select
-                    label="Status"
-                    value={selected.status}
-                    onChange={(v) => updateStatus.mutate({ id: selected.id, status: v })}
-                    options={STATUS_OPTIONS}
+      <PipelineMasterDetail
+        list={
+          <Card title="Lead pipeline">
+            <FilterTabs options={filterTabs} value={filter} onChange={setFilter} aria-label="Lead filter" />
+            <DataList
+              variant="pipeline"
+              items={filtered}
+              empty={
+                <PipelineEmptyState
+                  message="No leads in this view."
+                  actionLabel={filter !== "open" ? "Show open pipeline" : undefined}
+                  onAction={filter !== "open" ? () => setFilter("open") : undefined}
+                />
+              }
+              render={(l) => {
+                const stale = isLeadStale(l, now);
+                const isSelected = l.id === selectedId;
+                const title = leadListTitle(l);
+                const hint = slaHint(l, now);
+                return (
+                  <PipelineListItem
+                    title={title}
+                    meta={l.whatsapp_e164 ?? undefined}
+                    lines={[
+                      ...(l.child_name ? [`Child: ${l.child_name}`] : []),
+                      ...(hint ? [hint] : []),
+                    ]}
+                    initials={initialsFromName(title)}
+                    when={formatRelativeWhen(l.created_at, now)}
+                    selected={isSelected}
+                    onSelect={() => selectLead(l.id)}
+                    badges={
+                      <>
+                        <Badge>{l.status}</Badge>
+                        <Badge>{l.lead_source === "center" ? "Direct registration" : "Brand assigned"}</Badge>
+                        {stale && <Badge tone="warning">Brand SLA expired</Badge>}
+                      </>
+                    }
                   />
-                  <Button onClick={() => setConvertTarget(selected)} disabled={convert.isPending}>
-                    Convert to student
-                  </Button>
-                  <Button variant="danger" onClick={() => setLostMode(true)}>
-                    Mark lost
-                  </Button>
-                </div>
-              ) : null}
-            </>
-          }
-        />
-      )}
+                );
+              }}
+            />
+          </Card>
+        }
+        detail={
+          selected ? (
+            <StudentLeadDetailCard
+              lead={selected}
+              stale={selectedStale}
+              onClose={closeDetail}
+              actions={
+                <>
+                  {selectedHint && <p className="ed-text-sm ed-muted">{selectedHint}</p>}
+                  {lostMode ? (
+                    <>
+                      <p className="ed-text-sm ed-muted">Reason is required and visible to the brand (FR-C11b).</p>
+                      <Input label="Reason (required)" value={lostReason} onChange={setLostReason} />
+                      <div className="ed-form-section">
+                        <Button onClick={() => markLost.mutate()} disabled={!lostReason.trim() || markLost.isPending}>
+                          Confirm lost
+                        </Button>
+                        <Button variant="ghost" onClick={() => setLostMode(false)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </>
+                  ) : selectedPipeline ? (
+                    <div className="ed-form-section">
+                      <Select
+                        label="Status"
+                        value={selected.status}
+                        onChange={(v) => updateStatus.mutate({ id: selected.id, status: v })}
+                        options={STATUS_OPTIONS}
+                      />
+                      <Button onClick={() => setConvertTarget(selected)} disabled={convert.isPending}>
+                        Convert to student
+                      </Button>
+                      <Button variant="danger" onClick={() => setLostMode(true)}>
+                        Mark lost
+                      </Button>
+                    </div>
+                  ) : null}
+                </>
+              }
+            />
+          ) : (
+            <PipelineDetailPlaceholder message="Select a lead to update status, convert, or mark lost." />
+          )
+        }
+      />
 
       {convertTarget && (
         <ConvertLeadDialog

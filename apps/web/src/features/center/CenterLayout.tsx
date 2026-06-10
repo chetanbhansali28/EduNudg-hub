@@ -4,15 +4,14 @@ import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { useBrandFeatureFlags } from "@/hooks/useFeatureFlag";
+import { useStaffShellWelcome } from "@/hooks/useStaffShellWelcome";
 import { centerNavSections, filterNavByFeatureFlags, signOutNavItem, CENTER_FEATURE_FLAGS } from "@/lib/portalNav";
 import { resolveShellProductName } from "@/lib/portalBranding";
-import { displayUserFromAuth } from "@/lib/portalUser";
 
 export function CenterLayout() {
   const { pathname } = useLocation();
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
   const tenant = useTenant();
-  const profile = displayUserFromAuth(user);
   const { data: branding } = usePortalBranding();
   const featureFlags = useBrandFeatureFlags();
   const navSections = filterNavByFeatureFlags(centerNavSections(pathname), featureFlags, CENTER_FEATURE_FLAGS);
@@ -32,14 +31,17 @@ export function CenterLayout() {
     tenant.brandSlug,
     tenant.centerSlug
   );
+  const portalLabel = `Center · ${shell.productName}`;
+  const welcome = useStaffShellWelcome(portalLabel);
 
   return (
     <AppShell
       productName={shell.productName}
       logoUrl={shell.logoUrl}
-      portalLabel={`Center · ${shell.productName}`}
-      welcomeName={profile.name}
-      user={profile}
+      portalLabel={portalLabel}
+      welcomeHeading={welcome.welcomeHeading}
+      welcomeSubtitle={welcome.welcomeSubtitle}
+      user={welcome.user}
       navSections={navSections}
       footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}

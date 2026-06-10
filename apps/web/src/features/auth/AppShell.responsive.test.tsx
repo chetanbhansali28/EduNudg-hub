@@ -71,7 +71,8 @@ describe("AppShell responsive", () => {
         <ThemeProvider>
           <AppShell
             portalLabel="Platform Owner"
-            welcomeName="Platform Admin"
+            welcomeHeading="Good morning, Platform 👋"
+            welcomeSubtitle="Platform Owner · 2 brand signups pending review"
             user={{ name: "Platform Admin", email: "admin@edunudg.com" }}
             navSections={[{ title: "Main menu", items: [{ href: "/admin", label: "Home", active: true }] }]}
             showUpgradeCard={false}
@@ -86,6 +87,27 @@ describe("AppShell responsive", () => {
     expect(screen.queryByRole("button", { name: "Messages" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Notifications" })).toBeNull();
     expect(document.querySelector(".ed-header__collapse")).toBeNull();
+    expect(screen.getByText("Good morning, Platform 👋")).toBeDefined();
+    expect(screen.getByText("Platform Owner · 2 brand signups pending review")).toBeDefined();
+  });
+
+  it("regression_default_welcome_fallback", () => {
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <AppShell
+            portalLabel="Platform Owner"
+            welcomeName="Platform Admin"
+            user={{ name: "Platform Admin", email: "admin@edunudg.com" }}
+            navSections={[{ title: "Main menu", items: [{ href: "/admin", label: "Home", active: true }] }]}
+            showUpgradeCard={false}
+          >
+            <p>Page body</p>
+          </AppShell>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
     expect(screen.getByText("Welcome back, Platform Admin 👋")).toBeDefined();
   });
 

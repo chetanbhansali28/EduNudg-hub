@@ -43,7 +43,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 describe("FranchiseApplicationsPage", () => {
-  it("regression_single_applications_list_with_filter", async () => {
+  it("regression_pipeline_list_with_filter_tabs", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
@@ -51,9 +51,9 @@ describe("FranchiseApplicationsPage", () => {
       </QueryClientProvider>
     );
     expect(await screen.findByText("Applications")).toBeDefined();
-    expect(screen.getByLabelText("Show")).toBeDefined();
-    expect(screen.queryByText(/^Pending \(/)).toBeNull();
-    expect(screen.getAllByText("Applications")).toHaveLength(1);
+    expect(screen.getByRole("tablist", { name: "Application filter" })).toBeDefined();
+    expect(await screen.findByRole("tab", { name: /Pending review \(1\)/ })).toBeDefined();
+    expect(screen.queryByLabelText("Show")).toBeNull();
   });
 
   it("regression_franchise_name_opens_full_application_detail", async () => {
@@ -64,7 +64,7 @@ describe("FranchiseApplicationsPage", () => {
       </QueryClientProvider>
     );
 
-    fireEvent.click(await screen.findByRole("button", { name: "Abacus Pune West" }));
+    fireEvent.click(await screen.findByRole("button", { name: /Abacus Pune West/i }));
 
     expect(screen.getByText("Application detail")).toBeDefined();
     expect(screen.getByText("42 FC Road")).toBeDefined();

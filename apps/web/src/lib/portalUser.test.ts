@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { displayUserFromAuth } from "./portalUser";
+import { displayUserFromAuth, resolveStaffDisplayName } from "./portalUser";
 
 describe("displayUserFromAuth", () => {
   it("uses full_name from metadata", () => {
@@ -25,5 +25,21 @@ describe("displayUserFromAuth", () => {
       created_at: "",
     });
     expect(result.name).toBe("Center owner");
+  });
+
+  it("resolveStaffDisplayName prefers profiles.full_name", () => {
+    const result = resolveStaffDisplayName(
+      { full_name: "Chetan Kumar", email: "chetan@example.com" },
+      {
+        id: "1",
+        email: "admin@edunudg.com",
+        user_metadata: { full_name: "Platform Admin" },
+        app_metadata: {},
+        aud: "authenticated",
+        created_at: "",
+      }
+    );
+    expect(result.name).toBe("Chetan Kumar");
+    expect(result.email).toBe("chetan@example.com");
   });
 });

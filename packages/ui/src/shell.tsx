@@ -247,6 +247,8 @@ export function AppShell({
   logoUrl,
   portalLabel,
   welcomeName,
+  welcomeHeading,
+  welcomeSubtitle,
   user,
   navSections,
   footerItems = [],
@@ -258,6 +260,10 @@ export function AppShell({
   logoUrl?: string | null;
   portalLabel: string;
   welcomeName?: string;
+  /** Full greeting line; defaults to "Welcome back, {name} 👋". */
+  welcomeHeading?: string;
+  /** Context line under greeting; defaults to portalLabel. */
+  welcomeSubtitle?: string;
   user?: { name: string; email: string };
   navSections: ShellNavSection[];
   footerItems?: ShellNavItem[];
@@ -302,6 +308,8 @@ export function AppShell({
   }, [closeNav]);
 
   const displayName = welcomeName ?? user?.name ?? "there";
+  const heading = welcomeHeading ?? `Welcome back, ${displayName} 👋`;
+  const subtitle = welcomeSubtitle ?? portalLabel;
   const initials = (user?.name ?? displayName)
     .split(/\s+/)
     .map((p) => p[0])
@@ -367,8 +375,8 @@ export function AppShell({
 
         <header className="ed-header">
           <div className="ed-header__intro">
-            <h1 className="ed-header__welcome">Welcome back, {displayName} 👋</h1>
-            <p className="ed-header__welcome-sub">{portalLabel}</p>
+            <h1 className="ed-header__welcome">{heading}</h1>
+            <p className="ed-header__welcome-sub">{subtitle}</p>
           </div>
           {user && (
             <div className="ed-header__actions">

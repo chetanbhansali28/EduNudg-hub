@@ -30,7 +30,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 describe("CenterLeadsPage", () => {
-  it("regression_center_leads_pipeline_with_filter", async () => {
+  it("regression_center_leads_pipeline_with_filter_tabs", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
@@ -38,8 +38,8 @@ describe("CenterLeadsPage", () => {
       </QueryClientProvider>
     );
     expect(await screen.findByText("Lead pipeline")).toBeDefined();
-    expect(screen.getByLabelText("Show")).toBeDefined();
+    expect(screen.getByRole("tablist", { name: "Lead filter" })).toBeDefined();
     expect(screen.getByText(/staff-only/)).toBeDefined();
-    expect(screen.queryByText("Assigned leads")).toBeNull();
+    expect(screen.queryByLabelText("Show")).toBeNull();
   });
 });

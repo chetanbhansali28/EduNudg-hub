@@ -47,13 +47,35 @@ export function KpiCard({
   label,
   value,
   hint,
+  onClick,
+  active,
 }: {
   label: string;
   value: string | number;
   hint?: string;
+  onClick?: () => void;
+  active?: boolean;
 }) {
+  const className = [
+    "ed-kpi",
+    onClick ? "ed-kpi--clickable" : "",
+    active ? "ed-kpi--active" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  if (onClick) {
+    return (
+      <button type="button" className={className} onClick={onClick} aria-pressed={active}>
+        <div className="ed-kpi__label">{label}</div>
+        <div className="ed-kpi__value">{value}</div>
+        {hint && <div className="ed-kpi__hint">{hint}</div>}
+      </button>
+    );
+  }
+
   return (
-    <div className="ed-kpi">
+    <div className={className}>
       <div className="ed-kpi__label">{label}</div>
       <div className="ed-kpi__value">{value}</div>
       {hint && <div className="ed-kpi__hint">{hint}</div>}
@@ -327,16 +349,22 @@ export function DataList<T extends { id: string }>({
   items,
   render,
   empty,
+  variant = "default",
 }: {
   items: T[];
   render: (item: T) => ReactNode;
-  empty?: string;
+  empty?: ReactNode;
+  /** pipeline = compact rows for lead/application queues */
+  variant?: "default" | "pipeline";
 }) {
   if (items.length === 0) {
-    return <p className="ed-empty">{empty ?? "No items yet."}</p>;
+    if (empty != null) {
+      return typeof empty === "string" ? <p className="ed-empty">{empty}</p> : empty;
+    }
+    return <p className="ed-empty">No items yet.</p>;
   }
   return (
-    <div className="ed-data-list">
+    <div className={variant === "pipeline" ? "ed-data-list ed-data-list--pipeline" : "ed-data-list"}>
       {items.map((item) => (
         <div key={item.id} className="ed-data-list__item">
           {render(item)}
@@ -517,5 +545,129 @@ export function ToggleField({
       </div>
       <Toggle id={id} checked={checked} onChange={onChange} disabled={disabled} aria-label={label} />
     </div>
+  );
+}
+
+export function FilterTabs<T extends string>({
+  options,
+  value,
+  onChange,
+  "aria-label": ariaLabel = "Filter",
+}: {
+  options: { value: T; label: string; count?: number }[];
+  value: T;
+  onChange: (value: T) => void;
+  "aria-label"?: string;
+}) {
+  return (
+    <div className="ed-filter-tabs" role="tablist" aria-label={ariaLabel}>
+      {options.map((option) => {
+        const active = option.value === value;
+        const label =
+          option.count != null ? `${option.label} (${option.count})` : option.label;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="tab"
+            className={`ed-filter-tabs__btn${active ? " is-active" : ""}`}
+            aria-selected={active}
+            onClick={() => onChange(option.value)}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export function PipelineMasterDetail({
+  list,
+  detail,
+}: {
+  list: ReactNode;
+  detail?: ReactNode;
+}) {
+  return (
+    <div className="ed-pipeline-layout">
+      <div className="ed-pipeline-layout__list">{list}</div>
+      {detail ? <div className="ed-pipeline-layout__detail">{detail}</div> : null}
+    </div>
+  );
+}
+
+export function PipelineListItem({
+  title,
+  meta,
+  lines,
+  badges,
+  initials,
+  when,
+  selected,
+  onSelect,
+}: {
+  title: string;
+  meta?: string;
+  lines?: string[];
+  badges?: ReactNode;
+  initials?: string;
+  when?: string;
+  selected?: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`ed-pipeline-item${selected ? " ed-pipeline-item--selected" : ""}`}
+      onClick={onSelect}
+      aria-pressed={selected}
+    >
+      {initials && (
+        <span className="ed-pipeline-item__avatar" aria-hidden>
+          {initials}
+        </span>
+      )}
+      <span className="ed-pipeline-item__body">
+        <span className="ed-pipeline-item__title-row">
+          <span className="ed-pipeline-item__title">{title}</span>
+          {when && <span className="ed-pipeline-item__when">{when}</span>}
+        </span>
+        {meta && <span className="ed-pipeline-item__meta">{meta}</span>}
+        {lines?.map((line) => (
+          <span key={line} className="ed-pipeline-item__line">
+            {line}
+          </span>
+        ))}
+        {badges && <span className="ed-pipeline-item__badges">{badges}</span>}
+      </span>
+    </button>
+  );
+}
+
+export function PipelineEmptyState({
+  message,
+  actionLabel,
+  onAction,
+}: {
+  message: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="ed-pipeline-empty">
+      <p className="ed-pipeline-empty__message">{message}</p>
+      {actionLabel && onAction && (
+        <Button onClick={onAction}>{actionLabel}</Button>
+      )}
+    </div>
+  );
+}
+
+export function PipelineDetailPlaceholder({ message }: { message: string }) {
+  return (
+    <Card title="Details">
+      <p className="ed-text-sm ed-muted ed-pipeline-detail-placeholder">{message}</p>
+    </Card>
   );
 }

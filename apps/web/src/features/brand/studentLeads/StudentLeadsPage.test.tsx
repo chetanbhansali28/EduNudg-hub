@@ -32,7 +32,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 describe("StudentLeadsPage", () => {
-  it("regression_single_pipeline_list_with_filter", async () => {
+  it("regression_pipeline_list_with_filter_tabs", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <MemoryRouter>
@@ -42,9 +42,8 @@ describe("StudentLeadsPage", () => {
       </MemoryRouter>
     );
     expect(await screen.findByText("Lead pipeline")).toBeDefined();
-    expect(screen.getByLabelText("Show")).toBeDefined();
-    expect(screen.getByText("Leads needing attention")).toBeDefined();
-    expect(screen.queryByText(/^Stale \(/)).toBeNull();
-    expect(screen.getAllByText("Lead pipeline")).toHaveLength(1);
+    expect(screen.getByRole("tablist", { name: "Lead filter" })).toBeDefined();
+    expect(screen.getByRole("tab", { name: "Needs attention (0)" })).toBeDefined();
+    expect(screen.queryByLabelText("Show")).toBeNull();
   });
 });
