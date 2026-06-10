@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { HomepageEditorForm } from "./HomepageEditorForm";
 import { HomepageEditorShell } from "./HomepageEditorShell";
@@ -13,17 +13,17 @@ describe("HomepageEditorForm", () => {
     );
 
     expect(container.querySelector(".ed-homepage-editor-shell")).toBeTruthy();
-    expect(container.querySelector(".ed-homepage-editor")?.className).not.toContain("grid");
+    expect(container.querySelector(".ed-homepage-editor")).toBeTruthy();
 
-    const accordions = container.querySelectorAll("details.ed-editor-accordion");
+    const accordions = container.querySelectorAll(".ed-editor-accordion");
     expect(accordions.length).toBeGreaterThanOrEqual(8);
-    accordions.forEach((el) => {
-      expect(el.hasAttribute("open")).toBe(false);
-    });
+    expect(container.querySelector(".ed-editor-accordion--open")).toBeNull();
 
     expect(screen.getByText("Site")).toBeDefined();
     expect(screen.getByText("Navigation")).toBeDefined();
     expect(screen.getByText("Hero")).toBeDefined();
+
+    fireEvent.click(screen.getByRole("button", { name: /Hero/i }));
     expect(screen.queryByLabelText("Hero background image URL")).toBeNull();
     expect(screen.getByLabelText("Hero background image or video")).toBeDefined();
   });
@@ -35,7 +35,11 @@ describe("HomepageEditorForm", () => {
       </HomepageEditorShell>
     );
 
-    const fields = container.querySelectorAll("input.ed-field__input, select.ed-field__input, textarea.ed-field__input");
+    fireEvent.click(screen.getByRole("button", { name: /^Site/i }));
+
+    const fields = container.querySelectorAll(
+      "input.ed-field__input, select.ed-field__input, textarea.ed-field__input"
+    );
     expect(fields.length).toBeGreaterThan(0);
     fields.forEach((field) => {
       expect(field.getAttribute("id") || field.getAttribute("name")).toBeTruthy();

@@ -11,65 +11,57 @@ Admin portals (platform, brand, center) share the **Vivid Logic** design system 
 | Center template | `/app/homepage` (panel 2) | Same `HomepageEditorForm` as brand template |
 | Center detail | `/app/centers/:slug` | `BrandCenterDetailPage` (read-only KPIs; styling only) |
 
-Theme-specific editors (`AbacusClassicEditorForm`, future themes) reuse the same shell, accordion, and visibility patterns as `HomepageEditorForm`.
+Theme-specific editors (`AbacusClassicEditorForm`, future themes) reuse `HomepageEditorShell`, `HomepageEditorSections`, and `EditorAccordion`.
 
 ## Design tokens
 
-- Primary: `#2563eb`
-- Surface: `#faf8ff` (light)
-- Radius: `8px`
-- Font: Plus Jakarta Sans (loaded in `apps/web/index.html`)
-- Nav active state: bold + primary color
-- Button press: subtle scale on `:active`
+Material-inspired palette (ported from mockups, implemented as CSS variables — **not Tailwind**):
 
-Tokens live in CSS variables under `.ed-theme[data-theme="light"]` and `[data-theme="dark"]` in `packages/ui/src/styles.css`.
+- Primary container: `#2563eb`
+- Surface / background: `#faf8ff`
+- Outline variant: `#c3c6d7`
+- Editor card radius: `1.5rem` (`--ed-radius-editor`)
+- Headlines: **Plus Jakarta Sans**; body labels/inputs: **Inter**
+- Icons: **Material Symbols Outlined** (loaded in `apps/web/index.html`)
+
+Mobile navigation remains **sidebar overlay** (no bottom nav bar).
 
 ## Dark mode
 
-Users choose light or dark in the **AppShell header** (`ThemeToggle`). Preference persists in `localStorage` key `edunudg-admin-theme` via `packages/ui/src/themePreference.ts`.
-
-Both themes are fully supported; no system-preference auto-switch.
-
-## Mobile navigation
-
-Admin keeps the **sidebar overlay** drawer on small screens (not bottom nav). See `AppShell` in `packages/ui/src/shell.tsx`.
+Users choose light or dark in the **AppShell header** (`ThemeToggle`). Preference persists in `localStorage` key `edunudg-admin-theme`.
 
 ## Homepage editor patterns
 
-### Shell (`HomepageEditorShell`)
+### Hero card (`HomepageEditorShell`)
 
-- Page toolbar with **Save changes** (top)
-- Fixed bottom **Save changes** bar on long forms when `onSave` is provided
-- Multi-site layouts use `HomepageEditorPanel` per site with the same save label
-- Exports shared **`EditorAccordion`** used by all homepage editor forms
+- Gradient promo card with page title, subtitle, and full-width **Save changes** button (Material `save` icon)
+- Sticky bottom save bar on **mobile only** (hidden on desktop ≥1024px)
+- `HomepageEditorPanel` uses the same hero pattern for brand + center template panels
 
-### Accordions (`EditorAccordion` in `HomepageEditorShell.tsx`)
+### Accordions (`EditorAccordion` + `HomepageEditorSections`)
 
-- Single-column stack (`.ed-homepage-editor` uses flex column — no 2-column grid)
-- Collapsed by default; **title left, `+`/`−` right** on a full-width gray header bar
-- Optional **Visible on site** toggle at the top of the accordion body (not in the header row)
-- Section-off state dims body content
+- **Single-open** behaviour: opening one section closes others
+- Collapsed row: colored icon tile + title + subtitle + Material `add` icon
+- Expanded row: icon + title; **Visible on site** toggle + `remove` collapse control
+- Section metadata in `HOMEPAGE_EDITOR_SECTION_META` (`HomepageEditorShell.tsx`)
+- Active open section: primary border + elevated shadow
 
-### Testimonials (inline in `HomepageEditorForm.tsx`)
+### Testimonials (split layout in `HomepageEditorForm.tsx`)
 
-Used when testimonials are not managed externally.
+When testimonials are managed inline (Novu theme):
 
-- Drag handle + move up/down reorder
-- Soft character guidance: **50–100 characters** recommended (`testimonialEditorHelpers.ts`)
-- Remove uses danger button styling
+- Left column (desktop): section title, subtitle, editor tip (50–100 chars)
+- Right column: draggable testimonial cards, add/remove
 
-Abacus Classic / Spark Academy themes manage success stories elsewhere; their editors show an external hint only.
+Abacus Classic / Spark Academy: success stories external — no split layout.
 
 ### Brand marketing themes (`BrandMarketingThemesPanel`)
 
-Platform-only grid at `/admin/homepage`:
+Platform-only bento grid at `/admin/homepage`:
 
-- Saved theme shows green badge + **Saved** button (disabled)
-- Draft change shows **Unsaved changes** + primary **Update theme**
-
-## Center detail page
-
-`BrandCenterDetailPage` uses `.ed-detail-page`, `.ed-detail-page__subtitle`, and `.ed-detail-page__toolbar` for consistent spacing and actions. No new per-center landing editor — brand-level template at `/app/homepage` remains the source of truth.
+- Header with uppercase `{N} brands` pill
+- Two-column brand cards on desktop (12-col grid, span 6)
+- Theme badge per brand; **Saved** (check icon) vs primary **Update theme**
 
 ## Automated tests
 
@@ -86,37 +78,36 @@ Platform-only grid at `/admin/homepage`:
 Run:
 
 ```bash
-pnpm --filter @edunudg/ui test
-pnpm --filter web test
+pnpm --filter web test -- HomepageEditorShell HomepageEditorForm BrandMarketingThemesPanel
 ```
 
 ## Manual QA checklist
 
 ### Theme & shell
 
-- [ ] Toggle dark/light in platform, brand, and center portals; reload — preference persists
-- [ ] Sidebar overlay opens/closes on mobile; desktop collapse still works
-- [ ] Active nav item is bold and primary-colored
+- [ ] Toggle dark/light; reload — preference persists
+- [ ] Sidebar overlay on mobile (no bottom nav)
+- [ ] Desktop: sidebar + content layout unchanged
 
-### Homepage editor
+### Homepage editor (Admin, Brand, Center template)
 
-- [ ] Long form shows sticky bottom **Save changes**; top toolbar button also works
-- [ ] Each accordion: title + `−`/`+` on top header bar; body fields always directly below that section
-- [ ] Open a tall section (Hero / Why us) on a wide screen — next section header does not appear beside mid-content fields
-- [ ] Testimonials: reorder via drag and move buttons; character hint warns below 50 or above 100
-- [ ] Abacus Classic editor: same accordion/visibility UX; success stories hint only (no inline quotes)
+- [ ] Hero card shows title, subtitle, **Save changes**
+- [ ] Mobile: sticky bottom save bar; desktop: hero save only
+- [ ] Accordions: icon + subtitle when collapsed; only one open at a time
+- [ ] Visible on site toggle appears when section is expanded
+- [ ] Testimonials split layout on tablet/desktop; stacked on mobile
+- [ ] Abacus Classic: same accordion chrome; success stories hint only
 
 ### Platform themes panel
 
-- [ ] Unchanged brand shows **Saved**; changing select enables **Update theme**
-- [ ] After save, badge reflects new theme label
+- [ ] Bento grid on desktop; single column on mobile
+- [ ] **Saved** with check icon when unchanged; **Update theme** when draft differs
 
 ### Center detail
 
-- [ ] `/app/centers/:slug` shows KPI grid, profile card, recent leads
-- [ ] Toolbar: back link + open center site (when slug resolves)
+- [ ] `/app/centers/:slug` KPI grid and toolbar unchanged functionally
 
 ## Related docs
 
-- [Marketing landing pages](./marketing-landing.md) — public site themes and content
-- [Abacus Classic theme](./abacus-classic.md) — theme-specific public sections and editor fields
+- [Marketing landing pages](./marketing-landing.md)
+- [Abacus Classic theme](./abacus-classic.md)

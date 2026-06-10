@@ -1,76 +1,94 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { EditorAccordion, HomepageEditorPanel, HomepageEditorShell } from "./HomepageEditorShell";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
+import {
+  EditorAccordion,
+  HomepageEditorPanel,
+  HomepageEditorSections,
+  HomepageEditorShell,
+} from "./HomepageEditorShell";
 
 describe("HomepageEditorShell", () => {
-  it("regression_save_button_lives_in_page_toolbar", () => {
+  it("regression_save_button_lives_in_hero_card", () => {
     const { container } = render(
-      <HomepageEditorShell title="Marketing homepage" onSave={vi.fn()}>
+      <HomepageEditorShell title="Marketing & theming" subtitle="Edit the public site." onSave={vi.fn()}>
         <p>Form</p>
       </HomepageEditorShell>
     );
-    const toolbar = container.querySelector(".ed-page-toolbar");
-    const btn = toolbar?.querySelector("button");
-    expect(btn?.textContent).toBe("Save changes");
+    const hero = container.querySelector(".ed-editor-hero-card");
+    const btn = hero?.querySelector(".ed-editor-hero-card__save");
+    expect(btn?.textContent).toContain("Save changes");
   });
 
-  it("regression_sticky_save_bar_when_onSave_provided", () => {
+  it("regression_sticky_save_bar_on_mobile_when_onSave_provided", () => {
     const { container } = render(
       <HomepageEditorShell title="Marketing homepage" onSave={vi.fn()}>
         <p>Form</p>
       </HomepageEditorShell>
     );
     expect(container.querySelector(".ed-homepage-editor-shell--has-save")).toBeTruthy();
-    expect(screen.getByRole("region", { name: "Save changes" })).toBeDefined();
-    expect(screen.getAllByRole("button", { name: "Save changes" })).toHaveLength(2);
+    expect(container.querySelector(".ed-editor-save-bar--mobile")).toBeTruthy();
   });
 
-  it("regression_panel_save_button_uses_uniform_label", () => {
+  it("regression_panel_hero_save_button", () => {
     const onSave = vi.fn();
     render(
       <HomepageEditorShell title="Marketing pages">
-        <HomepageEditorPanel title="Brand site" onSave={onSave}>
+        <HomepageEditorPanel title="Brand site" description="Franchise recruitment" onSave={onSave}>
           <p>Editor fields</p>
         </HomepageEditorPanel>
       </HomepageEditorShell>
     );
     expect(screen.getByText("Brand site")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Save changes" })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Save changes/i })).toBeDefined();
   });
 });
 
 describe("EditorAccordion", () => {
+  function renderAccordion(ui: ReactElement) {
+    return render(<HomepageEditorSections>{ui}</HomepageEditorSections>);
+  }
+
   it("regression_collapsed_by_default", () => {
-    render(
-      <EditorAccordion title="Hero">
+    const { container } = renderAccordion(
+      <EditorAccordion sectionId="hero" title="Hero">
         <p>Form fields</p>
       </EditorAccordion>
     );
-    const details = screen.getByText("Hero").closest("details");
-    expect(details?.hasAttribute("open")).toBe(false);
+    expect(container.querySelector(".ed-editor-accordion--open")).toBeNull();
+    expect(screen.getByRole("button", { name: /Hero/i })).toBeDefined();
   });
 
-  it("regression_no_interactive_controls_inside_summary", () => {
-    const { container } = render(
-      <EditorAccordion title="FAQ" enabled onEnabledChange={() => undefined}>
+  it("regression_single_open_accordion", () => {
+    renderAccordion(
+      <>
+        <EditorAccordion sectionId="hero" title="Hero">
+          <p>Hero fields</p>
+        </EditorAccordion>
+        <EditorAccordion sectionId="faq" title="FAQ">
+          <p>FAQ fields</p>
+        </EditorAccordion>
+      </>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Hero/i }));
+    expect(screen.getByText("Hero fields")).toBeDefined();
+
+    fireEvent.click(screen.getByRole("button", { name: /FAQ/i }));
+    expect(screen.queryByText("Hero fields")).toBeNull();
+    expect(screen.getByText("FAQ fields")).toBeDefined();
+  });
+
+  it("regression_shows_icon_subtitle_and_visibility_when_open", () => {
+    const { container } = renderAccordion(
+      <EditorAccordion sectionId="faq" title="FAQ" enabled onEnabledChange={() => undefined}>
         <p>Form fields</p>
       </EditorAccordion>
     );
-    const summary = container.querySelector("summary");
-    expect(summary?.querySelector("button")).toBeNull();
-    expect(container.querySelector(".ed-editor-accordion__body button")).toBeTruthy();
+
+    expect(screen.getByText("Common questions and answers")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: /FAQ/i }));
     expect(screen.getByText("Visible on site")).toBeDefined();
-  });
-
-  it("regression_summary_title_precedes_body_content", () => {
-    const { container } = render(
-      <EditorAccordion title="Why us (feature blocks)" enabled onEnabledChange={() => undefined}>
-        <p>Block fields</p>
-      </EditorAccordion>
-    );
-    const details = container.querySelector("details.ed-editor-accordion");
-    const summary = details?.querySelector("summary");
-    const body = details?.querySelector(".ed-editor-accordion__body");
-    expect(summary?.compareDocumentPosition(body!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(container.querySelector(".ed-editor-accordion--open")).toBeTruthy();
   });
 });

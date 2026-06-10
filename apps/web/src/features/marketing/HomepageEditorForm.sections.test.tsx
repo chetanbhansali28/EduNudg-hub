@@ -16,6 +16,10 @@ describe("HomepageEditorForm section controls", () => {
       />
     );
 
+    fireEvent.click(
+      screen.getByRole("button", { name: /Highlight cards \(horizontal scroller\)/i })
+    );
+
     const toggle = screen.getByLabelText("Highlight cards (horizontal scroller) visible on site");
     fireEvent.click(toggle);
 
@@ -37,6 +41,9 @@ describe("HomepageEditorForm section controls", () => {
       <HomepageEditorForm config={config} onChange={onChange} onPersist={onPersist} />
     );
 
+    fireEvent.click(
+      screen.getByRole("button", { name: /Highlight cards \(horizontal scroller\)/i })
+    );
     fireEvent.click(screen.getAllByRole("button", { name: "Remove this card" })[0]!);
 
     const next = onChange.mock.calls.at(-1)?.[0];
@@ -60,6 +67,7 @@ describe("HomepageEditorForm section controls", () => {
 
     render(<HomepageEditorForm config={config} onChange={onChange} onPersist={onPersist} />);
 
+    fireEvent.click(screen.getByRole("button", { name: /Testimonials/i }));
     fireEvent.click(screen.getAllByRole("button", { name: "Move down" })[0]!);
 
     const next = onChange.mock.calls.at(-1)?.[0];
@@ -70,7 +78,7 @@ describe("HomepageEditorForm section controls", () => {
     expect(onPersist).toHaveBeenCalled();
   });
 
-  it("regression_testimonials_character_count_hint", () => {
+  it("regression_testimonials_split_layout_and_character_hint", () => {
     const config = {
       ...DEFAULT_HOMEPAGE_CONFIG,
       testimonials: {
@@ -79,9 +87,14 @@ describe("HomepageEditorForm section controls", () => {
       },
     };
 
-    render(<HomepageEditorForm config={config} onChange={() => undefined} />);
+    const { container } = render(
+      <HomepageEditorForm config={config} onChange={() => undefined} />
+    );
 
+    fireEvent.click(screen.getByRole("button", { name: /Testimonials/i }));
+
+    expect(container.querySelector(".ed-editor-accordion__split")).toBeTruthy();
+    expect(screen.getByText(/Editor tip/i)).toBeDefined();
     expect(screen.getByText(/5 \/ 100 characters/)).toBeDefined();
-    expect(screen.getByText(/shorter than recommended/)).toBeDefined();
   });
 });

@@ -19,7 +19,7 @@ import {
   moveItem,
   testimonialQuoteLengthHint,
 } from "@/lib/testimonialEditorHelpers";
-import { EditorAccordion } from "./HomepageEditorShell";
+import { EditorAccordion, HomepageEditorSections } from "./HomepageEditorShell";
 import { MarketingMediaField } from "./MarketingMediaField";
 
 export type HomepageEditorFormProps = {
@@ -75,8 +75,8 @@ export function HomepageEditorForm({
   };
 
   return (
-    <div className="ed-homepage-editor">
-      <EditorAccordion title="Site">
+    <HomepageEditorSections>
+      <EditorAccordion sectionId="site" title="Site">
         <Input
           label="Site name"
           value={config.meta.siteName}
@@ -92,7 +92,7 @@ export function HomepageEditorForm({
         />
       </EditorAccordion>
 
-      <EditorAccordion title="Navigation">
+      <EditorAccordion sectionId="navigation" title="Navigation">
         <p className="ed-text-sm ed-muted">
           Main menu links in the top bar. Use anchors like <code>#faq</code> for on-page sections, or paths like{" "}
           <code>/login</code> for other routes. The primary CTA button is edited under Hero.
@@ -136,6 +136,7 @@ export function HomepageEditorForm({
       </EditorAccordion>
 
       <EditorAccordion
+        sectionId="hero"
         title="Hero"
         enabled={sections.hero}
         onEnabledChange={(enabled) => setSection("hero", enabled)}
@@ -174,6 +175,7 @@ export function HomepageEditorForm({
       </EditorAccordion>
 
       <EditorAccordion
+        sectionId="featureScroll"
         title="Feature sections (phone blocks)"
         enabled={sections.featureScroll}
         onEnabledChange={(enabled) => setSection("featureScroll", enabled)}
@@ -258,6 +260,7 @@ export function HomepageEditorForm({
       </EditorAccordion>
 
       <EditorAccordion
+        sectionId="highlights"
         title="Highlight cards (horizontal scroller)"
         enabled={sections.highlights}
         onEnabledChange={(enabled) => setSection("highlights", enabled)}
@@ -354,20 +357,36 @@ export function HomepageEditorForm({
       </EditorAccordion>
 
       <EditorAccordion
+        sectionId="testimonials"
         title="Testimonials"
         enabled={sections.testimonials}
         onEnabledChange={(enabled) => setSection("testimonials", enabled)}
+        splitAside={
+          <>
+            <Input
+              label="Section title"
+              value={config.testimonials.title}
+              onChange={(v) => onChange({ ...config, testimonials: { ...config.testimonials, title: v } })}
+            />
+            <Input
+              label="Section subtitle"
+              value={config.testimonials.subtitle}
+              onChange={(v) => onChange({ ...config, testimonials: { ...config.testimonials, subtitle: v } })}
+            />
+            <div className="ed-testimonial-editor__tip">
+              <p className="ed-testimonial-editor__tip-title">
+                <span className="material-symbols-outlined ed-ms-icon" aria-hidden>
+                  info
+                </span>
+                Editor tip
+              </p>
+              <p className="ed-text-sm ed-muted">
+                Keep testimonial quotes between 50–100 characters for optimal readability on mobile devices.
+              </p>
+            </div>
+          </>
+        }
       >
-        <Input
-          label="Section title"
-          value={config.testimonials.title}
-          onChange={(v) => onChange({ ...config, testimonials: { ...config.testimonials, title: v } })}
-        />
-        <Input
-          label="Section subtitle"
-          value={config.testimonials.subtitle}
-          onChange={(v) => onChange({ ...config, testimonials: { ...config.testimonials, subtitle: v } })}
-        />
         {testimonialsManagedExternally ? (
           testimonialsExternalHint ?? (
             <p className="ed-text-sm ed-muted">Published success stories appear on the live site automatically.</p>
@@ -382,6 +401,7 @@ export function HomepageEditorForm({
       </EditorAccordion>
 
       <EditorAccordion
+        sectionId="faq"
         title="FAQ"
         enabled={sections.faq}
         onEnabledChange={(enabled) => setSection("faq", enabled)}
@@ -427,7 +447,7 @@ export function HomepageEditorForm({
         </Button>
       </EditorAccordion>
 
-      <EditorAccordion title="Privacy & footer">
+      <EditorAccordion sectionId="privacyFooter" title="Privacy & footer">
         <ToggleField
           label="Show privacy section"
           description="Trust / security copy block on the public homepage."
@@ -474,7 +494,7 @@ export function HomepageEditorForm({
           onChange={(v) => onChange({ ...config, footer: { ...config.footer, copyright: v } })}
         />
       </EditorAccordion>
-    </div>
+    </HomepageEditorSections>
   );
 }
 

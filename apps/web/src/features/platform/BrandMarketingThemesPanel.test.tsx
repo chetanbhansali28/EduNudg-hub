@@ -57,10 +57,12 @@ describe("BrandMarketingThemesPanel", () => {
     expect(await screen.findByRole("heading", { name: "Brand marketing themes" })).toBeDefined();
     expect(await screen.findByText("Digitley")).toBeDefined();
     expect(document.querySelector(".ed-brand-marketing-themes__list")).toBeDefined();
+    expect(document.querySelector(".ed-brand-marketing-themes__count")).toBeDefined();
+    expect(screen.getByText("2 brands")).toBeDefined();
     expect(screen.getByText("digitley-pune")).toBeDefined();
     expect(screen.getByText("Smart Brain Abacus")).toBeDefined();
     expect(screen.getAllByLabelText("Website theme")).toHaveLength(2);
-    expect(screen.getAllByRole("button", { name: "Saved" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /Saved/i })).toHaveLength(2);
   });
 
   it("shows unsaved state when theme draft changes", async () => {
@@ -74,7 +76,7 @@ describe("BrandMarketingThemesPanel", () => {
     const selects = await screen.findAllByLabelText("Website theme");
     fireEvent.change(selects[0]!, { target: { value: "spark-academy" } });
 
-    expect(screen.getByText("Unsaved changes")).toBeDefined();
     expect(screen.getByRole("button", { name: "Update theme" })).toBeDefined();
+    expect(screen.getAllByRole("button", { name: "Saved" })).toHaveLength(1);
   });
 });

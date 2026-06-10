@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, MutationError, Select } from "@edunudg/ui";
+import { Button, MutationError, Select } from "@edunudg/ui";
 import { updateBrandMarketingTheme } from "@/lib/brandLandingApi";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
@@ -12,6 +12,10 @@ interface BrandThemeRow {
   slug: string;
   name: string;
   marketing_theme: string;
+}
+
+function themeBadgeLabel(theme: MarketingTheme): string {
+  return MARKETING_THEME_LABELS[theme].replace(/\s*\(.*\)\s*$/, "").toUpperCase();
 }
 
 export function BrandMarketingThemesPanel() {
@@ -71,7 +75,9 @@ export function BrandMarketingThemesPanel() {
           </p>
         </div>
         {items.length > 0 ? (
-          <Badge tone="default">{items.length} brand{items.length === 1 ? "" : "s"}</Badge>
+          <span className="ed-brand-marketing-themes__count">
+            {items.length} brand{items.length === 1 ? "" : "s"}
+          </span>
         ) : null}
       </header>
 
@@ -92,13 +98,13 @@ export function BrandMarketingThemesPanel() {
             return (
               <li key={brand.id} className="ed-brand-marketing-themes__item">
                 <div className="ed-brand-marketing-themes__brand">
-                  <strong className="ed-brand-marketing-themes__name">{brand.name}</strong>
-                  <span className="ed-brand-marketing-themes__slug">{brand.slug}</span>
-                  {!dirty ? (
-                    <Badge tone="success">{MARKETING_THEME_LABELS[saved]}</Badge>
-                  ) : (
-                    <Badge tone="warning">Unsaved changes</Badge>
-                  )}
+                  <div className="ed-brand-marketing-themes__brand-top">
+                    <div>
+                      <strong className="ed-brand-marketing-themes__name">{brand.name}</strong>
+                      <div className="ed-brand-marketing-themes__slug">{brand.slug}</div>
+                    </div>
+                    <span className="ed-brand-marketing-themes__theme-badge">{themeBadgeLabel(saved)}</span>
+                  </div>
                 </div>
 
                 <div className="ed-brand-marketing-themes__field">
@@ -122,7 +128,18 @@ export function BrandMarketingThemesPanel() {
                     onClick={() => saveTheme.mutate({ brandId: brand.id, theme: draft })}
                     disabled={!dirty || isSaving}
                   >
-                    {isSaving ? "Saving…" : dirty ? "Update theme" : "Saved"}
+                    {!dirty ? (
+                      <>
+                        <span className="material-symbols-outlined ed-brand-marketing-themes__saved-icon" aria-hidden>
+                          check_circle
+                        </span>
+                        Saved
+                      </>
+                    ) : isSaving ? (
+                      "Saving…"
+                    ) : (
+                      "Update theme"
+                    )}
                   </Button>
                 </div>
               </li>
