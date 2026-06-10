@@ -6,18 +6,33 @@ import type { Membership } from "@/hooks/useMembership";
 import { LoginPage } from "./LoginPage";
 import { RequireMembership } from "./RequireMembership";
 
-const { signInWithEmail, authState, membershipState, rerenderRef } = vi.hoisted(() => ({
-  signInWithEmail: vi.fn(),
-  authState: {
-    session: null as { user: { id: string } } | null,
-    user: null as { id: string } | null,
-  },
-  membershipState: {
-    data: [] as Membership[],
-    isLoading: false,
-  },
-  rerenderRef: { current: () => {} },
-}));
+const { signInWithEmail, authState, membershipState, tenantState, portalBrandingState, rerenderRef } =
+  vi.hoisted(() => ({
+    signInWithEmail: vi.fn(),
+    authState: {
+      session: null as { user: { id: string } } | null,
+      user: null as { id: string } | null,
+    },
+    membershipState: {
+      data: [] as Membership[],
+      isLoading: false,
+    },
+    tenantState: {
+      portalType: "platform" as const,
+      hostname: "localhost",
+      brandId: null,
+      centerId: null,
+      brandSlug: null,
+      centerSlug: null,
+    },
+    portalBrandingState: {
+      data: undefined,
+      isLoading: false,
+      isFetched: true,
+      isFetching: false,
+    },
+    rerenderRef: { current: () => {} },
+  }));
 
 vi.mock("@/bootstrap/AuthProvider", () => ({
   useAuth: () => ({
@@ -47,14 +62,7 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
 }));
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
-  useTenant: () => ({
-    portalType: "platform",
-    hostname: "localhost",
-    brandId: null,
-    centerId: null,
-    brandSlug: null,
-    centerSlug: null,
-  }),
+  useTenant: () => tenantState,
 }));
 
 vi.mock("@/hooks/useMembership", () => ({
@@ -65,8 +73,20 @@ vi.mock("@/hooks/useMembership", () => ({
 }));
 
 vi.mock("@/hooks/usePortalBranding", () => ({
-  usePortalBranding: () => ({ data: undefined }),
+  usePortalBranding: () => portalBrandingState,
 }));
+
+vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
+  const { resolvePortalTenantIds } = await importOriginal<
+    typeof import("@/hooks/useResolvedPortalTenant")
+  >();
+  return {
+    useResolvedPortalTenant: () => ({
+      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
+      isResolving: false,
+    }),
+  };
+});
 
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
@@ -132,10 +152,8 @@ describe("LoginPage", () => {
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
     fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
-    await waitFor(() => {
-      expect(signInWithEmail).toHaveBeenCalledWith("admin@edunudg.com", "admin");
-      expect(screen.getByText("Admin home")).toBeDefined();
-    });
+    expect(await screen.findByText("Admin home")).toBeDefined();
+    expect(signInWithEmail).toHaveBeenCalledWith("admin@edunudg.com", "admin");
   });
 
   it("regression_does_not_redirect_when_session_lacks_portal_membership", async () => {
@@ -185,9 +203,7 @@ describe("LoginPage", () => {
       </QueryClientProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByText("Brand app home")).toBeDefined();
-    });
+    expect(await screen.findByText("Brand app home")).toBeDefined();
   });
 
   it("shows validation error when email or password is empty", async () => {

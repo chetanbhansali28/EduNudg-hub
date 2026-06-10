@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import type { Membership } from "@/hooks/useMembership";
@@ -9,7 +9,8 @@ import { RequireMembership } from "./RequireMembership";
 const ABACUSWORLD_BRAND_ID = "a0000000-0000-4000-8000-000000000001";
 const KORAMANGALA_CENTER_ID = "b0000000-0000-4000-8000-000000000001";
 
-const { signInWithEmail, authState, membershipState, rerenderRef } = vi.hoisted(() => ({
+const { signInWithEmail, authState, membershipState, tenantState, portalBrandingState, rerenderRef } =
+  vi.hoisted(() => ({
   signInWithEmail: vi.fn(),
   authState: {
     session: null as { user: { id: string } } | null,
@@ -18,6 +19,30 @@ const { signInWithEmail, authState, membershipState, rerenderRef } = vi.hoisted(
   membershipState: {
     data: [] as Membership[],
     isLoading: false,
+  },
+  tenantState: {
+    portalType: "center" as const,
+    hostname: "koramangala.abacusworld.localhost",
+    brandId: "a0000000-0000-4000-8000-000000000001",
+    centerId: "b0000000-0000-4000-8000-000000000001",
+    brandSlug: "abacusworld",
+    centerSlug: "koramangala",
+  },
+  portalBrandingState: {
+    data: {
+      brandId: "a0000000-0000-4000-8000-000000000001",
+      brandSlug: "abacusworld",
+      brandName: "Abacus World",
+      brandLogoUrl: "https://cdn.example/logo.png",
+      centerId: "b0000000-0000-4000-8000-000000000001",
+      centerSlug: "koramangala",
+      centerName: "Abacus World Koramangala",
+      loginHeadline: null,
+      loginSubtext: null,
+    },
+    isLoading: false,
+    isFetched: true,
+    isFetching: false,
   },
   rerenderRef: { current: () => {} },
 }));
@@ -50,14 +75,7 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
 }));
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
-  useTenant: () => ({
-    portalType: "center",
-    hostname: "koramangala.abacusworld.localhost",
-    brandId: ABACUSWORLD_BRAND_ID,
-    centerId: KORAMANGALA_CENTER_ID,
-    brandSlug: "abacusworld",
-    centerSlug: "koramangala",
-  }),
+  useTenant: () => tenantState,
 }));
 
 vi.mock("@/hooks/useMembership", () => ({
@@ -68,23 +86,20 @@ vi.mock("@/hooks/useMembership", () => ({
 }));
 
 vi.mock("@/hooks/usePortalBranding", () => ({
-  usePortalBranding: () => ({
-    data: {
-      brandId: ABACUSWORLD_BRAND_ID,
-      brandSlug: "abacusworld",
-      brandName: "Abacus World",
-      brandLogoUrl: "https://cdn.example/logo.png",
-      centerId: KORAMANGALA_CENTER_ID,
-      centerSlug: "koramangala",
-      centerName: "Abacus World Koramangala",
-      loginHeadline: null,
-      loginSubtext: null,
-    },
-    isLoading: false,
-    isFetched: true,
-    isFetching: false,
-  }),
+  usePortalBranding: () => portalBrandingState,
 }));
+
+vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
+  const { resolvePortalTenantIds } = await importOriginal<
+    typeof import("@/hooks/useResolvedPortalTenant")
+  >();
+  return {
+    useResolvedPortalTenant: () => ({
+      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
+      isResolving: false,
+    }),
+  };
+});
 
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
@@ -146,10 +161,8 @@ describe("LoginPage center portal", () => {
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
     fireEvent.click(screen.getByRole("button", { name: "Log in" }));
 
-    await waitFor(() => {
-      expect(signInWithEmail).toHaveBeenCalledWith("center@edunudg.com", "admin");
-      expect(screen.getByText("Center app home")).toBeDefined();
-    });
+    expect(await screen.findByText("Center app home")).toBeDefined();
+    expect(signInWithEmail).toHaveBeenCalledWith("center@edunudg.com", "admin");
 
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
   });

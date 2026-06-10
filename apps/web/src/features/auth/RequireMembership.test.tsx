@@ -6,7 +6,7 @@ import type { Membership } from "@/hooks/useMembership";
 import { LoginPage } from "./LoginPage";
 import { RequireMembership } from "./RequireMembership";
 
-const { authState, membershipState } = vi.hoisted(() => ({
+const { authState, membershipState, tenantState, portalBrandingState } = vi.hoisted(() => ({
   authState: {
     session: { user: { id: "user-1" } } as { user: { id: string } },
     user: { id: "user-1" } as { id: string },
@@ -14,6 +14,20 @@ const { authState, membershipState } = vi.hoisted(() => ({
   membershipState: {
     data: [] as Membership[],
     isLoading: false,
+  },
+  tenantState: {
+    portalType: "platform" as const,
+    hostname: "localhost",
+    brandId: null,
+    centerId: null,
+    brandSlug: null,
+    centerSlug: null,
+  },
+  portalBrandingState: {
+    data: undefined,
+    isLoading: false,
+    isFetched: true,
+    isFetching: false,
   },
 }));
 
@@ -28,14 +42,7 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
 }));
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
-  useTenant: () => ({
-    portalType: "platform",
-    hostname: "localhost",
-    brandId: null,
-    centerId: null,
-    brandSlug: null,
-    centerSlug: null,
-  }),
+  useTenant: () => tenantState,
 }));
 
 vi.mock("@/hooks/useMembership", () => ({
@@ -46,8 +53,20 @@ vi.mock("@/hooks/useMembership", () => ({
 }));
 
 vi.mock("@/hooks/usePortalBranding", () => ({
-  usePortalBranding: () => ({ data: undefined }),
+  usePortalBranding: () => portalBrandingState,
 }));
+
+vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
+  const { resolvePortalTenantIds } = await importOriginal<
+    typeof import("@/hooks/useResolvedPortalTenant")
+  >();
+  return {
+    useResolvedPortalTenant: () => ({
+      tenant: resolvePortalTenantIds(tenantState, portalBrandingState.data),
+      isResolving: false,
+    }),
+  };
+});
 
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegrations: () => ({
