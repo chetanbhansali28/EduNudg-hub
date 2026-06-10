@@ -2,43 +2,40 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
+import { buildCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import { CenterLandingPage } from "./CenterLandingPage";
 
-vi.mock("@/bootstrap/TenantProvider", () => ({
-  useTenant: () => ({
-    portalType: "center",
-    hostname: "koramangala.abacusworld.localhost",
-    brandSlug: "abacusworld",
+const landingConfig = buildCenterLandingConfig("Abacus World Koramangala", "Abacus World", "Bengaluru");
+const outletContext = {
+  config: landingConfig,
+  marketingTheme: "novu" as const,
+  brandSlug: "abacusworld",
+  centerSlug: "koramangala",
+  publicCurriculum: [],
+  publicStats: { centersCount: 0, studentsCount: 0 },
+  profile: {
+    centerId: "c1",
     centerSlug: "koramangala",
-    brandId: null,
-    centerId: null,
-  }),
-}));
+    centerName: "Abacus World Koramangala",
+    displayName: null,
+    city: "Bengaluru",
+    region: null,
+    pincode: null,
+    addressLine1: null,
+    contactPhone: null,
+    photoUrl: null,
+    shortDescription: null,
+    socialLinks: [],
+    brandName: "Abacus World",
+    brandSlug: "abacusworld",
+  },
+};
 
-vi.mock("@/lib/centerLandingApi", async () => {
-  const { buildCenterLandingConfig } = await import("@/lib/centerLandingDefaults");
-  const config = buildCenterLandingConfig("Abacus World Koramangala", "Abacus World", "Bengaluru");
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
   return {
-    fetchCenterLandingBundle: vi.fn().mockResolvedValue({
-      config,
-      profile: {
-        centerId: "c1",
-        centerSlug: "koramangala",
-        centerName: "Abacus World Koramangala",
-        displayName: null,
-        city: "Bengaluru",
-        region: null,
-        pincode: null,
-        addressLine1: null,
-        contactPhone: null,
-        photoUrl: null,
-        shortDescription: null,
-        socialLinks: [],
-        brandName: "Abacus World",
-        brandSlug: "abacusworld",
-      },
-    }),
-    fetchCenterLandingConfig: vi.fn().mockResolvedValue(config),
+    ...actual,
+    useOutletContext: () => outletContext,
   };
 });
 

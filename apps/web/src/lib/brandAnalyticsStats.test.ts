@@ -20,11 +20,13 @@ describe("brandAnalyticsStats", () => {
   });
 
   it("buildDailyTrend fills missing days with zero enrollments", () => {
-    const enrollmentCounts = new Map([["2026-06-03", 2]]);
-    const revenueByDate = new Map([["2026-06-03", 50000]]);
+    const dayKeys = recentDayKeys(3);
+    const busyDay = dayKeys[1]!;
+    const enrollmentCounts = new Map([[busyDay, 2]]);
+    const revenueByDate = new Map([[busyDay, 50000]]);
     const trend = buildDailyTrend(enrollmentCounts, revenueByDate, 4, 3);
     expect(trend).toHaveLength(3);
-    expect(trend[0].metric_date).toBe(recentDayKeys(1)[0]);
+    expect(trend[0].metric_date).toBe(dayKeys[0]);
     const busy = trend.find((row) => row.enrollments_count === 2);
     expect(busy?.revenue_cents).toBe(50000);
     expect(trend.every((row) => row.active_centers === 4)).toBe(true);
