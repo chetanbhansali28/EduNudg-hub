@@ -6,6 +6,7 @@ import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { useStaffShellWelcome } from "@/hooks/useStaffShellWelcome";
 import { studentNavSections, signOutNavItem } from "@/lib/portalNav";
 import { resolveShellProductName } from "@/lib/portalBranding";
+import "@/features/learn/studentPortal.css";
 
 export function StudentLearnLayout() {
   const { pathname } = useLocation();
@@ -37,13 +38,15 @@ export function StudentLearnLayout() {
       logoUrl={shell.logoUrl}
       portalLabel={portalLabel}
       welcomeHeading={welcome.welcomeHeading}
-      welcomeSubtitle={welcome.welcomeSubtitle}
+      welcomeSubtitle="Your progress, exams, and competitions — all in one place."
       user={welcome.user}
       navSections={studentNavSections(pathname)}
       footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}
     >
-      <Outlet />
+      <div className="ed-student-portal">
+        <Outlet />
+      </div>
     </AppShell>
   );
 }

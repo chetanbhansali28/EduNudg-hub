@@ -73,13 +73,16 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 
 ---
 
-## Student — `learn.*` host (v1 minimal)
+## Student — `learn.*` host
 
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
 | Main | Dashboard | `/` | Exists |
+| Main | Progress | `/progress` | Exists |
+| Main | Competitions | `/competitions` | Exists |
+| Main | Activity | `/activity` | Exists |
 | General | Profile | `/profile` | Exists |
-| — | Progress, Competitions, Kits | — | **Not in v1 nav** |
+| — | Kits / merchandise | — | **Not in nav** (FR-S03) |
 
 No sidebar required on mobile — single column shell acceptable.
 

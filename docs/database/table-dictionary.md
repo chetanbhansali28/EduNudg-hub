@@ -67,9 +67,10 @@ Center staff update via RPC `update_center_public_profile_rpc` (requires `has_ce
 | `merchandise_invoices` | center | Per-order invoices |
 | `merchandise_payments` | center | Payment records |
 | `merchandise_reminder_log` | center | Payment reminder audit |
-| `student_level_progress` | center | Level progress shown on learn dashboard |
-| `brand_competitions` | brand | Competition calendar |
-| `student_competition_entries` | center | Student competition results |
+| `student_level_progress` | center | Level progress on learn dashboard; `enrollment_id` required on new writes |
+| `brand_competitions` | brand | Competition calendar; `fee_type`, registration window |
+| `student_competition_registrations` | center | Student self-enroll (free); paid Coming soon |
+| `student_competition_entries` | center | Post-event results |
 
 ### `merchandise_catalog` columns (notable)
 

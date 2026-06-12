@@ -16,7 +16,9 @@
 | Platform admin | `admin@edunudg.com` | `platform_super_admin` | http://localhost:9000/login → redirects to `/admin` |
 | Franchisor (brand) | `owner@edunudg.com` | `brand_owner` | http://abacusworld.localhost:9000/login |
 | Franchise (center) | `center@edunudg.com` | `center_owner` | http://koramangala.abacusworld.localhost:9000/login |
-| Student / parent | `student@edunudg.com` | linked parent account | http://learn.abacusworld.localhost:9000/login |
+| Student | `student@edunudg.com` | student (`students.user_id` linked) | http://learn.abacusworld.localhost:9000/login |
+
+Student **learn portal** shows dashboard with curriculum ladder (3/8 levels), exams, free/paid upcoming competitions, and past results after seed + migration `048_student_learn_portal.sql`.
 
 Student **data** (enrollment at Koramangala) is visible when logged in as **center** or **brand** under Students.
 

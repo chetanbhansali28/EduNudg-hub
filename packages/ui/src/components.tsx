@@ -13,7 +13,6 @@ import { IconEye, IconEyeOff } from "./icons";
 
 export {
   ThemeProvider,
-  ThemeToggle,
   useAdminTheme,
   readAdminTheme,
   writeAdminTheme,

@@ -111,7 +111,7 @@ describe("AppShell responsive", () => {
     expect(screen.getByText("Welcome back, Platform Admin 👋")).toBeDefined();
   });
 
-  it("regression_header_includes_theme_toggle", () => {
+  it("regression_header_excludes_theme_toggle", () => {
     render(
       <MemoryRouter>
         <ThemeProvider>
@@ -128,6 +128,6 @@ describe("AppShell responsive", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole("button", { name: /switch to dark mode/i })).toBeDefined();
+    expect(screen.queryByRole("button", { name: /switch to (dark|light) mode/i })).toBeNull();
   });
 });

@@ -129,13 +129,27 @@ UI: Convert dialog shows read-only prefill; staff may add `student_code`, batch,
 
 ---
 
-## Student learn portal (v1 minimal)
+## Student learn portal
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
-| FR-S01 | S | Nav: Dashboard + Profile only | No kits in UI |
+| FR-S01 | S | Nav: Dashboard + Profile only | Superseded by FR-S14 for v2 |
 | FR-S02 | S | Auth Google + WhatsApp OTP | Phase D |
 | FR-S03 | S | Kits not visible | RLS + no routes |
+| FR-S10 | S | Active center enrollment gate | `NO_ACTIVE_ENROLLMENT` without active enrollment |
+| FR-S11 | S | Enrollment-scoped academic records | progress, assessments, competitions |
+| FR-S12 | S | Student portal auth | `students.user_id` + invite flow |
+| FR-S13 | S | Comprehensive dashboard | `get_student_learn_home` single RPC |
+| FR-S14 | S | Nav: Dashboard, Progress, Competitions, Activity, Profile | learn.* routes |
+| FR-S15 | S | Curriculum progress ladder | Pinned `curriculum_version_id` |
+| FR-S16 | S | Exam visibility | `student_assessments.visible_to_student` |
+| FR-S17 | S | Free competition self-enroll | `register_student_for_competition` |
+| FR-S18 | S | Paid competition deferred | Coming soon UI; RPC rejects |
+| FR-S19 | S | Competition results on portal | `student_competition_entries` |
+| FR-S20 | S | Activity timeline | Derived feed on dashboard + `/activity` |
+| FR-S21 | S | Profile + center transparency | Enrollment and center card |
+
+Canonical spec: [`openspec/changes/student-learn-portal/specs/student-learn-portal/spec.md`](../../openspec/changes/student-learn-portal/specs/student-learn-portal/spec.md)
 
 ---
 

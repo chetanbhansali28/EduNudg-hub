@@ -50,7 +50,10 @@ import { MarketingHomePage } from "@/features/marketing/MarketingHomePage";
 import { MarketingPublicLayout } from "@/features/marketing/MarketingPublicLayout";
 import { HomepageEditorPage } from "@/features/platform/HomepageEditorPage";
 import { StudentLearnLayout } from "@/features/learn/StudentLearnLayout";
-import { StudentDashboardPage } from "@/features/learn/StudentDashboardPage";
+import { StudentHomePage } from "@/features/learn/StudentHomePage";
+import { StudentProgressPage } from "@/features/learn/StudentProgressPage";
+import { StudentCompetitionsPage } from "@/features/learn/StudentCompetitionsPage";
+import { StudentActivityPage } from "@/features/learn/StudentActivityPage";
 import { StudentProfilePage } from "@/features/learn/StudentProfilePage";
 import { ParentPortalPage } from "@/features/learn/ParentPortalPage";
 import { ThemeProvider } from "@edunudg/ui";
@@ -86,7 +89,10 @@ export function AppRoutes() {
             </RequireAuth>
           }
         >
-          <Route index element={<StudentDashboardPage />} />
+          <Route index element={<StudentHomePage />} />
+          <Route path="progress" element={<StudentProgressPage />} />
+          <Route path="competitions" element={<StudentCompetitionsPage />} />
+          <Route path="activity" element={<StudentActivityPage />} />
           <Route path="profile" element={<StudentProfilePage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

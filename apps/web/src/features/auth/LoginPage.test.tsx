@@ -19,12 +19,12 @@ const { signInWithEmail, authState, membershipState, tenantState, portalBranding
       isLoading: false,
     },
     tenantState: {
-      portalType: "platform" as const,
+      portalType: "platform" as "platform" | "learn" | "brand" | "center" | "parents",
       hostname: "localhost",
-      brandId: null,
-      centerId: null,
-      brandSlug: null,
-      centerSlug: null,
+      brandId: null as string | null,
+      centerId: null as string | null,
+      brandSlug: null as string | null,
+      centerSlug: null as string | null,
     },
     portalBrandingState: {
       data: undefined,

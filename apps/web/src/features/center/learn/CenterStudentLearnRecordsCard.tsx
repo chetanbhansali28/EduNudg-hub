@@ -17,6 +17,7 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [studentId, setStudentId] = useState("");
+  const [levelId, setLevelId] = useState("");
   const [levelName, setLevelName] = useState("");
   const [progressStatus, setProgressStatus] = useState("in_progress");
   const [competitionId, setCompetitionId] = useState("");
@@ -30,17 +31,37 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("student_enrollments")
-        .select("student_id, students(id, full_name)")
+        .select("student_id, curriculum_version_id, students(id, full_name)")
         .eq("center_id", centerId)
         .eq("status", "active");
       const rows = supabaseList(data, qErr) as {
         student_id: string;
+        curriculum_version_id: string | null;
         students: { id: string; full_name: string } | { id: string; full_name: string }[] | null;
       }[];
       return rows.map((r) => {
         const s = Array.isArray(r.students) ? r.students[0] : r.students;
-        return { id: s?.id ?? r.student_id, full_name: s?.full_name ?? "Student" };
+        return {
+          id: s?.id ?? r.student_id,
+          full_name: s?.full_name ?? "Student",
+          curriculum_version_id: r.curriculum_version_id,
+        };
       });
+    },
+  });
+
+  const selectedStudent = (students.data ?? []).find((s) => s.id === studentId);
+
+  const levels = useQuery({
+    queryKey: ["curriculum-levels", selectedStudent?.curriculum_version_id],
+    enabled: !!selectedStudent?.curriculum_version_id,
+    queryFn: async () => {
+      const { data, error: qErr } = await getSupabase()
+        .from("levels")
+        .select("id, name, sort_order")
+        .eq("curriculum_version_id", selectedStudent!.curriculum_version_id!)
+        .order("sort_order");
+      return supabaseList(data, qErr) as { id: string; name: string; sort_order: number }[];
     },
   });
 
@@ -74,9 +95,13 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
 
   const saveProgress = useMutation({
     mutationFn: async () => {
-      if (!studentId || !levelName.trim()) throw new Error("Select student and enter level");
+      const name =
+        levelName.trim() ||
+        (levels.data ?? []).find((l) => l.id === levelId)?.name ||
+        "";
+      if (!studentId || !name) throw new Error("Select student and level");
       clear();
-      await recordStudentLevelProgress(centerId, studentId, levelName, progressStatus);
+      await recordStudentLevelProgress(centerId, studentId, name, progressStatus, levelId || null);
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["center-student-progress", centerId] });
@@ -102,7 +127,7 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
 
   return (
     <Card title="Student progress & competitions">
-      <p className="ed-text-sm ed-muted">Records appear on the student learn dashboard for linked parent accounts.</p>
+      <p className="ed-text-sm ed-muted">Records appear on the student learn portal for linked student accounts.</p>
       <MutationError message={error} />
       <AddFormSection
         buttonLabel="Record progress"
@@ -110,7 +135,7 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
         primaryAction={{
           onClick: () => saveProgress.mutate(),
           pending: saveProgress.isPending,
-          disabled: !studentId || !levelName.trim(),
+          disabled: !studentId || (!levelName.trim() && !levelId),
         }}
       >
         {({ close }) => {
@@ -120,22 +145,38 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
               <Select
                 label="Student"
                 value={studentId}
-                onChange={setStudentId}
+                onChange={(id) => {
+                  setStudentId(id);
+                  setLevelId("");
+                  setLevelName("");
+                }}
                 placeholder="Select student"
                 options={(students.data ?? []).map((s) => ({ value: s.id, label: s.full_name }))}
               />
-              <FormGrid>
-                <Input label="Level name" value={levelName} onChange={setLevelName} placeholder="e.g. Level 3" />
+              {selectedStudent?.curriculum_version_id ? (
                 <Select
-                  label="Progress status"
-                  value={progressStatus}
-                  onChange={setProgressStatus}
-                  options={[
-                    { value: "in_progress", label: "In progress" },
-                    { value: "completed", label: "Completed" },
-                  ]}
+                  label="Curriculum level"
+                  value={levelId}
+                  onChange={(id) => {
+                    setLevelId(id);
+                    const lvl = (levels.data ?? []).find((l) => l.id === id);
+                    if (lvl) setLevelName(lvl.name);
+                  }}
+                  placeholder="Select level"
+                  options={(levels.data ?? []).map((l) => ({ value: l.id, label: l.name }))}
                 />
-              </FormGrid>
+              ) : (
+                <Input label="Level name" value={levelName} onChange={setLevelName} placeholder="e.g. Level 3" />
+              )}
+              <Select
+                label="Progress status"
+                value={progressStatus}
+                onChange={setProgressStatus}
+                options={[
+                  { value: "in_progress", label: "In progress" },
+                  { value: "completed", label: "Completed" },
+                ]}
+              />
             </>
           );
         }}

@@ -112,6 +112,25 @@ flowchart LR
   Franchise_ops -.->|no payment| Platform
 ```
 
+## Flow 8 — Student portal access (learn host)
+
+```mermaid
+sequenceDiagram
+  participant S as Student
+  participant L as learn_brand_host
+  participant RPC as Supabase_RPC
+  participant CA as Center_app
+
+  CA->>RPC: convert_lead_to_student + invite_student_portal_access
+  S->>L: sign in at learn host
+  S->>RPC: get_student_learn_home brand_id
+  RPC->>RPC: resolve_student_for_learn + active enrollment
+  RPC-->>L: comprehensive dashboard JSON
+  S->>RPC: register_student_for_competition free only
+```
+
+Student learn data is **always** scoped to active `student_enrollments.center_id`. Paid competition enrollment shows **Coming soon** on the portal until payment integration ships.
+
 ## What does not cross portals
 
 | Data | Rule |

@@ -358,6 +358,147 @@ VALUES (
 )
 ON CONFLICT (parent_id, student_id) DO NOTHING;
 
+-- Student learn portal v2 demo data (student-first auth)
+UPDATE public.students
+SET user_id = 'f0000000-0000-4000-8000-000000000004',
+    login_email = 'student@edunudg.com',
+    updated_at = now()
+WHERE id = 'e0000000-0000-4000-8000-000000000001';
+
+-- Student auth takes precedence over legacy parent link on same email
+UPDATE public.parents
+SET user_id = NULL, updated_at = now()
+WHERE id = '90000000-0000-4000-8000-000000000001';
+
+INSERT INTO public.programs (id, brand_id, name, is_active)
+VALUES (
+  'f1000000-0000-4000-8000-000000000001',
+  'a0000000-0000-4000-8000-000000000001',
+  'Abacus Core',
+  true
+)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, updated_at = now();
+
+INSERT INTO public.curriculum_versions (id, program_id, brand_id, version_number, status, published_at)
+VALUES (
+  'f1000000-0000-4000-8000-000000000002',
+  'f1000000-0000-4000-8000-000000000001',
+  'a0000000-0000-4000-8000-000000000001',
+  1,
+  'published',
+  now()
+)
+ON CONFLICT (id) DO UPDATE SET status = 'published', updated_at = now();
+
+INSERT INTO public.levels (id, curriculum_version_id, brand_id, name, sort_order, abacus_level_code)
+VALUES
+  ('f2000000-0000-4000-8000-000000000001', 'f1000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Level 1', 1, 'L1'),
+  ('f2000000-0000-4000-8000-000000000002', 'f1000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Level 2', 2, 'L2'),
+  ('f2000000-0000-4000-8000-000000000003', 'f1000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Level 3', 3, 'L3'),
+  ('f2000000-0000-4000-8000-000000000004', 'f1000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Level 4', 4, 'L4'),
+  ('f2000000-0000-4000-8000-000000000005', 'f1000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Level 5', 5, 'L5'),
+  ('f2000000-0000-4000-8000-000000000006', 'f1000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Level 6', 6, 'L6'),
+  ('f2000000-0000-4000-8000-000000000007', 'f1000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Level 7', 7, 'L7'),
+  ('f2000000-0000-4000-8000-000000000008', 'f1000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Level 8', 8, 'L8')
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, updated_at = now();
+
+UPDATE public.student_enrollments
+SET curriculum_version_id = 'f1000000-0000-4000-8000-000000000002', updated_at = now()
+WHERE id = 'd0000000-0000-4000-8000-000000000001';
+
+INSERT INTO public.student_profiles (brand_id, student_id, school_name, city, pincode)
+VALUES (
+  'a0000000-0000-4000-8000-000000000001',
+  'e0000000-0000-4000-8000-000000000001',
+  'Demo Public School',
+  'Bengaluru',
+  '560034'
+)
+ON CONFLICT (student_id) DO UPDATE SET
+  school_name = EXCLUDED.school_name,
+  city = EXCLUDED.city,
+  pincode = EXCLUDED.pincode,
+  updated_at = now();
+
+INSERT INTO public.student_level_progress (
+  id, brand_id, center_id, student_id, enrollment_id, level_id, level_name, status, completed_at
+)
+VALUES
+  ('f3000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'e0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000000001', 'f2000000-0000-4000-8000-000000000001', 'Level 1', 'completed', now() - interval '60 days'),
+  ('f3000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'e0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000000001', 'f2000000-0000-4000-8000-000000000002', 'Level 2', 'completed', now() - interval '30 days'),
+  ('f3000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'e0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000000001', 'f2000000-0000-4000-8000-000000000003', 'Level 3', 'in_progress', NULL)
+ON CONFLICT (student_id, level_name) DO UPDATE SET
+  status = EXCLUDED.status, level_id = EXCLUDED.level_id, enrollment_id = EXCLUDED.enrollment_id, updated_at = now();
+
+INSERT INTO public.student_assessments (
+  id, brand_id, center_id, student_id, enrollment_id, assessment_type, score, max_score, assessed_at, visible_to_student
+)
+VALUES
+  ('f4000000-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'e0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000000001', 'level_check', 85, 100, (now() AT TIME ZONE 'Asia/Kolkata')::date - 45, true),
+  ('f4000000-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'e0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000000001', 'level_check', 90, 100, (now() AT TIME ZONE 'Asia/Kolkata')::date - 30, true),
+  ('f4000000-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000001', 'b0000000-0000-4000-8000-000000000001', 'e0000000-0000-4000-8000-000000000001', 'd0000000-0000-4000-8000-000000000001', 'mock_exam', 78, 100, (now() AT TIME ZONE 'Asia/Kolkata')::date - 14, true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.brand_competitions (
+  id, brand_id, name, event_date, location, is_active, fee_type, registration_mode,
+  registration_opens_at, registration_closes_at
+)
+VALUES
+  (
+    'f5000000-0000-4000-8000-000000000001',
+    'a0000000-0000-4000-8000-000000000001',
+    'Regional Abacus Challenge',
+    (now() AT TIME ZONE 'Asia/Kolkata')::date + 30,
+    'Bengaluru',
+    true,
+    'free',
+    'open',
+    now() - interval '1 day',
+    now() + interval '20 days'
+  ),
+  (
+    'f5000000-0000-4000-8000-000000000002',
+    'a0000000-0000-4000-8000-000000000001',
+    'National Championship',
+    (now() AT TIME ZONE 'Asia/Kolkata')::date + 60,
+    'Mumbai',
+    true,
+    'paid',
+    'open',
+    now() - interval '1 day',
+    now() + interval '45 days'
+  ),
+  (
+    'f5000000-0000-4000-8000-000000000003',
+    'a0000000-0000-4000-8000-000000000001',
+    'Winter Open 2025',
+    (now() AT TIME ZONE 'Asia/Kolkata')::date - 60,
+    'Bengaluru',
+    true,
+    'free',
+    'closed',
+    NULL,
+    NULL
+  )
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, fee_type = EXCLUDED.fee_type, updated_at = now();
+
+INSERT INTO public.student_competition_entries (
+  id, brand_id, center_id, student_id, enrollment_id, competition_id, result_rank, rank_position, score
+)
+VALUES (
+  'f6000000-0000-4000-8000-000000000001',
+  'a0000000-0000-4000-8000-000000000001',
+  'b0000000-0000-4000-8000-000000000001',
+  'e0000000-0000-4000-8000-000000000001',
+  'd0000000-0000-4000-8000-000000000001',
+  'f5000000-0000-4000-8000-000000000003',
+  '2nd place',
+  2,
+  92
+)
+ON CONFLICT (student_id, competition_id) DO UPDATE SET
+  result_rank = EXCLUDED.result_rank, rank_position = EXCLUDED.rank_position, updated_at = now();
+
 -- Verify
 SELECT u.email, p.full_name, m.scope_type, m.role_key, m.status
 FROM auth.users u

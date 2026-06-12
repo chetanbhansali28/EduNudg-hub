@@ -118,10 +118,16 @@ describe("portalNav", () => {
     expect(sections.some((s) => s.title === "Leads")).toBe(false);
   });
 
-  it("student learn nav has dashboard and profile", () => {
-    const sections = studentNavSections("/profile");
-    expect(sections[0]?.items[0]?.label).toBe("Dashboard");
+  it("student learn nav has dashboard, progress, competitions, activity, and profile", () => {
+    const sections = studentNavSections("/progress");
+    const main = sections[0]?.items ?? [];
+    expect(main.map((i) => i.label)).toEqual([
+      "Dashboard",
+      "Progress",
+      "Competitions",
+      "Activity",
+    ]);
+    expect(main.find((i) => i.label === "Progress")?.active).toBe(true);
     expect(sections[1]?.items[0]?.label).toBe("Profile");
-    expect(sections[1]?.items[0]?.active).toBe(true);
   });
 });

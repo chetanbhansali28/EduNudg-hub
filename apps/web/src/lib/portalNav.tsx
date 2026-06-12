@@ -151,7 +151,16 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
 
 export function studentNavSections(pathname: string): ShellNavSection[] {
   return [
-    section("Main menu", [{ path: "/", label: "Dashboard", icon: <IconHome /> }], pathname),
+    section(
+      "Main menu",
+      [
+        { path: "/", label: "Dashboard", icon: <IconHome /> },
+        { path: "/progress", label: "Progress", icon: <IconChart /> },
+        { path: "/competitions", label: "Competitions", icon: <IconGraduation /> },
+        { path: "/activity", label: "Activity", icon: <IconClipboard /> },
+      ],
+      pathname
+    ),
     section("General", [{ path: "/profile", label: "Profile", icon: <IconSettings /> }], pathname),
   ];
 }
