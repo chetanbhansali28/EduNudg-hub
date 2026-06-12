@@ -9,6 +9,9 @@ export function postLoginPath(tenant: Pick<TenantContext, "portalType">): string
       return "/app";
     case "center":
       return "/app";
+    case "learn":
+    case "parents":
+      return "/";
     default:
       return "/login";
   }

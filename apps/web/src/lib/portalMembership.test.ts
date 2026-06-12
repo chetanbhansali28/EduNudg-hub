@@ -64,4 +64,19 @@ describe("hasPortalMembership", () => {
       )
     ).toBe(true);
   });
+
+  it("regression_allows_learn_portal_without_staff_membership", () => {
+    expect(
+      hasPortalMembership(
+        undefined,
+        tenant({ portalType: "learn", brandSlug: "abacusworld", hostname: "learn.abacusworld.localhost" })
+      )
+    ).toBe(true);
+    expect(
+      hasPortalMembership(
+        [],
+        tenant({ portalType: "learn", brandSlug: "abacusworld", hostname: "learn.abacusworld.localhost" })
+      )
+    ).toBe(true);
+  });
 });

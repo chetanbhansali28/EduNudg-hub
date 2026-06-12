@@ -5,7 +5,13 @@ import {
   type TenantContext,
 } from "@edunudg/tenant";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { parsePortalBrandingRpc, type PortalBranding } from "@/lib/portalBranding";
+import {
+  parsePortalBrandingRpc,
+  seedPortalBrandingCache,
+  type PortalBranding,
+} from "@/lib/portalBranding";
+
+const inflightTenantScope = new Map<string, Promise<TenantContext>>();
 
 function slugMatches(actual: string | null | undefined, expected: string | null | undefined): boolean {
   if (!actual || !expected) return false;
@@ -45,34 +51,53 @@ export function mergePortalBrandingScope(tenant: TenantContext, branding: Portal
   };
 }
 
-/** Resolve hostname tenant: domain mapping for portal type, then slug-based get_portal_branding RPC. */
-export async function resolveTenantScope(
+async function resolveTenantScopeOnce(
   supabase: SupabaseClient,
   hostname: string
 ): Promise<TenantContext> {
   const base = resolveTenantFromHost(hostname);
 
-  const { data: mapping, error: mappingError } = await supabase
-    .from("domain_mappings")
-    .select("hostname, portal_type, brand_id, center_id")
-    .eq("hostname", base.hostname)
-    .maybeSingle();
+  try {
+    const { data: mapping, error: mappingError } = await supabase
+      .from("domain_mappings")
+      .select("hostname, portal_type, brand_id, center_id")
+      .eq("hostname", base.hostname)
+      .maybeSingle();
 
-  let tenant = mappingError
-    ? base
-    : mergeDomainMapping(base, mapping as DomainMappingRow | null);
+    let tenant = mappingError
+      ? base
+      : mergeDomainMapping(base, mapping as DomainMappingRow | null);
 
-  if (!tenant.brandSlug || !isBrandOrCenterPortal(tenant)) return tenant;
+    if (!tenant.brandSlug || !isBrandOrCenterPortal(tenant)) return tenant;
 
-  const { data, error } = await supabase.rpc("get_portal_branding", {
-    p_brand_slug: tenant.brandSlug,
-    p_center_slug: tenant.centerSlug,
+    const { data, error } = await supabase.rpc("get_portal_branding", {
+      p_brand_slug: tenant.brandSlug,
+      p_center_slug: tenant.centerSlug,
+    });
+
+    if (error) return tenant;
+
+    const branding = parsePortalBrandingRpc(data);
+    seedPortalBrandingCache(tenant.brandSlug, tenant.centerSlug, branding);
+    tenant = mergePortalBrandingScope(tenant, branding);
+
+    return tenant;
+  } catch {
+    return base;
+  }
+}
+
+/** Resolve hostname tenant: domain mapping for portal type, then slug-based get_portal_branding RPC. */
+export async function resolveTenantScope(
+  supabase: SupabaseClient,
+  hostname: string
+): Promise<TenantContext> {
+  const inflight = inflightTenantScope.get(hostname);
+  if (inflight) return inflight;
+
+  const promise = resolveTenantScopeOnce(supabase, hostname).finally(() => {
+    inflightTenantScope.delete(hostname);
   });
-
-  if (error) return tenant;
-
-  const branding = parsePortalBrandingRpc(data);
-  tenant = mergePortalBrandingScope(tenant, branding);
-
-  return tenant;
+  inflightTenantScope.set(hostname, promise);
+  return promise;
 }

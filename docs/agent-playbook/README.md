@@ -29,9 +29,21 @@ Instructions for humans and AI agents working on EduNudg.
 - **Deploy**: Vercel (static SPA + rewrites)
 - **Local dev**: http://localhost:9000 (`pnpm dev`, port fixed via `--strictPort`)
 
+## Change workflow (OpenSpec)
+
+Behavioral specs and feature planning live in [`openspec/`](../../openspec/).
+
+1. **Propose** — `/opsx:propose "your idea"` (or `openspec-propose` skill) before behavior-changing work
+2. **Implement** — `/opsx:apply` + relevant `edunudg-*` skill
+3. **Archive** — `/opsx:archive` merges delta specs into `openspec/specs/`
+
+Skip OpenSpec for typos, refactors with zero behavior change, and dependency bumps. Required for new routes, RPC/RLS changes, and UAT fixes that change expected behavior. See [definition-of-done](./definition-of-done.md).
+
+CLI: `pnpm openspec:update` refreshes Cursor slash commands. Requires Node.js ≥ 20.19.
+
 ## Skills (`.cursor/skills/`)
 
-Use the skill matching your task before writing code.
+Use the skill matching your task before writing code. OpenSpec skills (`openspec-*`) handle planning; `edunudg-*` skills handle implementation.
 
 ## Phases
 

@@ -11,6 +11,7 @@ import { useResolvedPortalTenant } from "@/hooks/useResolvedPortalTenant";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
 import { hasPortalMembership } from "@/lib/portalMembership";
 import { resolveLoginBranding } from "@/lib/portalBranding";
+import { learnPortalLoginUrl } from "@/lib/centerPublicNavUrls";
 import { postLoginPath } from "./postLoginPath";
 
 const REMEMBER_KEY = "edunudg_remember_email";
@@ -74,7 +75,9 @@ export function LoginPage() {
 
   const homepage = homepageQuery.data;
   const portalType = tenant.portalType;
-  const accessPending = membershipsLoading || portalTenantResolving;
+  const isStudentPortal = portalType === "learn" || portalType === "parents";
+  const accessPending =
+    portalTenantResolving || (!isStudentPortal && membershipsLoading);
   const hasAccess =
     !session || accessPending ? false : hasPortalMembership(memberships, portalTenant);
 
@@ -145,6 +148,11 @@ export function LoginPage() {
             <>
               Dev: <code>admin@edunudg.com</code> / <code>admin</code> → <code>/admin</code> after sign in.
             </>
+          ) : import.meta.env.DEV && tenant.portalType === "center" && tenant.brandSlug ? (
+            <>
+              Staff: <code>center@edunudg.com</code> / <code>admin</code>. Parents and students use{" "}
+              <a href={learnPortalLoginUrl(tenant.brandSlug)}>Student login</a>.
+            </>
           ) : undefined
         }
         legal={legal}
@@ -200,11 +208,7 @@ export function LoginPage() {
         {showEmailAuth && showAlternateAuth ? <div className="ed-login-split__divider">or continue with</div> : null}
 
         {showAlternateAuth ? (
-          !showAltSignIn ? (
-            <Button variant="ghost" block onClick={() => setShowAltSignIn(true)}>
-              More sign-in options
-            </Button>
-          ) : (
+          isStudentPortal || showAltSignIn ? (
             <div className="ed-login-split__oauth">
               {showGoogleAuth ? (
                 <Button onClick={() => signInWithOAuth("google").catch((e) => setError(e.message))}>
@@ -233,6 +237,10 @@ export function LoginPage() {
                 </>
               ) : null}
             </div>
+          ) : (
+            <Button variant="ghost" block onClick={() => setShowAltSignIn(true)}>
+              More sign-in options
+            </Button>
           )
         ) : null}
 
@@ -241,6 +249,14 @@ export function LoginPage() {
             <Link to="/">← Back to homepage</Link>
           </p>
         )}
+        {tenant.portalType === "center" && tenant.brandSlug ? (
+          <p className="ed-login-split__subtitle" style={{ marginTop: "1.25rem" }}>
+            Parent or student?{" "}
+            <a href={learnPortalLoginUrl(tenant.brandSlug)}>Sign in to the student portal</a>
+            {" · "}
+            <Link to="/">← Center homepage</Link>
+          </p>
+        ) : null}
       </LoginLayout>
     </ThemeProvider>
   );

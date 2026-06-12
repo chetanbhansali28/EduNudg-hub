@@ -17,12 +17,16 @@ export function useMembership() {
     queryKey: ["memberships", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await getSupabase()
-        .from("memberships")
-        .select("id, role_key, scope_type, brand_id, center_id")
-        .eq("user_id", user!.id)
-        .eq("status", "active");
-      return supabaseList(data, error) as Membership[];
+      try {
+        const { data, error } = await getSupabase()
+          .from("memberships")
+          .select("id, role_key, scope_type, brand_id, center_id")
+          .eq("user_id", user!.id)
+          .eq("status", "active");
+        return supabaseList(data, error) as Membership[];
+      } catch {
+        return [];
+      }
     },
   });
 }

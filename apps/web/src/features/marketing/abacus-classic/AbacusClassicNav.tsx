@@ -1,13 +1,16 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
+import { centerPublicLoginHrefs } from "@/features/marketing/CenterPublicNavLogins";
 import { AbacusCtaButton } from "./MarketingLeadModals";
 
 type Props = {
   config: HomepageConfig;
+  brandSlug?: string;
 };
 
-export function AbacusClassicNav({ config }: Props) {
+export function AbacusClassicNav({ config, brandSlug }: Props) {
+  const logins = brandSlug ? centerPublicLoginHrefs(brandSlug) : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const menuWrapRef = useRef<HTMLDivElement>(null);
@@ -47,6 +50,11 @@ export function AbacusClassicNav({ config }: Props) {
                   {link.label}
                 </a>
               ))}
+              {logins ? (
+                <a href={logins.studentLoginHref} onClick={() => setMenuOpen(false)}>
+                  Student Login
+                </a>
+              ) : null}
             </div>
           ) : null}
 
@@ -69,6 +77,11 @@ export function AbacusClassicNav({ config }: Props) {
         </nav>
 
         <div className="ac-nav__actions">
+          {logins ? (
+            <a href={logins.studentLoginHref} className="ac-nav__login-link ac-nav__login-link--student">
+              Student Login
+            </a>
+          ) : null}
           <AbacusCtaButton label={config.nav.ctaLabel} href={config.nav.ctaHref} variant="nav-enroll" />
           <AbacusCtaButton label={secondaryLabel} href={secondaryHref} variant="nav-apply" />
         </div>

@@ -334,6 +334,16 @@
   font-weight: 500;
 }
 
+.novu-nav-bar__logins {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.novu-nav-bar__link--login {
+  font-weight: 500;
+}
+
 .novu-nav-bar__link:hover {
   background: rgb(255 255 255 / 0.1);
   color: var(--novu-white);
@@ -2897,8 +2907,28 @@
 
 .ac-nav__actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
   justify-self: end;
+}
+
+.ac-nav__login-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-decoration: none;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+}
+
+.ac-nav__login-link--student {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
 }
 
 .ac-nav__dropdown {

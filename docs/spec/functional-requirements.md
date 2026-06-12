@@ -2,9 +2,13 @@
 
 FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand, `C` center, `S` student learn.
 
+**Canonical behavioral specs** live in [`openspec/specs/`](../../openspec/specs/). This file is a traceability index; edit OpenSpec specs when behavior changes.
+
 ---
 
 ## Platform (EduNudg)
+
+> Canonical spec: [`openspec/specs/platform-brand-onboarding/spec.md`](../../openspec/specs/platform-brand-onboarding/spec.md)
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
@@ -19,6 +23,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 
 ## Brand public
 
+> Canonical specs: [`franchise-applications`](../../openspec/specs/franchise-applications/spec.md) (FR-B01), [`student-leads`](../../openspec/specs/student-leads/spec.md) (FR-B02–B04)
+
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
 | FR-B01 | B | Franchise application form | Extended fields: name, email, phone, franchise name, address, city, state, pincode, experience |
@@ -29,6 +35,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 ---
 
 ## Brand app — Student leads
+
+> Canonical spec: [`openspec/specs/student-leads/spec.md`](../../openspec/specs/student-leads/spec.md)
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
@@ -47,6 +55,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 
 ## Brand app — Franchise applications
 
+> Canonical spec: [`openspec/specs/franchise-applications/spec.md`](../../openspec/specs/franchise-applications/spec.md)
+
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
 | FR-B20 | B | **Franchise Applications** nav `/app/franchise-applications` | Moved out of Settings |
@@ -56,6 +66,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 ---
 
 ## Center public
+
+> Canonical specs: [`student-leads`](../../openspec/specs/student-leads/spec.md) (registration), [`center-public-profile`](../../openspec/specs/center-public-profile/spec.md) (blurb, photo, social)
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
@@ -67,6 +79,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 ---
 
 ## Center app
+
+> Canonical spec: [`openspec/specs/student-leads/spec.md`](../../openspec/specs/student-leads/spec.md)
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|

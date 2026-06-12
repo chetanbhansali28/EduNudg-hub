@@ -1,13 +1,16 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
+import { centerPublicLoginHrefs } from "@/features/marketing/CenterPublicNavLogins";
 import { SparkAcademyCta } from "./SparkAcademyCta";
 
 type Props = {
   config: HomepageConfig;
+  brandSlug?: string;
 };
 
-export function SparkAcademyNav({ config }: Props) {
+export function SparkAcademyNav({ config, brandSlug }: Props) {
+  const logins = brandSlug ? centerPublicLoginHrefs(brandSlug) : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const menuWrapRef = useRef<HTMLDivElement>(null);
@@ -44,6 +47,11 @@ export function SparkAcademyNav({ config }: Props) {
                   {link.label}
                 </a>
               ))}
+              {logins ? (
+                <a href={logins.studentLoginHref} onClick={() => setMenuOpen(false)}>
+                  Student Login
+                </a>
+              ) : null}
             </div>
           ) : null}
 
@@ -66,9 +74,15 @@ export function SparkAcademyNav({ config }: Props) {
         </nav>
 
         <div className="sa-nav__actions">
-          <Link to={config.nav.adminHref} className="sa-btn sa-btn--outline">
-            Login
-          </Link>
+          {logins ? (
+            <a href={logins.studentLoginHref} className="sa-btn sa-btn--outline">
+              Student Login
+            </a>
+          ) : (
+            <Link to={config.nav.adminHref} className="sa-btn sa-btn--outline">
+              Login
+            </Link>
+          )}
           <SparkAcademyCta label={config.nav.ctaLabel} href={config.nav.ctaHref} variant="dark" />
         </div>
       </div>

@@ -1,6 +1,8 @@
 {
   "name": "edunudg",
+  "version": "0.0.0",
   "private": true,
+  "description": "EduNudg multi-tenant franchise learning OS",
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "dev": "turbo dev --filter=@edunudg/web",
@@ -15,9 +17,12 @@
     "functions:deploy": "supabase functions deploy",
     "functions:deploy:whatsapp": "supabase functions deploy whatsapp-otp",
     "functions:deploy:passkey": "supabase functions deploy passkey-verify",
-    "functions:deploy:brand-owner": "supabase functions deploy brand-owner-credentials"
+    "functions:deploy:brand-owner": "supabase functions deploy brand-owner-credentials",
+    "openspec:init": "openspec init --tools cursor",
+    "openspec:update": "openspec update"
   },
   "devDependencies": {
+    "@fission-ai/openspec": "^1.4.1",
     "@playwright/test": "^1.49.1",
     "pg": "^8.21.0",
     "turbo": "^2.3.3",

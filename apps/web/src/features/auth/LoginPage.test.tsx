@@ -241,4 +241,50 @@ describe("LoginPage", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("Enter email and password.");
     expect(signInWithEmail).not.toHaveBeenCalled();
   });
+
+  it("regression_learn_portal_redirects_to_dashboard_after_email_sign_in", async () => {
+    tenantState.portalType = "learn";
+    tenantState.brandSlug = "abacusworld";
+    signInWithEmail.mockResolvedValue({ error: null });
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const router = createMemoryRouter(
+      [
+        { path: "/login", element: <LoginPage /> },
+        { path: "/", element: <div>Student dashboard</div> },
+      ],
+      { initialEntries: ["/login"] }
+    );
+    const shell = (
+      <QueryClientProvider client={qc}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    );
+    const view = render(shell);
+    rerenderRef.current = () => view.rerender(shell);
+
+    fireEvent.change(screen.getByLabelText("Email"), { target: { value: "student@edunudg.com" } });
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+    });
+
+    await expectRedirectTo("Student dashboard");
+    tenantState.portalType = "platform";
+    tenantState.brandSlug = null;
+  });
+
+  it("regression_learn_portal_shows_oauth_options_without_more_sign_in_toggle", () => {
+    tenantState.portalType = "learn";
+    tenantState.brandSlug = "abacusworld";
+    renderLogin();
+
+    expect(screen.getByRole("button", { name: "Google" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "More sign-in options" })).toBeNull();
+    expect(screen.queryByText(/student dashboard/i)).toBeNull();
+    expect(screen.queryByText(/student@edunudg.com/i)).toBeNull();
+
+    tenantState.portalType = "platform";
+    tenantState.brandSlug = null;
+  });
 });

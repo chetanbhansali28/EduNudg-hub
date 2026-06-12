@@ -2,15 +2,15 @@ import type { ReactNode } from "react";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@edunudg/ui";
 import { AuthProvider } from "@/bootstrap/AuthProvider";
-import { TenantProvider } from "@/bootstrap/TenantProvider";
+import { TenantProvider, useTenant } from "@/bootstrap/TenantProvider";
 import { PortalDocumentHead } from "@/components/PortalDocumentHead";
+import { shouldUseAdminThemeProvider } from "@/lib/appThemeShell";
 import { AppRoutes } from "@/routes/AppRoutes";
 
-function AppShell({ children }: { children: ReactNode }) {
+function AppThemeShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
-  const isMarketing =
-    pathname === "/" || pathname === "/login" || pathname.startsWith("/login");
-  if (isMarketing) return <>{children}</>;
+  const tenant = useTenant();
+  if (!shouldUseAdminThemeProvider(tenant, pathname)) return <>{children}</>;
   return <ThemeProvider>{children}</ThemeProvider>;
 }
 
@@ -20,9 +20,9 @@ export function App() {
       <PortalDocumentHead />
       <AuthProvider>
         <BrowserRouter>
-          <AppShell>
+          <AppThemeShell>
             <AppRoutes />
-          </AppShell>
+          </AppThemeShell>
         </BrowserRouter>
       </AuthProvider>
     </TenantProvider>

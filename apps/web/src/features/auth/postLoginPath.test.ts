@@ -10,4 +10,9 @@ describe("postLoginPath", () => {
     expect(postLoginPath({ portalType: "brand" })).toBe("/app");
     expect(postLoginPath({ portalType: "center" })).toBe("/app");
   });
+
+  it("sends learn and parents portals to student home", () => {
+    expect(postLoginPath({ portalType: "learn" })).toBe("/");
+    expect(postLoginPath({ portalType: "parents" })).toBe("/");
+  });
 });

@@ -3,6 +3,11 @@ import type { TenantContext } from "@edunudg/tenant";
 
 /** Whether the signed-in user has an active membership for the current portal host. */
 export function hasPortalMembership(memberships: Membership[] | undefined, tenant: TenantContext): boolean {
+  // Parent/student portals use parent–student links in RPCs, not staff memberships.
+  if (tenant.portalType === "learn" || tenant.portalType === "parents") {
+    return true;
+  }
+
   if (!memberships?.length) return false;
 
   if (tenant.portalType === "platform") {

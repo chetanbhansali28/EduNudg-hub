@@ -11,6 +11,8 @@ Read this file before any implementation work. EduNudg is a **TypeScript + React
 5. Task-specific `.cursor/skills/*/SKILL.md`
 6. [`docs/agent-playbook/modular-architecture.md`](docs/agent-playbook/modular-architecture.md) — theme, services, feature modules, flags
 7. Journey specs: [`docs/spec/README.md`](docs/spec/README.md)
+8. Behavioral specs: [`openspec/specs/`](openspec/specs/) — source of truth for what the system should do (GIVEN/WHEN/THEN)
+9. New features or behavior changes: start with `/opsx:propose` before coding; archive with `/opsx:archive` when done
 
 ## Agent roles
 

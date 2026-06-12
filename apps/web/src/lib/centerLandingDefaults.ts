@@ -25,7 +25,6 @@ export function buildCenterLandingConfig(
         { label: "Why us", href: "#features" },
         { label: "Parent stories", href: "#testimonials" },
         { label: "FAQ", href: "#faq" },
-        { label: "Enroll", href: "#enroll" },
       ],
       ctaLabel: "Book a free trial",
       ctaHref: "#enroll",
@@ -123,7 +122,7 @@ export function buildCenterLandingConfig(
       productLinks: [
         { label: "Why abacus", href: "#features" },
         { label: "FAQ", href: "#faq" },
-        { label: "Enroll", href: "#enroll" },
+        { label: "Book a free trial", href: "#enroll" },
       ],
       companyLinks: [
         { label: "Staff login", href: "/login" },

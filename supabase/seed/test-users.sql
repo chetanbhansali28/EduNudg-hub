@@ -11,7 +11,7 @@
 -- | Platform    | admin@edunudg.com             | http://localhost:9000/admin           |
 -- | Franchisor  | owner@edunudg.com             | http://abacusworld.localhost:9000     |
 -- | Franchise   | center@edunudg.com            | http://koramangala.abacusworld.localhost:9000 |
--- | Student     | student@edunudg.com           | Data + auth (learn portal = Phase 2)  |
+-- | Student     | student@edunudg.com           | http://learn.abacusworld.localhost:9000/login |
 --
 -- Re-run safe: uses fixed UUIDs and skips existing emails.
 -- =============================================================================
@@ -58,6 +58,13 @@ VALUES
     'b0000000-0000-4000-8000-000000000001',
     'center',
     true
+  ),
+  (
+    'learn.abacusworld.localhost',
+    'a0000000-0000-4000-8000-000000000001',
+    NULL,
+    'learn',
+    false
   )
 ON CONFLICT (hostname) DO NOTHING;
 
@@ -209,7 +216,7 @@ BEGIN
   END IF;
 
   -- -------------------------------------------------------------------------
-  -- 4) Student (auth account — learn portal UI is Phase 2)
+  -- 4) Student / parent auth (learn portal)
   -- -------------------------------------------------------------------------
   IF NOT EXISTS (SELECT 1 FROM auth.users WHERE email = 'student@edunudg.com') THEN
     INSERT INTO auth.users (
@@ -331,10 +338,13 @@ VALUES (
   '90000000-0000-4000-8000-000000000001',
   'a0000000-0000-4000-8000-000000000001',
   'Test Parent',
-  'parent@edunudg.com',
-  NULL
+  'student@edunudg.com',
+  'f0000000-0000-4000-8000-000000000004'
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET
+  email = EXCLUDED.email,
+  user_id = EXCLUDED.user_id,
+  updated_at = now();
 
 INSERT INTO public.parent_student_links (
   id, brand_id, parent_id, student_id, relationship

@@ -16,14 +16,14 @@
 | Platform admin | `admin@edunudg.com` | `platform_super_admin` | http://localhost:9000/login → redirects to `/admin` |
 | Franchisor (brand) | `owner@edunudg.com` | `brand_owner` | http://abacusworld.localhost:9000/login |
 | Franchise (center) | `center@edunudg.com` | `center_owner` | http://koramangala.abacusworld.localhost:9000/login |
-| Student | `student@edunudg.com` | *(auth only)* | Learn portal UI is Phase 2 |
+| Student / parent | `student@edunudg.com` | linked parent account | http://learn.abacusworld.localhost:9000/login |
 
 Student **data** (enrollment at Koramangala) is visible when logged in as **center** or **brand** under Students.
 
 Add to `/etc/hosts` if needed:
 
 ```
-127.0.0.1 abacusworld.localhost koramangala.abacusworld.localhost
+127.0.0.1 abacusworld.localhost koramangala.abacusworld.localhost learn.abacusworld.localhost
 ```
 
 Optional: run [`supabase/seed/seed.sql`](../../supabase/seed/seed.sql) first for subscription plans (not required for login).

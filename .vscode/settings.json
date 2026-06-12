@@ -1,0 +1,10 @@
+{
+  "npm.packageManager": "pnpm",
+  "npm.exclude": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/.git/**"
+  ],
+  "npm.scriptExplorerAction": "run",
+  "npm.enableScriptExplorer": true
+}

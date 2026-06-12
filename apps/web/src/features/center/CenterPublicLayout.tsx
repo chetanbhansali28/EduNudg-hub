@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchCenterLandingBundle } from "@/lib/centerLandingApi";
+import { sanitizeCenterPublicNavConfig } from "@/lib/centerPublicNav";
 import { marketingPageClassName, themeUsesLeadModals } from "@/lib/marketingThemeLayout";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
@@ -62,18 +63,20 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
     );
   }
 
+  const publicConfig = sanitizeCenterPublicNavConfig(bundle.config);
+
   const layoutInner = (
     <div className={marketingPageClassName(theme)}>
       {isAbacusClassic ? (
-        <AbacusClassicNav config={bundle.config} />
+        <AbacusClassicNav config={publicConfig} brandSlug={brandSlug} />
       ) : isSparkAcademy ? (
-        <SparkAcademyNav config={bundle.config} />
+        <SparkAcademyNav config={publicConfig} brandSlug={brandSlug} />
       ) : (
-        <MarketingNav config={bundle.config} />
+        <MarketingNav config={publicConfig} brandSlug={brandSlug} />
       )}
       <Outlet
         context={{
-          config: bundle.config,
+          config: publicConfig,
           profile: bundle.profile,
           brandSlug,
           centerSlug,
@@ -82,12 +85,12 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           publicStats: bundle.publicStats,
         }}
       />
-      {showFooter && !isAbacusClassic && !isSparkAcademy ? <FooterSection config={bundle.config} /> : null}
+      {showFooter && !isAbacusClassic && !isSparkAcademy ? <FooterSection config={publicConfig} /> : null}
       {showFooter && isAbacusClassic ? (
-        <AbacusClassicFooter config={bundle.config} publicStats={bundle.publicStats} />
+        <AbacusClassicFooter config={publicConfig} publicStats={bundle.publicStats} />
       ) : null}
       {showFooter && isSparkAcademy ? (
-        <SparkAcademyFooter config={bundle.config} />
+        <SparkAcademyFooter config={publicConfig} />
       ) : null}
       {themeUsesLeadModals(theme) ? <MarketingLeadModals brandSlug={brandSlug} /> : null}
     </div>

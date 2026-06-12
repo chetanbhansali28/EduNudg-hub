@@ -48,7 +48,7 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 Hosts (add to `/etc/hosts`):
 
 ```
-127.0.0.1 localhost admin.localhost abacusworld.localhost koramangala.abacusworld.localhost smart-brain-abacus.localhost
+127.0.0.1 localhost admin.localhost abacusworld.localhost koramangala.abacusworld.localhost learn.abacusworld.localhost smart-brain-abacus.localhost
 ```
 
 ### Platform admin cross-portal access
@@ -123,6 +123,26 @@ supabase db push   # applies 009 if not yet applied
 ## OAuth (Google / Facebook)
 
 Configure in **Supabase Dashboard → Authentication → Providers** when ready. No local `config.toml` changes required for cloud.
+
+## OpenSpec (behavioral specs)
+
+EduNudg uses [OpenSpec](https://openspec.dev/) for testable requirements and change proposals. Reference docs stay in `docs/`; behavior lives in `openspec/specs/`.
+
+**Requirements:** Node.js ≥ 20.19.
+
+```bash
+pnpm install                    # includes @fission-ai/openspec devDependency
+pnpm openspec:update            # refresh Cursor /opsx:* slash commands
+pnpm exec openspec list         # active changes
+pnpm exec openspec validate --all --strict
+pnpm exec openspec archive <change-name> -y
+```
+
+**Cursor workflow:** `/opsx:propose` → review artifacts in `openspec/changes/` → `/opsx:apply` → `/opsx:archive`.
+
+**Telemetry opt-out (optional):** `export OPENSPEC_TELEMETRY=0` or `export DO_NOT_TRACK=1`.
+
+See [`openspec/README.md`](../../openspec/README.md) and [`docs/agent-playbook/README.md`](../agent-playbook/README.md).
 
 ## Security
 

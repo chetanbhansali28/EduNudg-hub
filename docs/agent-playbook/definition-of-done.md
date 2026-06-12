@@ -26,3 +26,4 @@ A work item is done when ALL apply:
 
 - [ ] Navigation updated in `docs/navigation/` if new routes
 - [ ] ADR for architectural decisions
+- [ ] OpenSpec change archived (or N/A for trivial fixes); `openspec/specs/` updated if behavior changed

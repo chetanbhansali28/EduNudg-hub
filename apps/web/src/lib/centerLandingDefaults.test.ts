@@ -10,6 +10,7 @@ describe("buildCenterLandingConfig", () => {
     );
     expect(config.hero.ctaHref).toBe("#enroll");
     expect(config.nav.ctaLabel).toBe("Book a free trial");
+    expect(config.nav.links.some((l) => l.label.toLowerCase() === "enroll")).toBe(false);
     expect(config.hero.ctaLabel).toBe(config.nav.ctaLabel);
     expect(config.footerCta.ctaLabel).toBe(config.nav.ctaLabel);
     expect(config.hero.subtitle).toContain("Abacus World Koramangala");

@@ -75,7 +75,7 @@ export function CenterLeadsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lostMode, setLostMode] = useState(false);
   const [lostReason, setLostReason] = useState("");
-  const [convertTarget, setConvertTarget] = useState<LeadRow | null>(null);
+  const [convertMode, setConvertMode] = useState(false);
 
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ["center-leads", centerId] });
@@ -104,12 +104,14 @@ export function CenterLeadsPage() {
     setSelectedId(null);
     setLostMode(false);
     setLostReason("");
+    setConvertMode(false);
   };
 
   const selectLead = (id: string) => {
     setSelectedId(id);
     setLostMode(false);
     setLostReason("");
+    setConvertMode(false);
   };
 
   const updateStatus = useMutation({
@@ -141,7 +143,7 @@ export function CenterLeadsPage() {
     },
     onSuccess: () => {
       invalidate();
-      setConvertTarget(null);
+      setConvertMode(false);
       closeDetail();
     },
     onError: capture,
@@ -292,20 +294,30 @@ export function CenterLeadsPage() {
                       </div>
                     </>
                   ) : selectedPipeline ? (
-                    <div className="ed-form-section">
-                      <Select
-                        label="Status"
-                        value={selected.status}
-                        onChange={(v) => updateStatus.mutate({ id: selected.id, status: v })}
-                        options={STATUS_OPTIONS}
+                    convertMode ? (
+                      <ConvertLeadDialog
+                        lead={selected}
+                        variant="inline"
+                        pending={convert.isPending}
+                        onCancel={() => setConvertMode(false)}
+                        onConfirm={(overrides) => convert.mutate({ id: selected.id, overrides })}
                       />
-                      <Button onClick={() => setConvertTarget(selected)} disabled={convert.isPending}>
-                        Convert to student
-                      </Button>
-                      <Button variant="danger" onClick={() => setLostMode(true)}>
-                        Mark lost
-                      </Button>
-                    </div>
+                    ) : (
+                      <div className="ed-form-section">
+                        <Select
+                          label="Status"
+                          value={selected.status}
+                          onChange={(v) => updateStatus.mutate({ id: selected.id, status: v })}
+                          options={STATUS_OPTIONS}
+                        />
+                        <Button onClick={() => setConvertMode(true)} disabled={convert.isPending}>
+                          Convert to student
+                        </Button>
+                        <Button variant="danger" onClick={() => setLostMode(true)}>
+                          Mark lost
+                        </Button>
+                      </div>
+                    )
                   ) : null}
                 </>
               }
@@ -316,14 +328,6 @@ export function CenterLeadsPage() {
         }
       />
 
-      {convertTarget && (
-        <ConvertLeadDialog
-          lead={convertTarget}
-          pending={convert.isPending}
-          onCancel={() => setConvertTarget(null)}
-          onConfirm={(overrides) => convert.mutate({ id: convertTarget.id, overrides })}
-        />
-      )}
     </>
   );
 }

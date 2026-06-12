@@ -1,12 +1,15 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
+import { CenterPublicNavLogins } from "./CenterPublicNavLogins";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { useHeroIntroComplete } from "./useHeroIntroComplete";
 import { useNavTheme } from "./useNavTheme";
 
 type Props = {
   config: HomepageConfig;
+  /** When set (center public site), show Student Login in the main nav. */
+  brandSlug?: string;
 };
 
 function MenuIcon({ open }: { open: boolean }) {
@@ -19,7 +22,7 @@ function MenuIcon({ open }: { open: boolean }) {
   );
 }
 
-export function MarketingNav({ config }: Props) {
+export function MarketingNav({ config, brandSlug }: Props) {
   const theme = useNavTheme();
   const heroIntroComplete = useHeroIntroComplete();
   const isLightBg = theme === "light";
@@ -82,6 +85,13 @@ export function MarketingNav({ config }: Props) {
                   {l.label}
                 </a>
               ))}
+              {brandSlug ? (
+                <CenterPublicNavLogins
+                  brandSlug={brandSlug}
+                  inDropdown
+                  onNavigate={closeMenu}
+                />
+              ) : null}
             </div>
           ) : null}
 
@@ -103,6 +113,7 @@ export function MarketingNav({ config }: Props) {
               {l.label}
             </a>
           ))}
+          {brandSlug ? <CenterPublicNavLogins brandSlug={brandSlug} isLightBg={isLightBg} /> : null}
           <MarketingCtaLink
             href={config.nav.ctaHref}
             label={config.nav.ctaLabel}

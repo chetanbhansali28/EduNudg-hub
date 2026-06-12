@@ -36,6 +36,27 @@ const EMPTY: PortalBranding = {
   loginSubtext: null,
 };
 
+function portalBrandingCacheKey(brandSlug: string, centerSlug: string | null): string {
+  return `${brandSlug}:${centerSlug ?? ""}`;
+}
+
+const portalBrandingCache = new Map<string, PortalBranding>();
+
+export function seedPortalBrandingCache(
+  brandSlug: string,
+  centerSlug: string | null,
+  branding: PortalBranding
+): void {
+  portalBrandingCache.set(portalBrandingCacheKey(brandSlug, centerSlug), branding);
+}
+
+export function readPortalBrandingCache(
+  brandSlug: string,
+  centerSlug: string | null
+): PortalBranding | undefined {
+  return portalBrandingCache.get(portalBrandingCacheKey(brandSlug, centerSlug));
+}
+
 export function parsePortalBrandingRpc(data: unknown): PortalBranding {
   if (!data || typeof data !== "object") return EMPTY;
   const row = data as BrandingRow;
@@ -59,13 +80,18 @@ export async function fetchPortalBranding(
 ): Promise<PortalBranding> {
   if (!brandSlug) return EMPTY;
 
+  const cached = readPortalBrandingCache(brandSlug, centerSlug);
+  if (cached) return cached;
+
   try {
     const { data, error } = await getSupabase().rpc("get_portal_branding", {
       p_brand_slug: brandSlug,
       p_center_slug: centerSlug,
     });
     if (error) return EMPTY;
-    return parsePortalBrandingRpc(data);
+    const branding = parsePortalBrandingRpc(data);
+    seedPortalBrandingCache(brandSlug, centerSlug, branding);
+    return branding;
   } catch {
     return EMPTY;
   }
