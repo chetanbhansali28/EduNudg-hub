@@ -309,3 +309,86 @@ export async function deleteUnit(id: string): Promise<void> {
   const { error } = await client().from("lessons").delete().eq("id", id);
   if (error) throw error;
 }
+
+export type CourseImpactStats = {
+  authorizedCenters: number;
+  activeBatches: number;
+};
+
+export async function fetchCourseImpactStats(
+  brandId: string,
+  programId: string
+): Promise<CourseImpactStats> {
+  const versions = await fetchVersions(brandId, programId);
+  const versionIds = versions.map((v) => v.id);
+
+  const [centersRes, batchesRes] = await Promise.all([
+    client()
+      .from("center_program_enablement")
+      .select("id", { count: "exact", head: true })
+      .eq("program_id", programId),
+    versionIds.length > 0
+      ? client()
+          .from("batches")
+          .select("id", { count: "exact", head: true })
+          .is("deleted_at", null)
+          .in("curriculum_version_id", versionIds)
+      : Promise.resolve({ count: 0, error: null }),
+  ]);
+
+  if (centersRes.error) throw centersRes.error;
+  if (batchesRes.error) throw batchesRes.error;
+
+  return {
+    authorizedCenters: centersRes.count ?? 0,
+    activeBatches: batchesRes.count ?? 0,
+  };
+}
+
+export async function cloneCurriculumVersionToDraft(versionId: string): Promise<string> {
+  const { data, error } = await client().rpc("clone_curriculum_version_to_draft", {
+    p_version_id: versionId,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function deleteLevelSafe(levelId: string): Promise<void> {
+  const { error } = await client().rpc("delete_curriculum_level", { p_level_id: levelId });
+  if (error) throw error;
+}
+
+export async function reorderLevels(orderedLevelIds: string[]): Promise<void> {
+  await Promise.all(
+    orderedLevelIds.map((id, index) =>
+      client()
+        .from("levels")
+        .update({ sort_order: index + 1 })
+        .eq("id", id)
+    )
+  );
+}
+
+export async function reorderUnits(orderedUnitIds: string[]): Promise<void> {
+  await Promise.all(
+    orderedUnitIds.map((id, index) =>
+      client()
+        .from("lessons")
+        .update({ sort_order: index + 1 })
+        .eq("id", id)
+    )
+  );
+}
+
+export async function fetchLevelUnitCounts(
+  levelIds: string[]
+): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  await Promise.all(
+    levelIds.map(async (levelId) => {
+      const units = await fetchLevelUnits(levelId);
+      counts[levelId] = units.length;
+    })
+  );
+  return counts;
+}

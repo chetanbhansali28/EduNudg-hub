@@ -1,17 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, PageGrid, PageGridFull, PageTitle } from "@edunudg/ui";
+import { Link } from "react-router-dom";
+import { Button, MutationError, PageGrid, PageGridFull, PageTitle } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { ActivityTimeline } from "@/features/learn/components/ActivityTimeline";
 import { CenterInfoCard } from "@/features/learn/components/CenterInfoCard";
 import { CompetitionCard } from "@/features/learn/components/CompetitionCard";
-import { CurriculumLadder } from "@/features/learn/components/CurriculumLadder";
 import { QuickActionStrip } from "@/features/learn/components/QuickActionStrip";
 import { SectionCard, StudentPortalLoading } from "@/features/learn/components/StudentPortalShell";
 import { StudentStatStrip } from "@/features/learn/components/StudentStatStrip";
 import { StudentEnrollmentBlockedPage } from "@/features/learn/StudentEnrollmentBlockedPage";
 import { StudentLearnRpcError, fetchStudentLearnHome } from "@/lib/studentLearnApi";
 import { registerForCompetition } from "@/lib/studentCompetitionsApi";
+import { fetchStudentOpenBatches, joinStudentBatch } from "@/lib/studentBatchJoinApi";
 import { formatShortDate } from "@/features/learn/studentFormatters";
+import "@/features/center/centerOps.css";
 
 export function StudentHomePage() {
   const tenant = useTenant();
@@ -28,9 +30,25 @@ export function StudentHomePage() {
     },
   });
 
+  const openBatches = useQuery({
+    queryKey: ["student-open-batches", brandId],
+    enabled: !!brandId,
+    queryFn: () => fetchStudentOpenBatches(brandId!),
+    retry: (_, err) => !(err instanceof StudentLearnRpcError),
+  });
+
   const enroll = useMutation({
     mutationFn: registerForCompetition,
     onSuccess: () => void qc.invalidateQueries({ queryKey: ["student-learn-home", brandId] }),
+  });
+
+  const joinBatch = useMutation({
+    mutationFn: joinStudentBatch,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["student-open-batches", brandId] });
+      void qc.invalidateQueries({ queryKey: ["student-program-ladders", brandId] });
+      void qc.invalidateQueries({ queryKey: ["student-learn-home", brandId] });
+    },
   });
 
   if (home.isLoading) {
@@ -63,8 +81,9 @@ export function StudentHomePage() {
   const data = home.data;
   if (!data) return null;
 
-  const { center, enrollment, curriculum_ladder, stats } = data;
+  const { center, enrollment, stats } = data;
   const hasCurriculum = !!enrollment.curriculum_version_id;
+  const batches = openBatches.data ?? [];
 
   return (
     <>
@@ -76,7 +95,7 @@ export function StudentHomePage() {
               {
                 label: "Levels done",
                 value: `${stats.levels_completed}/${stats.levels_total}`,
-                hint: hasCurriculum ? `${curriculum_ladder.completion_pct}% complete` : undefined,
+                hint: hasCurriculum ? "See full ladder on Progress" : undefined,
               },
               { label: "Exams taken", value: stats.assessments_count },
               {
@@ -92,20 +111,51 @@ export function StudentHomePage() {
           />
         </PageGridFull>
 
+        {batches.length > 0 && (
+          <SectionCard title="Join a batch" action={{ label: "View progress", to: "/progress" }}>
+            <MutationError message={joinBatch.error instanceof Error ? joinBatch.error.message : null} />
+            <div className="ed-ops-stagger">
+              {batches.map((b) => (
+                <div key={b.batch_id} className="ed-ops-join-banner" style={{ marginBottom: "0.75rem" }}>
+                  <p className="ed-sp-ladder__step-name">{b.name}</p>
+                  <p className="ed-text-sm ed-muted">
+                    {b.program_name} · {b.level_start} → {b.level_end}
+                  </p>
+                  {b.already_joined ? (
+                    <p className="ed-text-sm" role="status">
+                      You&apos;re enrolled in this batch.
+                    </p>
+                  ) : (
+                    <Button
+                      onClick={() => joinBatch.mutate(b.batch_id)}
+                      disabled={joinBatch.isPending}
+                      aria-live="polite"
+                    >
+                      {joinBatch.isPending && joinBatch.variables === b.batch_id ? "Joining…" : "Join now"}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+        )}
+
         <PageGrid cols={2}>
           <SectionCard title="My center">
             <CenterInfoCard center={center} enrollment={enrollment} />
           </SectionCard>
 
-          <SectionCard title="Your learning path" action={{ label: "Full progress", to: "/progress" }}>
+          <SectionCard title="Your learning path">
             {hasCurriculum ? (
-              <CurriculumLadder
-                levels={curriculum_ladder.levels}
-                completionPct={curriculum_ladder.completion_pct}
-                curriculumLabel={enrollment.curriculum_version_label}
-                limit={4}
-                progressLink="/progress"
-              />
+              <div className="ed-ops-animate-in">
+                <p className="ed-text-sm ed-muted">
+                  Track levels, exams, and program ladders on your progress page — especially when you&apos;re in
+                  multiple batches.
+                </p>
+                <Link to="/progress" className="ed-sp-section__action">
+                  Open progress →
+                </Link>
+              </div>
             ) : (
               <p className="ed-text-sm ed-muted">
                 Your center has not assigned a curriculum yet. Contact {center.display_name}
@@ -150,7 +200,7 @@ export function StudentHomePage() {
             <SectionCard title="Recent results">
               <ul className="ed-sp-timeline">
                 {data.recent_results.map((r, i) => (
-                  <li key={`${r.competition_name}-${i}`} className="ed-sp-timeline__item">
+                  <li key={`${r.competition_name}-${i}`} className="ed-sp-timeline__item ed-ops-animate-in">
                     <span className="ed-sp-timeline__icon" aria-hidden>
                       WIN
                     </span>
@@ -160,24 +210,6 @@ export function StudentHomePage() {
                         {r.result_rank ?? "Result posted"}
                         {r.event_date ? ` · ${formatShortDate(r.event_date)}` : ""}
                       </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </SectionCard>
-          )}
-
-          {data.my_registrations.length > 0 && (
-            <SectionCard title="My registrations">
-              <ul className="ed-sp-timeline">
-                {data.my_registrations.map((r) => (
-                  <li key={r.registration_id} className="ed-sp-timeline__item">
-                    <span className="ed-sp-timeline__icon" aria-hidden>
-                      EV
-                    </span>
-                    <div>
-                      <p className="ed-sp-timeline__title">{r.name}</p>
-                      <p className="ed-sp-timeline__sub">{r.status.replace("_", " ")}</p>
                     </div>
                   </li>
                 ))}

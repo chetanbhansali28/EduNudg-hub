@@ -40,3 +40,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+.ed-center-curriculum-toggles__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.ed-center-curriculum-toggles__row {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-lg);
+  background: var(--ed-card);
+}

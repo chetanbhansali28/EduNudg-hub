@@ -12,6 +12,13 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
   useTenant: () => ({ brandId: "brand-1", brandSlug: "abacusworld" }),
 }));
 
+const fetchStudentOpenBatches = vi.fn();
+
+vi.mock("@/lib/studentBatchJoinApi", () => ({
+  fetchStudentOpenBatches: (...args: unknown[]) => fetchStudentOpenBatches(...args),
+  joinStudentBatch: vi.fn(),
+}));
+
 vi.mock("@/lib/studentLearnApi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/studentLearnApi")>();
   return {
@@ -114,6 +121,7 @@ const mockHome = {
 describe("StudentHomePage", () => {
   beforeEach(() => {
     fetchStudentLearnHome.mockReset();
+    fetchStudentOpenBatches.mockResolvedValue([]);
   });
 
   it("renders comprehensive dashboard widget groups from mock payload", async () => {
@@ -122,6 +130,7 @@ describe("StudentHomePage", () => {
     expect(await screen.findByText("Koramangala Center")).toBeDefined();
     expect(screen.getByText("My center")).toBeDefined();
     expect(screen.getByText("Your learning path")).toBeDefined();
+    expect(screen.getByRole("link", { name: /Open progress/i })).toBeDefined();
     expect(screen.getByText("Upcoming competitions")).toBeDefined();
     expect(screen.getByText("Regional Challenge")).toBeDefined();
     expect(screen.getByText("Recent activity")).toBeDefined();

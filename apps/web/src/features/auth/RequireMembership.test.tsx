@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import type React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
@@ -16,12 +17,12 @@ const { authState, membershipState, tenantState, portalBrandingState } = vi.hois
     isLoading: false,
   },
   tenantState: {
-    portalType: "platform" as const,
+    portalType: "platform" as "platform" | "brand" | "center",
     hostname: "localhost",
-    brandId: null,
-    centerId: null,
-    brandSlug: null,
-    centerSlug: null,
+    brandId: null as string | null,
+    centerId: null as string | null,
+    brandSlug: null as string | null,
+    centerSlug: null as string | null,
   },
   portalBrandingState: {
     data: undefined,
@@ -85,7 +86,22 @@ vi.mock("@/lib/homepageApi", () => ({
   fetchHomepageConfig: vi.fn().mockResolvedValue(undefined),
 }));
 
-function renderProtectedRoute(initialPath: string) {
+vi.mock("@/lib/supabase", () => ({
+  getSupabase: () => ({
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: () => Promise.resolve({ data: { status: "suspended" }, error: null }),
+        }),
+      }),
+    }),
+  }),
+}));
+
+function renderProtectedRoute(
+  initialPath: string,
+  extraRoutes: { path: string; element: React.ReactNode }[] = []
+) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createMemoryRouter(
     [
@@ -98,6 +114,7 @@ function renderProtectedRoute(initialPath: string) {
           </RequireMembership>
         ),
       },
+      ...extraRoutes,
     ],
     { initialEntries: [initialPath] }
   );
@@ -113,6 +130,11 @@ describe("RequireMembership", () => {
   beforeEach(() => {
     membershipState.data = [];
     membershipState.isLoading = false;
+    tenantState.portalType = "platform";
+    tenantState.brandId = null;
+    tenantState.centerId = null;
+    tenantState.brandSlug = null;
+    tenantState.centerSlug = null;
   });
 
   it("regression_avoids_login_admin_redirect_loop_without_membership", async () => {
@@ -129,5 +151,68 @@ describe("RequireMembership", () => {
       expect.stringContaining("Maximum update depth exceeded")
     );
     consoleSpy.mockRestore();
+  });
+
+  it("regression_suspended_center_staff_blocked", async () => {
+    tenantState.portalType = "center";
+    tenantState.brandId = "brand-1";
+    tenantState.centerId = "center-1";
+    tenantState.brandSlug = "abacus";
+    tenantState.centerSlug = "koramangala";
+    membershipState.data = [
+      {
+        id: "m1",
+        scope_type: "center",
+        brand_id: "brand-1",
+        center_id: "center-1",
+        role_key: "center_owner",
+      },
+    ] as Membership[];
+
+    renderProtectedRoute("/center-app", [
+      {
+        path: "/center-app",
+        element: (
+          <RequireMembership>
+            <div>Center app</div>
+          </RequireMembership>
+        ),
+      },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByText("Franchise suspended")).toBeDefined();
+    });
+    expect(screen.queryByText("Center app")).toBeNull();
+  });
+
+  it("regression_brand_admin_allowed_on_suspended_center_host", async () => {
+    tenantState.portalType = "center";
+    tenantState.brandId = "brand-1";
+    tenantState.centerId = "center-1";
+    membershipState.data = [
+      {
+        id: "m1",
+        scope_type: "brand",
+        brand_id: "brand-1",
+        center_id: null,
+        role_key: "brand_owner",
+      },
+    ] as Membership[];
+
+    renderProtectedRoute("/center-app", [
+      {
+        path: "/center-app",
+        element: (
+          <RequireMembership>
+            <div>Center app</div>
+          </RequireMembership>
+        ),
+      },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByText("Center app")).toBeDefined();
+    });
   });
 });

@@ -4,6 +4,10 @@ import { Button, Card, FormGrid, Input, MutationError, Select } from "@edunudg/u
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import {
+  fetchStudentProfileAddress,
+  upsertStudentDeliveryAddress,
+} from "@/lib/studentProfileApi";
 
 type Props = { brandId: string; centerId: string };
 
@@ -45,15 +49,7 @@ export function CenterStudentProfileAddressCard({ brandId, centerId }: Props) {
   const profile = useQuery({
     queryKey: ["student-profile-address", studentId],
     enabled: !!studentId,
-    queryFn: async () => {
-      const { data, error: pErr } = await getSupabase()
-        .from("student_profiles")
-        .select("address_line1, city, state, pincode, phone")
-        .eq("student_id", studentId)
-        .maybeSingle();
-      if (pErr) throw pErr;
-      return data;
-    },
+    queryFn: () => fetchStudentProfileAddress(studentId),
   });
 
   useEffect(() => {
@@ -78,19 +74,7 @@ export function CenterStudentProfileAddressCard({ brandId, centerId }: Props) {
     mutationFn: async () => {
       if (!studentId) throw new Error("Select a student");
       clear();
-      const { error: uErr } = await getSupabase().from("student_profiles").upsert(
-        {
-          brand_id: brandId,
-          student_id: studentId,
-          address_line1: form.address_line1.trim() || null,
-          city: form.city.trim() || null,
-          state: form.state.trim() || null,
-          pincode: form.pincode.trim() || null,
-          phone: form.phone.trim() || null,
-        },
-        { onConflict: "student_id" }
-      );
-      if (uErr) throw uErr;
+      await upsertStudentDeliveryAddress(brandId, studentId, form);
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["student-profile-address", studentId] });

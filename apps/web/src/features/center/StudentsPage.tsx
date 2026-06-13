@@ -1,48 +1,79 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Button, Card, DataList, PageTitle } from "@edunudg/ui";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Badge,
+  Button,
+  Card,
+  DataList,
+  PageToolbar,
+  PipelineDetailPlaceholder,
+  PipelineEmptyState,
+  PipelineListItem,
+  PipelineMasterDetail,
+} from "@edunudg/ui";
 import { AddFormSection } from "@/features/shared/AddFormSection";
+import { CenterStudentDetailPanel } from "@/features/center/students/CenterStudentDetailPanel";
+import { fetchCenterStudents } from "@/lib/centerStudentsApi";
+import { markBatchJoinsSeen } from "@/lib/centerBatchesApi";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useTenant } from "@/bootstrap/TenantProvider";
-import { CenterStudentLearnRecordsCard } from "@/features/center/learn/CenterStudentLearnRecordsCard";
-import { CenterStudentPortalCard } from "@/features/center/learn/CenterStudentPortalCard";
-import { CenterStudentProfileAddressCard } from "@/features/center/merchandise/CenterStudentProfileAddressCard";
+import { initialsFromName } from "@/lib/welcomeMessage";
+import "@/features/center/centerOps.css";
 
 export function StudentsPage() {
   const tenant = useTenant();
+  const centerId = tenant.centerId;
+  const brandId = tenant.brandId;
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    if (centerId) {
+      void markBatchJoinsSeen(centerId)
+        .then(() => qc.invalidateQueries({ queryKey: ["shell-context-counts"] }))
+        .catch(() => undefined);
+    }
+  }, [centerId, qc]);
 
   const students = useQuery({
-    queryKey: ["students", tenant.brandId],
-    queryFn: async () => {
-      let q = getSupabase().from("students").select("id, full_name, student_code");
-      if (tenant.brandId) q = q.eq("brand_id", tenant.brandId);
-      const { data, error } = await q;
-      return supabaseList(data, error);
-    },
-  });
-
-  const enrollments = useQuery({
-    queryKey: ["enrollments", tenant.centerId],
-    queryFn: async () => {
-      let q = getSupabase().from("student_enrollments").select("id, student_id, status");
-      if (tenant.centerId) q = q.eq("center_id", tenant.centerId);
-      const { data, error } = await q;
-      return supabaseList(data, error);
-    },
+    queryKey: ["center-students", centerId, brandId],
+    enabled: !!centerId && !!brandId,
+    queryFn: () => fetchCenterStudents(centerId!, brandId!),
   });
 
   const transfers = useQuery({
-    queryKey: ["transfer-requests"],
+    queryKey: ["transfer-requests", centerId],
     queryFn: async () => {
-      const { data, error } = await getSupabase().from("transfer_requests").select("*").limit(20);
+      let q = getSupabase().from("transfer_requests").select("*").limit(20);
+      if (centerId) q = q.eq("from_center_id", centerId);
+      const { data, error } = await q;
       return supabaseList(data, error);
     },
   });
 
+  const selected = (students.data ?? []).find((s) => s.id === selectedId) ?? null;
+
+  const batchCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of students.data ?? []) {
+      map.set(s.id, s.batch_ids.length);
+    }
+    return map;
+  }, [students.data]);
+
+  if (!centerId || !brandId) {
+    return <p className="ed-empty">Center context not found.</p>;
+  }
+
   return (
     <>
-      <PageTitle>Students & Transfers</PageTitle>
+      <PageToolbar
+        title="Students"
+        subtitle="Manage enrollments, portal access, batch assignments, and delivery details in one place."
+      />
 
       <AddFormSection buttonLabel="Add students" panelTitle="Add students">
         <>
@@ -56,27 +87,71 @@ export function StudentsPage() {
         </>
       </AddFormSection>
 
-      <Card title="Students (brand-owned)">
-        <DataList items={(students.data ?? []).map((s) => s)} render={(s) => <strong>{s.full_name}</strong>} />
-      </Card>
-      <Card title="Active enrollments (this center)">
-        <DataList items={(enrollments.data ?? []).map((e) => e)} render={(e) => <span>Enrollment — {e.status}</span>} />
-      </Card>
+      <PipelineMasterDetail
+        list={
+          <Card title="Enrolled students">
+            <DataList
+              variant="pipeline"
+              items={students.data ?? []}
+              empty={
+                <PipelineEmptyState
+                  message="No active enrollments at this center."
+                  actionLabel="View leads"
+                  onAction={() => {
+                    window.location.href = "/app/leads";
+                  }}
+                />
+              }
+              render={(s) => {
+                const batchCount = batchCounts.get(s.id) ?? 0;
+                return (
+                  <PipelineListItem
+                    title={s.full_name}
+                    meta={s.student_code ?? undefined}
+                    lines={[
+                      batchCount > 0
+                        ? `${batchCount} batch${batchCount === 1 ? "" : "es"}`
+                        : "No batches assigned",
+                      s.login_email ?? "No portal email",
+                    ]}
+                    initials={initialsFromName(s.full_name)}
+                    selected={s.id === selectedId}
+                    onSelect={() => setSelectedId(s.id)}
+                    badges={
+                      <>
+                        {s.user_id && <Badge tone="success">Portal linked</Badge>}
+                        {batchCount === 0 && <Badge tone="warning">Unassigned</Badge>}
+                      </>
+                    }
+                  />
+                );
+              }}
+            />
+          </Card>
+        }
+        detail={
+          selected ? (
+            <CenterStudentDetailPanel
+              student={selected}
+              brandId={brandId}
+              centerId={centerId}
+              onSaved={() => void students.refetch()}
+            />
+          ) : (
+            <Card title="Student detail">
+              <PipelineDetailPlaceholder message="Select a student to manage portal access, batches, address, and progress." />
+            </Card>
+          )
+        }
+      />
+
       <Card title="Transfer requests">
         <DataList
-          items={(transfers.data ?? []).map((t) => t)}
+          items={(transfers.data ?? []).map((t) => ({ ...t, id: t.id as string }))}
           empty="No transfers."
-          render={(t) => <span>{t.status}</span>}
+          render={(t) => <span>{t.status as string}</span>}
         />
       </Card>
-
-      {tenant.brandId && tenant.centerId && (
-        <>
-          <CenterStudentPortalCard brandId={tenant.brandId} centerId={tenant.centerId} />
-          <CenterStudentProfileAddressCard brandId={tenant.brandId} centerId={tenant.centerId} />
-          <CenterStudentLearnRecordsCard brandId={tenant.brandId} centerId={tenant.centerId} />
-        </>
-      )}
     </>
   );
 }

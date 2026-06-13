@@ -39,6 +39,15 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 
 Center staff update via RPC `update_center_public_profile_rpc` (requires `has_center_access`).
 
+### Franchise lifecycle & curriculum (migration `052`)
+
+| Table | Scope | Description |
+|-------|-------|-------------|
+| `center_status_events` | brand | Append-only audit when brand suspends/re-enables a franchise |
+| `center_curriculum_enablement` | brand | Published `curriculum_version_id` pins per center; sync via `sync_center_curriculum_enablement` |
+
+RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended`. Center staff access gated via `user_center_ids()` (operational centers only).
+
 ## Leads & recruitment
 
 | Table | Scope | Description |

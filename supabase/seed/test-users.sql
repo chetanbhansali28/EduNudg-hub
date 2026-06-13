@@ -379,6 +379,15 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, updated_at = now();
 
+-- Student journey: authorize Abacus program for Koramangala demo center
+INSERT INTO public.center_program_enablement (brand_id, center_id, program_id)
+VALUES (
+  'a0000000-0000-4000-8000-000000000001',
+  'b0000000-0000-4000-8000-000000000001',
+  'f1000000-0000-4000-8000-000000000001'
+)
+ON CONFLICT (center_id, program_id) DO NOTHING;
+
 INSERT INTO public.curriculum_versions (id, program_id, brand_id, version_number, status, published_at)
 VALUES (
   'f1000000-0000-4000-8000-000000000002',

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { countStaleBrandLeads } from "@/lib/leadsApi";
+import { getCenterUnseenBatchJoins } from "@/lib/centerBatchesApi";
 import { listPendingPlatformSignups } from "@/lib/platformBrandSignupApi";
 import { getSupabase } from "@/lib/supabase";
 import { isLeadStale } from "@/lib/leadSla";
@@ -13,6 +14,7 @@ export type ShellContextCounts = {
   openCenterLeads: number;
   staleCenterLeads: number;
   pendingBrandSignups: number;
+  unseenBatchJoins: number;
 };
 
 const EMPTY_COUNTS: ShellContextCounts = {
@@ -22,6 +24,7 @@ const EMPTY_COUNTS: ShellContextCounts = {
   openCenterLeads: 0,
   staleCenterLeads: 0,
   pendingBrandSignups: 0,
+  unseenBatchJoins: 0,
 };
 
 function isPendingFranchiseStatus(status: string) {
@@ -60,14 +63,17 @@ async function fetchBrandContextCounts(brandId: string): Promise<Pick<
 
 async function fetchCenterContextCounts(centerId: string): Promise<Pick<
   ShellContextCounts,
-  "openCenterLeads" | "staleCenterLeads"
+  "openCenterLeads" | "staleCenterLeads" | "unseenBatchJoins"
 >> {
-  const { data, error } = await getSupabase()
-    .from("leads")
-    .select(
-      "center_id, assigned_at, stale_at, last_center_action_at, status"
-    )
-    .eq("center_id", centerId);
+  const [{ data, error }, unseenBatchJoins] = await Promise.all([
+    getSupabase()
+      .from("leads")
+      .select(
+        "center_id, assigned_at, stale_at, last_center_action_at, status"
+      )
+      .eq("center_id", centerId),
+    getCenterUnseenBatchJoins(centerId).catch(() => 0),
+  ]);
   if (error) throw error;
 
   const now = Date.now();
@@ -81,7 +87,7 @@ async function fetchCenterContextCounts(centerId: string): Promise<Pick<
   ).length;
   const staleCenterLeads = rows.filter((row) => isLeadStale(row, now)).length;
 
-  return { openCenterLeads, staleCenterLeads };
+  return { openCenterLeads, staleCenterLeads, unseenBatchJoins };
 }
 
 async function fetchPlatformContextCounts(): Promise<Pick<ShellContextCounts, "pendingBrandSignups">> {
@@ -149,6 +155,11 @@ export function shellActionHints(
     }
     if (counts.staleCenterLeads > 0) {
       hints.push(`${counts.staleCenterLeads} lead${counts.staleCenterLeads === 1 ? "" : "s"} need attention`);
+    }
+    if (counts.unseenBatchJoins > 0) {
+      hints.push(
+        `${counts.unseenBatchJoins} student${counts.unseenBatchJoins === 1 ? "" : "s"} joined a batch`
+      );
     }
   }
 

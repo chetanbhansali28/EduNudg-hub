@@ -62,6 +62,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-B20 | B | **Franchise Applications** nav `/app/franchise-applications` | Moved out of Settings |
 | FR-B21 | B | Approve creates center + domain + operator invite | Same transaction: `franchise_centers`, `{center}.{brand}` mapping |
 | FR-B22 | B | 360° read-only student/center views | All centers under brand (Phase B/C) |
+| FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Master-detail: courses → levels → units; draft/publish; clone live to draft before structural edits |
 
 ---
 

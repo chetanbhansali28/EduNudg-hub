@@ -1,127 +1,105 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
   Button,
   Card,
   DataList,
-  FormGrid,
+  FilterTabs,
   Input,
-  ListRow,
   MutationError,
-  PageTitle,
-  Select,
+  PageToolbar,
+  PipelineDetailPlaceholder,
+  PipelineEmptyState,
+  PipelineListItem,
+  PipelineMasterDetail,
 } from "@edunudg/ui";
-import { getSupabase } from "@/lib/supabase";
-import { supabaseList } from "@/lib/supabaseResult";
-import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
-import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useBrandScope } from "./hooks/useBrandScope";
+import { CenterDetailPanel } from "./centers/CenterDetailPanel";
+import {
+  centerMatchesSearch,
+  fetchBrandCenters,
+  type BrandCenterRow,
+} from "@/lib/centerCentersApi";
+import { initialsFromName } from "@/lib/welcomeMessage";
+import "@/features/center/centerOps.css";
 
-type CenterStatus = "pending" | "active" | "suspended" | "closed";
+type CenterFilter = "active" | "suspended" | "all";
 
-interface Center {
-  id: string;
-  slug: string;
-  name: string;
-  status: CenterStatus;
-  city: string | null;
-  address_line1: string | null;
-  region: string | null;
-  country: string | null;
-}
-
-const STATUS_OPTIONS: { value: CenterStatus; label: string }[] = [
-  { value: "pending", label: "Pending" },
+const FILTER_OPTIONS: { value: CenterFilter; label: string }[] = [
   { value: "active", label: "Active" },
   { value: "suspended", label: "Suspended" },
-  { value: "closed", label: "Closed" },
+  { value: "all", label: "All" },
 ];
 
-const emptyEditForm = {
-  slug: "",
-  name: "",
-  status: "pending" as CenterStatus,
-  city: "",
-  address_line1: "",
-  region: "",
-  country: "IN",
-};
+function centerListTitle(c: BrandCenterRow) {
+  return c.display_name ?? c.name;
+}
 
 export function CentersPage() {
-  const { brandId, missingBrand } = useBrandScope();
+  const { brandId, brandSlug, missingBrand } = useBrandScope();
   const qc = useQueryClient();
-  const { error, clear, capture } = useMutationError();
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState(emptyEditForm);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [filter, setFilter] = useState<CenterFilter>("active");
+  const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const centers = useQuery({
     queryKey: ["centers", brandId],
     enabled: !!brandId,
-    queryFn: async () => {
-      const { data, error: qErr } = await getSupabase()
-        .from("franchise_centers")
-        .select("id, slug, name, status, city, address_line1, region, country")
-        .eq("brand_id", brandId!)
-        .is("deleted_at", null)
-        .order("name");
-      return supabaseList(data, qErr) as Center[];
-    },
+    queryFn: () => fetchBrandCenters(brandId!),
   });
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ["centers", brandId] });
+  const all = centers.data ?? [];
 
-  const updateCenter = useMutation({
-    mutationFn: async (id: string) => {
-      clear();
-      const { error: mErr } = await getSupabase()
-        .from("franchise_centers")
-        .update({
-          slug: editForm.slug.trim(),
-          name: editForm.name.trim(),
-          status: editForm.status,
-          city: editForm.city.trim() || null,
-          address_line1: editForm.address_line1.trim() || null,
-          region: editForm.region.trim() || null,
-          country: editForm.country.trim() || "IN",
-        })
-        .eq("id", id);
-      if (mErr) throw mErr;
-    },
-    onSuccess: () => {
-      invalidate();
-      setEditingId(null);
-    },
-    onError: capture,
-  });
+  useEffect(() => {
+    const slug = searchParams.get("center")?.trim();
+    if (!slug || all.length === 0) return;
+    const match = all.find((c) => c.slug === slug);
+    if (match) setSelectedId(match.id);
+  }, [searchParams, all]);
 
-  const deleteCenter = useMutation({
-    mutationFn: async (id: string) => {
-      clear();
-      const { error: mErr } = await getSupabase()
-        .from("franchise_centers")
-        .update({ deleted_at: new Date().toISOString(), status: "closed" })
-        .eq("id", id);
-      if (mErr) throw mErr;
-    },
-    onSuccess: invalidate,
-    onError: capture,
-  });
+  const selected = all.find((c) => c.id === selectedId) ?? null;
 
-  const startEdit = (c: Center) => {
-    clear();
-    setEditingId(c.id);
-    setEditForm({
-      slug: c.slug,
-      name: c.name,
-      status: c.status,
-      city: c.city ?? "",
-      address_line1: c.address_line1 ?? "",
-      region: c.region ?? "",
-      country: c.country ?? "IN",
+  const counts = useMemo(
+    () => ({
+      active: all.filter((c) => c.status === "active").length,
+      suspended: all.filter((c) => c.status === "suspended").length,
+      all: all.length,
+    }),
+    [all]
+  );
+
+  const filtered = useMemo(() => {
+    return all.filter((c) => {
+      if (filter === "active" && c.status !== "active") return false;
+      if (filter === "suspended" && c.status !== "suspended") return false;
+      return centerMatchesSearch(c, search);
     });
+  }, [all, filter, search]);
+
+  const filterTabs = FILTER_OPTIONS.map((option) => ({
+    ...option,
+    count: counts[option.value],
+  }));
+
+  const selectCenter = (id: string) => {
+    setSelectedId(id);
+    const center = all.find((c) => c.id === id);
+    if (center) {
+      setSearchParams({ center: center.slug }, { replace: true });
+    }
+  };
+
+  const closeDetail = () => {
+    setSelectedId(null);
+    setSearchParams({}, { replace: true });
+  };
+
+  const refreshCenters = () => {
+    void qc.invalidateQueries({ queryKey: ["centers", brandId] });
   };
 
   if (missingBrand) {
@@ -130,8 +108,18 @@ export function CentersPage() {
 
   return (
     <>
-      <PageTitle>Franchise Centers</PageTitle>
-      <MutationError message={error} />
+      <PageToolbar
+        title="Franchise Centers"
+        subtitle="Manage franchise profile, curriculum, and lifecycle from one workspace."
+      >
+        <Input
+          label="Search"
+          value={search}
+          onChange={setSearch}
+          placeholder="Name or phone…"
+          name="search"
+        />
+      </PageToolbar>
 
       <AddFormSection buttonLabel="Add center" panelTitle="Add a new center">
         <>
@@ -145,90 +133,61 @@ export function CentersPage() {
         </>
       </AddFormSection>
 
-      <Card title="Centers">
-        <DataList
-          items={centers.data ?? []}
-          empty="No centers yet. Approve a franchise application to provision the first center."
-          render={(c) => {
-            const editing = editingId === c.id;
-            return (
-              <ListRow
-                aside={
-                  <>
-                    {!editing && (
-                      <Link to={`/app/centers/${c.slug}`}>
-                        <Button variant="primary">View</Button>
-                      </Link>
-                    )}
-                    <CrudRowActions
-                      editing={editing}
-                      onEdit={() => startEdit(c)}
-                      onSave={() => updateCenter.mutate(c.id)}
-                      onCancel={() => setEditingId(null)}
-                      onDelete={() => deleteCenter.mutate(c.id)}
-                      deleteDescription="The center will be removed from active lists. Historical data is kept."
-                      saveDisabled={!editForm.slug.trim() || !editForm.name.trim() || updateCenter.isPending}
-                    />
-                  </>
-                }
-              >
-                {editing ? (
-                  <div className="ed-editable-form">
-                    <FormGrid columns={3}>
-                      <Input
-                        label="Name"
-                        value={editForm.name}
-                        onChange={(v) => setEditForm((f) => ({ ...f, name: v }))}
-                        editable
-                      />
-                      <Input
-                        label="Slug"
-                        value={editForm.slug}
-                        onChange={(v) => setEditForm((f) => ({ ...f, slug: v }))}
-                        editable
-                      />
-                      <Select
-                        label="Status"
-                        value={editForm.status}
-                        onChange={(v) => setEditForm((f) => ({ ...f, status: v }))}
-                        options={STATUS_OPTIONS}
-                        editable
-                      />
-                      <Input
-                        label="City"
-                        value={editForm.city}
-                        onChange={(v) => setEditForm((f) => ({ ...f, city: v }))}
-                        editable
-                      />
-                      <Input
-                        label="Address"
-                        value={editForm.address_line1}
-                        onChange={(v) => setEditForm((f) => ({ ...f, address_line1: v }))}
-                        editable
-                      />
-                      <Input
-                        label="Region"
-                        value={editForm.region}
-                        onChange={(v) => setEditForm((f) => ({ ...f, region: v }))}
-                        editable
-                      />
-                    </FormGrid>
-                  </div>
-                ) : (
-                  <div>
-                    <strong>{c.name}</strong>
-                    <div className="ed-text-sm ed-muted">{c.slug}</div>
-                    {c.city && <div className="ed-text-sm ed-muted">{c.city}</div>}
-                    <Badge tone={c.status === "active" ? "success" : c.status === "suspended" ? "warning" : "default"}>
-                      {c.status}
-                    </Badge>
-                  </div>
-                )}
-              </ListRow>
-            );
-          }}
-        />
-      </Card>
+      <PipelineMasterDetail
+        list={
+          <Card title="Franchises">
+            <FilterTabs options={filterTabs} value={filter} onChange={setFilter} aria-label="Franchise status filter" />
+            <div className="ed-ops-stagger">
+            <DataList
+              variant="pipeline"
+              items={filtered}
+              empty={
+                <PipelineEmptyState
+                  message={search.trim() ? "No franchises match your search." : "No franchises in this view."}
+                  actionLabel={filter !== "all" ? "Show all" : undefined}
+                  onAction={filter !== "all" ? () => setFilter("all") : undefined}
+                />
+              }
+              render={(c) => {
+                const title = centerListTitle(c);
+                const isSelected = c.id === selectedId;
+                return (
+                  <PipelineListItem
+                    title={title}
+                    meta={[c.city, c.contact_phone].filter(Boolean).join(" · ") || c.slug}
+                    initials={initialsFromName(title)}
+                    selected={isSelected}
+                    onSelect={() => selectCenter(c.id)}
+                    badges={
+                      <Badge
+                        tone={
+                          c.status === "active" ? "success" : c.status === "suspended" ? "warning" : "default"
+                        }
+                      >
+                        {c.status}
+                      </Badge>
+                    }
+                  />
+                );
+              }}
+            />
+            </div>
+          </Card>
+        }
+        detail={
+          selected && brandId && brandSlug ? (
+            <CenterDetailPanel
+              center={selected}
+              brandId={brandId}
+              brandSlug={brandSlug}
+              onClose={closeDetail}
+              onStatusChanged={refreshCenters}
+            />
+          ) : (
+            <PipelineDetailPlaceholder message="Select a franchise to view and edit details, assign curriculum, or suspend access." />
+          )
+        }
+      />
     </>
   );
 }

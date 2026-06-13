@@ -10,6 +10,7 @@ describe("shellActionHints", () => {
       openCenterLeads: 0,
       staleCenterLeads: 0,
       pendingBrandSignups: 0,
+      unseenBatchJoins: 0,
     });
     expect(hints).toEqual([
       "2 franchise applications pending review",
@@ -27,8 +28,21 @@ describe("shellActionHints", () => {
         openCenterLeads: 4,
         staleCenterLeads: 1,
         pendingBrandSignups: 0,
+        unseenBatchJoins: 0,
       })
     ).toEqual(["4 open leads", "1 lead need attention"]);
+
+    expect(
+      shellActionHints("center", {
+        pendingFranchiseApplications: 0,
+        unassignedStudentLeads: 0,
+        staleStudentLeads: 0,
+        openCenterLeads: 0,
+        staleCenterLeads: 0,
+        pendingBrandSignups: 0,
+        unseenBatchJoins: 2,
+      })
+    ).toEqual(["2 students joined a batch"]);
 
     expect(
       shellActionHints("platform", {
@@ -38,6 +52,7 @@ describe("shellActionHints", () => {
         openCenterLeads: 0,
         staleCenterLeads: 0,
         pendingBrandSignups: 1,
+        unseenBatchJoins: 0,
       })
     ).toEqual(["1 brand signup pending review"]);
   });

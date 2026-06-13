@@ -37,7 +37,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | Features | **Student Leads** | `/app/leads` | Exists — manual add, assign, stale, lost |
 | | **Franchise Applications** | `/app/franchise-applications` | Exists — approve/reject, manual add |
 | | Franchise Centers | `/app/centers` | Exists |
-| | Curriculum | `/app/curriculum` | Exists — abacus level metadata, PageGrid |
+| | Curriculum | `/app/curriculum` | Exists — 2-column master-detail: courses, levels, units, publish |
 | | Royalties | `/app/royalties` | Exists |
 | | Analytics | `/app/analytics` | Exists |
 | | Campaigns | `/app/campaigns` | Exists — CRUD |

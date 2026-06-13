@@ -1,0 +1,175 @@
+/* Center ops — master-detail motion + batch/student polish */
+
+@keyframes ed-ops-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ed-ops-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ed-ops-animate-in {
+  animation: ed-ops-fade-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ed-ops-detail-enter {
+  animation: ed-ops-fade-up 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ed-ops-stagger > * {
+  animation: ed-ops-fade-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ed-ops-stagger > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.ed-ops-stagger > *:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.ed-ops-stagger > *:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.ed-ops-stagger > *:nth-child(4) {
+  animation-delay: 0.11s;
+}
+.ed-ops-stagger > *:nth-child(5) {
+  animation-delay: 0.14s;
+}
+
+.ed-ops-batch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--ed-primary-soft) 70%, var(--ed-card));
+  border: 1px solid var(--ed-border);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.ed-ops-batch-chip:hover {
+  transform: scale(1.02);
+}
+
+.ed-ops-batch-chip--open {
+  background: color-mix(in srgb, var(--ed-success-soft, #dcfce7) 80%, var(--ed-card));
+}
+
+.ed-ops-program-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ed-ops-program-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: calc(var(--ed-radius) + 2px);
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.ed-ops-program-toggle:hover {
+  transform: translateY(-1px);
+  border-color: var(--ed-primary);
+}
+
+.ed-ops-program-toggle[aria-pressed="true"] {
+  border-color: var(--ed-primary);
+  background: color-mix(in srgb, var(--ed-primary-soft) 65%, var(--ed-card));
+}
+
+.ed-ops-join-banner {
+  border: 1px dashed var(--ed-primary);
+  border-radius: calc(var(--ed-radius-lg) + 2px);
+  padding: 1rem 1.15rem;
+  background: color-mix(in srgb, var(--ed-primary-soft) 40%, var(--ed-card));
+  animation: ed-ops-fade-in 0.4s ease both;
+}
+
+.ed-sp-master-detail .ed-pipeline-layout__detail {
+  animation: ed-ops-fade-up 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ed-sp-ladder-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ed-sp-ladder-picker__item {
+  text-align: left;
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--ed-radius);
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ed-sp-ladder-picker__item:hover {
+  transform: translateX(2px);
+  border-color: var(--ed-primary);
+}
+
+.ed-sp-ladder-picker__item--selected {
+  border-color: var(--ed-primary);
+  box-shadow: var(--ed-shadow);
+  background: color-mix(in srgb, var(--ed-primary-soft) 50%, var(--ed-card));
+}
+
+.ed-sp-comp-hero {
+  border-radius: calc(var(--ed-radius-lg) + 6px);
+  padding: 1.35rem 1.5rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ed-primary-soft) 85%, var(--ed-card)),
+    var(--ed-card)
+  );
+  border: 1px solid var(--ed-border);
+  animation: ed-ops-fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-ops-animate-in,
+  .ed-ops-detail-enter,
+  .ed-ops-stagger > *,
+  .ed-ops-join-banner,
+  .ed-sp-master-detail .ed-pipeline-layout__detail,
+  .ed-sp-comp-hero {
+    animation: none;
+  }
+
+  .ed-ops-batch-chip:hover,
+  .ed-ops-program-toggle:hover,
+  .ed-sp-ladder-picker__item:hover {
+    transform: none;
+  }
+}

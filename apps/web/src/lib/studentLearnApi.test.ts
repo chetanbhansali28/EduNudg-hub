@@ -52,6 +52,7 @@ describe("studentLearnApi", () => {
 describe("parseStudentLearnError", () => {
   it("parses known codes", () => {
     expect(parseStudentLearnError({ message: "NO_ACTIVE_ENROLLMENT" })).toBe("NO_ACTIVE_ENROLLMENT");
+    expect(parseStudentLearnError({ message: "Error", details: "NO_STUDENT_LINK" })).toBe("NO_STUDENT_LINK");
     expect(parseStudentLearnError({ message: "PAID_ENROLLMENT_NOT_AVAILABLE" })).toBe(
       "PAID_ENROLLMENT_NOT_AVAILABLE"
     );
