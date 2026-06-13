@@ -9,7 +9,7 @@ export type CenterStudentRow = {
   user_id: string | null;
   enrollment_id: string;
   enrollment_status: string;
-  curriculum_version_id: string | null;
+  program_id: string | null;
   batch_ids: string[];
   batch_names: string[];
 };
@@ -18,7 +18,7 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
   const { data: enrollments, error: eErr } = await getSupabase()
     .from("student_enrollments")
     .select(
-      "id, status, curriculum_version_id, student_id, students(id, full_name, student_code, login_email, user_id)"
+      "id, status, program_id, student_id, students(id, full_name, student_code, login_email, user_id)"
     )
     .eq("center_id", centerId)
     .eq("brand_id", brandId)
@@ -27,7 +27,7 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
   const rows = supabaseList(enrollments, eErr) as unknown as {
     id: string;
     status: string;
-    curriculum_version_id: string | null;
+    program_id: string | null;
     student_id: string;
     students: {
       id: string;
@@ -72,7 +72,7 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
       user_id: r.students?.user_id ?? null,
       enrollment_id: r.id,
       enrollment_status: r.status,
-      curriculum_version_id: r.curriculum_version_id,
+      program_id: r.program_id,
       batch_ids: batchInfo.ids,
       batch_names: batchInfo.names,
     };

@@ -13,7 +13,7 @@ export function BrandDashboard() {
     enabled: !!brandId,
     queryFn: async () => {
       const sb = getSupabase();
-      const [centers, programs, inquiries, settlements, unassignedLeads, staleLeads, draftVersions] =
+      const [centers, programs, inquiries, settlements, unassignedLeads, staleLeads] =
         await Promise.all([
           sb
             .from("franchise_centers")
@@ -43,11 +43,6 @@ export function BrandDashboard() {
             .is("center_id", null)
             .not("status", "in", '("converted","lost")'),
           countStaleBrandLeads(brandId!),
-          sb
-            .from("curriculum_versions")
-            .select("id", { count: "exact", head: true })
-            .eq("brand_id", brandId!)
-            .eq("status", "draft"),
         ]);
 
       const royaltyDue = (settlements.data ?? []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
@@ -59,7 +54,6 @@ export function BrandDashboard() {
         unassignedLeads: unassignedLeads.count ?? 0,
         staleLeads,
         royaltyDue,
-        draftVersions: draftVersions.count ?? 0,
       };
     },
   });
@@ -87,7 +81,6 @@ export function BrandDashboard() {
           label="Royalty due (pending)"
           value={s != null ? formatInrFromPaise(s.royaltyDue) : "—"}
         />
-        <KpiCard label="Curriculum drafts" value={s?.draftVersions ?? "—"} />
       </KpiGrid>
     </>
   );

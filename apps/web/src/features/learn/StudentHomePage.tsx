@@ -82,7 +82,7 @@ export function StudentHomePage() {
   if (!data) return null;
 
   const { center, enrollment, stats } = data;
-  const hasCurriculum = !!enrollment.curriculum_version_id;
+  const hasCurriculum = !!enrollment.program_id;
   const batches = openBatches.data ?? [];
 
   return (

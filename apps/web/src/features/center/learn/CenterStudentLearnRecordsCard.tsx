@@ -31,12 +31,12 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("student_enrollments")
-        .select("student_id, curriculum_version_id, students(id, full_name)")
+        .select("student_id, program_id, students(id, full_name)")
         .eq("center_id", centerId)
         .eq("status", "active");
       const rows = supabaseList(data, qErr) as {
         student_id: string;
-        curriculum_version_id: string | null;
+        program_id: string | null;
         students: { id: string; full_name: string } | { id: string; full_name: string }[] | null;
       }[];
       return rows.map((r) => {
@@ -44,7 +44,7 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
         return {
           id: s?.id ?? r.student_id,
           full_name: s?.full_name ?? "Student",
-          curriculum_version_id: r.curriculum_version_id,
+          program_id: r.program_id,
         };
       });
     },
@@ -53,13 +53,13 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
   const selectedStudent = (students.data ?? []).find((s) => s.id === studentId);
 
   const levels = useQuery({
-    queryKey: ["curriculum-levels", selectedStudent?.curriculum_version_id],
-    enabled: !!selectedStudent?.curriculum_version_id,
+    queryKey: ["curriculum-levels", selectedStudent?.program_id],
+    enabled: !!selectedStudent?.program_id,
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("levels")
         .select("id, name, sort_order")
-        .eq("curriculum_version_id", selectedStudent!.curriculum_version_id!)
+        .eq("program_id", selectedStudent!.program_id!)
         .order("sort_order");
       return supabaseList(data, qErr) as { id: string; name: string; sort_order: number }[];
     },
@@ -153,7 +153,7 @@ export function CenterStudentLearnRecordsCard({ brandId, centerId }: Props) {
                 placeholder="Select student"
                 options={(students.data ?? []).map((s) => ({ value: s.id, label: s.full_name }))}
               />
-              {selectedStudent?.curriculum_version_id ? (
+              {selectedStudent?.program_id ? (
                 <Select
                   label="Curriculum level"
                   value={levelId}

@@ -1,12 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
-  cloneCurriculumVersionToDraft,
   deleteLevelSafe,
   fetchCourseImpactStats,
-  publishVersion,
+  purgeProgram,
   reorderLevels,
   reorderUnits,
-  unpublishVersion,
 } from "./curriculumApi";
 
 const rpc = vi.fn();
@@ -39,38 +37,16 @@ describe("curriculumApi", () => {
     fromMock.mockReset();
   });
 
-  it("publishVersion sets status published", async () => {
-    const update = vi.fn(() => chain(null));
-    fromMock.mockReturnValue({ update, eq: vi.fn(() => chain(null)) });
-    await publishVersion("v1");
-    expect(fromMock).toHaveBeenCalledWith("curriculum_versions");
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "published" }),
-    );
-  });
-
-  it("unpublishVersion sets status draft", async () => {
-    const update = vi.fn(() => chain(null));
-    fromMock.mockReturnValue({ update, eq: vi.fn(() => chain(null)) });
-    await unpublishVersion("v1");
-    expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "draft", published_at: null }),
-    );
-  });
-
-  it("cloneCurriculumVersionToDraft calls RPC", async () => {
-    rpc.mockResolvedValue({ data: "v2", error: null });
-    const id = await cloneCurriculumVersionToDraft("v1");
-    expect(id).toBe("v2");
-    expect(rpc).toHaveBeenCalledWith("clone_curriculum_version_to_draft", {
-      p_version_id: "v1",
-    });
-  });
-
   it("deleteLevelSafe calls RPC", async () => {
     rpc.mockResolvedValue({ data: null, error: null });
     await deleteLevelSafe("l1");
     expect(rpc).toHaveBeenCalledWith("delete_curriculum_level", { p_level_id: "l1" });
+  });
+
+  it("purgeProgram calls purge_curriculum_program RPC", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    await purgeProgram("p-legacy");
+    expect(rpc).toHaveBeenCalledWith("purge_curriculum_program", { p_program_id: "p-legacy" });
   });
 
   it("reorderLevels updates sort_order for each level", async () => {
@@ -94,9 +70,6 @@ describe("curriculumApi", () => {
 
   it("fetchCourseImpactStats returns center and batch counts", async () => {
     fromMock.mockImplementation((table: string) => {
-      if (table === "curriculum_versions") {
-        return chain([{ id: "v1", program_id: "p1", version_number: 1, status: "draft" }]);
-      }
       if (table === "center_program_enablement") {
         return chain(null, { count: 2 });
       }

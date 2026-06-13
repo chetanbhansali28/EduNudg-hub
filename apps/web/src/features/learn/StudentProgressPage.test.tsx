@@ -57,10 +57,8 @@ describe("StudentProgressPage", () => {
   it("renders ladder when progress exists", async () => {
     fetchStudentProgramLadders.mockResolvedValue([
       {
-        curriculum_version_id: "cv1",
-        program_id: "p1",
+        program_id: "cv1",
         program_name: "Abacus Core",
-        curriculum_label: "v1 — Abacus Core",
         batches: [],
         curriculum_ladder: {
           current_level_id: "l1",

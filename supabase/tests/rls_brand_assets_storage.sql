@@ -24,5 +24,11 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'Missing brand_assets_brand_manage policy';
   END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'brand_assets_student_self'
+  ) THEN
+    RAISE EXCEPTION 'Missing brand_assets_student_self policy';
+  END IF;
   RAISE NOTICE 'RLS brand-assets storage smoke test passed';
 END $$;

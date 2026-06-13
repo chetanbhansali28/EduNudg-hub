@@ -4,19 +4,22 @@ import { Link } from "react-router-dom";
 export function SectionCard({
   title,
   action,
+  headerAside,
   children,
   className,
 }: {
   title?: string;
   action?: { label: string; to: string };
+  headerAside?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
     <section className={["ed-sp-section", className].filter(Boolean).join(" ")}>
-      {(title || action) && (
+      {(title || action || headerAside) && (
         <div className="ed-sp-section__head">
           {title ? <h2 className="ed-sp-section__title">{title}</h2> : <span />}
+          {headerAside}
           {action ? (
             <Link className="ed-sp-section__action" to={action.to}>
               {action.label}

@@ -2,7 +2,7 @@
 
 BEGIN;
 
-SELECT plan(9);
+SELECT plan(11);
 
 SELECT has_table('public', 'student_competition_registrations', 'student_competition_registrations exists');
 
@@ -10,6 +10,13 @@ SELECT has_function('public', 'is_student_self', ARRAY['uuid', 'uuid'], 'is_stud
 SELECT has_function('public', 'resolve_student_for_learn', ARRAY['uuid'], 'resolve_student_for_learn exists');
 SELECT has_function('public', 'get_student_active_enrollment', ARRAY['uuid', 'uuid'], 'get_student_active_enrollment exists');
 SELECT has_function('public', 'get_student_learn_home', ARRAY['uuid'], 'get_student_learn_home exists');
+SELECT has_function(
+  'public',
+  'update_student_self_profile',
+  ARRAY['uuid', 'text', 'date', 'text', 'text', 'text', 'text', 'text', 'text', 'text'],
+  'update_student_self_profile exists'
+);
+SELECT has_column('public', 'student_profiles', 'photo_url', 'student_profiles.photo_url exists');
 SELECT is(
   (SELECT p.provolatile
    FROM pg_proc p

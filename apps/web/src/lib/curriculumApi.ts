@@ -1,11 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
-import {
-  DEFAULT_UNITS_MODULE_TITLE,
-  type CurriculumStatus,
-  type CurriculumVersion,
-} from "@/lib/curriculumHelpers";
+import { DEFAULT_UNITS_MODULE_TITLE } from "@/lib/curriculumHelpers";
 
 export interface CurriculumProgram {
   id: string;
@@ -65,23 +61,32 @@ export async function fetchPrograms(brandId: string): Promise<CurriculumProgram[
   return supabaseList(data, error) as CurriculumProgram[];
 }
 
-export async function fetchVersions(brandId: string, programId: string): Promise<CurriculumVersion[]> {
-  const { data, error } = await client()
-    .from("curriculum_versions")
-    .select("id, program_id, version_number, status, published_at")
-    .eq("brand_id", brandId)
-    .eq("program_id", programId)
-    .order("version_number", { ascending: false });
-  return supabaseList(data, error) as CurriculumVersion[];
-}
-
-export async function fetchLevels(versionId: string): Promise<CurriculumLevel[]> {
+export async function fetchLevels(programId: string): Promise<CurriculumLevel[]> {
   const { data, error } = await client()
     .from("levels")
     .select("id, name, sort_order, abacus_level_code, topics_covered, why_take, what_you_learn, marketing_video_url")
-    .eq("curriculum_version_id", versionId)
+    .eq("program_id", programId)
     .order("sort_order");
   return supabaseList(data, error) as CurriculumLevel[];
+}
+
+export async function fetchLevelCountsByProgram(
+  brandId: string,
+  programIds: string[],
+): Promise<Record<string, number>> {
+  if (programIds.length === 0) return {};
+  const { data, error } = await client()
+    .from("levels")
+    .select("program_id")
+    .eq("brand_id", brandId)
+    .in("program_id", programIds);
+  const rows = supabaseList(data, error) as { program_id: string }[];
+  const counts: Record<string, number> = {};
+  for (const id of programIds) counts[id] = 0;
+  for (const row of rows) {
+    counts[row.program_id] = (counts[row.program_id] ?? 0) + 1;
+  }
+  return counts;
 }
 
 export async function fetchModules(levelId: string): Promise<CurriculumModule[]> {
@@ -154,14 +159,6 @@ export async function createProgram(
     .select("id")
     .single();
   if (error || !created?.id) throw error ?? new Error("Program not created");
-
-  const { error: versionErr } = await client().from("curriculum_versions").insert({
-    brand_id: brandId,
-    program_id: created.id,
-    version_number: 1,
-    status: "draft",
-  });
-  if (versionErr) throw versionErr;
   return created.id;
 }
 
@@ -181,25 +178,14 @@ export async function archiveProgram(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function publishVersion(id: string): Promise<void> {
-  const { error } = await client()
-    .from("curriculum_versions")
-    .update({ status: "published" as CurriculumStatus, published_at: new Date().toISOString() })
-    .eq("id", id);
-  if (error) throw error;
-}
-
-export async function unpublishVersion(id: string): Promise<void> {
-  const { error } = await client()
-    .from("curriculum_versions")
-    .update({ status: "draft" as CurriculumStatus, published_at: null })
-    .eq("id", id);
+export async function purgeProgram(id: string): Promise<void> {
+  const { error } = await client().rpc("purge_curriculum_program", { p_program_id: id });
   if (error) throw error;
 }
 
 export async function createLevel(
   brandId: string,
-  versionId: string,
+  programId: string,
   input: {
     name: string;
     code: string;
@@ -212,7 +198,7 @@ export async function createLevel(
 ): Promise<void> {
   const { error } = await client().from("levels").insert({
     brand_id: brandId,
-    curriculum_version_id: versionId,
+    program_id: programId,
     name: input.name.trim(),
     sort_order: sortOrder,
     abacus_level_code: input.code.trim() || null,
@@ -249,8 +235,8 @@ export async function updateLevel(
   if (error) throw error;
 }
 
-export async function deleteLevel(id: string): Promise<void> {
-  const { error } = await client().from("levels").delete().eq("id", id);
+export async function deleteLevelSafe(levelId: string): Promise<void> {
+  const { error } = await client().rpc("delete_curriculum_level", { p_level_id: levelId });
   if (error) throw error;
 }
 
@@ -319,21 +305,16 @@ export async function fetchCourseImpactStats(
   brandId: string,
   programId: string
 ): Promise<CourseImpactStats> {
-  const versions = await fetchVersions(brandId, programId);
-  const versionIds = versions.map((v) => v.id);
-
   const [centersRes, batchesRes] = await Promise.all([
     client()
       .from("center_program_enablement")
       .select("id", { count: "exact", head: true })
       .eq("program_id", programId),
-    versionIds.length > 0
-      ? client()
-          .from("batches")
-          .select("id", { count: "exact", head: true })
-          .is("deleted_at", null)
-          .in("curriculum_version_id", versionIds)
-      : Promise.resolve({ count: 0, error: null }),
+    client()
+      .from("batches")
+      .select("id", { count: "exact", head: true })
+      .is("deleted_at", null)
+      .eq("program_id", programId),
   ]);
 
   if (centersRes.error) throw centersRes.error;
@@ -343,19 +324,6 @@ export async function fetchCourseImpactStats(
     authorizedCenters: centersRes.count ?? 0,
     activeBatches: batchesRes.count ?? 0,
   };
-}
-
-export async function cloneCurriculumVersionToDraft(versionId: string): Promise<string> {
-  const { data, error } = await client().rpc("clone_curriculum_version_to_draft", {
-    p_version_id: versionId,
-  });
-  if (error) throw error;
-  return data as string;
-}
-
-export async function deleteLevelSafe(levelId: string): Promise<void> {
-  const { error } = await client().rpc("delete_curriculum_level", { p_level_id: levelId });
-  if (error) throw error;
 }
 
 export async function reorderLevels(orderedLevelIds: string[]): Promise<void> {

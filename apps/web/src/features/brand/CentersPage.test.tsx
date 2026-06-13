@@ -67,10 +67,9 @@ vi.mock("@/lib/centerCentersApi", async (importOriginal) => {
 });
 
 vi.mock("@/lib/centerCurriculumApi", () => ({
-  fetchBrandPublishedCurriculumVersions: vi.fn().mockResolvedValue([]),
-  fetchCenterAuthorizedCurriculumVersionIds: vi.fn().mockResolvedValue([]),
-  groupCurriculumVersionsByProgram: vi.fn().mockReturnValue([]),
-  syncCenterCurriculumEnablement: vi.fn().mockResolvedValue(undefined),
+  fetchBrandPrograms: vi.fn().mockResolvedValue([]),
+  fetchCenterAuthorizedProgramIds: vi.fn().mockResolvedValue([]),
+  setCenterCourseAuthorized: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("@/features/center/settings/CenterPhotoUpload", () => ({

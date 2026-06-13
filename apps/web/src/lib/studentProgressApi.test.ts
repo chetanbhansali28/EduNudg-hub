@@ -27,10 +27,8 @@ describe("studentProgressApi", () => {
 
   it("fetchStudentProgramLadders returns ladders from RPC", async () => {
     const ladder = {
-      curriculum_version_id: "cv1",
-      program_id: "p1",
+      program_id: "cv1",
       program_name: "Abacus",
-      curriculum_label: "v1 — Abacus",
       batches: [],
       curriculum_ladder: { current_level_id: null, completion_pct: 0, levels: [] },
       assessments: [],

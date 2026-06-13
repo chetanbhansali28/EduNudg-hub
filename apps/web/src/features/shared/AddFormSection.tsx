@@ -20,6 +20,9 @@ type Props = {
   primaryAction?: AddFormPrimaryAction;
   /** header = actions in card header; footer = actions after form fields (better tab flow). */
   actionsPlacement?: "header" | "footer";
+  /** Controlled open state — use with onOpenChange to open the panel from outside (e.g. Edit). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   children: ReactNode | ((actions: AddFormSectionActions) => ReactNode);
 };
 
@@ -28,9 +31,18 @@ export function AddFormSection({
   panelTitle,
   primaryAction,
   actionsPlacement = "header",
+  open: openProp,
+  onOpenChange,
   children,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [openInternal, setOpenInternal] = useState(false);
+  const open = openProp ?? openInternal;
+
+  const setOpen = (next: boolean) => {
+    if (openProp === undefined) setOpenInternal(next);
+    onOpenChange?.(next);
+  };
+
   const close = () => setOpen(false);
 
   if (!open) {

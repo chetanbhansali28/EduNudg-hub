@@ -8,13 +8,13 @@ export async function inviteStudentPortalAccess(studentId: string, loginEmail: s
   if (error) throw error;
 }
 
-export async function pinEnrollmentCurriculum(
+export async function pinEnrollmentProgram(
   enrollmentId: string,
-  curriculumVersionId: string
+  programId: string
 ): Promise<void> {
-  const { error } = await getSupabase().rpc("pin_enrollment_curriculum", {
+  const { error } = await getSupabase().rpc("pin_enrollment_program", {
     p_enrollment_id: enrollmentId,
-    p_curriculum_version_id: curriculumVersionId,
+    p_program_id: programId,
   });
   if (error) throw error;
 }

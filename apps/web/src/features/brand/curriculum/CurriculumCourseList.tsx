@@ -1,14 +1,11 @@
 import {
   Badge,
-  Button,
   Card,
   FilterTabs,
   PipelineEmptyState,
   PipelineListItem,
 } from "@edunudg/ui";
 import type { CurriculumProgram, ProgramMarketingInput } from "@/lib/curriculumApi";
-import type { CurriculumVersion } from "@/lib/curriculumHelpers";
-import { getPublishLabel, publishLabelText } from "@/lib/curriculumHelpers";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { CourseFields } from "@/features/brand/curriculum/curriculumForms";
 
@@ -22,7 +19,6 @@ const FILTER_OPTIONS: { value: CourseFilter; label: string }[] = [
 type Props = {
   brandId: string;
   courses: CurriculumProgram[];
-  versionsByCourse: Record<string, CurriculumVersion[]>;
   levelCounts: Record<string, number>;
   selectedId: string | null;
   filter: CourseFilter;
@@ -35,20 +31,9 @@ type Props = {
   bindAddClose: (close: () => void) => void;
 };
 
-function publishBadge(courseId: string, versionsByCourse: Record<string, CurriculumVersion[]>) {
-  const versions = versionsByCourse[courseId] ?? [];
-  const published = versions.find((v) => v.status === "published");
-  const draft = versions.find((v) => v.status === "draft");
-  const label = getPublishLabel(draft ?? published ?? null, published ?? null);
-  if (label === "live") return <Badge tone="success">Live</Badge>;
-  if (label === "draft_with_live") return <Badge tone="warning">Draft edits</Badge>;
-  return <Badge>Draft</Badge>;
-}
-
 export function CurriculumCourseList({
   brandId,
   courses,
-  versionsByCourse,
   levelCounts,
   selectedId,
   filter,
@@ -106,7 +91,9 @@ export function CurriculumCourseList({
                   ]}
                   selected={course.id === selectedId}
                   onSelect={() => onSelect(course.id)}
-                  badges={publishBadge(course.id, versionsByCourse)}
+                  badges={
+                    course.is_active ? <Badge tone="success">Active</Badge> : <Badge>Inactive</Badge>
+                  }
                 />
               </div>
             );

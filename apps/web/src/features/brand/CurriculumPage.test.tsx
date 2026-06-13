@@ -12,10 +12,9 @@ vi.mock("@/features/platform/hooks/useMutationError", () => ({
 }));
 
 const fromMock = vi.fn();
-const rpcMock = vi.fn();
 
 vi.mock("@/lib/supabase", () => ({
-  getSupabase: () => ({ from: fromMock, rpc: rpcMock }),
+  getSupabase: () => ({ from: fromMock, rpc: vi.fn() }),
 }));
 
 function chain(data: unknown, opts?: { count?: number }) {
@@ -49,22 +48,6 @@ const sampleProgram = {
   is_active: true,
 };
 
-const sampleDraftVersion = {
-  id: "v1",
-  program_id: "p1",
-  version_number: 1,
-  status: "draft" as const,
-  published_at: null,
-};
-
-const samplePublishedVersion = {
-  id: "v1",
-  program_id: "p1",
-  version_number: 1,
-  status: "published" as const,
-  published_at: "2026-01-01T00:00:00Z",
-};
-
 const sampleLevel = {
   id: "l1",
   name: "Level 1",
@@ -76,12 +59,10 @@ const sampleLevel = {
   marketing_video_url: null,
 };
 
-function mockCurriculumTables(options?: { publishedOnly?: boolean }) {
-  const version = options?.publishedOnly ? samplePublishedVersion : sampleDraftVersion;
+function mockCurriculumTables() {
   fromMock.mockImplementation((table: string) => {
     if (table === "programs") return chain([sampleProgram]);
-    if (table === "curriculum_versions") return chain([version]);
-    if (table === "levels") return chain([sampleLevel]);
+    if (table === "levels") return chain([{ ...sampleLevel, program_id: "p1" }]);
     if (table === "center_program_enablement") return chain(null, { count: 0 });
     if (table === "batches") return chain(null, { count: 0 });
     if (table === "modules") return chain([]);
@@ -115,32 +96,18 @@ describe("CurriculumPage", () => {
     expect(screen.getByText(/Select a course to manage levels/i)).toBeDefined();
   });
 
-  it("shows master-detail with publish toggle for draft course", async () => {
+  it("shows master-detail with levels for active course", async () => {
     mockCurriculumTables();
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("group", { name: "Publication status" })).toBeDefined();
-      expect(screen.getByText(/Draft — not yet live/i)).toBeDefined();
+      expect(screen.getByRole("button", { name: "Add level" })).toBeDefined();
     });
 
     expect(screen.getByText("Courses")).toBeDefined();
-    expect(screen.getByText("Levels")).toBeDefined();
   });
 
-  it("regression_live_only_shows_create_draft_banner", async () => {
-    mockCurriculumTables({ publishedOnly: true });
-    renderPage();
-
-    await waitFor(() => {
-      expect(screen.getByText(/Create draft to edit/i)).toBeDefined();
-    });
-
-    expect(screen.getByText(/Live on website/i)).toBeDefined();
-    expect(screen.queryByRole("button", { name: "Add level" })).toBeNull();
-  });
-
-  it("shows units panel when level selected in draft mode", async () => {
+  it("shows units panel when level selected", async () => {
     mockCurriculumTables();
     renderPage();
 

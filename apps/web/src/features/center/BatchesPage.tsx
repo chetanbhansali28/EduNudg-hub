@@ -14,10 +14,11 @@ import {
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { AddFormSection } from "@/features/shared/AddFormSection";
+import { DeleteConfirmButton } from "@/features/shared/DeleteConfirmButton";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import {
-  fetchAuthorizedCurriculumVersions,
+  fetchAuthorizedPrograms,
   fetchCenterBatches,
   softDeleteCenterBatch,
   upsertCenterBatch,
@@ -28,19 +29,14 @@ import "@/features/center/centerOps.css";
 
 const emptyForm = {
   name: "",
-  curriculumVersionId: "",
+  programId: "",
   levelStartId: "",
   levelEndId: "",
   isOpenForEnrollment: false,
 };
 
-function programLabel(cv: { version_number: number; programs: { name: string } | { name: string }[] | null }) {
-  const program = Array.isArray(cv.programs) ? cv.programs[0] : cv.programs;
-  return `${program?.name ?? "Program"} · v${cv.version_number}`;
-}
-
 function batchSubtitle(batch: CenterBatchRow): string {
-  const program = batch.curriculum_versions?.programs;
+  const program = batch.programs;
   const programName = Array.isArray(program) ? program[0]?.name : program?.name;
   const start = batch.level_start?.name ?? "?";
   const end = batch.level_end?.name ?? "?";
@@ -53,6 +49,7 @@ export function BatchesPage() {
   const { error, clear, capture } = useMutationError();
   const { bindClose, closeAddForm } = useAddFormCloser();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
   const centerId = tenant.centerId;
@@ -64,16 +61,16 @@ export function BatchesPage() {
     queryFn: () => fetchCenterBatches(centerId!),
   });
 
-  const curricula = useQuery({
-    queryKey: ["authorized-curricula", centerId, brandId],
+  const programs = useQuery({
+    queryKey: ["authorized-programs", centerId, brandId],
     enabled: !!centerId && !!brandId,
-    queryFn: () => fetchAuthorizedCurriculumVersions(centerId!, brandId!),
+    queryFn: () => fetchAuthorizedPrograms(centerId!, brandId!),
   });
 
   const levels = useQuery({
-    queryKey: ["batch-form-levels", form.curriculumVersionId],
-    enabled: !!form.curriculumVersionId,
-    queryFn: () => fetchLevels(form.curriculumVersionId),
+    queryKey: ["batch-form-levels", form.programId],
+    enabled: !!form.programId,
+    queryFn: () => fetchLevels(form.programId),
   });
 
   const levelOptions = useMemo(
@@ -93,7 +90,7 @@ export function BatchesPage() {
         batchId: editingId,
         centerId,
         name: form.name,
-        curriculumVersionId: form.curriculumVersionId,
+        programId: form.programId,
         levelStartId: form.levelStartId,
         levelEndId: form.levelEndId,
         isOpenForEnrollment: form.isOpenForEnrollment,
@@ -103,6 +100,7 @@ export function BatchesPage() {
       invalidate();
       setEditingId(null);
       setForm(emptyForm);
+      setFormOpen(false);
       closeAddForm();
     },
     onError: capture,
@@ -121,21 +119,28 @@ export function BatchesPage() {
     setEditingId(batch.id);
     setForm({
       name: batch.name,
-      curriculumVersionId: batch.curriculum_version_id ?? "",
+      programId: batch.program_id ?? "",
       levelStartId: batch.level_start_id ?? "",
       levelEndId: batch.level_end_id ?? "",
       isOpenForEnrollment: batch.is_open_for_enrollment,
     });
+    setFormOpen(true);
   };
 
-  const curriculumOptions = (curricula.data ?? []).map((cv) => ({
-    value: cv.id,
-    label: programLabel(cv),
+  const closeForm = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setFormOpen(false);
+  };
+
+  const programOptions = (programs.data ?? []).map((p) => ({
+    value: p.id,
+    label: p.name,
   }));
 
   const canSave =
     form.name.trim() &&
-    form.curriculumVersionId &&
+    form.programId &&
     form.levelStartId &&
     form.levelEndId &&
     !save.isPending;
@@ -144,7 +149,7 @@ export function BatchesPage() {
     return <p className="ed-empty">Center context not found.</p>;
   }
 
-  const noPrograms = (curricula.data ?? []).length === 0;
+  const noPrograms = (programs.data ?? []).length === 0;
 
   return (
     <>
@@ -160,7 +165,15 @@ export function BatchesPage() {
         </div>
       )}
 
-      <AddFormSection buttonLabel="Create batch" panelTitle={editingId ? "Edit batch" : "Create batch"}>
+      <AddFormSection
+        buttonLabel="Create batch"
+        panelTitle={editingId ? "Edit batch" : "Create batch"}
+        open={formOpen}
+        onOpenChange={(open) => {
+          setFormOpen(open);
+          if (!open) closeForm();
+        }}
+      >
         {({ close }) => {
           bindClose(close);
           return (
@@ -173,17 +186,17 @@ export function BatchesPage() {
                   editable
                 />
                 <Select
-                  label="Curriculum"
-                  value={form.curriculumVersionId}
+                  label="Course"
+                  value={form.programId}
                   onChange={(v) =>
                     setForm((f) => ({
                       ...f,
-                      curriculumVersionId: v,
+                      programId: v,
                       levelStartId: "",
                       levelEndId: "",
                     }))
                   }
-                  options={[{ value: "", label: "Select curriculum…" }, ...curriculumOptions]}
+                  options={[{ value: "", label: "Select course…" }, ...programOptions]}
                   editable={!noPrograms}
                 />
                 <Select
@@ -191,14 +204,14 @@ export function BatchesPage() {
                   value={form.levelStartId}
                   onChange={(v) => setForm((f) => ({ ...f, levelStartId: v }))}
                   options={[{ value: "", label: "From level…" }, ...levelOptions]}
-                  editable={!!form.curriculumVersionId}
+                  editable={!!form.programId}
                 />
                 <Select
                   label="Level end"
                   value={form.levelEndId}
                   onChange={(v) => setForm((f) => ({ ...f, levelEndId: v }))}
                   options={[{ value: "", label: "To level…" }, ...levelOptions]}
-                  editable={!!form.curriculumVersionId}
+                  editable={!!form.programId}
                 />
               </FormGrid>
               <ToggleField
@@ -212,14 +225,7 @@ export function BatchesPage() {
                   {editingId ? "Save batch" : "Create batch"}
                 </Button>
                 {editingId && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      setEditingId(null);
-                      setForm(emptyForm);
-                      close();
-                    }}
-                  >
+                  <Button variant="ghost" onClick={close}>
                     Cancel edit
                   </Button>
                 )}
@@ -232,7 +238,7 @@ export function BatchesPage() {
       <Card title="Active batches">
         <DataList
           items={batches.data ?? []}
-          empty="No batches yet — create one to group students by curriculum and level range."
+          empty="No batches yet — create one to group students by course and level range."
           render={(batch) => (
             <ListRow
               aside={
@@ -240,13 +246,14 @@ export function BatchesPage() {
                   <Button variant="ghost" onClick={() => startEdit(batch)}>
                     Edit
                   </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => remove.mutate(batch.id)}
-                    disabled={remove.isPending}
+                  <DeleteConfirmButton
+                    onConfirm={() => remove.mutate(batch.id)}
+                    confirmPending={remove.isPending}
+                    title="Retire this batch?"
+                    description="The batch is hidden from your active list and students can no longer self-enroll. Existing enrollments and history are kept."
                   >
-                    Archive
-                  </Button>
+                    Retire
+                  </DeleteConfirmButton>
                 </>
               }
             >

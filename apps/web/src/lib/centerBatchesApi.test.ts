@@ -17,7 +17,7 @@ describe("centerBatchesApi", () => {
     const id = await upsertCenterBatch({
       centerId: "c1",
       name: "  Morning L1-3  ",
-      curriculumVersionId: "cv1",
+      programId: "p1",
       levelStartId: "l1",
       levelEndId: "l3",
       isOpenForEnrollment: true,

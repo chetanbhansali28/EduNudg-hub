@@ -28,22 +28,21 @@ function LadderList({
   return (
     <div className="ed-sp-ladder-picker ed-ops-stagger" role="listbox" aria-label="Your programs">
       {ladders.map((l) => {
-        const selected = l.curriculum_version_id === selectedId;
+        const selected = l.program_id === selectedId;
         const batchLabel =
           l.batches.length > 0
             ? l.batches.map((b) => b.batch_name).join(", ")
-            : "Enrollment curriculum";
+            : "Enrolled course";
         return (
           <button
-            key={l.curriculum_version_id}
+            key={l.program_id}
             type="button"
             role="option"
             aria-selected={selected}
             className={`ed-sp-ladder-picker__item${selected ? " ed-sp-ladder-picker__item--selected" : ""}`}
-            onClick={() => onSelect(l.curriculum_version_id)}
+            onClick={() => onSelect(l.program_id)}
           >
             <strong>{l.program_name}</strong>
-            <div className="ed-text-sm ed-muted">{l.curriculum_label}</div>
             <div className="ed-text-sm ed-muted">{batchLabel}</div>
             <div className="ed-text-sm">{l.curriculum_ladder.completion_pct}% complete</div>
           </button>
@@ -71,7 +70,7 @@ function LadderDetail({ ladder }: { ladder: ProgramLadder }) {
         <CurriculumLadder
           levels={ladder.curriculum_ladder.levels}
           completionPct={ladder.curriculum_ladder.completion_pct}
-          curriculumLabel={ladder.curriculum_label}
+          curriculumLabel={ladder.program_name}
         />
       )}
       <SectionCard title="Assessment history">
@@ -164,8 +163,8 @@ export function StudentProgressPage() {
     );
   }
 
-  const activeId = selectedId ?? ladders[0]?.curriculum_version_id ?? null;
-  const active = ladders.find((l) => l.curriculum_version_id === activeId) ?? null;
+  const activeId = selectedId ?? ladders[0]?.program_id ?? null;
+  const active = ladders.find((l) => l.program_id === activeId) ?? null;
 
   return (
     <>

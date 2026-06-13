@@ -1,11 +1,9 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MutationError, ToggleField } from "@edunudg/ui";
-import { fetchBrandPrograms } from "@/lib/centerProgramApi";
 import {
-  fetchBrandPublishedCurriculumVersions,
-  fetchCenterAuthorizedCurriculumVersionIds,
-  latestPublishedVersionByProgram,
+  fetchBrandPrograms,
+  fetchCenterAuthorizedProgramIds,
   setCenterCourseAuthorized,
 } from "@/lib/centerCurriculumApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -27,30 +25,12 @@ export function CenterCurriculumAuthPanel({ centerId, centerName, brandId }: Pro
     queryFn: () => fetchBrandPrograms(brandId),
   });
 
-  const published = useQuery({
-    queryKey: ["brand-published-curricula", brandId],
-    enabled: !!brandId,
-    queryFn: () => fetchBrandPublishedCurriculumVersions(brandId),
+  const authorizedProgramIds = useQuery({
+    queryKey: ["center-program-auth", centerId],
+    queryFn: () => fetchCenterAuthorizedProgramIds(centerId),
   });
 
-  const authorizedVersionIds = useQuery({
-    queryKey: ["center-curriculum-auth", centerId],
-    queryFn: () => fetchCenterAuthorizedCurriculumVersionIds(centerId),
-  });
-
-  const latestByProgram = useMemo(
-    () => latestPublishedVersionByProgram(published.data ?? []),
-    [published.data]
-  );
-
-  const authorizedProgramIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const versionId of authorizedVersionIds.data ?? []) {
-      const match = (published.data ?? []).find((v) => v.id === versionId);
-      if (match) ids.add(match.program_id);
-    }
-    return ids;
-  }, [authorizedVersionIds.data, published.data]);
+  const authorizedSet = new Set(authorizedProgramIds.data ?? []);
 
   const toggle = useMutation({
     mutationFn: async ({ programId, enabled }: { programId: string; enabled: boolean }) => {
@@ -59,16 +39,15 @@ export function CenterCurriculumAuthPanel({ centerId, centerName, brandId }: Pro
       await setCenterCourseAuthorized(centerId, brandId, programId, enabled);
     },
     onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["center-curriculum-auth", centerId] });
       void qc.invalidateQueries({ queryKey: ["center-program-auth", centerId] });
-      void qc.invalidateQueries({ queryKey: ["authorized-curricula", centerId] });
+      void qc.invalidateQueries({ queryKey: ["authorized-programs", centerId] });
       void qc.invalidateQueries({ queryKey: ["course-impact"] });
     },
     onError: capture,
     onSettled: () => setPendingProgramId(null),
   });
 
-  if (programs.isLoading || published.isLoading || authorizedVersionIds.isLoading) {
+  if (programs.isLoading || authorizedProgramIds.isLoading) {
     return <p className="ed-text-sm ed-muted">Loading curriculum…</p>;
   }
 
@@ -89,24 +68,15 @@ export function CenterCurriculumAuthPanel({ centerId, centerName, brandId }: Pro
       <MutationError message={error} />
       <div className="ed-center-curriculum-toggles__list" role="list" aria-label={`Courses for ${centerName}`}>
         {list.map((course) => {
-          const publishedVersion = latestByProgram.get(course.id);
-          const checked = authorizedProgramIds.has(course.id);
-          const canEnable = !!publishedVersion;
+          const checked = authorizedSet.has(course.id);
           const busy = pendingProgramId === course.id && toggle.isPending;
 
           return (
             <div key={course.id} className="ed-center-curriculum-toggles__row" role="listitem">
               <ToggleField
                 label={course.name}
-                description={
-                  !canEnable && !checked
-                    ? "Publish this course before assigning"
-                    : publishedVersion
-                      ? `Live version v${publishedVersion.version_number}`
-                      : undefined
-                }
                 checked={checked}
-                disabled={busy || (!canEnable && !checked)}
+                disabled={busy}
                 onChange={(enabled) => toggle.mutate({ programId: course.id, enabled })}
               />
             </div>

@@ -56,9 +56,9 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
   });
 
   const levels = useQuery({
-    queryKey: ["student-detail-levels", student.curriculum_version_id],
-    enabled: !!student.curriculum_version_id,
-    queryFn: () => fetchLevels(student.curriculum_version_id!),
+    queryKey: ["student-detail-levels", student.program_id],
+    enabled: !!student.program_id,
+    queryFn: () => fetchLevels(student.program_id!),
   });
 
   useEffect(() => {
@@ -226,7 +226,7 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
           </Button>
         </section>
 
-        {student.curriculum_version_id && (
+        {student.program_id && (
           <section>
             <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>Record level progress</h3>
             <FormGrid columns={2}>

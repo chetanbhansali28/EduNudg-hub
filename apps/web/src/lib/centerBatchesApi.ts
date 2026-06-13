@@ -5,14 +5,11 @@ export type CenterBatchRow = {
   id: string;
   name: string;
   is_open_for_enrollment: boolean;
-  curriculum_version_id: string | null;
+  program_id: string | null;
   level_start_id: string | null;
   level_end_id: string | null;
   schedule: Record<string, unknown> | null;
-  curriculum_versions: {
-    version_number: number;
-    programs: { name: string } | { name: string }[] | null;
-  } | null;
+  programs: { name: string } | { name: string }[] | null;
   level_start: { name: string } | null;
   level_end: { name: string } | null;
 };
@@ -21,7 +18,7 @@ export type UpsertBatchInput = {
   batchId?: string | null;
   centerId: string;
   name: string;
-  curriculumVersionId: string;
+  programId: string;
   levelStartId: string;
   levelEndId: string;
   isOpenForEnrollment?: boolean;
@@ -31,7 +28,7 @@ export async function fetchCenterBatches(centerId: string): Promise<CenterBatchR
   const { data, error } = await getSupabase()
     .from("batches")
     .select(
-      "id, name, is_open_for_enrollment, curriculum_version_id, level_start_id, level_end_id, schedule, curriculum_versions(version_number, programs(name)), level_start:levels!batches_level_start_id_fkey(name), level_end:levels!batches_level_end_id_fkey(name)"
+      "id, name, is_open_for_enrollment, program_id, level_start_id, level_end_id, schedule, programs(name), level_start:levels!batches_level_start_id_fkey(name), level_end:levels!batches_level_end_id_fkey(name)"
     )
     .eq("center_id", centerId)
     .is("deleted_at", null)
@@ -39,27 +36,23 @@ export async function fetchCenterBatches(centerId: string): Promise<CenterBatchR
   return supabaseList(data, error) as unknown as CenterBatchRow[];
 }
 
-export async function fetchAuthorizedCurriculumVersions(centerId: string, brandId: string) {
+export async function fetchAuthorizedPrograms(centerId: string, brandId: string) {
   const { data: auth, error: authErr } = await getSupabase()
-    .from("center_curriculum_enablement")
-    .select("curriculum_version_id")
+    .from("center_program_enablement")
+    .select("program_id")
     .eq("center_id", centerId);
-  const versionIds = supabaseList(auth, authErr).map((r) => r.curriculum_version_id as string);
-  if (versionIds.length === 0) return [];
+  const programIds = supabaseList(auth, authErr).map((r) => r.program_id as string);
+  if (programIds.length === 0) return [];
 
   const { data, error } = await getSupabase()
-    .from("curriculum_versions")
-    .select("id, version_number, program_id, programs(name)")
+    .from("programs")
+    .select("id, name")
     .eq("brand_id", brandId)
-    .eq("status", "published")
-    .in("id", versionIds)
-    .order("version_number", { ascending: false });
-  return supabaseList(data, error) as {
-    id: string;
-    version_number: number;
-    program_id: string;
-    programs: { name: string } | { name: string }[] | null;
-  }[];
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .in("id", programIds)
+    .order("name");
+  return supabaseList(data, error) as { id: string; name: string }[];
 }
 
 export async function upsertCenterBatch(input: UpsertBatchInput): Promise<string> {
@@ -67,7 +60,7 @@ export async function upsertCenterBatch(input: UpsertBatchInput): Promise<string
     p_batch_id: input.batchId ?? null,
     p_center_id: input.centerId,
     p_name: input.name.trim(),
-    p_curriculum_version_id: input.curriculumVersionId,
+    p_program_id: input.programId,
     p_level_start_id: input.levelStartId,
     p_level_end_id: input.levelEndId,
     p_is_open_for_enrollment: input.isOpenForEnrollment ?? false,

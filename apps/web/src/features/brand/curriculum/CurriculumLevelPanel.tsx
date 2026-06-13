@@ -91,7 +91,7 @@ export function CurriculumLevelPanel({
 
       {!canEdit && (
         <p className="ed-curriculum-live-banner" role="status">
-          This version is live. Create a draft to edit levels and units.
+          Editing is disabled.
         </p>
       )}
 

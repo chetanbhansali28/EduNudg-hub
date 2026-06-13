@@ -1,9 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
-  groupCurriculumVersionsByProgram,
-  latestPublishedVersionByProgram,
+  fetchCenterAuthorizedProgramIds,
   setCenterCourseAuthorized,
-  syncCenterCurriculumEnablement,
 } from "./centerCurriculumApi";
 
 const rpc = vi.fn();
@@ -13,93 +11,45 @@ vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({ from: fromMock, rpc }),
 }));
 
-function chain(data: unknown) {
-  const result = { data, error: null };
-  const api = {
-    select: vi.fn(() => api),
-    eq: vi.fn(() => api),
-    order: vi.fn(() => api),
-    then: (resolve: (v: typeof result) => void) => resolve(result),
-  };
-  return api;
-}
+vi.mock("@/lib/centerProgramApi", () => ({
+  fetchBrandPrograms: vi.fn(),
+  fetchCenterAuthorizedPrograms: vi.fn(),
+  syncCenterProgramEnablement: vi.fn(),
+}));
+
+import {
+  fetchCenterAuthorizedPrograms,
+  syncCenterProgramEnablement as syncPrograms,
+} from "@/lib/centerProgramApi";
 
 describe("centerCurriculumApi", () => {
   beforeEach(() => {
-    rpc.mockReset();
-    fromMock.mockReset();
+    vi.mocked(fetchCenterAuthorizedPrograms).mockReset();
+    vi.mocked(syncPrograms).mockReset();
   });
 
-  it("syncCenterCurriculumEnablement calls RPC with version ids", async () => {
-    rpc.mockResolvedValue({ data: null, error: null });
-    await syncCenterCurriculumEnablement("center-1", ["ver-a", "ver-b"]);
-    expect(rpc).toHaveBeenCalledWith("sync_center_curriculum_enablement", {
-      p_center_id: "center-1",
-      p_curriculum_version_ids: ["ver-a", "ver-b"],
-    });
-  });
-
-  it("groupCurriculumVersionsByProgram groups by program", () => {
-    const grouped = groupCurriculumVersionsByProgram([
-      { id: "v1", version_number: 2, program_id: "p1", program_name: "Abacus" },
-      { id: "v2", version_number: 1, program_id: "p1", program_name: "Abacus" },
-      { id: "v3", version_number: 1, program_id: "p2", program_name: "Vedic" },
+  it("fetchCenterAuthorizedProgramIds maps program ids", async () => {
+    vi.mocked(fetchCenterAuthorizedPrograms).mockResolvedValue([
+      { centerId: "c1", programId: "p1", programName: "Abacus", authorizedAt: "" },
     ]);
-    expect(grouped).toHaveLength(2);
-    expect(grouped[0].programName).toBe("Abacus");
-    expect(grouped[0].versions).toHaveLength(2);
+    const ids = await fetchCenterAuthorizedProgramIds("c1");
+    expect(ids).toEqual(["p1"]);
   });
 
-  it("latestPublishedVersionByProgram picks highest version per program", () => {
-    const map = latestPublishedVersionByProgram([
-      { id: "v1", version_number: 2, program_id: "p1", program_name: "Abacus" },
-      { id: "v2", version_number: 1, program_id: "p1", program_name: "Abacus" },
+  it("setCenterCourseAuthorized enables program via sync", async () => {
+    vi.mocked(fetchCenterAuthorizedPrograms).mockResolvedValue([]);
+    vi.mocked(syncPrograms).mockResolvedValue(undefined);
+    await setCenterCourseAuthorized("c1", "b1", "p1", true);
+    expect(syncPrograms).toHaveBeenCalledWith("c1", ["p1"]);
+  });
+
+  it("setCenterCourseAuthorized disables program via sync", async () => {
+    vi.mocked(fetchCenterAuthorizedPrograms).mockResolvedValue([
+      { centerId: "c1", programId: "p1", programName: "Abacus", authorizedAt: "" },
+      { centerId: "c1", programId: "p2", programName: "Vedic", authorizedAt: "" },
     ]);
-    expect(map.get("p1")?.id).toBe("v1");
-  });
-
-  it("setCenterCourseAuthorized enables latest published version", async () => {
-    fromMock.mockImplementation((table: string) => {
-      if (table === "curriculum_versions") {
-        return chain([
-          { id: "v2", version_number: 2, program_id: "p1", programs: { name: "Abacus" } },
-          { id: "v1", version_number: 1, program_id: "p1", programs: { name: "Abacus" } },
-        ]);
-      }
-      if (table === "center_curriculum_enablement") {
-        return chain([]);
-      }
-      return chain([]);
-    });
-    rpc.mockResolvedValue({ data: null, error: null });
-
-    await setCenterCourseAuthorized("center-1", "brand-1", "p1", true);
-
-    expect(rpc).toHaveBeenCalledWith("sync_center_curriculum_enablement", {
-      p_center_id: "center-1",
-      p_curriculum_version_ids: ["v2"],
-    });
-  });
-
-  it("setCenterCourseAuthorized disables all versions for program", async () => {
-    fromMock.mockImplementation((table: string) => {
-      if (table === "curriculum_versions") {
-        return chain([
-          { id: "v2", version_number: 2, program_id: "p1", programs: { name: "Abacus" } },
-        ]);
-      }
-      if (table === "center_curriculum_enablement") {
-        return chain([{ curriculum_version_id: "v2" }]);
-      }
-      return chain([]);
-    });
-    rpc.mockResolvedValue({ data: null, error: null });
-
-    await setCenterCourseAuthorized("center-1", "brand-1", "p1", false);
-
-    expect(rpc).toHaveBeenCalledWith("sync_center_curriculum_enablement", {
-      p_center_id: "center-1",
-      p_curriculum_version_ids: [],
-    });
+    vi.mocked(syncPrograms).mockResolvedValue(undefined);
+    await setCenterCourseAuthorized("c1", "b1", "p1", false);
+    expect(syncPrograms).toHaveBeenCalledWith("c1", ["p2"]);
   });
 });

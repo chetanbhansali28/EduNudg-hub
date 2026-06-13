@@ -7,7 +7,15 @@ export type StudentLearnHome = {
     full_name: string;
     student_code: string | null;
     date_of_birth: string | null;
-    profile: { school_name: string | null; city: string | null; pincode: string | null };
+    profile: {
+      school_name: string | null;
+      city: string | null;
+      pincode: string | null;
+      address_line1: string | null;
+      state: string | null;
+      phone: string | null;
+      photo_url: string | null;
+    };
   };
   brand: { id: string; name: string; logo_url: string | null };
   enrollment: {
@@ -16,8 +24,8 @@ export type StudentLearnHome = {
     enrolled_at: string;
     center_id: string;
     batch_name: string | null;
-    curriculum_version_id: string | null;
-    curriculum_version_label: string | null;
+    program_id: string | null;
+    program_name: string | null;
   };
   center: {
     id: string;
@@ -137,4 +145,36 @@ export async function fetchStudentProfile(brandId: string): Promise<StudentProfi
   const { data, error } = await getSupabase().rpc("get_student_profile", { p_brand_id: brandId });
   throwIfLearnError(error);
   return data as StudentProfilePayload;
+}
+
+export type UpdateStudentSelfProfileInput = {
+  fullName: string;
+  dateOfBirth: string;
+  pincode: string;
+  phone: string;
+  photoUrl: string;
+  schoolName?: string | null;
+  city?: string | null;
+  addressLine1?: string | null;
+  state?: string | null;
+};
+
+export async function updateStudentSelfProfile(
+  brandId: string,
+  input: UpdateStudentSelfProfileInput
+): Promise<StudentProfilePayload["student"]> {
+  const { data, error } = await getSupabase().rpc("update_student_self_profile", {
+    p_brand_id: brandId,
+    p_full_name: input.fullName.trim(),
+    p_date_of_birth: input.dateOfBirth,
+    p_phone: input.phone.trim(),
+    p_pincode: input.pincode.trim(),
+    p_photo_url: input.photoUrl.trim(),
+    p_school_name: input.schoolName?.trim() || null,
+    p_city: input.city?.trim() || null,
+    p_address_line1: input.addressLine1?.trim() || null,
+    p_state: input.state?.trim() || null,
+  });
+  throwIfLearnError(error);
+  return data as StudentProfilePayload["student"];
 }

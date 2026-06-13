@@ -21,10 +21,8 @@ export type ProgramLadderAssessment = {
 };
 
 export type ProgramLadder = {
-  curriculum_version_id: string;
   program_id: string;
   program_name: string;
-  curriculum_label: string;
   batches: { batch_id: string; batch_name: string; level_start: string; level_end: string }[];
   curriculum_ladder: {
     current_level_id: string | null;

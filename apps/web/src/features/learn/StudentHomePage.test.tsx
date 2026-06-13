@@ -51,8 +51,8 @@ const mockHome = {
     enrolled_at: new Date().toISOString(),
     center_id: "c1",
     batch_name: "Batch A",
-    curriculum_version_id: "cv1",
-    curriculum_version_label: "v1 — Abacus Core",
+    program_id: "cv1",
+    program_name: "Abacus Core",
   },
   center: {
     id: "c1",
