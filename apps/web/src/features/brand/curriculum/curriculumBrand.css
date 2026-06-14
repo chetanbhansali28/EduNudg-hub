@@ -63,6 +63,107 @@
   border-top: 1px solid var(--ed-border);
 }
 
+.ed-curriculum-level-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ed-curriculum-level-accordion__item {
+  border: 1px solid var(--ed-border);
+  border-radius: calc(var(--ed-radius-lg) + 2px);
+  background: var(--ed-card);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ed-curriculum-level-accordion__item--open {
+  border-color: color-mix(in srgb, var(--ed-primary) 35%, var(--ed-border));
+  box-shadow: var(--ed-shadow);
+}
+
+.ed-curriculum-level-accordion__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.ed-curriculum-level-accordion__trigger {
+  flex: 1 1 12rem;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ed-fg);
+}
+
+.ed-curriculum-level-accordion__trigger:hover {
+  background: color-mix(in srgb, var(--ed-primary-soft) 25%, transparent);
+}
+
+.ed-curriculum-level-accordion__trigger-title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.ed-curriculum-level-accordion__meta {
+  font-size: 0.8125rem;
+  color: var(--ed-muted);
+}
+
+.ed-curriculum-level-accordion__chevron {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--ed-muted);
+  transition: transform 0.2s ease;
+}
+
+.ed-curriculum-level-accordion__item--open .ed-curriculum-level-accordion__chevron {
+  transform: rotate(180deg);
+}
+
+.ed-curriculum-level-accordion__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.5rem 0.35rem 0;
+}
+
+.ed-curriculum-level-accordion__body {
+  padding: 0 0.85rem 0.85rem;
+  border-top: 1px solid var(--ed-border);
+}
+
+.ed-curriculum-level-accordion__body .ed-curriculum-level-nested {
+  margin-top: 0.85rem;
+  padding-top: 0;
+  border-top: none;
+}
+
+.ed-curriculum-chapter-row {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.ed-curriculum-chapter-row:last-child {
+  border-bottom: none;
+}
+
+.ed-curriculum-chapter-row__form {
+  width: 100%;
+}
+
 .ed-curriculum-unit-row {
   display: flex;
   align-items: center;

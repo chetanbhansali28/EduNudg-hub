@@ -7,16 +7,20 @@ import { StudentEnrollmentBlockedPage } from "@/features/learn/StudentEnrollment
 import { StudentLearnRpcError } from "@/lib/studentLearnApi";
 
 const fetchStudentLearnHome = vi.fn();
+const fetchStudentOpenBatches = vi.fn();
+const fetchStudentProgramLadders = vi.fn();
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
   useTenant: () => ({ brandId: "brand-1", brandSlug: "abacusworld" }),
 }));
 
-const fetchStudentOpenBatches = vi.fn();
-
 vi.mock("@/lib/studentBatchJoinApi", () => ({
   fetchStudentOpenBatches: (...args: unknown[]) => fetchStudentOpenBatches(...args),
   joinStudentBatch: vi.fn(),
+}));
+
+vi.mock("@/lib/studentProgressApi", () => ({
+  fetchStudentProgramLadders: (...args: unknown[]) => fetchStudentProgramLadders(...args),
 }));
 
 vi.mock("@/lib/studentLearnApi", async (importOriginal) => {
@@ -51,7 +55,7 @@ const mockHome = {
     enrolled_at: new Date().toISOString(),
     center_id: "c1",
     batch_name: "Batch A",
-    program_id: "cv1",
+    program_id: "p1",
     program_name: "Abacus Core",
   },
   center: {
@@ -63,16 +67,15 @@ const mockHome = {
     public_url: "http://koramangala.abacusworld.localhost:9000/",
   },
   curriculum_ladder: {
-    current_level_id: "l3",
-    completion_pct: 37.5,
+    current_level_id: "l2",
+    completion_pct: 25,
     levels: [
       { level_id: "l1", name: "Level 1", sort_order: 1, status: "completed", completed_at: null, abacus_level_code: "L1" },
-      { level_id: "l2", name: "Level 2", sort_order: 2, status: "completed", completed_at: null, abacus_level_code: "L2" },
-      { level_id: "l3", name: "Level 3", sort_order: 3, status: "in_progress", completed_at: null, abacus_level_code: "L3" },
+      { level_id: "l2", name: "Level 2", sort_order: 2, status: "in_progress", completed_at: null, abacus_level_code: "L2" },
     ],
   },
   stats: {
-    levels_completed: 2,
+    levels_completed: 1,
     levels_total: 8,
     assessments_count: 3,
     avg_score_pct: 84.3,
@@ -111,29 +114,61 @@ const mockHome = {
       enroll_blocked_reason: "paid_coming_soon",
     },
   ],
-  my_registrations: [{ registration_id: "r1", competition_id: "c0", name: "Past Open", event_date: null, status: "registered", fee_type: "free" }],
+  my_registrations: [],
   recent_results: [{ competition_name: "Winter Open", event_date: "2025-12-01", result_rank: "2nd", rank_position: 2, score: 90 }],
-  recent_assessments: [{ id: "a1", assessment_type: "level_check", score: 85, max_score: 100, assessed_at: "2026-01-01", level_name: null }],
-  recent_activity: [{ type: "level_progress", title: "Level 2", subtitle: "completed", occurred_at: new Date().toISOString(), href: "/progress" }],
-  quick_actions: [{ label: "View full progress", href: "/progress" }],
+  recent_assessments: [],
+  recent_activity: [],
+  quick_actions: [],
 };
+
+const mockLadders = [
+  {
+    program_id: "p1",
+    program_name: "Abacus Core",
+    batches: [{ batch_id: "b1", batch_name: "Morning", level_start: "L1", level_end: "L3" }],
+    curriculum_ladder: {
+      current_level_id: "l2",
+      completion_pct: 25,
+      levels: [
+        { level_id: "l1", name: "Level 1", sort_order: 1, status: "completed", completed_at: null, abacus_level_code: "L1" },
+        { level_id: "l2", name: "Level 2", sort_order: 2, status: "in_progress", completed_at: null, abacus_level_code: "L2" },
+        { level_id: "l3", name: "Level 3", sort_order: 3, status: "not_started", completed_at: null, abacus_level_code: "L3" },
+      ],
+    },
+    assessments: [],
+  },
+];
 
 describe("StudentHomePage", () => {
   beforeEach(() => {
     fetchStudentLearnHome.mockReset();
-    fetchStudentOpenBatches.mockResolvedValue([]);
+    fetchStudentOpenBatches.mockResolvedValue([
+      {
+        batch_id: "b1",
+        name: "Morning batch",
+        program_name: "Abacus Core",
+        level_start: "Level 1",
+        level_end: "Level 3",
+        already_joined: true,
+      },
+    ]);
+    fetchStudentProgramLadders.mockResolvedValue(mockLadders);
   });
 
-  it("renders comprehensive dashboard widget groups from mock payload", async () => {
+  it("regression_dashboard_shows_batch_carousel_and_learning_path", async () => {
     fetchStudentLearnHome.mockResolvedValue(mockHome);
     wrap(<StudentHomePage />);
-    expect(await screen.findByText("Koramangala Center")).toBeDefined();
-    expect(screen.getByText("My center")).toBeDefined();
+
+    expect(await screen.findByText("Join a batch")).toBeDefined();
+    expect(screen.queryByRole("link", { name: /View progress/i })).toBeNull();
+    expect(screen.getByText("Enrolled")).toBeDefined();
     expect(screen.getByText("Your learning path")).toBeDefined();
-    expect(screen.getByRole("link", { name: /Open progress/i })).toBeDefined();
+    expect(screen.getByText("Current program")).toBeDefined();
+    expect(screen.getByText("Level 2")).toBeDefined();
+    expect(screen.queryByText("My center")).toBeNull();
+    expect(screen.queryByText("Recent activity")).toBeNull();
+    expect(screen.queryByText("Quick shortcuts")).toBeNull();
     expect(screen.getByText("Upcoming competitions")).toBeDefined();
-    expect(screen.getByText("Regional Challenge")).toBeDefined();
-    expect(screen.getByText("Recent activity")).toBeDefined();
   });
 
   it("regression_paid_competition_shows_coming_soon", async () => {

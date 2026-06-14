@@ -29,6 +29,7 @@ type Props = {
   onAddCourse: () => void;
   addPending: boolean;
   bindAddClose: (close: () => void) => void;
+  readOnly?: boolean;
 };
 
 export function CurriculumCourseList({
@@ -44,6 +45,7 @@ export function CurriculumCourseList({
   onAddCourse,
   addPending,
   bindAddClose,
+  readOnly = false,
 }: Props) {
   const filtered =
     filter === "active" ? courses.filter((c) => c.is_active) : courses;
@@ -56,24 +58,26 @@ export function CurriculumCourseList({
   return (
     <Card title="Courses">
       <FilterTabs options={filterTabs} value={filter} onChange={onFilterChange} aria-label="Course filter" />
-      <AddFormSection
-        buttonLabel="Add course"
-        panelTitle="Add course"
-        actionsPlacement="footer"
-        primaryAction={{
-          label: "Create course",
-          onClick: onAddCourse,
-          pending: addPending,
-          disabled: !addCourse.name.trim(),
-        }}
-      >
-        {({ close }) => {
-          bindAddClose(close);
-          return (
-            <CourseFields brandId={brandId} value={addCourse} onChange={onAddCourseChange} />
-          );
-        }}
-      </AddFormSection>
+      {!readOnly && (
+        <AddFormSection
+          buttonLabel="Add course"
+          panelTitle="Add course"
+          actionsPlacement="footer"
+          primaryAction={{
+            label: "Create course",
+            onClick: onAddCourse,
+            pending: addPending,
+            disabled: !addCourse.name.trim(),
+          }}
+        >
+          {({ close }) => {
+            bindAddClose(close);
+            return (
+              <CourseFields brandId={brandId} value={addCourse} onChange={onAddCourseChange} />
+            );
+          }}
+        </AddFormSection>
+      )}
       <div className="ed-data-list ed-data-list--pipeline ed-curriculum-stagger">
         {filtered.length === 0 ? (
           <PipelineEmptyState message="No courses yet — create your first course (e.g. Abacus Core)." />
@@ -86,7 +90,9 @@ export function CurriculumCourseList({
                   title={course.name}
                   meta={course.age_label ?? undefined}
                   lines={[
-                    levelCount > 0 ? `${levelCount} level${levelCount === 1 ? "" : "s"}` : "No levels yet",
+                    levelCount > 0
+                      ? `${levelCount} program${levelCount === 1 ? "" : "s"}`
+                      : "No programs yet",
                     course.description?.slice(0, 60) ?? "Add marketing copy in course detail",
                   ]}
                   selected={course.id === selectedId}

@@ -10,6 +10,9 @@ export type CenterStudentRow = {
   enrollment_id: string;
   enrollment_status: string;
   program_id: string | null;
+  program_name: string | null;
+  starting_level_id: string | null;
+  starting_level_name: string | null;
   batch_ids: string[];
   batch_names: string[];
 };
@@ -18,7 +21,7 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
   const { data: enrollments, error: eErr } = await getSupabase()
     .from("student_enrollments")
     .select(
-      "id, status, program_id, student_id, students(id, full_name, student_code, login_email, user_id)"
+      "id, status, program_id, starting_level_id, student_id, programs(name), levels:starting_level_id(name), students(id, full_name, student_code, login_email, user_id)"
     )
     .eq("center_id", centerId)
     .eq("brand_id", brandId)
@@ -28,7 +31,10 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
     id: string;
     status: string;
     program_id: string | null;
+    starting_level_id: string | null;
     student_id: string;
+    programs: { name: string } | { name: string }[] | null;
+    levels: { name: string } | { name: string }[] | null;
     students: {
       id: string;
       full_name: string;
@@ -64,6 +70,8 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
   return rows.map((r) => {
     const sid = r.students?.id ?? r.student_id;
     const batchInfo = batchMap.get(sid) ?? { ids: [], names: [] };
+    const program = Array.isArray(r.programs) ? r.programs[0] : r.programs;
+    const startLevel = Array.isArray(r.levels) ? r.levels[0] : r.levels;
     return {
       id: sid,
       full_name: r.students?.full_name ?? "Student",
@@ -73,6 +81,9 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
       enrollment_id: r.id,
       enrollment_status: r.status,
       program_id: r.program_id,
+      program_name: program?.name ?? null,
+      starting_level_id: r.starting_level_id,
+      starting_level_name: startLevel?.name ?? null,
       batch_ids: batchInfo.ids,
       batch_names: batchInfo.names,
     };

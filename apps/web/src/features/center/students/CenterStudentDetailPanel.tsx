@@ -16,10 +16,10 @@ import {
   fetchStudentProfileAddress,
   upsertStudentDeliveryAddress,
 } from "@/lib/studentProfileApi";
-import { inviteStudentPortalAccess } from "@/lib/studentPortalAdminApi";
-import { recordStudentLevelProgress } from "@/lib/centerLearnRecordsApi";
+import { inviteStudentPortalAccess, pinEnrollmentProgram } from "@/lib/studentPortalAdminApi";
+import { fetchCenterStudentProgramContext } from "@/lib/centerStudentProgramApi";
 import { syncStudentBatchAssignments, type CenterStudentRow } from "@/lib/centerStudentsApi";
-import { fetchCenterBatches } from "@/lib/centerBatchesApi";
+import { fetchAuthorizedPrograms, fetchCenterBatches } from "@/lib/centerBatchesApi";
 import { fetchLevels } from "@/lib/curriculumApi";
 
 type Props = {
@@ -41,8 +41,8 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
     phone: "",
   });
   const [selectedBatches, setSelectedBatches] = useState<string[]>(student.batch_ids);
-  const [levelId, setLevelId] = useState("");
-  const [progressStatus, setProgressStatus] = useState("in_progress");
+  const [programId, setProgramId] = useState(student.program_id ?? "");
+  const [levelId, setLevelId] = useState(student.starting_level_id ?? "");
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const batches = useQuery({
@@ -50,21 +50,45 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
     queryFn: () => fetchCenterBatches(centerId),
   });
 
+  const programs = useQuery({
+    queryKey: ["authorized-programs", centerId, brandId],
+    queryFn: () => fetchAuthorizedPrograms(centerId, brandId),
+  });
+
+  const programLevels = useQuery({
+    queryKey: ["student-assign-levels", programId],
+    enabled: !!programId,
+    queryFn: () => fetchLevels(programId),
+  });
+
+  const programContext = useQuery({
+    queryKey: ["center-student-program", centerId, student.id],
+    queryFn: () => fetchCenterStudentProgramContext(centerId, student.id),
+  });
+
   const profile = useQuery({
     queryKey: ["student-profile-address", student.id],
     queryFn: () => fetchStudentProfileAddress(student.id),
   });
 
-  const levels = useQuery({
-    queryKey: ["student-detail-levels", student.program_id],
-    enabled: !!student.program_id,
-    queryFn: () => fetchLevels(student.program_id!),
-  });
-
   useEffect(() => {
     setSelectedBatches(student.batch_ids);
     setLoginEmail(student.login_email ?? "");
-  }, [student.id, student.batch_ids, student.login_email]);
+    setProgramId(student.program_id ?? "");
+    setLevelId(student.starting_level_id ?? "");
+  }, [
+    student.id,
+    student.batch_ids,
+    student.login_email,
+    student.program_id,
+    student.starting_level_id,
+  ]);
+
+  useEffect(() => {
+    if (programId !== student.program_id) {
+      setLevelId("");
+    }
+  }, [programId, student.program_id]);
 
   useEffect(() => {
     if (profile.data) {
@@ -80,6 +104,7 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
 
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ["center-students", centerId] });
+    void qc.invalidateQueries({ queryKey: ["center-student-program", centerId, student.id] });
     onSaved?.();
   };
 
@@ -108,6 +133,20 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
     onError: capture,
   });
 
+  const saveProgram = useMutation({
+    mutationFn: async () => {
+      if (!programId) throw new Error("Select a course / program");
+      if (!levelId) throw new Error("Select the starting level");
+      clear();
+      await pinEnrollmentProgram(student.enrollment_id, programId, levelId);
+    },
+    onSuccess: () => {
+      setSaveMessage("Course and starting level assigned — journey tracking is active.");
+      invalidate();
+    },
+    onError: capture,
+  });
+
   const saveBatches = useMutation({
     mutationFn: async () => {
       clear();
@@ -120,20 +159,6 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
     onError: capture,
   });
 
-  const saveProgress = useMutation({
-    mutationFn: async () => {
-      const level = (levels.data ?? []).find((l) => l.id === levelId);
-      if (!level) throw new Error("Select a level");
-      clear();
-      await recordStudentLevelProgress(centerId, student.id, level.name, progressStatus, level.id);
-    },
-    onSuccess: () => {
-      setSaveMessage("Level progress recorded.");
-      setLevelId("");
-    },
-    onError: capture,
-  });
-
   const toggleBatch = (batchId: string) => {
     setSelectedBatches((prev) =>
       prev.includes(batchId) ? prev.filter((id) => id !== batchId) : [...prev, batchId]
@@ -141,6 +166,9 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
   };
 
   const portalLinked = !!student.user_id;
+  const currentLevel = programContext.data?.current_level_name;
+  const assignmentChanged =
+    programId !== (student.program_id ?? "") || levelId !== (student.starting_level_id ?? "");
 
   return (
     <Card title={student.full_name}>
@@ -152,6 +180,66 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
       )}
 
       <div className="ed-ops-detail-enter" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+        <section>
+          <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>
+            Course / program
+          </h3>
+          <p className="ed-text-sm ed-muted" style={{ margin: "0 0 0.65rem" }}>
+            Assign the course and the level where this student is starting. Earlier levels are marked complete;
+            assessments advance them through the program automatically.
+          </p>
+          <FormGrid columns={2}>
+            <Select
+              label="Program"
+              value={programId}
+              onChange={setProgramId}
+              options={[
+                { value: "", label: "Select program…" },
+                ...(programs.data ?? []).map((p) => ({ value: p.id, label: p.name })),
+              ]}
+              editable
+            />
+            <Select
+              label="Starting level"
+              value={levelId}
+              onChange={setLevelId}
+              options={[
+                { value: "", label: programId ? "Select level…" : "Choose program first" },
+                ...(programLevels.data ?? []).map((l) => ({
+                  value: l.id,
+                  label: l.abacus_level_code ? `${l.name} (${l.abacus_level_code})` : l.name,
+                })),
+              ]}
+              editable
+            />
+            <FormActions>
+              <Button
+                onClick={() => saveProgram.mutate()}
+                disabled={
+                  saveProgram.isPending || !programId || !levelId || !assignmentChanged
+                }
+              >
+                {student.program_id ? "Update assignment" : "Assign course"}
+              </Button>
+            </FormActions>
+          </FormGrid>
+          {student.program_name && (
+            <p className="ed-text-sm" style={{ marginTop: "0.5rem" }}>
+              Assigned: <strong>{student.program_name}</strong>
+              {student.starting_level_name ? ` · started at ${student.starting_level_name}` : null}
+              {currentLevel && currentLevel !== student.starting_level_name
+                ? ` · now on ${currentLevel}`
+                : null}
+            </p>
+          )}
+          {programId && (programLevels.data ?? []).length === 0 && !programLevels.isLoading && (
+            <p className="ed-text-sm ed-muted">This program has no levels yet — ask your brand admin.</p>
+          )}
+          {(programs.data ?? []).length === 0 && (
+            <p className="ed-text-sm ed-muted">Ask your brand admin to authorize programs for this center.</p>
+          )}
+        </section>
+
         <section>
           <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>Enrollment</h3>
           <p className="ed-text-sm ed-muted">
@@ -225,37 +313,6 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
             Save address
           </Button>
         </section>
-
-        {student.program_id && (
-          <section>
-            <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>Record level progress</h3>
-            <FormGrid columns={2}>
-              <Select
-                label="Level"
-                value={levelId}
-                onChange={setLevelId}
-                options={[
-                  { value: "", label: "Select level…" },
-                  ...(levels.data ?? []).map((l) => ({ value: l.id, label: l.name })),
-                ]}
-                editable
-              />
-              <Select
-                label="Status"
-                value={progressStatus}
-                onChange={setProgressStatus}
-                options={[
-                  { value: "in_progress", label: "In progress" },
-                  { value: "completed", label: "Completed" },
-                ]}
-                editable
-              />
-            </FormGrid>
-            <Button onClick={() => saveProgress.mutate()} disabled={saveProgress.isPending || !levelId}>
-              Record progress
-            </Button>
-          </section>
-        )}
       </div>
     </Card>
   );

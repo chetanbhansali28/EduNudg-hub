@@ -10,11 +10,13 @@ export async function inviteStudentPortalAccess(studentId: string, loginEmail: s
 
 export async function pinEnrollmentProgram(
   enrollmentId: string,
-  programId: string
+  programId: string,
+  startLevelId?: string | null
 ): Promise<void> {
   const { error } = await getSupabase().rpc("pin_enrollment_program", {
     p_enrollment_id: enrollmentId,
     p_program_id: programId,
+    p_start_level_id: startLevelId ?? null,
   });
   if (error) throw error;
 }

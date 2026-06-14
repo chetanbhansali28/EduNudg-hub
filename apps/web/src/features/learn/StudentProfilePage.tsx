@@ -30,6 +30,13 @@ export function StudentProfilePage() {
     <>
       <PageTitle>Profile</PageTitle>
       <div className="ed-sp-stack ed-sp-profile-page">
+        <header className="ed-sp-profile-page__header">
+          <h1 className="ed-sp-profile-page__title">Profile</h1>
+          <p className="ed-sp-profile-page__subtitle">
+            Keep your photo and contact details current for your center and competitions.
+          </p>
+        </header>
+
         {profile.isLoading && <StudentPortalLoading label="Loading your details…" />}
 
         {profile.error && (
@@ -40,7 +47,7 @@ export function StudentProfilePage() {
         )}
 
         {profile.data && (
-          <>
+          <div className="ed-sp-profile-page__layout">
             <SectionCard title="Student Details" className="ed-sp-section--profile">
               <StudentProfileEditForm
                 brandId={brandId!}
@@ -49,10 +56,10 @@ export function StudentProfilePage() {
               />
             </SectionCard>
 
-            <SectionCard title="My center" className="ed-sp-section--profile-compact">
+            <SectionCard title="My center" className="ed-sp-section--profile-side">
               <CenterInfoCard center={profile.data.center} enrollment={profile.data.enrollment} />
             </SectionCard>
-          </>
+          </div>
         )}
       </div>
     </>

@@ -18,6 +18,8 @@ export type ProgramLadderAssessment = {
   max_score: number | null;
   assessed_at: string;
   notes: string | null;
+  passed: boolean | null;
+  level_name: string | null;
 };
 
 export type ProgramLadder = {

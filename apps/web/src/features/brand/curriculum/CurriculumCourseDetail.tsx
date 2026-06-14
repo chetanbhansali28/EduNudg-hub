@@ -30,7 +30,7 @@ type Props = {
   onArchiveCourse: () => void;
   archiveBlockedReason?: string | null;
   selectedLevelId: string | null;
-  onSelectLevel: (id: string) => void;
+  onSelectLevel: (id: string | null) => void;
   addLevel: LevelForm;
   onAddLevelChange: (v: LevelForm) => void;
   editLevel: LevelForm;
@@ -44,6 +44,7 @@ type Props = {
   reorderPending: boolean;
   onError: (err: unknown) => void;
   levelCloser: ReturnType<typeof useAddFormCloser>;
+  readOnly?: boolean;
 };
 
 export function CurriculumCourseDetail({
@@ -76,6 +77,7 @@ export function CurriculumCourseDetail({
   reorderPending,
   onError,
   levelCloser,
+  readOnly = false,
 }: Props) {
   return (
     <div className="ed-ops-detail-enter">
@@ -91,7 +93,7 @@ export function CurriculumCourseDetail({
               </span>
             )}
           </div>
-          {!editingCourse && (
+          {!readOnly && !editingCourse && (
             <CrudRowActions
               editing={false}
               onEdit={onStartEditCourse}
@@ -129,6 +131,12 @@ export function CurriculumCourseDetail({
           </p>
         )}
 
+        {readOnly && (
+          <p className="ed-curriculum-live-banner" role="status">
+            Read-only — contact your brand admin to change curriculum.
+          </p>
+        )}
+
         {editingCourse ? (
           <div className="ed-editable-form">
             <CourseFields brandId={brandId} value={editCourse} onChange={onEditCourseChange} />
@@ -152,7 +160,7 @@ export function CurriculumCourseDetail({
         brandId={brandId}
         levels={levels}
         unitCounts={unitCounts}
-        canEdit
+        canEdit={!readOnly}
         selectedLevelId={selectedLevelId}
         onSelectLevel={onSelectLevel}
         addLevel={addLevel}
@@ -176,7 +184,7 @@ export function CurriculumCourseDetail({
 export function CurriculumCourseDetailPlaceholder() {
   return (
     <Card title="Course detail">
-      <PipelineDetailPlaceholder message="Select a course to manage levels and units." />
+      <PipelineDetailPlaceholder message="Select a course to manage programs and chapters." />
     </Card>
   );
 }

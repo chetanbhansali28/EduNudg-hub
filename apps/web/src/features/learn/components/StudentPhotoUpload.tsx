@@ -11,8 +11,8 @@ type Props = {
   disabled?: boolean;
   required?: boolean;
   compact?: boolean;
-  /** Avatar + pick control only — no field label (profile identity row). */
-  inline?: boolean;
+  /** Large avatar for profile hero row. */
+  hero?: boolean;
 };
 
 export function StudentPhotoUpload({
@@ -23,7 +23,7 @@ export function StudentPhotoUpload({
   disabled,
   required,
   compact,
-  inline,
+  hero,
 }: Props) {
   const inputId = useId();
   const [preview, setPreview] = useState(currentPhotoUrl?.trim() || "");
@@ -49,18 +49,20 @@ export function StudentPhotoUpload({
     }
   };
 
-  if (inline) {
+  if (hero) {
     return (
-      <div className="ed-sp-photo-inline">
-        <label className="ed-sp-photo-inline__control" htmlFor={inputId}>
-          {preview ? (
-            <img src={preview} alt="" className="ed-sp-photo-preview ed-sp-photo-preview--inline" width={56} height={56} />
-          ) : (
-            <span className="ed-sp-photo-preview ed-sp-photo-preview--empty ed-sp-photo-preview--inline" aria-hidden>
-              {pending ? "…" : "Photo"}
-            </span>
-          )}
-          <span className="ed-sp-photo-inline__hint">{pending ? "Uploading" : "Change"}</span>
+      <div className="ed-sp-photo-hero">
+        <label className="ed-sp-photo-hero__control" htmlFor={inputId}>
+          <span className="ed-sp-photo-hero__ring">
+            {preview ? (
+              <img src={preview} alt="" className="ed-sp-photo-preview ed-sp-photo-preview--hero" width={88} height={88} />
+            ) : (
+              <span className="ed-sp-photo-preview ed-sp-photo-preview--empty ed-sp-photo-preview--hero" aria-hidden>
+                {pending ? "…" : "Add"}
+              </span>
+            )}
+          </span>
+          <span className="ed-sp-photo-hero__action">{pending ? "Uploading…" : "Update photo"}</span>
           <input
             id={inputId}
             name="student-photo"
@@ -72,12 +74,12 @@ export function StudentPhotoUpload({
           />
         </label>
         {required && !preview ? (
-          <span className="ed-sp-photo-inline__required" aria-hidden>
-            *
+          <span className="ed-sp-photo-hero__required" aria-hidden>
+            Required
           </span>
         ) : null}
         {localError ? (
-          <p className="ed-sp-photo-inline__error" role="alert">
+          <p className="ed-sp-photo-hero__error" role="alert">
             {localError}
           </p>
         ) : null}

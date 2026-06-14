@@ -102,7 +102,7 @@ describe("StudentProfilePage", () => {
     await waitFor(() => expect(screen.getByLabelText("School name")).toBeDefined());
 
     fireEvent.change(screen.getByLabelText("School name"), { target: { value: "New School" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save profile" }));
 
     await waitFor(() => {
       expect(updateStudentSelfProfile).toHaveBeenCalledWith(

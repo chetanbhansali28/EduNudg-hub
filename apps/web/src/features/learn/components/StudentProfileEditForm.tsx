@@ -66,7 +66,7 @@ export function StudentProfileEditForm({ brandId, student, email }: Props) {
     <div className="ed-sp-profile-form">
       <MutationError message={error} />
 
-      <div className="ed-sp-profile-form__identity">
+      <div className="ed-sp-profile-form__hero">
         <StudentPhotoUpload
           brandId={brandId}
           studentId={student.id}
@@ -74,9 +74,9 @@ export function StudentProfileEditForm({ brandId, student, email }: Props) {
           onUploaded={(url) => setForm((f) => ({ ...f, photoUrl: url }))}
           disabled={save.isPending}
           required
-          inline
+          hero
         />
-        <div className="ed-sp-profile-form__identity-fields">
+        <div className="ed-sp-profile-form__hero-fields">
           <Input
             label="Full name *"
             value={form.fullName}
@@ -87,63 +87,69 @@ export function StudentProfileEditForm({ brandId, student, email }: Props) {
         </div>
       </div>
 
-      <div className="ed-sp-profile-form__grid ed-sp-profile-form__grid--3">
-        <Input
-          label="Date of birth *"
-          type="date"
-          value={form.dateOfBirth}
-          onChange={(v) => setForm((f) => ({ ...f, dateOfBirth: v }))}
-          editable
-        />
-        <Input
-          label="Phone number *"
-          value={form.phone}
-          onChange={(v) => setForm((f) => ({ ...f, phone: v }))}
-          placeholder="+91…"
-          editable
-        />
-        <Input
-          label="Pincode *"
-          value={form.pincode}
-          onChange={(v) => setForm((f) => ({ ...f, pincode: v }))}
-          editable
-        />
-      </div>
+      <div className="ed-sp-profile-form__body">
+        <div className="ed-sp-profile-form__grid">
+          <Input
+            label="Date of birth *"
+            type="date"
+            value={form.dateOfBirth}
+            onChange={(v) => setForm((f) => ({ ...f, dateOfBirth: v }))}
+            editable
+          />
+          <Input
+            label="Phone number *"
+            value={form.phone}
+            onChange={(v) => setForm((f) => ({ ...f, phone: v }))}
+            placeholder="+91…"
+            editable
+          />
+        </div>
 
-      <Input
-        label="Address line"
-        value={form.addressLine1 ?? ""}
-        onChange={(v) => setForm((f) => ({ ...f, addressLine1: v }))}
-        editable
-      />
-
-      <div className="ed-sp-profile-form__grid">
         <Input
-          label="City"
-          value={form.city ?? ""}
-          onChange={(v) => setForm((f) => ({ ...f, city: v }))}
+          label="Address line"
+          value={form.addressLine1 ?? ""}
+          onChange={(v) => setForm((f) => ({ ...f, addressLine1: v }))}
           editable
         />
-        <Input
-          label="State"
-          value={form.state ?? ""}
-          onChange={(v) => setForm((f) => ({ ...f, state: v }))}
-          editable
-        />
-      </div>
 
-      <div className="ed-sp-profile-form__footer">
+        <div className="ed-sp-profile-form__grid">
+          <Input
+            label="City"
+            value={form.city ?? ""}
+            onChange={(v) => setForm((f) => ({ ...f, city: v }))}
+            editable
+          />
+          <Input
+            label="State"
+            value={form.state ?? ""}
+            onChange={(v) => setForm((f) => ({ ...f, state: v }))}
+            editable
+          />
+        </div>
+
+        <div className={student.student_code ? "ed-sp-profile-form__grid" : undefined}>
+          <Input
+            label="Pincode *"
+            value={form.pincode}
+            onChange={(v) => setForm((f) => ({ ...f, pincode: v }))}
+            editable
+          />
+          {student.student_code ? (
+            <Input label="Student code" value={student.student_code} onChange={() => {}} disabled />
+          ) : null}
+        </div>
+
         <Input
           label="School name"
           value={form.schoolName ?? ""}
           onChange={(v) => setForm((f) => ({ ...f, schoolName: v }))}
           editable
         />
-        {student.student_code ? (
-          <Input label="Student code" value={student.student_code} onChange={() => {}} disabled />
-        ) : null}
-        <Button onClick={() => save.mutate()} disabled={!canSave} block={false}>
-          {save.isPending ? "Saving…" : "Save"}
+      </div>
+
+      <div className="ed-sp-profile-form__save">
+        <Button onClick={() => save.mutate()} disabled={!canSave} block>
+          {save.isPending ? "Saving your profile…" : "Save profile"}
         </Button>
       </div>
     </div>

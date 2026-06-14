@@ -36,9 +36,10 @@ type CourseFilter = "active" | "all";
 
 interface CurriculumWorkspaceProps {
   brandId: string;
+  readOnly?: boolean;
 }
 
-export function CurriculumWorkspace({ brandId }: CurriculumWorkspaceProps) {
+export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWorkspaceProps) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const courseCloser = useAddFormCloser();
@@ -204,7 +205,11 @@ export function CurriculumWorkspace({ brandId }: CurriculumWorkspaceProps) {
     <div className="ed-curriculum-brand">
       <PageToolbar
         title="Curriculum"
-        subtitle="Courses, levels, and units — what parents see on your website and centers use for batches."
+        subtitle={
+          readOnly
+            ? "Read-only view: Course → Program → Chapter. Use this to see what your center teaches."
+            : "Build your curriculum: Course → Program → Chapter. Centers and parents see this on your website."
+        }
       />
       <MutationError message={error} />
 
@@ -223,6 +228,7 @@ export function CurriculumWorkspace({ brandId }: CurriculumWorkspaceProps) {
             onAddCourse={() => createCourse.mutate()}
             addPending={createCourse.isPending}
             bindAddClose={courseCloser.bindClose}
+            readOnly={readOnly}
           />
         }
         detail={
@@ -260,6 +266,7 @@ export function CurriculumWorkspace({ brandId }: CurriculumWorkspaceProps) {
               reorderPending={reorderLevelMutation.isPending}
               onError={capture}
               levelCloser={levelCloser}
+              readOnly={readOnly}
             />
           ) : (
             <CurriculumCourseDetailPlaceholder />

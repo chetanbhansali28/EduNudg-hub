@@ -93,31 +93,34 @@ describe("CurriculumPage", () => {
       expect(screen.getByText(/No courses yet/i)).toBeDefined();
     });
     expect(screen.getByRole("button", { name: "Add course" })).toBeDefined();
-    expect(screen.getByText(/Select a course to manage levels/i)).toBeDefined();
+    expect(screen.getByText(/Select a course to manage programs/i)).toBeDefined();
   });
 
-  it("shows master-detail with levels for active course", async () => {
+  it("shows master-detail with programs for active course", async () => {
     mockCurriculumTables();
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Add level" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "Add program" })).toBeDefined();
     });
 
     expect(screen.getByText("Courses")).toBeDefined();
+    expect(screen.getByText("Programs")).toBeDefined();
   });
 
-  it("shows units panel when level selected", async () => {
+  it("shows chapters panel when program accordion expanded", async () => {
     mockCurriculumTables();
     renderPage();
 
-    await waitFor(() => expect(screen.getByRole("button", { name: /Level 1/i })).toBeDefined());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Add program" })).toBeDefined());
 
-    fireEvent.click(screen.getByRole("button", { name: /Level 1/i }));
+    const trigger = document.querySelector(".ed-curriculum-level-accordion__trigger") as HTMLButtonElement;
+    fireEvent.click(trigger);
 
     await waitFor(() => {
-      expect(screen.getByText("Units")).toBeDefined();
-      expect(screen.getByRole("button", { name: "Add unit" })).toBeDefined();
+      expect(screen.getByText("Chapters")).toBeDefined();
+      expect(screen.getByRole("button", { name: "Add chapter" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "Save program" })).toBeDefined();
     });
   });
 });

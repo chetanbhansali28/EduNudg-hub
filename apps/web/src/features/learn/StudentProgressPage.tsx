@@ -80,8 +80,14 @@ function LadderDetail({ ladder }: { ladder: ProgramLadder }) {
           ladder.assessments.map((a) => (
             <div key={a.id} className="ed-sp-assessment ed-ops-animate-in">
               <div>
-                <p className="ed-sp-ladder__step-name">{a.assessment_type}</p>
+                <p className="ed-sp-ladder__step-name">
+                  {a.level_name ? `${a.level_name} · ` : ""}
+                  {a.assessment_type}
+                </p>
                 <p className="ed-sp-timeline__time">{formatShortDate(a.assessed_at)}</p>
+                {a.passed != null && (
+                  <p className="ed-text-sm">{a.passed ? "Passed" : "Did not pass"}</p>
+                )}
                 {a.notes ? <p className="ed-text-sm ed-muted">{a.notes}</p> : null}
               </div>
               <span className="ed-sp-assessment__score">

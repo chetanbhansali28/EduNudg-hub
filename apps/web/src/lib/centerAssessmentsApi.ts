@@ -9,13 +9,20 @@ export type StudentAssessmentRow = {
   max_score: number | null;
   assessed_at: string;
   notes: string | null;
+  passed: boolean | null;
+  level_id: string | null;
+  program_id: string | null;
   students?: { full_name: string } | { full_name: string }[] | null;
+  levels?: { name: string } | { name: string }[] | null;
+  programs?: { name: string } | { name: string }[] | null;
 };
 
 export async function listCenterAssessments(centerId: string): Promise<StudentAssessmentRow[]> {
   const { data, error } = await getSupabase()
     .from("student_assessments")
-    .select("id, student_id, assessment_type, score, max_score, assessed_at, notes, students(full_name)")
+    .select(
+      "id, student_id, assessment_type, score, max_score, assessed_at, notes, passed, level_id, program_id, students(full_name), levels(name), programs(name)"
+    )
     .eq("center_id", centerId)
     .order("assessed_at", { ascending: false })
     .limit(50);
@@ -32,6 +39,8 @@ export async function recordStudentAssessment(
     maxScore?: number;
     assessedAt?: string;
     notes?: string;
+    levelId?: string;
+    passed?: boolean;
   }
 ): Promise<string> {
   const { data, error } = await getSupabase().rpc("record_student_assessment", {
@@ -42,6 +51,9 @@ export async function recordStudentAssessment(
     p_max_score: input.maxScore ?? null,
     p_assessed_at: input.assessedAt || null,
     p_notes: input.notes?.trim() || null,
+    p_visible_to_student: true,
+    p_level_id: input.levelId ?? null,
+    p_passed: input.passed ?? null,
   });
   if (error) throw error;
   return data as string;

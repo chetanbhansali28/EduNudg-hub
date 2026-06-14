@@ -91,6 +91,13 @@ describe("portalNav", () => {
     expect(assessments?.href).toBe("/app/assessments");
   });
 
+  it("center nav includes curriculum for franchise reference", () => {
+    const sections = centerNavSections("/app/curriculum");
+    const curriculum = sections[1]?.items.find((i) => i.label === "Curriculum");
+    expect(curriculum?.href).toBe("/app/curriculum");
+    expect(curriculum?.active).toBe(true);
+  });
+
   it("center nav includes campaigns behind flag path", () => {
     const sections = centerNavSections("/app/campaigns");
     const campaigns = sections[1]?.items.find((i) => i.label === "Campaigns");

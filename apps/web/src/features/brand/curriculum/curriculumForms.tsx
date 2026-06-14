@@ -160,21 +160,21 @@ export function LevelMarketingFields({
     <div className="ed-editable-form">
       <FormGrid columns={3}>
         <Input
-          label="Level name"
+          label="Program name"
           value={value.name}
           onChange={(name) => onChange({ ...value, name })}
-          placeholder="Level 1 — Foundations"
+          placeholder="Level 1"
           editable
         />
         <Input
-          label="Level code"
+          label="Program code"
           value={value.code}
           onChange={(code) => onChange({ ...value, code })}
           placeholder="L1"
           editable
         />
         <Input
-          label="Topics in this level"
+          label="Topics in this program"
           value={value.topics}
           onChange={(topics) => onChange({ ...value, topics })}
           placeholder="Finger basics, Small friends, …"
@@ -183,7 +183,7 @@ export function LevelMarketingFields({
       </FormGrid>
       <FormGrid columns={2}>
         <Textarea
-          label="Why this level"
+          label="Why this program"
           value={value.whyTake}
           onChange={(whyTake) => onChange({ ...value, whyTake })}
           rows={3}

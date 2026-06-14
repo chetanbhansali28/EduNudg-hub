@@ -39,6 +39,7 @@ import { CenterLeadsPage } from "@/features/center/leads/CenterLeadsPage";
 import { CenterMerchandiseOrdersPage } from "@/features/center/merchandise/CenterMerchandiseOrdersPage";
 import { CenterCampaignsPage } from "@/features/center/campaigns/CenterCampaignsPage";
 import { CenterAssessmentsPage } from "@/features/center/assessments/CenterAssessmentsPage";
+import { CenterCurriculumPage } from "@/features/center/CenterCurriculumPage";
 import { CenterReportsPage } from "@/features/center/reports/CenterReportsPage";
 import { CenterSettingsPage } from "@/features/center/settings/CenterSettingsPage";
 import { StudentsPage } from "@/features/center/StudentsPage";
@@ -250,6 +251,7 @@ export function AppRoutes() {
             <Route path="assessments" element={<CenterAssessmentsPage />} />
             <Route path="reports" element={<CenterReportsPage />} />
             <Route path="batches" element={<BatchesPage />} />
+            <Route path="curriculum" element={<CenterCurriculumPage />} />
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="fees" element={<FeesPage />} />
             <Route path="inventory" element={<InventoryPage />} />

@@ -1,10 +1,8 @@
-import { useState } from "react";
 import {
   Badge,
   Button,
   Card,
   FormActions,
-  PipelineListItem,
   SaveButton,
 } from "@edunudg/ui";
 import type { CurriculumLevel } from "@/lib/curriculumApi";
@@ -24,7 +22,7 @@ type Props = {
   unitCounts: Record<string, number>;
   canEdit: boolean;
   selectedLevelId: string | null;
-  onSelectLevel: (id: string) => void;
+  onSelectLevel: (id: string | null) => void;
   addLevel: LevelForm;
   onAddLevelChange: (v: LevelForm) => void;
   editLevel: LevelForm;
@@ -51,6 +49,38 @@ function levelToForm(level: CurriculumLevel): LevelForm {
   };
 }
 
+function ProgramReadOnlySummary({ level }: { level: CurriculumLevel }) {
+  const topics = topicsToString(level.topics_covered);
+  return (
+    <dl className="ed-curriculum-preview-fields">
+      {level.abacus_level_code ? (
+        <>
+          <dt>Program code</dt>
+          <dd>{level.abacus_level_code}</dd>
+        </>
+      ) : null}
+      {topics ? (
+        <>
+          <dt>Topics covered</dt>
+          <dd>{topics}</dd>
+        </>
+      ) : null}
+      {level.why_take ? (
+        <>
+          <dt>Why this program</dt>
+          <dd>{level.why_take}</dd>
+        </>
+      ) : null}
+      {level.what_you_learn ? (
+        <>
+          <dt>Skills and outcomes</dt>
+          <dd>{level.what_you_learn}</dd>
+        </>
+      ) : null}
+    </dl>
+  );
+}
+
 export function CurriculumLevelPanel({
   brandId,
   levels,
@@ -72,9 +102,6 @@ export function CurriculumLevelPanel({
   onError,
   levelCloser,
 }: Props) {
-  const [editingLevel, setEditingLevel] = useState(false);
-  const selected = levels.find((l) => l.id === selectedLevelId) ?? null;
-
   const shift = (index: number, direction: -1 | 1) => {
     const next = [...levels];
     const target = index + direction;
@@ -83,10 +110,20 @@ export function CurriculumLevelPanel({
     onReorderLevels(next);
   };
 
+  const toggleLevel = (level: CurriculumLevel) => {
+    if (selectedLevelId === level.id) {
+      onSelectLevel(null);
+      return;
+    }
+    onSelectLevel(level.id);
+    onEditLevelChange(levelToForm(level));
+  };
+
   return (
-    <Card title="Levels">
+    <Card title="Programs">
       <p className="ed-text-sm ed-muted">
-        Each level has marketing copy, topics, and units shown on your public website and used in center batches.
+        Structure: <strong>Course → Program → Chapter</strong> — e.g. Abacus course, Level 1 program,
+        &quot;Numbers 1–100 on abacus&quot; chapter.
       </p>
 
       {!canEdit && (
@@ -97,11 +134,11 @@ export function CurriculumLevelPanel({
 
       {canEdit && (
         <AddFormSection
-          buttonLabel="Add level"
-          panelTitle="Add level"
+          buttonLabel="Add program"
+          panelTitle="Add program"
           actionsPlacement="footer"
           primaryAction={{
-            label: "Add level",
+            label: "Add program",
             onClick: onCreateLevel,
             pending: createPending,
             disabled: !addLevel.name.trim(),
@@ -114,95 +151,99 @@ export function CurriculumLevelPanel({
         </AddFormSection>
       )}
 
-      <div className="ed-curriculum-stagger">
-        {levels.map((level, index) => (
-          <div key={level.id} className="ed-curriculum-level-row-wrap">
-            <PipelineListItem
-              title={level.name}
-              meta={level.abacus_level_code ?? undefined}
-              lines={[
-                `${unitCounts[level.id] ?? 0} unit${(unitCounts[level.id] ?? 0) === 1 ? "" : "s"}`,
-              ]}
-              selected={level.id === selectedLevelId}
-              onSelect={() => {
-                onSelectLevel(level.id);
-                onEditLevelChange(levelToForm(level));
-                setEditingLevel(false);
-              }}
-            />
-            {canEdit && (
-              <FormActions>
-                <Button
-                  variant="ghost"
-                  aria-label={`Move ${level.name} up`}
-                  disabled={index === 0 || reorderPending}
-                  onClick={() => shift(index, -1)}
+      <div className="ed-curriculum-level-accordion ed-curriculum-stagger">
+        {levels.map((level, index) => {
+          const isOpen = level.id === selectedLevelId;
+          const chapterCount = unitCounts[level.id] ?? 0;
+          const panelId = `curriculum-program-panel-${level.id}`;
+          const isActiveForm = isOpen && selectedLevelId === level.id;
+
+          return (
+            <div
+              key={level.id}
+              className={`ed-curriculum-level-accordion__item${isOpen ? " ed-curriculum-level-accordion__item--open" : ""}`}
+            >
+              <div className="ed-curriculum-level-accordion__header">
+                <button
+                  type="button"
+                  className="ed-curriculum-level-accordion__trigger"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => toggleLevel(level)}
                 >
-                  Move up
-                </Button>
-                <Button
-                  variant="ghost"
-                  aria-label={`Move ${level.name} down`}
-                  disabled={index === levels.length - 1 || reorderPending}
-                  onClick={() => shift(index, 1)}
-                >
-                  Move down
-                </Button>
-              </FormActions>
-            )}
-          </div>
-        ))}
+                  <span className="ed-curriculum-level-accordion__trigger-title">{level.name}</span>
+                  {level.abacus_level_code ? <Badge>{level.abacus_level_code}</Badge> : null}
+                  <span className="ed-curriculum-level-accordion__meta">
+                    {chapterCount} chapter{chapterCount === 1 ? "" : "s"}
+                  </span>
+                  <span className="ed-curriculum-level-accordion__chevron" aria-hidden>
+                    ▾
+                  </span>
+                </button>
+
+                {canEdit && (
+                  <div className="ed-curriculum-level-accordion__actions">
+                    <Button
+                      variant="ghost"
+                      aria-label={`Move ${level.name} up`}
+                      disabled={index === 0 || reorderPending}
+                      onClick={() => shift(index, -1)}
+                    >
+                      Move up
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      aria-label={`Move ${level.name} down`}
+                      disabled={index === levels.length - 1 || reorderPending}
+                      onClick={() => shift(index, 1)}
+                    >
+                      Move down
+                    </Button>
+                    <DeleteConfirmButton
+                      onConfirm={() => onDeleteLevel(level.id)}
+                      description="Removes the program and all chapters. Blocked if students or batches use this program."
+                    >
+                      Delete
+                    </DeleteConfirmButton>
+                  </div>
+                )}
+              </div>
+
+              {isOpen && (
+                <div id={panelId} className="ed-curriculum-level-accordion__body ed-ops-animate-in">
+                  {canEdit && isActiveForm ? (
+                    <div className="ed-editable-form">
+                      <LevelMarketingFields value={editLevel} onChange={onEditLevelChange} />
+                      <FormActions>
+                        <SaveButton
+                          onClick={() => onUpdateLevel(level.id)}
+                          pending={updatePending}
+                          disabled={!editLevel.name.trim()}
+                          label="Save program"
+                        />
+                      </FormActions>
+                    </div>
+                  ) : (
+                    <ProgramReadOnlySummary level={level} />
+                  )}
+
+                  <CurriculumUnitsPanel
+                    brandId={brandId}
+                    levelId={level.id}
+                    canEdit={canEdit}
+                    onError={onError}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {levels.length === 0 && (
-        <p className="ed-text-sm ed-muted">No levels yet — add your first level (e.g. Level 1 · L1).</p>
-      )}
-
-      {selected && (
-        <div className="ed-curriculum-level-nested ed-ops-animate-in">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h4 className="ed-curriculum-section-title">{selected.name}</h4>
-            {selected.abacus_level_code && <Badge>{selected.abacus_level_code}</Badge>}
-          </div>
-
-          {canEdit && !editingLevel && (
-            <FormActions>
-              <Button variant="ghost" onClick={() => setEditingLevel(true)}>
-                Edit level
-              </Button>
-              <DeleteConfirmButton
-                onConfirm={() => onDeleteLevel(selected.id)}
-                description="Removes the level and all units. Blocked if students or batches use this level."
-              />
-            </FormActions>
-          )}
-
-          {canEdit && editingLevel && (
-            <div className="ed-editable-form">
-              <LevelMarketingFields value={editLevel} onChange={onEditLevelChange} />
-              <FormActions>
-                <SaveButton
-                  onClick={() => {
-                    onUpdateLevel(selected.id);
-                    setEditingLevel(false);
-                  }}
-                  pending={updatePending}
-                  disabled={!editLevel.name.trim()}
-                />
-                <Button variant="ghost" onClick={() => setEditingLevel(false)}>
-                  Cancel
-                </Button>
-              </FormActions>
-            </div>
-          )}
-
-          <CurriculumUnitsPanel
-            brandId={brandId}
-            levelId={selected.id}
-            canEdit={canEdit}
-            onError={onError}
-          />
-        </div>
+        <p className="ed-text-sm ed-muted">
+          No programs yet — add your first program (e.g. Level 1 · L1).
+        </p>
       )}
     </Card>
   );
