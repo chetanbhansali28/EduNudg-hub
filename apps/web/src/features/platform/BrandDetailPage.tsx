@@ -271,6 +271,7 @@ export function BrandDetailPage() {
           name={b.name}
           status={b.status as "draft" | "active" | "suspended" | "archived"}
           logoUrl={b.logo_url}
+          marketingTheme={b.marketing_theme}
         />
       </Card>
 

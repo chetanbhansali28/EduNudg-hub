@@ -10,6 +10,7 @@ export type HomepageSectionKey =
   | "faq"
   | "footer"
   | "programsGrid"
+  | "curriculumSyllabus"
   | "featureGrid"
   | "founders"
   | "trustMedia"
@@ -27,6 +28,7 @@ export const DEFAULT_HOMEPAGE_SECTION_VISIBILITY: Record<HomepageSectionKey, boo
   faq: true,
   footer: true,
   programsGrid: true,
+  curriculumSyllabus: false,
   featureGrid: true,
   founders: true,
   trustMedia: true,
@@ -43,6 +45,7 @@ export const ABACUS_CLASSIC_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean
   faq: true,
   footer: false,
   programsGrid: true,
+  curriculumSyllabus: true,
   featureGrid: true,
   founders: true,
   trustMedia: true,
@@ -59,6 +62,7 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   faq: true,
   footer: true,
   programsGrid: true,
+  curriculumSyllabus: false,
   featureGrid: true,
   founders: true,
   trustMedia: true,

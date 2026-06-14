@@ -149,6 +149,7 @@ export function BrandMarketingEditorPage() {
             <AbacusClassicEditorForm
               config={brandConfig}
               marketingTheme={marketingTheme}
+              portalMode="brand"
               onChange={setBrandConfig}
               uploadScope={{ kind: "brand", brandId: brandId! }}
               onPersist={(next) => {
@@ -164,6 +165,8 @@ export function BrandMarketingEditorPage() {
           ) : (
             <HomepageEditorForm
               config={brandConfig}
+              marketingTheme={marketingTheme}
+              portalMode="brand"
               onChange={setBrandConfig}
               uploadScope={{ kind: "brand", brandId: brandId! }}
               onPersist={(next) => {
@@ -189,10 +192,11 @@ export function BrandMarketingEditorPage() {
           saved={centerSaved}
           description="Template for every center hostname. Center name and city are filled in per location."
         >
-          {marketingTheme === "abacus-classic" ? (
+          {marketingTheme === "abacus-classic" || marketingTheme === "spark-academy" ? (
             <AbacusClassicEditorForm
               config={centerConfig}
               marketingTheme={marketingTheme}
+              portalMode="center"
               onChange={setCenterConfig}
               uploadScope={{ kind: "brand", brandId: brandId! }}
               onPersist={(next) => {
@@ -203,6 +207,8 @@ export function BrandMarketingEditorPage() {
           ) : (
             <HomepageEditorForm
               config={centerConfig}
+              marketingTheme={marketingTheme}
+              portalMode="center"
               onChange={setCenterConfig}
               uploadScope={{ kind: "brand", brandId: brandId! }}
               onPersist={(next) => {

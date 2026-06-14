@@ -77,3 +77,23 @@ export function programsGridHasContent(
 ): boolean {
   return resolveProgramsGridItems(programsSection, curriculum).length > 0;
 }
+
+/** Map grid display items to public curriculum shape for Spark courses section. */
+export function programsGridToPublicPrograms(
+  programsSection: HomepageProgramsSection | undefined,
+  curriculum: PublicCurriculumProgram[]
+): PublicCurriculumProgram[] {
+  return resolveProgramsGridItems(programsSection, curriculum).map((item) => ({
+    name: item.name,
+    description: item.description,
+    whyTake: item.intro,
+    whatYouLearn: item.benefits.length > 0 ? item.benefits.join("\n") : null,
+    marketingVideoUrl: null,
+    marketingImageUrl: item.imageUrl,
+    ageLabel: item.ageLabel,
+    marketingBenefits: item.benefits,
+    scholarshipHighlight: item.scholarshipHighlight,
+    versionNumber: 1,
+    levels: [],
+  }));
+}

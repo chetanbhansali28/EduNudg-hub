@@ -1,82 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrandMarketingThemesPanel } from "./BrandMarketingThemesPanel";
+import { describe, expect, it } from "vitest";
+import { marketingThemeSelectOptions } from "./BrandMarketingThemesPanel";
+import { MARKETING_THEMES } from "@/types/homepage";
 
-const fromMock = vi.fn();
-
-vi.mock("@/lib/brandLandingApi", () => ({
-  updateBrandMarketingTheme: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock("@/lib/supabase", () => ({
-  getSupabase: () => ({ from: fromMock }),
-}));
-
-function chain(result: { data: unknown; error: unknown }) {
-  const c = {
-    select: vi.fn(() => c),
-    eq: vi.fn(() => c),
-    is: vi.fn(() => c),
-    order: vi.fn(() => Promise.resolve(result)),
-  };
-  return c;
-}
-
-describe("BrandMarketingThemesPanel", () => {
-  beforeEach(() => {
-    fromMock.mockImplementation(() =>
-      chain({
-        data: [
-          {
-            id: "b1",
-            slug: "digitley-pune",
-            name: "Digitley",
-            marketing_theme: "novu",
-          },
-          {
-            id: "b2",
-            slug: "smart-brain-abacus",
-            name: "Smart Brain Abacus",
-            marketing_theme: "spark-academy",
-          },
-        ],
-        error: null,
-      })
-    );
-  });
-
-  it("regression_renders_responsive_brand_theme_cards", async () => {
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={qc}>
-        <BrandMarketingThemesPanel />
-      </QueryClientProvider>
-    );
-
-    expect(await screen.findByRole("heading", { name: "Brand marketing themes" })).toBeDefined();
-    expect(await screen.findByText("Digitley")).toBeDefined();
-    expect(document.querySelector(".ed-brand-marketing-themes__list")).toBeDefined();
-    expect(document.querySelector(".ed-brand-marketing-themes__count")).toBeDefined();
-    expect(screen.getByText("2 brands")).toBeDefined();
-    expect(screen.getByText("digitley-pune")).toBeDefined();
-    expect(screen.getByText("Smart Brain Abacus")).toBeDefined();
-    expect(screen.getAllByLabelText("Website theme")).toHaveLength(2);
-    expect(screen.getAllByRole("button", { name: /Saved/i })).toHaveLength(2);
-  });
-
-  it("shows unsaved state when theme draft changes", async () => {
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <QueryClientProvider client={qc}>
-        <BrandMarketingThemesPanel />
-      </QueryClientProvider>
-    );
-
-    const selects = await screen.findAllByLabelText("Website theme");
-    fireEvent.change(selects[0]!, { target: { value: "spark-academy" } });
-
-    expect(screen.getByRole("button", { name: "Update theme" })).toBeDefined();
-    expect(screen.getAllByRole("button", { name: "Saved" })).toHaveLength(1);
+describe("marketingThemeSelectOptions", () => {
+  it("regression_includes_all_marketing_themes", () => {
+    const options = marketingThemeSelectOptions();
+    expect(options).toHaveLength(MARKETING_THEMES.length);
+    expect(options.map((option) => option.value)).toEqual(MARKETING_THEMES);
+    expect(options.every((option) => option.label.length > 0)).toBe(true);
   });
 });

@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchBrandLandingBundle } from "@/lib/brandLandingApi";
 import { isBrandLandingBundleReady, normalizeBrandLandingBundle } from "@/lib/brandLandingBundle";
+import { scrollToMarketingHash } from "@/lib/marketingPublicSite";
 import { marketingPageClassName, themeUsesLeadModals } from "@/lib/marketingThemeLayout";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
@@ -27,6 +28,7 @@ type Props = {
 export function BrandPublicLayout({ showFooter = true }: Props) {
   const tenant = useTenant();
   const brandSlug = tenant.brandSlug ?? "brand";
+  const location = useLocation();
 
   const { data: bundle, isLoading } = useQuery({
     queryKey: ["brand-landing", brandSlug],
@@ -44,6 +46,11 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
       document.documentElement.style.setProperty("--novu-radius-section", bundle.config.theme.radiusSection);
     }
   }, [bundle?.config]);
+
+  useEffect(() => {
+    if (isLoading || !isBrandLandingBundleReady(bundle)) return;
+    scrollToMarketingHash(location.hash);
+  }, [isLoading, bundle, location.hash]);
 
   if (isLoading || !isBrandLandingBundleReady(bundle)) {
     return (

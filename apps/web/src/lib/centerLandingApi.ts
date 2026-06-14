@@ -3,7 +3,7 @@ import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAb
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
-import { applyCanonicalSiteName, applyCurriculumNavLink } from "@/lib/marketingPublicSite";
+import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPublicSite";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import type { HomepageConfig, MarketingTheme } from "@/types/homepage";
 import { parseMarketingTheme } from "@/types/homepage";
@@ -153,7 +153,7 @@ function buildConfigWithStories(
   landing: Partial<HomepageConfig> | undefined,
   logoUrl: string | null,
   stories: ReturnType<typeof parsePublicSuccessStories>,
-  curriculumCount: number,
+  curriculum: PublicCurriculumProgram[],
   theme: MarketingTheme = "novu"
 ): HomepageConfig {
   const config = buildCenterConfigForTheme(theme, centerName, brandName, city, landing, logoUrl);
@@ -165,7 +165,7 @@ function buildConfigWithStories(
     centerName,
     brandName
   );
-  return applyCurriculumNavLink(merged, curriculumCount > 0);
+  return syncMarketingNavLinks(merged, { theme, publicCurriculum: curriculum });
 }
 
 export async function fetchCenterLandingBundle(
@@ -191,7 +191,7 @@ export async function fetchCenterLandingBundle(
 
     if (error || !data || typeof data !== "object") {
       return {
-        config: buildConfigWithStories(fallbackCenter, fallbackBrand, null, undefined, null, stories, curriculum.length),
+        config: buildConfigWithStories(fallbackCenter, fallbackBrand, null, undefined, null, stories, curriculum),
         profile: fallbackProfile(brandSlug, centerSlug),
         publicCurriculum: curriculum,
         marketingTheme: "novu",
@@ -212,7 +212,7 @@ export async function fetchCenterLandingBundle(
           undefined,
           null,
           stories,
-          curriculum.length,
+          curriculum,
           theme
         ),
         profile: fallbackProfile(brandSlug, centerSlug),
@@ -230,7 +230,7 @@ export async function fetchCenterLandingBundle(
         row.landing ?? undefined,
         row.brand_logo_url ?? null,
         stories,
-        curriculum.length,
+        curriculum,
         theme
       ),
       profile: {
@@ -256,10 +256,10 @@ export async function fetchCenterLandingBundle(
   } catch {
     const config = buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
     return {
-      config: applyCurriculumNavLink(
-        applyCanonicalCenterName(config, fallbackCenter, fallbackBrand),
-        false
-      ),
+      config: syncMarketingNavLinks(applyCanonicalCenterName(config, fallbackCenter, fallbackBrand), {
+        theme: "novu",
+        publicCurriculum: [],
+      }),
       profile: fallbackProfile(brandSlug, centerSlug),
       publicCurriculum: [],
       marketingTheme: "novu",

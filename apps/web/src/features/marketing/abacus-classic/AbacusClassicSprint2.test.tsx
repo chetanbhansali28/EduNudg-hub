@@ -126,6 +126,7 @@ describe("Abacus Classic — programs grid", () => {
     );
 
     expect(container.querySelector("#programs.ac-programs-grid")).toBeTruthy();
+    expect(container.querySelector("#curriculum.ed-marketing-anchor")).toBeNull();
     expect(screen.getByText("WHAT WE TEACH")).toBeDefined();
     expect(screen.getByRole("heading", { level: 2, name: "World-Class Brain Development" })).toBeDefined();
     expect(screen.getByRole("heading", { level: 3, name: "Abacus (Mental Math)" })).toBeDefined();

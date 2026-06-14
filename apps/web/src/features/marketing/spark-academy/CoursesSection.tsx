@@ -77,6 +77,7 @@ export function CoursesSection({
 
   return (
     <section className="sa-courses" id="programs">
+      <span id="curriculum" className="ed-marketing-anchor" aria-hidden />
       <div className="sa-section-head">
         <h2 className="sa-section-title">{title}</h2>
         {subtitle ? <p className="sa-section-subtitle">{subtitle}</p> : null}

@@ -1927,6 +1927,18 @@
   margin-right: 0.25rem;
 }
 
+.ed-brand-row__theme {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 20rem;
+}
+
+.ed-brand-row__theme .ed-brand-marketing-themes__actions .ed-btn {
+  min-height: 2.5rem;
+}
+
 .ed-homepage-editor-shell {
   max-width: 56rem;
   display: flex;

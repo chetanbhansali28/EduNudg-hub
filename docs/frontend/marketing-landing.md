@@ -10,7 +10,7 @@ Public marketing landings share one UI kit under `apps/web/src/features/marketin
 
 ## Brand marketing themes
 
-Platform admins assign a theme per brand at **Platform → Homepage** (`/admin/homepage`) in the **Brand marketing themes** panel (`BrandMarketingThemesPanel`). Stored on `brands.marketing_theme`.
+Platform admins assign a theme per brand at **Platform → Brands → Edit** (`/admin/brands/:slug`) in **Brand settings** → **Website theme**. Stored on `brands.marketing_theme`.
 
 | Theme | Layout | Editor (brand owners) |
 |-------|--------|------------------------|
@@ -18,7 +18,7 @@ Platform admins assign a theme per brand at **Platform → Homepage** (`/admin/h
 | `abacus-classic` | Success Abacus-style sections, dual CTAs, modals | `AbacusClassicEditorForm` at `/app/homepage` |
 | `spark-academy` | Educat-style courses grid, mentors, journey stats | `AbacusClassicEditorForm` at `/app/homepage` |
 
-Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme selection is platform-only (homepage admin screen, not brand detail).
+Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme selection is platform-only (brand detail **Brand settings**, not the brands list).
 
 Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, domains, and franchise centers — not marketing theme.
 
@@ -27,6 +27,26 @@ Abacus Classic sections (in order): hero → programs grid (from brand curriculu
 Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_theme` and show the same programs grid from brand curriculum. Center copy (hero, city) comes from `mergeAbacusClassicCenterLandingConfig()` merged with `brand_settings.center_landing`.
 
 Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). When no named homepage cards exist, the grid falls back to published curriculum programs.
+
+## Public nav anchors (all themes)
+
+Nav links are configured in the homepage editor (`config.nav.links`). Brand owners choose **labels** freely; hrefs must match on-page section IDs.
+
+| Theme | Default programs link | Curriculum / programs target | Full curriculum tree |
+|-------|----------------------|------------------------------|----------------------|
+| `novu` | — (auto **Curriculum** when published programs exist) | `#curriculum` → `CurriculumPublicSection` | Yes |
+| `abacus-classic` | **Programs** → `#programs` | **`#curriculum`** → syllabus section (`AbacusCurriculumSection`) | No (marketing grid + syllabus tree) |
+| `spark-academy` | **Programs** → `#programs` | `#curriculum` alias scrolls to courses grid | No |
+
+`syncMarketingNavLinks()` in `marketingPublicSite.ts` auto-adds **Curriculum → `#curriculum`** on Novu only when RPC returns published programs. Alternate themes keep default **Programs** links; custom `#curriculum` hrefs still work via an in-section anchor alias.
+
+Direct URLs such as `/#curriculum` scroll after the landing bundle loads (`scrollToMarketingHash` in `BrandPublicLayout` / `CenterPublicLayout`).
+
+### Homepage editor nav Link dropdown
+
+In **Navigation & CTAs** (Abacus/Spark) or **Navigation Management** (Novu), each menu item **Link** field is a theme-aware dropdown plus optional **Custom link** text input. Presets match on-page section IDs above; Novu brand vs center templates differ (`#apply` vs `#register`). Helpers live in `marketingNavSectionOptions()` / `NavLinkHrefField` (`HomepageEditorShell.tsx`). Legacy mistyped anchors such as `#FoundersSection` normalize to `#founders` when saved.
+
+**Abacus Classic syllabus:** Toggle **Curriculum syllabus** in the homepage editor (visible by default). Content comes from published `/app/curriculum` data; no separate copy fields in v1.
 
 See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
 
@@ -88,7 +108,7 @@ Brand and center marketing editors (**Feature sections (phone blocks)**) support
 
 - `apps/web/src/lib/marketingFeatureSections.ts` — default phone videos; Abacus program marquee palette
 - `apps/web/src/types/homepage.ts` — `HomepageConfig` including `meta.logoUrl`
-- `apps/web/src/features/platform/BrandMarketingThemesPanel.tsx` — platform admin theme picker
+- `apps/web/src/features/platform/BrandEditForm.tsx` — **Website theme** in brand settings on `/admin/brands/:slug`
 - `apps/web/src/features/platform/HomepageEditorPage.tsx` — `/admin/homepage`
 - `apps/web/src/routes/AppRoutes.tsx` — public `/` vs staff `/app`; `/auth/handoff` on all portal hosts
 

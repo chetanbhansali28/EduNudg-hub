@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { brandAdminPath } from "@/lib/adminPaths";
 import { portalTargetFromDomain } from "@/lib/brandPortalUrl";
 import { PortalOpenButton } from "./PortalOpenButton";
-import { Badge, Button, Card, DataList, ListRow, MutationError, PageTitle } from "@edunudg/ui";
+import { Badge, Card, DataList, ListRow, MutationError, PageTitle } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { PlatformSignupRequestsPanel } from "@/features/platform/brandSignups/PlatformSignupRequestsPanel";

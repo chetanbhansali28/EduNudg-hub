@@ -35,9 +35,16 @@ vi.mock("./PortalOpenButton", () => ({
   ),
 }));
 
+vi.mock("@/lib/brandSlug", () => ({
+  uniqueBrandSlug: vi.fn().mockResolvedValue("demo"),
+}));
+
 function chain(result: { data: unknown; error: unknown; count?: number }) {
   const c = {
     select: vi.fn(() => c),
+    update: vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    })),
     eq: vi.fn(() => c),
     is: vi.fn(() => c),
     in: vi.fn(() => c),
@@ -151,6 +158,7 @@ describe("BrandDetailPage", () => {
     expect(screen.getByRole("button", { name: "Open brand backend" })).toBeDefined();
     expect(screen.getByText("Brand settings")).toBeDefined();
     expect(screen.queryByText("Marketing theme")).toBeNull();
+    expect(screen.getByLabelText("Website theme")).toBeDefined();
   });
 
   it("regression_uuid_brand_url_redirects_to_slug_path", async () => {
@@ -212,8 +220,20 @@ describe("BrandDetailPage", () => {
     expect(screen.getByLabelText("Status")).toBeDefined();
     expect(screen.getByLabelText("Login email")).toBeDefined();
     expect(screen.getByLabelText("Password")).toBeDefined();
+    expect(screen.getByLabelText("Website theme")).toBeDefined();
     expect(screen.getByRole("button", { name: "Save changes" })).toBeDefined();
     expect(screen.queryByLabelText("Slug")).toBeNull();
+  });
+
+  it("regression_brand_settings_saves_marketing_theme", async () => {
+    renderDetail("demo");
+    const themeSelect = await screen.findByLabelText("Website theme");
+    fireEvent.change(themeSelect, { target: { value: "abacus-classic" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() => {
+      expect(updateBrandMarketingThemeMock).toHaveBeenCalledWith("b1", "abacus-classic");
+    });
   });
 
   it("regression_platform_brand_detail_includes_features_section", async () => {

@@ -6,7 +6,6 @@ import { fetchHomepageEditorBundle, saveHomepageConfig } from "@/lib/homepageApi
 import { formatLastSavedLabel } from "@/lib/formatRelativeTime";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import type { HomepageConfig } from "@/types/homepage";
-import { BrandMarketingThemesPanel } from "./BrandMarketingThemesPanel";
 
 function configsEqual(a: HomepageConfig, b: HomepageConfig): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -68,9 +67,6 @@ export function HomepageEditorPage() {
           onPersist={(next) => save.mutate(next)}
         />
       </HomepageEditorShell>
-      <div className="ed-homepage-admin__themes">
-        <BrandMarketingThemesPanel />
-      </div>
     </>
   );
 }

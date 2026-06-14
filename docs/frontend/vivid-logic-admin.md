@@ -6,7 +6,8 @@ Admin portals (platform, brand, center) share the **Vivid Logic** design system 
 
 | Layer | Route | Components |
 |-------|-------|------------|
-| Platform | `/admin/homepage` | `HomepageEditorPage`, `HomepageEditorForm`, `BrandMarketingThemesPanel` |
+| Platform | `/admin/homepage` | `HomepageEditorPage`, `HomepageEditorForm` |
+| Platform | `/admin/brands/:slug` | `BrandDetailPage`, `BrandEditForm` (**Website theme** in Brand settings) |
 | Brand | `/app/homepage` | `BrandMarketingEditorPage`, `HomepageEditorForm` or theme-specific editor |
 | Center template | `/app/homepage` (panel 2) | Same `HomepageEditorForm` as brand template |
 | Center detail | `/app/centers/:slug` | `BrandCenterDetailPage` (read-only KPIs; styling only) |
@@ -71,13 +72,12 @@ When testimonials are managed inline (Novu theme):
 
 Abacus Classic / Spark Academy: success stories external — no split layout.
 
-### Brand marketing themes (`BrandMarketingThemesPanel`)
+### Brand marketing themes (`BrandEditForm`)
 
-Platform-only bento grid at `/admin/homepage`:
+Platform-only field in **Brand settings** on `/admin/brands/:slug`:
 
-- Header with uppercase `{N} brands` pill
-- Two-column brand cards on desktop (12-col grid, span 6)
-- Theme badge per brand; **Saved** (check icon) vs primary **Update theme**
+- **Website theme** select alongside name, status, logo, and login fields
+- Saved with the existing **Save changes** button
 
 ## Automated tests
 
@@ -89,13 +89,14 @@ Platform-only bento grid at `/admin/homepage`:
 | Two-column layout helpers | `HomepageEditorShell.test.tsx` (`Homepage editor layout helpers`) |
 | Testimonials + section toggles | `apps/web/src/features/marketing/HomepageEditorForm.sections.test.tsx` |
 | Quote helpers | `apps/web/src/lib/testimonialEditorHelpers.test.ts` |
-| Themes panel | `apps/web/src/features/platform/BrandMarketingThemesPanel.test.tsx` |
+| Theme options helper | `apps/web/src/features/platform/BrandMarketingThemesPanel.test.tsx` |
+| Brand settings theme | `apps/web/src/features/platform/BrandDetailPage.test.tsx` |
 | Center detail layout | `apps/web/src/features/brand/BrandCenterDetailPage.test.tsx` |
 
 Run:
 
 ```bash
-pnpm --filter web test -- HomepageEditorShell HomepageEditorForm BrandMarketingThemesPanel
+pnpm --filter web test -- HomepageEditorShell HomepageEditorForm BrandMarketingThemesPanel BrandDetailPage BrandsPage
 ```
 
 ## Manual QA checklist

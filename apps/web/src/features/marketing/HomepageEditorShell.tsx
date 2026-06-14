@@ -3,11 +3,21 @@ import {
   useCallback,
   useContext,
   useId,
+  useMemo,
   useState,
   type DragEvent,
   type ReactNode,
 } from "react";
-import { Button, EditorPageHeader, EditorSaveBar, EditorSectionCard, FormGrid, Toggle } from "@edunudg/ui";
+import { Button, EditorPageHeader, EditorSaveBar, EditorSectionCard, FormGrid, Input, Select, Toggle } from "@edunudg/ui";
+import type { MarketingTheme } from "@/types/homepage";
+import type { PortalMode } from "@/lib/portalMode";
+import type { HomepageSectionVisibility } from "@/lib/homepageSections";
+import {
+  CUSTOM_NAV_HREF_OPTION,
+  marketingNavSectionOptions,
+  normalizeMarketingNavHref,
+  resolveNavHrefSelectValue,
+} from "@/lib/marketingPublicSite";
 
 type ShellProps = {
   title: string;
@@ -46,6 +56,7 @@ export const HOMEPAGE_EDITOR_SECTION_META: Record<string, EditorSectionMeta> = {
   trustMedia: { icon: "play_circle", tone: "primary", description: "Trust stats and video" },
   gallery: { icon: "photo_library", tone: "neutral", description: "Photo gallery images" },
   programsGrid: { icon: "school", tone: "primary", description: "Program cards and Know More details" },
+  curriculumSyllabus: { icon: "menu_book", tone: "primary", description: "Published syllabus at #curriculum" },
   footerRich: { icon: "call_to_action", tone: "neutral", description: "Rich footer and contact info" },
 };
 
@@ -476,5 +487,55 @@ export function EditorAccordion({
         </>
       )}
     </section>
+  );
+}
+
+export type NavLinkHrefFieldProps = {
+  value: string;
+  onChange: (href: string) => void;
+  marketingTheme: MarketingTheme;
+  portalMode: PortalMode;
+  sections?: HomepageSectionVisibility;
+  label?: string;
+};
+
+/** Theme-aware nav target picker: preset section anchors + optional custom href. */
+export function NavLinkHrefField({
+  value,
+  onChange,
+  marketingTheme,
+  portalMode,
+  sections,
+  label = "Link",
+}: NavLinkHrefFieldProps) {
+  const options = useMemo(
+    () => marketingNavSectionOptions({ theme: marketingTheme, portalMode, sections }),
+    [marketingTheme, portalMode, sections]
+  );
+  const selectValue = resolveNavHrefSelectValue(value, options);
+  const isCustom = selectValue === CUSTOM_NAV_HREF_OPTION;
+
+  return (
+    <>
+      <Select
+        label={label}
+        value={selectValue}
+        onChange={(next) => {
+          if (next === CUSTOM_NAV_HREF_OPTION) {
+            onChange(normalizeMarketingNavHref(value) || "#");
+            return;
+          }
+          onChange(next);
+        }}
+        options={options}
+      />
+      {isCustom ? (
+        <Input
+          label="Custom link"
+          value={value}
+          onChange={(next) => onChange(normalizeMarketingNavHref(next))}
+        />
+      ) : null}
+    </>
   );
 }

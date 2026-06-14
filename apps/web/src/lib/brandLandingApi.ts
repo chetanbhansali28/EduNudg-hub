@@ -4,7 +4,7 @@ import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brand
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
 import type { BrandLandingBundle, BrandPublicStats } from "@/lib/brandLandingBundle";
-import { applyCanonicalSiteName, applyCurriculumNavLink } from "@/lib/marketingPublicSite";
+import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPublicSite";
 import type { MarketingTheme, HomepageConfig } from "@/types/homepage";
 import { MARKETING_THEMES, parseMarketingTheme } from "@/types/homepage";
 
@@ -66,7 +66,7 @@ function buildBundle(
     canonicalName
   );
   return {
-    config: applyCurriculumNavLink(merged, curriculum.length > 0),
+    config: syncMarketingNavLinks(merged, { theme, publicCurriculum: curriculum }),
     publicCurriculum: curriculum,
     marketingTheme: theme,
     publicStats,
@@ -89,7 +89,7 @@ function fallbackBundle(
     fallbackName
   );
   return {
-    config: applyCurriculumNavLink(merged, curriculum.length > 0),
+    config: syncMarketingNavLinks(merged, { theme, publicCurriculum: curriculum }),
     publicCurriculum: curriculum,
     marketingTheme: theme,
     publicStats,
@@ -126,7 +126,10 @@ export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandL
   } catch {
     const config = buildBrandLandingConfig(fallbackName);
     return {
-      config: applyCurriculumNavLink(applyCanonicalSiteName(config, fallbackName), false),
+      config: syncMarketingNavLinks(applyCanonicalSiteName(config, fallbackName), {
+        theme: "novu",
+        publicCurriculum: [],
+      }),
       publicCurriculum: [],
       marketingTheme: "novu",
       publicStats: { centersCount: 0, studentsCount: 0 },

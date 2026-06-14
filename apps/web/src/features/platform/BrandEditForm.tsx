@@ -3,8 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, FormGrid, Input, MutationError, PasswordInput, Select } from "@edunudg/ui";
 import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
 import { fetchBrandOwnerLoginEmail, upsertBrandOwnerCredentials } from "@/lib/brandOwnerCredentialsApi";
+import { updateBrandMarketingTheme } from "@/lib/brandLandingApi";
 import { uniqueBrandSlug } from "@/lib/brandSlug";
 import { getSupabase } from "@/lib/supabase";
+import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
+import { marketingThemeSelectOptions } from "./BrandMarketingThemesPanel";
 import { useMutationError } from "./hooks/useMutationError";
 
 type BrandStatus = "draft" | "active" | "suspended" | "archived";
@@ -21,18 +24,26 @@ type Props = {
   name: string;
   status: BrandStatus;
   logoUrl: string | null;
+  marketingTheme: string;
 };
 
-export function BrandEditForm({ brandId, name, status, logoUrl }: Props) {
+export function BrandEditForm({ brandId, name, status, logoUrl, marketingTheme }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
-  const [form, setForm] = useState({ name, status, loginEmail: "", password: "" });
+  const savedTheme = parseMarketingTheme(marketingTheme);
+  const [form, setForm] = useState({
+    name,
+    status,
+    loginEmail: "",
+    password: "",
+    marketingTheme: savedTheme,
+  });
   const [originalLoginEmail, setOriginalLoginEmail] = useState<string | null>(null);
   const [credentialsLoaded, setCredentialsLoaded] = useState(false);
 
   useEffect(() => {
-    setForm((prev) => ({ ...prev, name, status }));
-  }, [name, status]);
+    setForm((prev) => ({ ...prev, name, status, marketingTheme: parseMarketingTheme(marketingTheme) }));
+  }, [name, status, marketingTheme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +83,10 @@ export function BrandEditForm({ brandId, name, status, logoUrl }: Props) {
         .eq("id", brandId);
       if (mErr) throw mErr;
 
+      if (form.marketingTheme !== savedTheme) {
+        await updateBrandMarketingTheme(brandId, form.marketingTheme);
+      }
+
       const loginEmail = form.loginEmail.trim();
       if (loginEmail) {
         if (!originalLoginEmail && !form.password.trim()) {
@@ -90,6 +105,8 @@ export function BrandEditForm({ brandId, name, status, logoUrl }: Props) {
       void qc.invalidateQueries({ queryKey: ["brands"] });
       void qc.invalidateQueries({ queryKey: ["brand"] });
       void qc.invalidateQueries({ queryKey: ["platform-stats"] });
+      void qc.invalidateQueries({ queryKey: ["brand-landing"] });
+      void qc.invalidateQueries({ queryKey: ["center-landing"] });
       setForm((prev) => ({ ...prev, password: "" }));
     },
     onError: capture,
@@ -98,6 +115,7 @@ export function BrandEditForm({ brandId, name, status, logoUrl }: Props) {
   const dirty =
     form.name.trim() !== name ||
     form.status !== status ||
+    form.marketingTheme !== savedTheme ||
     form.loginEmail.trim() !== (originalLoginEmail ?? "") ||
     Boolean(form.password.trim());
 
@@ -133,6 +151,13 @@ export function BrandEditForm({ brandId, name, status, logoUrl }: Props) {
           onChange={(v) => setForm((f) => ({ ...f, password: v }))}
           placeholder={originalLoginEmail ? "Leave blank to keep current password" : "Required for new login"}
           disabled={!credentialsLoaded}
+        />
+        <Select
+          label="Website theme"
+          value={form.marketingTheme}
+          onChange={(v) => setForm((f) => ({ ...f, marketingTheme: parseMarketingTheme(v) as MarketingTheme }))}
+          options={marketingThemeSelectOptions()}
+          editable
         />
       </FormGrid>
       <div style={{ marginTop: "0.75rem" }}>

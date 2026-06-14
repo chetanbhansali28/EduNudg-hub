@@ -4,8 +4,8 @@ Three screens per portal (dashboard, list, detail):
 
 ## Platform
 - Command Center KPI grid (compact backend theme)
-- Brands list with **Brand backend** / Edit
-- Brand detail page — performance KPIs, brand settings, domains, franchise centers (no marketing theme card)
+- Brands list with **Brand backend** / Edit (theme in **Brand settings** on detail page)
+- Brand detail page — performance KPIs, brand settings (**Website theme**), domains, franchise centers
 
 ## Brand
 - Executive dashboard

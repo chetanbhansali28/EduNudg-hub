@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchCenterLandingBundle } from "@/lib/centerLandingApi";
 import { sanitizeCenterPublicNavConfig } from "@/lib/centerPublicNav";
+import { scrollToMarketingHash } from "@/lib/marketingPublicSite";
 import { marketingPageClassName, themeUsesLeadModals } from "@/lib/marketingThemeLayout";
 import { FooterSection } from "@/features/marketing/FooterSection";
 import { MarketingNav } from "@/features/marketing/MarketingNav";
@@ -38,6 +39,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
   const tenant = useTenant();
   const brandSlug = tenant.brandSlug ?? "brand";
   const centerSlug = tenant.centerSlug ?? "center";
+  const location = useLocation();
 
   const { data: bundle, isLoading } = useQuery({
     queryKey: ["center-landing", brandSlug, centerSlug],
@@ -54,6 +56,11 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
       document.documentElement.style.setProperty("--novu-radius-section", bundle.config.theme.radiusSection);
     }
   }, [bundle?.config]);
+
+  useEffect(() => {
+    if (isLoading || !bundle) return;
+    scrollToMarketingHash(location.hash);
+  }, [isLoading, bundle, location.hash]);
 
   if (isLoading || !bundle) {
     return (

@@ -118,6 +118,11 @@ export function parsePublicCurriculum(raw: unknown): PublicCurriculumProgram[] {
   return raw.map(parseProgram).filter((p): p is PublicCurriculumProgram => p !== null);
 }
 
+/** True when RPC returned at least one published course for the public syllabus section. */
+export function publicCurriculumHasSyllabus(programs: PublicCurriculumProgram[]): boolean {
+  return programs.length > 0;
+}
+
 const PUBLIC_CURRICULUM_PROGRAM_DEFAULTS: Omit<PublicCurriculumProgram, "name"> = {
   description: null,
   whyTake: null,

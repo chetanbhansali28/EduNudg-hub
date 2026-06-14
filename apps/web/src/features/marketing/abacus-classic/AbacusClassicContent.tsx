@@ -4,7 +4,9 @@ import { isAbacusSectionEnabled } from "@/lib/homepageSections";
 import { TestimonialsCarousel } from "../TestimonialsCarousel";
 import { AbacusClassicHero } from "./AbacusClassicHero";
 import { ProgramsGridSection } from "./ProgramsMarqueeSection";
+import { AbacusCurriculumSection } from "./AbacusCurriculumSection";
 import { programsGridHasContent } from "@/lib/programsGridItems";
+import { publicCurriculumHasSyllabus } from "@/lib/brandCurriculumPublic";
 import { FeatureGridSection } from "./FeatureGridSection";
 import { FoundersSection } from "./FoundersSection";
 import { TrustMediaSection } from "./TrustMediaSection";
@@ -33,6 +35,8 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
   const showPrograms =
     isAbacusSectionEnabled(config, "programsGrid") &&
     programsGridHasContent(config.programsSection, publicCurriculum);
+  const showCurriculumSyllabus =
+    isAbacusSectionEnabled(config, "curriculumSyllabus") && publicCurriculumHasSyllabus(publicCurriculum);
   const showFeatures = isAbacusSectionEnabled(config, "featureGrid") && config.featureSections.length > 0;
   const showFounders = isAbacusSectionEnabled(config, "founders") && (config.founders?.length ?? 0) > 0;
   const showTrust = isAbacusSectionEnabled(config, "trustMedia") && config.trustMedia;
@@ -46,6 +50,7 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
       {showPrograms ? (
         <ProgramsGridSection programs={publicCurriculum} programsSection={config.programsSection} />
       ) : null}
+      {showCurriculumSyllabus ? <AbacusCurriculumSection programs={publicCurriculum} /> : null}
       {showFeatures ? <FeatureGridSection siteName={config.meta.siteName} sections={config.featureSections} /> : null}
       {showFounders && config.founders ? <FoundersSection founders={config.founders} /> : null}
       {showTrust && config.trustMedia ? <TrustMediaSection trust={config.trustMedia} /> : null}

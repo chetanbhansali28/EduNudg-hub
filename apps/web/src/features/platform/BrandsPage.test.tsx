@@ -101,4 +101,10 @@ describe("BrandsPage", () => {
     await screen.findByText("Demo Brand");
     expect(screen.getByRole("button", { name: "Brand backend" })).toBeDefined();
   });
+
+  it("regression_brands_list_omits_website_theme_controls", async () => {
+    renderBrands();
+    await screen.findByText("Demo Brand");
+    expect(screen.queryByLabelText("Website theme")).toBeNull();
+  });
 });

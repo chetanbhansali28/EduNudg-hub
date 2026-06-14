@@ -15,14 +15,14 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
 | Main menu | Home | `/admin` | Exists |
-| Features | Brands | `/admin/brands` | Exists — list; **Brand backend** handoff to brand `/app` |
-| | ↳ Brand detail | `/admin/brands/:brandSlug` | Exists — KPIs, settings, domains, centers |
+| Features | Brands | `/admin/brands` | Exists — list; **Edit** → detail with **Brand settings** |
+| | ↳ Brand detail | `/admin/brands/:brandSlug` | Exists — KPIs, settings (**Website theme**), domains, centers |
 | | ↳ Brand signups | `/admin/brands` | Manual add + pending queue + approve |
 | | Subscriptions | `/admin/subscriptions` | Exists |
 | | Revenue & Usage | `/admin/revenue` | Exists |
 | | Audit Logs | `/admin/audit` | Exists |
 | General | Settings | `/admin/settings` | Exists |
-| | Homepage (marketing & theming) | `/admin/homepage` | Exists — platform homepage + brand marketing themes |
+| | Homepage (marketing editor) | `/admin/homepage` | Exists — platform homepage editor only |
 | Footer | Log out | — | Exists |
 
 **Not in platform nav:** student leads, franchise applications, center operations (brand-scoped).

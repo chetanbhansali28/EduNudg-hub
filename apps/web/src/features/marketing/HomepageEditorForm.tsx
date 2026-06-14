@@ -7,8 +7,10 @@ import type {
   HomepageLink,
   HomepageShowcaseCard,
   HomepageTestimonial,
+  MarketingTheme,
 } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
+import type { PortalMode } from "@/lib/portalMode";
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import {
@@ -30,6 +32,7 @@ import {
   EditorSectionNote,
   EditorStaticSection,
   HomepageEditorSections,
+  NavLinkHrefField,
 } from "./HomepageEditorShell";
 import { MarketingMediaField } from "./MarketingMediaField";
 
@@ -43,6 +46,10 @@ export type HomepageEditorFormProps = {
   /** When true, testimonial quotes are managed elsewhere (e.g. success stories). */
   testimonialsManagedExternally?: boolean;
   testimonialsExternalHint?: ReactNode;
+  /** Theme for nav link target dropdown (defaults to Novu). */
+  marketingTheme?: MarketingTheme;
+  /** Brand vs center vs platform — controls Novu CTA anchor presets. */
+  portalMode?: PortalMode;
 };
 
 export function HomepageEditorForm({
@@ -52,6 +59,8 @@ export function HomepageEditorForm({
   onPersist,
   testimonialsManagedExternally = false,
   testimonialsExternalHint,
+  marketingTheme = "novu",
+  portalMode = "platform",
 }: HomepageEditorFormProps) {
   const config = mergeHomepageConfig(rawConfig ?? DEFAULT_HOMEPAGE_CONFIG);
   const sections = mergeSectionVisibility(config.sections);
@@ -116,7 +125,12 @@ export function HomepageEditorForm({
         </EditorFieldsGrid>
       </EditorStaticSection>
 
-      <NavigationEditorSection config={config} updateNavLinks={updateNavLinks} />
+      <NavigationEditorSection
+        config={config}
+        updateNavLinks={updateNavLinks}
+        marketingTheme={marketingTheme}
+        portalMode={portalMode}
+      />
 
       <HomepageEditorSections>
       <EditorAccordion
@@ -516,9 +530,13 @@ export function HomepageEditorForm({
 function NavigationEditorSection({
   config,
   updateNavLinks,
+  marketingTheme,
+  portalMode,
 }: {
   config: HomepageConfig;
   updateNavLinks: (links: HomepageLink[]) => void;
+  marketingTheme: MarketingTheme;
+  portalMode: PortalMode;
 }) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -564,7 +582,8 @@ function NavigationEditorSection({
       }
     >
       <EditorSectionNote>
-        Manage primary links in the top header bar. Use anchors (e.g., <code>#features</code>) for on-page sections.
+        Manage primary links in the top header bar. Pick a section target from the dropdown or choose Custom link for
+        external URLs and paths.
       </EditorSectionNote>
       <EditorItemList>
         {config.nav.links.map((link, i) => (
@@ -597,9 +616,11 @@ function NavigationEditorSection({
                 updateNavLinks(links);
               }}
             />
-            <Input
-              label="Link"
+            <NavLinkHrefField
               value={link.href}
+              marketingTheme={marketingTheme}
+              portalMode={portalMode}
+              sections={config.sections}
               onChange={(v) => {
                 const links = [...config.nav.links];
                 links[i] = { ...link, href: v };

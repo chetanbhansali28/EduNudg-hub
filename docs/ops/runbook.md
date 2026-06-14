@@ -26,10 +26,10 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | http://localhost:9000/ | Platform marketing homepage (shared nav + footer) |
 | http://localhost:9000/login | Platform admin / staff login (split-screen UI) |
 | http://localhost:9000/admin | Platform app (Command Center KPIs) |
-| http://localhost:9000/admin/brands | Brands list — **Brand backend** opens target brand `/app` |
+| http://localhost:9000/admin/brands | Brands list — **Brand backend** opens target brand `/app`; **Edit** → brand detail |
 | http://localhost:9000/admin/brands/:slug | Brand detail — performance KPIs, settings, domains, centers |
 | http://localhost:9000/admin/revenue | Revenue & usage KPIs |
-| http://localhost:9000/admin/homepage | Marketing & theming — EduNudg homepage + **brand marketing themes** |
+| http://localhost:9000/admin/homepage | Platform marketing homepage editor |
 | http://abacusworld.localhost:9000/ | Abacus World franchise landing (public) |
 | http://smart-brain-abacus.localhost:9000/ | Smart Brain Abacus (Abacus Classic theme) |
 | http://abacusworld.localhost:9000/login | Brand staff login |
@@ -94,8 +94,8 @@ pnpm test:rls
 
 - Public config key: `platform_settings.marketing_homepage` (migration `009_marketing_homepage.sql`)
 - Anonymous users can **read**; platform admins can **read/write** via RLS
-- Edit at **Platform → Homepage** (`/admin/homepage`) after signing in as `admin@edunudg.com`
-- **Brand marketing themes** (Novu vs Abacus Classic) are assigned on the same page — not on brand detail
+- Edit platform homepage at **Platform → Homepage** (`/admin/homepage`) after signing in as `admin@edunudg.com`
+- **Brand marketing themes** (Novu / Abacus Classic / Spark Academy) are assigned on **Platform → Brands → Edit** → **Brand settings** → **Website theme**
 - Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
 - Brand owners edit page **content** at `{brand}.localhost:9000/app/homepage`
 

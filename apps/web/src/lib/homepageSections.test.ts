@@ -27,6 +27,7 @@ describe("homepageSections", () => {
     expect(ABACUS_CLASSIC_SECTION_DEFAULTS.featureScroll).toBe(false);
     expect(ABACUS_CLASSIC_SECTION_DEFAULTS.highlights).toBe(false);
     expect(ABACUS_CLASSIC_SECTION_DEFAULTS.programsGrid).toBe(true);
+    expect(ABACUS_CLASSIC_SECTION_DEFAULTS.curriculumSyllabus).toBe(true);
     expect(ABACUS_CLASSIC_SECTION_DEFAULTS.featureGrid).toBe(true);
   });
 

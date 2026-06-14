@@ -2,7 +2,7 @@
 
 Success Abacus–style public brand sites (`marketing_theme = 'abacus-classic'`). Reference layout: [Success Abacus](https://successabacus.com).
 
-Platform admins assign the theme at **Platform → Homepage** (`/admin/homepage`) → **Brand marketing themes**. Brand owners edit copy and media at `{brand}.localhost:9000/app/homepage` via `AbacusClassicEditorForm`. Editor uses the shared Vivid Logic accordion system (`HomepageEditorShell.tsx`) — icon tiles, single-open sections, hero save card. See [Vivid Logic admin UX](./vivid-logic-admin.md).
+Platform admins assign the theme at **Platform → Brands → Edit** (`/admin/brands/:slug`) → **Brand settings** → **Website theme**. Brand owners edit copy and media at `{brand}.localhost:9000/app/homepage` via `AbacusClassicEditorForm`. Editor uses the shared Vivid Logic accordion system (`HomepageEditorShell.tsx`) — icon tiles, single-open sections, hero save card. See [Vivid Logic admin UX](./vivid-logic-admin.md).
 
 Local demo brand: `smart-brain-abacus.localhost:9000` (see [Operations runbook](../ops/runbook.md#urls-port-9000)).
 
@@ -17,7 +17,7 @@ Sprint 1 establishes the **theme infrastructure** — database column, RPC paylo
 | 3 | Public RPC returns theme + stats + curriculum | `get_brand_landing_public` (migration 039) |
 | 4 | `MarketingTheme` type + `parseMarketingTheme()` | `apps/web/src/types/homepage.ts` |
 | 5 | Bundle includes `marketingTheme` + `publicStats` | `brandLandingApi.ts`, `brandLandingBundle.ts` |
-| 6 | Platform admin theme selector | `/admin/homepage` → `BrandMarketingThemesPanel` |
+| 6 | Platform admin theme selector | `/admin/brands/:slug` → **Brand settings** → **Website theme** |
 | 7 | Theme-aware public layout | `BrandPublicLayout` → Novu vs Abacus nav/footer |
 | 8 | Theme-aware landing route | `BrandLandingPage` → `MarketingContent` vs `AbacusClassicContent` |
 | 9 | Theme-aware brand editor | `BrandMarketingEditorPage` → `HomepageEditorForm` vs `AbacusClassicEditorForm` |
@@ -35,7 +35,7 @@ Add to hosts file:
 127.0.0.1 smart-brain-abacus.localhost
 ```
 
-Assign theme: **Platform admin** → **Homepage** (`/admin/homepage`) → **Brand marketing themes** → choose *Abacus Classic* for the brand → **Save**.
+Assign theme: **Platform admin** → **Brands** → **Edit** → **Brand settings** → **Website theme** → choose *Abacus Classic* → **Save changes**.
 
 Brand owners cannot change the theme; they only edit content at `{brand}.localhost:9000/app/homepage`.
 
@@ -49,12 +49,13 @@ Sprint 2 covers the top-of-page conversion flow and curriculum-driven programs s
 | 2 | Hero with badge + dual CTAs | `AbacusClassicHero` | `config.hero.*` |
 | 3 | Enroll + franchise lead modals | `MarketingLeadModals`, `AbacusCtaButton` | Hrefs `enroll` / `apply` open modals; other hrefs render anchors |
 | 4 | Programs card grid + Know More modal | `ProgramsGridSection` (`ProgramsMarqueeSection.tsx`) | `publicCurriculum` + `config.programsSection`; section toggle `programsGrid` |
-| 5 | Why-us feature grid (4 blocks) | `FeatureGridSection` | `config.featureSections`; heading uses `Why {siteName}` |
-| 6 | Smart Brain default copy | `mergeAbacusClassicLandingConfig()` | Seed + editor defaults in `brandLandingDefaults.ts` |
+| 5 | Curriculum syllabus (full tree) | `AbacusCurriculumSection.tsx` | `publicCurriculum` from RPC; toggle `curriculumSyllabus`; anchor `#curriculum` |
+| 6 | Why-us feature grid (4 blocks) | `FeatureGridSection` | `config.featureSections`; heading uses `Why {siteName}` |
+| 7 | Smart Brain default copy | `mergeAbacusClassicLandingConfig()` | Seed + editor defaults in `brandLandingDefaults.ts` |
 
 Section order on the public page (`AbacusClassicContent`):
 
-1. Hero → 2. Programs → 3. Feature grid → 4. Founders → 5. Trust / video → 6. Testimonials → 7. FAQ → 8. Gallery → 9. Rich footer (in `BrandPublicLayout`)
+1. Hero → 2. Programs (`#programs`) → 3. **Curriculum syllabus** (`#curriculum`) → 4. Feature grid → 5. Founders → 6. Trust / video → 7. Testimonials → 8. FAQ → 9. Gallery → 10. Rich footer (in `BrandPublicLayout`)
 
 Section toggles live in `config.sections` and are edited in `AbacusClassicEditorForm`.
 
@@ -100,6 +101,8 @@ Card-based programs section (replacing the auto-scroll marquee) with curriculum-
 
 **Section toggle:** `config.sections.programsGrid` (legacy saved `programsMarquee` is mapped automatically).
 
+**Navigation:** Default nav uses **Programs → `#programs`**. **`#curriculum`** scrolls to the published syllabus section (`AbacusCurriculumSection`). Brand owners may rename nav labels freely in the homepage editor. Platform auto-injected **Curriculum** nav (Novu-only) is not added on Abacus Classic.
+
 Run migration:
 
 ```bash
@@ -113,11 +116,12 @@ supabase db push   # applies 042_program_marketing_fields.sql
 | Layout + theme router | `apps/web/src/features/brand/BrandPublicLayout.tsx` |
 | Landing route | `apps/web/src/features/brand/BrandLandingPage.tsx` |
 | Main sections | `apps/web/src/features/marketing/abacus-classic/` |
+| Syllabus section | `AbacusCurriculumSection.tsx` — `#curriculum`, toggle `curriculumSyllabus` |
 | Defaults | `apps/web/src/lib/brandLandingDefaults.ts` → `mergeAbacusClassicLandingConfig` |
 | Program card colors | `apps/web/src/lib/marketingFeatureSections.ts` → `programCardPalette` |
 | Card source resolution | `apps/web/src/lib/programsGridItems.ts` → `resolveProgramsGridItems()` |
 | Types | `apps/web/src/types/homepage.ts` |
-| Platform theme admin | `apps/web/src/features/platform/BrandMarketingThemesPanel.tsx` on `/admin/homepage` |
+| Platform theme admin | `apps/web/src/features/platform/BrandEditForm.tsx` on `/admin/brands/:slug` |
 | Migration | `supabase/migrations/039_brand_marketing_theme.sql`, `042_program_marketing_fields.sql` |
 | Seed | `supabase/seed/seed.sql` (`smart-brain-abacus`) |
 
@@ -139,7 +143,7 @@ supabase db push   # applies 042_program_marketing_fields.sql
 | `lib/brandLandingBundle.test.ts` | Bundle normalization with `marketingTheme` / `publicStats` |
 | `lib/brandLandingEditorApi.test.ts` | `fetchBrandMarketingEditor` Novu vs Abacus config |
 | `lib/homepageSections.test.ts` | `ABACUS_CLASSIC_SECTION_DEFAULTS`, `isAbacusSectionEnabled` |
-| `features/platform/HomepageEditorPage.test.tsx` | Brand marketing themes panel on homepage admin |
+| `features/platform/BrandDetailPage.test.tsx` | Website theme in brand settings; save calls `updateBrandMarketingTheme` |
 | `features/platform/BrandDetailPage.test.tsx` | Brand settings, domains Open, no duplicate KPIs |
 | `features/brand/BrandPublicLayout.test.tsx` | Novu vs Abacus layout branch |
 | `features/brand/BrandLandingPage.test.tsx` | Theme branch via outlet context |
@@ -148,7 +152,7 @@ supabase db push   # applies 042_program_marketing_fields.sql
 Run Sprint 1 tests:
 
 ```bash
-pnpm --filter web test -- homepage.test brandLandingApi brandLandingBundle brandLandingEditorApi homepageSections HomepageEditorPage BrandDetailPage BrandPublicLayout BrandLandingPage BrandMarketingEditorPage
+pnpm --filter web test -- homepage.test brandLandingApi brandLandingBundle brandLandingEditorApi homepageSections HomepageEditorPage BrandsPage BrandMarketingThemesPanel BrandDetailPage BrandPublicLayout BrandLandingPage BrandMarketingEditorPage
 ```
 
 ### Sprint 2
@@ -198,7 +202,7 @@ Prerequisites: migration `039` applied, dev server on port 9000.
 
 ### Platform admin
 
-- [ ] `/admin/homepage` shows **Brand marketing themes** with Novu and Abacus Classic per brand
+- [ ] `/admin/brands/:slug` **Brand settings** shows **Website theme** with Novu and Abacus Classic options
 - [ ] **Save** is disabled until the selection changes
 - [ ] Saving Abacus Classic persists and survives page refresh
 - [ ] Public site for that brand switches layout after save (may need cache refresh)
@@ -249,7 +253,7 @@ Prerequisites: migration `039` applied, seed run, hosts entry for `smart-brain-a
 
 ### Theme routing
 
-- [ ] Platform admin can set theme to `abacus-classic` on `/admin/homepage`
+- [ ] Platform admin can set theme to `abacus-classic` in **Brand settings** on brand detail
 - [ ] `novu` brands still use phone-scroll `MarketingContent` layout
 
 ## Manual QA checklist (Sprint 3)

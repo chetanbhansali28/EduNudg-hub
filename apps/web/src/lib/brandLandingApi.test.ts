@@ -63,7 +63,14 @@ describe("fetchBrandLandingBundle", () => {
         public_stats: { centers_count: 8, students_count: 1200 },
         landing: {},
         success_stories: [],
-        curriculum: [],
+        curriculum: [
+          {
+            name: "Abacus Level 1",
+            description: "Basics",
+            version_number: 1,
+            levels: [],
+          },
+        ],
       },
       error: null,
     });
@@ -73,6 +80,8 @@ describe("fetchBrandLandingBundle", () => {
     expect(bundle?.publicStats).toEqual({ centersCount: 8, studentsCount: 1200 });
     expect(bundle?.config.hero.badge).toBe("FOR AGED 6–14 YEARS");
     expect(bundle?.config.sections?.featureScroll).toBe(false);
+    expect(bundle?.config.nav.links.some((l) => l.href === "#curriculum" && l.label === "Curriculum")).toBe(false);
+    expect(bundle?.config.nav.links.some((l) => l.href === "#programs")).toBe(true);
   });
 
   it("sprint1_parses_spark_academy_theme_and_defaults", async () => {
