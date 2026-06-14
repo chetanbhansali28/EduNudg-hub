@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Select } from "@edunudg/ui";
+import { Button, QuantityStepper } from "@edunudg/ui";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { activeMerchandisePhotoUrls } from "@/lib/merchandiseProductPhotoStorage";
 import type { MerchandiseCatalogItem, MerchandiseShopLine, MerchandiseStudentOption } from "./merchandiseShopTypes";
@@ -13,17 +13,21 @@ type Props = {
 
 const STOCK_VALUE = "";
 
+function productDescription(item: MerchandiseCatalogItem): string {
+  return item.description?.trim() || "Training kits and supplies for your center.";
+}
+
 function MerchandiseProductGallery({ photos, name }: { photos: string[]; name: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
   if (photos.length === 0) {
-    return <div className="ed-merch-product__image ed-merch-product__image--empty" aria-hidden />;
+    return <div className="ed-product-card__image ed-product-card__image--empty" aria-hidden />;
   }
 
   const active = photos[activeIndex] ?? photos[0]!;
 
   return (
-    <div className="ed-merch-product__gallery">
-      <img src={active} alt={name} className="ed-merch-product__image" />
+    <>
+      <img src={active} alt={name} className="ed-product-card__image" />
       {photos.length > 1 ? (
         <div className="ed-merch-product__thumbs" role="list" aria-label={`${name} photos`}>
           {photos.map((url, index) => (
@@ -40,20 +44,19 @@ function MerchandiseProductGallery({ photos, name }: { photos: string[]; name: s
           ))}
         </div>
       ) : null}
-    </div>
+    </>
   );
 }
 
-export function MerchandiseProductGrid({ catalog, cart, students, onUpdateLine }: Props) {
+export function MerchandiseProductGrid({ catalog, cart, onUpdateLine }: Props) {
   if (catalog.length === 0) {
     return <p className="ed-empty">No merchandise available from your brand yet.</p>;
   }
 
   return (
     <div className="ed-merch-catalog" role="list">
-      {catalog.map((item) => {
+      {catalog.map((item, index) => {
         const line = cart[item.id] ?? { catalogItemId: item.id, quantity: 0, studentId: STOCK_VALUE };
-        const active = line.quantity > 0;
 
         const setQty = (next: number) => {
           const quantity = Math.max(0, next);
@@ -67,39 +70,36 @@ export function MerchandiseProductGrid({ catalog, cart, students, onUpdateLine }
         const photos = activeMerchandisePhotoUrls(item.photo_urls);
 
         return (
-          <article
-            key={item.id}
-            role="listitem"
-            className={`ed-merch-product${active ? " ed-merch-product--active" : ""}`}
-          >
-            <MerchandiseProductGallery photos={photos} name={item.name} />
-            <span className="ed-merch-product__sku">{item.sku}</span>
-            <h3 className="ed-merch-product__name">{item.name}</h3>
-            <span className="ed-merch-product__price">{formatInrFromPaise(item.price_cents, item.currency)}</span>
-
-            <div className="ed-merch-qty" aria-label={`Quantity for ${item.name}`}>
-              <button type="button" onClick={() => setQty(line.quantity - 1)} disabled={line.quantity <= 0} aria-label="Decrease quantity">
-                −
-              </button>
-              <span aria-live="polite">{line.quantity}</span>
-              <button type="button" onClick={() => setQty(line.quantity + 1)} aria-label="Increase quantity">
-                +
-              </button>
+          <article key={item.id} role="listitem" className="ed-product-card">
+            <div className="ed-product-card__media">
+              <MerchandiseProductGallery photos={photos} name={item.name} />
+              <span className="ed-product-card__sku">{item.sku}</span>
+              {index === 0 ? <span className="ed-product-card__badge">Best Seller</span> : null}
             </div>
-
-            {active ? (
-              <Select
-                label="Assign to student (optional)"
-                value={line.studentId}
-                onChange={(studentId) => onUpdateLine(item.id, { studentId })}
-                options={[
-                  { value: STOCK_VALUE, label: "Center stock — no student" },
-                  ...students.map((s) => ({ value: s.id, label: s.full_name })),
-                ]}
-              />
-            ) : (
-              <p className="ed-text-sm ed-muted">Use + to add to your order.</p>
-            )}
+            <div className="ed-product-card__body">
+              <div className="ed-product-card__head">
+                <h3 className="ed-product-card__name">{item.name}</h3>
+                <span className="ed-product-card__price">
+                  {formatInrFromPaise(item.price_cents, item.currency)}
+                </span>
+              </div>
+              <p className="ed-product-card__desc">{productDescription(item)}</p>
+              <div className="ed-product-card__actions">
+                <QuantityStepper
+                  value={line.quantity}
+                  onChange={setQty}
+                  aria-label={`Quantity for ${item.name}`}
+                />
+                <Button
+                  onClick={() => {
+                    if (line.quantity === 0) setQty(1);
+                  }}
+                  disabled={line.quantity > 0}
+                >
+                  Add to Order
+                </Button>
+              </div>
+            </div>
           </article>
         );
       })}

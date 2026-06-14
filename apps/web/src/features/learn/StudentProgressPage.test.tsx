@@ -34,7 +34,7 @@ describe("StudentProgressPage", () => {
     wrap(<StudentProgressPage />);
     expect(await screen.findByText("Nothing to show yet")).toBeDefined();
     expect(screen.getByText(/No program progress yet/)).toBeDefined();
-    expect(screen.getByRole("link", { name: /Back to dashboard/i })).toBeDefined();
+    expect(screen.getByRole("link", { name: /Back to home/i })).toBeDefined();
   });
 
   it("regression_rpc_400_shows_graceful_error_not_blocked_page", async () => {
@@ -78,7 +78,8 @@ describe("StudentProgressPage", () => {
       },
     ]);
     wrap(<StudentProgressPage />);
-    expect(await screen.findByText("Level 1")).toBeDefined();
-    expect(screen.getByText("Your programs")).toBeDefined();
+    await screen.findByText("Your learning path");
+    expect(document.querySelector(".ed-sp-timeline__level-label")).toBeTruthy();
+    expect(screen.getByText("Progress")).toBeDefined();
   });
 });

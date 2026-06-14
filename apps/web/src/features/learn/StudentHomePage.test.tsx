@@ -23,6 +23,10 @@ vi.mock("@/lib/studentProgressApi", () => ({
   fetchStudentProgramLadders: (...args: unknown[]) => fetchStudentProgramLadders(...args),
 }));
 
+vi.mock("@/features/learn/hooks/useStudentBreakpoint", () => ({
+  useStudentBreakpoint: () => ({ isDesktop: true, isMobile: false }),
+}));
+
 vi.mock("@/lib/studentLearnApi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/studentLearnApi")>();
   return {
@@ -151,6 +155,14 @@ describe("StudentHomePage", () => {
         level_end: "Level 3",
         already_joined: true,
       },
+      {
+        batch_id: "b2",
+        name: "Evening batch",
+        program_name: "Abacus Core",
+        level_start: "Level 1",
+        level_end: "Level 3",
+        already_joined: false,
+      },
     ]);
     fetchStudentProgramLadders.mockResolvedValue(mockLadders);
   });
@@ -159,23 +171,27 @@ describe("StudentHomePage", () => {
     fetchStudentLearnHome.mockResolvedValue(mockHome);
     wrap(<StudentHomePage />);
 
-    expect(await screen.findByText("Join a batch")).toBeDefined();
-    expect(screen.queryByRole("link", { name: /View progress/i })).toBeNull();
-    expect(screen.getByText("Enrolled")).toBeDefined();
-    expect(screen.getByText("Your learning path")).toBeDefined();
-    expect(screen.getByText("Current program")).toBeDefined();
-    expect(screen.getByText("Level 2")).toBeDefined();
+    expect(await screen.findByText("Join a Batch")).toBeDefined();
+    expect(screen.getByText(/Welcome back, Asha!/)).toBeDefined();
+    expect(screen.getByText(/You've completed 25%/)).toBeDefined();
+    expect(screen.getByText("Active Level")).toBeDefined();
+    expect(screen.getByText("Continue Learning")).toBeDefined();
+    expect(screen.getByText("Explore Batches")).toBeDefined();
+    expect(screen.getByText("Your Learning Path")).toBeDefined();
+    expect(screen.getByText("Full Roadmap →")).toBeDefined();
+    expect(screen.getAllByText(/Level 2: Level 2/).length).toBeGreaterThan(0);
     expect(screen.queryByText("My center")).toBeNull();
     expect(screen.queryByText("Recent activity")).toBeNull();
     expect(screen.queryByText("Quick shortcuts")).toBeNull();
-    expect(screen.getByText("Upcoming competitions")).toBeDefined();
+    expect(screen.getByText("Recommended for You")).toBeDefined();
+    expect(screen.getByText("Upcoming Checkpoints")).toBeDefined();
   });
 
-  it("regression_paid_competition_shows_coming_soon", async () => {
+  it("regression_paid_competition_shows_on_recommended_grid", async () => {
     fetchStudentLearnHome.mockResolvedValue(mockHome);
     wrap(<StudentHomePage />);
     expect(await screen.findByText("National Championship")).toBeDefined();
-    expect(screen.getAllByRole("button", { name: /Coming soon/i }).length).toBeGreaterThan(0);
+    expect(screen.getByText("Recommended for You")).toBeDefined();
   });
 });
 

@@ -10,8 +10,8 @@ test("login page renders split-screen form", async ({ page }) => {
 
 test("login page exposes alternate sign-in options", async ({ page }) => {
   await page.goto("/login");
-  await page.getByRole("button", { name: "More sign-in options" }).click();
-  await expect(page.getByText("Google")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Log in with Google" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Log in with WhatsApp" })).toBeVisible();
 });
 
 test("marketing home renders shared nav and footer", async ({ page }) => {

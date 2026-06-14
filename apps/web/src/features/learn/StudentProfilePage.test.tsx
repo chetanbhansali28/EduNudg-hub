@@ -84,7 +84,7 @@ describe("StudentProfilePage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: "Student Details" })).toBeDefined();
+      expect(screen.getByRole("heading", { name: "Student details" })).toBeDefined();
       expect(screen.getByLabelText(/Full name/)).toBeDefined();
       expect(screen.getByLabelText("Email")).toBeDefined();
       expect(screen.getByDisplayValue("student@edunudg.com")).toBeDefined();

@@ -1,10 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
+  IconBell,
   IconBolt,
   IconChevronLeft,
   IconChevronRight,
+  IconHelp,
   IconMenu,
+  IconSearch,
   IconShield,
   IconX,
 } from "./icons";
@@ -144,9 +147,11 @@ function BrandMark({
 function SidebarPanel({
   productName,
   logoUrl,
+  portalTagline,
   navSections,
   footerItems,
   showUpgradeCard,
+  shellVariant,
   collapsed,
   onToggleCollapse,
   onNavigate,
@@ -154,9 +159,11 @@ function SidebarPanel({
 }: {
   productName: string;
   logoUrl?: string | null;
+  portalTagline?: string | null;
   navSections: ShellNavSection[];
   footerItems: ShellNavItem[];
   showUpgradeCard: boolean;
+  shellVariant: "staff" | "student";
   collapsed: boolean;
   onToggleCollapse: () => void;
   onNavigate?: () => void;
@@ -167,18 +174,25 @@ function SidebarPanel({
       <div className="ed-sidebar__top">
         <Link to="/" className="ed-sidebar__brand" onClick={onNavigate} title={productName}>
           <BrandMark logoUrl={logoUrl} className="ed-sidebar__logo-img" />
-          <span className="ed-sidebar__name">{productName}</span>
+          <span className="ed-sidebar__brand-text">
+            <span className="ed-sidebar__name">{productName}</span>
+            {portalTagline && !collapsed ? (
+              <span className="ed-sidebar__tagline">{portalTagline}</span>
+            ) : null}
+          </span>
         </Link>
         <div className="ed-sidebar__top-actions">
-          <button
-            type="button"
-            className="ed-sidebar__collapse"
-            onClick={onToggleCollapse}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-expanded={!collapsed}
-          >
-            {collapsed ? <IconChevronRight width={18} height={18} /> : <IconChevronLeft width={18} height={18} />}
-          </button>
+          {shellVariant !== "student" && (
+            <button
+              type="button"
+              className="ed-sidebar__collapse"
+              onClick={onToggleCollapse}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-expanded={!collapsed}
+            >
+              {collapsed ? <IconChevronRight width={18} height={18} /> : <IconChevronLeft width={18} height={18} />}
+            </button>
+          )}
           {onClose && (
             <button type="button" className="ed-sidebar__close" onClick={onClose} aria-label="Close menu">
               <IconX width={20} height={20} />
@@ -212,9 +226,13 @@ function SidebarPanel({
         </div>
       )}
 
-      {footerItems.map((navItem) => (
-        <SidebarNavLink key={navItem.label} item={navItem} onNavigate={onNavigate} collapsed={collapsed} />
-      ))}
+      {footerItems.length > 0 && (
+        <div className="ed-sidebar__footer">
+          {footerItems.map((navItem) => (
+            <SidebarNavLink key={navItem.label} item={navItem} onNavigate={onNavigate} collapsed={collapsed} />
+          ))}
+        </div>
+      )}
     </>
   );
 }
@@ -223,6 +241,7 @@ export function AppShell({
   productName = "EduNudg",
   logoUrl,
   portalLabel,
+  portalTagline,
   welcomeName,
   welcomeHeading,
   welcomeSubtitle,
@@ -230,23 +249,40 @@ export function AppShell({
   navSections,
   footerItems = [],
   showUpgradeCard = true,
+  showWelcome = true,
+  shellVariant = "staff",
   surface = "backend",
+  mobileBarTitle,
+  mobileBarEnd,
+  shellClassName,
   children,
 }: {
   productName?: string;
   logoUrl?: string | null;
   portalLabel: string;
+  /** Short label under product name in sidebar (e.g. Student portal). */
+  portalTagline?: string | null;
   welcomeName?: string;
   /** Full greeting line; defaults to "Welcome back, {name} 👋". */
   welcomeHeading?: string;
   /** Context line under greeting; defaults to portalLabel. */
   welcomeSubtitle?: string;
-  user?: { name: string; email: string };
+  user?: { name: string; email?: string; subtitle?: string; avatarUrl?: string | null };
   navSections: ShellNavSection[];
   footerItems?: ShellNavItem[];
   showUpgradeCard?: boolean;
+  /** When false, hides the welcome block in the header (student dashboard uses in-page welcome). */
+  showWelcome?: boolean;
+  /** Student portal uses compact header with search toolbar. */
+  shellVariant?: "staff" | "student";
   /** Staff portal chrome (admin / brand / center). Applies compact dashboard KPI styling. */
   surface?: "backend" | "marketing";
+  /** Overrides product name in the mobile top bar. */
+  mobileBarTitle?: string;
+  /** Optional trailing control in the mobile top bar (e.g. notifications). */
+  mobileBarEnd?: ReactNode;
+  /** Extra class on the shell root (e.g. ed-shell--commerce). */
+  shellClassName?: string;
   children: ReactNode;
 }) {
   const [navOpen, setNavOpen] = useState(false);
@@ -297,11 +333,15 @@ export function AppShell({
   const shellClass = [
     "ed-shell",
     surface === "backend" ? "ed-shell--backend" : "",
+    shellVariant === "student" ? "ed-shell--student" : "",
+    shellClassName ?? "",
     navOpen ? "ed-shell--nav-open" : "",
     sidebarCollapsed ? "ed-shell--sidebar-collapsed" : "",
   ]
     .filter(Boolean)
     .join(" ");
+
+  const mobileTitle = mobileBarTitle ?? productName;
 
   return (
     <div className={shellClass}>
@@ -317,9 +357,11 @@ export function AppShell({
         <SidebarPanel
           productName={productName}
           logoUrl={logoUrl}
+          portalTagline={portalTagline}
           navSections={navSections}
           footerItems={footerItems}
           showUpgradeCard={showUpgradeCard}
+          shellVariant={shellVariant}
           collapsed={sidebarCollapsed}
           onToggleCollapse={toggleSidebarCollapsed}
           onNavigate={closeNav}
@@ -339,31 +381,76 @@ export function AppShell({
             <IconMenu width={22} height={22} />
             <span className="ed-sr-only">{navOpen ? "Close menu" : "Open menu"}</span>
           </button>
-          <span className="ed-mobile-bar__title">{productName}</span>
-          <button
-            type="button"
-            className="ed-mobile-bar__collapse"
-            onClick={toggleSidebarCollapsed}
-            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {sidebarCollapsed ? <IconChevronRight width={20} height={20} /> : <IconChevronLeft width={20} height={20} />}
-          </button>
-        </div>
-
-        <header className="ed-header">
-          <div className="ed-header__intro">
-            <h1 className="ed-header__welcome">{heading}</h1>
-            <p className="ed-header__welcome-sub">{subtitle}</p>
-          </div>
-          {user && (
-            <div className="ed-header__actions">
-              <div className="ed-header__profile">
+          <span className="ed-mobile-bar__title">{mobileTitle}</span>
+          {mobileBarEnd ? (
+            <div className="ed-mobile-bar__end">{mobileBarEnd}</div>
+          ) : shellVariant === "student" && user ? (
+            <div className="ed-mobile-bar__profile">
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt="" className="ed-header__avatar ed-header__avatar--img" />
+              ) : (
                 <span className="ed-header__avatar" aria-hidden>
                   {initials}
                 </span>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="ed-mobile-bar__collapse"
+              onClick={toggleSidebarCollapsed}
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? <IconChevronRight width={20} height={20} /> : <IconChevronLeft width={20} height={20} />}
+            </button>
+          )}
+        </div>
+
+        <header className="ed-header">
+          {showWelcome ? (
+            <div className="ed-header__intro">
+              <h1 className="ed-header__welcome">{heading}</h1>
+              <p className="ed-header__welcome-sub">{subtitle}</p>
+            </div>
+          ) : shellVariant !== "student" ? (
+            <div className="ed-header__intro ed-header__intro--hidden" aria-hidden />
+          ) : null}
+          {shellVariant === "student" && (
+            <div className="ed-header__toolbar">
+              <label className="ed-header__search">
+                <IconSearch width={16} height={16} aria-hidden />
+                <input
+                  type="search"
+                  placeholder="Search courses, badges, analytics…"
+                  aria-label="Search"
+                  disabled
+                />
+              </label>
+            </div>
+          )}
+          {user && (
+            <div className="ed-header__actions">
+              {shellVariant === "student" && (
+                <>
+                  <button type="button" className="ed-header__icon-btn" aria-label="Notifications" disabled>
+                    <IconBell width={18} height={18} />
+                  </button>
+                  <button type="button" className="ed-header__icon-btn" aria-label="Help" disabled>
+                    <IconHelp width={18} height={18} />
+                  </button>
+                </>
+              )}
+              <div className="ed-header__profile">
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" className="ed-header__avatar ed-header__avatar--img" />
+                ) : (
+                  <span className="ed-header__avatar" aria-hidden>
+                    {initials}
+                  </span>
+                )}
                 <div className="ed-header__profile-text">
                   <p className="ed-header__profile-name">{user.name}</p>
-                  <p className="ed-header__profile-email">{user.email}</p>
+                  <p className="ed-header__profile-email">{user.subtitle ?? user.email}</p>
                 </div>
               </div>
             </div>
@@ -384,58 +471,110 @@ export type LoginBrandingProps = {
   accountSubtitle?: string;
 };
 
+export type LoginFooterLink = {
+  label: string;
+  href: string;
+};
+
+function LoginBrandMark({ logoUrl, productName }: { logoUrl?: string | null; productName: string }) {
+  if (logoUrl) {
+    return <img src={logoUrl} alt="" className="ed-login-brand__logo" />;
+  }
+
+  const initial = (productName.trim()[0] ?? "E").toUpperCase();
+  return (
+    <span className="ed-login-brand" aria-hidden>
+      <span className="ed-login-brand__half ed-login-brand__half--dark">
+        <IconBolt width={16} height={16} />
+      </span>
+      <span className="ed-login-brand__half ed-login-brand__half--light">{initial}</span>
+    </span>
+  );
+}
+
+function useMinWidth(minWidth: number) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia(`(min-width: ${minWidth}px)`);
+    const update = () => setMatches(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [minWidth]);
+
+  return matches;
+}
+
 export function LoginLayout({
   branding,
   children,
   hint,
-  legal,
+  footerLinks,
 }: {
   branding: LoginBrandingProps;
   children: ReactNode;
   hint?: ReactNode;
-  legal?: ReactNode;
+  footerLinks?: LoginFooterLink[];
 }) {
   const accountTitle = branding.accountTitle ?? "Welcome back!";
   const accountSubtitle =
     branding.accountSubtitle ?? `Log in to your ${branding.productName} account`;
+  const links = footerLinks ?? [
+    { label: "Terms", href: "/terms" },
+    { label: "Privacy", href: "/privacy" },
+    { label: "Help", href: "/help" },
+  ];
+  const isDesktopLogin = useMinWidth(960);
 
   return (
-    <div className="ed-login-split">
-      <aside className="ed-login-split__hero" aria-hidden={false}>
-        <div className="ed-login-split__hero-grid" aria-hidden />
-        <div className="ed-login-split__hero-inner">
-          <div className="ed-login-split__emblem">
-            {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt="" className="ed-login-split__emblem-img" />
-            ) : (
-              <span className="ed-login-split__emblem-icon">
-                <IconShield width={48} height={48} />
-                <IconBolt width={28} height={28} />
-              </span>
-            )}
+    <div className="ed-login-page">
+      <div className="ed-login-page__frame">
+        <aside className="ed-login-hero" aria-hidden={false}>
+          <div className="ed-login-hero__inner">
+            <div className="ed-login-hero__emblem">
+              <LoginBrandMark logoUrl={branding.logoUrl} productName={branding.productName} />
+            </div>
+            <h1 className="ed-login-hero__headline">{branding.headline}</h1>
+            <p className="ed-login-hero__subtext">{branding.subtext}</p>
           </div>
-          <h1 className="ed-login-split__headline">{branding.headline}</h1>
-          <p className="ed-login-split__subtext">{branding.subtext}</p>
-        </div>
-      </aside>
+          <div className="ed-login-hero__dots" aria-hidden>
+            <span className="ed-login-hero__dot ed-login-hero__dot--active" />
+            <span className="ed-login-hero__dot" />
+            <span className="ed-login-hero__dot" />
+          </div>
+        </aside>
 
-      <div className="ed-login-split__form-wrap">
-        <div className="ed-login-split__card">
-          <div className="ed-login-split__card-brand">
-            {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt="" className="ed-login-split__card-logo" />
-            ) : (
-              <span className="ed-login-split__card-mark" aria-hidden>
-                <IconBolt width={20} height={20} />
-              </span>
-            )}
+        <div className="ed-login-panel">
+          {!isDesktopLogin ? (
+            <header className="ed-login-panel__mobile-head">
+              <LoginBrandMark logoUrl={branding.logoUrl} productName={branding.productName} />
+              <h1 className="ed-login-panel__title">{accountTitle}</h1>
+              <p className="ed-login-panel__subtitle">{accountSubtitle}</p>
+            </header>
+          ) : null}
+
+          <div className="ed-login-card">
+            {isDesktopLogin ? (
+              <header className="ed-login-card__head">
+                <h2 className="ed-login-card__title">{accountTitle}</h2>
+                <p className="ed-login-card__subtitle">{accountSubtitle}</p>
+              </header>
+            ) : null}
+            {hint ? <div className="ed-login__hint">{hint}</div> : null}
+            {children}
           </div>
-          <h2 className="ed-login-split__title">{accountTitle}</h2>
-          <p className="ed-login-split__subtitle">{accountSubtitle}</p>
-          {hint && <div className="ed-login__hint">{hint}</div>}
-          {children}
+
+          <nav className="ed-login-footer" aria-label="Legal and help">
+            {links.map((link, index) => (
+              <span key={link.href} className="ed-login-footer__item">
+                {index > 0 ? <span className="ed-login-footer__sep" aria-hidden /> : null}
+                <a href={link.href}>{link.label}</a>
+              </span>
+            ))}
+          </nav>
         </div>
-        {legal && <div className="ed-login-split__legal">{legal}</div>}
       </div>
     </div>
   );

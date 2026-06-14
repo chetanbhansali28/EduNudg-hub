@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CenterMerchandiseOrdersPage } from "./CenterMerchandiseOrdersPage";
 
@@ -60,13 +61,16 @@ describe("CenterMerchandiseOrdersPage", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
-        <CenterMerchandiseOrdersPage />
+        <MemoryRouter initialEntries={["/app/merchandise"]}>
+          <CenterMerchandiseOrdersPage />
+        </MemoryRouter>
       </QueryClientProvider>
     );
 
     expect(screen.getByText("Merchandise")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Shop" })).toBeDefined();
+    expect(screen.getByText(/Browse and order kits for your center/i)).toBeDefined();
+    expect(screen.getByRole("tab", { name: "Shop" })).toBeDefined();
     expect(await screen.findByText("Abacus kit")).toBeDefined();
-    expect(screen.getByText("Your order")).toBeDefined();
+    expect(screen.getByText("Your Order")).toBeDefined();
   });
 });

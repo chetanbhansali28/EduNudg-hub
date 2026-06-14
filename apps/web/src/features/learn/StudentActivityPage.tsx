@@ -1,8 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { Button, PageTitle } from "@edunudg/ui";
+import { Button } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { ActivityTimeline } from "@/features/learn/components/ActivityTimeline";
-import { SectionCard, StudentPortalLoading } from "@/features/learn/components/StudentPortalShell";
+import {
+  SectionCard,
+  StudentPageHeading,
+  StudentPortalLoading,
+} from "@/features/learn/components/StudentPortalShell";
 import { StudentEnrollmentBlockedPage } from "@/features/learn/StudentEnrollmentBlockedPage";
 import { StudentLearnRpcError, fetchStudentLearnHome } from "@/lib/studentLearnApi";
 
@@ -18,12 +22,7 @@ export function StudentActivityPage() {
   });
 
   if (home.isLoading) {
-    return (
-      <>
-        <PageTitle>Activity</PageTitle>
-        <StudentPortalLoading label="Loading your timeline…" />
-      </>
-    );
+    return <StudentPortalLoading label="Loading your timeline…" />;
   }
 
   if (home.error instanceof StudentLearnRpcError) {
@@ -32,25 +31,20 @@ export function StudentActivityPage() {
 
   if (home.error) {
     return (
-      <>
-        <PageTitle>Activity</PageTitle>
-        <SectionCard title="Something went wrong">
-          <Button onClick={() => void home.refetch()}>Retry</Button>
-        </SectionCard>
-      </>
+      <SectionCard title="Something went wrong">
+        <Button onClick={() => void home.refetch()}>Retry</Button>
+      </SectionCard>
     );
   }
 
   const activity = home.data?.recent_activity ?? [];
 
   return (
-    <>
-      <PageTitle>Activity</PageTitle>
-      <div className="ed-sp-stack">
-        <SectionCard title="Your timeline">
-          <ActivityTimeline events={activity} />
-        </SectionCard>
-      </div>
-    </>
+    <div className="ed-sp-stack">
+      <StudentPageHeading title="Activity" subtitle="Recent updates from your classes and competitions." />
+      <SectionCard title="Your timeline">
+        <ActivityTimeline events={activity} />
+      </SectionCard>
+    </div>
   );
 }

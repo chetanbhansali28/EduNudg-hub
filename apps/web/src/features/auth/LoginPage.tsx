@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Button, IconGoogle, Input, LoginLayout, PasswordInput, ThemeProvider } from "@edunudg/ui";
+import { Button, IconGoogle, IconWhatsApp, Input, LoginLayout, PasswordInput, ThemeProvider } from "@edunudg/ui";
 import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { useMembership } from "@/hooks/useMembership";
@@ -50,7 +50,7 @@ export function LoginPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [showAltSignIn, setShowAltSignIn] = useState(false);
+  const [showWhatsappPhone, setShowWhatsappPhone] = useState(false);
 
   const branding = useMemo(
     () =>
@@ -120,18 +120,13 @@ export function LoginPage() {
     }
   };
 
-  const legal = homepage ? (
-    <>
-      By logging in, you agree to our{" "}
-      <a href={homepage.footer.privacyHref}>Privacy Policy</a> and{" "}
-      <a href={homepage.footer.termsHref}>Terms &amp; Conditions</a>.
-    </>
-  ) : tenant.portalType === "platform" ? (
-    <>
-      By logging in, you agree to our <a href="/#faq">Privacy Policy</a> and{" "}
-      <a href="/#faq">Terms &amp; Conditions</a>.
-    </>
-  ) : null;
+  const footerLinks = homepage
+    ? [
+        { label: "Terms", href: homepage.footer.termsHref },
+        { label: "Privacy", href: homepage.footer.privacyHref },
+        { label: "Help", href: "/help" },
+      ]
+    : undefined;
 
   const showEmailAuth = integrations.auth_email;
   const showGoogleAuth = integrations.auth_google;
@@ -143,6 +138,7 @@ export function LoginPage() {
     <ThemeProvider>
       <LoginLayout
         branding={branding}
+        footerLinks={footerLinks}
         hint={
           import.meta.env.DEV && tenant.portalType === "platform" ? (
             <>
@@ -155,7 +151,6 @@ export function LoginPage() {
             </>
           ) : undefined
         }
-        legal={legal}
       >
         {!showEmailAuth && !showAlternateAuth ? (
           <p className="ed-text-sm ed-muted">Sign-in is temporarily unavailable. Contact your administrator.</p>
@@ -168,10 +163,22 @@ export function LoginPage() {
               void handleEmailSignIn();
             }}
           >
-            <Input label="Email" value={email} onChange={setEmail} type="email" autoComplete="username" />
-            <PasswordInput label="Password" value={password} onChange={setPassword} />
+            <Input
+              label="Email"
+              value={email}
+              onChange={setEmail}
+              type="email"
+              autoComplete="username"
+              placeholder="name@company.com"
+            />
+            <PasswordInput
+              label="Password"
+              value={password}
+              onChange={setPassword}
+              placeholder="Enter your password"
+            />
 
-            <div className="ed-login-split__remember">
+            <div className="ed-login-form__remember">
               <label htmlFor="login-remember">
                 <input
                   id="login-remember"
@@ -182,7 +189,7 @@ export function LoginPage() {
                 />
                 Remember me for 1 week
               </label>
-              <a className="ed-login-split__forgot" href="#reset">
+              <a className="ed-login-form__forgot" href="#reset">
                 Forgot password? <u>Reset it</u>
               </a>
             </div>
@@ -205,52 +212,57 @@ export function LoginPage() {
           </p>
         )}
 
-        {showEmailAuth && showAlternateAuth ? <div className="ed-login-split__divider">or continue with</div> : null}
+        {showEmailAuth && showAlternateAuth ? <div className="ed-login-form__divider">or</div> : null}
 
         {showAlternateAuth ? (
-          isStudentPortal || showAltSignIn ? (
-            <div className="ed-login-split__oauth">
-              {showGoogleAuth ? (
-                <Button onClick={() => signInWithOAuth("google").catch((e) => setError(e.message))}>
-                  <IconGoogle aria-hidden />
-                  Google
-                </Button>
-              ) : null}
-              {showFacebookAuth ? (
-                <Button variant="ghost" onClick={() => signInWithOAuth("facebook").catch((e) => setError(e.message))}>
-                  Facebook
-                </Button>
-              ) : null}
-              {showWhatsappAuth ? (
-                <>
+          <div className="ed-login-form__oauth">
+            {showGoogleAuth ? (
+              <Button
+                variant="oauth-google"
+                block
+                onClick={() => signInWithOAuth("google").catch((e) => setError(e.message))}
+              >
+                <IconGoogle aria-hidden />
+                Log in with Google
+              </Button>
+            ) : null}
+            {showFacebookAuth ? (
+              <Button variant="ghost" block onClick={() => signInWithOAuth("facebook").catch((e) => setError(e.message))}>
+                Log in with Facebook
+              </Button>
+            ) : null}
+            {showWhatsappAuth ? (
+              <>
+                {showWhatsappPhone ? (
                   <Input label="Mobile number" value={phone} onChange={setPhone} placeholder="9890200000" />
-                  <Button
-                    variant="ghost"
-                    block
-                    onClick={async () => {
-                      const { error: err } = await signInWithOtpPhone(phone);
-                      setError(err?.message ?? "OTP sent — check WhatsApp");
-                    }}
-                  >
-                    Send OTP via WhatsApp
-                  </Button>
-                </>
-              ) : null}
-            </div>
-          ) : (
-            <Button variant="ghost" block onClick={() => setShowAltSignIn(true)}>
-              More sign-in options
-            </Button>
-          )
+                ) : null}
+                <Button
+                  variant="oauth-whatsapp"
+                  block
+                  onClick={async () => {
+                    if (!showWhatsappPhone) {
+                      setShowWhatsappPhone(true);
+                      return;
+                    }
+                    const { error: err } = await signInWithOtpPhone(phone);
+                    setError(err?.message ?? "OTP sent — check WhatsApp");
+                  }}
+                >
+                  <IconWhatsApp aria-hidden />
+                  Log in with WhatsApp
+                </Button>
+              </>
+            ) : null}
+          </div>
         ) : null}
 
         {tenant.portalType === "platform" && (
-          <p className="ed-login-split__subtitle" style={{ marginTop: "1.25rem" }}>
+          <p className="ed-login-form__extra">
             <Link to="/">← Back to homepage</Link>
           </p>
         )}
         {tenant.portalType === "center" && tenant.brandSlug ? (
-          <p className="ed-login-split__subtitle" style={{ marginTop: "1.25rem" }}>
+          <p className="ed-login-form__extra">
             Parent or student?{" "}
             <a href={learnPortalLoginUrl(tenant.brandSlug)}>Sign in to the student portal</a>
             {" · "}

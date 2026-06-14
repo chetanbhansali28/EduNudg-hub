@@ -12,6 +12,7 @@ export type MerchandiseCatalogItem = {
   price_cents: number;
   currency: string;
   photo_urls?: string[] | null;
+  description?: string | null;
 };
 
 export type MerchandiseStudentOption = {

@@ -79,7 +79,7 @@ describe("LoginPage Fundora theme", () => {
       </QueryClientProvider>
     );
     expect(screen.getByText("Welcome back!")).toBeDefined();
-    expect(container.querySelector(".ed-login-split")).toBeTruthy();
-    expect(container.querySelector(".ed-login-split__card")).toBeTruthy();
+    expect(container.querySelector(".ed-login-page")).toBeTruthy();
+    expect(container.querySelector(".ed-login-card")).toBeTruthy();
   });
 });

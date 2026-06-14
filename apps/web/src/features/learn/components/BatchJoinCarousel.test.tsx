@@ -30,7 +30,7 @@ describe("BatchJoinCarousel", () => {
     );
 
     expect(screen.getByText("Enrolled")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Join now" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Reserve spot" })).toBeDefined();
     expect(document.querySelector(".ed-sp-batch-card--joined")).toBeTruthy();
   });
 });

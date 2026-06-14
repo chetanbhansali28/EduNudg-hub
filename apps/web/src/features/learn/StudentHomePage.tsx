@@ -1,23 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, MutationError, PageGridFull, PageTitle } from "@edunudg/ui";
+import { Button, MutationError } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { BatchJoinCarousel } from "@/features/learn/components/BatchJoinCarousel";
-import { CompetitionCard } from "@/features/learn/components/CompetitionCard";
-import { LearningPathCarousel } from "@/features/learn/components/LearningPathCarousel";
-import { SectionCard, StudentPortalLoading } from "@/features/learn/components/StudentPortalShell";
-import { StudentStatStrip } from "@/features/learn/components/StudentStatStrip";
+import { JoinBatchPromoCard } from "@/features/learn/components/JoinBatchPromoCard";
+import { LearningPathPanel } from "@/features/learn/components/LearningPathPanel";
+import { LearningPathTimeline } from "@/features/learn/components/LearningPathTimeline";
+import { RecommendedEventCard } from "@/features/learn/components/RecommendedEventCard";
+import { StudentMobileProgressCard } from "@/features/learn/components/StudentMobileProgressCard";
+import {
+  SectionCard,
+  StudentPageWelcome,
+  StudentPortalLoading,
+} from "@/features/learn/components/StudentPortalShell";
+import { StudentProgressHeroCard } from "@/features/learn/components/StudentProgressHeroCard";
 import { StudentEnrollmentBlockedPage } from "@/features/learn/StudentEnrollmentBlockedPage";
-import { formatShortDate } from "@/features/learn/studentFormatters";
+import { useStudentBreakpoint } from "@/features/learn/hooks/useStudentBreakpoint";
 import { StudentLearnRpcError, fetchStudentLearnHome } from "@/lib/studentLearnApi";
-import { registerForCompetition } from "@/lib/studentCompetitionsApi";
 import { fetchStudentOpenBatches, joinStudentBatch } from "@/lib/studentBatchJoinApi";
 import { fetchStudentProgramLadders } from "@/lib/studentProgressApi";
-import "@/features/center/centerOps.css";
 
 export function StudentHomePage() {
   const tenant = useTenant();
   const brandId = tenant.brandId;
   const qc = useQueryClient();
+  const { isMobile } = useStudentBreakpoint();
 
   const home = useQuery({
     queryKey: ["student-learn-home", brandId],
@@ -43,11 +49,6 @@ export function StudentHomePage() {
     retry: (_, err) => !(err instanceof StudentLearnRpcError),
   });
 
-  const enroll = useMutation({
-    mutationFn: registerForCompetition,
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["student-learn-home", brandId] }),
-  });
-
   const joinBatch = useMutation({
     mutationFn: joinStudentBatch,
     onSuccess: () => {
@@ -58,12 +59,7 @@ export function StudentHomePage() {
   });
 
   if (home.isLoading) {
-    return (
-      <>
-        <PageTitle>Dashboard</PageTitle>
-        <StudentPortalLoading />
-      </>
-    );
+    return <StudentPortalLoading />;
   }
 
   if (home.error instanceof StudentLearnRpcError) {
@@ -74,52 +70,37 @@ export function StudentHomePage() {
 
   if (home.error) {
     return (
-      <>
-        <PageTitle>Dashboard</PageTitle>
-        <SectionCard title="Something went wrong">
-          <p>{home.error instanceof Error ? home.error.message : "Unable to load dashboard."}</p>
-          <Button onClick={() => void home.refetch()}>Retry</Button>
-        </SectionCard>
-      </>
+      <SectionCard title="Something went wrong">
+        <p>{home.error instanceof Error ? home.error.message : "Unable to load dashboard."}</p>
+        <Button onClick={() => void home.refetch()}>Retry</Button>
+      </SectionCard>
     );
   }
 
   const data = home.data;
   if (!data) return null;
 
-  const { stats } = data;
   const batches = openBatches.data ?? [];
   const ladders = programLadders.data ?? [];
-  const hasLearningPath = ladders.length > 0 || stats.levels_total > 0;
+  const pct = ladders[0]?.curriculum_ladder.completion_pct ?? data.curriculum_ladder.completion_pct;
+  const welcomeSubtitle =
+    pct > 0
+      ? `You've completed ${pct}% of your current module. Keep going!`
+      : "Your learning journey starts here — join a batch to begin.";
 
-  return (
-    <>
-      <PageTitle>Dashboard</PageTitle>
-      <div className="ed-sp-stack">
-        <PageGridFull>
-          <StudentStatStrip
-            stats={[
-              {
-                label: "Levels done",
-                value: `${stats.levels_completed}/${stats.levels_total}`,
-                hint: hasLearningPath ? "Scroll your path below" : undefined,
-              },
-              { label: "Exams taken", value: stats.assessments_count },
-              {
-                label: "Avg score",
-                value: stats.avg_score_pct != null ? `${stats.avg_score_pct}%` : "—",
-              },
-              {
-                label: "Competitions",
-                value: stats.competitions_registered,
-                hint: stats.competitions_completed > 0 ? `${stats.competitions_completed} completed` : undefined,
-              },
-            ]}
-          />
-        </PageGridFull>
+  if (isMobile) {
+    return (
+      <div className="ed-sp-stack ed-sp-layout-home ed-sp-layout-home--mobile">
+        <StudentPageWelcome name={data.student.full_name} mobile />
+
+        <StudentMobileProgressCard
+          ladders={ladders}
+          fallbackPct={data.curriculum_ladder.completion_pct}
+          batchName={data.enrollment.batch_name}
+        />
 
         {batches.length > 0 && (
-          <SectionCard title="Join a batch">
+          <SectionCard title="Join a batch" action={{ label: "View all", to: "/#join-batches" }} id="join-batches">
             <MutationError message={joinBatch.error instanceof Error ? joinBatch.error.message : null} />
             <BatchJoinCarousel
               batches={batches}
@@ -136,57 +117,75 @@ export function StudentHomePage() {
           ) : programLadders.error ? (
             <p className="ed-text-sm ed-muted">Unable to load your learning path right now.</p>
           ) : (
-            <LearningPathCarousel ladders={ladders} />
+            <LearningPathTimeline
+              ladders={ladders}
+              limit={5}
+              progressLink="/progress"
+              completionPct={pct}
+            />
           )}
         </SectionCard>
+      </div>
+    );
+  }
 
-        <SectionCard title="Upcoming competitions" action={{ label: "View all", to: "/competitions" }}>
-          {data.upcoming_competitions.length === 0 ? (
-            <p className="ed-text-sm ed-muted">No upcoming events right now — check back soon!</p>
-          ) : (
-            data.upcoming_competitions.slice(0, 3).map((c) => (
-              <CompetitionCard
+  return (
+    <div className="ed-sp-stack ed-sp-layout-home ed-sp-layout-home--desktop">
+      <StudentPageWelcome name={data.student.full_name} subtitle={welcomeSubtitle} />
+
+      <div className="ed-sp-layout-home__dashboard">
+        <div className="ed-sp-layout-home__left">
+          <StudentProgressHeroCard
+            ladders={ladders}
+            fallbackPct={data.curriculum_ladder.completion_pct}
+            levelsCompleted={data.stats.levels_completed}
+            levelsTotal={data.stats.levels_total}
+            assessmentsCount={data.stats.assessments_count}
+            avgScorePct={data.stats.avg_score_pct}
+          />
+          <JoinBatchPromoCard
+            batchCount={batches.filter((b) => !b.already_joined).length}
+            programName={data.enrollment.program_name}
+          />
+        </div>
+
+        <SectionCard
+          title="Your Learning Path"
+          panel
+          className="ed-sp-layout-home__path"
+          action={{ label: "Full Roadmap →", to: "/progress" }}
+        >
+          <LearningPathPanel
+            ladders={ladders}
+            assessments={data.recent_assessments}
+            recentResults={data.recent_results}
+            stats={data.stats}
+            completionPct={pct}
+            loading={programLadders.isLoading}
+            error={!!programLadders.error}
+          />
+        </SectionCard>
+      </div>
+
+      <SectionCard title="Recommended for You">
+        {data.upcoming_competitions.length === 0 ? (
+          <p className="ed-text-sm ed-muted">No upcoming events right now — check back soon!</p>
+        ) : (
+          <div className="ed-sp-recommend-grid ed-sp-recommend-grid--desktop">
+            {data.upcoming_competitions.slice(0, 4).map((c, i) => (
+              <RecommendedEventCard
                 key={c.id}
                 name={c.name}
                 eventDate={c.event_date}
                 location={c.location}
                 feeType={c.fee_type}
                 statusTag={c.my_registration_status !== "none" ? c.my_registration_status : undefined}
-                canEnroll={c.can_enroll}
-                enrollBlockedReason={c.enroll_blocked_reason}
-                onEnroll={() => enroll.mutate(c.id)}
-                enrollPending={enroll.isPending && enroll.variables === c.id}
-                enrollError={
-                  enroll.isError && enroll.variables === c.id && enroll.error instanceof Error
-                    ? enroll.error.message
-                    : null
-                }
+                accentIndex={i}
               />
-            ))
-          )}
-        </SectionCard>
-
-        {data.recent_results.length > 0 && (
-          <SectionCard title="Recent results">
-            <ul className="ed-sp-timeline">
-              {data.recent_results.map((r, i) => (
-                <li key={`${r.competition_name}-${i}`} className="ed-sp-timeline__item ed-ops-animate-in">
-                  <span className="ed-sp-timeline__icon" aria-hidden>
-                    WIN
-                  </span>
-                  <div>
-                    <p className="ed-sp-timeline__title">{r.competition_name}</p>
-                    <p className="ed-sp-timeline__sub">
-                      {r.result_rank ?? "Result posted"}
-                      {r.event_date ? ` · ${formatShortDate(r.event_date)}` : ""}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </SectionCard>
+            ))}
+          </div>
         )}
-      </div>
-    </>
+      </SectionCard>
+    </div>
   );
 }

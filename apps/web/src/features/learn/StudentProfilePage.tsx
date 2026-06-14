@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { Button, PageTitle } from "@edunudg/ui";
+import { Button } from "@edunudg/ui";
 import { useAuth } from "@/bootstrap/AuthProvider";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { CenterInfoCard } from "@/features/learn/components/CenterInfoCard";
 import { StudentProfileEditForm } from "@/features/learn/components/StudentProfileEditForm";
-import { SectionCard, StudentPortalLoading } from "@/features/learn/components/StudentPortalShell";
+import {
+  SectionCard,
+  StudentPageHeading,
+  StudentPortalLoading,
+} from "@/features/learn/components/StudentPortalShell";
 import { StudentEnrollmentBlockedPage } from "@/features/learn/StudentEnrollmentBlockedPage";
 import { StudentLearnRpcError, fetchStudentProfile } from "@/lib/studentLearnApi";
 import { displayUserFromAuth } from "@/lib/portalUser";
@@ -27,41 +31,36 @@ export function StudentProfilePage() {
   }
 
   return (
-    <>
-      <PageTitle>Profile</PageTitle>
-      <div className="ed-sp-stack ed-sp-profile-page">
-        <header className="ed-sp-profile-page__header">
-          <h1 className="ed-sp-profile-page__title">Profile</h1>
-          <p className="ed-sp-profile-page__subtitle">
-            Keep your photo and contact details current for your center and competitions.
-          </p>
-        </header>
+    <div className="ed-sp-stack ed-sp-profile-page">
+      <StudentPageHeading
+        title="Profile"
+        subtitle="Keep your photo and contact details current for your center and competitions."
+      />
 
-        {profile.isLoading && <StudentPortalLoading label="Loading your details…" />}
+      {profile.isLoading && <StudentPortalLoading label="Loading your details…" />}
 
-        {profile.error && (
-          <SectionCard title="Something went wrong">
-            <p>{profile.error.message}</p>
-            <Button onClick={() => void profile.refetch()}>Retry</Button>
+      {profile.error && (
+        <SectionCard title="Something went wrong">
+          <p>{profile.error.message}</p>
+          <Button onClick={() => void profile.refetch()}>Retry</Button>
+        </SectionCard>
+      )}
+
+      {profile.data && (
+        <div className="ed-sp-profile-page__layout">
+          <SectionCard title="Student details" className="ed-sp-section--profile">
+            <StudentProfileEditForm
+              brandId={brandId!}
+              student={profile.data.student}
+              email={authProfile.email}
+            />
           </SectionCard>
-        )}
 
-        {profile.data && (
-          <div className="ed-sp-profile-page__layout">
-            <SectionCard title="Student Details" className="ed-sp-section--profile">
-              <StudentProfileEditForm
-                brandId={brandId!}
-                student={profile.data.student}
-                email={authProfile.email}
-              />
-            </SectionCard>
-
-            <SectionCard title="My center" className="ed-sp-section--profile-side">
-              <CenterInfoCard center={profile.data.center} enrollment={profile.data.enrollment} />
-            </SectionCard>
-          </div>
-        )}
-      </div>
-    </>
+          <SectionCard title="My center" className="ed-sp-section--profile-side">
+            <CenterInfoCard center={profile.data.center} enrollment={profile.data.enrollment} />
+          </SectionCard>
+        </div>
+      )}
+    </div>
   );
 }

@@ -5,13 +5,13 @@ import { MerchandiseProductGrid } from "./MerchandiseProductGrid";
 const catalog = [
   {
     id: "item-1",
-    sku: "AB-01",
+    sku: "KIT001",
     name: "Abacus kit",
     price_cents: 150000,
     currency: "INR",
     photo_urls: ["https://cdn/kit.jpg", "https://cdn/kit-2.jpg"],
   },
-  { id: "item-2", sku: "BK-02", name: "Workbook", price_cents: 50000, currency: "INR", photo_urls: [] },
+  { id: "item-2", sku: "KIT002", name: "Workbook", price_cents: 50000, currency: "INR", photo_urls: [] },
 ];
 
 const students = [{ id: "stu-1", full_name: "Asha Kumar" }];
@@ -25,9 +25,10 @@ describe("MerchandiseProductGrid", () => {
 
     expect(screen.getByText("Abacus kit")).toBeDefined();
     expect(screen.getByText("Workbook")).toBeDefined();
+    expect(screen.getByText("Best Seller")).toBeDefined();
+    expect(screen.getByText("KIT001")).toBeDefined();
 
-    const increaseButtons = screen.getAllByRole("button", { name: "Increase quantity" });
-    fireEvent.click(increaseButtons[0]!);
+    fireEvent.click(screen.getAllByRole("button", { name: "Increase quantity" })[0]!);
 
     expect(onUpdateLine).toHaveBeenCalledWith("item-1", {
       catalogItemId: "item-1",
@@ -45,17 +46,17 @@ describe("MerchandiseProductGrid", () => {
     expect(screen.getByRole("button", { name: "Show photo 2" })).toBeDefined();
   });
 
-  it("shows student assign dropdown when quantity is active", () => {
+  it("regression_merchandise_add_to_order_sets_quantity_when_zero", () => {
+    const onUpdateLine = vi.fn();
     render(
-      <MerchandiseProductGrid
-        catalog={catalog}
-        cart={{ "item-1": { catalogItemId: "item-1", quantity: 2, studentId: "" } }}
-        students={students}
-        onUpdateLine={vi.fn()}
-      />
+      <MerchandiseProductGrid catalog={catalog} cart={{}} students={students} onUpdateLine={onUpdateLine} />
     );
 
-    expect(screen.getByLabelText("Assign to student (optional)")).toBeDefined();
-    expect(screen.getByRole("option", { name: "Asha Kumar" })).toBeDefined();
+    fireEvent.click(screen.getAllByRole("button", { name: "Add to Order" })[0]!);
+    expect(onUpdateLine).toHaveBeenCalledWith("item-1", {
+      catalogItemId: "item-1",
+      quantity: 1,
+      studentId: "",
+    });
   });
 });

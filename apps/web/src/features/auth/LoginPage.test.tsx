@@ -235,7 +235,7 @@ describe("LoginPage", () => {
 
   it("shows validation error when email or password is empty", async () => {
     renderLogin();
-    const form = document.querySelector(".ed-login-split__card form");
+    const form = document.querySelector(".ed-login-card form");
     expect(form).toBeTruthy();
     fireEvent.submit(form!);
     expect((await screen.findByRole("alert")).textContent).toContain("Enter email and password.");
@@ -274,12 +274,19 @@ describe("LoginPage", () => {
     tenantState.brandSlug = null;
   });
 
+  it("regression_platform_portal_shows_oauth_buttons_directly", () => {
+    renderLogin();
+    expect(screen.getByRole("button", { name: "Log in with Google" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Log in with WhatsApp" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "More sign-in options" })).toBeNull();
+  });
+
   it("regression_learn_portal_shows_oauth_options_without_more_sign_in_toggle", () => {
     tenantState.portalType = "learn";
     tenantState.brandSlug = "abacusworld";
     renderLogin();
 
-    expect(screen.getByRole("button", { name: "Google" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Log in with Google" })).toBeDefined();
     expect(screen.queryByRole("button", { name: "More sign-in options" })).toBeNull();
     expect(screen.queryByText(/student dashboard/i)).toBeNull();
     expect(screen.queryByText(/student@edunudg.com/i)).toBeNull();

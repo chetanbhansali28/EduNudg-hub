@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, FormGrid, Input, MutationError, PageTitle, Select } from "@edunudg/ui";
+import { useSearchParams } from "react-router-dom";
+import { FilterTabs, FormGrid, Input, MobileCartBar, MutationError, Select } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import {
@@ -31,8 +32,11 @@ import { CenterMerchandiseAllocationsCard } from "./CenterMerchandiseAllocations
 import { CenterMerchandiseOrderHistory } from "./CenterMerchandiseOrderHistory";
 import { CenterStudentProfileAddressCard } from "./CenterStudentProfileAddressCard";
 import { MerchandiseCheckoutPanel } from "./MerchandiseCheckoutPanel";
+import { CenterMerchandiseMobileChrome } from "./CenterMerchandiseMobileChrome";
 import { MerchandiseProductGrid } from "./MerchandiseProductGrid";
+import { useCommerceBreakpoint } from "./hooks/useCommerceBreakpoint";
 import {
+  cartSubtotalCents,
   cartTotalQuantity,
   shopLinesFromCart,
   type MerchandiseShopLine,
@@ -68,9 +72,18 @@ export function CenterMerchandiseOrdersPage() {
   const centerId = tenant.centerId;
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { isMobile } = useCommerceBreakpoint();
 
-  const [tab, setTab] = useState<ShopTab>("shop");
+  const tab: ShopTab = searchParams.get("tab") === "orders" ? "orders" : "shop";
+  const setTab = (next: ShopTab) => {
+    if (next === "orders") setSearchParams({ tab: "orders" });
+    else setSearchParams({});
+  };
+
   const [cart, setCart] = useState<Record<string, MerchandiseShopLine>>({});
+  const [mobileCartOpen, setMobileCartOpen] = useState(false);
+  const [checkoutExpanded, setCheckoutExpanded] = useState(false);
   const [shippingStudentId, setShippingStudentId] = useState("");
   const [shippingMode, setShippingMode] = useState<MerchandiseShippingMode>("franchise");
   const [customAddress, setCustomAddress] = useState(emptyCustomAddress);
@@ -163,6 +176,7 @@ export function CenterMerchandiseOrdersPage() {
 
   const shippingComplete = isShippingAddressComplete(shippingMode, shippingSnapshot);
   const cartQty = cartTotalQuantity(cart);
+  const cartSubtotal = cartSubtotalCents(cart, catalog.data ?? []);
 
   const paymentAlerts = useQuery({
     queryKey: ["center-merchandise-payment-alerts", centerId],
@@ -262,6 +276,8 @@ export function CenterMerchandiseOrdersPage() {
       setPromoCode("");
       setPromoMessage(null);
       setPromoValid(false);
+      setCheckoutExpanded(false);
+      setMobileCartOpen(false);
       setTab("orders");
     },
     onError: capture,
@@ -279,6 +295,19 @@ export function CenterMerchandiseOrdersPage() {
     });
     setPromoValid(false);
     setPromoMessage(null);
+  };
+
+  const removeCartLine = (catalogItemId: string) => {
+    updateCartLine(catalogItemId, { quantity: 0, studentId: "" });
+    setCheckoutExpanded(false);
+  };
+
+  const handleCheckoutAction = () => {
+    if (!checkoutExpanded) {
+      setCheckoutExpanded(true);
+      return;
+    }
+    placeOrder.mutate();
   };
 
   if (!centerId || !brandId) return <p className="ed-empty">Center context not found.</p>;
@@ -333,13 +362,45 @@ export function CenterMerchandiseOrdersPage() {
     />
   ) : null;
 
+  const checkoutPanelProps = {
+    cart,
+    catalog: catalogItems,
+    shippingMode,
+    onShippingModeChange: setShippingMode,
+    shippingPreview: `Shipping preview: ${formatAddressPreview(resolvedAddress.data ?? null)}`,
+    shippingComplete,
+    customAddressFields,
+    shippingStudentFields,
+    promoCode,
+    onPromoCodeChange: (v: string) => {
+      setPromoCode(v);
+      setPromoValid(false);
+      setPromoMessage(null);
+    },
+    promoMessage,
+    promoValid,
+    onValidatePromo: () => validatePromo.mutate(),
+    promoValidating: validatePromo.isPending,
+    paymentMethod,
+    onPaymentMethodChange: setPaymentMethod,
+    paymentOptions,
+    onPlaceOrder: handleCheckoutAction,
+    onRemoveLine: removeCartLine,
+    placing: placeOrder.isPending,
+    error,
+    checkoutExpanded,
+  };
+
   return (
-    <>
-      <PageTitle>Merchandise</PageTitle>
+    <div className="ed-merch-page">
+      <header className="ed-merch-page__intro">
+        <h1 className="ed-merch-page__title">Merchandise</h1>
+        <p className="ed-merch-page__subtitle">Browse and order kits for your center</p>
+      </header>
       <MutationError message={error} />
 
       {alerts && alerts.unpaid_count > 0 ? (
-        <Card title="Unpaid merchandise">
+        <div className="ed-card ed-merch-alert">
           <p className="ed-text-sm">
             {alerts.unpaid_count} order{alerts.unpaid_count === 1 ? "" : "s"} awaiting payment (
             {formatInrFromPaise(alerts.unpaid_total_cents)} total).
@@ -347,17 +408,19 @@ export function CenterMerchandiseOrdersPage() {
               ? ` ${alerts.overdue_count} invoice${alerts.overdue_count === 1 ? " is" : "s are"} overdue.`
               : null}
           </p>
-        </Card>
+        </div>
       ) : null}
 
-      <nav className="ed-merch-tabs" aria-label="Merchandise sections">
-        <button type="button" aria-selected={tab === "shop"} onClick={() => setTab("shop")}>
-          Shop
-        </button>
-        <button type="button" aria-selected={tab === "orders"} onClick={() => setTab("orders")}>
-          My orders
-        </button>
-      </nav>
+      <FilterTabs
+        variant="segmented"
+        aria-label="Merchandise sections"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: "shop", label: "Shop" },
+          { value: "orders", label: "My Orders" },
+        ]}
+      />
 
       {tab === "shop" ? (
         <div className="ed-merch-shop">
@@ -369,32 +432,9 @@ export function CenterMerchandiseOrdersPage() {
               onUpdateLine={updateCartLine}
             />
           </section>
-          <MerchandiseCheckoutPanel
-            cart={cart}
-            catalog={catalogItems}
-            shippingMode={shippingMode}
-            onShippingModeChange={setShippingMode}
-            shippingPreview={`Shipping preview: ${formatAddressPreview(resolvedAddress.data ?? null)}`}
-            shippingComplete={shippingComplete}
-            customAddressFields={customAddressFields}
-            shippingStudentFields={shippingStudentFields}
-            promoCode={promoCode}
-            onPromoCodeChange={(v) => {
-              setPromoCode(v);
-              setPromoValid(false);
-              setPromoMessage(null);
-            }}
-            promoMessage={promoMessage}
-            promoValid={promoValid}
-            onValidatePromo={() => validatePromo.mutate()}
-            promoValidating={validatePromo.isPending}
-            paymentMethod={paymentMethod}
-            onPaymentMethodChange={setPaymentMethod}
-            paymentOptions={paymentOptions}
-            onPlaceOrder={() => placeOrder.mutate()}
-            placing={placeOrder.isPending}
-            error={error}
-          />
+          <div className={`ed-merch-checkout${isMobile ? " ed-merch-checkout--mobile-hidden" : ""}`}>
+            <MerchandiseCheckoutPanel {...checkoutPanelProps} />
+          </div>
         </div>
       ) : (
         <>
@@ -407,6 +447,30 @@ export function CenterMerchandiseOrdersPage() {
           <CenterStudentProfileAddressCard brandId={brandId} centerId={centerId} />
         </>
       )}
-    </>
+
+      {isMobile && tab === "shop" && cartQty > 0 ? (
+        <MobileCartBar
+          itemCount={cartQty}
+          totalLabel={formatInrFromPaise(cartSubtotal)}
+          onOpen={() => setMobileCartOpen(true)}
+        />
+      ) : null}
+
+      {isMobile && mobileCartOpen ? (
+        <div className="ed-commerce-drawer" role="dialog" aria-modal aria-label="Your order">
+          <button
+            type="button"
+            className="ed-commerce-drawer__backdrop"
+            aria-label="Close cart"
+            onClick={() => setMobileCartOpen(false)}
+          />
+          <div className="ed-commerce-drawer__panel">
+            <MerchandiseCheckoutPanel {...checkoutPanelProps} />
+          </div>
+        </div>
+      ) : null}
+
+      <CenterMerchandiseMobileChrome />
+    </div>
   );
 }

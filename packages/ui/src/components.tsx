@@ -23,6 +23,7 @@ export {
   type ShellNavItem,
   type ShellNavSection,
   type LoginBrandingProps,
+  type LoginFooterLink,
 } from "./shell";
 
 /** @deprecated Use AppShell navSections with react-router Link */
@@ -95,14 +96,22 @@ export function Button({
   block,
 }: {
   children: ReactNode;
-  variant?: "primary" | "ghost" | "danger";
+  variant?: "primary" | "ghost" | "danger" | "oauth-google" | "oauth-whatsapp";
   onClick?: () => void;
   type?: "button" | "submit";
   disabled?: boolean;
   block?: boolean;
 }) {
   const variantClass =
-    variant === "primary" ? "ed-btn--primary" : variant === "danger" ? "ed-btn--danger" : "ed-btn--ghost";
+    variant === "primary"
+      ? "ed-btn--primary"
+      : variant === "danger"
+        ? "ed-btn--danger"
+        : variant === "oauth-google"
+          ? "ed-btn--oauth-google"
+          : variant === "oauth-whatsapp"
+            ? "ed-btn--oauth-whatsapp"
+            : "ed-btn--ghost";
   return (
     <button
       type={type}
@@ -557,15 +566,23 @@ export function FilterTabs<T extends string>({
   options,
   value,
   onChange,
+  variant = "default",
   "aria-label": ariaLabel = "Filter",
 }: {
   options: { value: T; label: string; count?: number }[];
   value: T;
   onChange: (value: T) => void;
+  variant?: "default" | "segmented";
   "aria-label"?: string;
 }) {
   return (
-    <div className="ed-filter-tabs" role="tablist" aria-label={ariaLabel}>
+    <div
+      className={["ed-filter-tabs", variant === "segmented" ? "ed-filter-tabs--segmented" : ""]
+        .filter(Boolean)
+        .join(" ")}
+      role="tablist"
+      aria-label={ariaLabel}
+    >
       {options.map((option) => {
         const active = option.value === value;
         const label =
@@ -674,5 +691,107 @@ export function PipelineDetailPlaceholder({ message }: { message: string }) {
     <Card title="Details">
       <p className="ed-text-sm ed-muted ed-pipeline-detail-placeholder">{message}</p>
     </Card>
+  );
+}
+
+export function QuantityStepper({
+  value,
+  onChange,
+  min = 0,
+  disabled,
+  "aria-label": ariaLabel = "Quantity",
+}: {
+  value: number;
+  onChange: (next: number) => void;
+  min?: number;
+  disabled?: boolean;
+  "aria-label"?: string;
+}) {
+  return (
+    <div className="ed-qty-stepper" aria-label={ariaLabel}>
+      <button
+        type="button"
+        className="ed-qty-stepper__btn"
+        onClick={() => onChange(Math.max(min, value - 1))}
+        disabled={disabled || value <= min}
+        aria-label="Decrease quantity"
+      >
+        −
+      </button>
+      <span className="ed-qty-stepper__value" aria-live="polite">
+        {value}
+      </span>
+      <button
+        type="button"
+        className="ed-qty-stepper__btn"
+        onClick={() => onChange(value + 1)}
+        disabled={disabled}
+        aria-label="Increase quantity"
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
+export function MobileCartBar({
+  itemCount,
+  totalLabel,
+  onOpen,
+  openLabel = "View Cart",
+}: {
+  itemCount: number;
+  totalLabel: string;
+  onOpen: () => void;
+  openLabel?: string;
+}) {
+  if (itemCount <= 0) return null;
+
+  return (
+    <div className="ed-cart-bar">
+      <button type="button" className="ed-cart-bar__btn" onClick={onOpen}>
+        <span className="ed-cart-bar__icon" aria-hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="9" cy="21" r="1" />
+            <circle cx="20" cy="21" r="1" />
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+          </svg>
+        </span>
+        <span className="ed-cart-bar__summary">
+          {itemCount} {itemCount === 1 ? "item" : "items"}
+        </span>
+        <span className="ed-cart-bar__dot" aria-hidden>
+          ·
+        </span>
+        <span className="ed-cart-bar__total">{totalLabel}</span>
+        <span className="ed-cart-bar__action">
+          {openLabel} →
+        </span>
+      </button>
+    </div>
+  );
+}
+
+export function BottomNav({
+  items,
+  "aria-label": ariaLabel = "Primary",
+}: {
+  items: { href: string; label: string; icon: ReactNode; active?: boolean }[];
+  "aria-label"?: string;
+}) {
+  return (
+    <nav className="ed-bottom-nav" aria-label={ariaLabel}>
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          to={item.href}
+          className={`ed-bottom-nav__item${item.active ? " ed-bottom-nav__item--active" : ""}`}
+          aria-current={item.active ? "page" : undefined}
+        >
+          <span className="ed-bottom-nav__icon">{item.icon}</span>
+          <span className="ed-bottom-nav__label">{item.label}</span>
+        </Link>
+      ))}
+    </nav>
   );
 }

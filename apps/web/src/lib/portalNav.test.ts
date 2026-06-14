@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { brandNavSections, centerNavSections, filterNavByFeatureFlags, platformNavSections, studentNavSections, BRAND_FEATURE_FLAGS } from "./portalNav";
+import { brandNavSections, centerNavSections, filterNavByFeatureFlags, platformNavSections, studentBottomNavItems, studentNavSections, BRAND_FEATURE_FLAGS } from "./portalNav";
 import { FEATURE_FLAG_DEFAULTS } from "@/hooks/useFeatureFlag";
 
 describe("portalNav", () => {
@@ -79,7 +79,7 @@ describe("portalNav", () => {
 
   it("center nav includes merchandise orders", () => {
     const sections = centerNavSections("/app/merchandise");
-    const merchandise = sections[1]?.items.find((i) => i.label === "Merchandise orders");
+    const merchandise = sections[1]?.items.find((i) => i.label === "Merchandise");
     expect(merchandise?.href).toBe("/app/merchandise");
   });
 
@@ -129,12 +129,18 @@ describe("portalNav", () => {
     const sections = studentNavSections("/progress");
     const main = sections[0]?.items ?? [];
     expect(main.map((i) => i.label)).toEqual([
-      "Dashboard",
+      "Home",
       "Progress",
-      "Competitions",
+      "Events",
       "Activity",
     ]);
     expect(main.find((i) => i.label === "Progress")?.active).toBe(true);
     expect(sections[1]?.items[0]?.label).toBe("Profile");
+  });
+
+  it("student bottom nav matches mobile mock labels", () => {
+    const items = studentBottomNavItems("/");
+    expect(items.map((i) => i.label)).toEqual(["Home", "Leads", "Batches", "Curriculum", "Profile"]);
+    expect(items.find((i) => i.id === "home")?.active).toBe(true);
   });
 });

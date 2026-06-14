@@ -3,14 +3,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   MutationError,
-  PageTitle,
   PipelineDetailPlaceholder,
   PipelineListItem,
   PipelineMasterDetail,
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { CompetitionCard } from "@/features/learn/components/CompetitionCard";
-import { SectionCard, StudentEmptyState, StudentPortalLoading } from "@/features/learn/components/StudentPortalShell";
+import { SectionCard, StudentEmptyState, StudentPageHeading, StudentPortalLoading } from "@/features/learn/components/StudentPortalShell";
 import { StudentTabBar } from "@/features/learn/components/StudentTabBar";
 import { StudentEnrollmentBlockedPage } from "@/features/learn/StudentEnrollmentBlockedPage";
 import { StudentLearnRpcError, type StudentCompetitionCard } from "@/lib/studentLearnApi";
@@ -73,10 +72,10 @@ export function StudentCompetitionsPage() {
     pastItems.find((r) => r.competition_id === selectedPastId) ?? pastItems[0] ?? null;
 
   return (
-    <>
-      <PageTitle>Competitions</PageTitle>
-      <div className="ed-sp-stack">
-        <StudentTabBar tabs={["upcoming", "registered", "past"] as const} value={tab} onChange={setTab} labels={TAB_LABELS} />
+    <div className="ed-sp-stack">
+      <StudentPageHeading title="Competitions" subtitle="Register for events and view your results." />
+
+      <StudentTabBar tabs={["upcoming", "registered", "past"] as const} value={tab} onChange={setTab} labels={TAB_LABELS} />
 
         {tab === "upcoming" && heroCompetition && (
           <div className="ed-sp-comp-hero">
@@ -163,42 +162,47 @@ export function StudentCompetitionsPage() {
               />
             )}
 
-            {tab === "upcoming" &&
-              restUpcoming.map((c) => (
-                <CompetitionCard
-                  key={c.id}
-                  name={c.name}
-                  eventDate={c.event_date}
-                  location={c.location}
-                  feeType={c.fee_type}
-                  canEnroll={c.can_enroll}
-                  enrollBlockedReason={c.enroll_blocked_reason}
-                  onEnroll={() => enroll.mutate(c.id)}
-                  enrollPending={enroll.isPending}
-                />
-              ))}
+            {tab === "upcoming" && restUpcoming.length > 0 && (
+              <div className="ed-sp-layout-competitions__list">
+                {restUpcoming.map((c) => (
+                  <CompetitionCard
+                    key={c.id}
+                    name={c.name}
+                    eventDate={c.event_date}
+                    location={c.location}
+                    feeType={c.fee_type}
+                    canEnroll={c.can_enroll}
+                    enrollBlockedReason={c.enroll_blocked_reason}
+                    onEnroll={() => enroll.mutate(c.id)}
+                    enrollPending={enroll.isPending}
+                  />
+                ))}
+              </div>
+            )}
 
-            {tab === "registered" &&
-              ((items as RegisteredCompetition[]).map((r) => (
-                <CompetitionCard
-                  key={r.registration_id}
-                  name={r.name}
-                  eventDate={r.event_date}
-                  location={r.location}
-                  feeType={r.fee_type}
-                  statusTag={r.status}
-                  secondaryAction={
-                    r.fee_type === "free" && r.status === "registered" ? (
-                      <Button variant="ghost" onClick={() => withdraw.mutate(r.registration_id)} disabled={withdraw.isPending}>
-                        Withdraw
-                      </Button>
-                    ) : undefined
-                  }
-                />
-              )))}
+            {tab === "registered" && (items as RegisteredCompetition[]).length > 0 && (
+              <div className="ed-sp-layout-competitions__list">
+                {(items as RegisteredCompetition[]).map((r) => (
+                  <CompetitionCard
+                    key={r.registration_id}
+                    name={r.name}
+                    eventDate={r.event_date}
+                    location={r.location}
+                    feeType={r.fee_type}
+                    statusTag={r.status}
+                    secondaryAction={
+                      r.fee_type === "free" && r.status === "registered" ? (
+                        <Button variant="ghost" onClick={() => withdraw.mutate(r.registration_id)} disabled={withdraw.isPending}>
+                          Withdraw
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                ))}
+              </div>
+            )}
           </SectionCard>
         )}
-      </div>
-    </>
+    </div>
   );
 }

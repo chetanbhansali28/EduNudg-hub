@@ -7,15 +7,22 @@ export function SectionCard({
   headerAside,
   children,
   className,
+  id,
+  panel = false,
 }: {
   title?: string;
   action?: { label: string; to: string };
   headerAside?: ReactNode;
   children: ReactNode;
   className?: string;
+  id?: string;
+  panel?: boolean;
 }) {
   return (
-    <section className={["ed-sp-section", className].filter(Boolean).join(" ")}>
+    <section
+      id={id}
+      className={["ed-sp-section", panel ? "ed-sp-section--panel" : "", className].filter(Boolean).join(" ")}
+    >
       {(title || action || headerAside) && (
         <div className="ed-sp-section__head">
           {title ? <h2 className="ed-sp-section__title">{title}</h2> : <span />}
@@ -43,4 +50,34 @@ export function StudentEmptyState({ title, text }: { title: string; text: string
 
 export function StudentPortalLoading({ label = "Loading your dashboard…" }: { label?: string }) {
   return <p className="ed-sp-loading">{label}</p>;
+}
+
+export function StudentPageWelcome({
+  name,
+  subtitle,
+  mobile = false,
+}: {
+  name: string;
+  subtitle?: string;
+  mobile?: boolean;
+}) {
+  const first = name.trim().split(/\s+/)[0] ?? name;
+  return (
+    <header className={`ed-sp-welcome${mobile ? " ed-sp-welcome--mobile" : ""}`}>
+      <h1 className="ed-sp-welcome__title">
+        Welcome back, {first}
+        {mobile ? "" : "!"}
+      </h1>
+      {subtitle && !mobile ? <p className="ed-sp-welcome__subtitle">{subtitle}</p> : null}
+    </header>
+  );
+}
+
+export function StudentPageHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <header className="ed-sp-page-heading">
+      <h1 className="ed-sp-page-heading__title">{title}</h1>
+      {subtitle ? <p className="ed-sp-page-heading__subtitle">{subtitle}</p> : null}
+    </header>
+  );
 }

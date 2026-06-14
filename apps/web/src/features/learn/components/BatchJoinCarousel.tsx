@@ -9,6 +9,17 @@ type Props = {
   onJoin: (batchId: string) => void;
 };
 
+function BatchIcon() {
+  return (
+    <span className="ed-sp-batch-card__icon" aria-hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M16 2v4M8 2v4M3 10h18" />
+      </svg>
+    </span>
+  );
+}
+
 export function BatchJoinCarousel({ batches, joinPending, joiningBatchId, onJoin }: Props) {
   return (
     <HorizontalScrollTrack ariaLabel="Open batches">
@@ -17,22 +28,33 @@ export function BatchJoinCarousel({ batches, joinPending, joiningBatchId, onJoin
           key={batch.batch_id}
           className={`ed-sp-batch-card${batch.already_joined ? " ed-sp-batch-card--joined" : ""}`}
         >
-          <p className="ed-sp-batch-card__name">{batch.name}</p>
-          <p className="ed-sp-batch-card__meta">
-            {batch.program_name} · {batch.level_start} → {batch.level_end}
-          </p>
+          <div className="ed-sp-batch-card__top">
+            <BatchIcon />
+            <div className="ed-sp-batch-card__info">
+              <p className="ed-sp-batch-card__name">{batch.name}</p>
+              <p className="ed-sp-batch-card__time">
+                {batch.program_name} · {batch.level_start} → {batch.level_end}
+              </p>
+            </div>
+          </div>
           {batch.already_joined ? (
             <p className="ed-sp-batch-card__badge" role="status">
               Enrolled
             </p>
           ) : (
-            <Button
-              onClick={() => onJoin(batch.batch_id)}
-              disabled={joinPending}
-              aria-live="polite"
-            >
-              {joinPending && joiningBatchId === batch.batch_id ? "Joining…" : "Join now"}
-            </Button>
+            <>
+              <p className="ed-sp-batch-card__slots">Open for enrollment · {batch.level_start} program</p>
+              <div className="ed-sp-batch-card__cta-wrap">
+                <Button
+                  onClick={() => onJoin(batch.batch_id)}
+                  disabled={joinPending}
+                  aria-live="polite"
+                  block
+                >
+                  {joinPending && joiningBatchId === batch.batch_id ? "Joining…" : "Reserve spot"}
+                </Button>
+              </div>
+            </>
           )}
         </article>
       ))}

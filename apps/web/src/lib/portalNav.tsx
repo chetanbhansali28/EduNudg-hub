@@ -6,6 +6,7 @@ import {
   IconChart,
   IconClipboard,
   IconGraduation,
+  IconHelp,
   IconHome,
   IconLogout,
   IconSettings,
@@ -139,7 +140,7 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
         { path: "/app/attendance", label: "Attendance", icon: <IconChart /> },
         { path: "/app/fees", label: "Fees & Payments", icon: <IconWallet /> },
         { path: "/app/inventory", label: "Inventory", icon: <IconBuilding /> },
-        { path: "/app/merchandise", label: "Merchandise orders", icon: <IconBook /> },
+        { path: "/app/merchandise", label: "Merchandise", icon: <IconBook /> },
         { path: "/app/campaigns", label: "Campaigns", icon: <IconChart /> },
         { path: "/app/assessments", label: "Assessments", icon: <IconClipboard /> },
         { path: "/app/reports", label: "Reports", icon: <IconChart /> },
@@ -150,14 +151,34 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
   ];
 }
 
+export function studentBottomNavItems(pathname: string) {
+  const items = [
+    { id: "home", href: "/", label: "Home" },
+    { id: "leads", href: "/activity", label: "Leads" },
+    { id: "batches", href: "/#join-batches", label: "Batches" },
+    { id: "curriculum", href: "/progress", label: "Curriculum" },
+    { id: "profile", href: "/profile", label: "Profile" },
+  ] as const;
+
+  return items.map((item) => {
+    const active =
+      item.href === "/"
+        ? pathname === "/"
+        : item.href.startsWith("/#")
+          ? pathname === "/"
+          : pathname === item.href || pathname.startsWith(`${item.href}/`);
+    return { ...item, active };
+  });
+}
+
 export function studentNavSections(pathname: string): ShellNavSection[] {
   return [
     section(
       "Main menu",
       [
-        { path: "/", label: "Dashboard", icon: <IconHome /> },
+        { path: "/", label: "Home", icon: <IconHome /> },
         { path: "/progress", label: "Progress", icon: <IconChart /> },
-        { path: "/competitions", label: "Competitions", icon: <IconGraduation /> },
+        { path: "/competitions", label: "Events", icon: <IconGraduation /> },
         { path: "/activity", label: "Activity", icon: <IconClipboard /> },
       ],
       pathname
@@ -166,10 +187,14 @@ export function studentNavSections(pathname: string): ShellNavSection[] {
   ];
 }
 
+export function supportNavItem(): ShellNavItem {
+  return { href: "/profile", label: "Support", icon: <IconHelp /> };
+}
+
 export function signOutNavItem(onSignOut: () => void): ShellNavItem {
   return {
     href: "#",
-    label: "Log out",
+    label: "Logout",
     icon: <IconLogout />,
     danger: true,
     onClick: onSignOut,
