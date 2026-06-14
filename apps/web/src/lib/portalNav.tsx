@@ -151,39 +151,48 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
   ];
 }
 
-export function studentBottomNavItems(pathname: string) {
-  const items = [
-    { id: "home", href: "/", label: "Home" },
-    { id: "leads", href: "/activity", label: "Leads" },
-    { id: "batches", href: "/#join-batches", label: "Batches" },
-    { id: "curriculum", href: "/progress", label: "Curriculum" },
-    { id: "profile", href: "/profile", label: "Profile" },
-  ] as const;
+const STUDENT_MAIN_NAV: NavDef[] = [
+  { path: "/", label: "Home", icon: <IconHome /> },
+  { path: "/progress", label: "Progress", icon: <IconChart /> },
+  { path: "/competitions", label: "Events", icon: <IconGraduation /> },
+  { path: "/activity", label: "Activity", icon: <IconClipboard /> },
+];
 
-  return items.map((item) => {
-    const active =
-      item.href === "/"
-        ? pathname === "/"
-        : item.href.startsWith("/#")
-          ? pathname === "/"
-          : pathname === item.href || pathname.startsWith(`${item.href}/`);
-    return { ...item, active };
-  });
+const STUDENT_PROFILE_NAV: NavDef = {
+  path: "/profile",
+  label: "Profile",
+  icon: <IconSettings />,
+};
+
+function studentNavActive(path: string, pathname: string): boolean {
+  if (path === "/") return pathname === "/";
+  return pathname === path || pathname.startsWith(`${path}/`);
+}
+
+function studentNavId(path: string): string {
+  const ids: Record<string, string> = {
+    "/": "home",
+    "/progress": "progress",
+    "/competitions": "events",
+    "/activity": "activity",
+    "/profile": "profile",
+  };
+  return ids[path] ?? path.replace(/^\//, "");
+}
+
+export function studentBottomNavItems(pathname: string) {
+  return [...STUDENT_MAIN_NAV, STUDENT_PROFILE_NAV].map((nav) => ({
+    id: studentNavId(nav.path),
+    href: nav.path,
+    label: nav.label,
+    active: studentNavActive(nav.path, pathname),
+  }));
 }
 
 export function studentNavSections(pathname: string): ShellNavSection[] {
   return [
-    section(
-      "Main menu",
-      [
-        { path: "/", label: "Home", icon: <IconHome /> },
-        { path: "/progress", label: "Progress", icon: <IconChart /> },
-        { path: "/competitions", label: "Events", icon: <IconGraduation /> },
-        { path: "/activity", label: "Activity", icon: <IconClipboard /> },
-      ],
-      pathname
-    ),
-    section("General", [{ path: "/profile", label: "Profile", icon: <IconSettings /> }], pathname),
+    section("Main menu", STUDENT_MAIN_NAV, pathname),
+    section("General", [STUDENT_PROFILE_NAV], pathname),
   ];
 }
 

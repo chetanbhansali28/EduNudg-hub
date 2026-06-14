@@ -6,7 +6,7 @@ import { useTenant } from "@/bootstrap/TenantProvider";
 import { StudentMobileChrome } from "@/features/learn/components/StudentMobileChrome";
 import { useStudentBreakpoint } from "@/features/learn/hooks/useStudentBreakpoint";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
-import { studentNavSections, signOutNavItem, supportNavItem } from "@/lib/portalNav";
+import { studentNavSections, signOutNavItem } from "@/lib/portalNav";
 import { resolveShellProductName } from "@/lib/portalBranding";
 import { displayUserFromAuth } from "@/lib/portalUser";
 import { fetchStudentLearnHome, StudentLearnRpcError } from "@/lib/studentLearnApi";
@@ -61,7 +61,7 @@ export function StudentLearnLayout() {
         avatarUrl,
       }}
       navSections={studentNavSections(pathname)}
-      footerItems={[supportNavItem(), signOutNavItem(() => void signOut())]}
+      footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}
       showWelcome={false}
       shellVariant="student"

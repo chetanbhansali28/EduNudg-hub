@@ -138,9 +138,13 @@ describe("portalNav", () => {
     expect(sections[1]?.items[0]?.label).toBe("Profile");
   });
 
-  it("student bottom nav matches mobile mock labels", () => {
-    const items = studentBottomNavItems("/");
-    expect(items.map((i) => i.label)).toEqual(["Home", "Leads", "Batches", "Curriculum", "Profile"]);
-    expect(items.find((i) => i.id === "home")?.active).toBe(true);
+  it("student bottom nav matches sidebar labels and routes", () => {
+    const sections = studentNavSections("/profile");
+    const sidebarLabels = sections.flatMap((section) => section.items.map((item) => item.label));
+    const bottomItems = studentBottomNavItems("/profile");
+
+    expect(bottomItems.map((i) => i.label)).toEqual(sidebarLabels);
+    expect(bottomItems.map((i) => i.href)).toEqual(["/", "/progress", "/competitions", "/activity", "/profile"]);
+    expect(bottomItems.find((i) => i.id === "profile")?.active).toBe(true);
   });
 });

@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { IconBolt, IconBook, IconGraduation, IconHome, IconUsers } from "@edunudg/ui";
+import { IconBolt, IconChart, IconClipboard, IconGraduation, IconHome, IconSettings } from "@edunudg/ui";
 import { studentBottomNavItems } from "@/lib/portalNav";
 
 const ICONS: Record<string, ReactNode> = {
   home: <IconHome width={22} height={22} />,
-  leads: <IconUsers width={22} height={22} />,
-  batches: <IconGraduation width={22} height={22} />,
-  curriculum: <IconBook width={22} height={22} />,
-  profile: <IconUsers width={22} height={22} />,
+  progress: <IconChart width={22} height={22} />,
+  events: <IconGraduation width={22} height={22} />,
+  activity: <IconClipboard width={22} height={22} />,
+  profile: <IconSettings width={22} height={22} />,
 };
 
 export function StudentMobileChrome() {

@@ -130,4 +130,30 @@ describe("AppShell responsive", () => {
 
     expect(screen.queryByRole("button", { name: /switch to (dark|light) mode/i })).toBeNull();
   });
+
+  it("regression_student_shell_omits_header_action_icons", () => {
+    const { container } = render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <AppShell
+            portalLabel="Learn · Smart Brain"
+            portalTagline="Student portal"
+            shellVariant="student"
+            showWelcome={false}
+            user={{ name: "Alex Student", email: "alex@example.com", subtitle: "Student ID: #1001" }}
+            navSections={[{ title: "Main menu", items: [{ href: "/", label: "Home", active: true }] }]}
+            footerItems={[{ href: "#", label: "Logout", icon: <span />, onClick: () => undefined }]}
+            showUpgradeCard={false}
+          >
+            <p>Student home</p>
+          </AppShell>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole("button", { name: "Help" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Notifications" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Support" })).toBeNull();
+    expect(container.querySelector(".ed-shell--student .ed-header")).toBeTruthy();
+  });
 });

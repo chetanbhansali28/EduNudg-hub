@@ -1,11 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
-  IconBell,
   IconBolt,
   IconChevronLeft,
   IconChevronRight,
-  IconHelp,
   IconMenu,
   IconSearch,
   IconShield,
@@ -430,16 +428,6 @@ export function AppShell({
           )}
           {user && (
             <div className="ed-header__actions">
-              {shellVariant === "student" && (
-                <>
-                  <button type="button" className="ed-header__icon-btn" aria-label="Notifications" disabled>
-                    <IconBell width={18} height={18} />
-                  </button>
-                  <button type="button" className="ed-header__icon-btn" aria-label="Help" disabled>
-                    <IconHelp width={18} height={18} />
-                  </button>
-                </>
-              )}
               <div className="ed-header__profile">
                 {user.avatarUrl ? (
                   <img src={user.avatarUrl} alt="" className="ed-header__avatar ed-header__avatar--img" />
