@@ -10,7 +10,10 @@ vi.mock("@/features/marketing/HomepageEditorForm", () => ({
 }));
 
 vi.mock("@/lib/homepageApi", () => ({
-  fetchHomepageConfig: vi.fn().mockResolvedValue({ meta: { siteName: "EduNudg" } }),
+  fetchHomepageEditorBundle: vi.fn().mockResolvedValue({
+    config: { meta: { siteName: "EduNudg" } },
+    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  }),
   saveHomepageConfig: vi.fn(),
 }));
 
@@ -56,7 +59,7 @@ describe("HomepageEditorPage", () => {
       </QueryClientProvider>
     );
 
-    expect(await screen.findByText("Marketing & theming")).toBeDefined();
+    expect(await screen.findByText("Homepage Configuration")).toBeDefined();
     expect(screen.getByText("Brand marketing themes")).toBeDefined();
     expect(screen.getByText("Smart Brain Abacus")).toBeDefined();
   });

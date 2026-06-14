@@ -45,6 +45,7 @@ describe("BrandMarketingEditorPage", () => {
         </QueryClientProvider>
       </MemoryRouter>
     );
+    expect(await screen.findByText("Homepage Configuration")).toBeDefined();
     expect(await screen.findByText("Brand site (franchise recruitment)")).toBeDefined();
     expect(screen.getByText("Center sites (parent enrollment template)")).toBeDefined();
     expect(screen.getAllByRole("button", { name: "Save changes" })).toHaveLength(2);

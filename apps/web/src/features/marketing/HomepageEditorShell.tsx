@@ -4,15 +4,19 @@ import {
   useContext,
   useId,
   useState,
+  type DragEvent,
   type ReactNode,
 } from "react";
-import { Button, FormGrid, SaveButton, Toggle } from "@edunudg/ui";
+import { Button, EditorPageHeader, EditorSaveBar, EditorSectionCard, FormGrid, Toggle } from "@edunudg/ui";
 
 type ShellProps = {
   title: string;
   subtitle?: ReactNode;
+  lastSavedLabel?: string | null;
   actions?: ReactNode;
   onSave?: () => void;
+  onDiscard?: () => void;
+  isDirty?: boolean;
   savePending?: boolean;
   saved?: boolean;
   saveLabel?: string;
@@ -36,7 +40,7 @@ export const HOMEPAGE_EDITOR_SECTION_META: Record<string, EditorSectionMeta> = {
   highlights: { icon: "view_carousel", tone: "neutral", description: "Featured content carousels" },
   testimonials: { icon: "format_quote", tone: "error", description: "Student & partner success stories" },
   faq: { icon: "help", tone: "neutral", description: "Common questions and answers" },
-  privacyFooter: { icon: "shield", tone: "neutral", description: "Legal disclosures and footer layout" },
+  privacyFooter: { icon: "shield", tone: "secondary", description: "Legal disclosures and footer layout" },
   featureGrid: { icon: "grid_view", tone: "secondary", description: "Why us feature blocks" },
   founders: { icon: "groups", tone: "primary", description: "Leadership profiles" },
   trustMedia: { icon: "play_circle", tone: "primary", description: "Trust stats and video" },
@@ -57,52 +61,25 @@ function MaterialIcon({ name, filled }: { name: string; filled?: boolean }) {
   );
 }
 
-function EditorHeroSaveButton({
-  onClick,
-  pending,
-  saved,
-  label,
-}: {
-  onClick: () => void;
-  pending?: boolean;
-  saved?: boolean;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      className="ed-editor-hero-card__save"
-      onClick={onClick}
-      disabled={pending}
-    >
-      <MaterialIcon name="save" filled />
-      {pending ? "Saving…" : saved ? "Saved" : label}
-    </button>
-  );
+function sectionIcon(sectionId: string, filled?: boolean) {
+  const meta = HOMEPAGE_EDITOR_SECTION_META[sectionId];
+  return <MaterialIcon name={meta?.icon ?? "tune"} filled={filled} />;
 }
 
 /** Shared layout wrapper for platform and brand homepage editors. */
 export function HomepageEditorShell({
   title,
   subtitle,
+  lastSavedLabel,
   actions,
   onSave,
+  onDiscard,
+  isDirty = false,
   savePending,
   saved,
   saveLabel = "Save changes",
   children,
 }: ShellProps) {
-  const saveControl =
-    actions ??
-    (onSave ? (
-      <EditorHeroSaveButton
-        onClick={onSave}
-        pending={savePending}
-        saved={saved}
-        label={saveLabel}
-      />
-    ) : null);
-
   return (
     <div
       className={[
@@ -112,21 +89,18 @@ export function HomepageEditorShell({
         .filter(Boolean)
         .join(" ")}
     >
-      <div className="ed-editor-hero-card">
-        <div className="ed-editor-hero-card__glow" aria-hidden />
-        <h2 className="ed-editor-hero-card__title">{title}</h2>
-        {subtitle ? <p className="ed-editor-hero-card__subtitle">{subtitle}</p> : null}
-        {saveControl}
-      </div>
+      <EditorPageHeader title={title} subtitle={subtitle} lastSavedLabel={lastSavedLabel} />
+      {actions}
       {children}
       {onSave ? (
-        <div
-          className="ed-editor-save-bar ed-editor-save-bar--mobile"
-          role="region"
-          aria-label="Save changes"
-        >
-          <SaveButton onClick={onSave} pending={savePending} saved={saved} label={saveLabel} block />
-        </div>
+        <EditorSaveBar
+          isDirty={isDirty}
+          onDiscard={onDiscard}
+          onSave={onSave}
+          savePending={savePending}
+          saved={saved}
+          saveLabel={saveLabel}
+        />
       ) : null}
     </div>
   );
@@ -136,6 +110,8 @@ type PanelProps = {
   title: string;
   description?: ReactNode;
   onSave: () => void;
+  onDiscard?: () => void;
+  isDirty?: boolean;
   savePending?: boolean;
   saved?: boolean;
   saveLabel?: string;
@@ -147,6 +123,8 @@ export function HomepageEditorPanel({
   title,
   description,
   onSave,
+  onDiscard,
+  isDirty = false,
   savePending,
   saved,
   saveLabel = "Save changes",
@@ -154,18 +132,44 @@ export function HomepageEditorPanel({
 }: PanelProps) {
   return (
     <section className="ed-homepage-editor-panel">
-      <div className="ed-editor-hero-card ed-editor-hero-card--panel">
-        <h3 className="ed-editor-hero-card__title">{title}</h3>
-        {description ? <p className="ed-editor-hero-card__subtitle">{description}</p> : null}
-        <EditorHeroSaveButton
-          onClick={onSave}
-          pending={savePending}
-          saved={saved}
-          label={saveLabel}
-        />
+      <div className="ed-homepage-editor-panel__head">
+        <h3 className="ed-homepage-editor-panel__title">{title}</h3>
+        {description ? <p className="ed-homepage-editor-panel__desc">{description}</p> : null}
       </div>
       {children}
+      <EditorSaveBar
+        isDirty={isDirty}
+        onDiscard={onDiscard}
+        onSave={onSave}
+        savePending={savePending}
+        saved={saved}
+        saveLabel={saveLabel}
+        inline
+      />
     </section>
+  );
+}
+
+type EditorStaticSectionProps = {
+  sectionId: string;
+  title?: string;
+  headerAction?: ReactNode;
+  children: ReactNode;
+};
+
+/** Always-visible section card wired to {@link HOMEPAGE_EDITOR_SECTION_META}. */
+export function EditorStaticSection({ sectionId, title, headerAction, children }: EditorStaticSectionProps) {
+  const meta = HOMEPAGE_EDITOR_SECTION_META[sectionId];
+  const tone = meta?.tone === "error" ? "neutral" : (meta?.tone ?? "primary");
+  return (
+    <EditorSectionCard
+      icon={sectionIcon(sectionId, true)}
+      iconTone={tone as "primary" | "secondary" | "tertiary" | "neutral"}
+      title={title ?? sectionId}
+      headerAction={headerAction}
+    >
+      {children}
+    </EditorSectionCard>
   );
 }
 
@@ -201,6 +205,14 @@ type EditorItemPanelProps = {
   onRemove?: () => void;
   removeLabel?: string;
   className?: string;
+  variant?: "default" | "nav";
+  dragHandleProps?: {
+    draggable: boolean;
+    onDragStart: (e: DragEvent) => void;
+    onDragOver: (e: DragEvent) => void;
+    onDrop: (e: DragEvent) => void;
+    onDragEnd: () => void;
+  };
 };
 
 /** Card panel for one repeatable homepage item (nav link, FAQ, program card, etc.). */
@@ -210,7 +222,35 @@ export function EditorItemPanel({
   onRemove,
   removeLabel = "Remove item",
   className,
+  variant = "default",
+  dragHandleProps,
 }: EditorItemPanelProps) {
+  if (variant === "nav") {
+    return (
+      <div
+        className={["ed-editor-nav-row", className].filter(Boolean).join(" ")}
+        {...dragHandleProps}
+      >
+        <span className="ed-editor-nav-row__handle material-symbols-outlined" aria-hidden>
+          drag_indicator
+        </span>
+        <div className="ed-editor-nav-row__fields">{children}</div>
+        {onRemove ? (
+          <button
+            type="button"
+            className="ed-editor-nav-row__remove"
+            onClick={onRemove}
+            aria-label={removeLabel}
+          >
+            <span className="material-symbols-outlined" aria-hidden>
+              delete
+            </span>
+          </button>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div className={["ed-editor-item-panel", className].filter(Boolean).join(" ")}>
       <h4 className="ed-editor-item-panel__title">{title}</h4>
@@ -228,21 +268,23 @@ export function EditorItemPanel({
 
 type EditorItemListProps = {
   children: ReactNode;
-  onAdd: () => void;
-  addLabel: string;
+  onAdd?: () => void;
+  addLabel?: string;
   className?: string;
 };
 
-/** Vertical stack of {@link EditorItemPanel} rows with a primary add action. */
+/** Vertical stack of {@link EditorItemPanel} rows with an optional primary add action. */
 export function EditorItemList({ children, onAdd, addLabel, className }: EditorItemListProps) {
   return (
     <div className={["ed-editor-item-list", className].filter(Boolean).join(" ")}>
       {children}
-      <div className="ed-editor-item-list__add">
-        <Button variant="primary" onClick={onAdd}>
-          {addLabel}
-        </Button>
-      </div>
+      {onAdd && addLabel ? (
+        <div className="ed-editor-item-list__add">
+          <Button variant="primary" onClick={onAdd}>
+            {addLabel}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -9,6 +9,7 @@ export type CenterStudentRow = {
   user_id: string | null;
   enrollment_id: string;
   enrollment_status: string;
+  enrollment_created_at: string | null;
   program_id: string | null;
   program_name: string | null;
   starting_level_id: string | null;
@@ -21,7 +22,7 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
   const { data: enrollments, error: eErr } = await getSupabase()
     .from("student_enrollments")
     .select(
-      "id, status, program_id, starting_level_id, student_id, programs(name), levels:starting_level_id(name), students(id, full_name, student_code, login_email, user_id)"
+      "id, status, created_at, program_id, starting_level_id, student_id, programs(name), levels:starting_level_id(name), students(id, full_name, student_code, login_email, user_id)"
     )
     .eq("center_id", centerId)
     .eq("brand_id", brandId)
@@ -30,6 +31,7 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
   const rows = supabaseList(enrollments, eErr) as unknown as {
     id: string;
     status: string;
+    created_at: string;
     program_id: string | null;
     starting_level_id: string | null;
     student_id: string;
@@ -80,6 +82,7 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
       user_id: r.students?.user_id ?? null,
       enrollment_id: r.id,
       enrollment_status: r.status,
+      enrollment_created_at: r.created_at ?? null,
       program_id: r.program_id,
       program_name: program?.name ?? null,
       starting_level_id: r.starting_level_id,

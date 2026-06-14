@@ -47,6 +47,7 @@ const student = {
   user_id: null,
   enrollment_id: "e1",
   enrollment_status: "active",
+  enrollment_created_at: "2023-10-01T00:00:00.000Z",
   program_id: null,
   program_name: null,
   starting_level_id: null,
@@ -67,8 +68,8 @@ describe("CenterStudentDetailPanel", () => {
 
   it("regression_shows_course_program_enrollment_section", () => {
     expect(screen.getByText("Course / program")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Assign course" })).toBeDefined();
-    expect(screen.getByText(/Starting level/i)).toBeDefined();
-    expect(screen.queryByText(/begins at level 1 and advances automatically/i)).toBeNull();
+    expect(screen.getByRole("button", { name: "Update assignment" })).toBeDefined();
+    expect(screen.getAllByText(/Starting level/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Active enrollment/i)).toBeDefined();
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StudentsPage } from "./StudentsPage";
@@ -15,19 +15,16 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
   }),
 }));
 
-vi.mock("@/lib/supabase", () => ({
-  getSupabase: () => ({
-    from: () => ({
-      select: () => ({
-        eq: () => Promise.resolve({ data: [], error: null }),
-        limit: () => Promise.resolve({ data: [], error: null }),
-      }),
-    }),
-  }),
+vi.mock("@/lib/centerBatchesApi", () => ({
+  markBatchJoinsSeen: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/lib/centerStudentsApi", () => ({
+  fetchCenterStudents: vi.fn().mockResolvedValue([]),
 }));
 
 describe("StudentsPage", () => {
-  it("regression_no_direct_register_links_to_leads", () => {
+  it("regression_renders_ops_students_header_and_add_action", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <MemoryRouter>
@@ -36,10 +33,11 @@ describe("StudentsPage", () => {
         </QueryClientProvider>
       </MemoryRouter>
     );
-    expect(screen.getByRole("button", { name: "Add students" })).toBeDefined();
-    expect(screen.queryByText("Go to leads")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Add students" }));
-    expect(screen.getByText("Go to leads")).toBeDefined();
-    expect(screen.queryByText("Register + enroll")).toBeNull();
+
+    expect(screen.getByRole("heading", { name: "Students" })).toBeDefined();
+    expect(screen.queryByText(/Browse and order kits for your center/i)).toBeNull();
+    expect(screen.getByText(/Manage enrollments, portal access/i)).toBeDefined();
+    expect(screen.getByRole("link", { name: "+ Add students" })).toBeDefined();
+    expect(screen.getByPlaceholderText(/Search by student name or ID/i)).toBeDefined();
   });
 });

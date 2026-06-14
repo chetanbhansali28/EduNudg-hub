@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Badge,
   Button,
-  Card,
-  FormGrid,
   FormActions,
+  FormGrid,
   Input,
   MutationError,
+  OpsSectionCard,
   Select,
   ToggleField,
 } from "@edunudg/ui";
@@ -19,8 +18,9 @@ import {
 import { inviteStudentPortalAccess, pinEnrollmentProgram } from "@/lib/studentPortalAdminApi";
 import { fetchCenterStudentProgramContext } from "@/lib/centerStudentProgramApi";
 import { syncStudentBatchAssignments, type CenterStudentRow } from "@/lib/centerStudentsApi";
-import { fetchAuthorizedPrograms, fetchCenterBatches } from "@/lib/centerBatchesApi";
+import { fetchAuthorizedPrograms, fetchCenterBatches, type CenterBatchRow } from "@/lib/centerBatchesApi";
 import { fetchLevels } from "@/lib/curriculumApi";
+import { initialsFromName } from "@/lib/welcomeMessage";
 
 type Props = {
   student: CenterStudentRow;
@@ -28,6 +28,40 @@ type Props = {
   centerId: string;
   onSaved?: () => void;
 };
+
+function formatJoined(iso: string | null): string {
+  if (!iso) return "—";
+  return new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(new Date(iso));
+}
+
+function formatBatchSchedule(batch: CenterBatchRow): string {
+  const schedule = batch.schedule;
+  if (schedule && typeof schedule === "object" && Array.isArray((schedule as { days?: unknown }).days)) {
+    return ((schedule as { days: string[] }).days ?? []).join(", ");
+  }
+  return "Schedule on request";
+}
+
+const ICON_GRAD = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+    <path d="M6 12v5c0 1 2 3 6 3s6-2 6-3v-5" />
+  </svg>
+);
+
+const ICON_KEY = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4" />
+  </svg>
+);
+
+const ICON_USERS = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
 
 export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }: Props) {
   const qc = useQueryClient();
@@ -76,18 +110,10 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
     setLoginEmail(student.login_email ?? "");
     setProgramId(student.program_id ?? "");
     setLevelId(student.starting_level_id ?? "");
-  }, [
-    student.id,
-    student.batch_ids,
-    student.login_email,
-    student.program_id,
-    student.starting_level_id,
-  ]);
+  }, [student.id, student.batch_ids, student.login_email, student.program_id, student.starting_level_id]);
 
   useEffect(() => {
-    if (programId !== student.program_id) {
-      setLevelId("");
-    }
+    if (programId !== student.program_id) setLevelId("");
   }, [programId, student.program_id]);
 
   useEffect(() => {
@@ -141,7 +167,7 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
       await pinEnrollmentProgram(student.enrollment_id, programId, levelId);
     },
     onSuccess: () => {
-      setSaveMessage("Course and starting level assigned — journey tracking is active.");
+      setSaveMessage("Course and starting level assigned.");
       invalidate();
     },
     onError: capture,
@@ -169,25 +195,49 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
   const currentLevel = programContext.data?.current_level_name;
   const assignmentChanged =
     programId !== (student.program_id ?? "") || levelId !== (student.starting_level_id ?? "");
+  const openBatchSlots = (batches.data ?? []).filter((b) => b.is_open_for_enrollment).length;
 
   return (
-    <Card title={student.full_name}>
+    <div className="ed-ops-detail-enter">
       <MutationError message={error} />
-      {saveMessage && (
+      {saveMessage ? (
         <p className="ed-text-sm ed-success" role="status" aria-live="polite">
           {saveMessage}
         </p>
-      )}
+      ) : null}
 
-      <div className="ed-ops-detail-enter" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-        <section>
-          <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>
-            Course / program
-          </h3>
-          <p className="ed-text-sm ed-muted" style={{ margin: "0 0 0.65rem" }}>
-            Assign the course and the level where this student is starting. Earlier levels are marked complete;
-            assessments advance them through the program automatically.
-          </p>
+      <header className="ed-ops-detail-hero">
+        <div className="ed-ops-detail-hero__main">
+          <span className="ed-ops-detail-hero__avatar" aria-hidden>
+            {initialsFromName(student.full_name)}
+          </span>
+          <div>
+            <h2 className="ed-ops-detail-hero__name">{student.full_name}</h2>
+            <p className="ed-ops-detail-hero__status">
+              <span className="ed-ops-detail-hero__status-dot" aria-hidden />
+              Active enrollment
+            </p>
+            <p className="ed-ops-detail-hero__meta">
+              ID: {student.student_code ?? student.id.slice(0, 8).toUpperCase()} · Joined:{" "}
+              {formatJoined(student.enrollment_created_at)}
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <div className="ed-ops-detail-grid">
+        <OpsSectionCard
+          icon={ICON_GRAD}
+          title="Course / program"
+          description="Assign the course and the starting level. Progress is tracked automatically."
+          footer={
+            student.program_name
+              ? `Currently assigned: ${student.program_name}${student.starting_level_name ? ` • ${student.starting_level_name}` : ""}${
+                  currentLevel && currentLevel !== student.starting_level_name ? ` · now on ${currentLevel}` : ""
+                }`
+              : undefined
+          }
+        >
           <FormGrid columns={2}>
             <Select
               label="Program"
@@ -212,108 +262,88 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
               ]}
               editable
             />
-            <FormActions>
-              <Button
-                onClick={() => saveProgram.mutate()}
-                disabled={
-                  saveProgram.isPending || !programId || !levelId || !assignmentChanged
-                }
-              >
-                {student.program_id ? "Update assignment" : "Assign course"}
-              </Button>
-            </FormActions>
           </FormGrid>
-          {student.program_name && (
-            <p className="ed-text-sm" style={{ marginTop: "0.5rem" }}>
-              Assigned: <strong>{student.program_name}</strong>
-              {student.starting_level_name ? ` · started at ${student.starting_level_name}` : null}
-              {currentLevel && currentLevel !== student.starting_level_name
-                ? ` · now on ${currentLevel}`
-                : null}
-            </p>
-          )}
-          {programId && (programLevels.data ?? []).length === 0 && !programLevels.isLoading && (
-            <p className="ed-text-sm ed-muted">This program has no levels yet — ask your brand admin.</p>
-          )}
-          {(programs.data ?? []).length === 0 && (
-            <p className="ed-text-sm ed-muted">Ask your brand admin to authorize programs for this center.</p>
-          )}
-        </section>
+          <FormActions>
+            <Button
+              onClick={() => saveProgram.mutate()}
+              disabled={saveProgram.isPending || !programId || !levelId || !assignmentChanged}
+            >
+              Update assignment
+            </Button>
+          </FormActions>
+        </OpsSectionCard>
 
-        <section>
-          <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>Enrollment</h3>
-          <p className="ed-text-sm ed-muted">
-            {student.student_code ? `Code ${student.student_code} · ` : ""}
-            Status: {student.enrollment_status}
-          </p>
-          {student.batch_names.length > 0 && (
-            <div className="ed-ops-program-grid">
-              {student.batch_names.map((name) => (
-                <span key={name} className="ed-ops-batch-chip">
-                  {name}
-                </span>
-              ))}
+        <OpsSectionCard
+          icon={ICON_KEY}
+          title="Portal access"
+          description="Manage student login credentials and mobile app access status."
+        >
+          <Input label="Login email" value={loginEmail} onChange={setLoginEmail} editable />
+          {portalLinked ? (
+            <div className="ed-ops-linked-banner">
+              <span aria-hidden>✓</span>
+              LINKED TO LOGIN · Last active: recently
             </div>
-          )}
-        </section>
+          ) : null}
+          <Button variant="ghost" onClick={() => invite.mutate()} disabled={invite.isPending || !loginEmail.trim()}>
+            {portalLinked ? "Update invite" : "Send invite"}
+          </Button>
+        </OpsSectionCard>
+      </div>
 
-        <section>
-          <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>Portal access</h3>
-          <FormGrid columns={2}>
-            <Input label="Login email" value={loginEmail} onChange={setLoginEmail} editable />
-            <FormActions>
-              <Button onClick={() => invite.mutate()} disabled={invite.isPending || !loginEmail.trim()}>
-                {portalLinked ? "Update invite" : "Send invite"}
-              </Button>
-            </FormActions>
-          </FormGrid>
-          {portalLinked && <Badge tone="success">Linked to login</Badge>}
-        </section>
-
-        <section>
-          <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>Batch assignments</h3>
-          <div className="ed-ops-stagger">
-            {(batches.data ?? []).map((b) => (
-              <ToggleField
-                key={b.id}
-                label={`${b.name}${b.is_open_for_enrollment ? " (open)" : ""}`}
-                checked={selectedBatches.includes(b.id)}
-                onChange={() => toggleBatch(b.id)}
-              />
-            ))}
-            {(batches.data ?? []).length === 0 && (
-              <p className="ed-text-sm ed-muted">Create batches first to assign this student.</p>
-            )}
+      <OpsSectionCard
+        icon={ICON_USERS}
+        title="Batch assignments"
+        footer={`Slots available: ${openBatchSlots}`}
+      >
+        {(batches.data ?? []).map((batch) => (
+          <div key={batch.id} className="ed-ops-batch-row">
+            <div>
+              <p className="ed-ops-batch-row__name">
+                {batch.name}
+                {batch.is_open_for_enrollment ? " (open)" : ""}
+              </p>
+              <p className="ed-ops-batch-row__meta">{formatBatchSchedule(batch)}</p>
+            </div>
+            <ToggleField
+              label={`Assign ${batch.name}`}
+              checked={selectedBatches.includes(batch.id)}
+              onChange={() => toggleBatch(batch.id)}
+            />
           </div>
+        ))}
+        {(batches.data ?? []).length === 0 ? (
+          <p className="ed-text-sm ed-muted">Create batches first to assign this student.</p>
+        ) : null}
+        <FormActions>
           <Button onClick={() => saveBatches.mutate()} disabled={saveBatches.isPending}>
             Save batches
           </Button>
-        </section>
+        </FormActions>
+      </OpsSectionCard>
 
-        <section>
-          <h3 className="ed-text-sm" style={{ fontWeight: 700, margin: "0 0 0.5rem" }}>Delivery address</h3>
-          <FormGrid columns={2}>
-            <Input
-              label="Address"
-              value={address.address_line1}
-              onChange={(v) => setAddress((a) => ({ ...a, address_line1: v }))}
-              editable
-            />
-            <Input label="City" value={address.city} onChange={(v) => setAddress((a) => ({ ...a, city: v }))} editable />
-            <Input label="State" value={address.state} onChange={(v) => setAddress((a) => ({ ...a, state: v }))} editable />
-            <Input
-              label="Pincode"
-              value={address.pincode}
-              onChange={(v) => setAddress((a) => ({ ...a, pincode: v }))}
-              editable
-            />
-            <Input label="Phone" value={address.phone} onChange={(v) => setAddress((a) => ({ ...a, phone: v }))} editable />
-          </FormGrid>
-          <Button onClick={() => saveAddress.mutate()} disabled={saveAddress.isPending}>
-            Save address
-          </Button>
-        </section>
-      </div>
-    </Card>
+      <OpsSectionCard icon={ICON_KEY} title="Delivery address" description="Used for kit and merchandise shipping.">
+        <FormGrid columns={2}>
+          <Input
+            label="Address"
+            value={address.address_line1}
+            onChange={(v) => setAddress((a) => ({ ...a, address_line1: v }))}
+            editable
+          />
+          <Input label="City" value={address.city} onChange={(v) => setAddress((a) => ({ ...a, city: v }))} editable />
+          <Input label="State" value={address.state} onChange={(v) => setAddress((a) => ({ ...a, state: v }))} editable />
+          <Input
+            label="Pincode"
+            value={address.pincode}
+            onChange={(v) => setAddress((a) => ({ ...a, pincode: v }))}
+            editable
+          />
+          <Input label="Phone" value={address.phone} onChange={(v) => setAddress((a) => ({ ...a, phone: v }))} editable />
+        </FormGrid>
+        <Button onClick={() => saveAddress.mutate()} disabled={saveAddress.isPending}>
+          Save address
+        </Button>
+      </OpsSectionCard>
+    </div>
   );
 }

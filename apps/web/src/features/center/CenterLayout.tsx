@@ -10,6 +10,7 @@ import { resolveShellProductName } from "@/lib/portalBranding";
 import {
   CenterMerchandiseMobileBarEnd,
 } from "@/features/center/merchandise/CenterMerchandiseMobileChrome";
+import { CenterOpsMobileBarEnd, CenterOpsMobileChrome } from "@/features/center/CenterOpsMobileChrome";
 
 export function CenterLayout() {
   const { pathname } = useLocation();
@@ -37,7 +38,14 @@ export function CenterLayout() {
   const portalLabel = `Center · ${shell.productName}`;
   const welcome = useStaffShellWelcome(portalLabel);
   const isMerchandise = pathname.startsWith("/app/merchandise");
+  const isOpsRoute =
+    pathname === "/app" ||
+    pathname.startsWith("/app/leads") ||
+    pathname.startsWith("/app/students") ||
+    pathname.startsWith("/app/batches") ||
+    pathname.startsWith("/app/settings");
   const storeTitle = branding?.brandName ? `${branding.brandName} Store` : `${shell.productName} Store`;
+  const opsTitle = "Student Management";
 
   return (
     <AppShell
@@ -50,12 +58,15 @@ export function CenterLayout() {
       navSections={navSections}
       footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}
-      showWelcome={!isMerchandise}
-      mobileBarTitle={isMerchandise ? storeTitle : undefined}
-      mobileBarEnd={isMerchandise ? <CenterMerchandiseMobileBarEnd /> : undefined}
-      shellClassName={isMerchandise ? "ed-shell--commerce" : undefined}
+      showWelcome={!isMerchandise && !isOpsRoute}
+      mobileBarTitle={isMerchandise ? storeTitle : isOpsRoute ? opsTitle : undefined}
+      mobileBarEnd={
+        isMerchandise ? <CenterMerchandiseMobileBarEnd /> : isOpsRoute ? <CenterOpsMobileBarEnd /> : undefined
+      }
+      shellClassName={isMerchandise ? "ed-shell--commerce" : isOpsRoute ? "ed-shell--ops" : undefined}
     >
       <Outlet />
+      {isOpsRoute ? <CenterOpsMobileChrome /> : null}
     </AppShell>
   );
 }

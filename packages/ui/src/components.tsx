@@ -96,7 +96,7 @@ export function Button({
   block,
 }: {
   children: ReactNode;
-  variant?: "primary" | "ghost" | "danger" | "oauth-google" | "oauth-whatsapp";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "oauth-google" | "oauth-whatsapp";
   onClick?: () => void;
   type?: "button" | "submit";
   disabled?: boolean;
@@ -105,13 +105,15 @@ export function Button({
   const variantClass =
     variant === "primary"
       ? "ed-btn--primary"
-      : variant === "danger"
-        ? "ed-btn--danger"
-        : variant === "oauth-google"
-          ? "ed-btn--oauth-google"
-          : variant === "oauth-whatsapp"
-            ? "ed-btn--oauth-whatsapp"
-            : "ed-btn--ghost";
+      : variant === "secondary"
+        ? "ed-btn--secondary"
+        : variant === "danger"
+          ? "ed-btn--danger"
+          : variant === "oauth-google"
+            ? "ed-btn--oauth-google"
+            : variant === "oauth-whatsapp"
+              ? "ed-btn--oauth-whatsapp"
+              : "ed-btn--ghost";
   return (
     <button
       type={type}
@@ -627,6 +629,7 @@ export function PipelineListItem({
   initials,
   when,
   selected,
+  linked,
   onSelect,
 }: {
   title: string;
@@ -636,6 +639,7 @@ export function PipelineListItem({
   initials?: string;
   when?: string;
   selected?: boolean;
+  linked?: boolean;
   onSelect: () => void;
 }) {
   return (
@@ -645,6 +649,7 @@ export function PipelineListItem({
       onClick={onSelect}
       aria-pressed={selected}
     >
+      {linked ? <span className="ed-pipeline-item__linked">LINKED</span> : null}
       {initials && (
         <span className="ed-pipeline-item__avatar" aria-hidden>
           {initials}
@@ -793,5 +798,220 @@ export function BottomNav({
         </Link>
       ))}
     </nav>
+  );
+}
+
+export function OpsPageHeader({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <header className="ed-ops-page-header">
+      <div>
+        <h1 className="ed-ops-page-header__title">{title}</h1>
+        {subtitle ? <p className="ed-ops-page-header__subtitle">{subtitle}</p> : null}
+      </div>
+      {action ? <div className="ed-ops-page-header__action">{action}</div> : null}
+    </header>
+  );
+}
+
+export function OpsListHeader({ title, badge }: { title: string; badge?: string }) {
+  return (
+    <div className="ed-ops-list-header">
+      <h2 className="ed-ops-list-header__title">{title}</h2>
+      {badge ? <span className="ed-ops-list-header__badge">{badge}</span> : null}
+    </div>
+  );
+}
+
+export function OpsSearchField({
+  value,
+  onChange,
+  placeholder = "Search…",
+  onFilterClick,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  onFilterClick?: () => void;
+}) {
+  return (
+    <div className="ed-ops-search-row">
+      <label className="ed-ops-search">
+        <span className="ed-ops-search__icon" aria-hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+        </span>
+        <input
+          type="search"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+        />
+      </label>
+      {onFilterClick ? (
+        <button type="button" className="ed-ops-filter-btn" aria-label="Filter" onClick={onFilterClick}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 6h16M7 12h10M10 18h4" />
+          </svg>
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+export function OpsMobileFab({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button type="button" className="ed-ops-fab" aria-label={label} onClick={onClick}>
+      +
+    </button>
+  );
+}
+
+export function OpsSectionCard({
+  icon,
+  title,
+  description,
+  children,
+  footer,
+}: {
+  icon: ReactNode;
+  title: string;
+  description?: string;
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  return (
+    <section className="ed-ops-section-card">
+      <div className="ed-ops-section-card__head">
+        <span className="ed-ops-section-card__icon">{icon}</span>
+        <div>
+          <h3 className="ed-ops-section-card__title">{title}</h3>
+          {description ? <p className="ed-ops-section-card__desc">{description}</p> : null}
+        </div>
+      </div>
+      {children}
+      {footer ? <div className="ed-ops-section-card__footer">{footer}</div> : null}
+    </section>
+  );
+}
+
+export type EditorSectionTone = "primary" | "secondary" | "tertiary" | "neutral";
+
+/** Homepage / marketing editor page header with optional last-saved badge. */
+export function EditorPageHeader({
+  title,
+  subtitle,
+  lastSavedLabel,
+}: {
+  title: string;
+  subtitle?: ReactNode;
+  lastSavedLabel?: string | null;
+}) {
+  return (
+    <header className="ed-editor-page-header">
+      <div className="ed-editor-page-header__main">
+        <h1 className="ed-editor-page-header__title">{title}</h1>
+        {subtitle ? <p className="ed-editor-page-header__subtitle">{subtitle}</p> : null}
+      </div>
+      {lastSavedLabel ? (
+        <p className="ed-editor-page-header__saved">
+          <span className="ed-editor-page-header__saved-icon material-symbols-outlined" aria-hidden>
+            schedule
+          </span>
+          {lastSavedLabel}
+        </p>
+      ) : null}
+    </header>
+  );
+}
+
+/** Always-visible editor section card (Site Identity, Navigation, etc.). */
+export function EditorSectionCard({
+  icon,
+  iconTone = "primary",
+  title,
+  headerAction,
+  children,
+}: {
+  icon: ReactNode;
+  iconTone?: EditorSectionTone;
+  title: string;
+  headerAction?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="ed-editor-section-card">
+      <div className="ed-editor-section-card__header">
+        <div className="ed-editor-section-card__title-row">
+          <span className={`ed-editor-section-card__icon ed-editor-section-card__icon--${iconTone}`}>
+            {icon}
+          </span>
+          <h2 className="ed-editor-section-card__title">{title}</h2>
+        </div>
+        {headerAction ? <div className="ed-editor-section-card__action">{headerAction}</div> : null}
+      </div>
+      <div className="ed-editor-section-card__body">{children}</div>
+    </section>
+  );
+}
+
+/** Sticky draft/save bar for homepage and marketing editors. */
+export function EditorSaveBar({
+  draftNote = "Changes are currently in draft.",
+  savedNote = "All changes saved.",
+  isDirty = false,
+  onDiscard,
+  onSave,
+  savePending = false,
+  saved = false,
+  saveLabel = "Save changes",
+  discardLabel = "Discard",
+  inline = false,
+}: {
+  draftNote?: string;
+  savedNote?: string;
+  isDirty?: boolean;
+  onDiscard?: () => void;
+  onSave: () => void;
+  savePending?: boolean;
+  saved?: boolean;
+  saveLabel?: string;
+  discardLabel?: string;
+  /** When true, bar flows at the end of a panel instead of fixed to the viewport. */
+  inline?: boolean;
+}) {
+  return (
+    <div
+      className={["ed-editor-save-bar", inline ? "ed-editor-save-bar--inline" : ""].filter(Boolean).join(" ")}
+      role="region"
+      aria-label="Save changes"
+    >
+      <div className="ed-editor-save-bar__inner">
+        <p className="ed-editor-save-bar__status">{isDirty ? draftNote : savedNote}</p>
+        <div className="ed-editor-save-bar__actions">
+          {onDiscard && isDirty ? (
+            <Button variant="secondary" onClick={onDiscard} disabled={savePending}>
+              {discardLabel}
+            </Button>
+          ) : null}
+          <SaveButton
+            onClick={onSave}
+            pending={savePending}
+            saved={saved}
+            label={saveLabel}
+            disabled={!isDirty && !savePending && !saved}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

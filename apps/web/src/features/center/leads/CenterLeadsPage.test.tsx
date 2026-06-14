@@ -39,7 +39,7 @@ describe("CenterLeadsPage", () => {
     );
     expect(await screen.findByText("Lead pipeline")).toBeDefined();
     expect(screen.getByRole("tablist", { name: "Lead filter" })).toBeDefined();
-    expect(screen.getByText(/staff-only/)).toBeDefined();
+    expect(screen.getByPlaceholderText(/Search by name, phone, or email/i)).toBeDefined();
     expect(screen.queryByLabelText("Show")).toBeNull();
   });
 });

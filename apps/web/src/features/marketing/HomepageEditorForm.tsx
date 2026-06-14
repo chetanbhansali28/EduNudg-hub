@@ -9,6 +9,8 @@ import type {
   HomepageTestimonial,
 } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
+import { mergeHomepageConfig } from "@/lib/homepageApi";
+import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import {
   mergeSectionVisibility,
   setSectionEnabled,
@@ -19,7 +21,16 @@ import {
   moveItem,
   testimonialQuoteLengthHint,
 } from "@/lib/testimonialEditorHelpers";
-import { EditorAccordion, EditorFieldSpan, EditorFieldsGrid, EditorItemList, EditorItemPanel, EditorSectionNote, HomepageEditorSections } from "./HomepageEditorShell";
+import {
+  EditorAccordion,
+  EditorFieldSpan,
+  EditorFieldsGrid,
+  EditorItemList,
+  EditorItemPanel,
+  EditorSectionNote,
+  EditorStaticSection,
+  HomepageEditorSections,
+} from "./HomepageEditorShell";
 import { MarketingMediaField } from "./MarketingMediaField";
 
 export type HomepageEditorFormProps = {
@@ -35,13 +46,14 @@ export type HomepageEditorFormProps = {
 };
 
 export function HomepageEditorForm({
-  config,
+  config: rawConfig,
   onChange,
   uploadScope = { kind: "platform" },
   onPersist,
   testimonialsManagedExternally = false,
   testimonialsExternalHint,
 }: HomepageEditorFormProps) {
+  const config = mergeHomepageConfig(rawConfig ?? DEFAULT_HOMEPAGE_CONFIG);
   const sections = mergeSectionVisibility(config.sections);
 
   const commit = (next: HomepageConfig) => {
@@ -75,14 +87,19 @@ export function HomepageEditorForm({
   };
 
   return (
-    <HomepageEditorSections>
-      <EditorAccordion sectionId="site" title="Site">
+    <>
+      <EditorStaticSection sectionId="site" title="Site Identity">
         <EditorFieldsGrid>
-          <Input
-            label="Site name"
-            value={config.meta.siteName}
-            onChange={(v) => onChange({ ...config, meta: { ...config.meta, siteName: v } })}
-          />
+          <EditorFieldSpan>
+            <Input
+              label="Site name"
+              value={config.meta.siteName}
+              onChange={(v) => onChange({ ...config, meta: { ...config.meta, siteName: v } })}
+            />
+            <p className="ed-text-sm ed-muted ed-editor-field-hint">
+              This name appears in the browser title and header.
+            </p>
+          </EditorFieldSpan>
           <EditorFieldSpan>
             <MarketingMediaField
               label="Site logo"
@@ -90,55 +107,18 @@ export function HomepageEditorForm({
               onChange={(v) => commitMedia({ ...config, meta: { ...config.meta, logoUrl: v || null } })}
               mediaType="image"
               uploadSubdir=""
-              uploadScope={{ kind: "platform-logo" }}
+              uploadScope={
+                uploadScope.kind === "brand" ? uploadScope : { kind: "platform-logo" }
+              }
+              layout="logo"
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>
-      </EditorAccordion>
+      </EditorStaticSection>
 
-      <EditorAccordion sectionId="navigation" title="Navigation">
-        <EditorSectionNote>
-          Main menu links in the top bar. Use anchors like <code>#faq</code> for on-page sections, or paths like{" "}
-          <code>/login</code> for other routes. The primary CTA button is edited under Hero.
-        </EditorSectionNote>
-        <EditorItemList
-          onAdd={() =>
-            updateNavLinks([...config.nav.links, { label: "New item", href: "#" } satisfies HomepageLink])
-          }
-          addLabel="+ Add menu item"
-        >
-          {config.nav.links.map((link, i) => (
-            <EditorItemPanel
-              key={`nav-link-${i}`}
-              title={`Menu item ${i + 1}`}
-              onRemove={() => updateNavLinks(config.nav.links.filter((_, idx) => idx !== i))}
-              removeLabel="Remove menu item"
-            >
-              <EditorFieldsGrid>
-                <Input
-                  label="Label"
-                  value={link.label}
-                  onChange={(v) => {
-                    const links = [...config.nav.links];
-                    links[i] = { ...link, label: v };
-                    updateNavLinks(links);
-                  }}
-                />
-                <Input
-                  label="Link"
-                  value={link.href}
-                  onChange={(v) => {
-                    const links = [...config.nav.links];
-                    links[i] = { ...link, href: v };
-                    updateNavLinks(links);
-                  }}
-                />
-              </EditorFieldsGrid>
-            </EditorItemPanel>
-          ))}
-        </EditorItemList>
-      </EditorAccordion>
+      <NavigationEditorSection config={config} updateNavLinks={updateNavLinks} />
 
+      <HomepageEditorSections>
       <EditorAccordion
         sectionId="hero"
         title="Hero"
@@ -470,13 +450,14 @@ export function HomepageEditorForm({
           ))}
         </EditorItemList>
       </EditorAccordion>
+      </HomepageEditorSections>
 
-      <EditorAccordion sectionId="privacyFooter" title="Privacy & footer">
+      <EditorStaticSection sectionId="privacyFooter" title="Privacy & Footer">
         <EditorFieldsGrid>
           <EditorFieldSpan>
             <ToggleField
               label="Show privacy section"
-              description="Trust / security copy block on the public homepage."
+              description="Trust block on homepage."
               checked={sections.privacy}
               onChange={(enabled) => setSection("privacy", enabled)}
             />
@@ -484,7 +465,7 @@ export function HomepageEditorForm({
           <EditorFieldSpan>
             <ToggleField
               label="Show site footer"
-              description="Footer CTA banner, link columns, and copyright."
+              description="Logo, links, and copyright."
               checked={sections.footer}
               onChange={(enabled) => setSection("footer", enabled)}
             />
@@ -522,11 +503,113 @@ export function HomepageEditorForm({
               mediaType="image"
               uploadSubdir="footer-background"
               uploadScope={uploadScope}
+              layout="hero"
+              recommendedSize="1920×800px"
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>
-      </EditorAccordion>
-    </HomepageEditorSections>
+      </EditorStaticSection>
+    </>
+  );
+}
+
+function NavigationEditorSection({
+  config,
+  updateNavLinks,
+}: {
+  config: HomepageConfig;
+  updateNavLinks: (links: HomepageLink[]) => void;
+}) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const onDragStart = (index: number) => (e: DragEvent) => {
+    setDragIndex(index);
+    setDragOverIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDragOver = (index: number) => (e: DragEvent) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const onDrop = (index: number) => (e: DragEvent) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    updateNavLinks(moveItem(config.nav.links, dragIndex, index));
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const onDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  return (
+    <EditorStaticSection
+      sectionId="navigation"
+      title="Navigation Management"
+      headerAction={
+        <Button
+          variant="primary"
+          onClick={() =>
+            updateNavLinks([...config.nav.links, { label: "New item", href: "#" } satisfies HomepageLink])
+          }
+        >
+          + Add menu item
+        </Button>
+      }
+    >
+      <EditorSectionNote>
+        Manage primary links in the top header bar. Use anchors (e.g., <code>#features</code>) for on-page sections.
+      </EditorSectionNote>
+      <EditorItemList>
+        {config.nav.links.map((link, i) => (
+          <EditorItemPanel
+            key={`nav-link-${i}`}
+            title={`Menu item ${i + 1}`}
+            variant="nav"
+            onRemove={() => updateNavLinks(config.nav.links.filter((_, idx) => idx !== i))}
+            removeLabel="Remove menu item"
+            className={[
+              dragIndex === i ? "ed-editor-nav-row--dragging" : "",
+              dragOverIndex === i && dragIndex !== i ? "ed-editor-nav-row--drop-target" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            dragHandleProps={{
+              draggable: true,
+              onDragStart: onDragStart(i),
+              onDragOver: onDragOver(i),
+              onDrop: onDrop(i),
+              onDragEnd,
+            }}
+          >
+            <Input
+              label="Label"
+              value={link.label}
+              onChange={(v) => {
+                const links = [...config.nav.links];
+                links[i] = { ...link, label: v };
+                updateNavLinks(links);
+              }}
+            />
+            <Input
+              label="Link"
+              value={link.href}
+              onChange={(v) => {
+                const links = [...config.nav.links];
+                links[i] = { ...link, href: v };
+                updateNavLinks(links);
+              }}
+            />
+          </EditorItemPanel>
+        ))}
+      </EditorItemList>
+    </EditorStaticSection>
   );
 }
 

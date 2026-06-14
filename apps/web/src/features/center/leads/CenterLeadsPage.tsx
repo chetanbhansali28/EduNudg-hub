@@ -10,8 +10,10 @@ import {
   KpiCard,
   KpiGrid,
   MutationError,
+  OpsListHeader,
+  OpsPageHeader,
+  OpsSearchField,
   PageGridFull,
-  PageToolbar,
   PipelineDetailPlaceholder,
   PipelineEmptyState,
   PipelineListItem,
@@ -34,6 +36,7 @@ import {
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { formatRelativeWhen, initialsFromName } from "@/lib/welcomeMessage";
+import "@/features/center/centerOps.css";
 
 const STATUS_OPTIONS: { value: LeadStatus; label: string }[] = [
   { value: "new", label: "New" },
@@ -72,6 +75,7 @@ export function CenterLeadsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<LeadFilter>("open");
+  const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lostMode, setLostMode] = useState(false);
   const [lostReason, setLostReason] = useState("");
@@ -177,13 +181,23 @@ export function CenterLeadsPage() {
   );
 
   const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
     return allLeads.filter((l) => {
-      if (filter === "open") return ["new", "contacted", "qualified"].includes(l.status);
-      if (filter === "lost") return l.status === "lost";
-      if (filter === "converted") return l.status === "converted";
-      return true;
+      const matchesFilter =
+        filter === "open"
+          ? ["new", "contacted", "qualified"].includes(l.status)
+          : filter === "lost"
+            ? l.status === "lost"
+            : filter === "converted"
+              ? l.status === "converted"
+              : true;
+      if (!matchesFilter) return false;
+      if (!q) return true;
+      return [l.full_name, l.parent_name, l.email, l.whatsapp_e164, l.child_name]
+        .filter(Boolean)
+        .some((value) => value!.toLowerCase().includes(q));
     });
-  }, [allLeads, filter]);
+  }, [allLeads, filter, search]);
 
   const filterTabs = FILTER_OPTIONS.map((option) => ({
     ...option,
@@ -199,11 +213,13 @@ export function CenterLeadsPage() {
 
   return (
     <>
-      <PageToolbar
+      <OpsPageHeader
         title="Leads"
-        subtitle="Call parents on WhatsApp, update status after each contact, then convert when enrolled (staff-only — FR-C12)."
+        subtitle="Call parents on WhatsApp, update status after each contact, then convert when enrolled."
       />
       <MutationError message={error} />
+
+      <OpsSearchField value={search} onChange={setSearch} placeholder="Search by name, phone, or email…" />
 
       <PageGridFull>
         <ManualStudentLeadCard scope="center" centerId={centerId} invalidateKey={["center-leads", centerId]} />
@@ -229,8 +245,15 @@ export function CenterLeadsPage() {
 
       <PipelineMasterDetail
         list={
-          <Card title="Lead pipeline">
-            <FilterTabs options={filterTabs} value={filter} onChange={setFilter} aria-label="Lead filter" />
+          <div className="ed-pipeline-list-panel">
+            <OpsListHeader title="Lead pipeline" badge={`${filtered.length} SHOWN`} />
+            <FilterTabs
+              variant="segmented"
+              options={filterTabs}
+              value={filter}
+              onChange={setFilter}
+              aria-label="Lead filter"
+            />
             <DataList
               variant="pipeline"
               items={filtered}
@@ -269,7 +292,7 @@ export function CenterLeadsPage() {
                 );
               }}
             />
-          </Card>
+          </div>
         }
         detail={
           selected ? (

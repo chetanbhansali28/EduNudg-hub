@@ -157,6 +157,22 @@
   animation: ed-ops-fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.ed-ops-batch-row .ed-toggle-field {
+  flex-shrink: 0;
+}
+
+.ed-ops-batch-row .ed-toggle-field__body {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.ed-pipeline-list-panel + .ed-ops-featured-card {
+  margin-top: 1rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ed-ops-animate-in,
   .ed-ops-detail-enter,

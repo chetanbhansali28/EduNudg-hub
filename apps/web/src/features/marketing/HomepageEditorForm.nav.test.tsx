@@ -12,7 +12,7 @@ describe("HomepageEditorForm navigation", () => {
 
     render(<HomepageEditorForm config={config} onChange={onChange} />);
 
-    fireEvent.click(screen.getByText("Navigation"));
+    expect(screen.getByRole("heading", { name: "Navigation Management" })).toBeDefined();
     expect(screen.getAllByLabelText("Label").length).toBeGreaterThanOrEqual(1);
 
     fireEvent.click(screen.getByRole("button", { name: /Add menu item/i }));

@@ -6,6 +6,7 @@ import {
   EditorFieldsGrid,
   EditorItemList,
   EditorItemPanel,
+  EditorStaticSection,
   HomepageEditorPanel,
   HomepageEditorSections,
   HomepageEditorShell,
@@ -13,38 +14,56 @@ import {
 import { Input } from "@edunudg/ui";
 
 describe("HomepageEditorShell", () => {
-  it("regression_save_button_lives_in_hero_card", () => {
+  it("regression_editor_page_header_and_sticky_save_bar", () => {
+    const onSave = vi.fn();
     const { container } = render(
-      <HomepageEditorShell title="Marketing & theming" subtitle="Edit the public site." onSave={vi.fn()}>
+      <HomepageEditorShell
+        title="Homepage Configuration"
+        subtitle="Manage your public brand recruitment site."
+        lastSavedLabel="Last saved: 2 hours ago"
+        onSave={onSave}
+        isDirty
+      >
         <p>Form</p>
       </HomepageEditorShell>
     );
-    const hero = container.querySelector(".ed-editor-hero-card");
-    const btn = hero?.querySelector(".ed-editor-hero-card__save");
-    expect(btn?.textContent).toContain("Save changes");
-  });
 
-  it("regression_sticky_save_bar_on_mobile_when_onSave_provided", () => {
-    const { container } = render(
-      <HomepageEditorShell title="Marketing homepage" onSave={vi.fn()}>
-        <p>Form</p>
-      </HomepageEditorShell>
-    );
+    expect(screen.getByRole("heading", { name: "Homepage Configuration" })).toBeDefined();
+    expect(screen.getByText("Last saved: 2 hours ago")).toBeDefined();
+    expect(container.querySelector(".ed-editor-page-header")).toBeTruthy();
     expect(container.querySelector(".ed-homepage-editor-shell--has-save")).toBeTruthy();
-    expect(container.querySelector(".ed-editor-save-bar--mobile")).toBeTruthy();
+    expect(container.querySelector(".ed-editor-save-bar")).toBeTruthy();
+    expect(screen.getByText("Changes are currently in draft.")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: /Save changes/i }));
+    expect(onSave).toHaveBeenCalled();
   });
 
-  it("regression_panel_hero_save_button", () => {
+  it("regression_panel_inline_save_bar", () => {
     const onSave = vi.fn();
     render(
-      <HomepageEditorShell title="Marketing pages">
-        <HomepageEditorPanel title="Brand site" description="Franchise recruitment" onSave={onSave}>
+      <HomepageEditorShell title="Homepage Configuration">
+        <HomepageEditorPanel title="Brand site" description="Franchise recruitment" onSave={onSave} isDirty>
           <p>Editor fields</p>
         </HomepageEditorPanel>
       </HomepageEditorShell>
     );
     expect(screen.getByText("Brand site")).toBeDefined();
-    expect(screen.getByRole("button", { name: /Save changes/i })).toBeDefined();
+    expect(document.querySelector(".ed-editor-save-bar--inline")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Save changes/i }));
+    expect(onSave).toHaveBeenCalled();
+  });
+});
+
+describe("EditorStaticSection", () => {
+  it("regression_renders_always_visible_section_card", () => {
+    const { container } = render(
+      <EditorStaticSection sectionId="site" title="Site Identity">
+        <p>Site fields</p>
+      </EditorStaticSection>
+    );
+    expect(screen.getByRole("heading", { name: "Site Identity" })).toBeDefined();
+    expect(screen.getByText("Site fields")).toBeDefined();
+    expect(container.querySelector(".ed-editor-section-card")).toBeTruthy();
   });
 });
 
@@ -115,5 +134,15 @@ describe("Homepage editor layout helpers", () => {
     expect(container.querySelector(".ed-editor-item-list__add .ed-btn--primary")).toBeTruthy();
     expect(container.querySelector(".ed-editor-item-panel__remove .ed-btn--danger")).toBeTruthy();
     expect(screen.getByRole("button", { name: "+ Add item" })).toBeDefined();
+  });
+
+  it("regression_nav_row_variant", () => {
+    const { container } = render(
+      <EditorItemPanel title="Menu item 1" variant="nav" onRemove={vi.fn()} removeLabel="Remove menu item">
+        <Input label="Label" value="FAQ" onChange={() => undefined} />
+        <Input label="Link" value="#faq" onChange={() => undefined} />
+      </EditorItemPanel>
+    );
+    expect(container.querySelector(".ed-editor-nav-row")).toBeTruthy();
   });
 });

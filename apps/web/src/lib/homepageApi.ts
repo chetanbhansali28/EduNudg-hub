@@ -5,21 +5,34 @@ import type { HomepageConfig, HomepageShowcaseCard, HomepageTestimonial } from "
 
 const HOMEPAGE_KEY = "marketing_homepage";
 
-export async function fetchHomepageConfig(): Promise<HomepageConfig> {
+export type HomepageEditorBundle = {
+  config: HomepageConfig;
+  updatedAt: string | null;
+};
+
+export async function fetchHomepageEditorBundle(): Promise<HomepageEditorBundle> {
   try {
     const { data, error } = await getSupabase()
       .from("platform_settings")
-      .select("value")
+      .select("value, updated_at")
       .eq("key", HOMEPAGE_KEY)
       .maybeSingle();
 
     if (error || !data?.value) {
-      return DEFAULT_HOMEPAGE_CONFIG;
+      return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: data?.updated_at ?? null };
     }
-    return mergeHomepageConfig(data.value as Partial<HomepageConfig>);
+    return {
+      config: mergeHomepageConfig(data.value as Partial<HomepageConfig>),
+      updatedAt: data.updated_at ?? null,
+    };
   } catch {
-    return DEFAULT_HOMEPAGE_CONFIG;
+    return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: null };
   }
+}
+
+export async function fetchHomepageConfig(): Promise<HomepageConfig> {
+  const bundle = await fetchHomepageEditorBundle();
+  return bundle.config;
 }
 
 export async function saveHomepageConfig(config: HomepageConfig): Promise<void> {
