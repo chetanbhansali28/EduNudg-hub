@@ -23,6 +23,8 @@ type Props = {
   /** Controlled open state — use with onOpenChange to open the panel from outside (e.g. Edit). */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** When true with controlled open, hides the default trigger button when closed. */
+  hideTrigger?: boolean;
   children: ReactNode | ((actions: AddFormSectionActions) => ReactNode);
 };
 
@@ -33,6 +35,7 @@ export function AddFormSection({
   actionsPlacement = "header",
   open: openProp,
   onOpenChange,
+  hideTrigger = false,
   children,
 }: Props) {
   const [openInternal, setOpenInternal] = useState(false);
@@ -46,6 +49,7 @@ export function AddFormSection({
   const close = () => setOpen(false);
 
   if (!open) {
+    if (hideTrigger) return null;
     return (
       <div className="ed-add-form-trigger">
         <Button onClick={() => setOpen(true)}>{buttonLabel}</Button>

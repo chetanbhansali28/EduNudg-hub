@@ -157,7 +157,7 @@ export function StudentHomePage() {
         >
           <LearningPathPanel
             ladders={ladders}
-            assessments={data.recent_assessments}
+            assessments={ladders[0]?.assessments ?? []}
             recentResults={data.recent_results}
             stats={data.stats}
             completionPct={pct}

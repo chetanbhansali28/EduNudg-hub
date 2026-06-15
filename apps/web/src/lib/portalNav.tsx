@@ -137,7 +137,6 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
         { path: "/app/students", label: "Students", icon: <IconUsers /> },
         { path: "/app/batches", label: "Batches", icon: <IconGraduation /> },
         { path: "/app/curriculum", label: "Curriculum", icon: <IconBook /> },
-        { path: "/app/attendance", label: "Attendance", icon: <IconChart /> },
         { path: "/app/fees", label: "Fees & Payments", icon: <IconWallet /> },
         { path: "/app/inventory", label: "Inventory", icon: <IconBuilding /> },
         { path: "/app/merchandise", label: "Merchandise", icon: <IconBook /> },

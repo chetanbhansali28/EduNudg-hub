@@ -14,7 +14,6 @@ See [Navigation spec](../spec/navigation-spec.md).
 - **Leads** (`/app/leads`) — replaces Admissions; assign convert
 - Students & Transfers
 - Batches & Schedule
-- Attendance
 - Fees & Payments
 - Inventory (kits Phase D)
 - **Kit orders** (`/app/kits`) — when brand enables `kits` feature

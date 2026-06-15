@@ -16,7 +16,6 @@ leads,read,y,y,y,y,y,y,y,y
 enrollments,create,n,n,n,n,y,y,y,n
 enrollments,read,y,y,y,y,y,y,y,y
 batches,create,n,n,n,n,y,y,n,n
-attendance,update,n,n,n,n,y,y,n,n
 fees,create,n,n,y,y,y,n,n,y
 invoices,create,n,n,n,n,y,y,n,y
 payments,create,n,n,n,n,y,y,n,y

@@ -6,7 +6,6 @@ export type Resource =
   | "leads"
   | "enrollments"
   | "batches"
-  | "attendance"
   | "fees"
   | "invoices"
   | "payments"

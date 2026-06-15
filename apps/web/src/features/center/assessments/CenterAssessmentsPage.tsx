@@ -1,221 +1,223 @@
-import { useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
-  Badge,
-  Card,
+  Button,
   DataList,
-  FormGrid,
-  Input,
-  ListRow,
-  MutationError,
-  PageTitle,
-  Select,
-  Textarea,
+  OpsListHeader,
+  OpsMobileFab,
+  OpsPageHeader,
+  OpsSearchField,
+  PipelineDetailPlaceholder,
+  PipelineEmptyState,
+  PipelineListItem,
+  PipelineMasterDetail,
 } from "@edunudg/ui";
-import { getSupabase } from "@/lib/supabase";
-import { supabaseList } from "@/lib/supabaseResult";
+import { CenterStudentAssessmentPanel } from "@/features/center/assessments/CenterStudentAssessmentPanel";
+import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
+import { fetchCenterStudents, type CenterStudentRow } from "@/lib/centerStudentsApi";
 import { useTenant } from "@/bootstrap/TenantProvider";
-import { useMutationError } from "@/features/platform/hooks/useMutationError";
-import { AddFormSection } from "@/features/shared/AddFormSection";
-import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
-import { listCenterAssessments, recordStudentAssessment } from "@/lib/centerAssessmentsApi";
-import { fetchCenterStudentProgramContext } from "@/lib/centerStudentProgramApi";
+import { initialsFromName } from "@/lib/welcomeMessage";
+import "@/features/center/centerOps.css";
 
-function passFailLabel(passed: boolean | null | undefined): string {
-  if (passed === true) return "Pass";
-  if (passed === false) return "Fail";
-  return "—";
+const LIST_PREVIEW = 8;
+
+function studentProgramLabel(student: CenterStudentRow): string {
+  if (!student.program_name) return "Not assigned";
+  return student.starting_level_name
+    ? `${student.program_name} · ${student.starting_level_name}`
+    : student.program_name;
+}
+
+function matchesSearch(student: CenterStudentRow, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return [student.full_name, student.student_code, student.login_email, student.program_name]
+    .filter(Boolean)
+    .some((value) => value!.toLowerCase().includes(q));
+}
+
+function FeaturedAssessmentStudentCard({
+  student,
+  onViewDetails,
+}: {
+  student: CenterStudentRow;
+  onViewDetails: () => void;
+}) {
+  return (
+    <article className="ed-ops-featured-card">
+      <div className="ed-ops-featured-card__head">
+        <span className="ed-ops-featured-card__avatar" aria-hidden>
+          {initialsFromName(student.full_name)}
+        </span>
+        <div>
+          <h3 className="ed-ops-featured-card__name">{student.full_name}</h3>
+          <p className="ed-ops-featured-card__meta">
+            ID: {student.student_code ?? student.id.slice(0, 8).toUpperCase()}
+          </p>
+        </div>
+        {student.program_name ? <span className="ed-ops-featured-card__linked">ENROLLED</span> : null}
+      </div>
+      <div className="ed-ops-featured-card__grid">
+        <div>
+          <p className="ed-ops-featured-card__label">Program</p>
+          <p className="ed-ops-featured-card__value">{studentProgramLabel(student)}</p>
+        </div>
+        <div>
+          <p className="ed-ops-featured-card__label">Portal access</p>
+          <p className="ed-ops-featured-card__value">{student.user_id ? "● Active" : "Not linked"}</p>
+        </div>
+      </div>
+      <div className="ed-ops-featured-card__actions">
+        <Button onClick={onViewDetails}>View details</Button>
+      </div>
+    </article>
+  );
 }
 
 export function CenterAssessmentsPage() {
   const tenant = useTenant();
   const centerId = tenant.centerId;
-  const qc = useQueryClient();
-  const { error, clear, capture } = useMutationError();
-  const [studentId, setStudentId] = useState("");
-  const [assessmentType, setAssessmentType] = useState("level_check");
-  const [score, setScore] = useState("");
-  const [maxScore, setMaxScore] = useState("");
-  const [passed, setPassed] = useState("");
-  const [notes, setNotes] = useState("");
-  const { bindClose, closeAddForm } = useAddFormCloser();
+  const brandId = tenant.brandId;
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const { isDesktop, isMobile } = useOpsBreakpoint();
 
   const students = useQuery({
-    queryKey: ["center-students-assessments", centerId],
-    enabled: !!centerId,
-    queryFn: async () => {
-      const { data, error: qErr } = await getSupabase()
-        .from("student_enrollments")
-        .select("student_id, students(id, full_name)")
-        .eq("center_id", centerId!)
-        .eq("status", "active");
-      const rows = supabaseList(data, qErr) as {
-        student_id: string;
-        students: { id: string; full_name: string } | { id: string; full_name: string }[] | null;
-      }[];
-      return rows.map((r) => {
-        const s = Array.isArray(r.students) ? r.students[0] : r.students;
-        return { id: s?.id ?? r.student_id, full_name: s?.full_name ?? "Student" };
-      });
-    },
+    queryKey: ["center-students", centerId, brandId],
+    enabled: !!centerId && !!brandId,
+    queryFn: () => fetchCenterStudents(centerId!, brandId!),
   });
 
-  const programContext = useQuery({
-    queryKey: ["center-student-program", centerId, studentId],
-    enabled: !!centerId && !!studentId,
-    queryFn: () => fetchCenterStudentProgramContext(centerId!, studentId),
-  });
-
-  const assessments = useQuery({
-    queryKey: ["center-assessments", centerId],
-    enabled: !!centerId,
-    queryFn: () => listCenterAssessments(centerId!),
-  });
+  const allStudents = students.data ?? [];
+  const filteredStudents = useMemo(
+    () => allStudents.filter((student) => matchesSearch(student, search)),
+    [allStudents, search]
+  );
 
   useEffect(() => {
-    setPassed("");
-  }, [studentId]);
+    if (selectedId || filteredStudents.length === 0) return;
+    setSelectedId(filteredStudents[0]!.id);
+  }, [selectedId, filteredStudents]);
 
-  const save = useMutation({
-    mutationFn: async () => {
-      if (!centerId || !studentId) throw new Error("Select a student");
-      if (!programContext.data?.program_id) {
-        throw new Error("Assign a course / program on the Students page before recording assessments.");
-      }
-      if (!programContext.data.current_level_id) {
-        throw new Error("No current level — assign a program with published levels first.");
-      }
-      if (passed !== "pass" && passed !== "fail") {
-        throw new Error("Select Pass or Fail");
-      }
-      clear();
-      await recordStudentAssessment(centerId, {
-        studentId,
-        assessmentType,
-        score: score ? parseFloat(score) : undefined,
-        maxScore: maxScore ? parseFloat(maxScore) : undefined,
-        notes,
-        levelId: programContext.data.current_level_id,
-        passed: passed === "pass",
-      });
-    },
-    onSuccess: () => {
-      void qc.invalidateQueries({ queryKey: ["center-assessments", centerId] });
-      void qc.invalidateQueries({ queryKey: ["center-student-program", centerId, studentId] });
-      setScore("");
-      setMaxScore("");
-      setNotes("");
-      setPassed("");
-      closeAddForm();
-    },
-    onError: capture,
-  });
+  const selected =
+    filteredStudents.find((s) => s.id === selectedId) ??
+    allStudents.find((s) => s.id === selectedId) ??
+    null;
+  const listPreview = filteredStudents.slice(0, LIST_PREVIEW);
 
-  if (!centerId) return <p className="ed-empty">Center context not found.</p>;
+  const selectStudent = (id: string) => {
+    setSelectedId(id);
+    if (isMobile) setMobileDetailOpen(false);
+  };
 
-  const ctx = programContext.data;
+  if (!centerId || !brandId) {
+    return <p className="ed-empty">Center context not found.</p>;
+  }
 
-  return (
-    <>
-      <PageTitle>Assessments</PageTitle>
-      <MutationError message={error} />
-      <AddFormSection
-        buttonLabel="Record assessment"
-        panelTitle="Record assessment"
-        primaryAction={{
-          onClick: () => save.mutate(),
-          pending: save.isPending,
-          disabled: !studentId || !passed,
-        }}
-      >
-        {({ close }) => {
-          bindClose(close);
+  const listPanel = (
+    <div className="ed-pipeline-list-panel">
+      {!isMobile ? <OpsListHeader title="Enrolled students" badge={`ACTIVE: ${allStudents.length}`} /> : null}
+      <DataList
+        variant="pipeline"
+        items={isMobile ? listPreview : filteredStudents}
+        empty={
+          <PipelineEmptyState
+            message="No active enrollments at this center."
+            actionLabel="View leads"
+            onAction={() => {
+              window.location.href = "/app/leads";
+            }}
+          />
+        }
+        render={(s) => {
+          const batchCount = s.batch_ids.length;
           return (
-            <>
-              <Select
-                label="Student"
-                value={studentId}
-                onChange={setStudentId}
-                placeholder="Select student"
-                options={(students.data ?? []).map((s) => ({ value: s.id, label: s.full_name }))}
-              />
-
-              {studentId && programContext.isLoading && (
-                <p className="ed-text-sm ed-muted">Loading program context…</p>
-              )}
-
-              {studentId && programContext.error && (
-                <p className="ed-text-sm ed-muted" role="alert">
-                  {programContext.error instanceof Error
-                    ? programContext.error.message
-                    : "Unable to load program context."}
-                </p>
-              )}
-
-              {ctx?.program_id && (
-                <div className="ed-ops-program-context" style={{ marginBottom: "0.75rem" }}>
-                  <p className="ed-text-sm">
-                    <strong>Program:</strong> {ctx.program_name ?? "—"}
-                  </p>
-                  <p className="ed-text-sm">
-                    <strong>Current level:</strong> {ctx.current_level_name ?? "All levels complete"}
-                  </p>
-                </div>
-              )}
-
-              {studentId && !programContext.isLoading && !ctx?.program_id && (
-                <p className="ed-text-sm ed-muted">
-                  No program assigned — go to Students and assign a course first.
-                </p>
-              )}
-
-              <FormGrid>
-                <Input label="Type" value={assessmentType} onChange={setAssessmentType} placeholder="level_check" />
-                <Input label="Score" value={score} onChange={setScore} type="number" />
-                <Input label="Max score" value={maxScore} onChange={setMaxScore} type="number" />
-                <Select
-                  label="Result"
-                  value={passed}
-                  onChange={setPassed}
-                  options={[
-                    { value: "", label: "Pass or fail…" },
-                    { value: "pass", label: "Pass — advance to next level" },
-                    { value: "fail", label: "Fail — stay on current level" },
-                  ]}
-                  editable
-                />
-              </FormGrid>
-              <Textarea label="Notes" value={notes} onChange={setNotes} rows={2} />
-            </>
+            <PipelineListItem
+              title={s.full_name}
+              meta={s.student_code ? `ID: ${s.student_code}` : undefined}
+              lines={[
+                studentProgramLabel(s),
+                batchCount > 0 ? `${batchCount} batch${batchCount === 1 ? "" : "es"}` : "No batches assigned",
+              ]}
+              initials={initialsFromName(s.full_name)}
+              selected={s.id === selectedId}
+              linked={!!s.program_name}
+              onSelect={() => selectStudent(s.id)}
+            />
           );
         }}
-      </AddFormSection>
+      />
+      {isDesktop && filteredStudents.length > LIST_PREVIEW ? (
+        <p className="ed-ops-list-footer">Showing {filteredStudents.length} enrolled students</p>
+      ) : null}
+    </div>
+  );
 
-      <Card title="Recent assessments">
-        <DataList
-          items={assessments.data ?? []}
-          empty="No assessments recorded yet."
-          render={(row) => {
-            const student = Array.isArray(row.students) ? row.students[0] : row.students;
-            const level = Array.isArray(row.levels) ? row.levels[0] : row.levels;
-            const program = Array.isArray(row.programs) ? row.programs[0] : row.programs;
-            return (
-              <ListRow>
-                <div>
-                  <strong>{student?.full_name ?? "Student"}</strong>
-                  <div className="ed-text-sm ed-muted">
-                    {program?.name ?? "Program"} · {level?.name ?? "Level"} · {row.assessment_type} · {row.assessed_at}
-                    {row.score != null ? ` · ${row.score}${row.max_score != null ? ` / ${row.max_score}` : ""}` : ""}
-                  </div>
-                </div>
-                <Badge tone={row.passed === true ? "success" : row.passed === false ? "warning" : "neutral"}>
-                  {passFailLabel(row.passed)}
-                </Badge>
-              </ListRow>
-            );
-          }}
-        />
-      </Card>
-    </>
+  const detailPanel = selected ? (
+    <CenterStudentAssessmentPanel
+      student={selected}
+      centerId={centerId}
+      onSaved={() => void students.refetch()}
+    />
+  ) : (
+    <div className="ed-pipeline-list-panel">
+      <PipelineDetailPlaceholder message="Select a student to review program progress, assessment history, and record a new evaluation." />
+    </div>
+  );
+
+  return (
+    <div className={isMobile ? "ed-ops-pipeline-hide-detail" : undefined}>
+      <OpsPageHeader
+        title="Assessments"
+        subtitle="Select a student to review program progress, past evaluations, and record level checks."
+      />
+
+      <OpsSearchField
+        value={search}
+        onChange={setSearch}
+        placeholder="Search by student name or ID…"
+      />
+
+      {isMobile ? (
+        <>
+          <OpsListHeader
+            title={`Enrolled students (${filteredStudents.length})`}
+            badge={search ? "FILTERED" : undefined}
+          />
+          {listPanel}
+          {selected ? (
+            <FeaturedAssessmentStudentCard
+              student={selected}
+              onViewDetails={() => setMobileDetailOpen(true)}
+            />
+          ) : null}
+        </>
+      ) : (
+        <PipelineMasterDetail list={listPanel} detail={detailPanel} />
+      )}
+
+      {isMobile ? (
+        <>
+          {selected ? (
+            <OpsMobileFab label="Record assessment" onClick={() => setMobileDetailOpen(true)} />
+          ) : null}
+          {mobileDetailOpen && selected ? (
+            <div className="ed-ops-mobile-detail" role="dialog" aria-modal aria-label="Student assessments">
+              <div className="ed-ops-mobile-detail__bar">
+                <button type="button" className="ed-ops-mobile-detail__back" onClick={() => setMobileDetailOpen(false)}>
+                  ← Back
+                </button>
+              </div>
+              <CenterStudentAssessmentPanel
+                student={selected}
+                centerId={centerId}
+                onSaved={() => void students.refetch()}
+              />
+            </div>
+          ) : null}
+        </>
+      ) : null}
+    </div>
   );
 }

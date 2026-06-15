@@ -1,7 +1,9 @@
 import {
   Badge,
   Card,
+  DataList,
   FilterTabs,
+  OpsListHeader,
   PipelineEmptyState,
   PipelineListItem,
 } from "@edunudg/ui";
@@ -30,6 +32,7 @@ type Props = {
   addPending: boolean;
   bindAddClose: (close: () => void) => void;
   readOnly?: boolean;
+  layout?: "ops" | "card";
 };
 
 export function CurriculumCourseList({
@@ -46,6 +49,7 @@ export function CurriculumCourseList({
   addPending,
   bindAddClose,
   readOnly = false,
+  layout = "ops",
 }: Props) {
   const filtered =
     filter === "active" ? courses.filter((c) => c.is_active) : courses;
@@ -55,8 +59,8 @@ export function CurriculumCourseList({
     count: o.value === "active" ? courses.filter((c) => c.is_active).length : courses.length,
   }));
 
-  return (
-    <Card title="Courses">
+  const listBody = (
+    <>
       <FilterTabs options={filterTabs} value={filter} onChange={onFilterChange} aria-label="Course filter" />
       {!readOnly && (
         <AddFormSection
@@ -78,34 +82,49 @@ export function CurriculumCourseList({
           }}
         </AddFormSection>
       )}
-      <div className="ed-data-list ed-data-list--pipeline ed-curriculum-stagger">
-        {filtered.length === 0 ? (
-          <PipelineEmptyState message="No courses yet — create your first course (e.g. Abacus Core)." />
-        ) : (
-          filtered.map((course) => {
+      <div className={layout === "ops" ? "ed-ops-stagger" : "ed-curriculum-stagger"}>
+        <DataList
+          variant="pipeline"
+          items={filtered}
+          empty={
+            <PipelineEmptyState message="No courses yet — create your first course (e.g. Abacus Core)." />
+          }
+          render={(course) => {
             const levelCount = levelCounts[course.id] ?? 0;
             return (
-              <div key={course.id} className="ed-data-list__item">
-                <PipelineListItem
-                  title={course.name}
-                  meta={course.age_label ?? undefined}
-                  lines={[
-                    levelCount > 0
-                      ? `${levelCount} program${levelCount === 1 ? "" : "s"}`
-                      : "No programs yet",
-                    course.description?.slice(0, 60) ?? "Add marketing copy in course detail",
-                  ]}
-                  selected={course.id === selectedId}
-                  onSelect={() => onSelect(course.id)}
-                  badges={
-                    course.is_active ? <Badge tone="success">Active</Badge> : <Badge>Inactive</Badge>
-                  }
-                />
-              </div>
+              <PipelineListItem
+                title={course.name}
+                meta={course.age_label ?? undefined}
+                lines={[
+                  levelCount > 0
+                    ? `${levelCount} program${levelCount === 1 ? "" : "s"}`
+                    : "No programs yet",
+                  course.description?.slice(0, 60) ?? "Add marketing copy in course detail",
+                ]}
+                initials={course.name.slice(0, 2).toUpperCase()}
+                selected={course.id === selectedId}
+                onSelect={() => onSelect(course.id)}
+                badges={
+                  course.is_active ? <Badge tone="success">Active</Badge> : <Badge>Inactive</Badge>
+                }
+              />
             );
-          })
-        )}
+          }}
+        />
       </div>
-    </Card>
+    </>
+  );
+
+  if (layout === "card") {
+    return <Card title="Courses">{listBody}</Card>;
+  }
+
+  const activeCount = courses.filter((c) => c.is_active).length;
+
+  return (
+    <div className="ed-pipeline-list-panel">
+      <OpsListHeader title="Courses" badge={`ACTIVE: ${activeCount}`} />
+      {listBody}
+    </div>
   );
 }

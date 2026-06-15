@@ -1,0 +1,32 @@
+.ed-pipeline-detail-footer-actions {
+  display: flex;
+  gap: 0.625rem;
+}
+
+.ed-pipeline-detail-footer-actions > * {
+  flex: 1;
+}
+
+.ed-center-leads-page__pager {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ed-center-leads-page__placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 16rem;
+  padding: 1.5rem;
+}
+
+.ed-center-leads-page__add-form {
+  margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .ed-center-leads-page__placeholder {
+    min-height: 24rem;
+  }
+}

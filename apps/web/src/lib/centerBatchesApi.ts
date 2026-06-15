@@ -9,6 +9,7 @@ export type CenterBatchRow = {
   level_start_id: string | null;
   level_end_id: string | null;
   schedule: Record<string, unknown> | null;
+  created_at?: string | null;
   programs: { name: string } | { name: string }[] | null;
   level_start: { name: string } | null;
   level_end: { name: string } | null;
@@ -28,12 +29,26 @@ export async function fetchCenterBatches(centerId: string): Promise<CenterBatchR
   const { data, error } = await getSupabase()
     .from("batches")
     .select(
-      "id, name, is_open_for_enrollment, program_id, level_start_id, level_end_id, schedule, programs(name), level_start:levels!batches_level_start_id_fkey(name), level_end:levels!batches_level_end_id_fkey(name)"
+      "id, name, is_open_for_enrollment, program_id, level_start_id, level_end_id, schedule, created_at, programs(name), level_start:levels!batches_level_start_id_fkey(name), level_end:levels!batches_level_end_id_fkey(name)"
     )
     .eq("center_id", centerId)
     .is("deleted_at", null)
-    .order("name");
+    .order("created_at", { ascending: false });
   return supabaseList(data, error) as unknown as CenterBatchRow[];
+}
+
+export async function fetchBatchEnrollmentCounts(centerId: string): Promise<Map<string, number>> {
+  const { data, error } = await getSupabase()
+    .from("batch_enrollments")
+    .select("batch_id")
+    .eq("center_id", centerId);
+  const rows = supabaseList(data, error);
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const batchId = row.batch_id as string;
+    counts.set(batchId, (counts.get(batchId) ?? 0) + 1);
+  }
+  return counts;
 }
 
 export async function fetchAuthorizedPrograms(centerId: string, brandId: string) {

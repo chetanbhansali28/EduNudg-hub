@@ -12,7 +12,26 @@ export function formatDateTime(value: string): string {
 }
 
 export function levelStatusLabel(status: string): string {
-  return status.replaceAll("_", " ");
+  switch (status) {
+    case "failed":
+      return "Fail";
+    case "in_progress":
+      return "In progress";
+    case "not_started":
+      return "Not started";
+    case "completed":
+      return "Completed";
+    case "passed":
+      return "Pass";
+    default:
+      return status.replaceAll("_", " ");
+  }
+}
+
+export function assessmentResultLabel(passed: boolean | null | undefined): string | null {
+  if (passed === true) return "Pass";
+  if (passed === false) return "Fail";
+  return null;
 }
 
 export function studentGreeting(name: string): string {

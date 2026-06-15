@@ -1015,3 +1015,860 @@ export function EditorSaveBar({
     </div>
   );
 }
+
+/* ─── Backend commerce (merchandise orders, inventory ops) ─── */
+
+export function CommercePageHeader({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+}) {
+  return (
+    <header className="ed-commerce-page-header">
+      <div className="ed-commerce-page-header__copy">
+        <h1 className="ed-commerce-page-header__title">{title}</h1>
+        {subtitle ? <p className="ed-commerce-page-header__subtitle">{subtitle}</p> : null}
+      </div>
+      {action ? <div className="ed-commerce-page-header__action">{action}</div> : null}
+    </header>
+  );
+}
+
+export function CommerceAlertBanner({
+  message,
+  actionLabel,
+  onAction,
+  actionHref,
+}: {
+  message: ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
+  actionHref?: string;
+}) {
+  const action =
+    actionLabel && onAction ? (
+      <button type="button" className="ed-commerce-alert__action" onClick={onAction}>
+        {actionLabel}
+      </button>
+    ) : actionLabel && actionHref ? (
+      <Link to={actionHref} className="ed-commerce-alert__action">
+        {actionLabel}
+      </Link>
+    ) : null;
+
+  return (
+    <div className="ed-commerce-alert" role="status">
+      <span className="ed-commerce-alert__icon" aria-hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 16v-4M12 8h.01" />
+        </svg>
+      </span>
+      <p className="ed-commerce-alert__message">{message}</p>
+      {action}
+    </div>
+  );
+}
+
+export function CommerceWorkspace({
+  main,
+  aside,
+}: {
+  main: ReactNode;
+  aside?: ReactNode;
+}) {
+  return (
+    <div className={`ed-commerce-workspace${aside ? "" : " ed-commerce-workspace--single"}`}>
+      <div className="ed-commerce-workspace__main">{main}</div>
+      {aside ? <aside className="ed-commerce-workspace__aside">{aside}</aside> : null}
+    </div>
+  );
+}
+
+export function CommerceSectionHeader({
+  title,
+  badge,
+}: {
+  title: string;
+  badge?: string;
+}) {
+  return (
+    <div className="ed-commerce-section-header">
+      <h2 className="ed-commerce-section-header__title">{title}</h2>
+      {badge ? <span className="ed-commerce-section-header__badge">{badge}</span> : null}
+    </div>
+  );
+}
+
+export function CommerceWidgetCard({
+  icon,
+  title,
+  description,
+  children,
+  footer,
+}: {
+  icon: ReactNode;
+  title: string;
+  description?: string;
+  children?: ReactNode;
+  footer?: ReactNode;
+}) {
+  return (
+    <section className="ed-commerce-widget">
+      <div className="ed-commerce-widget__head">
+        <span className="ed-commerce-widget__icon">{icon}</span>
+        <div>
+          <h3 className="ed-commerce-widget__title">{title}</h3>
+          {description ? <p className="ed-commerce-widget__desc">{description}</p> : null}
+        </div>
+      </div>
+      {children ? <div className="ed-commerce-widget__body">{children}</div> : null}
+      {footer ? <div className="ed-commerce-widget__footer">{footer}</div> : null}
+    </section>
+  );
+}
+
+export type CommerceStatTone = "blue" | "purple" | "teal" | "rose";
+
+export function CommerceStatTiles({
+  items,
+}: {
+  items: { label: string; value: string; tone?: CommerceStatTone }[];
+}) {
+  return (
+    <div className="ed-commerce-stat-tiles">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className={`ed-commerce-stat-tile ed-commerce-stat-tile--${item.tone ?? "blue"}`}
+        >
+          <p className="ed-commerce-stat-tile__label">{item.label}</p>
+          <p className="ed-commerce-stat-tile__value">{item.value}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function CommerceArchiveNote({ children }: { children?: ReactNode }) {
+  return (
+    <div className="ed-commerce-archive-note">
+      <span className="ed-commerce-archive-note__icon" aria-hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+      </span>
+      <p className="ed-commerce-archive-note__text">
+        {children ?? "Older orders are archived. View full history."}
+      </p>
+    </div>
+  );
+}
+
+export function CommerceOrderCard({
+  orderLabel,
+  statusBadges,
+  placedAt,
+  invoiceLabel,
+  invoiceNumber,
+  lines,
+  totalLabel,
+  dueLabel,
+  dueTone = "default",
+  footer,
+  expanded,
+}: {
+  orderLabel: string;
+  statusBadges: ReactNode;
+  placedAt: string;
+  invoiceLabel?: string;
+  invoiceNumber?: string;
+  lines: ReactNode;
+  totalLabel: string;
+  dueLabel?: string;
+  dueTone?: "default" | "danger";
+  footer?: ReactNode;
+  expanded?: ReactNode;
+}) {
+  return (
+    <article className="ed-commerce-order-card">
+      <div className="ed-commerce-order-card__top">
+        <div className="ed-commerce-order-card__identity">
+          <strong className="ed-commerce-order-card__id">{orderLabel}</strong>
+          <div className="ed-commerce-order-card__badges">{statusBadges}</div>
+        </div>
+        {invoiceNumber ? (
+          <div className="ed-commerce-order-card__invoice">
+            <span className="ed-commerce-order-card__invoice-label">{invoiceLabel ?? "Invoice"}</span>
+            <span className="ed-commerce-order-card__invoice-number">{invoiceNumber}</span>
+          </div>
+        ) : null}
+      </div>
+      <p className="ed-commerce-order-card__date">
+        <span className="ed-commerce-order-card__date-icon" aria-hidden>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+        </span>
+        {placedAt}
+      </p>
+      <ul className="ed-commerce-order-card__lines">{lines}</ul>
+      <div className="ed-commerce-order-card__footer">
+        <p className="ed-commerce-order-card__total">{totalLabel}</p>
+        {dueLabel ? (
+          <p
+            className={`ed-commerce-order-card__due${
+              dueTone === "danger" ? " ed-commerce-order-card__due--danger" : ""
+            }`}
+          >
+            <span aria-hidden>⏱</span> {dueLabel}
+          </p>
+        ) : null}
+        {footer}
+      </div>
+      {expanded ? <div className="ed-commerce-order-card__expanded">{expanded}</div> : null}
+    </article>
+  );
+}
+
+/* ─── Backend pipeline (leads, applications) ─── */
+
+export type PipelineMetricTone = "blue" | "red" | "purple";
+
+export function PipelinePageHeader({
+  title,
+  subtitle,
+  actions,
+}: {
+  title: string;
+  subtitle?: string;
+  actions?: ReactNode;
+}) {
+  return (
+    <header className="ed-pipeline-page-header">
+      <div className="ed-pipeline-page-header__copy">
+        <h1 className="ed-pipeline-page-header__title">{title}</h1>
+        {subtitle ? <p className="ed-pipeline-page-header__subtitle">{subtitle}</p> : null}
+      </div>
+      {actions ? <div className="ed-pipeline-page-header__actions">{actions}</div> : null}
+    </header>
+  );
+}
+
+export function PipelineMetricCard({
+  icon,
+  label,
+  value,
+  hint,
+  badge,
+  tone = "blue",
+  active,
+  onClick,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string | number;
+  hint?: string;
+  badge?: ReactNode;
+  tone?: PipelineMetricTone;
+  active?: boolean;
+  onClick?: () => void;
+}) {
+  const className = [
+    "ed-pipeline-metric",
+    `ed-pipeline-metric--${tone}`,
+    active ? "ed-pipeline-metric--active" : "",
+    onClick ? "ed-pipeline-metric--clickable" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const body = (
+    <>
+      <div className="ed-pipeline-metric__head">
+        <span className="ed-pipeline-metric__icon">{icon}</span>
+        {badge}
+      </div>
+      <p className="ed-pipeline-metric__value">{value}</p>
+      <p className="ed-pipeline-metric__label">{label}</p>
+      {hint ? <p className="ed-pipeline-metric__hint">{hint}</p> : null}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button type="button" className={className} onClick={onClick} aria-pressed={active}>
+        {body}
+      </button>
+    );
+  }
+
+  return <div className={className}>{body}</div>;
+}
+
+export function PipelineMetricStrip({ children }: { children: ReactNode }) {
+  return <div className="ed-pipeline-metric-strip">{children}</div>;
+}
+
+export function PipelineWorkspace({
+  list,
+  detail,
+  detailOpen,
+}: {
+  list: ReactNode;
+  detail?: ReactNode;
+  detailOpen?: boolean;
+}) {
+  return (
+    <div
+      className={[
+        "ed-pipeline-workspace",
+        detailOpen ? "ed-pipeline-workspace--detail-open" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <div className="ed-pipeline-workspace__list">{list}</div>
+      {detail ? <aside className="ed-pipeline-workspace__detail">{detail}</aside> : null}
+    </div>
+  );
+}
+
+export function PipelinePanel({ children }: { children: ReactNode }) {
+  return <section className="ed-pipeline-panel">{children}</section>;
+}
+
+export function PipelineTableToolbar({
+  tabs,
+  meta,
+}: {
+  tabs: ReactNode;
+  meta?: ReactNode;
+}) {
+  return (
+    <div className="ed-pipeline-table-toolbar">
+      <div className="ed-pipeline-table-toolbar__tabs">{tabs}</div>
+      {meta ? <p className="ed-pipeline-table-toolbar__meta">{meta}</p> : null}
+    </div>
+  );
+}
+
+export type PipelineStatusTone = "new" | "contacted" | "trial" | "hot" | "lost" | "converted" | "neutral";
+
+export function PipelineStatusBadge({
+  label,
+  tone = "neutral",
+}: {
+  label: string;
+  tone?: PipelineStatusTone;
+}) {
+  return <span className={`ed-pipeline-status-badge ed-pipeline-status-badge--${tone}`}>{label}</span>;
+}
+
+export type PipelineTimelineItem = {
+  id: string;
+  title: string;
+  detail?: string;
+  time?: string;
+};
+
+export function PipelineTimeline({ items }: { items: PipelineTimelineItem[] }) {
+  return (
+    <div className="ed-pipeline-timeline">
+      {items.map((item, index) => (
+        <div key={item.id} className="ed-pipeline-timeline__item">
+          <span
+            className={`ed-pipeline-timeline__dot${
+              index === 0 ? " ed-pipeline-timeline__dot--active" : ""
+            }`}
+            aria-hidden
+          />
+          <div className="ed-pipeline-timeline__content">
+            <p className="ed-pipeline-timeline__title">{item.title}</p>
+            {item.detail ? <p className="ed-pipeline-timeline__detail">{item.detail}</p> : null}
+            {item.time ? <p className="ed-pipeline-timeline__time">{item.time}</p> : null}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function PipelineDetailPanel({
+  title,
+  onBack,
+  menu,
+  children,
+  footer,
+}: {
+  title: string;
+  onBack?: () => void;
+  menu?: ReactNode;
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  return (
+    <div className="ed-pipeline-detail-panel">
+      <div className="ed-pipeline-detail-panel__head">
+        {onBack ? (
+          <button type="button" className="ed-pipeline-detail-panel__back" onClick={onBack}>
+            ← Back
+          </button>
+        ) : null}
+        <h2 className="ed-pipeline-detail-panel__title">{title}</h2>
+        {menu ? <div className="ed-pipeline-detail-panel__menu">{menu}</div> : null}
+      </div>
+      <div className="ed-pipeline-detail-panel__body">{children}</div>
+      {footer ? <div className="ed-pipeline-detail-panel__footer">{footer}</div> : null}
+    </div>
+  );
+}
+
+/* ─── Backend catalog workspace (batches, curriculum groups) ─── */
+
+export function CatalogBreadcrumbs({
+  items,
+}: {
+  items: { label: string; href?: string }[];
+}) {
+  return (
+    <nav className="ed-catalog-breadcrumbs" aria-label="Breadcrumb">
+      {items.map((item, index) => (
+        <span key={`${item.label}-${index}`} className="ed-catalog-breadcrumbs__item">
+          {index > 0 ? <span className="ed-catalog-breadcrumbs__sep" aria-hidden>›</span> : null}
+          {item.href ? (
+            <Link className="ed-catalog-breadcrumbs__link" to={item.href}>
+              {item.label}
+            </Link>
+          ) : (
+            <span className="ed-catalog-breadcrumbs__current">{item.label}</span>
+          )}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+export function CatalogPageHeader({
+  breadcrumbs,
+  title,
+  subtitle,
+  actions,
+}: {
+  breadcrumbs?: ReactNode;
+  title: string;
+  subtitle?: string;
+  actions?: ReactNode;
+}) {
+  return (
+    <header className="ed-catalog-page-header">
+      <div className="ed-catalog-page-header__copy">
+        {breadcrumbs}
+        <h1 className="ed-catalog-page-header__title">{title}</h1>
+        {subtitle ? <p className="ed-catalog-page-header__subtitle">{subtitle}</p> : null}
+      </div>
+      {actions ? <div className="ed-catalog-page-header__actions">{actions}</div> : null}
+    </header>
+  );
+}
+
+export function CatalogWorkspace({
+  main,
+  aside,
+  asideOpen = true,
+}: {
+  main: ReactNode;
+  aside?: ReactNode;
+  asideOpen?: boolean;
+}) {
+  return (
+    <div
+      className={[
+        "ed-catalog-workspace",
+        aside ? "" : "ed-catalog-workspace--single",
+        aside && asideOpen ? "ed-catalog-workspace--aside-open" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <div className="ed-catalog-workspace__main">{main}</div>
+      {aside ? (
+        <aside className={`ed-catalog-workspace__aside${asideOpen ? " is-open" : ""}`}>{aside}</aside>
+      ) : null}
+    </div>
+  );
+}
+
+export function CatalogToolbar({
+  tabs,
+  meta,
+}: {
+  tabs: ReactNode;
+  meta?: ReactNode;
+}) {
+  return (
+    <div className="ed-catalog-toolbar">
+      <div className="ed-catalog-toolbar__tabs">{tabs}</div>
+      {meta ? <div className="ed-catalog-toolbar__meta">{meta}</div> : null}
+    </div>
+  );
+}
+
+export type CatalogAccent = "blue" | "purple" | "teal" | "rose";
+
+export function CatalogEnrollmentBadge({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: "open" | "closed";
+}) {
+  return (
+    <span className={`ed-catalog-enrollment-badge ed-catalog-enrollment-badge--${tone}`}>
+      {tone === "open" ? <span className="ed-catalog-enrollment-badge__dot" aria-hidden /> : null}
+      {label}
+    </span>
+  );
+}
+
+export function CatalogListCard({
+  icon,
+  accent = "blue",
+  title,
+  badge,
+  meta,
+  actions,
+  onClick,
+  selected,
+}: {
+  icon: ReactNode;
+  accent?: CatalogAccent;
+  title: string;
+  badge?: ReactNode;
+  meta: ReactNode;
+  actions?: ReactNode;
+  onClick?: () => void;
+  selected?: boolean;
+}) {
+  const className = [
+    "ed-catalog-list-card",
+    `ed-catalog-list-card--${accent}`,
+    onClick ? "ed-catalog-list-card--clickable" : "",
+    selected ? "ed-catalog-list-card--selected" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const body = (
+    <>
+      <span className="ed-catalog-list-card__icon" aria-hidden>
+        {icon}
+      </span>
+      <div className="ed-catalog-list-card__body">
+        <div className="ed-catalog-list-card__head">
+          <strong className="ed-catalog-list-card__title">{title}</strong>
+          {badge}
+        </div>
+        <div className="ed-catalog-list-card__meta">{meta}</div>
+      </div>
+      {actions ? <div className="ed-catalog-list-card__actions">{actions}</div> : null}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button type="button" className={className} onClick={onClick}>
+        {body}
+      </button>
+    );
+  }
+
+  return <article className={className}>{body}</article>;
+}
+
+export function CatalogFormPanel({
+  icon,
+  title,
+  description,
+  children,
+  footer,
+}: {
+  icon?: ReactNode;
+  title: string;
+  description?: string;
+  children: ReactNode;
+  footer?: ReactNode;
+}) {
+  return (
+    <div className="ed-catalog-form-panel">
+      <div className="ed-catalog-form-panel__head">
+        {icon ? <span className="ed-catalog-form-panel__icon" aria-hidden>{icon}</span> : null}
+        <div>
+          <h2 className="ed-catalog-form-panel__title">{title}</h2>
+          {description ? <p className="ed-catalog-form-panel__description">{description}</p> : null}
+        </div>
+      </div>
+      <div className="ed-catalog-form-panel__body">{children}</div>
+      {footer ? <div className="ed-catalog-form-panel__footer">{footer}</div> : null}
+    </div>
+  );
+}
+
+export function CatalogCreateSlot({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button type="button" className="ed-catalog-create-slot" onClick={onClick}>
+      <span className="ed-catalog-create-slot__icon" aria-hidden>
+        +
+      </span>
+      <span>{label}</span>
+    </button>
+  );
+}
+
+export function CatalogFab({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button type="button" className="ed-catalog-fab" aria-label={label} onClick={onClick}>
+      +
+    </button>
+  );
+}
+
+/* ─── Backend settings workspace (center/brand account & profile) ─── */
+
+export function SettingsPageHeader({
+  title,
+  subtitle,
+}: {
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <header className="ed-settings-page-header">
+      <h1 className="ed-settings-page-header__title">{title}</h1>
+      {subtitle ? <p className="ed-settings-page-header__subtitle">{subtitle}</p> : null}
+    </header>
+  );
+}
+
+export function SettingsStack({ children }: { children: ReactNode }) {
+  return <div className="ed-settings-stack">{children}</div>;
+}
+
+export function SettingsSection({
+  title,
+  mobileLabel,
+  children,
+  footer,
+  className,
+}: {
+  title?: string;
+  mobileLabel?: string;
+  children: ReactNode;
+  footer?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={["ed-settings-section", className].filter(Boolean).join(" ")}>
+      {mobileLabel ? <p className="ed-settings-section__mobile-label">{mobileLabel}</p> : null}
+      {title ? <h2 className="ed-settings-section__title">{title}</h2> : null}
+      <div className="ed-settings-section__body">{children}</div>
+      {footer ? <div className="ed-settings-section__footer">{footer}</div> : null}
+    </section>
+  );
+}
+
+export function SettingsAccountLayout({
+  photo,
+  children,
+}: {
+  photo: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="ed-settings-account-layout">
+      <div className="ed-settings-account-layout__photo">{photo}</div>
+      <div className="ed-settings-account-layout__fields">{children}</div>
+    </div>
+  );
+}
+
+export function SettingsMetaList({ items }: { items: { label: string; value: string }[] }) {
+  return (
+    <dl className="ed-settings-meta-list">
+      {items.map((item) => (
+        <div key={item.label} className="ed-settings-meta-list__row">
+          <dt>{item.label}</dt>
+          <dd>{item.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+export function SettingsProfileBanner({
+  initials,
+  title,
+}: {
+  initials: string;
+  title: string;
+}) {
+  return (
+    <div className="ed-settings-profile-banner">
+      <span className="ed-settings-profile-banner__mark" aria-hidden>
+        {initials}
+      </span>
+      <p className="ed-settings-profile-banner__title">{title}</p>
+    </div>
+  );
+}
+
+export function SettingsSubsection({
+  label,
+  children,
+  cardOnMobile = false,
+}: {
+  label?: string;
+  children: ReactNode;
+  cardOnMobile?: boolean;
+}) {
+  return (
+    <div
+      className={[
+        "ed-settings-subsection",
+        cardOnMobile ? "ed-settings-subsection--card-mobile" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {label ? <h3 className="ed-settings-subsection__label">{label}</h3> : null}
+      {children}
+    </div>
+  );
+}
+
+export function SettingsFormFooter({
+  hint,
+  children,
+}: {
+  hint?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="ed-settings-form-footer">
+      {hint ? <p className="ed-settings-form-footer__hint">{hint}</p> : null}
+      <div className="ed-settings-form-footer__actions">{children}</div>
+    </div>
+  );
+}
+
+export function SettingsPhoneField({
+  label,
+  countryCode,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string;
+  countryCode?: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  const id = useId();
+  return (
+    <label className="ed-settings-phone-field" htmlFor={id}>
+      <span className="ed-field__label">{label}</span>
+      <div className="ed-settings-phone-field__row">
+        <span className="ed-settings-phone-field__prefix" aria-hidden>
+          {countryCode ?? "+91"}
+        </span>
+        <input
+          id={id}
+          className="ed-field__input"
+          type="tel"
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
+    </label>
+  );
+}
+
+export function SettingsMapsButton({
+  label = "Verify on Google Maps",
+  href,
+}: {
+  label?: string;
+  href: string;
+}) {
+  return (
+    <a className="ed-settings-maps-button" href={href} target="_blank" rel="noreferrer">
+      <span className="ed-settings-maps-button__icon" aria-hidden>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" />
+          <circle cx="12" cy="10" r="2.5" />
+        </svg>
+      </span>
+      {label}
+    </a>
+  );
+}
+
+export function SettingsSocialField({
+  platform,
+  value,
+  onChange,
+  onRemove,
+  removable,
+}: {
+  platform: string;
+  value: string;
+  onChange: (value: string) => void;
+  onRemove?: () => void;
+  removable?: boolean;
+}) {
+  const id = useId();
+  const tone = platform.toLowerCase().replace(/[^a-z]/g, "");
+  return (
+    <div className={`ed-settings-social-field ed-settings-social-field--${tone}`}>
+      <span className="ed-settings-social-field__icon" aria-hidden>
+        {platform.charAt(0).toUpperCase()}
+      </span>
+      <label className="ed-settings-social-field__input-wrap" htmlFor={id}>
+        <span className="ed-sr-only">{platform}</span>
+        <input
+          id={id}
+          className="ed-field__input"
+          type="url"
+          value={value}
+          placeholder={`${platform.toLowerCase()}.com/your-page`}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </label>
+      {removable && onRemove ? (
+        <button type="button" className="ed-settings-social-field__remove" onClick={onRemove}>
+          Remove
+        </button>
+      ) : null}
+    </div>
+  );
+}

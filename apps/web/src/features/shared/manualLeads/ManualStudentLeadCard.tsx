@@ -9,8 +9,8 @@ import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
 type Props =
-  | { scope: "brand"; brandId: string; invalidateKey: unknown[] }
-  | { scope: "center"; centerId: string; invalidateKey: unknown[] };
+  | { scope: "brand"; brandId: string; invalidateKey: unknown[]; formOpen?: boolean; onFormOpenChange?: (open: boolean) => void; hideTrigger?: boolean }
+  | { scope: "center"; centerId: string; invalidateKey: unknown[]; formOpen?: boolean; onFormOpenChange?: (open: boolean) => void; hideTrigger?: boolean };
 
 export function ManualStudentLeadCard(props: Props) {
   const qc = useQueryClient();
@@ -93,6 +93,9 @@ export function ManualStudentLeadCard(props: Props) {
     <AddFormSection
       buttonLabel="Add lead"
       panelTitle="Add student lead manually"
+      open={props.formOpen}
+      onOpenChange={props.onFormOpenChange}
+      hideTrigger={props.hideTrigger}
       primaryAction={{
         label: "Create lead",
         onClick: () => save.mutate(),

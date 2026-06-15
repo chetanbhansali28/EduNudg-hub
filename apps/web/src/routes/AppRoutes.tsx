@@ -44,7 +44,6 @@ import { CenterReportsPage } from "@/features/center/reports/CenterReportsPage";
 import { CenterSettingsPage } from "@/features/center/settings/CenterSettingsPage";
 import { StudentsPage } from "@/features/center/StudentsPage";
 import { BatchesPage } from "@/features/center/BatchesPage";
-import { AttendancePage } from "@/features/center/AttendancePage";
 import { FeesPage } from "@/features/center/FeesPage";
 import { InventoryPage } from "@/features/center/InventoryPage";
 import { MarketingHomePage } from "@/features/marketing/MarketingHomePage";
@@ -252,7 +251,6 @@ export function AppRoutes() {
             <Route path="reports" element={<CenterReportsPage />} />
             <Route path="batches" element={<BatchesPage />} />
             <Route path="curriculum" element={<CenterCurriculumPage />} />
-            <Route path="attendance" element={<AttendancePage />} />
             <Route path="fees" element={<FeesPage />} />
             <Route path="inventory" element={<InventoryPage />} />
           </Route>
@@ -260,7 +258,6 @@ export function AppRoutes() {
           <Route path="/app/admissions" element={<Navigate to="/app/leads" replace />} />
           <Route path="/students" element={<Navigate to="/app/students" replace />} />
           <Route path="/batches" element={<Navigate to="/app/batches" replace />} />
-          <Route path="/attendance" element={<Navigate to="/app/attendance" replace />} />
           <Route path="/fees" element={<Navigate to="/app/fees" replace />} />
           <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
           <Route path="/assessments" element={<Navigate to="/app/assessments" replace />} />

@@ -38,14 +38,18 @@ export function CenterLayout() {
   const portalLabel = `Center · ${shell.productName}`;
   const welcome = useStaffShellWelcome(portalLabel);
   const isMerchandise = pathname.startsWith("/app/merchandise");
+  const isCurriculum = pathname.startsWith("/app/curriculum");
+  const isAssessments = pathname.startsWith("/app/assessments");
   const isOpsRoute =
     pathname === "/app" ||
     pathname.startsWith("/app/leads") ||
     pathname.startsWith("/app/students") ||
     pathname.startsWith("/app/batches") ||
-    pathname.startsWith("/app/settings");
+    pathname.startsWith("/app/settings") ||
+    isCurriculum ||
+    isAssessments;
   const storeTitle = branding?.brandName ? `${branding.brandName} Store` : `${shell.productName} Store`;
-  const opsTitle = "Student Management";
+  const opsTitle = isCurriculum ? "Curriculum" : isAssessments ? "Assessments" : "Student Management";
 
   return (
     <AppShell

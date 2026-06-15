@@ -17,13 +17,29 @@ export type StudentAssessmentRow = {
   programs?: { name: string } | { name: string }[] | null;
 };
 
+const ASSESSMENT_SELECT =
+  "id, student_id, assessment_type, score, max_score, assessed_at, notes, passed, level_id, program_id, students(full_name), levels(name), programs(name)";
+
 export async function listCenterAssessments(centerId: string): Promise<StudentAssessmentRow[]> {
   const { data, error } = await getSupabase()
     .from("student_assessments")
-    .select(
-      "id, student_id, assessment_type, score, max_score, assessed_at, notes, passed, level_id, program_id, students(full_name), levels(name), programs(name)"
-    )
+    .select(ASSESSMENT_SELECT)
     .eq("center_id", centerId)
+    .order("assessed_at", { ascending: false })
+    .limit(50);
+  if (error) throw error;
+  return supabaseList(data, null) as StudentAssessmentRow[];
+}
+
+export async function listStudentAssessments(
+  centerId: string,
+  studentId: string
+): Promise<StudentAssessmentRow[]> {
+  const { data, error } = await getSupabase()
+    .from("student_assessments")
+    .select(ASSESSMENT_SELECT)
+    .eq("center_id", centerId)
+    .eq("student_id", studentId)
     .order("assessed_at", { ascending: false })
     .limit(50);
   if (error) throw error;

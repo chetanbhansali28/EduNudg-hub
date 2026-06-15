@@ -98,6 +98,13 @@ describe("portalNav", () => {
     expect(curriculum?.active).toBe(true);
   });
 
+  it("regression_center_nav_excludes_attendance", () => {
+    const sections = centerNavSections("/app");
+    const features = sections.find((s) => s.title === "Features");
+    expect(features?.items.some((i) => i.label === "Attendance")).toBe(false);
+    expect(features?.items.some((i) => i.href === "/app/attendance")).toBe(false);
+  });
+
   it("center nav includes campaigns behind flag path", () => {
     const sections = centerNavSections("/app/campaigns");
     const campaigns = sections[1]?.items.find((i) => i.label === "Campaigns");

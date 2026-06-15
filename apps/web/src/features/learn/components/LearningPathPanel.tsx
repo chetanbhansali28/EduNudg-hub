@@ -1,19 +1,30 @@
 import { Link } from "react-router-dom";
 import { LearningPathTrack } from "@/features/learn/components/LearningPathTrack";
 import { StudentEmptyState } from "@/features/learn/components/StudentPortalShell";
-import { formatShortDate } from "@/features/learn/studentFormatters";
-import type { ProgramLadder } from "@/lib/studentProgressApi";
+import { assessmentResultLabel, formatShortDate } from "@/features/learn/studentFormatters";
+import type { ProgramLadder, ProgramLadderAssessment } from "@/lib/studentProgressApi";
 import type { StudentLearnHome } from "@/lib/studentLearnApi";
 
 type Props = {
   ladders: ProgramLadder[];
-  assessments?: StudentLearnHome["recent_assessments"];
+  assessments?: ProgramLadderAssessment[];
   recentResults?: StudentLearnHome["recent_results"];
   stats?: StudentLearnHome["stats"];
   completionPct?: number;
   loading?: boolean;
   error?: boolean;
 };
+
+function checkpointMeta(assessment: ProgramLadderAssessment): string {
+  const parts: string[] = [];
+  if (assessment.score != null && assessment.max_score) {
+    parts.push(`Scored ${assessment.score}/${assessment.max_score}`);
+  }
+  const result = assessmentResultLabel(assessment.passed);
+  if (result) parts.push(result);
+  parts.push(formatShortDate(assessment.assessed_at));
+  return parts.join(" · ");
+}
 
 function checkpointIcon(type: string) {
   if (type.toLowerCase().includes("lab")) return "🧪";
@@ -48,10 +59,7 @@ export function LearningPathPanel({
       ? assessments.slice(0, 2).map((a) => ({
           id: a.id,
           title: a.level_name ? `${a.level_name}: ${a.assessment_type}` : a.assessment_type,
-          meta:
-            a.score != null && a.max_score
-              ? `Scored ${a.score}/${a.max_score} · ${formatShortDate(a.assessed_at)}`
-              : `Assessed ${formatShortDate(a.assessed_at)}`,
+          meta: checkpointMeta(a),
           icon: checkpointIcon(a.assessment_type),
           locked: false,
         }))

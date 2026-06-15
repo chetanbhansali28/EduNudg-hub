@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, FormGrid, Input, MutationError, Select } from "@edunudg/ui";
+import { Button, CommerceWidgetCard, FormGrid, Input, MutationError, Select } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -9,7 +9,14 @@ import {
   upsertStudentDeliveryAddress,
 } from "@/lib/studentProfileApi";
 
-type Props = { brandId: string; centerId: string };
+type Props = { brandId: string; centerId: string; layout?: "widget" | "page" };
+
+const SHIPPING_ICON = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z" />
+    <circle cx="12" cy="10" r="2.5" />
+  </svg>
+);
 
 const emptyAddress = {
   address_line1: "",
@@ -19,7 +26,11 @@ const emptyAddress = {
   phone: "",
 };
 
-export function CenterStudentProfileAddressCard({ brandId, centerId }: Props) {
+export function CenterStudentProfileAddressCard({
+  brandId,
+  centerId,
+  layout = "page",
+}: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [studentId, setStudentId] = useState("");
@@ -82,40 +93,53 @@ export function CenterStudentProfileAddressCard({ brandId, centerId }: Props) {
     onError: capture,
   });
 
-  return (
-    <Card title="Student shipping addresses">
-      <p className="ed-text-sm ed-muted">
-        Update delivery address details for enrolled students. Required for per-student merchandise orders shipped to
-        the student.
-      </p>
-      <MutationError message={error} />
+  const studentSelect = (
+    <Select
+      label="Student Name"
+      value={studentId}
+      onChange={setStudentId}
+      placeholder="Select student"
+      options={(students.data ?? []).map((s) => ({ value: s.id, label: s.full_name }))}
+    />
+  );
+
+  const addressBody = studentId ? (
+    <>
       <FormGrid>
-        <Select
-          label="Student"
-          value={studentId}
-          onChange={setStudentId}
-          placeholder="Select student"
-          options={(students.data ?? []).map((s) => ({ value: s.id, label: s.full_name }))}
+        <Input
+          label="Address line 1"
+          value={form.address_line1}
+          onChange={(v) => setForm((f) => ({ ...f, address_line1: v }))}
         />
+        <Input label="City" value={form.city} onChange={(v) => setForm((f) => ({ ...f, city: v }))} />
+        <Input label="State" value={form.state} onChange={(v) => setForm((f) => ({ ...f, state: v }))} />
+        <Input label="Pincode" value={form.pincode} onChange={(v) => setForm((f) => ({ ...f, pincode: v }))} />
+        <Input label="Phone" value={form.phone} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
       </FormGrid>
-      {studentId ? (
-        <>
-          <FormGrid>
-            <Input
-              label="Address line 1"
-              value={form.address_line1}
-              onChange={(v) => setForm((f) => ({ ...f, address_line1: v }))}
-            />
-            <Input label="City" value={form.city} onChange={(v) => setForm((f) => ({ ...f, city: v }))} />
-            <Input label="State" value={form.state} onChange={(v) => setForm((f) => ({ ...f, state: v }))} />
-            <Input label="Pincode" value={form.pincode} onChange={(v) => setForm((f) => ({ ...f, pincode: v }))} />
-            <Input label="Phone" value={form.phone} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
-          </FormGrid>
-          <Button onClick={() => save.mutate()} disabled={save.isPending}>
-            Save address
-          </Button>
-        </>
-      ) : null}
-    </Card>
+      <Button onClick={() => save.mutate()} disabled={save.isPending}>
+        Save address
+      </Button>
+    </>
+  ) : (
+    <div className="ed-commerce-widget__placeholder">
+      {SHIPPING_ICON}
+      <span>Select a student to view or edit their shipping address.</span>
+    </div>
+  );
+
+  return (
+    <CommerceWidgetCard
+      icon={SHIPPING_ICON}
+      title={layout === "widget" ? "Shipping Directory" : "Student shipping addresses"}
+      description={
+        layout === "widget"
+          ? "View and update delivery addresses for enrolled students."
+          : "Update delivery address details for enrolled students. Required for per-student merchandise orders shipped to the student."
+      }
+    >
+      <MutationError message={error} />
+      {studentSelect}
+      {addressBody}
+    </CommerceWidgetCard>
   );
 }

@@ -1,12 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { FilterTabs, FormGrid, Input, MobileCartBar, MutationError, Select } from "@edunudg/ui";
+import {
+  Button,
+  CommerceAlertBanner,
+  CommercePageHeader,
+  CommerceStatTiles,
+  CommerceWorkspace,
+  FilterTabs,
+  FormGrid,
+  Input,
+  MobileCartBar,
+  MutationError,
+  Select,
+} from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
+import { fetchCenterInventorySummary } from "@/lib/centerInventoryApi";
+import {
+  computeMerchandiseAvgDeliveryDays,
+  computeMerchandiseStockKits,
+} from "@/lib/merchandiseOrdersHelpers";
 import {
   createCenterMerchandiseOrder,
   listActiveMerchandiseCatalog,
+  listCenterMerchandiseOrders,
   validateMerchandisePromoCode,
   type MerchandisePaymentMethod,
   type MerchandiseShippingMode,
@@ -43,7 +61,7 @@ import {
 } from "./merchandiseShopTypes";
 import "./merchandiseShop.css";
 
-type ShopTab = "shop" | "orders";
+type MerchTab = "shop" | "orders";
 
 const emptyCustomAddress = {
   name: "",
@@ -53,6 +71,13 @@ const emptyCustomAddress = {
   state: "",
   pincode: "",
 };
+
+const PLACE_ORDER_ICON = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+    <path d="M3 6h18M16 10a4 4 0 0 1-8 0" />
+  </svg>
+);
 
 function formatAddressPreview(address: ShippingAddressSnapshot | null): string {
   if (!address) return "Address not available.";
@@ -66,6 +91,12 @@ function formatAddressPreview(address: ShippingAddressSnapshot | null): string {
   return parts.join(" · ") || "Incomplete address.";
 }
 
+function tabFromSearchParams(searchParams: URLSearchParams): MerchTab {
+  const tab = searchParams.get("tab");
+  if (tab === "orders") return tab;
+  return "shop";
+}
+
 export function CenterMerchandiseOrdersPage() {
   const tenant = useTenant();
   const brandId = tenant.brandId;
@@ -75,11 +106,17 @@ export function CenterMerchandiseOrdersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { isMobile } = useCommerceBreakpoint();
 
-  const tab: ShopTab = searchParams.get("tab") === "orders" ? "orders" : "shop";
-  const setTab = (next: ShopTab) => {
-    if (next === "orders") setSearchParams({ tab: "orders" });
-    else setSearchParams({});
+  const tab = tabFromSearchParams(searchParams);
+  const setTab = (next: MerchTab) => {
+    if (next === "shop") setSearchParams({});
+    else setSearchParams({ tab: next });
   };
+
+  useEffect(() => {
+    if (searchParams.get("tab") === "allocation") {
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const [cart, setCart] = useState<Record<string, MerchandiseShopLine>>({});
   const [mobileCartOpen, setMobileCartOpen] = useState(false);
@@ -102,6 +139,18 @@ export function CenterMerchandiseOrdersPage() {
     queryKey: ["merchandise-brand-settings", brandId],
     enabled: !!brandId,
     queryFn: () => fetchMerchandiseBrandSettings(brandId!),
+  });
+
+  const inventorySummary = useQuery({
+    queryKey: ["center-inventory-summary", brandId, centerId],
+    enabled: !!brandId && !!centerId,
+    queryFn: () => fetchCenterInventorySummary(brandId!, centerId!),
+  });
+
+  const merchandiseOrders = useQuery({
+    queryKey: ["center-merchandise-orders", centerId],
+    enabled: !!centerId && tab !== "shop",
+    queryFn: () => listCenterMerchandiseOrders(centerId!),
   });
 
   const paymentOptions = useMemo(() => {
@@ -272,6 +321,7 @@ export function CenterMerchandiseOrdersPage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["center-merchandise-orders", centerId] });
       void qc.invalidateQueries({ queryKey: ["center-merchandise-payment-alerts", centerId] });
+      void qc.invalidateQueries({ queryKey: ["center-inventory-summary", brandId, centerId] });
       setCart({});
       setPromoCode("");
       setPromoMessage(null);
@@ -316,6 +366,17 @@ export function CenterMerchandiseOrdersPage() {
   const catalogItems = catalog.data ?? [];
   const studentOptions = students.data ?? [];
   const needsShippingStudentPick = shippingMode === "student" && cartStudentIds.length !== 1;
+
+  const stockKits = computeMerchandiseStockKits(inventorySummary.data ?? []);
+  const avgDelivery = computeMerchandiseAvgDeliveryDays(merchandiseOrders.data ?? []);
+  const statTiles = [
+    { label: "Stock Level", value: `${stockKits} kits`, tone: "blue" as const },
+    {
+      label: "Avg. Delivery",
+      value: avgDelivery != null ? `${avgDelivery} days` : "—",
+      tone: "purple" as const,
+    },
+  ];
 
   const customAddressFields = (
     <FormGrid>
@@ -391,24 +452,42 @@ export function CenterMerchandiseOrdersPage() {
     checkoutExpanded,
   };
 
+  const ordersSidebar = (
+    <>
+      <CenterMerchandiseAllocationsCard brandId={brandId} centerId={centerId} layout="widget" />
+      <CenterStudentProfileAddressCard brandId={brandId} centerId={centerId} layout="widget" />
+      <CommerceStatTiles items={statTiles} />
+    </>
+  );
+
   return (
     <div className="ed-merch-page">
-      <header className="ed-merch-page__intro">
-        <h1 className="ed-merch-page__title">Merchandise</h1>
-        <p className="ed-merch-page__subtitle">Browse and order kits for your center</p>
-      </header>
+      <CommercePageHeader
+        title="Merchandise Orders"
+        subtitle="Track and manage kit orders for your center."
+        action={
+          <Button onClick={() => setTab("shop")}>
+            {PLACE_ORDER_ICON}
+            Place New Order
+          </Button>
+        }
+      />
       <MutationError message={error} />
 
       {alerts && alerts.unpaid_count > 0 ? (
-        <div className="ed-card ed-merch-alert">
-          <p className="ed-text-sm">
-            {alerts.unpaid_count} order{alerts.unpaid_count === 1 ? "" : "s"} awaiting payment (
-            {formatInrFromPaise(alerts.unpaid_total_cents)} total).
-            {alerts.overdue_count > 0
-              ? ` ${alerts.overdue_count} invoice${alerts.overdue_count === 1 ? " is" : "s are"} overdue.`
-              : null}
-          </p>
-        </div>
+        <CommerceAlertBanner
+          message={
+            <>
+              {alerts.unpaid_count} order{alerts.unpaid_count === 1 ? "" : "s"} awaiting payment (
+              {formatInrFromPaise(alerts.unpaid_total_cents)} total).
+              {alerts.overdue_count > 0
+                ? ` ${alerts.overdue_count} invoice${alerts.overdue_count === 1 ? " is" : "s are"} overdue.`
+                : null}
+            </>
+          }
+          actionLabel="Pay Now"
+          onAction={() => setTab("orders")}
+        />
       ) : null}
 
       <FilterTabs
@@ -436,17 +515,20 @@ export function CenterMerchandiseOrdersPage() {
             <MerchandiseCheckoutPanel {...checkoutPanelProps} />
           </div>
         </div>
-      ) : (
-        <>
-          <CenterMerchandiseOrderHistory
-            centerId={centerId}
-            brandId={brandId}
-            brandSlug={tenant.brandSlug}
-          />
-          <CenterMerchandiseAllocationsCard brandId={brandId} centerId={centerId} />
-          <CenterStudentProfileAddressCard brandId={brandId} centerId={centerId} />
-        </>
-      )}
+      ) : null}
+
+      {tab === "orders" ? (
+        <CommerceWorkspace
+          main={
+            <CenterMerchandiseOrderHistory
+              centerId={centerId}
+              brandId={brandId}
+              brandSlug={tenant.brandSlug}
+            />
+          }
+          aside={ordersSidebar}
+        />
+      ) : null}
 
       {isMobile && tab === "shop" && cartQty > 0 ? (
         <MobileCartBar

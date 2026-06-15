@@ -21,6 +21,7 @@ type Props = {
 
 function stepClass(status: string): string {
   if (status === "completed") return "ed-sp-ladder__step ed-sp-ladder__step--completed";
+  if (status === "failed") return "ed-sp-ladder__step ed-sp-ladder__step--failed";
   if (status === "in_progress") return "ed-sp-ladder__step ed-sp-ladder__step--in_progress";
   return "ed-sp-ladder__step";
 }

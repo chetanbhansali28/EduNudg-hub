@@ -59,7 +59,6 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | Features | **Leads** | `/app/leads` | Exists — manual add, convert, mark lost |
 | | Students | `/app/students` | Exists |
 | | Batches | `/app/batches` | Exists |
-| | Attendance | `/app/attendance` | Exists |
 | | Fees & Payments | `/app/fees` | Exists |
 | | Merchandise | `/app/merchandise` | Exists — shop, checkout, order history |
 | | Assessments | `/app/assessments` | Phase D |

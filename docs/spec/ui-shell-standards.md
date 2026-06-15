@@ -47,6 +47,40 @@ import { PageGrid, PageGridFull, FormGrid } from "@edunudg/ui";
 
 Do not stack many full-width `Card`s in a single column on laptop viewports.
 
+## Backend commerce workspace
+
+Staff merchandise and inventory ops use reusable primitives from `@edunudg/ui`:
+
+| Primitive | Use |
+|-----------|-----|
+| `CommercePageHeader` | Title, subtitle, primary action |
+| `CommerceAlertBanner` | Payment / status alerts |
+| `CommerceWorkspace` | Main column + optional aside (≥1024px two-column; stacks on tablet/mobile) |
+| `CommerceSectionHeader` | Section title + badge (e.g. Last 30 Days) |
+| `CommerceOrderCard` | Order history cards |
+| `CommerceWidgetCard` | Sidebar widgets (allocate stock, shipping directory) |
+| `CommerceStatTiles` | Compact KPI pair (stock level, avg delivery) |
+| `CommerceArchiveNote` | Archived history placeholder |
+
+Styles live in `packages/ui/src/styles.css` under **Backend commerce workspace**; work inside `ed-shell--backend` and `ed-shell--commerce`.
+
+## Backend pipeline workspace
+
+Staff lead and application pipelines use reusable primitives from `@edunudg/ui`:
+
+| Primitive | Use |
+|-----------|-----|
+| `PipelinePageHeader` | Title, subtitle, filter/add actions |
+| `PipelineMetricStrip` / `PipelineMetricCard` | KPI row (scroll on mobile, grid on desktop) |
+| `PipelineWorkspace` | Lead list + detail aside (stacks on mobile when detail open) |
+| `PipelinePanel` | White list container |
+| `PipelineTableToolbar` | Underline tabs + pagination meta |
+| `PipelineStatusBadge` | Row/detail status pills |
+| `PipelineDetailPanel` | Right-hand lead detail shell |
+| `PipelineTimeline` | Lead history timeline |
+
+Row markup uses `.ed-pipeline-lead-row` classes in `packages/ui/src/styles.css`. Center leads helpers live in `apps/web/src/lib/centerLeadsHelpers.ts`.
+
 ## Marketing (public)
 
 - Mobile-first CSS in [`marketing.css`](../../apps/web/src/features/marketing/marketing.css)
@@ -91,6 +125,50 @@ Styles use admin theme tokens (`--ed-primary-soft`, `--ed-card`, etc.) for light
 Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `PlatformSignupRequestsPanel`.
 
 Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `PlatformSignupRequestsPanel.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`.
+
+## Backend catalog workspace
+
+Staff batch and curriculum group management use reusable primitives from `@edunudg/ui`:
+
+| Primitive | Use |
+|-----------|-----|
+| `CatalogPageHeader` | Breadcrumbs, title, subtitle, export/actions |
+| `CatalogWorkspace` | Batch list + add/edit aside (stacks on mobile) |
+| `CatalogToolbar` | Course filter pills + sort meta |
+| `CatalogListCard` | Batch row with icon, status badge, meta, actions |
+| `CatalogEnrollmentBadge` | Open / closed enrollment pills |
+| `CatalogFormPanel` | Right-hand add/edit batch form |
+| `CatalogCreateSlot` | Mobile dashed “create another” CTA |
+| `CatalogFab` | Mobile add-batch floating action |
+
+Styles live in `packages/ui/src/styles.css` under **Backend catalog workspace**. Center batch helpers: `apps/web/src/lib/centerBatchesHelpers.ts`.
+
+Pages: `BatchesPage` (center `/app/batches`).
+
+Tests: `BatchesPage.test.tsx`, `centerBatchesHelpers.test.ts`.
+
+## Backend settings workspace
+
+Staff account and public profile settings use reusable primitives from `@edunudg/ui`:
+
+| Primitive | Use |
+|-----------|-----|
+| `SettingsPageHeader` | Settings page title |
+| `SettingsStack` / `SettingsSection` | Card sections (account, profile) |
+| `SettingsAccountLayout` | Photo + account fields grid |
+| `SettingsMetaList` | Mobile account summary rows |
+| `SettingsProfileBanner` | Public profile preview strip |
+| `SettingsSubsection` | Contact / social blocks (split cards on mobile) |
+| `SettingsPhoneField` | +91 prefixed phone input |
+| `SettingsMapsButton` | Google Maps verify CTA |
+| `SettingsSocialField` | Platform icon + URL row |
+| `SettingsFormFooter` | Cancel / save actions + last-edited hint |
+
+Styles live in `packages/ui/src/styles.css` under **Backend settings workspace**. Helpers: `apps/web/src/lib/centerSettingsHelpers.ts`.
+
+Pages: `CenterSettingsPage` (center `/app/settings`).
+
+Tests: `CenterSettingsPage.test.tsx`, `centerSettingsHelpers.test.ts`.
 
 ## Related
 

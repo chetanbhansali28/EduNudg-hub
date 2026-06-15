@@ -10,7 +10,7 @@ vi.mock("@/lib/supabase", () => ({
 describe("centerReportsApi", () => {
   it("fetchCenterOpsReport calls RPC", async () => {
     rpc.mockResolvedValue({
-      data: { active_enrollments: 5, open_leads: 2, converted_leads: 1, attendance_sessions_30d: 4, assessments_30d: 3, recent_assessments: [] },
+      data: { active_enrollments: 5, open_leads: 2, converted_leads: 1, assessments_30d: 3, recent_assessments: [] },
       error: null,
     });
     const report = await fetchCenterOpsReport("center-1");

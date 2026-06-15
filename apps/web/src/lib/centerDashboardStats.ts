@@ -1,12 +1,11 @@
 import { getSupabase } from "@/lib/supabase";
 import { listCenterMerchandisePaymentAlerts } from "@/lib/merchandiseRemindersApi";
+import { countLowStockItems, fetchCenterInventorySummary } from "@/lib/centerInventoryApi";
 
 export const LOW_STOCK_THRESHOLD = 5;
 
 export interface CenterDashboardStats {
   batchCount: number;
-  sessionsToday: number;
-  attendanceRate7d: number | null;
   openLeads: number;
   pendingConversion: number;
   activeEnrollments: number;
@@ -16,23 +15,6 @@ export interface CenterDashboardStats {
   unpaidMerchandiseCount: number;
   unpaidMerchandiseCents: number;
   overdueMerchandiseCount: number;
-}
-
-function sevenDaysAgoDate(): string {
-  const d = new Date();
-  d.setDate(d.getDate() - 7);
-  return d.toISOString().slice(0, 10);
-}
-
-function todayDate(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-/** Computes attendance rate as present / total records (0–100). */
-export function computeAttendanceRate(records: { present: boolean }[]): number | null {
-  if (records.length === 0) return null;
-  const present = records.filter((r) => r.present).length;
-  return Math.round((present / records.length) * 100);
 }
 
 /** Fee collection rate: paid amount / billable amount (0–100). */
@@ -58,53 +40,47 @@ export function computeFeeCollectionRate(
 
 export async function fetchCenterDashboardStats(centerId: string): Promise<CenterDashboardStats> {
   const sb = getSupabase();
-  const since = sevenDaysAgoDate();
-  const today = todayDate();
 
-  const [batches, sessionsToday, sessions7d, openLeads, pendingConversion, enrollments, invoices, stock] =
-    await Promise.all([
-      sb.from("batches").select("id", { count: "exact", head: true }).eq("center_id", centerId),
-      sb
-        .from("attendance_sessions")
-        .select("id", { count: "exact", head: true })
-        .eq("center_id", centerId)
-        .eq("session_date", today),
-      sb.from("attendance_sessions").select("id").eq("center_id", centerId).gte("session_date", since),
-      sb
-        .from("leads")
-        .select("id", { count: "exact", head: true })
-        .eq("center_id", centerId)
-        .in("status", ["new", "contacted", "qualified"]),
-      sb
-        .from("leads")
-        .select("id", { count: "exact", head: true })
-        .eq("center_id", centerId)
-        .eq("status", "qualified"),
-      sb
-        .from("student_enrollments")
-        .select("id", { count: "exact", head: true })
-        .eq("center_id", centerId)
-        .eq("status", "active"),
-      sb
-        .from("invoices")
-        .select("amount_cents, status")
-        .eq("center_id", centerId),
-      sb.from("inventory_stock").select("quantity").eq("center_id", centerId),
-    ]);
-
-  const sessionIds = (sessions7d.data ?? []).map((s) => s.id as string);
-  let attendanceRate7d: number | null = null;
-  if (sessionIds.length > 0) {
-    const { data: records } = await sb
-      .from("attendance_records")
-      .select("present")
+  const [batches, openLeads, pendingConversion, enrollments, invoices] = await Promise.all([
+    sb.from("batches").select("id", { count: "exact", head: true }).eq("center_id", centerId),
+    sb
+      .from("leads")
+      .select("id", { count: "exact", head: true })
       .eq("center_id", centerId)
-      .in("session_id", sessionIds);
-    attendanceRate7d = computeAttendanceRate(records ?? []);
-  }
+      .in("status", ["new", "contacted", "qualified"]),
+    sb
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("center_id", centerId)
+      .eq("status", "qualified"),
+    sb
+      .from("student_enrollments")
+      .select("id", { count: "exact", head: true })
+      .eq("center_id", centerId)
+      .eq("status", "active"),
+    sb
+      .from("invoices")
+      .select("amount_cents, status")
+      .eq("center_id", centerId),
+  ]);
 
   const feeStats = computeFeeCollectionRate(invoices.data ?? []);
-  const lowStockItems = (stock.data ?? []).filter((row) => (row.quantity ?? 0) <= LOW_STOCK_THRESHOLD).length;
+
+  let lowStockItems = 0;
+  try {
+    const { data: centerRow } = await sb
+      .from("franchise_centers")
+      .select("brand_id")
+      .eq("id", centerId)
+      .maybeSingle();
+    if (centerRow?.brand_id) {
+      const inventoryRows = await fetchCenterInventorySummary(centerRow.brand_id, centerId);
+      lowStockItems = countLowStockItems(inventoryRows, LOW_STOCK_THRESHOLD);
+    }
+  } catch {
+    const { data: stock } = await sb.from("inventory_stock").select("quantity").eq("center_id", centerId);
+    lowStockItems = (stock ?? []).filter((row) => (row.quantity ?? 0) <= LOW_STOCK_THRESHOLD).length;
+  }
 
   let merchandiseAlerts = { unpaid_count: 0, unpaid_total_cents: 0, overdue_count: 0 };
   try {
@@ -115,8 +91,6 @@ export async function fetchCenterDashboardStats(centerId: string): Promise<Cente
 
   return {
     batchCount: batches.count ?? 0,
-    sessionsToday: sessionsToday.count ?? 0,
-    attendanceRate7d,
     openLeads: openLeads.count ?? 0,
     pendingConversion: pendingConversion.count ?? 0,
     activeEnrollments: enrollments.count ?? 0,

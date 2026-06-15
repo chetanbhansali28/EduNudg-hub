@@ -1,0 +1,33 @@
+.ed-center-batches-page__banner {
+  margin-bottom: 1rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--ed-radius-lg);
+  border: 1px solid var(--ed-border);
+  background: var(--ed-surface-container-low);
+}
+
+.ed-center-batches-page .ed-catalog-toolbar__meta .ed-field {
+  margin: 0;
+}
+
+.ed-center-batches-page .ed-catalog-toolbar__meta label {
+  display: none;
+}
+
+.ed-center-batches-page .ed-catalog-toolbar__meta select {
+  min-width: 9rem;
+  font-size: 0.8125rem;
+}
+
+.ed-center-batches-page .ed-catalog-list-card__actions .ed-btn {
+  padding: 0;
+  min-width: 0;
+  border: none;
+  background: transparent;
+}
+
+@media (max-width: 1023px) {
+  .ed-center-batches-page .ed-catalog-workspace__aside.is-open {
+    order: -1;
+  }
+}

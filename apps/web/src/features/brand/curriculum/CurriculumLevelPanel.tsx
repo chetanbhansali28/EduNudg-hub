@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   FormActions,
+  OpsSectionCard,
   SaveButton,
 } from "@edunudg/ui";
 import type { CurriculumLevel } from "@/lib/curriculumApi";
@@ -36,6 +37,7 @@ type Props = {
   reorderPending: boolean;
   onError: (err: unknown) => void;
   levelCloser: ReturnType<typeof useAddFormCloser>;
+  layout?: "ops" | "card";
 };
 
 function levelToForm(level: CurriculumLevel): LevelForm {
@@ -101,6 +103,7 @@ export function CurriculumLevelPanel({
   reorderPending,
   onError,
   levelCloser,
+  layout = "ops",
 }: Props) {
   const shift = (index: number, direction: -1 | 1) => {
     const next = [...levels];
@@ -119,8 +122,8 @@ export function CurriculumLevelPanel({
     onEditLevelChange(levelToForm(level));
   };
 
-  return (
-    <Card title="Programs">
+  const panelBody = (
+    <>
       <p className="ed-text-sm ed-muted">
         Structure: <strong>Course → Program → Chapter</strong> — e.g. Abacus course, Level 1 program,
         &quot;Numbers 1–100 on abacus&quot; chapter.
@@ -151,7 +154,7 @@ export function CurriculumLevelPanel({
         </AddFormSection>
       )}
 
-      <div className="ed-curriculum-level-accordion ed-curriculum-stagger">
+      <div className={`ed-curriculum-level-accordion${layout === "ops" ? " ed-ops-stagger" : " ed-curriculum-stagger"}`}>
         {levels.map((level, index) => {
           const isOpen = level.id === selectedLevelId;
           const chapterCount = unitCounts[level.id] ?? 0;
@@ -245,6 +248,25 @@ export function CurriculumLevelPanel({
           No programs yet — add your first program (e.g. Level 1 · L1).
         </p>
       )}
-    </Card>
+    </>
+  );
+
+  if (layout === "card") {
+    return <Card title="Programs">{panelBody}</Card>;
+  }
+
+  return (
+    <OpsSectionCard
+      icon={
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+          <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+          <path d="M12 12l8-4.5M12 12v9M12 12L4 7.5" />
+        </svg>
+      }
+      title="Programs"
+      description="Levels within this course and their chapters."
+    >
+      {panelBody}
+    </OpsSectionCard>
   );
 }

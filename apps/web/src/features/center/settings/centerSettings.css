@@ -1,25 +1,82 @@
-.ed-center-photo-upload__row {
+.ed-center-settings-page {
+  max-width: 56rem;
+}
+
+.ed-center-settings-page__mobile-photo {
+  display: none;
+}
+
+.ed-center-photo-upload {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ed-center-photo-upload__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ed-center-photo-upload__visual {
+  position: relative;
+  width: fit-content;
 }
 
 .ed-center-photo-preview {
-  width: 6rem;
-  height: 6rem;
+  width: 7rem;
+  height: 7rem;
   object-fit: cover;
-  border-radius: var(--ed-radius-lg);
-  border: 1px solid var(--ed-border);
+  border-radius: 50%;
+  border: 3px solid var(--ed-card);
+  box-shadow: 0 0 0 1px var(--ed-border);
 }
 
 .ed-center-photo-preview--empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
   color: var(--ed-muted);
   background: var(--ed-surface-container-low);
+}
+
+.ed-center-photo-upload__edit {
+  position: absolute;
+  right: 0.15rem;
+  bottom: 0.15rem;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--ed-card);
+  border-radius: 50%;
+  background: var(--ed-primary);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.ed-center-photo-upload--mobile {
+  align-items: center;
+  text-align: center;
+}
+
+.ed-center-photo-upload--mobile .ed-center-photo-preview,
+.ed-center-photo-upload--mobile .ed-center-photo-preview--empty {
+  width: 8.5rem;
+  height: 8.5rem;
+  border-radius: var(--ed-radius-lg);
+}
+
+.ed-center-photo-upload__mobile-trigger {
+  border: none;
+  background: transparent;
+  color: var(--ed-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
 }
 
 .ed-center-social-links {
@@ -28,29 +85,19 @@
   gap: 0.75rem;
 }
 
-.ed-center-social-links__row {
-  display: grid;
-  gap: 0.5rem;
-  grid-template-columns: minmax(8rem, 10rem) 1fr auto;
-  align-items: end;
-}
+@media (max-width: 767px) {
+  .ed-center-settings-page__mobile-photo {
+    display: block;
+  }
 
-@media (max-width: 640px) {
-  .ed-center-social-links__row {
-    grid-template-columns: 1fr;
+  .ed-settings-section--account .ed-center-photo-upload--desktop,
+  .ed-settings-account-layout__photo {
+    display: none;
   }
 }
 
-.ed-center-curriculum-toggles__list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  margin-top: 0.75rem;
-}
-
-.ed-center-curriculum-toggles__row {
-  padding: 0.65rem 0.75rem;
-  border: 1px solid var(--ed-border);
-  border-radius: var(--ed-radius-lg);
-  background: var(--ed-card);
+@media (min-width: 768px) {
+  .ed-center-settings-page__mobile-photo {
+    display: none;
+  }
 }

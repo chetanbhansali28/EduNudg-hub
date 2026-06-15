@@ -11,7 +11,7 @@ import {
 } from "@/features/learn/components/StudentPortalShell";
 import { StudentProgressHeroCard } from "@/features/learn/components/StudentProgressHeroCard";
 import { StudentEnrollmentBlockedPage } from "@/features/learn/StudentEnrollmentBlockedPage";
-import { formatShortDate } from "@/features/learn/studentFormatters";
+import { assessmentResultLabel, formatShortDate } from "@/features/learn/studentFormatters";
 import { StudentLearnRpcError } from "@/lib/studentLearnApi";
 import {
   shouldRetryStudentLearnQuery,
@@ -103,11 +103,11 @@ export function StudentProgressPage() {
                           {a.assessment_type}
                         </p>
                         <p className="ed-sp-assessment__date">{formatShortDate(a.assessed_at)}</p>
-                        {a.passed != null && (
+                        {a.passed != null && assessmentResultLabel(a.passed) && (
                           <span
                             className={`ed-sp-assessment__pass${a.passed ? " ed-sp-assessment__pass--yes" : " ed-sp-assessment__pass--no"}`}
                           >
-                            {a.passed ? "Passed" : "Did not pass"}
+                            {assessmentResultLabel(a.passed)}
                           </span>
                         )}
                         {a.notes ? <p className="ed-text-sm ed-muted">{a.notes}</p> : null}

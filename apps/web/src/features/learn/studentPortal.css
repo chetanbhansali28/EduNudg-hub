@@ -295,6 +295,16 @@
   position: relative;
 }
 
+.ed-sp-path-track__node--failed {
+  border-color: var(--ed-warning-fg);
+  background: var(--ed-warning-bg);
+  color: var(--ed-warning-fg);
+}
+
+.ed-sp-path-track__step--failed .ed-sp-path-track__step-label {
+  color: var(--ed-warning-fg);
+}
+
 .ed-sp-path-track__pulse {
   position: absolute;
   top: -2px;
@@ -1685,6 +1695,16 @@
   color: var(--ed-primary);
 }
 
+.ed-sp-ladder__step--failed .ed-sp-ladder__dot {
+  background: var(--ed-warning-fg);
+  box-shadow: 0 0 0 4px var(--ed-warning-bg);
+}
+
+.ed-sp-ladder__step--failed .ed-sp-ladder__status {
+  background: var(--ed-warning-bg);
+  color: var(--ed-warning-fg);
+}
+
 .ed-sp-tabs {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1925,6 +1945,27 @@
   font-weight: 700;
   font-size: 1.125rem;
   color: var(--ed-primary);
+}
+
+.ed-sp-assessment__pass {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+.ed-sp-assessment__pass--yes {
+  background: var(--ed-success-bg);
+  color: var(--ed-success);
+}
+
+.ed-sp-assessment__pass--no {
+  background: var(--ed-warning-bg);
+  color: var(--ed-warning-fg);
 }
 
 .ed-sp-blocked {
@@ -2195,6 +2236,12 @@
   box-shadow: 0 0 0 3px var(--ed-primary-soft);
 }
 
+.ed-sp-timeline__node--failed {
+  border-color: var(--ed-warning-fg);
+  background: var(--ed-warning-bg);
+  color: var(--ed-warning-fg);
+}
+
 .ed-sp-timeline__node--locked {
   background: var(--ed-bg);
   border-color: var(--ed-border);
@@ -2212,6 +2259,15 @@
 .ed-sp-timeline__item--current .ed-sp-timeline__card {
   border-color: color-mix(in srgb, var(--ed-primary) 45%, var(--ed-border));
   background: color-mix(in srgb, var(--ed-primary-soft) 40%, var(--ed-card));
+}
+
+.ed-sp-timeline__item--failed .ed-sp-timeline__card {
+  border-color: color-mix(in srgb, var(--ed-warning-fg) 45%, var(--ed-border));
+  background: color-mix(in srgb, var(--ed-warning-bg) 55%, var(--ed-card));
+}
+
+.ed-sp-timeline__item--failed .ed-sp-timeline__level-label {
+  color: var(--ed-warning-fg);
 }
 
 .ed-sp-timeline__item--locked .ed-sp-timeline__card {
@@ -2235,6 +2291,11 @@
   text-transform: uppercase;
   color: #fff;
   background: var(--ed-primary);
+}
+
+.ed-sp-timeline__badge--fail {
+  background: var(--ed-warning-fg);
+  color: #fff;
 }
 
 .ed-sp-timeline__level-label {

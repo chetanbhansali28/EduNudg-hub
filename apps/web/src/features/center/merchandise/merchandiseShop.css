@@ -1,7 +1,7 @@
 .ed-merch-page {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 1rem;
 }
 
 .ed-merch-page__intro {

@@ -1,12 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Card, FormGrid, Input, MutationError, Select } from "@edunudg/ui";
+import {
+  Button,
+  FormGrid,
+  Input,
+  MutationError,
+  Select,
+  SettingsFormFooter,
+  SettingsMapsButton,
+  SettingsPhoneField,
+  SettingsProfileBanner,
+  SettingsSection,
+  SettingsSocialField,
+  SettingsSubsection,
+  Textarea,
+} from "@edunudg/ui";
 import {
   type CenterPublicProfileInput,
   type CenterPublicProfileRow,
   updateCenterPublicProfile,
 } from "@/lib/centerProfileApi";
+import {
+  formatSettingsLastEdited,
+  googleMapsSearchUrl,
+  INDIAN_STATES,
+  joinIndiaPhone,
+  splitIndiaPhone,
+} from "@/lib/centerSettingsHelpers";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { initialsFromName } from "@/lib/welcomeMessage";
 import { CenterPhotoUpload } from "./CenterPhotoUpload";
 import "./centerSettings.css";
 
@@ -21,7 +43,7 @@ const SOCIAL_PLATFORMS = [
 
 const MAX_SOCIAL_LINKS = 6;
 
-function profileToForm(row: CenterPublicProfileRow): CenterPublicProfileInput {
+function profileToForm(row: CenterPublicProfileRow): CenterPublicProfileInput & { phoneNational: string } {
   return {
     displayName: row.displayName,
     shortDescription: row.shortDescription,
@@ -31,11 +53,10 @@ function profileToForm(row: CenterPublicProfileRow): CenterPublicProfileInput {
     pincode: row.pincode,
     country: row.country || "IN",
     contactPhone: row.contactPhone,
+    phoneNational: splitIndiaPhone(row.contactPhone),
     photoUrl: row.photoUrl,
     socialLinks:
-      row.socialLinks.length > 0
-        ? row.socialLinks
-        : [{ platform: "Facebook", url: "" }],
+      row.socialLinks.length > 0 ? row.socialLinks : [{ platform: "Facebook", url: "" }],
   };
 }
 
@@ -49,6 +70,7 @@ export function CenterPublicProfileForm({ brandId, centerId, profile }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [form, setForm] = useState(() => profileToForm(profile));
+  const [savedFlash, setSavedFlash] = useState(false);
 
   useEffect(() => {
     setForm(profileToForm(profile));
@@ -57,16 +79,22 @@ export function CenterPublicProfileForm({ brandId, centerId, profile }: Props) {
   const save = useMutation({
     mutationFn: async () => {
       clear();
-      await updateCenterPublicProfile(centerId, form);
+      const { phoneNational, ...payload } = form;
+      await updateCenterPublicProfile(centerId, {
+        ...payload,
+        contactPhone: joinIndiaPhone(phoneNational),
+      });
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["center-public-profile", centerId] });
       void qc.invalidateQueries({ queryKey: ["center-landing"] });
+      setSavedFlash(true);
+      window.setTimeout(() => setSavedFlash(false), 2500);
     },
     onError: capture,
   });
 
-  const setField = <K extends keyof CenterPublicProfileInput>(key: K, value: CenterPublicProfileInput[K]) => {
+  const setField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -92,87 +120,114 @@ export function CenterPublicProfileForm({ brandId, centerId, profile }: Props) {
     }));
   };
 
+  const resetForm = () => setForm(profileToForm(profile));
+
+  const bannerTitle = form.displayName.trim() || profile.name;
+  const bannerInitials = initialsFromName(bannerTitle);
+  const mapsUrl = useMemo(
+    () =>
+      googleMapsSearchUrl({
+        addressLine1: form.addressLine1,
+        city: form.city,
+        region: form.region,
+        pincode: form.pincode,
+      }),
+    [form.addressLine1, form.city, form.region, form.pincode]
+  );
+  const lastEdited = formatSettingsLastEdited(profile.updatedAt);
+
+  const stateOptions = useMemo(() => {
+    const values = Array.from(new Set([...INDIAN_STATES, form.region.trim()].filter(Boolean)));
+    return [{ value: "", label: "Select state…" }, ...values.map((state) => ({ value: state, label: state }))];
+  }, [form.region]);
+
   return (
-    <Card title="Public center profile">
-      <p className="ed-text-sm ed-muted">
-        These details appear on your public center site so parents can find and contact you. Your login email is shown
-        under Account (from Google or social sign-in). Slug and status are managed by your brand.
-      </p>
+    <SettingsSection title="Public Center Profile" mobileLabel="Public profile" className="ed-settings-section--profile">
+      <SettingsProfileBanner initials={bannerInitials} title={bannerTitle} />
       <MutationError message={error} />
 
-      <CenterPhotoUpload
-        brandId={brandId}
-        centerId={centerId}
-        currentPhotoUrl={form.photoUrl}
-        onUploaded={(url) => setField("photoUrl", url)}
-        disabled={save.isPending}
-      />
-
-      <FormGrid>
+      <SettingsSubsection label="Public profile" cardOnMobile>
+        <div className="ed-center-settings-page__mobile-photo">
+          <CenterPhotoUpload
+            brandId={brandId}
+            centerId={centerId}
+            currentPhotoUrl={form.photoUrl}
+            onUploaded={(url) => setField("photoUrl", url)}
+            disabled={save.isPending}
+            variant="mobile"
+          />
+        </div>
         <Input
           label="Display name"
           value={form.displayName}
-          onChange={(v) => setField("displayName", v)}
+          onChange={(value) => setField("displayName", value)}
           placeholder={profile.name}
         />
-        <Input
+        <Textarea
           label="Short description"
           value={form.shortDescription}
-          onChange={(v) => setField("shortDescription", v)}
+          onChange={(value) => setField("shortDescription", value)}
           placeholder="A sentence about your center for parents"
+          rows={4}
         />
-      </FormGrid>
+      </SettingsSubsection>
 
-      <FormGrid>
+      <SettingsSubsection label="Contact info" cardOnMobile>
+        <SettingsPhoneField
+          label="Phone number"
+          value={form.phoneNational}
+          onChange={(value) => setField("phoneNational", value)}
+          placeholder="9876543210"
+        />
         <Input
-          label="Address line 1"
+          label="Address line"
           value={form.addressLine1}
-          onChange={(v) => setField("addressLine1", v)}
+          onChange={(value) => setField("addressLine1", value)}
         />
-        <Input label="City" value={form.city} onChange={(v) => setField("city", v)} />
-        <Input label="State / region" value={form.region} onChange={(v) => setField("region", v)} />
-        <Input label="Pincode" value={form.pincode} onChange={(v) => setField("pincode", v)} />
-        <Input label="Country" value={form.country} onChange={(v) => setField("country", v)} />
-      </FormGrid>
+        <FormGrid columns={2}>
+          <Input label="City" value={form.city} onChange={(value) => setField("city", value)} />
+          <Select
+            label="State"
+            value={form.region}
+            onChange={(value) => setField("region", value)}
+            options={stateOptions}
+          />
+        </FormGrid>
+        <Input label="Pincode" value={form.pincode} onChange={(value) => setField("pincode", value)} />
+        {mapsUrl ? <SettingsMapsButton href={mapsUrl} /> : null}
+      </SettingsSubsection>
 
-      <FormGrid>
-        <Input
-          label="Phone / WhatsApp"
-          value={form.contactPhone}
-          onChange={(v) => setField("contactPhone", v)}
-          placeholder="+91…"
-        />
-      </FormGrid>
-
-      <div className="ed-center-social-links">
-        <p className="ed-field__label">Social media</p>
-        {form.socialLinks.map((link, index) => (
-          <div key={`social-${index}`} className="ed-center-social-links__row">
-            <Select
-              label="Platform"
-              value={link.platform}
-              onChange={(platform) => updateSocial(index, { platform })}
-              options={SOCIAL_PLATFORMS.map((p) => ({ value: p, label: p }))}
-            />
-            <Input
-              label="Profile URL"
+      <SettingsSubsection label="Social presence" cardOnMobile>
+        <div className="ed-center-social-links">
+          {form.socialLinks.map((link, index) => (
+            <SettingsSocialField
+              key={`social-${index}`}
+              platform={link.platform}
               value={link.url}
               onChange={(url) => updateSocial(index, { url })}
-              placeholder="https://…"
+              removable={form.socialLinks.length > 1}
+              onRemove={() => removeSocial(index)}
             />
-            <Button variant="ghost" onClick={() => removeSocial(index)} disabled={form.socialLinks.length <= 1}>
-              Remove
-            </Button>
-          </div>
-        ))}
-        <Button variant="ghost" onClick={addSocial} disabled={form.socialLinks.length >= MAX_SOCIAL_LINKS}>
-          Add social link
-        </Button>
-      </div>
+          ))}
+          <button
+            type="button"
+            className="ed-settings-add-link"
+            onClick={addSocial}
+            disabled={form.socialLinks.length >= MAX_SOCIAL_LINKS}
+          >
+            + Add social link
+          </button>
+        </div>
+      </SettingsSubsection>
 
-      <Button onClick={() => save.mutate()} disabled={save.isPending}>
-        {save.isPending ? "Saving…" : "Save profile"}
-      </Button>
-    </Card>
+      <SettingsFormFooter hint={lastEdited ?? undefined}>
+        <Button variant="ghost" onClick={resetForm} disabled={save.isPending}>
+          Cancel
+        </Button>
+        <Button onClick={() => save.mutate()} disabled={save.isPending}>
+          {save.isPending ? "Saving…" : savedFlash ? "Saved" : "Save profile"}
+        </Button>
+      </SettingsFormFooter>
+    </SettingsSection>
   );
 }

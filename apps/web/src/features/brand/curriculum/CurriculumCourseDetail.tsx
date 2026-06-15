@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   FormActions,
+  OpsSectionCard,
   PipelineDetailPlaceholder,
   SaveButton,
 } from "@edunudg/ui";
@@ -45,6 +46,7 @@ type Props = {
   onError: (err: unknown) => void;
   levelCloser: ReturnType<typeof useAddFormCloser>;
   readOnly?: boolean;
+  layout?: "ops" | "card";
 };
 
 export function CurriculumCourseDetail({
@@ -78,83 +80,122 @@ export function CurriculumCourseDetail({
   onError,
   levelCloser,
   readOnly = false,
+  layout = "ops",
 }: Props) {
-  return (
-    <div className="ed-ops-detail-enter">
-      <Card title={course.name}>
-        <div className="ed-curriculum-program-summary">
-          <div>
-            <Badge tone={course.is_active ? "success" : "default"}>
-              {course.is_active ? "Active" : "Inactive"}
-            </Badge>
-            {course.age_label && (
-              <span className="ed-text-sm ed-muted" style={{ marginLeft: "0.5rem" }}>
-                {course.age_label}
-              </span>
-            )}
-          </div>
-          {!readOnly && !editingCourse && (
-            <CrudRowActions
-              editing={false}
-              onEdit={onStartEditCourse}
-              onSave={onSaveCourse}
-              onCancel={onCancelEditCourse}
-              onDelete={archiveBlockedReason ? undefined : onArchiveCourse}
-              deleteTitle="Archive this course?"
-              deleteDescription={
-                archiveBlockedReason ??
-                "The course will be archived and hidden from your website and center authorization."
-              }
-              saveDisabled
-            />
+  const courseSummary = (
+    <>
+      <div className="ed-curriculum-program-summary">
+        <div>
+          <Badge tone={course.is_active ? "success" : "default"}>
+            {course.is_active ? "Active" : "Inactive"}
+          </Badge>
+          {course.age_label && (
+            <span className="ed-text-sm ed-muted" style={{ marginLeft: "0.5rem" }}>
+              {course.age_label}
+            </span>
           )}
         </div>
+        {!readOnly && !editingCourse && (
+          <CrudRowActions
+            editing={false}
+            onEdit={onStartEditCourse}
+            onSave={onSaveCourse}
+            onCancel={onCancelEditCourse}
+            onDelete={archiveBlockedReason ? undefined : onArchiveCourse}
+            deleteTitle="Archive this course?"
+            deleteDescription={
+              archiveBlockedReason ??
+              "The course will be archived and hidden from your website and center authorization."
+            }
+            saveDisabled
+          />
+        )}
+      </div>
 
-        {impact && (impact.authorizedCenters > 0 || impact.activeBatches > 0) && (
-          <div className="ed-curriculum-impact-row">
-            {impact.authorizedCenters > 0 && (
-              <span className="ed-curriculum-impact-chip">
-                {impact.authorizedCenters} center{impact.authorizedCenters === 1 ? "" : "s"} authorized
+      {impact && (impact.authorizedCenters > 0 || impact.activeBatches > 0) && (
+        <div className="ed-curriculum-impact-row">
+          {impact.authorizedCenters > 0 && (
+            <span className="ed-curriculum-impact-chip">
+              {impact.authorizedCenters} center{impact.authorizedCenters === 1 ? "" : "s"} authorized
+            </span>
+          )}
+          {impact.activeBatches > 0 && (
+            <span className="ed-curriculum-impact-chip">
+              {impact.activeBatches} active batch{impact.activeBatches === 1 ? "" : "es"}
+            </span>
+          )}
+        </div>
+      )}
+
+      {archiveBlockedReason && (
+        <p className="ed-text-sm ed-muted" role="status">
+          {archiveBlockedReason}
+        </p>
+      )}
+
+      {readOnly && (
+        <p className="ed-curriculum-live-banner" role="status">
+          Read-only — contact your brand admin to change curriculum.
+        </p>
+      )}
+
+      {editingCourse ? (
+        <div className="ed-editable-form">
+          <CourseFields brandId={brandId} value={editCourse} onChange={onEditCourseChange} />
+          <FormActions>
+            <SaveButton
+              onClick={onSaveCourse}
+              pending={saveCoursePending}
+              disabled={!editCourse.name.trim()}
+            />
+            <Button variant="ghost" onClick={onCancelEditCourse}>
+              Cancel
+            </Button>
+          </FormActions>
+        </div>
+      ) : (
+        course.description && <p className="ed-text-sm ed-muted">{course.description}</p>
+      )}
+    </>
+  );
+
+  return (
+    <div className="ed-ops-detail-enter">
+      {layout === "ops" ? (
+        <>
+          <header className="ed-ops-detail-hero">
+            <div className="ed-ops-detail-hero__main">
+              <span className="ed-ops-detail-hero__avatar" aria-hidden>
+                {course.name.slice(0, 2).toUpperCase()}
               </span>
-            )}
-            {impact.activeBatches > 0 && (
-              <span className="ed-curriculum-impact-chip">
-                {impact.activeBatches} active batch{impact.activeBatches === 1 ? "" : "es"}
-              </span>
-            )}
-          </div>
-        )}
-
-        {archiveBlockedReason && (
-          <p className="ed-text-sm ed-muted" role="status">
-            {archiveBlockedReason}
-          </p>
-        )}
-
-        {readOnly && (
-          <p className="ed-curriculum-live-banner" role="status">
-            Read-only — contact your brand admin to change curriculum.
-          </p>
-        )}
-
-        {editingCourse ? (
-          <div className="ed-editable-form">
-            <CourseFields brandId={brandId} value={editCourse} onChange={onEditCourseChange} />
-            <FormActions>
-              <SaveButton
-                onClick={onSaveCourse}
-                pending={saveCoursePending}
-                disabled={!editCourse.name.trim()}
-              />
-              <Button variant="ghost" onClick={onCancelEditCourse}>
-                Cancel
-              </Button>
-            </FormActions>
-          </div>
-        ) : (
-          course.description && <p className="ed-text-sm ed-muted">{course.description}</p>
-        )}
-      </Card>
+              <div>
+                <h2 className="ed-ops-detail-hero__name">{course.name}</h2>
+                <p className="ed-ops-detail-hero__meta">
+                  {course.age_label ?? "Course overview"} · Course → Program → Chapter
+                </p>
+              </div>
+            </div>
+            <span className="ed-ops-detail-hero__status">
+              <span className="ed-ops-detail-hero__status-dot" aria-hidden />
+              {course.is_active ? "Active course" : "Inactive course"}
+            </span>
+          </header>
+          <OpsSectionCard
+            icon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            }
+            title="Course details"
+            description="Marketing copy and authorization impact for this course."
+          >
+            {courseSummary}
+          </OpsSectionCard>
+        </>
+      ) : (
+        <Card title={course.name}>{courseSummary}</Card>
+      )}
 
       <CurriculumLevelPanel
         brandId={brandId}
@@ -176,15 +217,24 @@ export function CurriculumCourseDetail({
         reorderPending={reorderPending}
         onError={onError}
         levelCloser={levelCloser}
+        layout={layout}
       />
     </div>
   );
 }
 
-export function CurriculumCourseDetailPlaceholder() {
+export function CurriculumCourseDetailPlaceholder({ layout = "ops" }: { layout?: "ops" | "card" } = {}) {
+  if (layout === "card") {
+    return (
+      <Card title="Course detail">
+        <PipelineDetailPlaceholder message="Select a course to manage programs and chapters." />
+      </Card>
+    );
+  }
+
   return (
-    <Card title="Course detail">
+    <div className="ed-pipeline-list-panel">
       <PipelineDetailPlaceholder message="Select a course to manage programs and chapters." />
-    </Card>
+    </div>
   );
 }

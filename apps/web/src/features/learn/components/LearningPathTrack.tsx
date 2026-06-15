@@ -8,8 +8,9 @@ type Props = {
 
 function StepNode({ level }: { level: ProgramLadderLevel }) {
   const isCompleted = level.status === "completed";
+  const isFailed = level.status === "failed";
   const isCurrent = level.status === "in_progress";
-  const isLocked = !isCompleted && !isCurrent;
+  const isLocked = !isCompleted && !isCurrent && !isFailed;
 
   return (
     <span
@@ -17,6 +18,7 @@ function StepNode({ level }: { level: ProgramLadderLevel }) {
         "ed-sp-path-track__node",
         "ed-sp-path-track__node--rail",
         isCompleted ? "ed-sp-path-track__node--done" : "",
+        isFailed ? "ed-sp-path-track__node--failed" : "",
         isCurrent ? "ed-sp-path-track__node--current" : "",
         isLocked ? "ed-sp-path-track__node--locked" : "",
       ]
@@ -24,7 +26,7 @@ function StepNode({ level }: { level: ProgramLadderLevel }) {
         .join(" ")}
       aria-hidden
     >
-      {isCompleted ? "✓" : isCurrent ? "📚" : "🔒"}
+      {isCompleted ? "✓" : isFailed ? "✗" : isCurrent ? "📚" : "🔒"}
       {isCurrent ? <span className="ed-sp-path-track__pulse" aria-hidden /> : null}
     </span>
   );
@@ -58,10 +60,17 @@ export function LearningPathTrack({ ladders, limit }: Props) {
       <ol className="ed-sp-path-track__steps ed-sp-path-track__steps--dashboard">
         {levels.map((level) => {
           const isCurrent = level.status === "in_progress";
+          const isFailed = level.status === "failed";
           return (
             <li
               key={level.level_id}
-              className={`ed-sp-path-track__step ed-sp-path-track__step--dashboard${isCurrent ? " ed-sp-path-track__step--current" : ""}`}
+              className={[
+                "ed-sp-path-track__step ed-sp-path-track__step--dashboard",
+                isCurrent ? "ed-sp-path-track__step--current" : "",
+                isFailed ? "ed-sp-path-track__step--failed" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               <StepNode level={level} />
               <span className="ed-sp-path-track__step-label">Level {level.sort_order}</span>

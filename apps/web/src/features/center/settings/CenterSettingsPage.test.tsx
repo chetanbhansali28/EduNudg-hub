@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "@edunudg/ui";
 import { CenterSettingsPage } from "./CenterSettingsPage";
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
@@ -23,11 +24,12 @@ vi.mock("@/lib/centerProfileApi", () => ({
     name: "Koramangala",
     slug: "koramangala",
     status: "active",
+    updatedAt: "2026-06-15T10:42:00Z",
     displayName: "Abacus Koramangala",
     shortDescription: "South Bengaluru center",
     addressLine1: "12 Main Road",
     city: "Bengaluru",
-    region: "KA",
+    region: "Karnataka",
     pincode: "560034",
     country: "IN",
     contactPhone: "+919876543210",
@@ -42,21 +44,39 @@ vi.mock("./CenterPhotoUpload", () => ({
 }));
 
 describe("CenterSettingsPage", () => {
-  it("regression_center_settings_shows_editable_public_profile", async () => {
+  it("regression_center_settings_catalog_theme", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
-        <CenterSettingsPage />
+        <ThemeProvider>
+          <CenterSettingsPage />
+        </ThemeProvider>
       </QueryClientProvider>
     );
 
-    expect(await screen.findByText("Public center profile")).toBeDefined();
-    expect(screen.getByText("Save profile")).toBeDefined();
-    expect(screen.getByTestId("center-photo-upload")).toBeDefined();
+    expect(await screen.findByText("Settings")).toBeDefined();
+    expect(await screen.findByText("Account")).toBeDefined();
+    expect(await screen.findByText("Public Center Profile")).toBeDefined();
+    expect(await screen.findByLabelText("Center ID")).toBeDefined();
+    expect(await screen.findByLabelText("Owner email")).toHaveProperty("value", "owner@gmail.com");
+    expect(screen.getByRole("button", { name: "Send reset link" })).toBeDefined();
     expect(screen.getByDisplayValue("Abacus Koramangala")).toBeDefined();
-    expect(screen.getByText(/Sign-in email: owner@gmail.com/)).toBeDefined();
-    expect(screen.getByText(/Your public website:/)).toBeDefined();
-    expect(screen.queryByLabelText("Email")).toBeNull();
-    expect(screen.queryByLabelText("Website")).toBeNull();
+    expect(screen.getByRole("button", { name: "Save profile" })).toBeDefined();
+    expect(document.querySelector(".ed-settings-stack")).toBeTruthy();
+  });
+
+  it("regression_center_settings_save_profile_button_present", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <CenterSettingsPage />
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+
+    await screen.findByText("Save profile");
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.getByDisplayValue("Abacus Koramangala")).toBeDefined();
   });
 });

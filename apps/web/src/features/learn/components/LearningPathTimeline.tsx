@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { formatShortDate } from "@/features/learn/studentFormatters";
+import { formatShortDate, levelStatusLabel } from "@/features/learn/studentFormatters";
 import { StudentEmptyState } from "@/features/learn/components/StudentPortalShell";
 import type { ProgramLadder, ProgramLadderLevel } from "@/lib/studentProgressApi";
 
@@ -11,6 +11,9 @@ type Props = {
 };
 
 function levelDescription(level: ProgramLadderLevel, programName: string): string | null {
+  if (level.status === "failed") {
+    return `Did not pass ${programName} at this level — review with your teacher and try again.`;
+  }
   if (level.status === "in_progress") {
     return `Focused on ${programName} — keep practicing to unlock the next level.`;
   }
@@ -21,16 +24,18 @@ function levelDescription(level: ProgramLadderLevel, programName: string): strin
   return null;
 }
 
-function TimelineNode({ level, index }: { level: ProgramLadderLevel; index: number }) {
+function TimelineNode({ level }: { level: ProgramLadderLevel; index: number }) {
   const isCompleted = level.status === "completed";
+  const isFailed = level.status === "failed";
   const isCurrent = level.status === "in_progress";
-  const isLocked = !isCompleted && !isCurrent;
+  const isLocked = !isCompleted && !isCurrent && !isFailed;
 
   return (
     <span
       className={[
         "ed-sp-timeline__node",
         isCompleted ? "ed-sp-timeline__node--done" : "",
+        isFailed ? "ed-sp-timeline__node--failed" : "",
         isCurrent ? "ed-sp-timeline__node--current" : "",
         isLocked ? "ed-sp-timeline__node--locked" : "",
       ]
@@ -38,7 +43,7 @@ function TimelineNode({ level, index }: { level: ProgramLadderLevel; index: numb
         .join(" ")}
       aria-hidden
     >
-      {isCompleted ? "✓" : isLocked ? "🔒" : level.sort_order}
+      {isCompleted ? "✓" : isFailed ? "✗" : isLocked ? "🔒" : level.sort_order}
     </span>
   );
 }
@@ -53,8 +58,9 @@ function TimelineRow({
   completionPct?: number;
 }) {
   const isCompleted = level.status === "completed";
+  const isFailed = level.status === "failed";
   const isCurrent = level.status === "in_progress";
-  const isLocked = !isCompleted && !isCurrent;
+  const isLocked = !isCompleted && !isCurrent && !isFailed;
   const description = levelDescription(level, programName);
 
   return (
@@ -62,6 +68,7 @@ function TimelineRow({
       className={[
         "ed-sp-timeline__item",
         isCompleted ? "ed-sp-timeline__item--done" : "",
+        isFailed ? "ed-sp-timeline__item--failed" : "",
         isCurrent ? "ed-sp-timeline__item--current" : "",
         isLocked ? "ed-sp-timeline__item--locked" : "",
       ]
@@ -71,6 +78,11 @@ function TimelineRow({
       <TimelineNode level={level} index={level.sort_order - 1} />
       <div className="ed-sp-timeline__card">
         {isCurrent && <span className="ed-sp-timeline__badge">Current</span>}
+        {isFailed && (
+          <span className="ed-sp-timeline__badge ed-sp-timeline__badge--fail">
+            {levelStatusLabel(level.status)}
+          </span>
+        )}
         <p className="ed-sp-timeline__level-label">
           Level {level.sort_order}: {level.name}
         </p>

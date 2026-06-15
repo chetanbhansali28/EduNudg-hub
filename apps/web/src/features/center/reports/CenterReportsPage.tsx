@@ -32,7 +32,6 @@ export function CenterReportsPage() {
         </Card>
         <Card title="Activity (30 days)">
           <ul className="ed-text-sm">
-            <li>Attendance sessions: {data?.attendance_sessions_30d ?? "—"}</li>
             <li>Assessments recorded: {data?.assessments_30d ?? "—"}</li>
           </ul>
         </Card>

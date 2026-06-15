@@ -14,10 +14,11 @@ export type CenterPublicProfileRow = CenterPublicProfileInput & {
   name: string;
   slug: string;
   status: string;
+  updatedAt?: string | null;
 };
 
 const PROFILE_SELECT =
-  "id, name, slug, status, display_name, short_description, address_line1, city, region, pincode, country, contact_phone, photo_url, social_links";
+  "id, name, slug, status, updated_at, display_name, short_description, address_line1, city, region, pincode, country, contact_phone, photo_url, social_links";
 
 function rowToProfile(row: Record<string, unknown>): CenterPublicProfileRow {
   return {
@@ -25,6 +26,7 @@ function rowToProfile(row: Record<string, unknown>): CenterPublicProfileRow {
     name: String(row.name ?? ""),
     slug: String(row.slug ?? ""),
     status: String(row.status ?? ""),
+    updatedAt: row.updated_at != null ? String(row.updated_at) : null,
     displayName: String(row.display_name ?? ""),
     shortDescription: String(row.short_description ?? ""),
     addressLine1: String(row.address_line1 ?? ""),

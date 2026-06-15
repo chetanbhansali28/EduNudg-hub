@@ -4,7 +4,6 @@ export type CenterOpsReport = {
   active_enrollments: number;
   open_leads: number;
   converted_leads: number;
-  attendance_sessions_30d: number;
   assessments_30d: number;
   recent_assessments: {
     student_name: string;

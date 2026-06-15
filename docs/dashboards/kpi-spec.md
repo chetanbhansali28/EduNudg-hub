@@ -16,4 +16,4 @@ Platform brand detail: 30d royalty, enrollments, centers active/total, leads, un
 
 ## Center
 
-Home (`/app`): today's batches, attendance rate (7d), open leads, pending enrollments, fee collection rate, overdue fees, low stock.
+Home (`/app`): today's schedule layout — open leads (+today), batches today (next session), pending/overdue fees, live & upcoming batch cards, action items, system status. Legacy KPI helpers remain in `centerDashboardStats.ts` for fee rate computation.

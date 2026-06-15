@@ -1,28 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Badge,
   Button,
-  Card,
-  DataList,
   FilterTabs,
-  Input,
-  KpiCard,
-  KpiGrid,
   MutationError,
-  OpsListHeader,
-  OpsPageHeader,
-  OpsSearchField,
-  PageGridFull,
-  PipelineDetailPlaceholder,
-  PipelineEmptyState,
-  PipelineListItem,
-  PipelineMasterDetail,
-  Select,
+  PipelineMetricCard,
+  PipelineMetricStrip,
+  PipelinePageHeader,
+  PipelinePanel,
+  PipelineStatusBadge,
+  PipelineTableToolbar,
+  PipelineWorkspace,
 } from "@edunudg/ui";
-import { ConvertLeadDialog } from "@/features/center/convertStudent/ConvertLeadDialog";
 import { ManualStudentLeadCard } from "@/features/shared/manualLeads/ManualStudentLeadCard";
-import { leadListTitle, StudentLeadDetailCard } from "@/features/shared/leads/StudentLeadDetailCard";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { isLeadStale } from "@/lib/leadSla";
@@ -33,25 +23,30 @@ import {
   type LeadRow,
   type LeadStatus,
 } from "@/lib/leadsApi";
+import {
+  computeLeadPipelineStats,
+  convertedPipelineHint,
+  filterCenterLeads,
+  formatLeadContactWhen,
+  LEAD_FILTER_OPTIONS,
+  LEAD_PAGE_SIZE,
+  leadContactTimestamp,
+  leadDisplayName,
+  leadStatusPresentation,
+  leadStudentInterest,
+  lostPipelineHint,
+  openPipelineHint,
+  paginateItems,
+  paginationLabel,
+  telHref,
+  whatsappHref,
+  type LeadFilter,
+} from "@/lib/centerLeadsHelpers";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
-import { formatRelativeWhen, initialsFromName } from "@/lib/welcomeMessage";
-import "@/features/center/centerOps.css";
-
-const STATUS_OPTIONS: { value: LeadStatus; label: string }[] = [
-  { value: "new", label: "New" },
-  { value: "contacted", label: "Contacted" },
-  { value: "qualified", label: "Qualified" },
-];
-
-type LeadFilter = "open" | "lost" | "converted" | "all";
-
-const FILTER_OPTIONS: { value: LeadFilter; label: string }[] = [
-  { value: "open", label: "Open pipeline" },
-  { value: "lost", label: "Lost" },
-  { value: "converted", label: "Converted" },
-  { value: "all", label: "All" },
-];
+import { initialsFromName } from "@/lib/welcomeMessage";
+import { CenterLeadDetailPanel } from "./CenterLeadDetailPanel";
+import "./centerLeads.css";
 
 function slaHint(lead: LeadRow, now: number): string | null {
   if (!lead.center_id || lead.status === "converted" || lead.status === "lost") return null;
@@ -69,13 +64,38 @@ function slaHint(lead: LeadRow, now: number): string | null {
   return "Update status after each parent contact (resets SLA).";
 }
 
+const ICON_OPEN = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M3 3v18h18" />
+    <path d="m19 9-5 5-4-4-3 3" />
+  </svg>
+);
+
+const ICON_LOST = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M17 11l2 2 4-4" />
+  </svg>
+);
+
+const ICON_CONVERTED = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 11v6M19 14h6" />
+  </svg>
+);
+
 export function CenterLeadsPage() {
   const tenant = useTenant();
   const centerId = tenant.centerId;
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<LeadFilter>("open");
-  const [search, setSearch] = useState("");
+  const [addLeadOpen, setAddLeadOpen] = useState(false);
+  const addFormRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lostMode, setLostMode] = useState(false);
   const [lostReason, setLostReason] = useState("");
@@ -83,7 +103,7 @@ export function CenterLeadsPage() {
 
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ["center-leads", centerId] });
-    void qc.invalidateQueries({ queryKey: ["center-dashboard", centerId] });
+    void qc.invalidateQueries({ queryKey: ["center-dashboard-home", centerId] });
     void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
   };
 
@@ -168,189 +188,251 @@ export function CenterLeadsPage() {
 
   const now = Date.now();
   const allLeads = leads.data ?? [];
-
-  const counts = useMemo(
-    () => ({
-      open: allLeads.filter((l) => ["new", "contacted", "qualified"].includes(l.status)).length,
-      lost: allLeads.filter((l) => l.status === "lost").length,
-      converted: allLeads.filter((l) => l.status === "converted").length,
-      all: allLeads.length,
-      stale: allLeads.filter((l) => isLeadStale(l, now)).length,
-    }),
-    [allLeads, now]
-  );
+  const stats = useMemo(() => computeLeadPipelineStats(allLeads, now), [allLeads, now]);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return allLeads.filter((l) => {
-      const matchesFilter =
-        filter === "open"
-          ? ["new", "contacted", "qualified"].includes(l.status)
-          : filter === "lost"
-            ? l.status === "lost"
-            : filter === "converted"
-              ? l.status === "converted"
-              : true;
-      if (!matchesFilter) return false;
-      if (!q) return true;
-      return [l.full_name, l.parent_name, l.email, l.whatsapp_e164, l.child_name]
-        .filter(Boolean)
-        .some((value) => value!.toLowerCase().includes(q));
-    });
-  }, [allLeads, filter, search]);
+    return filterCenterLeads(allLeads, filter, "");
+  }, [allLeads, filter]);
 
-  const filterTabs = FILTER_OPTIONS.map((option) => ({
+  const openAddLead = () => setAddLeadOpen(true);
+
+  useEffect(() => {
+    if (!addLeadOpen || !addFormRef.current) return;
+    const frame = requestAnimationFrame(() => {
+      addFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [addLeadOpen]);
+
+  const pageItems = useMemo(() => paginateItems(filtered, page, LEAD_PAGE_SIZE), [filtered, page]);
+
+  const filterTabs = LEAD_FILTER_OPTIONS.map((option) => ({
     ...option,
-    count: counts[option.value],
+    count: stats[option.value === "open" ? "open" : option.value],
   }));
+
+  const openHint = openPipelineHint(stats);
+  const lostHint = lostPipelineHint(stats);
 
   if (!centerId) return <p className="ed-empty">Center context not found.</p>;
 
   const selectedPipeline =
     selected && selected.status !== "converted" && selected.status !== "lost";
   const selectedHint = selected ? slaHint(selected, now) : null;
-  const selectedStale = selected ? isLeadStale(selected, now) : false;
 
   return (
-    <>
-      <OpsPageHeader
+    <div className="ed-center-leads-page">
+      <PipelinePageHeader
         title="Leads"
-        subtitle="Call parents on WhatsApp, update status after each contact, then convert when enrolled."
+        subtitle="Call parents on WhatsApp, update status, then convert when enrolled."
+        actions={<Button onClick={openAddLead}>+ Add Lead</Button>}
       />
       <MutationError message={error} />
 
-      <OpsSearchField value={search} onChange={setSearch} placeholder="Search by name, phone, or email…" />
-
-      <PageGridFull>
-        <ManualStudentLeadCard scope="center" centerId={centerId} invalidateKey={["center-leads", centerId]} />
-      </PageGridFull>
-
-      <KpiGrid>
-        <KpiCard label="Open pipeline" value={counts.open} active={filter === "open"} onClick={() => setFilter("open")} />
-        <KpiCard
-          label="Needs attention"
-          value={counts.stale}
-          hint="Brand SLA expired"
+      <PipelineMetricStrip>
+        <PipelineMetricCard
+          icon={ICON_OPEN}
+          tone="blue"
+          label="Open Pipeline"
+          value={stats.open}
+          hint={openHint ?? undefined}
+          badge={
+            stats.stale > 0 ? <span className="ed-pipeline-attention-badge">Needs Attention</span> : undefined
+          }
           active={filter === "open"}
-          onClick={() => setFilter("open")}
+          onClick={() => {
+            setFilter("open");
+            setPage(1);
+          }}
         />
-        <KpiCard label="Lost" value={counts.lost} active={filter === "lost"} onClick={() => setFilter("lost")} />
-        <KpiCard
+        <PipelineMetricCard
+          icon={ICON_LOST}
+          tone="red"
+          label="Lost Leads"
+          value={stats.lost}
+          hint={lostHint ?? undefined}
+          active={filter === "lost"}
+          onClick={() => {
+            setFilter("lost");
+            setPage(1);
+          }}
+        />
+        <PipelineMetricCard
+          icon={ICON_CONVERTED}
+          tone="purple"
           label="Converted"
-          value={counts.converted}
+          value={stats.converted}
+          hint={convertedPipelineHint(stats.converted)}
           active={filter === "converted"}
-          onClick={() => setFilter("converted")}
+          onClick={() => {
+            setFilter("converted");
+            setPage(1);
+          }}
         />
-      </KpiGrid>
+      </PipelineMetricStrip>
 
-      <PipelineMasterDetail
+      <PipelineWorkspace
+        detailOpen={!!selected}
         list={
-          <div className="ed-pipeline-list-panel">
-            <OpsListHeader title="Lead pipeline" badge={`${filtered.length} SHOWN`} />
-            <FilterTabs
-              variant="segmented"
-              options={filterTabs}
-              value={filter}
-              onChange={setFilter}
-              aria-label="Lead filter"
-            />
-            <DataList
-              variant="pipeline"
-              items={filtered}
-              empty={
-                <PipelineEmptyState
-                  message="No leads in this view."
-                  actionLabel={filter !== "open" ? "Show open pipeline" : undefined}
-                  onAction={filter !== "open" ? () => setFilter("open") : undefined}
+          <PipelinePanel>
+            <PipelineTableToolbar
+              tabs={
+                <FilterTabs
+                  options={filterTabs}
+                  value={filter}
+                  onChange={(value) => {
+                    setFilter(value);
+                    setPage(1);
+                  }}
+                  aria-label="Lead filter"
                 />
               }
-              render={(l) => {
-                const stale = isLeadStale(l, now);
-                const isSelected = l.id === selectedId;
-                const title = leadListTitle(l);
-                const hint = slaHint(l, now);
-                return (
-                  <PipelineListItem
-                    title={title}
-                    meta={l.whatsapp_e164 ?? undefined}
-                    lines={[
-                      ...(l.child_name ? [`Child: ${l.child_name}`] : []),
-                      ...(hint ? [hint] : []),
-                    ]}
-                    initials={initialsFromName(title)}
-                    when={formatRelativeWhen(l.created_at, now)}
-                    selected={isSelected}
-                    onSelect={() => selectLead(l.id)}
-                    badges={
-                      <>
-                        <Badge>{l.status}</Badge>
-                        <Badge>{l.lead_source === "center" ? "Direct registration" : "Brand assigned"}</Badge>
-                        {stale && <Badge tone="warning">Brand SLA expired</Badge>}
-                      </>
-                    }
-                  />
-                );
-              }}
+              meta={paginationLabel(filtered.length, page, LEAD_PAGE_SIZE)}
             />
-          </div>
+
+            <div className="ed-pipeline-table-head" aria-hidden>
+              <span>Parent Name</span>
+              <span>Student Interest</span>
+              <span>Status</span>
+              <span>Last Contacted</span>
+            </div>
+
+            <div className="ed-pipeline-table-body">
+              {leads.isLoading ? <p className="ed-text-sm ed-muted">Loading leads…</p> : null}
+              {!leads.isLoading && pageItems.length === 0 ? (
+                <p className="ed-text-sm ed-muted">No leads in this view.</p>
+              ) : null}
+              {pageItems.map((lead) => {
+                const name = leadDisplayName(lead);
+                const status = leadStatusPresentation(lead, now);
+                const interest = leadStudentInterest(lead);
+                const contact = formatLeadContactWhen(leadContactTimestamp(lead), now);
+                const followUpDue = isLeadStale(lead, now) || contact.followUpDue;
+                const wa = whatsappHref(lead.whatsapp_e164);
+                const tel = telHref(lead.whatsapp_e164);
+
+                return (
+                  <button
+                    key={lead.id}
+                    type="button"
+                    className={`ed-pipeline-lead-row${lead.id === selectedId ? " ed-pipeline-lead-row--selected" : ""}`}
+                    onClick={() => selectLead(lead.id)}
+                  >
+                    <div className="ed-pipeline-lead-row__parent">
+                      <span className="ed-pipeline-lead-row__avatar" aria-hidden>
+                        {initialsFromName(name)}
+                      </span>
+                      <div>
+                        <p className="ed-pipeline-lead-row__name">{name}</p>
+                        <p className="ed-pipeline-lead-row__phone">{lead.whatsapp_e164 ?? lead.email ?? "—"}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="ed-pipeline-lead-row__interest-title">{interest.title}</p>
+                      <p className="ed-pipeline-lead-row__interest-sub">{interest.subtitle}</p>
+                    </div>
+                    <div>
+                      <PipelineStatusBadge label={status.label} tone={status.tone} />
+                    </div>
+                    <div className="ed-pipeline-lead-row__contact">
+                      <p style={{ margin: 0 }}>{contact.label}</p>
+                      {followUpDue ? <p className="ed-pipeline-lead-row__followup">Follow-up due</p> : null}
+                    </div>
+                    <div className="ed-pipeline-lead-row__mobile-actions">
+                      {tel ? (
+                        <a className="ed-pipeline-lead-row__call" href={tel} onClick={(e) => e.stopPropagation()}>
+                          Call
+                        </a>
+                      ) : null}
+                      {wa ? (
+                        <a
+                          className="ed-pipeline-lead-row__chat"
+                          href={wa}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={`WhatsApp ${name}`}
+                        >
+                          💬
+                        </a>
+                      ) : null}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {filtered.length > LEAD_PAGE_SIZE ? (
+              <div className="ed-center-leads-page__pager">
+                <Button
+                  variant="ghost"
+                  disabled={page <= 1}
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={page * LEAD_PAGE_SIZE >= filtered.length}
+                  onClick={() => setPage((current) => current + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            ) : null}
+          </PipelinePanel>
         }
         detail={
           selected ? (
-            <StudentLeadDetailCard
+            <CenterLeadDetailPanel
               lead={selected}
-              stale={selectedStale}
-              onClose={closeDetail}
-              actions={
-                <>
-                  {selectedHint && <p className="ed-text-sm ed-muted">{selectedHint}</p>}
-                  {lostMode ? (
-                    <>
-                      <p className="ed-text-sm ed-muted">Reason is required and visible to the brand (FR-C11b).</p>
-                      <Input label="Reason (required)" value={lostReason} onChange={setLostReason} />
-                      <div className="ed-form-section">
-                        <Button onClick={() => markLost.mutate()} disabled={!lostReason.trim() || markLost.isPending}>
-                          Confirm lost
-                        </Button>
-                        <Button variant="ghost" onClick={() => setLostMode(false)}>
-                          Cancel
-                        </Button>
-                      </div>
-                    </>
-                  ) : selectedPipeline ? (
-                    convertMode ? (
-                      <ConvertLeadDialog
-                        lead={selected}
-                        variant="inline"
-                        pending={convert.isPending}
-                        onCancel={() => setConvertMode(false)}
-                        onConfirm={(overrides) => convert.mutate({ id: selected.id, overrides })}
-                      />
-                    ) : (
-                      <div className="ed-form-section">
-                        <Select
-                          label="Status"
-                          value={selected.status}
-                          onChange={(v) => updateStatus.mutate({ id: selected.id, status: v })}
-                          options={STATUS_OPTIONS}
-                        />
-                        <Button onClick={() => setConvertMode(true)} disabled={convert.isPending}>
-                          Convert to student
-                        </Button>
-                        <Button variant="danger" onClick={() => setLostMode(true)}>
-                          Mark lost
-                        </Button>
-                      </div>
-                    )
-                  ) : null}
-                </>
-              }
+              now={now}
+              hint={selectedHint}
+              pipelineOpen={!!selectedPipeline}
+              convertMode={convertMode}
+              lostMode={lostMode}
+              lostReason={lostReason}
+              convertPending={convert.isPending}
+              markLostPending={markLost.isPending}
+              onBack={closeDetail}
+              onConvertMode={() => setConvertMode(true)}
+              onCancelConvert={() => setConvertMode(false)}
+              onConfirmConvert={(overrides) => convert.mutate({ id: selected.id, overrides })}
+              onLostMode={() => setLostMode(true)}
+              onCancelLost={() => setLostMode(false)}
+              onLostReasonChange={setLostReason}
+              onConfirmLost={() => markLost.mutate()}
+              onStatusChange={(status) => updateStatus.mutate({ id: selected.id, status })}
             />
           ) : (
-            <PipelineDetailPlaceholder message="Select a lead to update status, convert, or mark lost." />
+            <div className="ed-pipeline-detail-panel ed-center-leads-page__placeholder">
+              <p className="ed-text-sm ed-muted">Select a lead to update status, convert, or mark lost.</p>
+            </div>
           )
         }
       />
 
-    </>
+      {addLeadOpen ? (
+        <div ref={addFormRef} id="center-add-student-lead" className="ed-center-leads-page__add-form">
+          <ManualStudentLeadCard
+            scope="center"
+            centerId={centerId}
+            invalidateKey={["center-leads", centerId]}
+            formOpen={addLeadOpen}
+            onFormOpenChange={setAddLeadOpen}
+            hideTrigger
+          />
+        </div>
+      ) : null}
+
+      <button
+        type="button"
+        className="ed-pipeline-fab"
+        aria-label="Add lead"
+        onClick={openAddLead}
+      >
+        +
+      </button>
+    </div>
   );
 }

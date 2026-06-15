@@ -54,4 +54,32 @@ describe("LearningPathTimeline", () => {
     expect(screen.getByText("Level 2: Level 2")).toBeDefined();
     expect(document.querySelector(".ed-sp-timeline")).toBeTruthy();
   });
+
+  it("regression_renders_failed_level_with_fail_badge", () => {
+    const failedLadders = [
+      {
+        ...mockLadders[0]!,
+        curriculum_ladder: {
+          ...mockLadders[0]!.curriculum_ladder,
+          levels: [
+            mockLadders[0]!.curriculum_ladder.levels[0]!,
+            {
+              ...mockLadders[0]!.curriculum_ladder.levels[1]!,
+              status: "failed",
+            },
+            mockLadders[0]!.curriculum_ladder.levels[2]!,
+          ],
+        },
+      },
+    ];
+
+    render(
+      <MemoryRouter>
+        <LearningPathTimeline ladders={failedLadders} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Fail")).toBeDefined();
+    expect(document.querySelector(".ed-sp-timeline__item--failed")).toBeTruthy();
+  });
 });

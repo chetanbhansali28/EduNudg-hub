@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, DataList, ListRow } from "@edunudg/ui";
+import { Button, CommerceArchiveNote, CommerceOrderCard, CommerceSectionHeader } from "@edunudg/ui";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import {
   listCenterMerchandiseOrders,
@@ -13,18 +14,18 @@ import {
 import { openRazorpayCheckout } from "@/services/payments/razorpayGateway";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { fetchMerchandiseBrandSettings } from "@/lib/merchandiseSettingsApi";
+import {
+  filterMerchandiseOrdersSince,
+  formatMerchandiseOrderLabel,
+  hasOlderMerchandiseOrders,
+  merchandiseOrderStatusBadge,
+} from "@/lib/merchandiseOrdersHelpers";
 
 type Props = {
   centerId: string;
   brandId: string;
   brandSlug?: string | null;
 };
-
-function paymentBadgeTone(status: string): "default" | "success" | "warning" {
-  if (status === "paid") return "success";
-  if (status === "unpaid" || status === "pending" || status === "failed") return "warning";
-  return "default";
-}
 
 function orderInvoice(order: MerchandiseOrderRow) {
   const inv = order.merchandise_invoices;
@@ -38,9 +39,14 @@ function orderTracking(order: MerchandiseOrderRow): Record<string, unknown> | nu
   return t as Record<string, unknown>;
 }
 
+function StatusBadge({ label, tone }: { label: string; tone: string }) {
+  return <span className={`ed-commerce-status-badge ed-commerce-status-badge--${tone}`}>{label}</span>;
+}
+
 export function CenterMerchandiseOrderHistory({ centerId, brandId, brandSlug }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   const orders = useQuery({
     queryKey: ["center-merchandise-orders", centerId],
@@ -72,13 +78,17 @@ export function CenterMerchandiseOrderHistory({ centerId, brandId, brandSlug }: 
       onSuccess: async (paymentId) => {
         await confirmMerchandiseRazorpayPayment(order.id, paymentId, razorpayOrderId, order.total_cents);
         void qc.invalidateQueries({ queryKey: ["center-merchandise-orders", centerId] });
+        void qc.invalidateQueries({ queryKey: ["center-merchandise-payment-alerts", centerId] });
       },
     });
   };
 
   const markReceived = useMutation({
     mutationFn: (orderId: string) => markMerchandiseOrderReceived(orderId),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["center-merchandise-orders", centerId] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["center-merchandise-orders", centerId] });
+      void qc.invalidateQueries({ queryKey: ["center-inventory-summary"] });
+    },
     onError: capture,
   });
 
@@ -90,71 +100,105 @@ export function CenterMerchandiseOrderHistory({ centerId, brandId, brandSlug }: 
     onError: capture,
   });
 
-  return (
-    <Card title="Order history">
-      {error ? <p className="ed-text-sm" style={{ color: "var(--ed-danger)" }}>{error}</p> : null}
-      <DataList
-        items={orders.data ?? []}
-        empty="No merchandise orders yet."
-        render={(o) => {
-          const invoice = orderInvoice(o);
-          const tracking = orderTracking(o);
-          const canMarkReceived = o.status === "shipped";
-          const canPay =
-            o.payment_method === "razorpay" &&
-            (o.payment_status === "unpaid" || o.payment_status === "pending" || o.status === "awaiting_payment");
+  const allOrders = orders.data ?? [];
+  const recentOrders = filterMerchandiseOrdersSince(allOrders, 1);
+  const showArchive = hasOlderMerchandiseOrders(allOrders, 1);
 
-          return (
-            <ListRow
-              aside={
+  return (
+    <section aria-label="Order history">
+      <CommerceSectionHeader title="Order History" badge="Last 30 Days" />
+      {error ? (
+        <p className="ed-text-sm" style={{ color: "var(--ed-danger)" }}>
+          {error}
+        </p>
+      ) : null}
+      {orders.isLoading ? <p className="ed-text-sm ed-muted">Loading orders…</p> : null}
+      {!orders.isLoading && recentOrders.length === 0 ? (
+        <p className="ed-commerce-archive-note__text">No merchandise orders yet.</p>
+      ) : null}
+      {recentOrders.map((order) => {
+        const invoice = orderInvoice(order);
+        const tracking = orderTracking(order);
+        const orderStatus = merchandiseOrderStatusBadge(order.status);
+        const paymentStatus = merchandiseOrderStatusBadge(order.payment_status);
+        const canMarkReceived = order.status === "shipped";
+        const canPay =
+          order.payment_method === "razorpay" &&
+          (order.payment_status === "unpaid" ||
+            order.payment_status === "pending" ||
+            order.status === "awaiting_payment");
+        const expanded = expandedOrderId === order.id;
+
+        const dueLabel = invoice
+          ? `due ${new Date(invoice.due_at).toLocaleDateString()}`
+          : undefined;
+        const dueTone =
+          invoice && new Date(invoice.due_at).getTime() < Date.now() ? "danger" : "default";
+
+        return (
+          <CommerceOrderCard
+            key={order.id}
+            orderLabel={formatMerchandiseOrderLabel(order.id)}
+            statusBadges={
+              <>
+                <StatusBadge label={orderStatus.label} tone={orderStatus.tone} />
+                <StatusBadge label={paymentStatus.label} tone={paymentStatus.tone} />
+              </>
+            }
+            placedAt={new Date(order.created_at).toLocaleString()}
+            invoiceNumber={invoice?.invoice_number}
+            lines={order.merchandise_order_lines?.map((line) => {
+              const catalogItem = Array.isArray(line.merchandise_catalog)
+                ? line.merchandise_catalog[0]
+                : line.merchandise_catalog;
+              return (
+                <li key={line.id}>
+                  {catalogItem?.name ?? "Item"} x {line.quantity}
+                </li>
+              );
+            })}
+            totalLabel={`Total: ${formatInrFromPaise(order.total_cents)}`}
+            dueLabel={dueLabel}
+            dueTone={dueTone}
+            footer={
+              <Button
+                variant={expanded ? "secondary" : "primary"}
+                onClick={() => setExpandedOrderId(expanded ? null : order.id)}
+              >
+                Details
+              </Button>
+            }
+            expanded={
+              expanded ? (
                 <>
+                  {tracking?.tracking_number ? (
+                    <p className="ed-text-sm ed-muted">Tracking: {String(tracking.tracking_number)}</p>
+                  ) : null}
                   {canPay ? (
-                    <Button variant="ghost" onClick={() => retryPayment.mutate(o)} disabled={retryPayment.isPending}>
+                    <Button
+                      variant="primary"
+                      onClick={() => retryPayment.mutate(order)}
+                      disabled={retryPayment.isPending}
+                    >
                       Pay now
                     </Button>
                   ) : null}
                   {canMarkReceived ? (
-                    <Button variant="ghost" onClick={() => markReceived.mutate(o.id)} disabled={markReceived.isPending}>
+                    <Button
+                      variant="secondary"
+                      onClick={() => markReceived.mutate(order.id)}
+                      disabled={markReceived.isPending}
+                    >
                       Mark received
                     </Button>
                   ) : null}
                 </>
-              }
-            >
-              <div>
-                <strong>Order {o.id.slice(0, 8)}</strong>
-                <div className="ed-text-sm ed-muted">{new Date(o.created_at).toLocaleString()}</div>
-                <div className="ed-text-sm">
-                  <Badge>{o.status}</Badge>{" "}
-                  <Badge tone={paymentBadgeTone(o.payment_status)}>{o.payment_status}</Badge>
-                </div>
-                <ul className="ed-text-sm">
-                  {o.merchandise_order_lines?.map((line) => {
-                    const catalogItem = Array.isArray(line.merchandise_catalog)
-                      ? line.merchandise_catalog[0]
-                      : line.merchandise_catalog;
-                    return (
-                      <li key={line.id}>
-                        {catalogItem?.name ?? "Item"} × {line.quantity}
-                        {line.student_id ? " (student)" : ""}
-                      </li>
-                    );
-                  })}
-                </ul>
-                <p className="ed-text-sm ed-muted">Total: {formatInrFromPaise(o.total_cents)}</p>
-                {tracking?.tracking_number ? (
-                  <p className="ed-text-sm ed-muted">Tracking: {String(tracking.tracking_number)}</p>
-                ) : null}
-                {invoice ? (
-                  <p className="ed-text-sm ed-muted">
-                    Invoice {invoice.invoice_number} — due {new Date(invoice.due_at).toLocaleDateString()}
-                  </p>
-                ) : null}
-              </div>
-            </ListRow>
-          );
-        }}
-      />
-    </Card>
+              ) : undefined
+            }
+          />
+        );
+      })}
+      {showArchive ? <CommerceArchiveNote /> : null}
+    </section>
   );
 }
