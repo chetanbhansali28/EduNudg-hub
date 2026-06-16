@@ -4,6 +4,7 @@ import { useAuth } from "@/bootstrap/AuthProvider";
 import { usePlatformShellBranding } from "@/hooks/usePlatformShellBranding";
 import { useStaffShellWelcome } from "@/hooks/useStaffShellWelcome";
 import { platformNavSections, signOutNavItem } from "@/lib/portalNav";
+import { StaffMobileChrome } from "@/features/shared/StaffMobileChrome";
 
 export function PlatformLayout() {
   const { pathname } = useLocation();
@@ -11,6 +12,7 @@ export function PlatformLayout() {
   const { productName, logoUrl } = usePlatformShellBranding();
   const portalLabel = "Platform Owner";
   const welcome = useStaffShellWelcome(portalLabel);
+  const navSections = platformNavSections(pathname);
 
   return (
     <AppShell
@@ -20,9 +22,12 @@ export function PlatformLayout() {
       welcomeHeading={welcome.welcomeHeading}
       welcomeSubtitle={welcome.welcomeSubtitle}
       user={welcome.user}
-      navSections={platformNavSections(pathname)}
+      navSections={navSections}
       footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}
+      mobileNavMode="bottom"
+      showWelcome={pathname === "/admin" || pathname === "/admin/"}
+      mobileChrome={<StaffMobileChrome sections={navSections} ariaLabel="Platform navigation" />}
     >
       <Outlet />
     </AppShell>

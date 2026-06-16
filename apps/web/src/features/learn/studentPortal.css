@@ -25,6 +25,25 @@
   max-width: 40rem;
 }
 
+.ed-sp-page-heading {
+  margin: 0 0 1.25rem;
+}
+
+.ed-sp-page-heading__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ed-sp-page-heading__subtitle {
+  margin: 0;
+  max-width: 40rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--ed-muted);
+}
+
 /* ── Active course card ── */
 .ed-sp-course-card {
   padding: 1.25rem;
@@ -2021,7 +2040,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 .ed-student-portal--mobile {
-  padding-bottom: 0.5rem;
+  padding-bottom: 0;
 }
 
 .ed-sp-welcome--mobile .ed-sp-welcome__title {
@@ -2377,6 +2396,14 @@
   box-shadow: 0 -4px 20px rgb(15 23 42 / 0.06);
 }
 
+.ed-shell__mobile-chrome .ed-sp-bottom-nav {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  box-shadow: none;
+}
+
 .ed-sp-bottom-nav__item {
   display: flex;
   flex-direction: column;
@@ -2424,7 +2451,7 @@
   transform: scale(0.97);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .ed-sp-bottom-nav,
   .ed-sp-fab {
     display: none;

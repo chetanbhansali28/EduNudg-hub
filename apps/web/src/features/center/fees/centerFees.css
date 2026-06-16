@@ -1,0 +1,57 @@
+.ed-center-fees-page {
+  max-width: 72rem;
+}
+
+.ed-center-fees-page__section {
+  border: 1px solid var(--ed-border);
+  border-radius: calc(var(--ed-radius-lg) + 2px);
+  background: var(--ed-card);
+  box-shadow: var(--ed-shadow);
+  padding: 1rem 1.125rem;
+}
+
+.ed-center-fees-page__section + .ed-center-fees-page__section {
+  margin-top: 1rem;
+}
+
+.ed-center-fees-page__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ed-center-fees-page__section-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ed-center-fees-page__section-meta {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ed-muted);
+}
+
+.ed-center-fees-page__row strong {
+  display: block;
+}
+
+.ed-center-fees-page__row p {
+  margin: 0.2rem 0 0;
+}
+
+.ed-center-fees-page__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (max-width: 1023px) {
+  .ed-center-fees-page__aside {
+    order: -1;
+  }
+}

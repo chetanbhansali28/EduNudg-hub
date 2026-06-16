@@ -77,7 +77,7 @@ function renderStudentShell() {
 describe("StudentLearnLayout", () => {
   beforeEach(() => {
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: query.includes("min-width: 900px"),
+      matches: query.includes("min-width: 1024px"),
       media: query,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),

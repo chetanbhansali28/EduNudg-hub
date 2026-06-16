@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  CatalogBreadcrumbs,
   CatalogCreateSlot,
   CatalogEnrollmentBadge,
   CatalogFab,
@@ -334,14 +333,6 @@ export function BatchesPage() {
   return (
     <div className="ed-center-batches-page">
       <CatalogPageHeader
-        breadcrumbs={
-          <CatalogBreadcrumbs
-            items={[
-              { label: "Curriculum", href: "/app/curriculum" },
-              { label: "Batch Management" },
-            ]}
-          />
-        }
         title="Active Batches"
         subtitle="Manage schedules, enrollment status, and course progression."
         actions={

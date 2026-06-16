@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { brandNavSections, centerNavSections, filterNavByFeatureFlags, platformNavSections, studentBottomNavItems, studentNavSections, BRAND_FEATURE_FLAGS } from "./portalNav";
+import { brandNavSections, centerNavSections, filterNavByFeatureFlags, platformNavSections, studentBottomNavItems, studentNavSections, BRAND_FEATURE_FLAGS, staffBottomNavFromSections } from "./portalNav";
 import { FEATURE_FLAG_DEFAULTS } from "@/hooks/useFeatureFlag";
 
 describe("portalNav", () => {
@@ -153,5 +153,46 @@ describe("portalNav", () => {
     expect(bottomItems.map((i) => i.label)).toEqual(sidebarLabels);
     expect(bottomItems.map((i) => i.href)).toEqual(["/", "/progress", "/competitions", "/activity", "/profile"]);
     expect(bottomItems.find((i) => i.id === "profile")?.active).toBe(true);
+  });
+
+  it("center bottom nav mirrors sidebar sections", () => {
+    const sections = centerNavSections("/app/fees");
+    const items = staffBottomNavFromSections(sections);
+    const sidebarItems = sections.flatMap((section) => section.items);
+
+    expect(items.map((item) => item.href)).toEqual(sidebarItems.map((item) => item.href));
+    expect(items.find((item) => item.label === "Fees & Payments")?.active).toBe(true);
+    expect(items.find((item) => item.label === "Home")?.active).toBe(false);
+  });
+
+  it("brand bottom nav mirrors sidebar sections", () => {
+    const sections = brandNavSections("/app/franchise-applications");
+    const items = staffBottomNavFromSections(sections);
+
+    expect(items.find((item) => item.label === "Franchise leads")?.active).toBe(true);
+    expect(items.map((item) => item.label)).toContain("Student leads");
+    expect(items.map((item) => item.label)).toContain("Merchandise");
+  });
+
+  it("platform bottom nav mirrors sidebar sections", () => {
+    const sections = platformNavSections("/admin/brands/acme");
+    const items = staffBottomNavFromSections(sections);
+
+    expect(items.find((item) => item.label === "Brands")?.active).toBe(true);
+    expect(items.find((item) => item.label === "Home")?.active).toBe(false);
+    expect(items.map((item) => item.label)).toContain("Audit Logs");
+  });
+
+  it("staff bottom nav excludes logout action items", () => {
+    const sections = centerNavSections("/app");
+    const items = staffBottomNavFromSections([
+      ...sections,
+      {
+        title: "Footer",
+        items: [{ href: "#", label: "Logout", onClick: () => undefined, active: false }],
+      },
+    ]);
+
+    expect(items.some((item) => item.label === "Logout")).toBe(false);
   });
 });

@@ -1,87 +1,30 @@
 import { useQuery } from "@tanstack/react-query";
-import { KpiCard, KpiGrid, PageTitle } from "@edunudg/ui";
-import { getSupabase } from "@/lib/supabase";
-import { formatInrFromPaise } from "@/lib/inrCurrency";
-import { countStaleBrandLeads } from "@/lib/leadsApi";
+import { useStaffProfile } from "@/hooks/useStaffProfile";
+import { fetchBrandDashboardHome } from "@/lib/brandDashboardHomeApi";
 import { useBrandScope } from "./hooks/useBrandScope";
+import { BrandDashboardView } from "./dashboard/BrandDashboardView";
 
 export function BrandDashboard() {
   const { brandId, missingBrand } = useBrandScope();
+  const profile = useStaffProfile();
 
-  const stats = useQuery({
+  const dashboard = useQuery({
     queryKey: ["brand-dashboard", brandId],
     enabled: !!brandId,
-    queryFn: async () => {
-      const sb = getSupabase();
-      const [centers, programs, inquiries, settlements, unassignedLeads, staleLeads] =
-        await Promise.all([
-          sb
-            .from("franchise_centers")
-            .select("id", { count: "exact", head: true })
-            .eq("brand_id", brandId!)
-            .eq("status", "active")
-            .is("deleted_at", null),
-          sb
-            .from("programs")
-            .select("id", { count: "exact", head: true })
-            .eq("brand_id", brandId!)
-            .is("deleted_at", null),
-          sb
-            .from("franchise_inquiries")
-            .select("id", { count: "exact", head: true })
-            .eq("brand_id", brandId!)
-            .eq("status", "new"),
-          sb
-            .from("royalty_settlements")
-            .select("amount_cents")
-            .eq("brand_id", brandId!)
-            .eq("status", "pending"),
-          sb
-            .from("leads")
-            .select("id", { count: "exact", head: true })
-            .eq("brand_id", brandId!)
-            .is("center_id", null)
-            .not("status", "in", '("converted","lost")'),
-          countStaleBrandLeads(brandId!),
-        ]);
-
-      const royaltyDue = (settlements.data ?? []).reduce((s, r) => s + (r.amount_cents ?? 0), 0);
-
-      return {
-        activeCenters: centers.count ?? 0,
-        programs: programs.count ?? 0,
-        newInquiries: inquiries.count ?? 0,
-        unassignedLeads: unassignedLeads.count ?? 0,
-        staleLeads,
-        royaltyDue,
-      };
-    },
+    queryFn: () => fetchBrandDashboardHome(brandId!),
   });
 
   if (missingBrand) {
     return <p className="ed-empty">Brand context not found.</p>;
   }
 
-  const s = stats.data;
+  if (dashboard.isLoading) {
+    return <p className="ed-text-sm ed-muted">Loading dashboard…</p>;
+  }
 
-  return (
-    <>
-      <PageTitle>Executive Dashboard</PageTitle>
-      <KpiGrid>
-        <KpiCard label="Active centers" value={s?.activeCenters ?? "—"} />
-        <KpiCard label="Programs" value={s?.programs ?? "—"} />
-        <KpiCard label="New franchise applications" value={s?.newInquiries ?? "—"} />
-        <KpiCard label="Unassigned student leads" value={s?.unassignedLeads ?? "—"} />
-        <KpiCard
-          label="Leads needing attention (SLA)"
-          value={s?.staleLeads ?? "—"}
-          hint="No center status change since assign"
-        />
-        <KpiCard
-          label="Royalty due (pending)"
-          value={s != null ? formatInrFromPaise(s.royaltyDue) : "—"}
-        />
-      </KpiGrid>
-    </>
-  );
+  if (!dashboard.data) {
+    return <p className="ed-empty">Dashboard data unavailable.</p>;
+  }
+
+  return <BrandDashboardView data={dashboard.data} displayName={profile.name} />;
 }

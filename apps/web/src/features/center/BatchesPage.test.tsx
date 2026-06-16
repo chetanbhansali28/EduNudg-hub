@@ -73,7 +73,6 @@ describe("BatchesPage", () => {
 
     expect(await screen.findByText("Active Batches")).toBeDefined();
     expect(screen.getByText(/Manage schedules, enrollment status/i)).toBeDefined();
-    expect(screen.getByText("Batch Management")).toBeDefined();
     expect(await screen.findByText("Morning batch")).toBeDefined();
     expect(screen.getByText("5/20 Students")).toBeDefined();
     expect(document.querySelector(".ed-catalog-workspace")).toBeTruthy();

@@ -779,13 +779,21 @@ export function MobileCartBar({
 
 export function BottomNav({
   items,
-  "aria-label": ariaLabel = "Primary",
+  navLabel = "Primary",
+  scrollable = false,
+  "aria-label": ariaLabelProp,
 }: {
   items: { href: string; label: string; icon: ReactNode; active?: boolean }[];
+  navLabel?: string;
+  scrollable?: boolean;
   "aria-label"?: string;
 }) {
+  const ariaLabel = ariaLabelProp ?? navLabel;
+  const className = ["ed-bottom-nav", scrollable || items.length > 5 ? "ed-bottom-nav--scroll" : ""]
+    .filter(Boolean)
+    .join(" ");
   return (
-    <nav className="ed-bottom-nav" aria-label={ariaLabel}>
+    <nav className={className} aria-label={ariaLabel}>
       {items.map((item) => (
         <Link
           key={item.href}

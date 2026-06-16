@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const DESKTOP_MQ = "(min-width: 900px)";
+const DESKTOP_MQ = "(min-width: 1024px)";
 
 function readIsDesktop() {
   if (typeof window === "undefined") return true;

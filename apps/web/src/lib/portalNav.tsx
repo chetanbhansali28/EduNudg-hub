@@ -188,6 +188,11 @@ export function studentBottomNavItems(pathname: string) {
   }));
 }
 
+/** Flatten sidebar sections into bottom-nav links (excludes logout / action-only items). */
+export function staffBottomNavFromSections(sections: ShellNavSection[]): ShellNavItem[] {
+  return sections.flatMap((section) => section.items.filter((item) => item.href !== "#"));
+}
+
 export function studentNavSections(pathname: string): ShellNavSection[] {
   return [
     section("Main menu", STUDENT_MAIN_NAV, pathname),

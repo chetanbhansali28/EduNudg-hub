@@ -50,7 +50,6 @@ import { CenterMerchandiseAllocationsCard } from "./CenterMerchandiseAllocations
 import { CenterMerchandiseOrderHistory } from "./CenterMerchandiseOrderHistory";
 import { CenterStudentProfileAddressCard } from "./CenterStudentProfileAddressCard";
 import { MerchandiseCheckoutPanel } from "./MerchandiseCheckoutPanel";
-import { CenterMerchandiseMobileChrome } from "./CenterMerchandiseMobileChrome";
 import { MerchandiseProductGrid } from "./MerchandiseProductGrid";
 import { useCommerceBreakpoint } from "./hooks/useCommerceBreakpoint";
 import {
@@ -551,8 +550,6 @@ export function CenterMerchandiseOrdersPage() {
           </div>
         </div>
       ) : null}
-
-      <CenterMerchandiseMobileChrome />
     </div>
   );
 }

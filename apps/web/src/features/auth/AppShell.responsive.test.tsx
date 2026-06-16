@@ -13,6 +13,54 @@ describe("AppShell responsive", () => {
     }));
   });
 
+  it("regression_mobile_bottom_nav_hides_hamburger", () => {
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <AppShell
+            portalLabel="Center"
+            welcomeName="Test"
+            mobileNavMode="bottom"
+            mobileChrome={<nav aria-label="Center navigation">Nav</nav>}
+            navSections={[{ title: "Main menu", items: [{ href: "/", label: "Home", active: true }] }]}
+          >
+            <p>Page body</p>
+          </AppShell>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByRole("button", { name: /open menu/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /notifications/i })).toBeNull();
+    expect(document.querySelector(".ed-shell--bottom-nav")).toBeTruthy();
+    expect(document.querySelector(".ed-shell__mobile-chrome")).toBeTruthy();
+    expect(document.querySelector(".ed-mobile-page-body")).toBeTruthy();
+  });
+
+  it("regression_title_only_mobile_bar_omits_trailing_actions", () => {
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <AppShell
+            portalLabel="Learn · Demo"
+            productName="Demo Academy"
+            shellVariant="student"
+            mobileNavMode="bottom"
+            mobileChrome={<nav aria-label="Student navigation">Nav</nav>}
+            user={{ name: "Alex Student", email: "alex@example.com" }}
+            navSections={[{ title: "Main menu", items: [{ href: "/", label: "Home", active: true }] }]}
+          >
+            <p>Student home</p>
+          </AppShell>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
+    expect(document.querySelector(".ed-mobile-bar__profile")).toBeNull();
+    expect(document.querySelector(".ed-mobile-bar__end")).toBeNull();
+    expect(document.querySelector(".ed-mobile-bar__title")?.textContent).toBe("Demo Academy");
+  });
+
   it("regression_mobile_nav_toggle_opens_drawer", () => {
     const { container } = render(
       <MemoryRouter>

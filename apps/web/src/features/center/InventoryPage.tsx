@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Button, CatalogPageHeader } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
-import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { InventoryItemDetailPanel, InventoryValueCard } from "@/features/center/inventory/InventoryItemDetailPanel";
 import { IconDownload, IconSearch } from "@/features/center/inventory/InventoryIcons";
 import { InventoryStockCard } from "@/features/center/inventory/InventoryStockCard";
@@ -20,21 +20,10 @@ function matchesSearch(item: InventorySummaryRow, query: string): boolean {
   return [item.name, item.sku].some((value) => value.toLowerCase().includes(q));
 }
 
-function centerBreadcrumbLabel(
-  branding: { brandName: string | null; centerName: string | null } | undefined,
-  brandSlug?: string | null,
-  centerSlug?: string | null
-): string {
-  const brand = branding?.brandName ?? brandSlug ?? "Brand";
-  const center = branding?.centerName ?? centerSlug ?? "Center";
-  return `${brand} ${center}`;
-}
-
 export function InventoryPage() {
   const tenant = useTenant();
   const brandId = tenant.brandId;
   const centerId = tenant.centerId;
-  const { data: branding } = usePortalBranding();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -67,27 +56,22 @@ export function InventoryPage() {
 
   if (!centerId || !brandId) return <p className="ed-empty">Center context not found.</p>;
 
-  const breadcrumbCenter = centerBreadcrumbLabel(branding ?? undefined, tenant.brandSlug, tenant.centerSlug);
-
   return (
     <div className="ed-inv-page">
-      <p className="ed-inv-page__crumbs">Center / {breadcrumbCenter}</p>
-
-      <div className="ed-inv-page__header">
-        <div>
-          <h1 className="ed-inv-page__title">Inventory</h1>
-          <p className="ed-inv-page__subtitle">Manage on-hand stock and track incoming merchandise.</p>
-        </div>
-        <button
-          type="button"
-          className="ed-inv-page__export"
-          disabled={!inventory.data?.length}
-          onClick={() => downloadInventoryCsv(inventory.data ?? [])}
-        >
-          <IconDownload />
-          Export CSV
-        </button>
-      </div>
+      <CatalogPageHeader
+        title="Inventory"
+        subtitle="Manage on-hand stock and track incoming merchandise."
+        actions={
+          <Button
+            variant="secondary"
+            disabled={!inventory.data?.length}
+            onClick={() => downloadInventoryCsv(inventory.data ?? [])}
+          >
+            <IconDownload />
+            Export CSV
+          </Button>
+        }
+      />
 
       <div className="ed-inv-page__search-wrap">
         <IconSearch className="ed-inv-page__search-icon" />

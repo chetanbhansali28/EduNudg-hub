@@ -252,6 +252,8 @@ export function AppShell({
   surface = "backend",
   mobileBarTitle,
   mobileBarEnd,
+  mobileNavMode = "drawer",
+  mobileChrome,
   shellClassName,
   children,
 }: {
@@ -279,6 +281,10 @@ export function AppShell({
   mobileBarTitle?: string;
   /** Optional trailing control in the mobile top bar (e.g. notifications). */
   mobileBarEnd?: ReactNode;
+  /** Mobile nav: drawer (hamburger sidebar) or bottom tab bar (hides hamburger). */
+  mobileNavMode?: "drawer" | "bottom";
+  /** Fixed bottom navigation rendered outside the scrolling content column. */
+  mobileChrome?: ReactNode;
   /** Extra class on the shell root (e.g. ed-shell--commerce). */
   shellClassName?: string;
   children: ReactNode;
@@ -333,6 +339,8 @@ export function AppShell({
     surface === "backend" ? "ed-shell--backend" : "",
     shellVariant === "student" ? "ed-shell--student" : "",
     shellClassName ?? "",
+    mobileNavMode === "bottom" ? "ed-shell--bottom-nav" : "",
+    mobileChrome ? "ed-shell--mobile-chrome" : "",
     navOpen ? "ed-shell--nav-open" : "",
     sidebarCollapsed ? "ed-shell--sidebar-collapsed" : "",
   ]
@@ -340,6 +348,7 @@ export function AppShell({
     .join(" ");
 
   const mobileTitle = mobileBarTitle ?? productName;
+  const titleOnlyMobileBar = mobileNavMode === "bottom" || mobileChrome != null;
 
   return (
     <div className={shellClass}>
@@ -369,20 +378,22 @@ export function AppShell({
 
       <div className="ed-main">
         <div className="ed-mobile-bar">
-          <button
-            type="button"
-            className="ed-mobile-bar__menu"
-            aria-expanded={navOpen}
-            aria-controls="app-sidebar"
-            onClick={() => setNavOpen((open) => !open)}
-          >
-            <IconMenu width={22} height={22} />
-            <span className="ed-sr-only">{navOpen ? "Close menu" : "Open menu"}</span>
-          </button>
+          {!titleOnlyMobileBar ? (
+            <button
+              type="button"
+              className="ed-mobile-bar__menu"
+              aria-expanded={navOpen}
+              aria-controls="app-sidebar"
+              onClick={() => setNavOpen((open) => !open)}
+            >
+              <IconMenu width={22} height={22} />
+              <span className="ed-sr-only">{navOpen ? "Close menu" : "Open menu"}</span>
+            </button>
+          ) : null}
           <span className="ed-mobile-bar__title">{mobileTitle}</span>
-          {mobileBarEnd ? (
+          {!titleOnlyMobileBar && mobileBarEnd ? (
             <div className="ed-mobile-bar__end">{mobileBarEnd}</div>
-          ) : shellVariant === "student" && user ? (
+          ) : !titleOnlyMobileBar && shellVariant === "student" && user ? (
             <div className="ed-mobile-bar__profile">
               {user.avatarUrl ? (
                 <img src={user.avatarUrl} alt="" className="ed-header__avatar ed-header__avatar--img" />
@@ -392,7 +403,7 @@ export function AppShell({
                 </span>
               )}
             </div>
-          ) : (
+          ) : !titleOnlyMobileBar ? (
             <button
               type="button"
               className="ed-mobile-bar__collapse"
@@ -401,7 +412,7 @@ export function AppShell({
             >
               {sidebarCollapsed ? <IconChevronRight width={20} height={20} /> : <IconChevronLeft width={20} height={20} />}
             </button>
-          )}
+          ) : null}
         </div>
 
         <header className="ed-header">
@@ -444,7 +455,10 @@ export function AppShell({
             </div>
           )}
         </header>
-        <div className="ed-content">{children}</div>
+        <div className="ed-content">
+          {titleOnlyMobileBar ? <div className="ed-mobile-page-body">{children}</div> : children}
+        </div>
+        {mobileChrome ? <div className="ed-shell__mobile-chrome">{mobileChrome}</div> : null}
       </div>
     </div>
   );

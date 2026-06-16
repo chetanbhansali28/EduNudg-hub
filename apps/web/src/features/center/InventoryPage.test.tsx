@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
+import { ThemeProvider } from "@edunudg/ui";
 import { InventoryPage } from "@/features/center/InventoryPage";
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
@@ -11,12 +12,6 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
     brandSlug: "abacusworld",
     centerSlug: "koramangala",
     portalType: "center",
-  }),
-}));
-
-vi.mock("@/hooks/usePortalBranding", () => ({
-  usePortalBranding: () => ({
-    data: { brandName: "Abacus World", centerName: "Koramangala" },
   }),
 }));
 
@@ -66,9 +61,11 @@ function renderPage() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter>
-        <InventoryPage />
-      </MemoryRouter>
+      <ThemeProvider>
+        <MemoryRouter>
+          <InventoryPage />
+        </MemoryRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
@@ -78,9 +75,11 @@ describe("InventoryPage", () => {
     renderPage();
 
     await waitFor(() => {
+      expect(screen.getByText("Inventory")).toBeDefined();
       expect(screen.getByText("Manage on-hand stock and track incoming merchandise.")).toBeDefined();
       expect(screen.getByText("Level 1 Book")).toBeDefined();
     });
+    expect(screen.queryByText(/Center \//)).toBeNull();
     expect(screen.getByText("Stock by item")).toBeDefined();
     expect(screen.getByText(/1 ITEMS SHOWN/)).toBeDefined();
     expect(screen.getByText("IN STOCK")).toBeDefined();

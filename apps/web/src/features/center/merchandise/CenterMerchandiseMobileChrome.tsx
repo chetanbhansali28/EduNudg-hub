@@ -1,4 +1,4 @@
-import { IconBell, IconHome, IconStore, IconUsers, BottomNav } from "@edunudg/ui";
+import { IconHome, IconStore, IconUsers, BottomNav } from "@edunudg/ui";
 import { useLocation } from "react-router-dom";
 
 const ICONS = {
@@ -24,7 +24,7 @@ export function CenterMerchandiseMobileChrome() {
 
   return (
     <BottomNav
-      aria-label="Store navigation"
+      navLabel="Store navigation"
       items={[
         { href: "/app", label: "Home", icon: ICONS.home, active: false },
         {
@@ -42,13 +42,5 @@ export function CenterMerchandiseMobileChrome() {
         { href: "/app/settings", label: "Profile", icon: ICONS.profile, active: false },
       ]}
     />
-  );
-}
-
-export function CenterMerchandiseMobileBarEnd() {
-  return (
-    <button type="button" className="ed-header__icon-btn" aria-label="Notifications" disabled>
-      <IconBell width={20} height={20} />
-    </button>
   );
 }

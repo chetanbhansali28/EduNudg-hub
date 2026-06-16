@@ -66,10 +66,11 @@ export function StudentLearnLayout() {
       showWelcome={false}
       shellVariant="student"
       surface="backend"
+      mobileNavMode="bottom"
+      mobileChrome={isMobile ? <StudentMobileChrome /> : undefined}
     >
       <div className={`ed-student-portal${isMobile ? " ed-student-portal--mobile" : ""}`}>
         <Outlet />
-        {isMobile ? <StudentMobileChrome /> : null}
       </div>
     </AppShell>
   );

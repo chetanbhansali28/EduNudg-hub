@@ -7,6 +7,7 @@ import { useBrandFeatureFlags } from "@/hooks/useFeatureFlag";
 import { useStaffShellWelcome } from "@/hooks/useStaffShellWelcome";
 import { brandNavSections, filterNavByFeatureFlags, signOutNavItem, BRAND_FEATURE_FLAGS } from "@/lib/portalNav";
 import { resolveShellProductName } from "@/lib/portalBranding";
+import { StaffMobileChrome } from "@/features/shared/StaffMobileChrome";
 
 export function BrandLayout() {
   const { pathname } = useLocation();
@@ -45,6 +46,9 @@ export function BrandLayout() {
       navSections={navSections}
       footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}
+      mobileNavMode="bottom"
+      showWelcome={pathname === "/app"}
+      mobileChrome={<StaffMobileChrome sections={navSections} ariaLabel="Brand navigation" />}
     >
       <Outlet />
     </AppShell>
