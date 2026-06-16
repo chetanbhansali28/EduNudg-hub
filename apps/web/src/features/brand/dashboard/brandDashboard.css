@@ -57,13 +57,24 @@
 
 .ed-brand-dash__kpis {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.875rem;
 }
 
-.ed-brand-dash__kpi-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.ed-brand-dash__kpi--stale {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-color: color-mix(in srgb, #ef4444 35%, var(--ed-border));
+}
+
+.ed-brand-dash__kpi--stale .ed-brand-dash__kpi-main {
+  display: flex;
+  align-items: center;
   gap: 0.875rem;
+  min-width: 0;
 }
 
 .ed-brand-dash__kpi {
@@ -177,20 +188,6 @@
   font-size: 0.6875rem;
   font-weight: 700;
   pointer-events: none;
-}
-
-.ed-brand-dash__kpi--stale {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.ed-brand-dash__kpi--stale .ed-brand-dash__kpi-main {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  min-width: 0;
 }
 
 .ed-brand-dash__main {
@@ -587,11 +584,8 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .ed-brand-dash__kpi-row {
-    display: contents;
-  }
-
   .ed-brand-dash__kpi--stale {
+    grid-column: auto;
     display: block;
   }
 
@@ -601,7 +595,6 @@
 
   .ed-brand-dash__kpi--stale .ed-brand-dash__kpi-action {
     margin-top: 0.75rem;
-    margin-left: 0;
     display: inline-flex;
   }
 

@@ -129,7 +129,7 @@ function CenterHealthCard({ data }: { data: BrandDashboardHome }) {
 function KpiSection({ data }: { data: BrandDashboardHome }) {
   return (
     <div className="ed-brand-dash__kpis">
-      <Link to="/app/leads" className="ed-brand-dash__kpi">
+      <Link to="/app/leads" className="ed-brand-dash__kpi ed-brand-dash__kpi--leads">
         <div className="ed-brand-dash__kpi-head">
           <span className="ed-brand-dash__kpi-icon ed-brand-dash__kpi-icon--blue">
             <KpiIconLeads />
@@ -145,39 +145,37 @@ function KpiSection({ data }: { data: BrandDashboardHome }) {
         <p className="ed-brand-dash__kpi-hint">{unassignedLeadsHint(data.unassignedLeads)}</p>
       </Link>
 
-      <div className="ed-brand-dash__kpi-row">
-        <Link to="/app/franchise-applications" className="ed-brand-dash__kpi">
-          <div className="ed-brand-dash__kpi-head">
-            <span className="ed-brand-dash__kpi-icon ed-brand-dash__kpi-icon--purple">
-              <KpiIconFranchise />
-            </span>
-            {data.pendingFranchiseApps > 0 ? (
-              <span className="ed-brand-dash__kpi-badge ed-brand-dash__kpi-badge--new">New</span>
-            ) : null}
-          </div>
-          <p className="ed-brand-dash__kpi-label">Franchise Apps</p>
-          <p className="ed-brand-dash__kpi-value">{data.pendingFranchiseApps}</p>
-          <p className="ed-brand-dash__kpi-hint">{franchiseAppsHint(data.pendingFranchiseApps)}</p>
-        </Link>
-
-        <Link to="/app/leads" className="ed-brand-dash__kpi ed-brand-dash__kpi--alert ed-brand-dash__kpi--stale">
-          <div className="ed-brand-dash__kpi-main">
-            <span className="ed-brand-dash__kpi-icon ed-brand-dash__kpi-icon--red">
-              <KpiIconStale />
-            </span>
-            <div>
-              <p className="ed-brand-dash__kpi-label">Stale Leads (&gt;48h)</p>
-              <p className="ed-brand-dash__kpi-value ed-brand-dash__kpi-value--danger">{data.staleLeads}</p>
-              <p className="ed-brand-dash__kpi-hint ed-brand-dash__kpi-hint--danger">
-                {staleLeadsHint(data.staleLeads)}
-              </p>
-            </div>
-          </div>
-          {data.staleLeads > 0 ? (
-            <span className="ed-brand-dash__kpi-action">Action Required</span>
+      <Link to="/app/franchise-applications" className="ed-brand-dash__kpi ed-brand-dash__kpi--apps">
+        <div className="ed-brand-dash__kpi-head">
+          <span className="ed-brand-dash__kpi-icon ed-brand-dash__kpi-icon--purple">
+            <KpiIconFranchise />
+          </span>
+          {data.pendingFranchiseApps > 0 ? (
+            <span className="ed-brand-dash__kpi-badge ed-brand-dash__kpi-badge--new">New</span>
           ) : null}
-        </Link>
-      </div>
+        </div>
+        <p className="ed-brand-dash__kpi-label">Franchise Apps</p>
+        <p className="ed-brand-dash__kpi-value">{data.pendingFranchiseApps}</p>
+        <p className="ed-brand-dash__kpi-hint">{franchiseAppsHint(data.pendingFranchiseApps)}</p>
+      </Link>
+
+      <Link to="/app/leads" className="ed-brand-dash__kpi ed-brand-dash__kpi--stale">
+        <div className="ed-brand-dash__kpi-main">
+          <span className="ed-brand-dash__kpi-icon ed-brand-dash__kpi-icon--red">
+            <KpiIconStale />
+          </span>
+          <div>
+            <p className="ed-brand-dash__kpi-label">Stale Leads (&gt;48h)</p>
+            <p className="ed-brand-dash__kpi-value ed-brand-dash__kpi-value--danger">{data.staleLeads}</p>
+            <p className="ed-brand-dash__kpi-hint ed-brand-dash__kpi-hint--danger">
+              {staleLeadsHint(data.staleLeads)}
+            </p>
+          </div>
+        </div>
+        {data.staleLeads > 0 ? (
+          <span className="ed-brand-dash__kpi-action">Action Required</span>
+        ) : null}
+      </Link>
     </div>
   );
 }

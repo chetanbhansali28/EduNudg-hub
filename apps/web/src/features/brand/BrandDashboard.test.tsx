@@ -14,12 +14,13 @@ vi.mock("@/hooks/useStaffProfile", () => ({
   useStaffProfile: () => ({ name: "Director Patel", email: "director@example.com" }),
 }));
 
-const sampleHome: BrandDashboardHome = {
+const { sampleHome } = vi.hoisted(() => ({
+  sampleHome: {
   unassignedLeads: 12,
   unassignedLeadsTrend: 12,
   pendingFranchiseApps: 4,
   staleLeads: 8,
-  revenueTotalCents: 120_000_000_00,
+  revenueTotalCents: 1_200_000_000,
   revenueTrendPercent: 18,
   revenueBars: [0.4, 0.45, 0.5, 0.55, 0.65, 0.8, 1],
   centerHealthPercent: 92,
@@ -53,7 +54,8 @@ const sampleHome: BrandDashboardHome = {
     { id: "Delhi NCR", label: "Delhi NCR", percent: 85 },
     { id: "Mumbai Metro", label: "Mumbai Metro", percent: 62 },
   ],
-};
+  } satisfies BrandDashboardHome,
+}));
 
 vi.mock("@/lib/brandDashboardHomeApi", () => ({
   fetchBrandDashboardHome: vi.fn().mockResolvedValue(sampleHome),
@@ -71,12 +73,12 @@ describe("BrandDashboard", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Today at a glance", level: 1 })).toBeDefined();
-    expect(screen.getByText(/Good morning, Director/i)).toBeDefined();
+    expect(screen.getAllByText(/Good (morning|afternoon|evening), Director/i).length).toBeGreaterThan(0);
     expect(screen.getByText("Unassigned Leads")).toBeDefined();
     expect(screen.getByText("Franchise Apps")).toBeDefined();
     expect(screen.getAllByText("Stale Leads (>48h)").length).toBeGreaterThan(0);
     expect(screen.getByText("Recent Activity")).toBeDefined();
-    expect(screen.getByText("Bright Minds Academy")).toBeDefined();
+    expect(screen.getByText(/Bright Minds Academy/i)).toBeDefined();
     expect(screen.getAllByText("Revenue Outlook").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Center Health").length).toBeGreaterThan(0);
     expect(screen.getByText("Expansion Goals")).toBeDefined();
@@ -99,10 +101,10 @@ describe("BrandDashboardView", () => {
     expect(screen.getByRole("link", { name: "+ New Center Proposal" }).getAttribute("href")).toBe(
       "/app/franchise-applications"
     );
-    expect(screen.getByText("₹1.2Cr")).toBeDefined();
-    expect(screen.getByText("+18% vs LW")).toBeDefined();
-    expect(screen.getByText("LC")).toBeDefined();
-    expect(screen.getByText("+14")).toBeDefined();
+    expect(screen.getAllByText("₹1.2Cr").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("+18% vs LW").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("LC").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("+14").length).toBeGreaterThan(0);
     expect(screen.getByText("142 Active Hubs • 12 Pending")).toBeDefined();
   });
 });

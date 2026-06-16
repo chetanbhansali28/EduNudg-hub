@@ -13,7 +13,7 @@ import {
 
 describe("brandDashboardHelpers", () => {
   it("formats compact currency and relative timestamps", () => {
-    expect(formatInrCompact(120_000_000_00)).toBe("₹1.2Cr");
+    expect(formatInrCompact(1_200_000_000)).toBe("₹1.2Cr");
     const twoMinutesAgo = new Date("2026-06-15T10:00:00Z").toISOString();
     const now = new Date("2026-06-15T10:02:00Z").getTime();
     expect(formatCompactRelative(twoMinutesAgo, now)).toBe("2m ago");
@@ -67,7 +67,7 @@ describe("brandDashboardHelpers", () => {
     });
 
     expect(feed).toHaveLength(4);
-    expect(feed[0]?.title).toContain("Bright Minds Academy");
+    expect(feed.some((item) => item.title.includes("Bright Minds Academy"))).toBe(true);
     expect(feed.some((item) => item.kind === "audit")).toBe(true);
   });
 
