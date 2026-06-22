@@ -1,0 +1,19 @@
+.ed-sub-plans-section__actions,
+.ed-sub-subs-section__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ed-sub-mobile-editor-actions,
+.ed-sub-editor__danger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ed-sub-mobile-editor-actions {
+  justify-content: flex-end;
+}

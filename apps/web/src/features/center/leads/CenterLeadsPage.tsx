@@ -13,6 +13,7 @@ import {
   PipelineWorkspace,
 } from "@edunudg/ui";
 import { ManualStudentLeadCard } from "@/features/shared/manualLeads/ManualStudentLeadCard";
+import { PhoneLink } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { isLeadStale } from "@/lib/leadSla";
@@ -324,7 +325,16 @@ export function CenterLeadsPage() {
                       </span>
                       <div>
                         <p className="ed-pipeline-lead-row__name">{name}</p>
-                        <p className="ed-pipeline-lead-row__phone">{lead.whatsapp_e164 ?? lead.email ?? "—"}</p>
+                        <p className="ed-pipeline-lead-row__phone">
+                          {lead.whatsapp_e164 ? (
+                            <PhoneLink
+                              phone={lead.whatsapp_e164}
+                              onClick={(event) => event.stopPropagation()}
+                            />
+                          ) : (
+                            lead.email ?? "—"
+                          )}
+                        </p>
                       </div>
                     </div>
                     <div>

@@ -13,7 +13,7 @@ const { mockCenters } = vi.hoisted(() => ({
       display_name: "Abacus Koramangala",
       status: "active" as const,
       city: "Bengaluru",
-      region: null,
+      region: "KA",
       pincode: "560034",
       contact_phone: "+91 98765 43210",
       address_line1: null,
@@ -29,7 +29,7 @@ const { mockCenters } = vi.hoisted(() => ({
       display_name: null,
       status: "suspended" as const,
       city: "Bengaluru",
-      region: null,
+      region: "KA",
       pincode: null,
       contact_phone: "+91 90000 11111",
       address_line1: null,
@@ -50,6 +50,10 @@ vi.mock("./hooks/useBrandScope", () => ({
   }),
 }));
 
+vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
+  useOpsBreakpoint: () => ({ isDesktop: true, isMobile: false }),
+}));
+
 vi.mock("@/lib/centerCentersApi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/centerCentersApi")>();
   return {
@@ -66,8 +70,25 @@ vi.mock("@/lib/centerCentersApi", async (importOriginal) => {
   };
 });
 
+vi.mock("@/lib/supabase", () => ({
+  getSupabase: () => ({
+    from: (table: string) => ({
+      select: () => ({
+        eq: () => ({
+          is: () => ({
+            order: () =>
+              Promise.resolve({
+                data: table === "programs" ? [{ id: "p1", name: "Abacus", age_label: "L1-L8", description: "Core" }] : [],
+                error: null,
+              }),
+          }),
+        }),
+      }),
+    }),
+  }),
+}));
+
 vi.mock("@/lib/centerCurriculumApi", () => ({
-  fetchBrandPrograms: vi.fn().mockResolvedValue([]),
   fetchCenterAuthorizedProgramIds: vi.fn().mockResolvedValue([]),
   setCenterCourseAuthorized: vi.fn().mockResolvedValue(undefined),
 }));
@@ -76,10 +97,10 @@ vi.mock("@/features/center/settings/CenterPhotoUpload", () => ({
   CenterPhotoUpload: () => <div>Photo upload</div>,
 }));
 
-function renderPage() {
+function renderPage(initialEntries = ["/app/centers"]) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <QueryClientProvider client={qc}>
         <CentersPage />
       </QueryClientProvider>
@@ -92,12 +113,12 @@ describe("CentersPage", () => {
     vi.clearAllMocks();
   });
 
-  it("regression_no_direct_center_create_links_to_franchise_applications", async () => {
+  it("regression_centers_management_layout", async () => {
     renderPage();
-    expect(screen.getByText("Franchise Centers")).toBeDefined();
-    fireEvent.click(screen.getByRole("button", { name: "Add center" }));
-    expect(screen.getByText("Go to franchise applications")).toBeDefined();
-    expect(screen.queryByText("Create center")).toBeNull();
+    expect(await screen.findByRole("heading", { name: "Franchise Management" })).toBeDefined();
+    expect(screen.getByText("Total Centers")).toBeDefined();
+    expect(screen.getByText("Directory")).toBeDefined();
+    expect(screen.getByRole("link", { name: "Add New" })).toBeDefined();
   });
 
   it("regression_centers_no_delete", async () => {
@@ -108,23 +129,20 @@ describe("CentersPage", () => {
     expect(screen.queryByRole("button", { name: /delete/i })).toBeNull();
   });
 
-  it("regression_master_detail_selects_franchise", async () => {
-    renderPage();
-    await waitFor(() => {
-      expect(screen.getByText("Abacus Koramangala")).toBeDefined();
-    });
-    fireEvent.click(screen.getByText("Abacus Koramangala"));
-    expect(await screen.findByText("Franchise detail")).toBeDefined();
-    expect(screen.getByText(/Slug: koramangala \(read-only\)/)).toBeDefined();
+  it("regression_master_detail_selects_center", async () => {
+    renderPage(["/app/centers?center=koramangala"]);
+    expect(await screen.findByText("Franchise Identity")).toBeDefined();
+    expect(screen.getByLabelText("Franchise Name")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeDefined();
   });
 
   it("regression_search_by_phone", async () => {
     renderPage();
-    fireEvent.click(screen.getByRole("tab", { name: /All/i }));
     await waitFor(() => {
-      expect(screen.getByText("Jayanagar")).toBeDefined();
+      expect(screen.getByText("Abacus Koramangala")).toBeDefined();
     });
-    fireEvent.change(screen.getByPlaceholderText("Name or phone…"), {
+    fireEvent.click(screen.getByRole("button", { name: /Total Centers/i }));
+    fireEvent.change(screen.getByPlaceholderText("Search centers…"), {
       target: { value: "90000" },
     });
     await waitFor(() => {

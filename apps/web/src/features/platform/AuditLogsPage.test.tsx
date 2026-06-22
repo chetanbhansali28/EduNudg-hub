@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "@edunudg/ui";
 import { AuditLogsPage } from "./AuditLogsPage";
 
 vi.mock("@/lib/supabase", () => ({
@@ -20,12 +21,16 @@ describe("AuditLogsPage", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
-        <AuditLogsPage />
+        <ThemeProvider>
+          <AuditLogsPage />
+        </ThemeProvider>
       </QueryClientProvider>
     );
-    expect(screen.getByText(/Append-only record of platform admin actions/)).toBeDefined();
-    expect(await screen.findByText(/No audit events yet/)).toBeDefined();
-    expect(screen.getByText(/Brand signup approved or rejected/)).toBeDefined();
+    expect(
+      (await screen.findAllByText(/Track system-wide administrative actions and security events/)).length
+    ).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/No audit events yet/)).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Brand signup approved or rejected/).length).toBeGreaterThan(0);
     expect(screen.queryByText("Log event")).toBeNull();
     expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
   });

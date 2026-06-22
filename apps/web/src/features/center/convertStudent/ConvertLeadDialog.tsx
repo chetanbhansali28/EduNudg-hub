@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button, Input } from "@edunudg/ui";
+import { PhoneLink } from "@edunudg/ui";
 import type { LeadRow } from "@/lib/leadsApi";
 
 export type ConvertLeadOverrides = {
@@ -72,7 +73,7 @@ export function ConvertLeadDialog({
             {lead.child_dob ? ` · DOB ${lead.child_dob}` : ""}
           </li>
           <li>
-            <strong>WhatsApp:</strong> {lead.whatsapp_e164 ?? "—"}
+            <strong>WhatsApp:</strong> <PhoneLink phone={lead.whatsapp_e164} />
           </li>
         </ul>
         <div className="ed-form-section">
@@ -108,7 +109,7 @@ export function ConvertLeadDialog({
         onChange={(v) => setFields((prev) => ({ ...prev, parentName: v }))}
       />
       <p className="ed-text-sm">
-        <strong>WhatsApp:</strong> {lead.whatsapp_e164 ?? "—"}
+        <strong>WhatsApp:</strong> <PhoneLink phone={lead.whatsapp_e164} />
       </p>
       <Input label="Child name" value={fields.childName} onChange={(v) => setFields((prev) => ({ ...prev, childName: v }))} />
       <Input

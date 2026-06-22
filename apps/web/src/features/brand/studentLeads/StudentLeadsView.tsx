@@ -18,6 +18,7 @@ import {
   Select,
 } from "@edunudg/ui";
 import { ManualStudentLeadCard } from "@/features/shared/manualLeads/ManualStudentLeadCard";
+import { PhoneLink, telHref } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { isLeadStale } from "@/lib/leadSla";
@@ -44,7 +45,7 @@ import {
   leadGridFields,
   leadInitials,
   leadListLines,
-  leadListMeta,
+  leadListLocation,
   leadListTitle,
   leadSourcePresentation,
   leadStatusPresentation,
@@ -258,13 +259,22 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
           const status = leadStatusPresentation(lead);
           const source = leadSourcePresentation(lead.lead_source);
           const centerName = lead.center_id ? centerNameById.get(lead.center_id) : undefined;
+          const location = leadListLocation(lead);
           return (
             <LeadListCard
               key={lead.id}
               initials={leadInitials(lead)}
               avatarTone={leadAvatarTone(lead.id)}
               title={leadListTitle(lead)}
-              meta={leadListMeta(lead)}
+              meta={
+                <>
+                  <PhoneLink
+                    phone={lead.whatsapp_e164}
+                    onClick={(event) => event.stopPropagation()}
+                  />
+                  {location ? ` • ${location}` : null}
+                </>
+              }
               lines={leadListLines(lead, centerName)}
               when={formatLeadListWhen(lead.created_at, now)}
               selected={lead.id === selectedId}
@@ -309,7 +319,19 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
               when={formatLeadSubmittedRelative(lead.created_at, now)}
               statusBadge={<LeadStatusBadge tone={status.tone}>{status.label}</LeadStatusBadge>}
               sourceBadge={<LeadStatusBadge tone={source.tone}>{source.label}</LeadStatusBadge>}
-              fields={leadGridFields(lead)}
+              fields={leadGridFields(lead).map((field) =>
+                field.label === "Contact"
+                  ? {
+                      ...field,
+                      value: (
+                        <PhoneLink
+                          phone={lead.whatsapp_e164}
+                          onClick={(event) => event.stopPropagation()}
+                        />
+                      ),
+                    }
+                  : field
+              )}
               footer={
                 lead.status === "converted" ? (
                   <Button variant="secondary" block onClick={() => selectLead(lead.id)}>
@@ -323,8 +345,10 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
                   <>
                     <Button
                       variant="secondary"
-                      onClick={() => {
-                        if (lead.whatsapp_e164) window.location.href = `tel:${lead.whatsapp_e164}`;
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        const href = telHref(lead.whatsapp_e164);
+                        if (href) window.location.href = href;
                       }}
                     >
                       Call

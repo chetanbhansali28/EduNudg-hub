@@ -14,13 +14,14 @@ export type ShippingAddressSnapshot = {
 export async function resolveFranchiseAddress(centerId: string): Promise<ShippingAddressSnapshot | null> {
   const { data, error } = await getSupabase()
     .from("franchise_centers")
-    .select("name, display_name, address_line1, city, region, country")
+    .select("name, display_name, address_line1, city, region, country, contact_phone")
     .eq("id", centerId)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
   return {
     name: data.display_name ?? data.name,
+    phone: data.contact_phone ?? undefined,
     address_line1: data.address_line1 ?? undefined,
     city: data.city ?? undefined,
     state: data.region ?? undefined,

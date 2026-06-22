@@ -67,6 +67,7 @@ describe("CenterLeadsPage", () => {
     expect(screen.getByText(/Call parents on WhatsApp/i)).toBeDefined();
     expect(await screen.findByText("Open Pipeline")).toBeDefined();
     expect(await screen.findByText("Meera Reddy")).toBeDefined();
+    expect(screen.getByRole("link", { name: "+919876543210" }).getAttribute("href")).toBe("tel:+919876543210");
     expect(screen.getByRole("tablist", { name: "Lead filter" })).toBeDefined();
     expect(await screen.findByText("Showing 1-1 of 1 leads")).toBeDefined();
     expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();

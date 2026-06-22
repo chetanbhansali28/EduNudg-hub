@@ -1,5 +1,8 @@
 import { isLeadStale } from "@/lib/leadSla";
 import type { LeadRow, LeadStatus } from "@/lib/leadsApi";
+import { telHref } from "@edunudg/ui";
+
+export { telHref };
 
 export type LeadStatusTone = "new" | "contacted" | "trial" | "hot" | "lost" | "converted" | "neutral";
 
@@ -226,11 +229,6 @@ export function whatsappHref(phone: string | null | undefined): string | null {
   if (!phone) return null;
   const digits = phone.replace(/\D/g, "");
   return digits ? `https://wa.me/${digits}` : null;
-}
-
-export function telHref(phone: string | null | undefined): string | null {
-  if (!phone) return null;
-  return `tel:${phone}`;
 }
 
 export function openPipelineHint(stats: LeadPipelineStats): string | null {

@@ -1,0 +1,12 @@
+.ed-pfset-loading {
+  margin: 0;
+  color: var(--ed-muted);
+  font-size: 0.875rem;
+}
+
+.ed-pfset-card__external {
+  color: var(--ed-muted);
+  text-decoration: none;
+  font-size: 1rem;
+  line-height: 1;
+}

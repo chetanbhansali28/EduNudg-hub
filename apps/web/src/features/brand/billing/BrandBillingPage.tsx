@@ -12,7 +12,6 @@ import {
   MutationError,
 } from "@edunudg/ui";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
-import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { usePlatformIntegration } from "@/hooks/usePlatformIntegration";
 import { fetchBrandBillingSummary } from "@/lib/brandBillingApi";
 import {
@@ -65,7 +64,6 @@ const PROMO_SHIELD_ICON = (
 
 export function BrandBillingPage() {
   const { brandId, missingBrand } = useBrandScope();
-  const { data: branding } = usePortalBranding();
   const paymentGatewayEnabled = usePlatformIntegration("payment_gateway");
   const { error, clear, capture } = useMutationError();
 
@@ -99,7 +97,6 @@ export function BrandBillingPage() {
   const plan = resolveSubscriptionPlan(sub?.subscription_plans);
   const status = subscriptionStatusBadge(sub?.status ?? "");
   const invoices = billing.data?.invoices ?? [];
-  const eyebrow = branding?.brandName?.trim() || "EduFranchise";
 
   const statusBadge = <BillingStatusBadge label={status.label} tone={status.tone} />;
 
@@ -115,7 +112,7 @@ export function BrandBillingPage() {
 
   return (
     <div className="ed-brand-billing-page">
-      <BillingPageHeader eyebrow={eyebrow} title="Billing" subtitle={BILLING_PAGE_SUBTITLE} />
+      <BillingPageHeader title="Billing" subtitle={BILLING_PAGE_SUBTITLE} />
       <MutationError message={error} />
 
       <BillingStack>

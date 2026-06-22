@@ -8,10 +8,6 @@ vi.mock("@/features/brand/hooks/useBrandScope", () => ({
   useBrandScope: () => ({ brandId: "brand-1", missingBrand: false }),
 }));
 
-vi.mock("@/hooks/usePortalBranding", () => ({
-  usePortalBranding: () => ({ data: { brandName: "EduFranchise" } }),
-}));
-
 vi.mock("@/hooks/usePlatformIntegration", () => ({
   usePlatformIntegration: () => true,
 }));
@@ -55,7 +51,6 @@ describe("BrandBillingPage", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Billing", level: 1 })).toBeDefined();
-    expect(screen.getByText("EduFranchise")).toBeDefined();
     expect(screen.getByText(/Manage your franchise subscription/)).toBeDefined();
     expect(screen.getByRole("heading", { name: "Platform subscription", level: 2 })).toBeDefined();
     expect(screen.getAllByText("ACTIVE").length).toBeGreaterThan(0);

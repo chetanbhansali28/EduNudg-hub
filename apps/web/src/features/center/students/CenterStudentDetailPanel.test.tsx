@@ -27,7 +27,13 @@ vi.mock("@/lib/centerBatchesApi", () => ({
 }));
 
 vi.mock("@/lib/studentProfileApi", () => ({
-  fetchStudentProfileAddress: vi.fn().mockResolvedValue(null),
+  fetchStudentProfileAddress: vi.fn().mockResolvedValue({
+    address_line1: "12 Main Road",
+    city: "Bengaluru",
+    state: "Karnataka",
+    pincode: "560034",
+    phone: "+91 98765 43210",
+  }),
   upsertStudentDeliveryAddress: vi.fn(),
 }));
 
@@ -86,5 +92,13 @@ describe("CenterStudentDetailPanel", () => {
       expect(screen.getByText("Record assessment")).toBeDefined();
     });
     expect(screen.getByRole("button", { name: "Save assessment" })).toBeDefined();
+  });
+
+  it("regression_delivery_phone_is_dialable", async () => {
+    await waitFor(() => {
+      expect(screen.getByLabelText("Phone").getAttribute("value")).toBe("+91 98765 43210");
+    });
+    const dial = await screen.findByRole("link", { name: "Call +91 98765 43210" });
+    expect(dial.getAttribute("href")).toBe("tel:+919876543210");
   });
 });

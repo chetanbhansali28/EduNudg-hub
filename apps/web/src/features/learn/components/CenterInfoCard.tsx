@@ -1,3 +1,4 @@
+import { PhoneLink } from "@edunudg/ui";
 import { formatShortDate, studentInitials } from "@/features/learn/studentFormatters";
 
 type Center = {
@@ -33,8 +34,7 @@ export function CenterInfoCard({
         </p>
         {center.contact_phone && (
           <p className="ed-sp-center__meta">
-            Need help?{" "}
-            <a href={`tel:${center.contact_phone}`}>{center.contact_phone}</a>
+            Need help? <PhoneLink phone={center.contact_phone} />
           </p>
         )}
         <div className="ed-sp-center__links">

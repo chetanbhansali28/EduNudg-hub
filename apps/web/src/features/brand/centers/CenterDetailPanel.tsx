@@ -1,18 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Badge,
   Button,
-  Card,
+  CenterAddSocialButton,
+  CenterCurriculumToggleCard,
+  CenterDetailFooter,
+  CenterDetailHero,
+  CenterDetailStatsRow,
+  CenterMobileHeroBanner,
+  CentersSectionCard,
+  CenterSocialLinkRow,
+  CenterStatusBadge,
   FormGrid,
   Input,
-  KpiCard,
-  KpiGrid,
   MutationError,
   SaveButton,
   Select,
+  Textarea,
 } from "@edunudg/ui";
-import { centerPortalUrl } from "@/lib/brandPortalUrl";
+import { portalBackendUrl } from "@/lib/brandPortalUrl";
 import {
   type BrandCenterRow,
   fetchCenterStats,
@@ -20,10 +26,22 @@ import {
   updateFranchiseCenter,
 } from "@/lib/centerCentersApi";
 import type { CenterPublicProfileInput } from "@/lib/centerProfileFields";
+import { getSupabase } from "@/lib/supabase";
+import { supabaseList } from "@/lib/supabaseResult";
+import {
+  fetchCenterAuthorizedProgramIds,
+  setCenterCourseAuthorized,
+} from "@/lib/centerCurriculumApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { CenterPhotoUpload } from "@/features/center/settings/CenterPhotoUpload";
-import { CenterCurriculumAuthPanel } from "./CenterCurriculumAuthPanel";
-import "@/features/center/settings/centerSettings.css";
+import {
+  centerFranchiseId,
+  centerInitials,
+  centerListTitle,
+  centerStatsItems,
+  centerStatusTone,
+  programCurriculumSubtitle,
+} from "@/features/brand/centers/brandCentersHelpers";
 
 const SOCIAL_PLATFORMS = [
   "Facebook",
@@ -59,19 +77,23 @@ type Props = {
   center: BrandCenterRow;
   brandId: string;
   brandSlug: string;
-  onClose: () => void;
+  isMobile: boolean;
   onStatusChanged: () => void;
 };
 
-export function CenterDetailPanel({ center, brandId, brandSlug, onClose, onStatusChanged }: Props) {
+export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStatusChanged }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [form, setForm] = useState(() => centerToForm(center));
+  const [savedForm, setSavedForm] = useState(() => centerToForm(center));
   const [suspendMode, setSuspendMode] = useState(false);
   const [suspendReason, setSuspendReason] = useState("");
+  const [pendingProgramId, setPendingProgramId] = useState<string | null>(null);
 
   useEffect(() => {
-    setForm(centerToForm(center));
+    const next = centerToForm(center);
+    setForm(next);
+    setSavedForm(next);
     setSuspendMode(false);
     setSuspendReason("");
   }, [center]);
@@ -81,10 +103,38 @@ export function CenterDetailPanel({ center, brandId, brandSlug, onClose, onStatu
     queryFn: () => fetchCenterStats(center.id),
   });
 
-  const portalUrl = useMemo(
-    () => (center.status === "active" ? centerPortalUrl(brandSlug, center.slug) : null),
-    [brandSlug, center.slug, center.status]
-  );
+  const programs = useQuery({
+    queryKey: ["brand-programs-for-auth", brandId],
+    enabled: !!brandId,
+    queryFn: async () => {
+      const { data, error: qErr } = await getSupabase()
+        .from("programs")
+        .select("id, name, age_label, description")
+        .eq("brand_id", brandId)
+        .is("deleted_at", null)
+        .order("name");
+      return supabaseList(data, qErr) as {
+        id: string;
+        name: string;
+        age_label: string | null;
+        description: string | null;
+      }[];
+    },
+  });
+
+  const authorizedProgramIds = useQuery({
+    queryKey: ["center-program-auth", center.id],
+    queryFn: () => fetchCenterAuthorizedProgramIds(center.id),
+  });
+
+  const authorizedSet = new Set(authorizedProgramIds.data ?? []);
+  const title = centerListTitle(center);
+  const initials = centerInitials(center);
+  const centerBackendUrl =
+    center.status === "active"
+      ? portalBackendUrl({ portalType: "center", brandSlug, centerSlug: center.slug })
+      : null;
+  const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm);
 
   const saveProfile = useMutation({
     mutationFn: async () => {
@@ -92,6 +142,7 @@ export function CenterDetailPanel({ center, brandId, brandSlug, onClose, onStatu
       await updateFranchiseCenter(center.id, form);
     },
     onSuccess: () => {
+      setSavedForm(form);
       void qc.invalidateQueries({ queryKey: ["centers", brandId] });
     },
     onError: capture,
@@ -116,6 +167,21 @@ export function CenterDetailPanel({ center, brandId, brandSlug, onClose, onStatu
     },
     onSuccess: onStatusChanged,
     onError: capture,
+  });
+
+  const toggleProgram = useMutation({
+    mutationFn: async ({ programId, enabled }: { programId: string; enabled: boolean }) => {
+      clear();
+      setPendingProgramId(programId);
+      await setCenterCourseAuthorized(center.id, brandId, programId, enabled);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["center-program-auth", center.id] });
+      void qc.invalidateQueries({ queryKey: ["authorized-programs", center.id] });
+      void qc.invalidateQueries({ queryKey: ["course-impact"] });
+    },
+    onError: capture,
+    onSettled: () => setPendingProgramId(null),
   });
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -144,47 +210,58 @@ export function CenterDetailPanel({ center, brandId, brandSlug, onClose, onStatu
     }));
   };
 
-  const title = center.display_name ?? center.name;
+  const resetForm = () => setForm(savedForm);
+
+  const heroActions = (
+    <>
+      {centerBackendUrl ? (
+        <Button
+          variant="secondary"
+          onClick={() => window.open(`${centerBackendUrl}/students`, "_blank", "noopener,noreferrer")}
+        >
+          View Students
+        </Button>
+      ) : (
+        <Button variant="secondary" disabled>
+          View Students
+        </Button>
+      )}
+      {centerBackendUrl ? (
+        <Button onClick={() => window.open(centerBackendUrl, "_blank", "noopener,noreferrer")}>
+          Assign Faculty
+        </Button>
+      ) : (
+        <Button disabled>Assign Faculty</Button>
+      )}
+    </>
+  );
 
   return (
-    <Card title="Franchise detail">
-      <div className="ed-ops-detail-enter ed-inquiry-detail">
-        <div className="ed-inquiry-detail__header">
-          <div>
-            <h3 className="ed-inquiry-detail__title">{title}</h3>
-            <p className="ed-text-sm ed-muted">
-              Slug: {center.slug} (read-only)
-              {center.city ? ` · ${center.city}` : ""}
-            </p>
-          </div>
-          <Badge tone={center.status === "active" ? "success" : center.status === "suspended" ? "warning" : "default"}>
-            {center.status}
-          </Badge>
-        </div>
+    <div className={`ed-brand-centers__detail${isMobile ? " ed-brand-centers__detail--mobile" : ""}`}>
+      {isMobile ? (
+        <CenterMobileHeroBanner
+          initials={initials}
+          imageUrl={form.photoUrl}
+          title={title}
+          slug={center.slug}
+        />
+      ) : (
+        <CenterDetailHero
+          initials={initials}
+          imageUrl={form.photoUrl}
+          title={title}
+          franchiseId={centerFranchiseId(center)}
+          status={<CenterStatusBadge status={centerStatusTone(center.status)} />}
+          actions={heroActions}
+        />
+      )}
 
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.75rem" }}>
-          <Button variant="ghost" onClick={onClose}>
-            Close
-          </Button>
-          {portalUrl && (
-            <Button variant="ghost" onClick={() => window.open(portalUrl, "_blank", "noopener,noreferrer")}>
-              Open center site
-            </Button>
-          )}
-        </div>
+      {stats.data ? <CenterDetailStatsRow items={centerStatsItems(stats.data)} /> : null}
 
-        <KpiGrid>
-          <KpiCard label="Open leads" value={stats.data?.openLeads ?? "—"} />
-          <KpiCard label="Students enrolled" value={stats.data?.students ?? "—"} />
-          <KpiCard label="Active enrollments" value={stats.data?.activeEnrollments ?? "—"} />
-        </KpiGrid>
+      <MutationError message={error} />
 
-        <MutationError message={error} />
-
-        <section style={{ marginTop: "1rem" }}>
-          <h4 className="ed-text-sm" style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
-            Profile
-          </h4>
+      {!isMobile ? null : (
+        <div className="ed-brand-centers__mobile-photo">
           <CenterPhotoUpload
             brandId={brandId}
             centerId={center.id}
@@ -192,113 +269,172 @@ export function CenterDetailPanel({ center, brandId, brandSlug, onClose, onStatu
             onUploaded={(url) => setField("photoUrl", url)}
             disabled={saveProfile.isPending}
           />
-          <FormGrid>
-            <Input label="Franchise name" value={form.name} onChange={(v) => setField("name", v)} editable />
-            <Input
-              label="Display name"
-              value={form.displayName}
-              onChange={(v) => setField("displayName", v)}
-              placeholder={center.name}
-              editable
-            />
-            <Input
-              label="Short description"
-              value={form.shortDescription}
-              onChange={(v) => setField("shortDescription", v)}
-              editable
-            />
-            <Input label="Address" value={form.addressLine1} onChange={(v) => setField("addressLine1", v)} editable />
-            <Input label="City" value={form.city} onChange={(v) => setField("city", v)} editable />
-            <Input label="Region" value={form.region} onChange={(v) => setField("region", v)} editable />
-            <Input label="Pincode" value={form.pincode} onChange={(v) => setField("pincode", v)} editable />
-            <Input label="Country" value={form.country} onChange={(v) => setField("country", v)} editable />
-            <Input
-              label="Phone / WhatsApp"
-              value={form.contactPhone}
-              onChange={(v) => setField("contactPhone", v)}
-              editable
-            />
-          </FormGrid>
+        </div>
+      )}
 
-          <div className="ed-center-social-links">
-            <p className="ed-field__label">Social media</p>
-            {form.socialLinks.map((link, index) => (
-              <div key={`social-${index}`} className="ed-center-social-links__row">
-                <Select
-                  label="Platform"
-                  value={link.platform}
-                  onChange={(platform) => updateSocial(index, { platform })}
-                  options={SOCIAL_PLATFORMS.map((p) => ({ value: p, label: p }))}
-                  editable
-                />
-                <Input
-                  label="Profile URL"
-                  value={link.url}
-                  onChange={(url) => updateSocial(index, { url })}
-                  editable
-                />
-                <Button variant="ghost" onClick={() => removeSocial(index)} disabled={form.socialLinks.length <= 1}>
-                  Remove
-                </Button>
-              </div>
-            ))}
-            <Button variant="ghost" onClick={addSocial} disabled={form.socialLinks.length >= MAX_SOCIAL_LINKS}>
-              Add social link
+      <CentersSectionCard title="Franchise Identity">
+        {!isMobile ? (
+          <CenterPhotoUpload
+            brandId={brandId}
+            centerId={center.id}
+            currentPhotoUrl={form.photoUrl}
+            onUploaded={(url) => setField("photoUrl", url)}
+            disabled={saveProfile.isPending}
+          />
+        ) : null}
+        <FormGrid columns={isMobile ? 1 : 2}>
+          <Input label="Franchise Name" value={form.name} onChange={(v) => setField("name", v)} editable />
+          <Input
+            label="Display Name"
+            value={form.displayName}
+            onChange={(v) => setField("displayName", v)}
+            placeholder={center.name}
+            editable
+          />
+        </FormGrid>
+        <Textarea
+          label="Short Description"
+          value={form.shortDescription}
+          onChange={(v) => setField("shortDescription", v)}
+          rows={3}
+          editable
+        />
+      </CentersSectionCard>
+
+      <CentersSectionCard title="Location & Contact">
+        <FormGrid columns={2}>
+          <Input label="City" value={form.city} onChange={(v) => setField("city", v)} editable />
+          <Input label="Region" value={form.region} onChange={(v) => setField("region", v)} editable />
+          <Input label="Pincode" value={form.pincode} onChange={(v) => setField("pincode", v)} editable />
+          <Input label="Country" value={form.country} onChange={(v) => setField("country", v)} editable />
+        </FormGrid>
+        <Input
+          label="Contact Phone"
+          value={form.contactPhone}
+          onChange={(v) => setField("contactPhone", v)}
+          editable
+        />
+        {!isMobile ? (
+          <Input label="Address" value={form.addressLine1} onChange={(v) => setField("addressLine1", v)} editable />
+        ) : null}
+      </CentersSectionCard>
+
+      <CentersSectionCard
+        title="Social Media"
+        action={
+          <button type="button" className="ed-centers-section__link" onClick={addSocial} disabled={form.socialLinks.length >= MAX_SOCIAL_LINKS}>
+            + Add Link
+          </button>
+        }
+      >
+        {form.socialLinks.map((link, index) => (
+          <div key={`social-${index}`} className="ed-brand-centers__social-block">
+            <Select
+              label="Platform"
+              value={link.platform}
+              onChange={(platform) => updateSocial(index, { platform })}
+              options={SOCIAL_PLATFORMS.map((p) => ({ value: p, label: p }))}
+              editable
+            />
+            <CenterSocialLinkRow
+              value={link.url}
+              onChange={(url) => updateSocial(index, { url })}
+              onRemove={form.socialLinks.length > 1 ? () => removeSocial(index) : undefined}
+            />
+          </div>
+        ))}
+        {isMobile ? <CenterAddSocialButton onClick={addSocial} /> : null}
+      </CentersSectionCard>
+
+      <CentersSectionCard title="Curriculum Assignment">
+        {programs.isLoading || authorizedProgramIds.isLoading ? (
+          <p className="ed-text-sm ed-muted">Loading curriculum…</p>
+        ) : (programs.data ?? []).length === 0 ? (
+          <p className="ed-text-sm ed-muted">
+            Create a course on the Curriculum page before assigning it to franchises.
+          </p>
+        ) : (
+          (programs.data ?? []).map((course) => {
+            const checked = authorizedSet.has(course.id);
+            const busy = pendingProgramId === course.id && toggleProgram.isPending;
+            return (
+              <CenterCurriculumToggleCard
+                key={course.id}
+                title={course.name}
+                subtitle={programCurriculumSubtitle(course.age_label, course.description)}
+                checked={checked}
+                disabled={busy}
+                onChange={(enabled) => toggleProgram.mutate({ programId: course.id, enabled })}
+              />
+            );
+          })
+        )}
+      </CentersSectionCard>
+
+      {suspendMode ? (
+        <CentersSectionCard title="Suspend franchise">
+          <p className="ed-text-sm ed-muted">
+            Suspending blocks center staff from /app and hides public registration. You can re-enable later.
+          </p>
+          <Input label="Reason (optional)" value={suspendReason} onChange={setSuspendReason} editable />
+          <div className="ed-brand-centers__inline-actions">
+            <Button onClick={() => suspend.mutate()} disabled={suspend.isPending}>
+              {suspend.isPending ? "Suspending…" : "Confirm suspend"}
+            </Button>
+            <Button variant="ghost" onClick={() => setSuspendMode(false)}>
+              Cancel
             </Button>
           </div>
+        </CentersSectionCard>
+      ) : null}
 
+      {isMobile ? (
+        <div className="ed-brand-centers__mobile-actions">
           <SaveButton
             onClick={() => saveProfile.mutate()}
-            disabled={!form.name.trim() || saveProfile.isPending}
+            disabled={!form.name.trim() || saveProfile.isPending || !isDirty}
             pending={saveProfile.isPending}
-            label="Save profile"
+            label="Save Changes"
+            block
           />
-        </section>
-
-        <section style={{ marginTop: "1.25rem" }}>
-          <h4 className="ed-text-sm" style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
-            Curriculum assignment
-          </h4>
-          <CenterCurriculumAuthPanel centerId={center.id} centerName={title} brandId={brandId} />
-        </section>
-
-        <section style={{ marginTop: "1.25rem" }}>
-          <h4 className="ed-text-sm" style={{ fontWeight: 600, marginBottom: "0.5rem" }}>
-            Lifecycle
-          </h4>
-          {center.status === "active" && !suspendMode && (
-            <Button variant="ghost" onClick={() => setSuspendMode(true)}>
+          {center.status === "active" ? (
+            <Button variant="danger" block onClick={() => setSuspendMode(true)}>
               Suspend franchise
             </Button>
-          )}
-          {suspendMode && (
-            <div className="ed-ops-animate-in">
-              <p className="ed-text-sm ed-muted">
-                Suspending blocks center staff from /app and hides public registration. You can re-enable later.
-              </p>
-              <Input
-                label="Reason (optional)"
-                value={suspendReason}
-                onChange={setSuspendReason}
-                editable
-              />
-              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-                <Button onClick={() => suspend.mutate()} disabled={suspend.isPending}>
-                  {suspend.isPending ? "Suspending…" : "Confirm suspend"}
-                </Button>
-                <Button variant="ghost" onClick={() => setSuspendMode(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-          {center.status === "suspended" && (
-            <Button onClick={() => reEnable.mutate()} disabled={reEnable.isPending}>
+          ) : (
+            <Button block onClick={() => reEnable.mutate()} disabled={reEnable.isPending}>
               {reEnable.isPending ? "Re-enabling…" : "Re-enable franchise"}
             </Button>
           )}
-        </section>
-      </div>
-    </Card>
+        </div>
+      ) : (
+        <CenterDetailFooter
+          suspendAction={
+            center.status === "active" ? (
+              <Button variant="danger" onClick={() => setSuspendMode(true)}>
+                Suspend Franchise
+              </Button>
+            ) : (
+              <Button onClick={() => reEnable.mutate()} disabled={reEnable.isPending}>
+                {reEnable.isPending ? "Re-enabling…" : "Re-enable franchise"}
+              </Button>
+            )
+          }
+          resetAction={
+            <Button variant="ghost" onClick={resetForm} disabled={!isDirty}>
+              Reset Changes
+            </Button>
+          }
+          saveAction={
+            <SaveButton
+              onClick={() => saveProfile.mutate()}
+              disabled={!form.name.trim() || saveProfile.isPending || !isDirty}
+              pending={saveProfile.isPending}
+              label="Save Changes"
+            />
+          }
+        />
+      )}
+    </div>
   );
 }

@@ -48,7 +48,7 @@ export function PlatformSignupDetailCard({
           <RecordDetailField label="Brand name" value={signup.requested_name} />
           <RecordDetailField label="Admin name" value={signup.admin_full_name} />
           <RecordDetailField label="Email" value={signup.email} />
-          <RecordDetailField label="Phone" value={signup.phone_e164} />
+          <RecordDetailField label="Phone" value={signup.phone_e164} linkKind="phone" />
           <RecordDetailField label="City" value={signup.city} />
           <RecordDetailField label="Country" value={signup.country} />
           <RecordDetailField label="Proposed slug" value={signup.proposed_slug} />

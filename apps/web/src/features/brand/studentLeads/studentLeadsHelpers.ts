@@ -55,9 +55,14 @@ export function leadListTitle(lead: LeadRow): string {
   return lead.parent_name ?? lead.full_name;
 }
 
+export function leadListLocation(lead: LeadRow): string | null {
+  const location = [lead.city, lead.pincode].filter(Boolean).join(" ");
+  return location || null;
+}
+
 export function leadListMeta(lead: LeadRow): string {
   const phone = lead.whatsapp_e164 ?? "—";
-  const location = [lead.city, lead.pincode].filter(Boolean).join(" ");
+  const location = leadListLocation(lead);
   return location ? `${phone} • ${location}` : phone;
 }
 

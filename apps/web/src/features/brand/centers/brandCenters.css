@@ -1,0 +1,79 @@
+.ed-brand-centers__layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.95fr) minmax(0, 2.05fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ed-brand-centers__layout > :first-child {
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+}
+
+.ed-brand-centers__main {
+  min-width: 0;
+}
+
+.ed-brand-centers__placeholder {
+  padding: 2rem 1rem;
+  border: 1px dashed var(--ed-border);
+  border-radius: var(--ed-radius-lg);
+  background: var(--ed-card);
+  text-align: center;
+}
+
+.ed-brand-centers__empty,
+.ed-brand-centers__hint {
+  padding: 0.5rem 0.75rem;
+}
+
+.ed-centers-directory__add-link {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ed-primary);
+  text-decoration: none;
+}
+
+.ed-centers-directory__add-link:hover {
+  text-decoration: underline;
+}
+
+.ed-centers-section__link {
+  border: none;
+  background: transparent;
+  color: var(--ed-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ed-brand-centers__social-block {
+  margin-bottom: 0.75rem;
+}
+
+.ed-brand-centers__inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ed-brand-centers__mobile-actions {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.ed-brand-centers--mobile {
+  padding-bottom: 1rem;
+}
+
+.ed-brand-centers__detail--mobile .ed-center-detail-footer {
+  display: none;
+}
+
+.ed-brand-centers__mobile-photo {
+  margin: 0.75rem 0 1rem;
+}

@@ -8,6 +8,7 @@ import {
   Select,
 } from "@edunudg/ui";
 import { ConvertLeadDialog } from "@/features/center/convertStudent/ConvertLeadDialog";
+import { PhoneLink } from "@edunudg/ui";
 import {
   buildLeadTimeline,
   leadDisplayName,
@@ -79,7 +80,11 @@ export function CenterLeadDetailPanel({
   const interest = leadStudentInterest(lead);
   const wa = whatsappHref(lead.whatsapp_e164);
   const tel = telHref(lead.whatsapp_e164);
-  const timeline = buildLeadTimeline(lead);
+  const timeline = buildLeadTimeline(lead).map((item) =>
+    item.id === "whatsapp" && lead.whatsapp_e164
+      ? { ...item, detail: <PhoneLink phone={lead.whatsapp_e164} /> }
+      : item
+  );
 
   const footer =
     pipelineOpen && !lostMode && !convertMode ? (

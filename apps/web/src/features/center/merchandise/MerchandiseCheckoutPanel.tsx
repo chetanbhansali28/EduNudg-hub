@@ -12,7 +12,7 @@ type Props = {
   catalog: MerchandiseCatalogItem[];
   shippingMode: MerchandiseShippingMode;
   onShippingModeChange: (mode: MerchandiseShippingMode) => void;
-  shippingPreview: string;
+  shippingPreview: React.ReactNode;
   shippingComplete: boolean;
   customAddressFields: React.ReactNode;
   shippingStudentFields: React.ReactNode | null;

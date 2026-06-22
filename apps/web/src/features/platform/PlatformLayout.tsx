@@ -26,7 +26,7 @@ export function PlatformLayout() {
       footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}
       mobileNavMode="bottom"
-      showWelcome={pathname === "/admin" || pathname === "/admin/"}
+      showWelcome={pathname !== "/admin" && pathname !== "/admin/"}
       mobileChrome={<StaffMobileChrome sections={navSections} ariaLabel="Platform navigation" />}
     >
       <Outlet />

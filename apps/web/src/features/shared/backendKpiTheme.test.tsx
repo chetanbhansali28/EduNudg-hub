@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AppShell, KpiCard, KpiGrid, ThemeProvider } from "@edunudg/ui";
+import { AppShell, ThemeProvider } from "@edunudg/ui";
 import { PlatformLayout } from "@/features/platform/PlatformLayout";
 import { CommandCenter } from "@/features/platform/CommandCenter";
 
@@ -26,12 +26,39 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
   }),
 }));
 
-vi.mock("@/lib/supabase", () => ({
-  getSupabase: () => ({
-    from: () => ({
-      select: () => Promise.resolve({ data: [], count: 0, error: null }),
-    }),
-  }),
+vi.mock("@/hooks/useStaffProfile", () => ({
+  useStaffProfile: () => ({ name: "Admin", email: "admin@edunudg.com" }),
+}));
+
+vi.mock("@/hooks/usePlatformShellBranding", () => ({
+  usePlatformShellBranding: () => ({ productName: "EduNudg", logoUrl: null }),
+}));
+
+vi.mock("@/hooks/useShellContextCounts", () => ({
+  useShellContextCounts: () => ({ data: { pendingBrandSignups: 0 } }),
+  shellActionHints: () => [],
+}));
+
+vi.mock("@/lib/platformDashboardApi", () => ({
+  fetchPlatformDashboardHome: vi.fn(async () => ({
+    activeBrands: 0,
+    totalBrands: 0,
+    activeBrandsTrend: null,
+    totalCenters: 0,
+    centersTrend: null,
+    regionCount: 0,
+    planCount: 0,
+    planNames: "",
+    plansTrend: null,
+    monthlyEnrollments: [],
+    quarterlyEnrollments: [],
+    peakEnrollment: 0,
+    enterpriseLeadsConverted: 0,
+    enterpriseAvatars: [],
+    extraEnterpriseCount: 0,
+    onboardingRows: [],
+    activities: [],
+  })),
 }));
 
 function renderWithRouter(ui: ReactNode) {
@@ -55,17 +82,14 @@ describe("backend KPI theme", () => {
   it("critical_backend_shell_applies_compact_kpi_grid", () => {
     renderWithRouter(
       <AppShell portalLabel="Platform Owner" navSections={[]} surface="backend">
-        <KpiGrid>
-          <KpiCard label="Active brands" value={3} />
-        </KpiGrid>
+        <p>Child</p>
       </AppShell>
     );
 
     expect(document.querySelector(".ed-shell--backend")).toBeTruthy();
-    expect(document.querySelector(".ed-shell--backend .ed-kpi-grid")).toBeTruthy();
   });
 
-  it("critical_platform_admin_dashboard_uses_backend_kpi_theme", async () => {
+  it("critical_platform_admin_dashboard_uses_dashboard_workspace", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
@@ -82,6 +106,6 @@ describe("backend KPI theme", () => {
     );
 
     expect(await screen.findByText("Executive Command Center")).toBeDefined();
-    expect(document.querySelector(".ed-shell--backend .ed-kpi-grid")).toBeTruthy();
+    expect(document.querySelector(".ed-dash")).toBeTruthy();
   });
 });

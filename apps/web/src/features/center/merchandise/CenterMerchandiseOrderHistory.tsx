@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, CommerceArchiveNote, CommerceOrderCard, CommerceSectionHeader } from "@edunudg/ui";
+import { Button, CommerceArchiveNote, CommerceOrderCard, CommerceSectionHeader, ShippingAddressPreview } from "@edunudg/ui";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import {
   listCenterMerchandiseOrders,
@@ -37,6 +37,21 @@ function orderTracking(order: MerchandiseOrderRow): Record<string, unknown> | nu
   const t = order.shipping_tracking;
   if (!t || typeof t !== "object") return null;
   return t as Record<string, unknown>;
+}
+
+function orderShippingAddress(order: MerchandiseOrderRow) {
+  const address = order.shipping_address;
+  if (!address || typeof address !== "object") return null;
+  const row = address as Record<string, unknown>;
+  return {
+    name: typeof row.name === "string" ? row.name : null,
+    phone: typeof row.phone === "string" ? row.phone : null,
+    addressLine1: typeof row.address_line1 === "string" ? row.address_line1 : null,
+    city: typeof row.city === "string" ? row.city : null,
+    state: typeof row.state === "string" ? row.state : null,
+    pincode: typeof row.pincode === "string" ? row.pincode : null,
+    country: typeof row.country === "string" ? row.country : null,
+  };
 }
 
 function StatusBadge({ label, tone }: { label: string; tone: string }) {
@@ -171,6 +186,14 @@ export function CenterMerchandiseOrderHistory({ centerId, brandId, brandSlug }: 
             expanded={
               expanded ? (
                 <>
+                  {orderShippingAddress(order) ? (
+                    <p className="ed-text-sm ed-muted">
+                      <ShippingAddressPreview
+                        prefix="Ship to: "
+                        address={orderShippingAddress(order)}
+                      />
+                    </p>
+                  ) : null}
                   {tracking?.tracking_number ? (
                     <p className="ed-text-sm ed-muted">Tracking: {String(tracking.tracking_number)}</p>
                   ) : null}

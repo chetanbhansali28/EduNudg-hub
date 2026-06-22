@@ -45,6 +45,7 @@ describe("FranchiseInquiryDetailCard", () => {
     expect(screen.getByText("Proposed Center Details")).toBeDefined();
     expect(screen.getByText("Applicant Information")).toBeDefined();
     expect(screen.getByText("Tutoring background")).toBeDefined();
+    expect(screen.getByRole("link", { name: "+919876543210" }).getAttribute("href")).toBe("tel:+919876543210");
     expect(screen.queryByLabelText("Center slug (optional)")).toBeNull();
     expect(screen.getByText(/slug is generated automatically/i)).toBeDefined();
     fireEvent.click(screen.getByRole("button", { name: "Approve & create center" }));

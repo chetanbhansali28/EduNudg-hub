@@ -114,7 +114,7 @@ export function CenterStudentProfileAddressCard({
         <Input label="City" value={form.city} onChange={(v) => setForm((f) => ({ ...f, city: v }))} />
         <Input label="State" value={form.state} onChange={(v) => setForm((f) => ({ ...f, state: v }))} />
         <Input label="Pincode" value={form.pincode} onChange={(v) => setForm((f) => ({ ...f, pincode: v }))} />
-        <Input label="Phone" value={form.phone} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
+        <Input label="Phone" type="tel" value={form.phone} onChange={(v) => setForm((f) => ({ ...f, phone: v }))} />
       </FormGrid>
       <Button onClick={() => save.mutate()} disabled={save.isPending}>
         Save address

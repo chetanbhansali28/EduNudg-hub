@@ -390,7 +390,7 @@ export function CenterStudentDetailPanel({
             onChange={(v) => setAddress((a) => ({ ...a, pincode: v }))}
             editable
           />
-          <Input label="Phone" value={address.phone} onChange={(v) => setAddress((a) => ({ ...a, phone: v }))} editable />
+          <Input label="Phone" type="tel" value={address.phone} onChange={(v) => setAddress((a) => ({ ...a, phone: v }))} editable />
         </FormGrid>
         <Button onClick={() => saveAddress.mutate()} disabled={saveAddress.isPending}>
           Save address

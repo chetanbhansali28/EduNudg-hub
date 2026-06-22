@@ -1,0 +1,33 @@
+.ed-rev-page__invoice-edit,
+.ed-rev-page__metric-edit {
+  margin-top: 0.75rem;
+}
+
+.ed-rev-page__rollup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ed-border);
+}
+
+.ed-rev-page__rollup-title {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.ed-rev-page__rollup-meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ed-muted);
+}
+
+.ed-rev-page__invoice-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

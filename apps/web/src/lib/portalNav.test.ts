@@ -56,6 +56,13 @@ describe("portalNav", () => {
     expect(leadsSection?.items.find((i) => i.label === "Franchise leads")?.active).toBe(true);
   });
 
+  it("regression_brand_nav_excludes_royalties", () => {
+    const sections = brandNavSections("/app");
+    const features = sections.find((s) => s.title === "Features");
+    expect(features?.items.some((i) => i.label === "Royalties")).toBe(false);
+    expect(features?.items.some((i) => i.href === "/app/royalties")).toBe(false);
+  });
+
   it("center nav uses leads instead of admissions", () => {
     const sections = centerNavSections("/app/leads");
     const leads = sections[1]?.items.find((i) => i.label === "Leads");

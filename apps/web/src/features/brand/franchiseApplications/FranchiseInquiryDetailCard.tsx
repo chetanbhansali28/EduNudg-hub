@@ -1,4 +1,5 @@
 import { Button, Input, PipelineDetailPanel } from "@edunudg/ui";
+import { PhoneLink } from "@edunudg/ui";
 import { mapsSearchUrl } from "./franchiseApplicationsHelpers";
 
 export interface FranchiseInquiry {
@@ -87,7 +88,11 @@ function DetailField({
       >
         {contactIcon === "mail" ? ICON_MAIL : null}
         {contactIcon === "phone" ? ICON_PHONE : null}
-        {display}
+        {contactIcon === "phone" && value?.trim() ? (
+          <PhoneLink phone={value} />
+        ) : (
+          display
+        )}
       </p>
     </div>
   );

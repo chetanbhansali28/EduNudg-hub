@@ -45,6 +45,7 @@ describe("StudentLeadDetailCard", () => {
 
     expect(screen.getByText("Aarav")).toBeDefined();
     expect(screen.getByText("DPS")).toBeDefined();
+    expect(screen.getByRole("link", { name: "+919876543210" }).getAttribute("href")).toBe("tel:+919876543210");
     fireEvent.click(screen.getByRole("button", { name: "Assign" }));
     expect(onAssign).toHaveBeenCalled();
   });

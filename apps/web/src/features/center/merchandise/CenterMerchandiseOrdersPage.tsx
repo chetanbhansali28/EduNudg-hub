@@ -13,6 +13,7 @@ import {
   MobileCartBar,
   MutationError,
   Select,
+  ShippingAddressPreview,
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
@@ -78,16 +79,17 @@ const PLACE_ORDER_ICON = (
   </svg>
 );
 
-function formatAddressPreview(address: ShippingAddressSnapshot | null): string {
-  if (!address) return "Address not available.";
-  const parts = [
-    address.name,
-    address.phone,
-    address.address_line1,
-    [address.city, address.state, address.pincode].filter(Boolean).join(", "),
-    address.country,
-  ].filter(Boolean);
-  return parts.join(" · ") || "Incomplete address.";
+function toAddressPreviewParts(address: ShippingAddressSnapshot | null) {
+  if (!address) return null;
+  return {
+    name: address.name,
+    phone: address.phone,
+    addressLine1: address.address_line1,
+    city: address.city,
+    state: address.state,
+    pincode: address.pincode,
+    country: address.country,
+  };
 }
 
 function tabFromSearchParams(searchParams: URLSearchParams): MerchTab {
@@ -386,6 +388,7 @@ export function CenterMerchandiseOrdersPage() {
       />
       <Input
         label="Phone"
+        type="tel"
         value={customAddress.phone}
         onChange={(v) => setCustomAddress((a) => ({ ...a, phone: v }))}
       />
@@ -427,7 +430,12 @@ export function CenterMerchandiseOrdersPage() {
     catalog: catalogItems,
     shippingMode,
     onShippingModeChange: setShippingMode,
-    shippingPreview: `Shipping preview: ${formatAddressPreview(resolvedAddress.data ?? null)}`,
+    shippingPreview: (
+      <ShippingAddressPreview
+        prefix="Shipping preview: "
+        address={toAddressPreviewParts(resolvedAddress.data ?? null)}
+      />
+    ),
     shippingComplete,
     customAddressFields,
     shippingStudentFields,

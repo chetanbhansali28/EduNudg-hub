@@ -15,6 +15,7 @@ import {
   leadSourcePresentation,
   leadStatusPresentation,
 } from "@/features/brand/studentLeads/studentLeadsHelpers";
+import { PhoneLink } from "@edunudg/ui";
 
 type CenterOption = {
   id: string;
@@ -82,13 +83,7 @@ export function StudentLeadDetailView({
         {
           key: "whatsapp",
           label: "WhatsApp",
-          value: lead.whatsapp_e164 ? (
-            <a href={`tel:${lead.whatsapp_e164}`} className="ed-lead-link">
-              {lead.whatsapp_e164}
-            </a>
-          ) : (
-            "—"
-          ),
+          value: <PhoneLink phone={lead.whatsapp_e164} className="ed-lead-link" />,
         },
         { key: "dob", label: "Child DOB", value: childAgeFromDob(lead.child_dob) ?? "—" },
         { key: "city", label: "City", value: lead.city ?? "—" },

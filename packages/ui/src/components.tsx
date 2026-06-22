@@ -1,4 +1,6 @@
 import { useState, useId, type ReactNode } from "react";
+import { PhoneDialButton } from "./phone";
+import { telHref } from "./phoneLinks";
 
 function fieldNameFromLabel(label: string): string {
   const slug = label
@@ -234,21 +236,33 @@ export function Input({
   const autoId = useId();
   const inputId = id ?? autoId;
   const inputName = name ?? fieldNameFromLabel(label);
+  const dialHref = type === "tel" ? telHref(value) : null;
+  const input = (
+    <input
+      id={inputId}
+      name={inputName}
+      className="ed-field__input"
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      autoComplete={autoComplete}
+      step={step}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  );
+
   return (
-    <label className={`ed-field${editable ? " ed-field--editable" : ""}`} htmlFor={inputId}>
+    <label className={`ed-field${editable ? " ed-field--editable" : ""}${dialHref ? " ed-field--dialable" : ""}`} htmlFor={inputId}>
       <span className="ed-field__label">{label}</span>
-      <input
-        id={inputId}
-        name={inputName}
-        className="ed-field__input"
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        step={step}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      {dialHref ? (
+        <div className="ed-field__input-wrap">
+          {input}
+          <PhoneDialButton phone={value} label={`Call ${value.trim()}`} />
+        </div>
+      ) : (
+        input
+      )}
     </label>
   );
 }
@@ -1382,7 +1396,7 @@ export function PipelineStatusBadge({
 export type PipelineTimelineItem = {
   id: string;
   title: string;
-  detail?: string;
+  detail?: ReactNode;
   time?: string;
 };
 
@@ -1801,21 +1815,25 @@ export function SettingsPhoneField({
   placeholder?: string;
 }) {
   const id = useId();
+  const fullPhone = value.trim() ? `${countryCode ?? "+91"}${value.trim()}` : "";
   return (
-    <label className="ed-settings-phone-field" htmlFor={id}>
+    <label className={`ed-settings-phone-field${telHref(fullPhone) ? " ed-field--dialable" : ""}`} htmlFor={id}>
       <span className="ed-field__label">{label}</span>
       <div className="ed-settings-phone-field__row">
         <span className="ed-settings-phone-field__prefix" aria-hidden>
           {countryCode ?? "+91"}
         </span>
-        <input
-          id={id}
-          className="ed-field__input"
-          type="tel"
-          value={value}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-        />
+        <div className="ed-field__input-wrap ed-settings-phone-field__input-wrap">
+          <input
+            id={id}
+            className="ed-field__input"
+            type="tel"
+            value={value}
+            placeholder={placeholder}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          <PhoneDialButton phone={fullPhone} label={`Call ${fullPhone}`} />
+        </div>
       </div>
     </label>
   );

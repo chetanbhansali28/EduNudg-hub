@@ -40,7 +40,7 @@ export function StudentLeadDetailCard({
         <dl className="ed-inquiry-detail__grid">
           <RecordDetailField label="Parent name" value={lead.parent_name ?? lead.full_name} />
           <RecordDetailField label="Email" value={lead.email} />
-          <RecordDetailField label="WhatsApp" value={lead.whatsapp_e164} />
+          <RecordDetailField label="WhatsApp" value={lead.whatsapp_e164} linkKind="phone" />
           <RecordDetailField label="Child name" value={lead.child_name} />
           <RecordDetailField label="Child date of birth" value={lead.child_dob} />
           <RecordDetailField label="School" value={lead.school_name} />

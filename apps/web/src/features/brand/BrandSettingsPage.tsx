@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input, MutationError, SaveButton, Select, Textarea } from "@edunudg/ui";
@@ -191,17 +190,10 @@ export function BrandSettingsPage() {
   return (
     <div className="ed-brand-settings-page">
       {isDesktop ? (
-        <>
-          <nav className="ed-brand-settings-page__breadcrumbs" aria-label="Breadcrumb">
-            <Link to="/app">Admin</Link>
-            <span aria-hidden>›</span>
-            <span>Brand Settings</span>
-          </nav>
-          <div className="ed-brand-settings-page__title-row">
-            <h1 className="ed-brand-settings-page__title">Brand Configuration</h1>
-            <span className="ed-brand-settings-page__entity-badge">Active Entity: {brandName}</span>
-          </div>
-        </>
+        <div className="ed-brand-settings-page__title-row">
+          <h1 className="ed-brand-settings-page__title">Brand Configuration</h1>
+          <span className="ed-brand-settings-page__entity-badge">Active Entity: {brandName}</span>
+        </div>
       ) : (
         <div className="ed-brand-settings-page__mobile-intro">
           <h1 className="ed-brand-settings-page__title">Brand Settings</h1>

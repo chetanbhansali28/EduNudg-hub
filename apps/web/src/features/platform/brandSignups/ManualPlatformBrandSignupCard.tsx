@@ -5,9 +5,23 @@ import { createPlatformBrandSignupStaff } from "@/lib/manualLeadsApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 
-export function ManualPlatformBrandSignupCard() {
+export function ManualPlatformBrandSignupCard({
+  open,
+  onOpenChange,
+  hideTrigger = false,
+}: {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+} = {}) {
   return (
-    <AddFormSection buttonLabel="Add brand" panelTitle="Add brand signup manually">
+    <AddFormSection
+      buttonLabel="Add brand"
+      panelTitle="Add brand signup manually"
+      open={open}
+      onOpenChange={onOpenChange}
+      hideTrigger={hideTrigger}
+    >
       {({ close }) => <ManualPlatformBrandSignupForm onComplete={close} />}
     </AddFormSection>
   );
@@ -38,6 +52,7 @@ function ManualPlatformBrandSignupForm({ onComplete }: { onComplete: () => void 
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["platform-brand-signups"] });
+      void qc.invalidateQueries({ queryKey: ["platform-brands-home"] });
       setRequestedName("");
       setAdminFullName("");
       setEmail("");

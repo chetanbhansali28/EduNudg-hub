@@ -146,8 +146,8 @@ export function LeadListCard({
   initials: string;
   avatarTone?: "blue" | "purple" | "teal" | "amber" | "gray";
   title: string;
-  meta?: string;
-  lines?: { label: string; value: string }[];
+  meta?: ReactNode;
+  lines?: { label: string; value: ReactNode }[];
   when?: string;
   badges?: ReactNode;
   selected?: boolean;
@@ -444,7 +444,7 @@ export function LeadGridCard({
   when?: string;
   statusBadge?: ReactNode;
   sourceBadge?: ReactNode;
-  fields: { label: string; value: string }[];
+  fields: { label: string; value: ReactNode }[];
   footer?: ReactNode;
   onSelect?: () => void;
 }) {
