@@ -8,6 +8,10 @@ vi.mock("@/features/brand/hooks/useBrandScope", () => ({
   useBrandScope: () => ({ brandId: "brand-1", brandSlug: "abacus", isLoading: false, missingBrand: false }),
 }));
 
+vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
+  useOpsBreakpoint: () => ({ isDesktop: true, isMobile: false }),
+}));
+
 vi.mock("@/features/shared/manualLeads/ManualStudentLeadCard", () => ({
   ManualStudentLeadCard: () => <div>Manual student lead</div>,
 }));
@@ -32,7 +36,7 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 describe("StudentLeadsPage", () => {
-  it("regression_pipeline_list_with_filter_tabs", async () => {
+  it("regression_student_leads_pipeline_layout", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <MemoryRouter>
@@ -41,9 +45,12 @@ describe("StudentLeadsPage", () => {
         </QueryClientProvider>
       </MemoryRouter>
     );
-    expect(await screen.findByText("Lead pipeline")).toBeDefined();
+    expect(await screen.findByRole("heading", { name: "Student Leads" })).toBeDefined();
+    expect(screen.getByText("Manage parent inquiries and track conversion pipeline.")).toBeDefined();
     expect(screen.getByRole("tablist", { name: "Lead filter" })).toBeDefined();
     expect(screen.getByRole("tab", { name: "Needs attention (0)" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Export List" })).toBeDefined();
+    expect(screen.getByText("Follow-up Insights")).toBeDefined();
     expect(screen.queryByLabelText("Show")).toBeNull();
   });
 });

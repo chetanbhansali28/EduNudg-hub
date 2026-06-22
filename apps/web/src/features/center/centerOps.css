@@ -173,6 +173,40 @@
   margin-top: 1rem;
 }
 
+.ed-ops-detail-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ed-ops-detail-tabs__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  appearance: none;
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  color: var(--ed-muted);
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ed-ops-detail-tabs__btn.is-active {
+  border-color: color-mix(in srgb, var(--ed-primary) 35%, var(--ed-border));
+  background: color-mix(in srgb, var(--ed-primary) 10%, var(--ed-card));
+  color: var(--ed-primary);
+}
+
+.ed-ops-assessment-embedded {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ed-ops-animate-in,
   .ed-ops-detail-enter,

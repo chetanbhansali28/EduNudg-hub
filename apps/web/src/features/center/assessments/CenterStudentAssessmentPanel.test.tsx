@@ -68,7 +68,7 @@ describe("CenterStudentAssessmentPanel", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Alex Student" })).toBeDefined();
-    expect(await screen.findByText("Course / program")).toBeDefined();
+    expect(await screen.findByText("Level progress")).toBeDefined();
     expect(screen.getAllByText(/Level 1 \(L1\)/).length).toBeGreaterThan(0);
     expect(screen.queryByText("Assessment history")).toBeNull();
     const typeSelect = await screen.findByLabelText("Type");

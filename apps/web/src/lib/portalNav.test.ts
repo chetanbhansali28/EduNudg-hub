@@ -83,12 +83,12 @@ describe("portalNav", () => {
     expect(merchandise?.href).toBe("/app/merchandise");
   });
 
-  it("center nav includes assessments and reports", () => {
+  it("center nav includes reports without separate assessments item", () => {
     const sections = centerNavSections("/app/reports");
     const reports = sections[1]?.items.find((i) => i.label === "Reports");
     const assessments = sections[1]?.items.find((i) => i.label === "Assessments");
     expect(reports?.active).toBe(true);
-    expect(assessments?.href).toBe("/app/assessments");
+    expect(assessments).toBeUndefined();
   });
 
   it("center nav includes curriculum for franchise reference", () => {

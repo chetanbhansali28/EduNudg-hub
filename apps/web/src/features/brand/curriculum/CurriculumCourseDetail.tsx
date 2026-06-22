@@ -1,31 +1,42 @@
+import { useRef } from "react";
 import {
-  Badge,
-  Button,
-  Card,
-  FormActions,
-  OpsSectionCard,
-  PipelineDetailPlaceholder,
+  CurriculumBannerDropzone,
+  CurriculumBuilderHeader,
+  CurriculumCourseEditorHero,
+  CurriculumGeneralInfoCard,
+  CurriculumMediaIcon,
+  CurriculumSectionCard,
+  CurriculumStatChip,
+  CurriculumVideoPreview,
+  FormGrid,
+  Input,
   SaveButton,
+  Textarea,
 } from "@edunudg/ui";
 import type { CurriculumProgram, ProgramMarketingInput } from "@/lib/curriculumApi";
-import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
-import { CourseFields } from "@/features/brand/curriculum/curriculumForms";
+import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
 import { CurriculumLevelPanel } from "@/features/brand/curriculum/CurriculumLevelPanel";
 import type { LevelForm } from "@/features/brand/curriculum/curriculumForms";
 import type { CurriculumLevel, CourseImpactStats } from "@/lib/curriculumApi";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import {
+  courseAvatarTone,
+  courseInitials,
+  courseStatus,
+  editorCourseDescription,
+  editorCourseTitle,
+  impactStatChips,
+} from "@/features/brand/curriculum/curriculumBrandHelpers";
 
 type Props = {
   brandId: string;
   course: CurriculumProgram;
+  courseIndex: number;
   impact?: CourseImpactStats;
   levels: CurriculumLevel[];
   unitCounts: Record<string, number>;
-  editingCourse: boolean;
   editCourse: ProgramMarketingInput;
   onEditCourseChange: (v: ProgramMarketingInput) => void;
-  onStartEditCourse: () => void;
-  onCancelEditCourse: () => void;
   onSaveCourse: () => void;
   saveCoursePending: boolean;
   onArchiveCourse: () => void;
@@ -45,24 +56,23 @@ type Props = {
   reorderPending: boolean;
   onError: (err: unknown) => void;
   levelCloser: ReturnType<typeof useAddFormCloser>;
+  requestAddProgram?: boolean;
   readOnly?: boolean;
-  layout?: "ops" | "card";
+  layout?: "builder" | "legacy";
+  showPageHeader?: boolean;
 };
 
 export function CurriculumCourseDetail({
   brandId,
   course,
+  courseIndex,
   impact,
   levels,
   unitCounts,
-  editingCourse,
   editCourse,
   onEditCourseChange,
-  onStartEditCourse,
-  onCancelEditCourse,
   onSaveCourse,
   saveCoursePending,
-  onArchiveCourse,
   archiveBlockedReason,
   selectedLevelId,
   onSelectLevel,
@@ -79,123 +89,133 @@ export function CurriculumCourseDetail({
   reorderPending,
   onError,
   levelCloser,
+  requestAddProgram = false,
   readOnly = false,
-  layout = "ops",
+  layout = "builder",
+  showPageHeader = false,
 }: Props) {
-  const courseSummary = (
-    <>
-      <div className="ed-curriculum-program-summary">
-        <div>
-          <Badge tone={course.is_active ? "success" : "default"}>
-            {course.is_active ? "Active" : "Inactive"}
-          </Badge>
-          {course.age_label && (
-            <span className="ed-text-sm ed-muted" style={{ marginLeft: "0.5rem" }}>
-              {course.age_label}
-            </span>
-          )}
-        </div>
-        {!readOnly && !editingCourse && (
-          <CrudRowActions
-            editing={false}
-            onEdit={onStartEditCourse}
-            onSave={onSaveCourse}
-            onCancel={onCancelEditCourse}
-            onDelete={archiveBlockedReason ? undefined : onArchiveCourse}
-            deleteTitle="Archive this course?"
-            deleteDescription={
-              archiveBlockedReason ??
-              "The course will be archived and hidden from your website and center authorization."
-            }
-            saveDisabled
-          />
-        )}
-      </div>
+  const bannerInputRef = useRef<HTMLDivElement>(null);
+  const uploadScope = { kind: "brand" as const, brandId };
+  const status = courseStatus(course);
+  const statChips = impact ? impactStatChips(impact) : [];
 
-      {impact && (impact.authorizedCenters > 0 || impact.activeBatches > 0) && (
-        <div className="ed-curriculum-impact-row">
-          {impact.authorizedCenters > 0 && (
-            <span className="ed-curriculum-impact-chip">
-              {impact.authorizedCenters} center{impact.authorizedCenters === 1 ? "" : "s"} authorized
-            </span>
-          )}
-          {impact.activeBatches > 0 && (
-            <span className="ed-curriculum-impact-chip">
-              {impact.activeBatches} active batch{impact.activeBatches === 1 ? "" : "es"}
-            </span>
-          )}
-        </div>
-      )}
+  if (layout === "legacy") {
+    return null;
+  }
 
-      {archiveBlockedReason && (
-        <p className="ed-text-sm ed-muted" role="status">
-          {archiveBlockedReason}
-        </p>
-      )}
-
-      {readOnly && (
-        <p className="ed-curriculum-live-banner" role="status">
-          Read-only — contact your brand admin to change curriculum.
-        </p>
-      )}
-
-      {editingCourse ? (
-        <div className="ed-editable-form">
-          <CourseFields brandId={brandId} value={editCourse} onChange={onEditCourseChange} />
-          <FormActions>
-            <SaveButton
-              onClick={onSaveCourse}
-              pending={saveCoursePending}
-              disabled={!editCourse.name.trim()}
-            />
-            <Button variant="ghost" onClick={onCancelEditCourse}>
-              Cancel
-            </Button>
-          </FormActions>
-        </div>
-      ) : (
-        course.description && <p className="ed-text-sm ed-muted">{course.description}</p>
-      )}
-    </>
+  const hero = (
+    <CurriculumCourseEditorHero
+      initials={courseInitials(course.name)}
+      tone={courseAvatarTone(courseIndex)}
+      title={editorCourseTitle(course.name)}
+      status={status}
+      description={editorCourseDescription(course.name)}
+      embedded
+      saveAction={
+        !readOnly ? (
+          <SaveButton onClick={onSaveCourse} pending={saveCoursePending} disabled={!editCourse.name.trim()} label="Save Changes" />
+        ) : null
+      }
+    />
   );
 
   return (
-    <div className="ed-ops-detail-enter">
-      {layout === "ops" ? (
-        <>
-          <header className="ed-ops-detail-hero">
-            <div className="ed-ops-detail-hero__main">
-              <span className="ed-ops-detail-hero__avatar" aria-hidden>
-                {course.name.slice(0, 2).toUpperCase()}
-              </span>
-              <div>
-                <h2 className="ed-ops-detail-hero__name">{course.name}</h2>
-                <p className="ed-ops-detail-hero__meta">
-                  {course.age_label ?? "Course overview"} · Course → Program → Chapter
-                </p>
-              </div>
+    <div className="ed-curriculum-brand__editor">
+      {showPageHeader ? (
+        <CurriculumBuilderHeader
+          variant="detail"
+          title="Curriculum Builder"
+          subtitle="Structure courses, programs, and chapters for your franchise network."
+        />
+      ) : null}
+
+      {archiveBlockedReason ? (
+        <p className="ed-text-sm ed-muted" role="status">
+          {archiveBlockedReason}
+        </p>
+      ) : null}
+
+      <CurriculumGeneralInfoCard
+        hero={hero}
+        stats={
+          statChips.length > 0 ? (
+            <>
+              {statChips.map((chip) => (
+                <CurriculumStatChip key={chip}>{chip}</CurriculumStatChip>
+              ))}
+            </>
+          ) : null
+        }
+      >
+        <div className="ed-editable-form">
+          <FormGrid columns={2}>
+            <Input
+              label="Course Name"
+              value={editCourse.name}
+              onChange={(name) => onEditCourseChange({ ...editCourse, name })}
+              editable={!readOnly}
+            />
+            <Input
+              label="Age / Grade Badge"
+              value={editCourse.ageLabel}
+              onChange={(ageLabel) => onEditCourseChange({ ...editCourse, ageLabel })}
+              placeholder="Level 1 to 8"
+              editable={!readOnly}
+            />
+          </FormGrid>
+          <Textarea
+            label="Short Description (Card Blurb)"
+            value={editCourse.description}
+            onChange={(description) => onEditCourseChange({ ...editCourse, description })}
+            rows={4}
+            editable={!readOnly}
+          />
+        </div>
+      </CurriculumGeneralInfoCard>
+
+      <CurriculumSectionCard icon={<CurriculumMediaIcon />} title="Course Media & Visuals">
+        <div className="ed-curriculum-brand__media-grid">
+          <div>
+            <p className="ed-field__label">Preview Video</p>
+            <CurriculumVideoPreview
+              url={editCourse.videoUrl}
+              onDelete={
+                !readOnly && editCourse.videoUrl
+                  ? () => onEditCourseChange({ ...editCourse, videoUrl: "" })
+                  : undefined
+              }
+            />
+            <Input
+              label="Preview Video Link"
+              value={editCourse.videoUrl}
+              onChange={(videoUrl) => onEditCourseChange({ ...editCourse, videoUrl })}
+              placeholder="https://…"
+              editable={!readOnly}
+            />
+          </div>
+          <div>
+            <p className="ed-field__label">Course Banner (Thumbnail)</p>
+            <CurriculumBannerDropzone
+              imageUrl={editCourse.marketingImageUrl}
+              onUploadClick={() => {
+                const input = bannerInputRef.current?.querySelector<HTMLInputElement>('input[type="file"]');
+                input?.click();
+              }}
+            />
+            <div className="ed-curriculum-brand__hidden-media" ref={bannerInputRef}>
+              <MarketingMediaField
+                label="Course Banner (Thumbnail)"
+                value={editCourse.marketingImageUrl}
+                onChange={(marketingImageUrl) => onEditCourseChange({ ...editCourse, marketingImageUrl })}
+                mediaType="image"
+                uploadSubdir="program-marketing"
+                uploadScope={uploadScope}
+                disabled={readOnly}
+              />
             </div>
-            <span className="ed-ops-detail-hero__status">
-              <span className="ed-ops-detail-hero__status-dot" aria-hidden />
-              {course.is_active ? "Active course" : "Inactive course"}
-            </span>
-          </header>
-          <OpsSectionCard
-            icon={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-              </svg>
-            }
-            title="Course details"
-            description="Marketing copy and authorization impact for this course."
-          >
-            {courseSummary}
-          </OpsSectionCard>
-        </>
-      ) : (
-        <Card title={course.name}>{courseSummary}</Card>
-      )}
+          </div>
+        </div>
+      </CurriculumSectionCard>
 
       <CurriculumLevelPanel
         brandId={brandId}
@@ -217,24 +237,17 @@ export function CurriculumCourseDetail({
         reorderPending={reorderPending}
         onError={onError}
         levelCloser={levelCloser}
-        layout={layout}
+        requestAddProgram={requestAddProgram}
+        layout="builder"
       />
     </div>
   );
 }
 
-export function CurriculumCourseDetailPlaceholder({ layout = "ops" }: { layout?: "ops" | "card" } = {}) {
-  if (layout === "card") {
-    return (
-      <Card title="Course detail">
-        <PipelineDetailPlaceholder message="Select a course to manage programs and chapters." />
-      </Card>
-    );
-  }
-
+export function CurriculumCourseDetailPlaceholder() {
   return (
-    <div className="ed-pipeline-list-panel">
-      <PipelineDetailPlaceholder message="Select a course to manage programs and chapters." />
+    <div className="ed-curriculum-brand__editor-placeholder">
+      <p className="ed-text-sm ed-muted">Select a course to manage programs and chapters.</p>
     </div>
   );
 }

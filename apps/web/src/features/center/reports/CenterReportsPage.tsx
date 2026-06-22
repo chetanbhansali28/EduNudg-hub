@@ -301,7 +301,7 @@ export function CenterReportsPage() {
               <div className="ed-center-reports-mobile-list">
                 <div className="ed-center-reports-mobile-list__head">
                   <h2 className="ed-center-reports-mobile-list__title">Recent Assessments</h2>
-                  <Link className="ed-center-reports-mobile-list__link" to="/app/assessments">
+                  <Link className="ed-center-reports-mobile-list__link" to="/app/students?tab=assessments">
                     View All
                   </Link>
                 </div>
@@ -315,7 +315,7 @@ export function CenterReportsPage() {
           )}
 
           <div className="ed-center-reports-panel__foot">
-            <Link to="/app/assessments">View All Assessments</Link>
+            <Link to="/app/students?tab=assessments">Record assessments</Link>
           </div>
         </section>
 

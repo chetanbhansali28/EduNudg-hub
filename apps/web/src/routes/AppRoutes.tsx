@@ -38,7 +38,7 @@ import { CenterDashboard } from "@/features/center/CenterDashboard";
 import { CenterLeadsPage } from "@/features/center/leads/CenterLeadsPage";
 import { CenterMerchandiseOrdersPage } from "@/features/center/merchandise/CenterMerchandiseOrdersPage";
 import { CenterCampaignsPage } from "@/features/center/campaigns/CenterCampaignsPage";
-import { CenterAssessmentsPage } from "@/features/center/assessments/CenterAssessmentsPage";
+import { CenterAssessmentsRedirect } from "@/features/center/assessments/CenterAssessmentsRedirect";
 import { CenterCurriculumPage } from "@/features/center/CenterCurriculumPage";
 import { CenterReportsPage } from "@/features/center/reports/CenterReportsPage";
 import { CenterSettingsPage } from "@/features/center/settings/CenterSettingsPage";
@@ -247,7 +247,7 @@ export function AppRoutes() {
                 </FeatureFlagRoute>
               }
             />
-            <Route path="assessments" element={<CenterAssessmentsPage />} />
+            <Route path="assessments" element={<CenterAssessmentsRedirect />} />
             <Route path="reports" element={<CenterReportsPage />} />
             <Route path="batches" element={<BatchesPage />} />
             <Route path="curriculum" element={<CenterCurriculumPage />} />
@@ -260,7 +260,7 @@ export function AppRoutes() {
           <Route path="/batches" element={<Navigate to="/app/batches" replace />} />
           <Route path="/fees" element={<Navigate to="/app/fees" replace />} />
           <Route path="/inventory" element={<Navigate to="/app/inventory" replace />} />
-          <Route path="/assessments" element={<Navigate to="/app/assessments" replace />} />
+          <Route path="/assessments" element={<Navigate to="/app/students?tab=assessments" replace />} />
           <Route path="/reports" element={<Navigate to="/app/reports" replace />} />
         </>
       )}

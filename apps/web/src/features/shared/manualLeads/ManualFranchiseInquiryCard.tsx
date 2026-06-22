@@ -7,9 +7,14 @@ import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 
-type Props = { brandId: string };
+type Props = {
+  brandId: string;
+  formOpen?: boolean;
+  onFormOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+};
 
-export function ManualFranchiseInquiryCard({ brandId }: Props) {
+export function ManualFranchiseInquiryCard({ brandId, formOpen, onFormOpenChange, hideTrigger }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const { bindClose, closeAddForm } = useAddFormCloser();
@@ -64,6 +69,9 @@ export function ManualFranchiseInquiryCard({ brandId }: Props) {
     <AddFormSection
       buttonLabel="Add franchise application"
       panelTitle="Add franchise application manually"
+      open={formOpen}
+      onOpenChange={onFormOpenChange}
+      hideTrigger={hideTrigger}
       primaryAction={{
         label: "Create application",
         onClick: () => save.mutate(),

@@ -1,0 +1,632 @@
+/* Franchise applications workspace — desktop master/detail + mobile cards */
+
+.ed-franchise-apps-page {
+  --ed-franchise-apps-radius: calc(var(--ed-radius-lg) + 4px);
+}
+
+.ed-franchise-apps-page .ed-pipeline-workspace {
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .ed-franchise-apps-page .ed-pipeline-workspace {
+    grid-template-columns: minmax(16rem, 0.95fr) minmax(0, 2.05fr);
+  }
+}
+
+.ed-franchise-apps-page__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.ed-franchise-apps-page__toolbar .ed-filter-tabs {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1023px) {
+  .ed-franchise-apps-page__toolbar .ed-filter-tabs {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 999px;
+    background: var(--ed-surface-container-low);
+    overflow-x: auto;
+  }
+
+  .ed-franchise-apps-page__toolbar .ed-filter-tabs__btn {
+    border: none;
+    background: transparent;
+    color: var(--ed-muted);
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+  }
+
+  .ed-franchise-apps-page__toolbar .ed-filter-tabs__btn.is-active {
+    background: var(--ed-card);
+    color: var(--ed-fg);
+    box-shadow: var(--ed-shadow);
+    border: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ed-franchise-apps-page__search {
+    display: none;
+  }
+
+  .ed-franchise-apps-page__toolbar .ed-filter-tabs {
+    gap: 0.625rem;
+  }
+
+  .ed-franchise-apps-page__toolbar .ed-filter-tabs__btn {
+    border: none;
+    background: transparent;
+    color: var(--ed-muted);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+  }
+
+  .ed-franchise-apps-page__toolbar .ed-filter-tabs__btn.is-active {
+    background: color-mix(in srgb, var(--ed-primary) 12%, var(--ed-card));
+    color: var(--ed-primary);
+    border: none;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ed-primary) 22%, transparent);
+  }
+}
+
+.ed-franchise-apps-page__search {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ed-border);
+  border-radius: 999px;
+  background: var(--ed-card);
+}
+
+.ed-franchise-apps-page__search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+.ed-franchise-apps-page__search input::placeholder {
+  color: var(--ed-muted);
+}
+
+.ed-franchise-apps-page__search-icon {
+  color: var(--ed-muted);
+  display: grid;
+  place-items: center;
+}
+
+@media (min-width: 1024px) {
+  .ed-franchise-apps-page__promo,
+  .ed-franchise-apps-page__mobile-list {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ed-franchise-apps-page__desktop-list,
+  .ed-franchise-apps-page__placeholder {
+    display: none;
+  }
+
+  .ed-franchise-apps-page .ed-pipeline-page-header__actions .ed-btn {
+    display: none;
+  }
+}
+
+.ed-franchise-apps-page__desktop-list,
+.ed-franchise-apps-page__mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ed-franchise-app-list-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-franchise-apps-radius);
+  background: var(--ed-card);
+  padding: 1rem 1.125rem;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ed-franchise-app-list-item:hover {
+  border-color: color-mix(in srgb, var(--ed-primary) 30%, var(--ed-border));
+}
+
+.ed-franchise-app-list-item--selected {
+  border-color: var(--ed-primary);
+  background: color-mix(in srgb, var(--ed-primary) 6%, var(--ed-card));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ed-primary) 18%, transparent);
+}
+
+.ed-franchise-app-list-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.625rem;
+}
+
+.ed-franchise-app-list-item__when {
+  font-size: 0.75rem;
+  color: var(--ed-muted);
+  white-space: nowrap;
+}
+
+.ed-franchise-app-list-item__title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.ed-franchise-app-list-item__location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ed-muted);
+}
+
+.ed-franchise-app-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.ed-franchise-app-status-badge--new {
+  background: color-mix(in srgb, #2563eb 14%, var(--ed-card));
+  color: #1d4ed8;
+}
+
+.ed-franchise-app-status-badge--pending {
+  background: var(--ed-surface-container-low);
+  color: var(--ed-muted);
+}
+
+.ed-franchise-app-status-badge--approved {
+  background: color-mix(in srgb, #16a34a 14%, var(--ed-card));
+  color: #15803d;
+}
+
+.ed-franchise-app-status-badge--rejected {
+  background: color-mix(in srgb, #dc2626 12%, var(--ed-card));
+  color: #b91c1c;
+}
+
+.ed-franchise-app-status-badge--neutral {
+  background: var(--ed-surface-container-low);
+  color: var(--ed-muted);
+}
+
+.ed-franchise-app-mobile-card {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-franchise-apps-radius);
+  background: var(--ed-card);
+  padding: 1rem;
+  box-shadow: var(--ed-shadow);
+  cursor: pointer;
+  color: inherit;
+}
+
+.ed-franchise-app-mobile-card__head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.ed-franchise-app-mobile-card__avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.ed-franchise-app-mobile-card__avatar--blue {
+  background: color-mix(in srgb, #3b82f6 16%, var(--ed-card));
+  color: #1d4ed8;
+}
+
+.ed-franchise-app-mobile-card__avatar--purple {
+  background: color-mix(in srgb, #8b5cf6 16%, var(--ed-card));
+  color: #6d28d9;
+}
+
+.ed-franchise-app-mobile-card__avatar--teal {
+  background: color-mix(in srgb, #14b8a6 16%, var(--ed-card));
+  color: #0f766e;
+}
+
+.ed-franchise-app-mobile-card__avatar--amber {
+  background: color-mix(in srgb, #f59e0b 16%, var(--ed-card));
+  color: #b45309;
+}
+
+.ed-franchise-app-mobile-card__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ed-franchise-app-mobile-card__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.ed-franchise-app-mobile-card__date {
+  font-size: 0.75rem;
+  color: var(--ed-muted);
+  white-space: nowrap;
+}
+
+.ed-franchise-app-mobile-card__location {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ed-muted);
+}
+
+.ed-franchise-app-mobile-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.875rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ed-border);
+}
+
+.ed-franchise-app-mobile-card__cta {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ed-primary);
+}
+
+.ed-franchise-apps-page__promo {
+  margin-top: 1rem;
+  border-radius: var(--ed-franchise-apps-radius);
+  overflow: hidden;
+  position: relative;
+  min-height: 7.5rem;
+  padding: 1.25rem 1.125rem;
+  color: #fff;
+  background:
+    linear-gradient(120deg, color-mix(in srgb, #1d4ed8 92%, transparent), color-mix(in srgb, #2563eb 78%, transparent)),
+    radial-gradient(circle at 80% 20%, color-mix(in srgb, #fff 18%, transparent), transparent 55%);
+}
+
+.ed-franchise-apps-page__promo-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.ed-franchise-apps-page__promo-copy {
+  margin: 0;
+  max-width: 18rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  opacity: 0.95;
+}
+
+.ed-franchise-apps-page__empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--ed-muted);
+  font-size: 0.875rem;
+}
+
+.ed-franchise-apps-page__placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 20rem;
+  border: 1px dashed var(--ed-border);
+  border-radius: var(--ed-franchise-apps-radius);
+  background: var(--ed-surface-container-low);
+  padding: 2rem;
+}
+
+.ed-franchise-apps-page__add-form {
+  margin-top: 1rem;
+}
+
+/* Detail panel */
+
+.ed-franchise-app-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+}
+
+.ed-franchise-app-detail__hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-franchise-apps-radius);
+  background: var(--ed-card);
+  box-shadow: var(--ed-shadow);
+}
+
+.ed-franchise-app-detail__hero-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: calc(var(--ed-radius) + 2px);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ed-primary) 14%, var(--ed-card));
+  color: var(--ed-primary);
+  flex-shrink: 0;
+}
+
+.ed-franchise-app-detail__hero-copy {
+  flex: 1;
+  min-width: 12rem;
+}
+
+.ed-franchise-app-detail__hero-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ed-franchise-app-detail__hero-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--ed-muted);
+}
+
+.ed-franchise-app-detail__hero-actions {
+  display: none;
+}
+
+.ed-franchise-app-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+@media (min-width: 1024px) {
+  .ed-franchise-app-detail__actions {
+    position: absolute;
+    top: 1.125rem;
+    right: 1.25rem;
+    z-index: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ed-franchise-app-detail__actions {
+    position: sticky;
+    bottom: 0;
+    margin-top: 0.25rem;
+    padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, transparent, var(--ed-bg) 24%);
+  }
+
+  .ed-franchise-app-detail__actions > * {
+    flex: 1;
+  }
+}
+
+.ed-franchise-app-detail__reject {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.ed-franchise-app-detail__reject:hover {
+  background: color-mix(in srgb, #dc2626 8%, transparent);
+}
+
+.ed-franchise-app-detail__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .ed-franchise-app-detail__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ed-franchise-app-detail__card--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.ed-franchise-app-detail__card {
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-franchise-apps-radius);
+  background: var(--ed-card);
+  padding: 1.125rem 1.25rem;
+  box-shadow: var(--ed-shadow);
+}
+
+.ed-franchise-app-detail__card-title {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ed-primary);
+}
+
+.ed-franchise-app-detail__fields {
+  display: grid;
+  gap: 0.875rem;
+}
+
+@media (min-width: 480px) {
+  .ed-franchise-app-detail__fields--split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ed-franchise-app-detail__field-label {
+  display: block;
+  margin: 0 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ed-muted);
+  text-transform: uppercase;
+}
+
+.ed-franchise-app-detail__field-value {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.ed-franchise-app-detail__field-value--contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ed-franchise-app-detail__field-value--italic {
+  font-weight: 500;
+  font-style: italic;
+  color: var(--ed-muted);
+}
+
+.ed-franchise-app-detail__map {
+  display: block;
+  margin-top: 1rem;
+  border-radius: var(--ed-radius);
+  overflow: hidden;
+  border: 1px solid var(--ed-border);
+  min-height: 7rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ed-primary) 8%, var(--ed-card)), var(--ed-surface-container-low)),
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--ed-border) 40%, transparent) 0,
+      color-mix(in srgb, var(--ed-border) 40%, transparent) 1px,
+      transparent 1px,
+      transparent 24px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--ed-border) 40%, transparent) 0,
+      color-mix(in srgb, var(--ed-border) 40%, transparent) 1px,
+      transparent 1px,
+      transparent 24px
+    );
+  text-decoration: none;
+  color: inherit;
+}
+
+.ed-franchise-app-detail__map-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 7rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ed-muted);
+}
+
+.ed-franchise-app-detail__message {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.ed-franchise-app-detail__reject-panel {
+  border: 1px solid color-mix(in srgb, #dc2626 25%, var(--ed-border));
+  border-radius: var(--ed-franchise-apps-radius);
+  background: color-mix(in srgb, #dc2626 4%, var(--ed-card));
+  padding: 1rem 1.125rem;
+}
+
+.ed-franchise-app-detail__reject-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+}
+
+.ed-franchise-app-detail__meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ed-muted);
+}
+
+.ed-franchise-apps-page__fab {
+  position: fixed;
+  right: 1.25rem;
+  bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  width: 3.5rem;
+  height: 3.5rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--ed-primary);
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: 300;
+  line-height: 1;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ed-primary) 45%, transparent);
+  cursor: pointer;
+  z-index: 20;
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .ed-franchise-apps-page__fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ed-franchise-apps-page .ed-pipeline-detail-panel__head {
+    display: none;
+  }
+
+  .ed-franchise-apps-page .ed-pipeline-detail-panel__body {
+    padding-top: 0;
+  }
+}

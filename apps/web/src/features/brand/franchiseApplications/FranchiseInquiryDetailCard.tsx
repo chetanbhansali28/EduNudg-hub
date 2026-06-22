@@ -1,5 +1,5 @@
-import { Badge, Button, Card, Input } from "@edunudg/ui";
-import { RecordDetailField, formatRecordWhen } from "@/features/shared/recordDetail";
+import { Button, Input, PipelineDetailPanel } from "@edunudg/ui";
+import { mapsSearchUrl } from "./franchiseApplicationsHelpers";
 
 export interface FranchiseInquiry {
   id: string;
@@ -23,7 +23,7 @@ export interface FranchiseInquiry {
 type Props = {
   inquiry: FranchiseInquiry;
   pending: boolean;
-  onClose: () => void;
+  onBack?: () => void;
   onApprove: () => void;
   onReject: () => void;
   rejectMode: boolean;
@@ -35,10 +35,90 @@ type Props = {
   rejectPending: boolean;
 };
 
+const ICON_STORE = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+    <path d="M3 9l9-6 9 6v11a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9z" />
+  </svg>
+);
+
+const ICON_MAIL = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M4 6h16v12H4z" />
+    <path d="m4 7 8 6 8-6" />
+  </svg>
+);
+
+const ICON_PHONE = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M6.5 4h3l1.5 4-2 1.5a11 11 0 0 0 5.5 5.5L17 13l4 1.5v3A2 2 0 0 1 18.2 19 16 16 0 0 1 5 5.8 2 2 0 0 1 6.5 4z" />
+  </svg>
+);
+
+const ICON_PIN = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z" />
+    <circle cx="12" cy="10" r="2.5" />
+  </svg>
+);
+
+function DetailField({
+  label,
+  value,
+  contactIcon,
+  italic,
+}: {
+  label: string;
+  value: string | null | undefined;
+  contactIcon?: "mail" | "phone";
+  italic?: boolean;
+}) {
+  const display = value?.trim() || "—";
+  return (
+    <div>
+      <span className="ed-franchise-app-detail__field-label">{label}</span>
+      <p
+        className={[
+          "ed-franchise-app-detail__field-value",
+          contactIcon ? "ed-franchise-app-detail__field-value--contact" : "",
+          italic ? "ed-franchise-app-detail__field-value--italic" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {contactIcon === "mail" ? ICON_MAIL : null}
+        {contactIcon === "phone" ? ICON_PHONE : null}
+        {display}
+      </p>
+    </div>
+  );
+}
+
+function ActionButtons({
+  pending,
+  rejectMode,
+  approvePending,
+  rejectPending,
+  onApprove,
+  onReject,
+}: Pick<Props, "pending" | "rejectMode" | "approvePending" | "rejectPending" | "onApprove" | "onReject">) {
+  if (!pending || rejectMode) return null;
+
+  return (
+    <>
+      <button type="button" className="ed-btn ed-btn--ghost ed-franchise-app-detail__reject" onClick={onReject}>
+        Reject
+      </button>
+      <Button onClick={onApprove} disabled={approvePending}>
+        {approvePending ? "Provisioning…" : "Approve & create center"}
+      </Button>
+    </>
+  );
+}
+
 export function FranchiseInquiryDetailCard({
   inquiry,
   pending,
-  onClose,
+  onBack,
   onApprove,
   onReject,
   rejectMode,
@@ -50,63 +130,83 @@ export function FranchiseInquiryDetailCard({
   rejectPending,
 }: Props) {
   const title = inquiry.proposed_franchise_name ?? inquiry.full_name;
+  const mapUrl = mapsSearchUrl(inquiry);
+  const locationLabel = [inquiry.city, inquiry.state].filter(Boolean).join(", ") || "View on map";
 
   return (
-    <Card title="Application detail">
-      <div className="ed-inquiry-detail">
-        <div className="ed-inquiry-detail__header">
-          <div>
-            <h3 className="ed-inquiry-detail__title">{title}</h3>
-            <p className="ed-text-sm ed-muted">
-              Submitted {formatRecordWhen(inquiry.created_at)}
-              {inquiry.updated_at !== inquiry.created_at && ` · Updated ${formatRecordWhen(inquiry.updated_at)}`}
-            </p>
+    <PipelineDetailPanel title={title} onBack={onBack}>
+      <div className="ed-franchise-app-detail">
+        <header className="ed-franchise-app-detail__hero">
+          <div className="ed-franchise-app-detail__hero-icon">{ICON_STORE}</div>
+          <div className="ed-franchise-app-detail__hero-copy">
+            <h2 className="ed-franchise-app-detail__hero-title">{title}</h2>
+            <p className="ed-franchise-app-detail__hero-subtitle">Proposed Center Details</p>
           </div>
-          <Badge tone={pending ? "warning" : inquiry.status === "lost" ? "default" : "success"}>
-            {inquiry.status}
-          </Badge>
+        </header>
+
+        <div className="ed-franchise-app-detail__grid">
+          <section className="ed-franchise-app-detail__card">
+            <h3 className="ed-franchise-app-detail__card-title">Applicant Information</h3>
+            <div className="ed-franchise-app-detail__fields ed-franchise-app-detail__fields--split">
+              <DetailField label="Applicant name" value={inquiry.full_name} />
+              <DetailField label="Proposed name" value={inquiry.proposed_franchise_name} />
+              <DetailField label="Email address" value={inquiry.email} contactIcon="mail" />
+              <DetailField label="Phone / WhatsApp" value={inquiry.phone_e164} contactIcon="phone" />
+            </div>
+          </section>
+
+          <section className="ed-franchise-app-detail__card">
+            <h3 className="ed-franchise-app-detail__card-title">Proposed Location</h3>
+            <div className="ed-franchise-app-detail__fields ed-franchise-app-detail__fields--split">
+              <DetailField label="City" value={inquiry.city} />
+              <DetailField label="State" value={inquiry.state} />
+              <DetailField label="Pincode" value={inquiry.pincode} />
+              <DetailField label="Address" value={inquiry.address_line} />
+            </div>
+            {mapUrl ? (
+              <a className="ed-franchise-app-detail__map" href={mapUrl} target="_blank" rel="noreferrer">
+                <span className="ed-franchise-app-detail__map-label">
+                  {ICON_PIN}
+                  {locationLabel}
+                </span>
+              </a>
+            ) : null}
+          </section>
+
+          <section className="ed-franchise-app-detail__card ed-franchise-app-detail__card--wide">
+            <h3 className="ed-franchise-app-detail__card-title">Background &amp; Experience</h3>
+            <DetailField
+              label="Prior experience"
+              value={inquiry.prior_experience?.trim() || "Not provided"}
+              italic
+            />
+          </section>
+
+          {inquiry.message?.trim() ? (
+            <section className="ed-franchise-app-detail__card ed-franchise-app-detail__card--wide">
+              <h3 className="ed-franchise-app-detail__card-title">Additional notes</h3>
+              <p className="ed-franchise-app-detail__message">{inquiry.message}</p>
+            </section>
+          ) : null}
+
+          {inquiry.rejected_reason ? (
+            <section className="ed-franchise-app-detail__card ed-franchise-app-detail__card--wide">
+              <h3 className="ed-franchise-app-detail__card-title">Rejection reason</h3>
+              <p className="ed-franchise-app-detail__message">{inquiry.rejected_reason}</p>
+            </section>
+          ) : null}
+
+          {inquiry.converted_center_id ? (
+            <p className="ed-franchise-app-detail__meta">
+              Center provisioned (ID {inquiry.converted_center_id.slice(0, 8)}…)
+            </p>
+          ) : null}
         </div>
 
-        <dl className="ed-inquiry-detail__grid">
-          <RecordDetailField label="Applicant name" value={inquiry.full_name} />
-          <RecordDetailField label="Email" value={inquiry.email} />
-          <RecordDetailField label="Phone / WhatsApp" value={inquiry.phone_e164} />
-          <RecordDetailField label="Proposed franchise name" value={inquiry.proposed_franchise_name} />
-          <RecordDetailField label="Preferred city" value={inquiry.city} />
-          <RecordDetailField label="State" value={inquiry.state} />
-          <RecordDetailField label="Pincode" value={inquiry.pincode} />
-          <RecordDetailField label="Address" value={inquiry.address_line} />
-        </dl>
-
-        {inquiry.prior_experience?.trim() && (
-          <div className="ed-inquiry-detail__block">
-            <p className="ed-text-sm ed-muted">Prior experience</p>
-            <p className="ed-text-sm">{inquiry.prior_experience}</p>
-          </div>
-        )}
-
-        {inquiry.message?.trim() && (
-          <div className="ed-inquiry-detail__block">
-            <p className="ed-text-sm ed-muted">Message</p>
-            <p className="ed-text-sm">{inquiry.message}</p>
-          </div>
-        )}
-
-        {inquiry.rejected_reason && (
-          <div className="ed-inquiry-detail__block">
-            <p className="ed-text-sm ed-muted">Rejection reason</p>
-            <p className="ed-text-sm">{inquiry.rejected_reason}</p>
-          </div>
-        )}
-
-        {inquiry.converted_center_id && (
-          <p className="ed-text-sm ed-muted">Center provisioned (ID {inquiry.converted_center_id.slice(0, 8)}…)</p>
-        )}
-
-        {rejectMode && (
-          <div className="ed-inquiry-detail__actions">
+        {rejectMode ? (
+          <div className="ed-franchise-app-detail__reject-panel">
             <Input label="Rejection reason (required)" value={rejectReason} onChange={onRejectReasonChange} />
-            <div className="ed-form-section">
+            <div className="ed-franchise-app-detail__reject-actions">
               <Button variant="danger" onClick={onConfirmReject} disabled={!rejectReason.trim() || rejectPending}>
                 {rejectPending ? "Rejecting…" : "Confirm reject"}
               </Button>
@@ -115,34 +215,26 @@ export function FranchiseInquiryDetailCard({
               </Button>
             </div>
           </div>
-        )}
+        ) : null}
 
-        {!rejectMode && (
-          <div className="ed-form-section">
-            {pending && (
-              <>
-                <p className="ed-text-sm ed-muted">
-                  Approving creates a franchise center and <code>{`{center}.{brand}`}</code> domain mapping. The center
-                  slug is generated automatically from the franchise name and city.
-                </p>
-                <Button onClick={onApprove} disabled={approvePending}>
-                  {approvePending ? "Provisioning…" : "Approve & create center"}
-                </Button>
-                <Button variant="danger" onClick={onReject}>
-                  Reject
-                </Button>
-              </>
-            )}
-            <Button variant="ghost" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        )}
+        {!rejectMode && pending ? (
+          <p className="ed-franchise-app-detail__meta">
+            Approving creates a franchise center and <code>{`{center}.{brand}`}</code> domain mapping. The center slug
+            is generated automatically from the franchise name and city.
+          </p>
+        ) : null}
+
+        <div className="ed-franchise-app-detail__actions">
+          <ActionButtons
+            pending={pending}
+            rejectMode={rejectMode}
+            approvePending={approvePending}
+            rejectPending={rejectPending}
+            onApprove={onApprove}
+            onReject={onReject}
+          />
+        </div>
       </div>
-    </Card>
+    </PipelineDetailPanel>
   );
-}
-
-export function inquiryListTitle(row: FranchiseInquiry): string {
-  return row.proposed_franchise_name?.trim() || row.full_name;
 }

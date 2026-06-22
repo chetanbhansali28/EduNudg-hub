@@ -1,0 +1,17 @@
+.ed-brand-billing-page {
+  width: 100%;
+  max-width: 56rem;
+}
+
+@media (max-width: 1023px) {
+  .ed-brand-billing-page {
+    margin-inline: calc(-1 * var(--ed-mobile-content-inline, 1rem));
+    padding: 0 var(--ed-mobile-content-inline, 1rem) 1.25rem;
+    background: var(--ed-surface-container-low);
+  }
+
+  .ed-billing-subscription-card__gateway-note {
+    margin: 0;
+    text-align: center;
+  }
+}

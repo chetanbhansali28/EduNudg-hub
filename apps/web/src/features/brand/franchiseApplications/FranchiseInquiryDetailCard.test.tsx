@@ -29,7 +29,6 @@ describe("FranchiseInquiryDetailCard", () => {
       <FranchiseInquiryDetailCard
         inquiry={inquiry}
         pending
-        onClose={vi.fn()}
         onApprove={onApprove}
         onReject={vi.fn()}
         rejectMode={false}
@@ -43,6 +42,8 @@ describe("FranchiseInquiryDetailCard", () => {
     );
 
     expect(screen.getAllByText("Abacus Pune West").length).toBeGreaterThan(0);
+    expect(screen.getByText("Proposed Center Details")).toBeDefined();
+    expect(screen.getByText("Applicant Information")).toBeDefined();
     expect(screen.getByText("Tutoring background")).toBeDefined();
     expect(screen.queryByLabelText("Center slug (optional)")).toBeNull();
     expect(screen.getByText(/slug is generated automatically/i)).toBeDefined();

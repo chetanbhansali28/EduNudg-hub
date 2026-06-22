@@ -7,6 +7,10 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
   useTenant: () => ({ brandId: "brand-1", centerId: "center-1" }),
 }));
 
+vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
+  useOpsBreakpoint: () => ({ isDesktop: true, isMobile: false }),
+}));
+
 vi.mock("@/features/platform/hooks/useMutationError", () => ({
   useMutationError: () => ({ error: null, clear: vi.fn(), capture: vi.fn() }),
 }));
@@ -17,6 +21,9 @@ vi.mock("@/lib/supabase", () => ({
       select: () => ({
         eq: () => ({
           is: () => ({
+            in: () => ({
+              order: () => Promise.resolve({ data: [], error: null }),
+            }),
             order: () => Promise.resolve({ data: [], error: null }),
           }),
         }),
@@ -34,9 +41,9 @@ describe("CenterCurriculumPage", () => {
         <CenterCurriculumPage />
       </QueryClientProvider>
     );
-    expect(screen.getByText("Curriculum")).toBeDefined();
-    expect(screen.getByText(/Course → Program → Chapter/i)).toBeDefined();
-    expect(screen.getByPlaceholderText(/Search courses by name or age band/i)).toBeDefined();
-    expect(document.querySelector(".ed-pipeline-list-panel")).toBeTruthy();
+    expect(screen.getByText("Curriculum Builder")).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Active Courses/i })).toBeDefined();
+    expect(document.querySelector(".ed-curriculum-brand__layout")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Add course" })).toBeNull();
   });
 });

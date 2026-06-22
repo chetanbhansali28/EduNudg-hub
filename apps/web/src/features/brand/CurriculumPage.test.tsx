@@ -7,6 +7,10 @@ vi.mock("./hooks/useBrandScope", () => ({
   useBrandScope: () => ({ brandId: "brand-1", brandSlug: "abacus", missingBrand: false }),
 }));
 
+vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
+  useOpsBreakpoint: () => ({ isDesktop: true, isMobile: false }),
+}));
+
 vi.mock("@/features/platform/hooks/useMutationError", () => ({
   useMutationError: () => ({ error: null, clear: vi.fn(), capture: vi.fn() }),
 }));
@@ -36,13 +40,13 @@ function chain(data: unknown, opts?: { count?: number }) {
 
 const sampleProgram = {
   id: "p1",
-  name: "Junior Track",
+  name: "Abacus",
   description: "Desc",
   why_take: "Why",
   what_you_learn: "What",
   marketing_video_url: null,
   marketing_image_url: null,
-  age_label: "Age 6–10",
+  age_label: "Level 1 to 8",
   marketing_benefits: [],
   scholarship_highlight: null,
   is_active: true,
@@ -57,12 +61,13 @@ const sampleLevel = {
   why_take: "Start here",
   what_you_learn: "Basics",
   marketing_video_url: null,
+  program_id: "p1",
 };
 
 function mockCurriculumTables() {
   fromMock.mockImplementation((table: string) => {
     if (table === "programs") return chain([sampleProgram]);
-    if (table === "levels") return chain([{ ...sampleLevel, program_id: "p1" }]);
+    if (table === "levels") return chain([sampleLevel]);
     if (table === "center_program_enablement") return chain(null, { count: 0 });
     if (table === "batches") return chain(null, { count: 0 });
     if (table === "modules") return chain([]);
@@ -76,12 +81,12 @@ function renderPage() {
   return render(
     <QueryClientProvider client={qc}>
       <CurriculumPage />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 
 describe("CurriculumPage", () => {
-  it("shows empty course list with add course action", async () => {
+  it("shows empty course list message", async () => {
     fromMock.mockImplementation((table: string) => {
       if (table === "programs") return chain([]);
       return chain([]);
@@ -90,32 +95,51 @@ describe("CurriculumPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText(/No courses yet/i)).toBeDefined();
+      expect(screen.getByText(/No active courses yet/i)).toBeDefined();
     });
-    expect(screen.getByRole("button", { name: "Add course" })).toBeDefined();
     expect(screen.getByText(/Select a course to manage programs/i)).toBeDefined();
   });
 
-  it("shows master-detail with programs for active course", async () => {
+  it("shows curriculum builder layout for active course", async () => {
     mockCurriculumTables();
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Add program" })).toBeDefined();
+      expect(screen.getByText("Abacus")).toBeDefined();
     });
 
-    expect(screen.getByText("Courses")).toBeDefined();
-    expect(screen.getByText("Programs")).toBeDefined();
+    expect(screen.getByText(/Active Courses \(1\)/)).toBeDefined();
+    expect(screen.getByText("Programs Structure")).toBeDefined();
+    expect(screen.getByLabelText("Course Name")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Save Changes" })).toBeDefined();
+    expect(screen.getByText(/Marketing copy and structure for the core Abacus course/i)).toBeDefined();
+  });
+
+  it("regression_desktop_add_course_opens_create_form", async () => {
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Add course" })).toBeDefined();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Add course" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Add course" })).toBeDefined();
+      expect(screen.getByLabelText("Course name")).toBeDefined();
+      expect(screen.getByRole("button", { name: "Create course" })).toBeDefined();
+    });
   });
 
   it("shows chapters panel when program accordion expanded", async () => {
     mockCurriculumTables();
     renderPage();
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Add program" })).toBeDefined());
+    await waitFor(() => expect(screen.getByText("Programs Structure")).toBeDefined());
 
-    const trigger = document.querySelector(".ed-curriculum-level-accordion__trigger") as HTMLButtonElement;
-    fireEvent.click(trigger);
+    const programRow = document.querySelector(".ed-curriculum-program-outline") as HTMLButtonElement;
+    fireEvent.click(programRow);
 
     await waitFor(() => {
       expect(screen.getByText("Chapters")).toBeDefined();

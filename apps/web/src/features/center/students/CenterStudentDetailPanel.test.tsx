@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CenterStudentDetailPanel } from "./CenterStudentDetailPanel";
 
@@ -11,11 +11,13 @@ vi.mock("@/lib/studentPortalAdminApi", () => ({
 vi.mock("@/lib/centerStudentProgramApi", () => ({
   fetchCenterStudentProgramContext: vi.fn().mockResolvedValue({
     enrollment_id: "e1",
-    program_id: null,
-    program_name: null,
-    current_level_id: null,
-    current_level_name: null,
-    levels: [],
+    program_id: "p1",
+    program_name: "Abacus Core",
+    starting_level_id: "l1",
+    starting_level_name: "Level 1",
+    current_level_id: "l1",
+    current_level_name: "Level 1",
+    levels: [{ level_id: "l1", name: "Level 1", sort_order: 1, status: "in_progress", abacus_level_code: "L1" }],
   }),
 }));
 
@@ -37,6 +39,11 @@ vi.mock("@/lib/curriculumApi", () => ({
   fetchLevels: vi.fn().mockResolvedValue([
     { id: "l1", name: "Level 1", sort_order: 1, abacus_level_code: "L1" },
   ]),
+}));
+
+vi.mock("@/lib/centerAssessmentsApi", () => ({
+  listStudentAssessments: vi.fn().mockResolvedValue([]),
+  recordStudentAssessment: vi.fn(),
 }));
 
 const student = {
@@ -71,5 +78,13 @@ describe("CenterStudentDetailPanel", () => {
     expect(screen.getByRole("button", { name: "Update assignment" })).toBeDefined();
     expect(screen.getAllByText(/Starting level/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Active enrollment/i)).toBeDefined();
+  });
+
+  it("regression_assessments_tab_shows_record_form", async () => {
+    fireEvent.click(screen.getByRole("tab", { name: /Assessments/i }));
+    await waitFor(() => {
+      expect(screen.getByText("Record assessment")).toBeDefined();
+    });
+    expect(screen.getByRole("button", { name: "Save assessment" })).toBeDefined();
   });
 });

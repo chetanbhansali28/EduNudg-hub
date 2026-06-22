@@ -12,7 +12,7 @@ function wrapWithLeadModal(ui: ReactNode) {
   return (
     <LeadModalProvider>
       {ui}
-      <MarketingLeadModals />
+      <MarketingLeadModals brandSlug="abacus" />
     </LeadModalProvider>
   );
 }

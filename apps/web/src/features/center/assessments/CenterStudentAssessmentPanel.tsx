@@ -26,6 +26,8 @@ type Props = {
   student: CenterStudentRow;
   centerId: string;
   onSaved?: () => void;
+  /** When true, omits hero header (used inside Students detail). */
+  embedded?: boolean;
 };
 
 function formatJoined(iso: string | null): string {
@@ -36,9 +38,9 @@ function formatJoined(iso: string | null): string {
 function levelBadgeTone(
   status: string,
   isCurrent: boolean
-): "success" | "warning" | "default" | "info" {
+): "success" | "warning" | "default" {
   if (status === "failed") return "warning";
-  if (isCurrent) return "info";
+  if (isCurrent) return "default";
   if (status === "completed" || status === "passed") return "success";
   if (status === "in_progress") return "warning";
   return "default";
@@ -58,7 +60,7 @@ const ICON_EDIT = (
   </svg>
 );
 
-export function CenterStudentAssessmentPanel({ student, centerId, onSaved }: Props) {
+export function CenterStudentAssessmentPanel({ student, centerId, onSaved, embedded = false }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [selectedLevelId, setSelectedLevelId] = useState("");
@@ -140,7 +142,7 @@ export function CenterStudentAssessmentPanel({ student, centerId, onSaved }: Pro
   const save = useMutation({
     mutationFn: async () => {
       if (!ctx?.program_id) {
-        throw new Error("Assign a course / program on the Students page before recording assessments.");
+        throw new Error("Assign a course / program before recording assessments.");
       }
       if (!selectedLevelId) {
         throw new Error("Select a course / program level to assess.");
@@ -174,7 +176,7 @@ export function CenterStudentAssessmentPanel({ student, centerId, onSaved }: Pro
     programLevels.find((level) => level.level_id === selectedLevelId)?.label ?? null;
 
   return (
-    <div className="ed-ops-detail-enter">
+    <div className={embedded ? "ed-ops-assessment-embedded" : "ed-ops-detail-enter"}>
       <MutationError message={error} />
       {saveMessage ? (
         <p className="ed-text-sm ed-success" role="status" aria-live="polite">
@@ -182,33 +184,37 @@ export function CenterStudentAssessmentPanel({ student, centerId, onSaved }: Pro
         </p>
       ) : null}
 
-      <header className="ed-ops-detail-hero">
-        <div className="ed-ops-detail-hero__main">
-          <span className="ed-ops-detail-hero__avatar" aria-hidden>
-            {initialsFromName(student.full_name)}
-          </span>
-          <div>
-            <h2 className="ed-ops-detail-hero__name">{student.full_name}</h2>
-            <p className="ed-ops-detail-hero__status">
-              <span className="ed-ops-detail-hero__status-dot" aria-hidden />
-              {ctx?.program_name ? `On ${ctx.program_name}` : "No program assigned"}
-            </p>
-            <p className="ed-ops-detail-hero__meta">
-              ID: {student.student_code ?? student.id.slice(0, 8).toUpperCase()} · Joined:{" "}
-              {formatJoined(student.enrollment_created_at)}
-            </p>
+      {!embedded ? (
+        <header className="ed-ops-detail-hero">
+          <div className="ed-ops-detail-hero__main">
+            <span className="ed-ops-detail-hero__avatar" aria-hidden>
+              {initialsFromName(student.full_name)}
+            </span>
+            <div>
+              <h2 className="ed-ops-detail-hero__name">{student.full_name}</h2>
+              <p className="ed-ops-detail-hero__status">
+                <span className="ed-ops-detail-hero__status-dot" aria-hidden />
+                {ctx?.program_name ? `On ${ctx.program_name}` : "No program assigned"}
+              </p>
+              <p className="ed-ops-detail-hero__meta">
+                ID: {student.student_code ?? student.id.slice(0, 8).toUpperCase()} · Joined:{" "}
+                {formatJoined(student.enrollment_created_at)}
+              </p>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      ) : null}
 
       <OpsSectionCard
         icon={ICON_GRAD}
-        title="Course / program"
+        title="Level progress"
         description="Current enrollment, starting level, and level-by-level progress."
         footer={
           ctx?.program_id
             ? `Starting: ${ctx.starting_level_name ?? "—"} · Current: ${ctx.current_level_name ?? "All levels complete"}`
-            : "Assign a program on the Students page to enable assessments."
+            : embedded
+              ? "Assign a program on the Enrollment tab to enable assessments."
+              : "Assign a program on the Students page to enable assessments."
         }
       >
         {programContext.isLoading ? (
@@ -245,7 +251,9 @@ export function CenterStudentAssessmentPanel({ student, centerId, onSaved }: Pro
         description="Choose a course level, enter scores, and mark pass or fail. Previously recorded levels pre-fill their last result."
       >
         {!programContext.isLoading && !ctx?.program_id ? (
-          <p className="ed-text-sm ed-muted">Assign a course on the Students page before recording.</p>
+          <p className="ed-text-sm ed-muted">
+            {embedded ? "Assign a program on the Enrollment tab before recording." : "Assign a course on the Students page before recording."}
+          </p>
         ) : null}
 
         {programLevels.length === 0 && ctx?.program_id ? (

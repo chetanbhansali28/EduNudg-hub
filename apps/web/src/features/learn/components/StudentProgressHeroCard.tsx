@@ -9,6 +9,8 @@ type Props = {
   levelsTotal?: number;
   assessmentsCount?: number;
   avgScorePct?: number | null;
+  /** When false, hides the CTA (e.g. on /progress where the link would be a no-op). */
+  showContinueCta?: boolean;
 };
 
 function pickCurrent(ladders: ProgramLadder[]) {
@@ -48,6 +50,7 @@ export function StudentProgressHeroCard({
   levelsTotal,
   assessmentsCount,
   avgScorePct,
+  showContinueCta = true,
 }: Props) {
   const current = pickCurrent(ladders);
   const pct = current?.pct ?? fallbackPct;
@@ -98,9 +101,11 @@ export function StudentProgressHeroCard({
         </div>
       </div>
 
-      <Link to="/progress" className="ed-sp-course-card__cta-link ed-sp-course-card__cta-link--block">
-        <Button variant="ghost">Continue Learning</Button>
-      </Link>
+      {showContinueCta ? (
+        <Link to="/progress" className="ed-sp-course-card__cta-link ed-sp-course-card__cta-link--block">
+          <Button variant="ghost">Continue Learning</Button>
+        </Link>
+      ) : null}
     </article>
   );
 }

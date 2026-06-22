@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MutationError, OpsPageHeader, OpsSearchField, PipelineMasterDetail } from "@edunudg/ui";
+import { CurriculumBuilderHeader, CurriculumFab, MutationError } from "@edunudg/ui";
+import { CurriculumAddCoursePanel } from "@/features/brand/curriculum/CurriculumAddCoursePanel";
 import {
   archiveProgram,
   createLevel,
@@ -8,14 +9,14 @@ import {
   deleteLevelSafe,
   fetchCourseImpactStats,
   fetchLevelCountsByProgram,
-  fetchLevelUnitCounts,
   fetchLevels,
+  fetchLevelsForPrograms,
+  fetchLevelUnitCounts,
   fetchPrograms,
   reorderLevels,
   updateLevel,
   updateProgram,
   type CurriculumLevel,
-  type CurriculumProgram,
 } from "@/lib/curriculumApi";
 import { parseTopicsComma } from "@/lib/curriculumHelpers";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -26,28 +27,21 @@ import {
   CurriculumCourseDetail,
   CurriculumCourseDetailPlaceholder,
 } from "@/features/brand/curriculum/CurriculumCourseDetail";
-import { CurriculumCourseFeaturedCard } from "@/features/brand/curriculum/CurriculumCourseFeaturedCard";
 import {
   courseToForm,
   EMPTY_COURSE_FORM,
   EMPTY_LEVEL_FORM,
 } from "@/features/brand/curriculum/curriculumForms";
+import {
+  filterCoursesByTab,
+  matchesCurriculumSearch,
+  type CurriculumTabFilter,
+} from "@/features/brand/curriculum/curriculumBrandHelpers";
 import "@/features/brand/curriculum/curriculumBrand.css";
-import "@/features/center/centerOps.css";
-
-type CourseFilter = "active" | "all";
 
 interface CurriculumWorkspaceProps {
   brandId: string;
   readOnly?: boolean;
-}
-
-function matchesCourseSearch(course: CurriculumProgram, query: string): boolean {
-  const q = query.trim().toLowerCase();
-  if (!q) return true;
-  return [course.name, course.description, course.age_label]
-    .filter(Boolean)
-    .some((value) => value!.toLowerCase().includes(q));
 }
 
 export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWorkspaceProps) {
@@ -59,10 +53,11 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
 
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
-  const [courseFilter, setCourseFilter] = useState<CourseFilter>("active");
+  const [mobileTab, setMobileTab] = useState<CurriculumTabFilter>("active");
   const [search, setSearch] = useState("");
-  const [editingCourse, setEditingCourse] = useState(false);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [addCourseOpen, setAddCourseOpen] = useState(false);
+  const [requestAddProgram, setRequestAddProgram] = useState(false);
 
   const [addCourse, setAddCourse] = useState(EMPTY_COURSE_FORM);
   const [editCourse, setEditCourse] = useState(EMPTY_COURSE_FORM);
@@ -74,26 +69,28 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
     queryFn: () => fetchPrograms(brandId),
   });
 
+  const allCourses = courses.data ?? [];
+
   const activeCourseId = useMemo(() => {
-    const list = courses.data ?? [];
-    if (selectedCourseId && list.some((c) => c.id === selectedCourseId)) {
+    if (addCourseOpen) return "";
+    if (selectedCourseId && allCourses.some((course) => course.id === selectedCourseId)) {
       return selectedCourseId;
     }
-    return list[0]?.id ?? "";
-  }, [selectedCourseId, courses.data]);
+    const firstActive = allCourses.find((course) => course.is_active);
+    return firstActive?.id ?? allCourses[0]?.id ?? "";
+  }, [addCourseOpen, selectedCourseId, allCourses]);
 
-  const filteredCourses = useMemo(() => {
-    const list =
-      courseFilter === "active"
-        ? (courses.data ?? []).filter((course) => course.is_active)
-        : (courses.data ?? []);
-    return list.filter((course) => matchesCourseSearch(course, search));
-  }, [courseFilter, courses.data, search]);
+  const levelCountsByProgram = useQuery({
+    queryKey: ["level-counts-by-program", brandId, allCourses.map((course) => course.id).join(",")],
+    enabled: allCourses.length > 0,
+    queryFn: () => fetchLevelCountsByProgram(brandId, allCourses.map((course) => course.id)),
+  });
 
-  useEffect(() => {
-    if (activeCourseId || filteredCourses.length === 0) return;
-    setSelectedCourseId(filteredCourses[0]!.id);
-  }, [activeCourseId, filteredCourses]);
+  const levelsByProgram = useQuery({
+    queryKey: ["levels-by-program", brandId, allCourses.map((course) => course.id).join(",")],
+    enabled: allCourses.length > 0,
+    queryFn: () => fetchLevelsForPrograms(allCourses.map((course) => course.id)),
+  });
 
   const levels = useQuery({
     queryKey: ["levels", activeCourseId],
@@ -101,16 +98,23 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
     queryFn: () => fetchLevels(activeCourseId),
   });
 
-  const levelCountsByProgram = useQuery({
-    queryKey: ["level-counts-by-program", brandId, courses.data?.map((c) => c.id).join(",")],
-    enabled: (courses.data?.length ?? 0) > 0,
-    queryFn: () => fetchLevelCountsByProgram(brandId, (courses.data ?? []).map((c) => c.id)),
-  });
+  const filteredCourses = useMemo(() => {
+    const tabbed = isMobile ? filterCoursesByTab(allCourses, mobileTab) : allCourses.filter((course) => course.is_active);
+    return tabbed.filter((course) => {
+      const levelNames = (levelsByProgram.data?.[course.id] ?? []).map((level) => level.name);
+      return matchesCurriculumSearch(course, levelNames, search);
+    });
+  }, [allCourses, isMobile, mobileTab, search, levelsByProgram.data]);
+
+  useEffect(() => {
+    if (activeCourseId || filteredCourses.length === 0) return;
+    setSelectedCourseId(filteredCourses[0]!.id);
+  }, [activeCourseId, filteredCourses]);
 
   const unitCounts = useQuery({
-    queryKey: ["level-unit-counts", activeCourseId, levels.data?.map((l) => l.id).join(",")],
+    queryKey: ["level-unit-counts", activeCourseId, levels.data?.map((level) => level.id).join(",")],
     enabled: !!levels.data?.length,
-    queryFn: () => fetchLevelUnitCounts((levels.data ?? []).map((l) => l.id)),
+    queryFn: () => fetchLevelUnitCounts((levels.data ?? []).map((level) => level.id)),
   });
 
   const impact = useQuery({
@@ -119,20 +123,25 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
     queryFn: () => fetchCourseImpactStats(brandId, activeCourseId),
   });
 
-  const selectedCourse =
-    filteredCourses.find((course) => course.id === activeCourseId) ??
-    (courses.data ?? []).find((course) => course.id === activeCourseId) ??
-    null;
+  const selectedCourse = allCourses.find((course) => course.id === activeCourseId) ?? null;
+  const selectedCourseIndex = selectedCourse ? allCourses.findIndex((course) => course.id === selectedCourse.id) : 0;
+
+  useEffect(() => {
+    const course = allCourses.find((item) => item.id === activeCourseId);
+    if (course) setEditCourse(courseToForm(course));
+  }, [activeCourseId, courses.data]);
 
   useEffect(() => {
     setSelectedLevelId(null);
+    setRequestAddProgram(false);
   }, [activeCourseId]);
 
   const invalidateAll = () => {
     void qc.invalidateQueries({ queryKey: ["programs", brandId] });
+    void qc.invalidateQueries({ queryKey: ["level-counts-by-program", brandId] });
+    void qc.invalidateQueries({ queryKey: ["levels-by-program", brandId] });
     if (activeCourseId) {
       void qc.invalidateQueries({ queryKey: ["levels", activeCourseId] });
-      void qc.invalidateQueries({ queryKey: ["level-counts-by-program", brandId] });
       void qc.invalidateQueries({ queryKey: ["course-impact", activeCourseId] });
     }
     void qc.invalidateQueries({ queryKey: ["level-unit-counts"] });
@@ -145,6 +154,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       invalidateAll();
       setAddCourse(EMPTY_COURSE_FORM);
       setSelectedCourseId(id);
+      setAddCourseOpen(false);
       courseCloser.closeAddForm();
     },
     onError: capture,
@@ -155,7 +165,6 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
     onSuccess: () => {
       clear();
       invalidateAll();
-      setEditingCourse(false);
     },
     onError: capture,
   });
@@ -166,6 +175,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       clear();
       invalidateAll();
       setSelectedCourseId("");
+      setMobileDetailOpen(false);
     },
     onError: capture,
   });
@@ -184,13 +194,14 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
           whatYouLearn: addLevel.whatYouLearn,
           videoUrl: addLevel.videoUrl,
         },
-        order,
+        order
       );
     },
     onSuccess: () => {
       clear();
       invalidateAll();
       setAddLevel(EMPTY_LEVEL_FORM);
+      setRequestAddProgram(false);
       levelCloser.closeAddForm();
     },
     onError: capture,
@@ -221,7 +232,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
   });
 
   const reorderLevelMutation = useMutation({
-    mutationFn: (ordered: CurriculumLevel[]) => reorderLevels(ordered.map((l) => l.id)),
+    mutationFn: (ordered: CurriculumLevel[]) => reorderLevels(ordered.map((level) => level.id)),
     onSuccess: invalidateAll,
     onError: capture,
   });
@@ -231,32 +242,47 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       ? `Cannot archive while ${impact.data.authorizedCenters} center(s) are authorized for this course. Remove authorization on Centers first.`
       : null;
 
+  const openMobileCourse = (courseId: string, levelId?: string) => {
+    setAddCourseOpen(false);
+    setSelectedCourseId(courseId);
+    setMobileDetailOpen(true);
+    setSelectedLevelId(levelId ?? null);
+  };
+
+  const openAddCourse = () => {
+    clear();
+    setAddCourse(EMPTY_COURSE_FORM);
+    setAddCourseOpen(true);
+    setMobileDetailOpen(false);
+  };
+
+  const closeAddCourse = () => {
+    setAddCourseOpen(false);
+    setAddCourse(EMPTY_COURSE_FORM);
+    courseCloser.closeAddForm();
+  };
+
   const selectCourse = (id: string) => {
+    setAddCourseOpen(false);
     setSelectedCourseId(id);
-    if (isMobile) setMobileDetailOpen(false);
   };
 
   const detailPanel = selectedCourse ? (
     <CurriculumCourseDetail
       brandId={brandId}
       course={selectedCourse}
+      courseIndex={Math.max(0, selectedCourseIndex)}
       impact={impact.data}
       levels={levels.data ?? []}
       unitCounts={unitCounts.data ?? {}}
-      editingCourse={editingCourse}
       editCourse={editCourse}
       onEditCourseChange={setEditCourse}
-      onStartEditCourse={() => {
-        setEditCourse(courseToForm(selectedCourse));
-        setEditingCourse(true);
-      }}
-      onCancelEditCourse={() => setEditingCourse(false)}
       onSaveCourse={() => saveCourse.mutate()}
       saveCoursePending={saveCourse.isPending}
       onArchiveCourse={() => archiveCourse.mutate()}
       archiveBlockedReason={archiveBlockedReason}
       selectedLevelId={selectedLevelId}
-      onSelectLevel={(id) => setSelectedLevelId(id)}
+      onSelectLevel={setSelectedLevelId}
       addLevel={addLevel}
       onAddLevelChange={setAddLevel}
       editLevel={editLevel}
@@ -270,7 +296,9 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       reorderPending={reorderLevelMutation.isPending}
       onError={capture}
       levelCloser={levelCloser}
+      requestAddProgram={requestAddProgram}
       readOnly={readOnly}
+      showPageHeader={isMobile}
     />
   ) : (
     <CurriculumCourseDetailPlaceholder />
@@ -280,54 +308,63 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
     <CurriculumCourseList
       brandId={brandId}
       courses={filteredCourses}
+      allCourses={allCourses}
+      levelsByProgram={levelsByProgram.data ?? {}}
       levelCounts={levelCountsByProgram.data ?? {}}
       selectedId={activeCourseId || null}
-      filter={courseFilter}
-      onFilterChange={setCourseFilter}
+      mobileTab={mobileTab}
+      onMobileTabChange={setMobileTab}
+      search={search}
+      onSearchChange={setSearch}
       onSelect={selectCourse}
-      addCourse={addCourse}
-      onAddCourseChange={setAddCourse}
-      onAddCourse={() => createCourse.mutate()}
-      addPending={createCourse.isPending}
-      bindAddClose={courseCloser.bindClose}
+      onOpenCourse={(id) => openMobileCourse(id)}
+      onEditProgram={(courseId, programId) => openMobileCourse(courseId, programId)}
+      onAddProgram={(courseId) => {
+        openMobileCourse(courseId);
+        setRequestAddProgram(true);
+      }}
+      onOpenAddCourse={openAddCourse}
       readOnly={readOnly}
+      isMobile={isMobile}
     />
   );
 
+  const addCoursePanel = !readOnly ? (
+    <CurriculumAddCoursePanel
+      brandId={brandId}
+      value={addCourse}
+      onChange={setAddCourse}
+      onCancel={closeAddCourse}
+      onCreate={() => createCourse.mutate()}
+      pending={createCourse.isPending}
+      isMobile={isMobile}
+    />
+  ) : null;
+
+  const mainDetailPanel = addCourseOpen && addCoursePanel ? addCoursePanel : detailPanel;
+
   return (
-    <div className={`ed-curriculum-brand${isMobile ? " ed-ops-pipeline-hide-detail" : ""}`}>
-      <OpsPageHeader
-        title="Curriculum"
-        subtitle={
-          readOnly
-            ? "Read-only view: Course → Program → Chapter. See what your center teaches."
-            : "Build your curriculum: Course → Program → Chapter. Centers and parents see this on your website."
-        }
-      />
+    <div className={`ed-curriculum-brand${isMobile ? " ed-curriculum-brand--mobile" : ""}`}>
+      {!isMobile ? (
+        <CurriculumBuilderHeader
+          variant="page"
+          title="Curriculum Builder"
+          subtitle="Design and manage your franchise's educational blueprint. Changes here update across all authorized centers and student portals."
+        />
+      ) : null}
+
       <MutationError message={error} />
 
-      <OpsSearchField
-        value={search}
-        onChange={setSearch}
-        placeholder="Search courses by name or age band…"
-      />
-
       {isMobile ? (
-        <>
-          {listPanel}
-          {selectedCourse ? (
-            <CurriculumCourseFeaturedCard
-              course={selectedCourse}
-              programCount={levelCountsByProgram.data?.[selectedCourse.id] ?? 0}
-              onViewDetails={() => setMobileDetailOpen(true)}
-            />
-          ) : null}
-        </>
+        listPanel
       ) : (
-        <PipelineMasterDetail list={listPanel} detail={detailPanel} />
+        <div className="ed-curriculum-brand__layout">
+          {listPanel}
+          <div className="ed-curriculum-brand__detail">{mainDetailPanel}</div>
+        </div>
       )}
 
-      {isMobile && mobileDetailOpen && selectedCourse ? (
+      {isMobile && mobileDetailOpen && selectedCourse && !addCourseOpen ? (
         <div className="ed-ops-mobile-detail" role="dialog" aria-modal aria-label="Course details">
           <div className="ed-ops-mobile-detail__bar">
             <button type="button" className="ed-ops-mobile-detail__back" onClick={() => setMobileDetailOpen(false)}>
@@ -336,6 +373,16 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
           </div>
           {detailPanel}
         </div>
+      ) : null}
+
+      {isMobile && addCourseOpen && addCoursePanel ? (
+        <div className="ed-ops-mobile-detail" role="dialog" aria-modal aria-label="Add course">
+          {addCoursePanel}
+        </div>
+      ) : null}
+
+      {isMobile && !readOnly && !addCourseOpen ? (
+        <CurriculumFab onClick={openAddCourse} />
       ) : null}
     </div>
   );

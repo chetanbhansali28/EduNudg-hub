@@ -89,6 +89,23 @@ export async function fetchLevelCountsByProgram(
   return counts;
 }
 
+export async function fetchLevelsForPrograms(programIds: string[]): Promise<Record<string, CurriculumLevel[]>> {
+  if (programIds.length === 0) return {};
+  const { data, error } = await client()
+    .from("levels")
+    .select("id, name, sort_order, abacus_level_code, topics_covered, why_take, what_you_learn, marketing_video_url, program_id")
+    .in("program_id", programIds)
+    .order("sort_order");
+  const rows = supabaseList(data, error) as (CurriculumLevel & { program_id: string })[];
+  const grouped: Record<string, CurriculumLevel[]> = {};
+  for (const id of programIds) grouped[id] = [];
+  for (const row of rows) {
+    const { program_id, ...level } = row;
+    grouped[program_id]!.push(level);
+  }
+  return grouped;
+}
+
 export async function fetchModules(levelId: string): Promise<CurriculumModule[]> {
   const { data, error } = await client()
     .from("modules")

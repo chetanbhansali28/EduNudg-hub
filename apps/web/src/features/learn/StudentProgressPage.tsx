@@ -83,7 +83,7 @@ export function StudentProgressPage() {
     <div className="ed-sp-stack ed-sp-layout-progress">
       <StudentPageHeading title="Progress" subtitle="Your program levels and exam history." />
 
-      <StudentProgressHeroCard ladders={ladders} />
+      <StudentProgressHeroCard ladders={ladders} showContinueCta={false} />
 
       <div className="ed-sp-layout-progress__grid">
         <SectionCard title="Your learning path">

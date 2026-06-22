@@ -1,0 +1,126 @@
+/* Brand analytics workspace — desktop chart/table + mobile activity feed */
+
+.ed-brand-analytics {
+  --ed-brand-analytics-gap: 1.25rem;
+}
+
+.ed-brand-analytics .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ed-brand-analytics__header {
+  margin-bottom: 1.25rem;
+}
+
+.ed-brand-analytics__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ed-brand-analytics__subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: var(--ed-muted);
+  max-width: 42rem;
+  line-height: 1.5;
+}
+
+.ed-brand-analytics__main {
+  display: grid;
+  gap: var(--ed-brand-analytics-gap);
+  margin-bottom: var(--ed-brand-analytics-gap);
+}
+
+@media (min-width: 1024px) {
+  .ed-brand-analytics__main {
+    grid-template-columns: minmax(0, 1.65fr) minmax(16rem, 1fr);
+    align-items: start;
+  }
+}
+
+.ed-brand-analytics__chart-panel .ed-analytics-panel__body {
+  padding-top: 0.75rem;
+}
+
+.ed-brand-analytics__chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.ed-brand-analytics__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ed-brand-analytics__section-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ed-brand-analytics__section-link {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ed-primary);
+  text-decoration: none;
+}
+
+.ed-brand-analytics__mobile-only {
+  display: block;
+}
+
+.ed-brand-analytics__desktop-only {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .ed-brand-analytics__mobile-only {
+    display: none;
+  }
+
+  .ed-brand-analytics__desktop-only {
+    display: block;
+  }
+}
+
+.ed-brand-analytics__export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.875rem;
+  border-radius: var(--ed-radius);
+  border: 1px solid var(--ed-border);
+  background: var(--ed-card);
+  color: var(--ed-fg);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ed-brand-analytics__export-btn:hover {
+  border-color: color-mix(in srgb, var(--ed-primary) 35%, var(--ed-border));
+  color: var(--ed-primary);
+}
+
+.ed-brand-analytics__loading {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ed-muted);
+}

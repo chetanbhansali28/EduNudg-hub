@@ -118,8 +118,8 @@ describe("CenterReportsPage", () => {
     expect(screen.getByText("Leads Generated")).toBeDefined();
     expect(screen.getByText("Export CSV")).toBeDefined();
     expect(screen.getByText("Scale Your Center")).toBeDefined();
-    const viewAllLink = screen.getByRole("link", { name: "View All Assessments" });
-    expect(viewAllLink.getAttribute("href")).toBe("/app/assessments");
+    const recordLink = screen.getByRole("link", { name: "Record assessments" });
+    expect(recordLink.getAttribute("href")).toBe("/app/students?tab=assessments");
   });
 
   it("toggles_assessment_sort_order", async () => {

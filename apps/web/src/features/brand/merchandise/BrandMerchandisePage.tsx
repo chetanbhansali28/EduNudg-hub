@@ -69,9 +69,7 @@ export function BrandMerchandisePage() {
           title="Merchandise Catalog"
           actions={
             activeTab === "catalog" ? (
-              <Button className="ed-brand-merch-page__add-btn" onClick={() => setCatalogAddOpen(true)}>
-                + Add catalog item
-              </Button>
+              <Button onClick={() => setCatalogAddOpen(true)}>+ Add catalog item</Button>
             ) : null
           }
         />

@@ -1880,3 +1880,191 @@ export function SettingsSocialField({
     </div>
   );
 }
+
+/* ─── Backend billing workspace (brand platform subscription) ─── */
+
+export function BillingPageHeader({
+  eyebrow,
+  title,
+  subtitle,
+}: {
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <header className="ed-billing-page-header">
+      {eyebrow ? <p className="ed-billing-page-header__eyebrow">{eyebrow}</p> : null}
+      <h1 className="ed-billing-page-header__title">{title}</h1>
+      {subtitle ? <p className="ed-billing-page-header__subtitle">{subtitle}</p> : null}
+    </header>
+  );
+}
+
+export function BillingStatusBadge({
+  label,
+  tone = "active",
+}: {
+  label: string;
+  tone?: "active" | "draft" | "warning";
+}) {
+  return <span className={`ed-billing-status-badge ed-billing-status-badge--${tone}`}>{label}</span>;
+}
+
+export function BillingSubscriptionCard({
+  icon,
+  title = "Platform subscription",
+  description,
+  planName,
+  statusBadge,
+  priceLabel,
+  action,
+}: {
+  icon?: ReactNode;
+  title?: string;
+  description: ReactNode;
+  planName: string;
+  statusBadge: ReactNode;
+  priceLabel: string;
+  action?: ReactNode;
+}) {
+  return (
+    <section className="ed-billing-subscription-card">
+      <div className="ed-billing-subscription-card__intro">
+        <div className="ed-billing-subscription-card__intro-head">
+          {icon ? <span className="ed-billing-subscription-card__icon">{icon}</span> : null}
+          <div className="ed-billing-subscription-card__copy">
+            <div className="ed-billing-subscription-card__title-row">
+              <h2 className="ed-billing-subscription-card__title">{title}</h2>
+              <span className="ed-billing-subscription-card__badge-mobile">{statusBadge}</span>
+            </div>
+            <p className="ed-billing-subscription-card__description">{description}</p>
+          </div>
+        </div>
+      </div>
+      <div className="ed-billing-subscription-card__meta">
+        <div className="ed-billing-subscription-card__detail">
+          <span>Plan</span>
+          <strong className="ed-billing-subscription-card__plan">{planName}</strong>
+        </div>
+        <div className="ed-billing-subscription-card__detail ed-billing-subscription-card__detail--status">
+          <span>Status</span>
+          {statusBadge}
+        </div>
+        <div className="ed-billing-subscription-card__detail">
+          <span>Price</span>
+          <strong>{priceLabel}</strong>
+        </div>
+        {action ? <div className="ed-billing-subscription-card__action">{action}</div> : null}
+      </div>
+    </section>
+  );
+}
+
+export function BillingInvoicesPanel({
+  title = "Invoices",
+  headIcon,
+  emptyIcon,
+  emptyTitle = "No invoices yet.",
+  emptyDescription,
+  isEmpty,
+  children,
+}: {
+  title?: string;
+  headIcon?: ReactNode;
+  emptyIcon?: ReactNode;
+  emptyTitle?: string;
+  emptyDescription?: string;
+  isEmpty: boolean;
+  children?: ReactNode;
+}) {
+  return (
+    <section className="ed-billing-invoices-panel">
+      <header className="ed-billing-invoices-panel__head">
+        {headIcon ? <span className="ed-billing-invoices-panel__head-icon">{headIcon}</span> : null}
+        <h2 className="ed-billing-invoices-panel__title">{title}</h2>
+      </header>
+      <div className="ed-billing-invoices-panel__body">
+        {isEmpty ? (
+          <div className="ed-billing-invoices-panel__empty">
+            {emptyIcon ? <span className="ed-billing-invoices-panel__empty-icon">{emptyIcon}</span> : null}
+            <p className="ed-billing-invoices-panel__empty-title">{emptyTitle}</p>
+            {emptyDescription ? (
+              <p className="ed-billing-invoices-panel__empty-description">{emptyDescription}</p>
+            ) : null}
+          </div>
+        ) : (
+          <div className="ed-billing-invoices-panel__list">{children}</div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+export function BillingInvoiceRow({
+  amount,
+  meta,
+  badge,
+}: {
+  amount: string;
+  meta: ReactNode;
+  badge?: ReactNode;
+}) {
+  return (
+    <div className="ed-billing-invoice-row">
+      <div className="ed-billing-invoice-row__main">
+        <strong className="ed-billing-invoice-row__amount">{amount}</strong>
+        <div className="ed-billing-invoice-row__meta">{meta}</div>
+      </div>
+      {badge ? <div className="ed-billing-invoice-row__badge">{badge}</div> : null}
+    </div>
+  );
+}
+
+export function BillingPromoGrid({ children }: { children: ReactNode }) {
+  return <div className="ed-billing-promo-grid">{children}</div>;
+}
+
+export function BillingPromoCard({
+  accent = "blue",
+  icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  actionHref,
+}: {
+  accent?: "blue" | "purple";
+  icon?: ReactNode;
+  title: string;
+  description: ReactNode;
+  actionLabel: string;
+  onAction?: () => void;
+  actionHref?: string;
+}) {
+  const action =
+    onAction ? (
+      <button type="button" className="ed-billing-promo-card__action" onClick={onAction}>
+        {actionLabel}
+      </button>
+    ) : actionHref ? (
+      <Link to={actionHref} className="ed-billing-promo-card__action">
+        {actionLabel}
+      </Link>
+    ) : (
+      <span className="ed-billing-promo-card__action">{actionLabel}</span>
+    );
+
+  return (
+    <article className={`ed-billing-promo-card ed-billing-promo-card--${accent}`}>
+      {icon ? <span className="ed-billing-promo-card__icon">{icon}</span> : null}
+      <h3 className="ed-billing-promo-card__title">{title}</h3>
+      <p className="ed-billing-promo-card__description">{description}</p>
+      {action}
+    </article>
+  );
+}
+
+export function BillingStack({ children }: { children: ReactNode }) {
+  return <div className="ed-billing-stack">{children}</div>;
+}

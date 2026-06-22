@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FranchiseApplicationsPage } from "./FranchiseApplicationsPage";
@@ -43,6 +43,15 @@ vi.mock("@/lib/supabase", () => ({
 }));
 
 describe("FranchiseApplicationsPage", () => {
+  beforeEach(() => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes("1024"),
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+  });
+
   it("regression_pipeline_list_with_filter_tabs", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
@@ -50,10 +59,11 @@ describe("FranchiseApplicationsPage", () => {
         <FranchiseApplicationsPage />
       </QueryClientProvider>
     );
-    expect(await screen.findByText("Applications")).toBeDefined();
+    expect(await screen.findByText("Franchise Applications")).toBeDefined();
+    expect(screen.getByText("Review and manage incoming center requests.")).toBeDefined();
     expect(screen.getByRole("tablist", { name: "Application filter" })).toBeDefined();
     expect(await screen.findByRole("tab", { name: /Pending review \(1\)/ })).toBeDefined();
-    expect(screen.queryByLabelText("Show")).toBeNull();
+    expect(screen.getByPlaceholderText("Search applications...")).toBeDefined();
   });
 
   it("regression_franchise_name_opens_full_application_detail", async () => {
@@ -66,7 +76,8 @@ describe("FranchiseApplicationsPage", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: /Abacus Pune West/i }));
 
-    expect(screen.getByText("Application detail")).toBeDefined();
+    expect(screen.getByText("Proposed Center Details")).toBeDefined();
+    expect(screen.getByText("Applicant Information")).toBeDefined();
     expect(screen.getByText("42 FC Road")).toBeDefined();
     expect(screen.getByText("Ran a tutoring center for 3 years.")).toBeDefined();
     expect(screen.getByText("Looking to open in Q3.")).toBeDefined();

@@ -21,12 +21,15 @@ import { syncStudentBatchAssignments, type CenterStudentRow } from "@/lib/center
 import { fetchAuthorizedPrograms, fetchCenterBatches, type CenterBatchRow } from "@/lib/centerBatchesApi";
 import { fetchLevels } from "@/lib/curriculumApi";
 import { initialsFromName } from "@/lib/welcomeMessage";
+import { CenterStudentAssessmentPanel } from "@/features/center/assessments/CenterStudentAssessmentPanel";
+import type { CenterStudentDetailTab } from "@/features/center/students/centerStudentDetailTabs";
 
 type Props = {
   student: CenterStudentRow;
   brandId: string;
   centerId: string;
   onSaved?: () => void;
+  initialTab?: CenterStudentDetailTab;
 };
 
 function formatJoined(iso: string | null): string {
@@ -63,9 +66,23 @@ const ICON_USERS = (
   </svg>
 );
 
-export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }: Props) {
+const ICON_CLIPBOARD = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+    <rect x="9" y="3" width="6" height="4" rx="1" />
+  </svg>
+);
+
+export function CenterStudentDetailPanel({
+  student,
+  brandId,
+  centerId,
+  onSaved,
+  initialTab = "enrollment",
+}: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const [activeTab, setActiveTab] = useState<CenterStudentDetailTab>(initialTab);
   const [loginEmail, setLoginEmail] = useState(student.login_email ?? "");
   const [address, setAddress] = useState({
     address_line1: "",
@@ -111,6 +128,10 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
     setProgramId(student.program_id ?? "");
     setLevelId(student.starting_level_id ?? "");
   }, [student.id, student.batch_ids, student.login_email, student.program_id, student.starting_level_id]);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [student.id, initialTab]);
 
   useEffect(() => {
     if (programId !== student.program_id) setLevelId("");
@@ -225,6 +246,37 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
         </div>
       </header>
 
+      <div className="ed-ops-detail-tabs" role="tablist" aria-label="Student detail sections">
+        <button
+          type="button"
+          role="tab"
+          className={`ed-ops-detail-tabs__btn${activeTab === "enrollment" ? " is-active" : ""}`}
+          aria-selected={activeTab === "enrollment"}
+          onClick={() => setActiveTab("enrollment")}
+        >
+          Enrollment
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={`ed-ops-detail-tabs__btn${activeTab === "assessments" ? " is-active" : ""}`}
+          aria-selected={activeTab === "assessments"}
+          onClick={() => setActiveTab("assessments")}
+        >
+          {ICON_CLIPBOARD}
+          Assessments
+        </button>
+      </div>
+
+      {activeTab === "assessments" ? (
+        <CenterStudentAssessmentPanel
+          student={student}
+          centerId={centerId}
+          embedded
+          onSaved={onSaved}
+        />
+      ) : (
+        <>
       <div className="ed-ops-detail-grid">
         <OpsSectionCard
           icon={ICON_GRAD}
@@ -344,6 +396,8 @@ export function CenterStudentDetailPanel({ student, brandId, centerId, onSaved }
           Save address
         </Button>
       </OpsSectionCard>
+        </>
+      )}
     </div>
   );
 }

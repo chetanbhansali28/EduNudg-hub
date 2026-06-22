@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -14,6 +14,7 @@ import {
   PipelineMasterDetail,
 } from "@edunudg/ui";
 import { CenterStudentDetailPanel } from "@/features/center/students/CenterStudentDetailPanel";
+import { parseCenterStudentDetailTab } from "@/features/center/students/centerStudentDetailTabs";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { fetchCenterStudents, type CenterStudentRow } from "@/lib/centerStudentsApi";
 import { markBatchJoinsSeen } from "@/lib/centerBatchesApi";
@@ -83,7 +84,10 @@ export function StudentsPage() {
   const tenant = useTenant();
   const centerId = tenant.centerId;
   const brandId = tenant.brandId;
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const detailTab = parseCenterStudentDetailTab(searchParams.get("tab"));
+  const deepLinkStudentId = searchParams.get("studentId");
+  const [selectedId, setSelectedId] = useState<string | null>(deepLinkStudentId);
   const [search, setSearch] = useState("");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const { isDesktop, isMobile } = useOpsBreakpoint();
@@ -110,11 +114,24 @@ export function StudentsPage() {
   );
 
   useEffect(() => {
+    if (deepLinkStudentId) {
+      setSelectedId(deepLinkStudentId);
+    }
+  }, [deepLinkStudentId]);
+
+  useEffect(() => {
     if (selectedId || filteredStudents.length === 0) return;
+    if (deepLinkStudentId) return;
     setSelectedId(filteredStudents[0]!.id);
-  }, [selectedId, filteredStudents]);
+  }, [selectedId, filteredStudents, deepLinkStudentId]);
 
   const selected = filteredStudents.find((s) => s.id === selectedId) ?? allStudents.find((s) => s.id === selectedId) ?? null;
+
+  useEffect(() => {
+    if (isMobile && selected && detailTab === "assessments") {
+      setMobileDetailOpen(true);
+    }
+  }, [isMobile, selected, detailTab]);
   const listPreview = filteredStudents.slice(0, LIST_PREVIEW);
 
   const selectStudent = (id: string) => {
@@ -176,7 +193,7 @@ export function StudentsPage() {
     <div className={isMobile ? "ed-ops-pipeline-hide-detail" : undefined}>
       <OpsPageHeader
         title="Students"
-        subtitle="Manage enrollments, portal access, batch assignments, and delivery details."
+        subtitle="Manage enrollments, batches, portal access, and record level assessments in one place."
         action={
           isDesktop ? (
             <Link to="/app/leads">
@@ -216,11 +233,12 @@ export function StudentsPage() {
                 student={selected}
                 brandId={brandId}
                 centerId={centerId}
+                initialTab={detailTab}
                 onSaved={() => void students.refetch()}
               />
             ) : (
               <div className="ed-pipeline-list-panel">
-                <PipelineDetailPlaceholder message="Select a student to manage portal access, batches, address, and progress." />
+                <PipelineDetailPlaceholder message="Select a student to manage enrollment, batches, portal access, and assessments." />
               </div>
             )
           }
@@ -241,6 +259,7 @@ export function StudentsPage() {
                 student={selected}
                 brandId={brandId}
                 centerId={centerId}
+                initialTab={detailTab}
                 onSaved={() => void students.refetch()}
               />
             </div>

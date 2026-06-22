@@ -69,9 +69,9 @@ describe("AbacusClassicEditorForm navigation", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Navigation & CTAs/i }));
 
-    const navPanel = screen.getByText("Menu item 1").closest(".ed-editor-item-panel");
+    const navPanel = screen.getByText("Menu item 1").closest(".ed-editor-item-panel") as HTMLElement;
     expect(navPanel).toBeDefined();
-    const linkSelect = within(navPanel!).getByLabelText("Link") as HTMLSelectElement;
+    const linkSelect = within(navPanel).getByLabelText("Link") as HTMLSelectElement;
     expect(Array.from(linkSelect.options).some((o) => o.value === "#founders")).toBe(true);
   });
 });

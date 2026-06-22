@@ -171,7 +171,7 @@ export async function fetchBrandAnalyticsStats(brandId: string): Promise<BrandAn
     enrollments30d,
     unpaidInvoices: invoices.length,
     unpaidAmountCents: invoices.reduce((s, i) => s + (i.amount_cents ?? 0), 0),
-    recentDaily: buildDailyTrend(enrollmentByDate, revenueByDate, centersActive),
+    recentDaily: buildDailyTrend(enrollmentByDate, revenueByDate, centersActive, 30),
     topCenters,
   };
 }

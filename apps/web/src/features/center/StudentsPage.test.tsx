@@ -36,7 +36,7 @@ describe("StudentsPage", () => {
 
     expect(screen.getByRole("heading", { name: "Students" })).toBeDefined();
     expect(screen.queryByText(/Browse and order kits for your center/i)).toBeNull();
-    expect(screen.getByText(/Manage enrollments, portal access/i)).toBeDefined();
+    expect(screen.getByText(/Manage enrollments, batches, portal access/i)).toBeDefined();
     expect(screen.getByRole("link", { name: "+ Add students" })).toBeDefined();
     expect(screen.getByPlaceholderText(/Search by student name or ID/i)).toBeDefined();
   });

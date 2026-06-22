@@ -81,5 +81,6 @@ describe("StudentProgressPage", () => {
     await screen.findByText("Your learning path");
     expect(document.querySelector(".ed-sp-timeline__level-label")).toBeTruthy();
     expect(screen.getByText("Progress")).toBeDefined();
+    expect(screen.queryByRole("link", { name: /Continue Learning/i })).toBeNull();
   });
 });

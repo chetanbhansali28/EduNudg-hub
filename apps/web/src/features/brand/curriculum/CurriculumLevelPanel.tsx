@@ -1,7 +1,10 @@
+import { useEffect, useState } from "react";
 import {
   Badge,
   Button,
   Card,
+  CurriculumProgramOutlineRow,
+  CurriculumSectionCard,
   FormActions,
   OpsSectionCard,
   SaveButton,
@@ -37,7 +40,8 @@ type Props = {
   reorderPending: boolean;
   onError: (err: unknown) => void;
   levelCloser: ReturnType<typeof useAddFormCloser>;
-  layout?: "ops" | "card";
+  requestAddProgram?: boolean;
+  layout?: "ops" | "card" | "builder";
 };
 
 function levelToForm(level: CurriculumLevel): LevelForm {
@@ -103,8 +107,15 @@ export function CurriculumLevelPanel({
   reorderPending,
   onError,
   levelCloser,
+  requestAddProgram = false,
   layout = "ops",
 }: Props) {
+  const [addProgramOpen, setAddProgramOpen] = useState(false);
+
+  useEffect(() => {
+    if (requestAddProgram) setAddProgramOpen(true);
+  }, [requestAddProgram]);
+
   const shift = (index: number, direction: -1 | 1) => {
     const next = [...levels];
     const target = index + direction;
@@ -124,10 +135,12 @@ export function CurriculumLevelPanel({
 
   const panelBody = (
     <>
-      <p className="ed-text-sm ed-muted">
-        Structure: <strong>Course → Program → Chapter</strong> — e.g. Abacus course, Level 1 program,
-        &quot;Numbers 1–100 on abacus&quot; chapter.
-      </p>
+      {layout !== "builder" ? (
+        <p className="ed-text-sm ed-muted">
+          Structure: <strong>Course → Program → Chapter</strong> — e.g. Abacus course, Level 1 program,
+          &quot;Numbers 1–100 on abacus&quot; chapter.
+        </p>
+      ) : null}
 
       {!canEdit && (
         <p className="ed-curriculum-live-banner" role="status">
@@ -140,6 +153,9 @@ export function CurriculumLevelPanel({
           buttonLabel="Add program"
           panelTitle="Add program"
           actionsPlacement="footer"
+          open={layout === "builder" ? addProgramOpen : undefined}
+          onOpenChange={layout === "builder" ? setAddProgramOpen : undefined}
+          hideTrigger={layout === "builder"}
           primaryAction={{
             label: "Add program",
             onClick: onCreateLevel,
@@ -154,12 +170,28 @@ export function CurriculumLevelPanel({
         </AddFormSection>
       )}
 
-      <div className={`ed-curriculum-level-accordion${layout === "ops" ? " ed-ops-stagger" : " ed-curriculum-stagger"}`}>
+      <div className={`ed-curriculum-level-accordion${layout === "ops" ? " ed-ops-stagger" : layout === "builder" ? "" : " ed-curriculum-stagger"}`}>
         {levels.map((level, index) => {
           const isOpen = level.id === selectedLevelId;
           const chapterCount = unitCounts[level.id] ?? 0;
           const panelId = `curriculum-program-panel-${level.id}`;
           const isActiveForm = isOpen && selectedLevelId === level.id;
+
+          if (layout === "builder" && !isOpen) {
+            return (
+              <CurriculumProgramOutlineRow
+                key={level.id}
+                title={level.name}
+                subtitle={
+                  level.abacus_level_code
+                    ? `${level.abacus_level_code} · ${chapterCount} chapter${chapterCount === 1 ? "" : "s"}`
+                    : `${chapterCount} chapter${chapterCount === 1 ? "" : "s"}`
+                }
+                selected={isOpen}
+                onSelect={() => toggleLevel(level)}
+              />
+            );
+          }
 
           return (
             <div
@@ -253,6 +285,28 @@ export function CurriculumLevelPanel({
 
   if (layout === "card") {
     return <Card title="Programs">{panelBody}</Card>;
+  }
+
+  if (layout === "builder") {
+    return (
+      <CurriculumSectionCard
+        icon={
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+          </svg>
+        }
+        title="Programs Structure"
+        actions={
+          canEdit ? (
+            <Button variant="secondary" onClick={() => setAddProgramOpen(true)}>
+              + Add Program
+            </Button>
+          ) : null
+        }
+      >
+        {panelBody}
+      </CurriculumSectionCard>
+    );
   }
 
   return (
