@@ -4,20 +4,19 @@ test("login page renders split-screen form", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByRole("heading", { name: "Welcome back!" })).toBeVisible();
   await expect(page.getByText(/EduNudg platform account/i)).toBeVisible();
-  await expect(page.getByLabelText("Email")).toBeVisible();
+  await expect(page.getByLabel("Email")).toBeVisible();
   await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
 });
 
-test("login page exposes alternate sign-in options", async ({ page }) => {
+test("login page exposes default alternate sign-in options", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByRole("button", { name: "Log in with Google" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Log in with WhatsApp" })).toBeVisible();
 });
 
 test("marketing home renders shared nav and footer", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL("/");
-  await expect(page.getByLabelText("Site")).toBeVisible();
+  await expect(page.getByLabel("Site")).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
 });
 

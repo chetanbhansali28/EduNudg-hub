@@ -41,8 +41,7 @@ export function invoiceStatusLabel(status: InvoiceStatus): string {
   if (status === "paid") return "PAID";
   if (status === "overdue") return "OVERDUE";
   if (status === "sent" || status === "draft" || status === "partial") return "PENDING";
-  if (status === "cancelled") return "CANCELLED";
-  return status.toUpperCase();
+  return "CANCELLED";
 }
 
 export function invoiceStatusTone(status: InvoiceStatus): RevenueInvoiceStatusTone {

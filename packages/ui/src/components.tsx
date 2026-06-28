@@ -1,4 +1,4 @@
-import { useState, useId, type ReactNode } from "react";
+import { useState, useId, type MouseEventHandler, type ReactNode } from "react";
 import { PhoneDialButton } from "./phone";
 import { telHref } from "./phoneLinks";
 
@@ -99,7 +99,7 @@ export function Button({
 }: {
   children: ReactNode;
   variant?: "primary" | "secondary" | "ghost" | "danger" | "oauth-google" | "oauth-whatsapp";
-  onClick?: () => void;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
   type?: "button" | "submit";
   disabled?: boolean;
   block?: boolean;
@@ -220,6 +220,7 @@ export function Input({
   disabled,
   id,
   name,
+  list,
 }: {
   label: string;
   value: string;
@@ -232,6 +233,7 @@ export function Input({
   disabled?: boolean;
   id?: string;
   name?: string;
+  list?: string;
 }) {
   const autoId = useId();
   const inputId = id ?? autoId;
@@ -248,6 +250,7 @@ export function Input({
       autoComplete={autoComplete}
       step={step}
       disabled={disabled}
+      list={list}
       onChange={(e) => onChange(e.target.value)}
     />
   );
@@ -472,11 +475,11 @@ export function PageGridFull({ children, className }: { children: ReactNode; cla
   return <div className={["ed-page-grid__full", className].filter(Boolean).join(" ")}>{children}</div>;
 }
 
-/** Two-column form fields from tablet up; pass columns={3} for three fields on desktop. */
-export function FormGrid({ children, columns }: { children: ReactNode; columns?: 2 | 3 }) {
-  return (
-    <div className={`ed-form-grid${columns === 3 ? " ed-form-grid--3" : ""}`}>{children}</div>
-  );
+/** Form field grid: default 2 columns from tablet; pass columns={1} or {3} to override. */
+export function FormGrid({ children, columns }: { children: ReactNode; columns?: 1 | 2 | 3 }) {
+  const modifier =
+    columns === 3 ? " ed-form-grid--3" : columns === 1 ? " ed-form-grid--1" : "";
+  return <div className={`ed-form-grid${modifier}`}>{children}</div>;
 }
 
 export function Textarea({

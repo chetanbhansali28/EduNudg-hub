@@ -39,7 +39,10 @@ describe("brandCentersHelpers", () => {
   });
 
   it("counts and filters centers", () => {
-    const centers = [sample, { ...sample, id: "c2", status: "suspended" }];
+    const centers: BrandCenterRow[] = [
+      sample,
+      { ...sample, id: "c2", status: "suspended" },
+    ];
     expect(centerCounts(centers)).toEqual({ total: 2, active: 1, suspended: 1, all: 2 });
     expect(filterCenters(centers, "suspended")).toHaveLength(1);
   });
