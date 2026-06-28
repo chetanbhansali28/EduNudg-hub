@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-export function useScrollReveal(active: boolean) {
+export function useScrollReveal(active: boolean, selector = ".novu-reveal") {
   useEffect(() => {
     if (!active) return;
-    const els = document.querySelectorAll(".novu-reveal");
+    const els = document.querySelectorAll(selector);
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -14,5 +14,5 @@ export function useScrollReveal(active: boolean) {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, [active]);
+  }, [active, selector]);
 }

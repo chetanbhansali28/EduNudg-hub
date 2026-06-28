@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
-import { MarketingContent } from "./MarketingContent";
+import { EnterprisePlatformContent } from "./enterprise/EnterprisePlatformContent";
 
 export function MarketingHomePage() {
   const { data: config, isLoading } = useQuery({
@@ -12,5 +12,5 @@ export function MarketingHomePage() {
     return <p className="marketing-page--loading-inline">Loading…</p>;
   }
 
-  return <MarketingContent config={config} portalMode="platform" />;
+  return <EnterprisePlatformContent config={config} />;
 }

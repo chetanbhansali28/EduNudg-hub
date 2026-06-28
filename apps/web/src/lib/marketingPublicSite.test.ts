@@ -9,6 +9,8 @@ import {
   normalizeMarketingNavHref,
   resolveNavHrefSelectValue,
   scrollToMarketingHash,
+  sanitizePublicFooter,
+  sanitizePublicFooterLinks,
   syncMarketingNavLinks,
 } from "./marketingPublicSite";
 
@@ -125,5 +127,37 @@ describe("toYoutubeEmbedUrl", () => {
     expect(toYoutubeEmbedUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ")).toBe(
       "https://www.youtube.com/embed/dQw4w9WgXcQ"
     );
+  });
+});
+
+describe("sanitizePublicFooter", () => {
+  it("regression_platform_footer_omits_admin_links_in_merge", async () => {
+    const { mergeHomepageConfig } = await import("./homepageApi");
+    const merged = mergeHomepageConfig({
+      footer: {
+        productLinks: [{ label: "Sign in", href: "/login" }],
+        companyLinks: [
+          { label: "Platform admin", href: "/admin" },
+          { label: "Edit homepage", href: "/admin/homepage" },
+          { label: "Contact", href: "mailto:support@edunudg.com" },
+        ],
+        connectLinks: [],
+        copyright: "© Test",
+        privacyHref: "/legal/privacy",
+        termsHref: "/legal/terms",
+      },
+    });
+
+    expect(merged.footer.companyLinks.some((l) => l.href.startsWith("/admin"))).toBe(false);
+    expect(merged.footer.companyLinks.some((l) => l.label === "Contact")).toBe(true);
+    expect(merged.footer.productLinks.some((l) => l.href === "/login")).toBe(true);
+  });
+
+  it("regression_sanitize_public_footer_links_filters_admin_paths", () => {
+    const filtered = sanitizePublicFooterLinks([
+      { label: "Admin", href: "/admin" },
+      { label: "FAQ", href: "#faq" },
+    ]);
+    expect(filtered).toEqual([{ label: "FAQ", href: "#faq" }]);
   });
 });

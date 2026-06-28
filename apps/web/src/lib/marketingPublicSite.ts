@@ -1,4 +1,4 @@
-import type { HomepageConfig, MarketingTheme } from "@/types/homepage";
+import type { HomepageConfig, HomepageLink, MarketingTheme } from "@/types/homepage";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import type { PortalMode } from "@/lib/portalMode";
 import {
@@ -191,6 +191,26 @@ export function applyCanonicalSiteName(config: HomepageConfig, siteName: string)
   return {
     ...config,
     meta: { ...config.meta, siteName },
+  };
+}
+
+/** Admin-only paths that must not appear in public marketing footers. */
+export function isAdminOnlyPublicFooterHref(href: string): boolean {
+  const normalized = href.trim().toLowerCase();
+  if (!normalized.startsWith("/")) return false;
+  return normalized === "/admin" || normalized === "/admin/homepage" || normalized.startsWith("/admin/");
+}
+
+export function sanitizePublicFooterLinks(links: HomepageLink[]): HomepageLink[] {
+  return links.filter((link) => !isAdminOnlyPublicFooterHref(link.href));
+}
+
+export function sanitizePublicFooter(config: HomepageConfig["footer"]): HomepageConfig["footer"] {
+  return {
+    ...config,
+    productLinks: sanitizePublicFooterLinks(config.productLinks),
+    companyLinks: sanitizePublicFooterLinks(config.companyLinks),
+    connectLinks: sanitizePublicFooterLinks(config.connectLinks),
   };
 }
 

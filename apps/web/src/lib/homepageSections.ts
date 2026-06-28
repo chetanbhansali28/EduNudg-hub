@@ -15,7 +15,10 @@ export type HomepageSectionKey =
   | "founders"
   | "trustMedia"
   | "gallery"
-  | "footerRich";
+  | "footerRich"
+  | "ecosystemIntro"
+  | "connectivityShowcase"
+  | "footerCta";
 
 export type HomepageSectionVisibility = Partial<Record<HomepageSectionKey, boolean>>;
 
@@ -34,6 +37,30 @@ export const DEFAULT_HOMEPAGE_SECTION_VISIBILITY: Record<HomepageSectionKey, boo
   trustMedia: true,
   gallery: true,
   footerRich: true,
+  ecosystemIntro: true,
+  connectivityShowcase: true,
+  footerCta: true,
+};
+
+/** Section defaults for the platform enterprise landing at localhost:9000. */
+export const ENTERPRISE_PLATFORM_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean> = {
+  hero: true,
+  featureScroll: false,
+  highlights: false,
+  privacy: false,
+  testimonials: false,
+  faq: true,
+  footer: true,
+  programsGrid: false,
+  curriculumSyllabus: false,
+  featureGrid: true,
+  founders: false,
+  trustMedia: false,
+  gallery: false,
+  footerRich: false,
+  ecosystemIntro: true,
+  connectivityShowcase: true,
+  footerCta: true,
 };
 
 export const ABACUS_CLASSIC_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean> = {
@@ -51,6 +78,9 @@ export const ABACUS_CLASSIC_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean
   trustMedia: true,
   gallery: true,
   footerRich: true,
+  ecosystemIntro: false,
+  connectivityShowcase: false,
+  footerCta: false,
 };
 
 export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean> = {
@@ -68,6 +98,9 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   trustMedia: true,
   gallery: false,
   footerRich: true,
+  ecosystemIntro: false,
+  connectivityShowcase: false,
+  footerCta: false,
 };
 
 export type HomepageSectionVisibilityInput = HomepageSectionVisibility & {
@@ -98,6 +131,10 @@ export function isSectionEnabled(config: HomepageConfig, key: HomepageSectionKey
   return mergeSectionVisibility(config.sections)[key];
 }
 
+export function isPlatformSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {
+  return mergeSectionVisibility(config.sections, ENTERPRISE_PLATFORM_SECTION_DEFAULTS)[key];
+}
+
 export function isAbacusSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {
   return mergeSectionVisibility(config.sections, ABACUS_CLASSIC_SECTION_DEFAULTS)[key];
 }
@@ -109,10 +146,11 @@ export function isSparkSectionEnabled(config: HomepageConfig, key: HomepageSecti
 export function setSectionEnabled(
   config: HomepageConfig,
   key: HomepageSectionKey,
-  enabled: boolean
+  enabled: boolean,
+  themeDefaults: Record<HomepageSectionKey, boolean> = DEFAULT_HOMEPAGE_SECTION_VISIBILITY
 ): HomepageConfig {
   return {
     ...config,
-    sections: { ...mergeSectionVisibility(config.sections), [key]: enabled },
+    sections: { ...mergeSectionVisibility(config.sections, themeDefaults), [key]: enabled },
   };
 }

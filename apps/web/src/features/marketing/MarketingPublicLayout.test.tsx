@@ -33,6 +33,7 @@ describe("MarketingPublicLayout", () => {
     expect(await screen.findByText("Page body")).toBeDefined();
     expect(screen.getByLabelText("Site")).toBeDefined();
     expect(screen.getByText(DEFAULT_HOMEPAGE_CONFIG.footer.copyright)).toBeDefined();
+    expect(document.querySelector(".ent-footer")).toBeTruthy();
     expect(document.querySelector(".novu-site-footer__qr")).toBeNull();
   });
 
@@ -57,7 +58,7 @@ describe("MarketingPublicLayout", () => {
     );
 
     await screen.findByText("Page body");
-    const logo = document.querySelector(".novu-nav-bar__logo-img");
+    const logo = document.querySelector(".ent-nav__logo-img");
     expect(logo).not.toBeNull();
     expect(logo?.getAttribute("src")).toBe("https://cdn.example/platform-logo.png?v=1");
   });

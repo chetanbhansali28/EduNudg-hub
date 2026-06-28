@@ -14,6 +14,42 @@ export interface HomepageFeatureSection {
   titleSerif: string;
   body: string;
   videoUrl?: string;
+  /** Platform enterprise theme: preset icon keys for card header. */
+  iconKeys?: string[];
+}
+
+export interface HomepageHeroOverlayCard {
+  eyebrow: string;
+  value: string;
+  progressPercent: number;
+}
+
+export interface HomepageEcosystemIntro {
+  title: string;
+  subtitle: string;
+}
+
+export interface HomepageConnectivityCard {
+  id: string;
+  iconKey: string;
+  title: string;
+  body: string;
+}
+
+export interface HomepageConnectivityShowcase {
+  title: string;
+  subtitle: string;
+  centerImageUrl?: string;
+  cards: HomepageConnectivityCard[];
+}
+
+export interface HomepageBrandSignupCopy {
+  promoTitle: string;
+  promoSubtitle: string;
+  steps: [string, string, string];
+  formTitle: string;
+  formSubtitle: string;
+  submitLabel: string;
 }
 
 export interface HomepagePriorityItem {
@@ -201,6 +237,14 @@ export interface HomepageConfig {
   trustMedia?: HomepageTrustMedia;
   gallery?: HomepageGallery;
   programsSection?: HomepageProgramsSection;
+  /** Platform enterprise landing: hero stat overlay on side image. */
+  heroOverlayCard?: HomepageHeroOverlayCard;
+  /** Platform enterprise landing: cream intro band below hero. */
+  ecosystemIntro?: HomepageEcosystemIntro;
+  /** Platform enterprise landing: phone + satellite cards section. */
+  connectivityShowcase?: HomepageConnectivityShowcase;
+  /** Platform enterprise landing: brand signup section copy. */
+  brandSignup?: HomepageBrandSignupCopy;
   /** Show/hide major page sections on the public marketing site. */
   sections?: HomepageSectionVisibility;
 }

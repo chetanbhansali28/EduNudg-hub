@@ -9,11 +9,13 @@ import type {
   HomepageTestimonial,
   MarketingTheme,
 } from "@/types/homepage";
+import type { HomepageSectionVisibility } from "@/lib/homepageSections";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import type { PortalMode } from "@/lib/portalMode";
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import {
+  ENTERPRISE_PLATFORM_SECTION_DEFAULTS,
   mergeSectionVisibility,
   setSectionEnabled,
   type HomepageSectionKey,
@@ -63,7 +65,9 @@ export function HomepageEditorForm({
   portalMode = "platform",
 }: HomepageEditorFormProps) {
   const config = mergeHomepageConfig(rawConfig ?? DEFAULT_HOMEPAGE_CONFIG);
-  const sections = mergeSectionVisibility(config.sections);
+  const isPlatformEditor = portalMode === "platform";
+  const sectionDefaults = isPlatformEditor ? ENTERPRISE_PLATFORM_SECTION_DEFAULTS : undefined;
+  const sections = mergeSectionVisibility(config.sections, sectionDefaults);
 
   const commit = (next: HomepageConfig) => {
     onChange(next);
@@ -75,7 +79,7 @@ export function HomepageEditorForm({
   };
 
   const setSection = (key: HomepageSectionKey, enabled: boolean) => {
-    commit(setSectionEnabled(config, key, enabled));
+    commit(setSectionEnabled(config, key, enabled, sectionDefaults));
   };
 
   const updateHero = (field: keyof HomepageConfig["hero"], value: string) => {
@@ -83,12 +87,23 @@ export function HomepageEditorForm({
   };
 
   const updatePrimaryCta = (field: "ctaLabel" | "ctaHref", value: string) => {
+    if (isPlatformEditor) {
+      onChange({ ...config, nav: { ...config.nav, [field]: value } });
+      return;
+    }
     onChange({
       ...config,
       nav: { ...config.nav, [field]: value },
       hero: { ...config.hero, [field]: value },
       footerCta: { ...config.footerCta, [field]: value },
     });
+  };
+
+  const updateFooterLinks = (
+    key: "productLinks" | "companyLinks" | "connectLinks",
+    links: HomepageLink[]
+  ) => {
+    onChange({ ...config, footer: { ...config.footer, [key]: links } });
   };
 
   const updateNavLinks = (links: HomepageLink[]) => {
@@ -145,19 +160,103 @@ export function HomepageEditorForm({
           <Input label="Line 2 (sans)" value={config.hero.line2} onChange={(v) => updateHero("line2", v)} />
           <Input label="Line 2 (serif)" value={config.hero.line2Serif} onChange={(v) => updateHero("line2Serif", v)} />
           <Input label="Subtitle" value={config.hero.subtitle} onChange={(v) => updateHero("subtitle", v)} />
+          {isPlatformEditor ? (
+            <>
+              <Input
+                label="Badge"
+                value={config.hero.badge ?? ""}
+                onChange={(v) => updateHero("badge", v)}
+              />
+              <Input
+                label="Hero primary CTA label"
+                value={config.hero.ctaLabel ?? config.nav.ctaLabel}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    hero: { ...config.hero, ctaLabel: v },
+                  })
+                }
+              />
+              <Input
+                label="Hero primary CTA link"
+                value={config.hero.ctaHref ?? config.nav.ctaHref}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    hero: { ...config.hero, ctaHref: v },
+                  })
+                }
+              />
+              <Input
+                label="Secondary CTA label"
+                value={config.hero.secondaryCtaLabel ?? config.nav.secondaryCtaLabel ?? ""}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    nav: { ...config.nav, secondaryCtaLabel: v },
+                    hero: { ...config.hero, secondaryCtaLabel: v },
+                  })
+                }
+              />
+              <Input
+                label="Secondary CTA link"
+                value={config.hero.secondaryCtaHref ?? config.nav.secondaryCtaHref ?? ""}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    nav: { ...config.nav, secondaryCtaHref: v },
+                    hero: { ...config.hero, secondaryCtaHref: v },
+                  })
+                }
+              />
+              <Input
+                label="Overlay eyebrow"
+                value={config.heroOverlayCard?.eyebrow ?? ""}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    heroOverlayCard: { ...config.heroOverlayCard!, eyebrow: v },
+                  })
+                }
+              />
+              <Input
+                label="Overlay value"
+                value={config.heroOverlayCard?.value ?? ""}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    heroOverlayCard: { ...config.heroOverlayCard!, value: v },
+                  })
+                }
+              />
+              <Input
+                label="Overlay progress %"
+                value={String(config.heroOverlayCard?.progressPercent ?? 0)}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    heroOverlayCard: {
+                      ...config.heroOverlayCard!,
+                      progressPercent: Number.parseInt(v, 10) || 0,
+                    },
+                  })
+                }
+              />
+            </>
+          ) : null}
           <Input
-            label="Primary CTA label (nav, hero, footer)"
+            label={isPlatformEditor ? "Header CTA label" : "Primary CTA label (nav, hero, footer)"}
             value={config.nav.ctaLabel}
             onChange={(v) => updatePrimaryCta("ctaLabel", v)}
           />
           <Input
-            label="Primary CTA link"
+            label={isPlatformEditor ? "Header CTA link" : "Primary CTA link"}
             value={config.nav.ctaHref}
             onChange={(v) => updatePrimaryCta("ctaHref", v)}
           />
           <EditorFieldSpan>
             <MarketingMediaField
-              label="Hero background image or video"
+              label={isPlatformEditor ? "Hero side image" : "Hero background image or video"}
               value={config.hero.backgroundImageUrl}
               onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, backgroundImageUrl: v } })}
               mediaType="image"
@@ -167,7 +266,7 @@ export function HomepageEditorForm({
           </EditorFieldSpan>
           <EditorFieldSpan>
             <MarketingMediaField
-              label="Phone frame image"
+              label={isPlatformEditor ? "Connectivity phone image" : "Phone frame image"}
               value={config.hero.phoneFrameUrl}
               onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, phoneFrameUrl: v } })}
               mediaType="image"
@@ -178,6 +277,323 @@ export function HomepageEditorForm({
         </EditorFieldsGrid>
       </EditorAccordion>
 
+      {isPlatformEditor ? (
+        <>
+          <EditorAccordion
+            sectionId="ecosystemIntro"
+            title="Ecosystem intro"
+            enabled={sections.ecosystemIntro}
+            onEnabledChange={(enabled) => setSection("ecosystemIntro", enabled)}
+          >
+            <EditorFieldsGrid>
+              <Input
+                label="Title"
+                value={config.ecosystemIntro?.title ?? ""}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    ecosystemIntro: { ...config.ecosystemIntro!, title: v },
+                  })
+                }
+              />
+              <EditorFieldSpan>
+                <Input
+                  label="Subtitle"
+                  value={config.ecosystemIntro?.subtitle ?? ""}
+                  onChange={(v) =>
+                    onChange({
+                      ...config,
+                      ecosystemIntro: { ...config.ecosystemIntro!, subtitle: v },
+                    })
+                  }
+                />
+              </EditorFieldSpan>
+            </EditorFieldsGrid>
+          </EditorAccordion>
+
+          <EditorAccordion
+            sectionId="connectivityShowcase"
+            title="Connectivity showcase"
+            enabled={sections.connectivityShowcase}
+            onEnabledChange={(enabled) => setSection("connectivityShowcase", enabled)}
+          >
+            <EditorFieldsGrid>
+              <Input
+                label="Title"
+                value={config.connectivityShowcase?.title ?? ""}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    connectivityShowcase: { ...config.connectivityShowcase!, title: v },
+                  })
+                }
+              />
+              <EditorFieldSpan>
+                <Input
+                  label="Subtitle"
+                  value={config.connectivityShowcase?.subtitle ?? ""}
+                  onChange={(v) =>
+                    onChange({
+                      ...config,
+                      connectivityShowcase: { ...config.connectivityShowcase!, subtitle: v },
+                    })
+                  }
+                />
+              </EditorFieldSpan>
+              <EditorFieldSpan>
+                <MarketingMediaField
+                  label="Center phone image (optional override)"
+                  value={config.connectivityShowcase?.centerImageUrl ?? ""}
+                  onChange={(v) =>
+                    commitMedia({
+                      ...config,
+                      connectivityShowcase: {
+                        ...config.connectivityShowcase!,
+                        centerImageUrl: v || undefined,
+                      },
+                    })
+                  }
+                  mediaType="image"
+                  uploadSubdir="connectivity-center"
+                  uploadScope={uploadScope}
+                />
+              </EditorFieldSpan>
+            </EditorFieldsGrid>
+            <EditorItemList
+              onAdd={() =>
+                commit({
+                  ...config,
+                  connectivityShowcase: {
+                    ...config.connectivityShowcase!,
+                    cards: [
+                      ...config.connectivityShowcase!.cards,
+                      {
+                        id: `card-${Date.now()}`,
+                        iconKey: "message",
+                        title: "New card",
+                        body: "Description",
+                      },
+                    ],
+                  },
+                })
+              }
+              addLabel="+ Add connectivity card"
+            >
+              {config.connectivityShowcase?.cards.map((card, i) => (
+                <EditorItemPanel
+                  key={card.id}
+                  title={`Card ${i + 1}`}
+                  onRemove={
+                    (config.connectivityShowcase?.cards.length ?? 0) <= 1
+                      ? undefined
+                      : () =>
+                          commit({
+                            ...config,
+                            connectivityShowcase: {
+                              ...config.connectivityShowcase!,
+                              cards: config.connectivityShowcase!.cards.filter((_, idx) => idx !== i),
+                            },
+                          })
+                  }
+                  removeLabel="Remove card"
+                >
+                  <EditorFieldsGrid>
+                    <Input
+                      label="Icon key"
+                      value={card.iconKey}
+                      onChange={(v) => {
+                        const cards = [...config.connectivityShowcase!.cards];
+                        cards[i] = { ...card, iconKey: v };
+                        onChange({ ...config, connectivityShowcase: { ...config.connectivityShowcase!, cards } });
+                      }}
+                    />
+                    <Input
+                      label="Title"
+                      value={card.title}
+                      onChange={(v) => {
+                        const cards = [...config.connectivityShowcase!.cards];
+                        cards[i] = { ...card, title: v };
+                        onChange({ ...config, connectivityShowcase: { ...config.connectivityShowcase!, cards } });
+                      }}
+                    />
+                    <EditorFieldSpan>
+                      <Input
+                        label="Body"
+                        value={card.body}
+                        onChange={(v) => {
+                          const cards = [...config.connectivityShowcase!.cards];
+                          cards[i] = { ...card, body: v };
+                          onChange({ ...config, connectivityShowcase: { ...config.connectivityShowcase!, cards } });
+                        }}
+                      />
+                    </EditorFieldSpan>
+                  </EditorFieldsGrid>
+                </EditorItemPanel>
+              ))}
+            </EditorItemList>
+          </EditorAccordion>
+
+          <EditorAccordion
+            sectionId="featureGrid"
+            title="Feature grid"
+            enabled={sections.featureGrid}
+            onEnabledChange={(enabled) => setSection("featureGrid", enabled)}
+          >
+            <EditorSectionNote>Three-column feature cards on the platform homepage.</EditorSectionNote>
+            <EditorItemList
+              onAdd={() =>
+                commit({
+                  ...config,
+                  featureSections: [
+                    ...config.featureSections,
+                    {
+                      id: `section-${Date.now()}`,
+                      title: "New",
+                      titleSerif: "feature",
+                      body: "Description",
+                    } satisfies HomepageFeatureSection,
+                  ],
+                })
+              }
+              addLabel="+ Add feature card"
+            >
+              {config.featureSections.map((section, i) => (
+                <EditorItemPanel
+                  key={section.id}
+                  title={`Feature card ${i + 1}`}
+                  onRemove={
+                    config.featureSections.length <= 1
+                      ? undefined
+                      : () =>
+                          commit({
+                            ...config,
+                            featureSections: config.featureSections.filter((_, idx) => idx !== i),
+                          })
+                  }
+                  removeLabel="Remove card"
+                >
+                  <EditorFieldsGrid>
+                    <Input
+                      label="Title"
+                      value={section.title}
+                      onChange={(v) => {
+                        const featureSections = [...config.featureSections];
+                        featureSections[i] = { ...section, title: v };
+                        onChange({ ...config, featureSections });
+                      }}
+                    />
+                    <Input
+                      label="Serif phrase"
+                      value={section.titleSerif}
+                      onChange={(v) => {
+                        const featureSections = [...config.featureSections];
+                        featureSections[i] = { ...section, titleSerif: v };
+                        onChange({ ...config, featureSections });
+                      }}
+                    />
+                    <Input
+                      label="Icon keys (comma-separated)"
+                      value={(section.iconKeys ?? []).join(", ")}
+                      onChange={(v) => {
+                        const featureSections = [...config.featureSections];
+                        featureSections[i] = {
+                          ...section,
+                          iconKeys: v
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter(Boolean),
+                        };
+                        onChange({ ...config, featureSections });
+                      }}
+                    />
+                    <EditorFieldSpan>
+                      <Input
+                        label="Body"
+                        value={section.body}
+                        onChange={(v) => {
+                          const featureSections = [...config.featureSections];
+                          featureSections[i] = { ...section, body: v };
+                          onChange({ ...config, featureSections });
+                        }}
+                      />
+                    </EditorFieldSpan>
+                  </EditorFieldsGrid>
+                </EditorItemPanel>
+              ))}
+            </EditorItemList>
+          </EditorAccordion>
+
+          <EditorAccordion sectionId="brandSignup" title="Brand signup" enabled>
+            <EditorFieldsGrid>
+              <Input
+                label="Promo title"
+                value={config.brandSignup?.promoTitle ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, brandSignup: { ...config.brandSignup!, promoTitle: v } })
+                }
+              />
+              <Input
+                label="Promo subtitle"
+                value={config.brandSignup?.promoSubtitle ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, brandSignup: { ...config.brandSignup!, promoSubtitle: v } })
+                }
+              />
+              <Input
+                label="Step 1 label"
+                value={config.brandSignup?.steps[0] ?? ""}
+                onChange={(v) => {
+                  const steps = [...(config.brandSignup?.steps ?? ["", "", ""])] as [string, string, string];
+                  steps[0] = v;
+                  onChange({ ...config, brandSignup: { ...config.brandSignup!, steps } });
+                }}
+              />
+              <Input
+                label="Step 2 label"
+                value={config.brandSignup?.steps[1] ?? ""}
+                onChange={(v) => {
+                  const steps = [...(config.brandSignup?.steps ?? ["", "", ""])] as [string, string, string];
+                  steps[1] = v;
+                  onChange({ ...config, brandSignup: { ...config.brandSignup!, steps } });
+                }}
+              />
+              <Input
+                label="Step 3 label"
+                value={config.brandSignup?.steps[2] ?? ""}
+                onChange={(v) => {
+                  const steps = [...(config.brandSignup?.steps ?? ["", "", ""])] as [string, string, string];
+                  steps[2] = v;
+                  onChange({ ...config, brandSignup: { ...config.brandSignup!, steps } });
+                }}
+              />
+              <Input
+                label="Form title"
+                value={config.brandSignup?.formTitle ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, brandSignup: { ...config.brandSignup!, formTitle: v } })
+                }
+              />
+              <Input
+                label="Form subtitle"
+                value={config.brandSignup?.formSubtitle ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, brandSignup: { ...config.brandSignup!, formSubtitle: v } })
+                }
+              />
+              <Input
+                label="Submit button label"
+                value={config.brandSignup?.submitLabel ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, brandSignup: { ...config.brandSignup!, submitLabel: v } })
+                }
+              />
+            </EditorFieldsGrid>
+          </EditorAccordion>
+        </>
+      ) : null}
+
+      {!isPlatformEditor ? (
+      <>
       <EditorAccordion
         sectionId="featureScroll"
         title="Feature sections (phone blocks)"
@@ -371,7 +787,10 @@ export function HomepageEditorForm({
           ))}
         </EditorItemList>
       </EditorAccordion>
+      </>
+      ) : null}
 
+      {!isPlatformEditor ? (
       <EditorAccordion
         sectionId="testimonials"
         title="Testimonials"
@@ -417,6 +836,7 @@ export function HomepageEditorForm({
           />
         )}
       </EditorAccordion>
+      ) : null}
 
       <EditorAccordion
         sectionId="faq"
@@ -466,47 +886,148 @@ export function HomepageEditorForm({
       </EditorAccordion>
       </HomepageEditorSections>
 
-      <EditorStaticSection sectionId="privacyFooter" title="Privacy & Footer">
+      <EditorStaticSection
+        sectionId="privacyFooter"
+        title={isPlatformEditor ? "Pre-footer CTA & site footer" : "Privacy & Footer"}
+      >
         <EditorFieldsGrid>
-          <EditorFieldSpan>
-            <ToggleField
-              label="Show privacy section"
-              description="Trust block on homepage."
-              checked={sections.privacy}
-              onChange={(enabled) => setSection("privacy", enabled)}
-            />
-          </EditorFieldSpan>
+          {!isPlatformEditor ? (
+            <>
+              <EditorFieldSpan>
+                <ToggleField
+                  label="Show privacy section"
+                  description="Trust block on homepage."
+                  checked={sections.privacy}
+                  onChange={(enabled) => setSection("privacy", enabled)}
+                />
+              </EditorFieldSpan>
+            </>
+          ) : null}
+          {isPlatformEditor ? (
+            <EditorFieldSpan>
+              <ToggleField
+                label="Show pre-footer CTA"
+                description="Light call-to-action band above the site footer."
+                checked={sections.footerCta}
+                onChange={(enabled) => setSection("footerCta", enabled)}
+              />
+            </EditorFieldSpan>
+          ) : null}
           <EditorFieldSpan>
             <ToggleField
               label="Show site footer"
-              description="Logo, links, and copyright."
+              description="Link columns and copyright."
               checked={sections.footer}
               onChange={(enabled) => setSection("footer", enabled)}
             />
           </EditorFieldSpan>
+          {!isPlatformEditor ? (
+            <>
+              <Input
+                label="Privacy title"
+                value={config.privacy.title}
+                onChange={(v) => onChange({ ...config, privacy: { ...config.privacy, title: v } })}
+              />
+              <Input
+                label="Privacy body"
+                value={config.privacy.body}
+                onChange={(v) => onChange({ ...config, privacy: { ...config.privacy, body: v } })}
+              />
+            </>
+          ) : null}
           <Input
-            label="Privacy title"
-            value={config.privacy.title}
-            onChange={(v) => onChange({ ...config, privacy: { ...config.privacy, title: v } })}
-          />
-          <Input
-            label="Privacy body"
-            value={config.privacy.body}
-            onChange={(v) => onChange({ ...config, privacy: { ...config.privacy, body: v } })}
-          />
-          <Input
-            label="Footer CTA title"
+            label={isPlatformEditor ? "Pre-footer CTA title" : "Footer CTA title"}
             value={config.footerCta.title}
             onChange={(v) => onChange({ ...config, footerCta: { ...config.footerCta, title: v } })}
           />
+          <Input
+            label={isPlatformEditor ? "Pre-footer CTA subtitle" : "Footer CTA subtitle"}
+            value={config.footerCta.subtitle}
+            onChange={(v) => onChange({ ...config, footerCta: { ...config.footerCta, subtitle: v } })}
+          />
+          {isPlatformEditor ? (
+            <>
+              <Input
+                label="Pre-footer CTA button label"
+                value={config.footerCta.ctaLabel}
+                onChange={(v) =>
+                  onChange({ ...config, footerCta: { ...config.footerCta, ctaLabel: v } })
+                }
+              />
+              <NavLinkHrefField
+                label="Pre-footer CTA button link"
+                value={config.footerCta.ctaHref}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+                onChange={(v) =>
+                  onChange({ ...config, footerCta: { ...config.footerCta, ctaHref: v } })
+                }
+              />
+            </>
+          ) : null}
           <Input
             label="Copyright"
             value={config.footer.copyright}
             onChange={(v) => onChange({ ...config, footer: { ...config.footer, copyright: v } })}
           />
+          {isPlatformEditor ? (
+            <>
+              <EditorFieldSpan>
+                <EditorSectionNote>
+                  Footer columns use fixed headings: Product, Company, Connect, and Legal. Admin-only links are
+                  removed automatically when the page is saved.
+                </EditorSectionNote>
+              </EditorFieldSpan>
+              <FooterColumnLinksEditor
+                title="Product links"
+                links={config.footer.productLinks}
+                onChange={(links) => updateFooterLinks("productLinks", links)}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+              />
+              <FooterColumnLinksEditor
+                title="Company links"
+                links={config.footer.companyLinks}
+                onChange={(links) => updateFooterLinks("companyLinks", links)}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+              />
+              <FooterColumnLinksEditor
+                title="Connect links"
+                links={config.footer.connectLinks}
+                onChange={(links) => updateFooterLinks("connectLinks", links)}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+              />
+              <NavLinkHrefField
+                label="Legal — Privacy link"
+                value={config.footer.privacyHref}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+                onChange={(v) =>
+                  onChange({ ...config, footer: { ...config.footer, privacyHref: v } })
+                }
+              />
+              <NavLinkHrefField
+                label="Legal — Terms link"
+                value={config.footer.termsHref}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+                onChange={(v) =>
+                  onChange({ ...config, footer: { ...config.footer, termsHref: v } })
+                }
+              />
+            </>
+          ) : null}
           <EditorFieldSpan>
             <MarketingMediaField
-              label="Footer CTA background image or video"
+              label={isPlatformEditor ? "Pre-footer side image" : "Footer CTA background image or video"}
               value={config.footerCta.backgroundImageUrl ?? ""}
               onChange={(v) =>
                 commitMedia({
@@ -524,6 +1045,102 @@ export function HomepageEditorForm({
         </EditorFieldsGrid>
       </EditorStaticSection>
     </>
+  );
+}
+
+function FooterColumnLinksEditor({
+  title,
+  links,
+  onChange,
+  marketingTheme,
+  portalMode,
+  sections,
+}: {
+  title: string;
+  links: HomepageLink[];
+  onChange: (links: HomepageLink[]) => void;
+  marketingTheme: MarketingTheme;
+  portalMode: PortalMode;
+  sections: HomepageSectionVisibility;
+}) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const onDragStart = (index: number) => (e: DragEvent) => {
+    setDragIndex(index);
+    setDragOverIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const onDragOver = (index: number) => (e: DragEvent) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const onDrop = (index: number) => (e: DragEvent) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    onChange(moveItem(links, dragIndex, index));
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const onDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  return (
+    <EditorFieldSpan>
+      <EditorItemList
+        onAdd={() => onChange([...links, { label: "New link", href: "#" }])}
+        addLabel={`+ Add ${title.toLowerCase().replace(/ links$/, "")} link`}
+      >
+        {links.map((link, i) => (
+          <EditorItemPanel
+            key={`footer-${title}-${i}-${link.label}`}
+            title={`${title} ${i + 1}`}
+            onRemove={() => onChange(links.filter((_, idx) => idx !== i))}
+            removeLabel="Remove link"
+            className={[
+              dragIndex === i ? "ed-editor-nav-row--dragging" : "",
+              dragOverIndex === i && dragIndex !== i ? "ed-editor-nav-row--drop-target" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            dragHandleProps={{
+              draggable: true,
+              onDragStart: onDragStart(i),
+              onDragOver: onDragOver(i),
+              onDrop: onDrop(i),
+              onDragEnd,
+            }}
+          >
+            <Input
+              label="Label"
+              value={link.label}
+              onChange={(v) => {
+                const next = [...links];
+                next[i] = { ...link, label: v };
+                onChange(next);
+              }}
+            />
+            <NavLinkHrefField
+              value={link.href}
+              marketingTheme={marketingTheme}
+              portalMode={portalMode}
+              sections={sections}
+              onChange={(v) => {
+                const next = [...links];
+                next[i] = { ...link, href: v };
+                onChange(next);
+              }}
+            />
+          </EditorItemPanel>
+        ))}
+      </EditorItemList>
+    </EditorFieldSpan>
   );
 }
 

@@ -8,11 +8,17 @@ describe("HomepageEditorForm section controls", () => {
     const onChange = vi.fn();
     const onPersist = vi.fn();
 
+    const config = {
+      ...DEFAULT_HOMEPAGE_CONFIG,
+      sections: { ...DEFAULT_HOMEPAGE_CONFIG.sections, highlights: true },
+    };
+
     render(
       <HomepageEditorForm
-        config={DEFAULT_HOMEPAGE_CONFIG}
+        config={config}
         onChange={onChange}
         onPersist={onPersist}
+        portalMode="brand"
       />
     );
 
@@ -38,7 +44,7 @@ describe("HomepageEditorForm section controls", () => {
     };
 
     render(
-      <HomepageEditorForm config={config} onChange={onChange} onPersist={onPersist} />
+      <HomepageEditorForm config={config} onChange={onChange} onPersist={onPersist} portalMode="brand" />
     );
 
     fireEvent.click(

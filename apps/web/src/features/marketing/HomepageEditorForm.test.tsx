@@ -22,12 +22,12 @@ describe("HomepageEditorForm", () => {
 
     expect(screen.getByRole("heading", { name: "Site Identity" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Navigation Management" })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "Privacy & Footer" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Pre-footer CTA & site footer" })).toBeDefined();
     expect(screen.getByText("Hero")).toBeDefined();
 
-    fireEvent.click(screen.getByRole("button", { name: /Hero/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Hero.*Main banner content/i }));
     expect(screen.queryByLabelText("Hero background image URL")).toBeNull();
-    expect(screen.getByLabelText("Hero background image or video")).toBeDefined();
+    expect(screen.getByLabelText("Hero side image")).toBeDefined();
     expect(container.querySelector(".ed-editable-form .ed-form-grid")).toBeTruthy();
   });
 

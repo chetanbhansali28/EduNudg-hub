@@ -1,6 +1,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { mergeSectionVisibility } from "@/lib/homepageSections";
+import { sanitizePublicFooter } from "@/lib/marketingPublicSite";
 import type { HomepageConfig, HomepageShowcaseCard, HomepageTestimonial } from "@/types/homepage";
 
 const HOMEPAGE_KEY = "marketing_homepage";
@@ -86,6 +87,7 @@ export function mergeHomepageConfig(partial: Partial<HomepageConfig>): HomepageC
         titleSerif: old.titleSerif ?? old.titleLine2 ?? def?.titleSerif ?? "",
         body: old.body ?? def?.body ?? "",
         videoUrl: old.videoUrl ?? def?.videoUrl,
+        iconKeys: old.iconKeys ?? def?.iconKeys,
       };
     }) ?? DEFAULT_HOMEPAGE_CONFIG.featureSections;
 
@@ -100,6 +102,28 @@ export function mergeHomepageConfig(partial: Partial<HomepageConfig>): HomepageC
       links: partial.nav?.links ?? DEFAULT_HOMEPAGE_CONFIG.nav.links,
     },
     hero,
+    heroOverlayCard: {
+      ...DEFAULT_HOMEPAGE_CONFIG.heroOverlayCard!,
+      ...partial.heroOverlayCard,
+    },
+    ecosystemIntro: {
+      ...DEFAULT_HOMEPAGE_CONFIG.ecosystemIntro!,
+      ...partial.ecosystemIntro,
+    },
+    connectivityShowcase: {
+      ...DEFAULT_HOMEPAGE_CONFIG.connectivityShowcase!,
+      ...partial.connectivityShowcase,
+      cards:
+        partial.connectivityShowcase?.cards?.map((c, i) => ({
+          ...DEFAULT_HOMEPAGE_CONFIG.connectivityShowcase!.cards[i],
+          ...c,
+        })) ?? DEFAULT_HOMEPAGE_CONFIG.connectivityShowcase!.cards,
+    },
+    brandSignup: {
+      ...DEFAULT_HOMEPAGE_CONFIG.brandSignup!,
+      ...partial.brandSignup,
+      steps: partial.brandSignup?.steps ?? DEFAULT_HOMEPAGE_CONFIG.brandSignup!.steps,
+    },
     featureSections,
     showcaseCards:
       partial.showcaseCards?.map((c, i) => {
@@ -114,7 +138,7 @@ export function mergeHomepageConfig(partial: Partial<HomepageConfig>): HomepageC
     testimonials,
     faq: partial.faq ?? DEFAULT_HOMEPAGE_CONFIG.faq,
     footerCta: { ...DEFAULT_HOMEPAGE_CONFIG.footerCta, ...partial.footerCta },
-    footer: { ...DEFAULT_HOMEPAGE_CONFIG.footer, ...partial.footer },
+    footer: sanitizePublicFooter({ ...DEFAULT_HOMEPAGE_CONFIG.footer, ...partial.footer }),
     sections: mergeSectionVisibility(partial.sections),
   };
 }
