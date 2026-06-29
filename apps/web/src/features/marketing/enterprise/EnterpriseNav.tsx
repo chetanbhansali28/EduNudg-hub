@@ -97,9 +97,6 @@ export function EnterpriseNav({ config }: Props) {
         </div>
 
         <div className="ent-nav__actions">
-          <Link to="/login" className="ent-nav__sign-in">
-            Sign In
-          </Link>
           <a href={config.nav.ctaHref} className="ent-nav__cta">
             {config.nav.ctaLabel}
           </a>

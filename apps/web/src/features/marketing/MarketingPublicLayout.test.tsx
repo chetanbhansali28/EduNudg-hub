@@ -32,6 +32,7 @@ describe("MarketingPublicLayout", () => {
 
     expect(await screen.findByText("Page body")).toBeDefined();
     expect(screen.getByLabelText("Site")).toBeDefined();
+    expect(screen.queryByRole("link", { name: "Sign In" })).toBeNull();
     expect(screen.getByText(DEFAULT_HOMEPAGE_CONFIG.footer.copyright)).toBeDefined();
     expect(document.querySelector(".ent-footer")).toBeTruthy();
     expect(document.querySelector(".novu-site-footer__qr")).toBeNull();
