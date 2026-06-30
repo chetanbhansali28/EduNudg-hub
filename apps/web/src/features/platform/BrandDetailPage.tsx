@@ -1,14 +1,15 @@
 import { useEffect } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, DataList, KpiCard, KpiGrid, ListRow, PageToolbar } from "@edunudg/ui";
+import { Badge, Button, Card, DataList, ListRow, PageToolbar } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { brandAdminPath, isUuid } from "@/lib/adminPaths";
 import { portalTargetFromDomain } from "@/lib/brandPortalUrl";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
-import { formatInrFromPaise, useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
+import { useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
 import { BrandEditForm } from "./BrandEditForm";
 import { BrandFeatureTogglesCard } from "./BrandFeatureTogglesCard";
+import { BrandPerformanceCard } from "./BrandPerformanceCard";
 import { PortalOpenButton } from "./PortalOpenButton";
 
 interface BrandRow {
@@ -179,91 +180,11 @@ export function BrandDetailPage() {
         {brandBackendTarget ? <PortalOpenButton target={brandBackendTarget} label="Open brand backend" /> : null}
       </PageToolbar>
 
-      <Card title="Performance (last 30 days)">
-        {monitoring.isLoading ? (
-          <p className="ed-text-sm ed-muted">Loading metrics…</p>
-        ) : (
-          <>
-            <KpiGrid>
-              <KpiCard
-                label="Royalty collected (30d)"
-                value={stats ? formatInrFromPaise(stats.revenue30dCents) : "—"}
-                hint="Paid settlements"
-              />
-              <KpiCard label="Enrollments (30d)" value={stats?.enrollments30d ?? 0} />
-              <KpiCard
-                label="Active enrollments"
-                value={stats?.enrollmentsActive ?? 0}
-                hint={`${stats?.students ?? 0} students`}
-              />
-              <KpiCard
-                label="Centers"
-                value={`${stats?.centersActive ?? 0} / ${stats?.centersTotal ?? 0}`}
-                hint="Active / total"
-              />
-              <KpiCard label="Open leads" value={stats?.leadsOpen ?? 0} />
-              <KpiCard
-                label="Unpaid invoices"
-                value={stats ? formatInrFromPaise(stats.unpaidAmountCents) : "—"}
-                hint={stats ? `${stats.unpaidInvoices} open` : undefined}
-              />
-              <KpiCard label="Subscription" value={sub?.subscription_plans?.name ?? "—"} hint={sub?.status} />
-            </KpiGrid>
-
-            {stats && stats.recentDaily.some((row) => row.enrollments_count > 0 || row.revenue_cents > 0) ? (
-              <div className="ed-monitoring-table-wrap">
-                <p className="ed-text-sm ed-muted" style={{ marginBottom: "0.5rem" }}>
-                  Daily trend (computed from enrollments &amp; royalties)
-                </p>
-                <table className="ed-monitoring-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Enrollments</th>
-                      <th>Royalty (paid)</th>
-                      <th>Active centers</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stats.recentDaily.map((row) => (
-                      <tr key={row.metric_date}>
-                        <td>{row.metric_date}</td>
-                        <td>{row.enrollments_count}</td>
-                        <td>{formatInrFromPaise(row.revenue_cents)}</td>
-                        <td>{row.active_centers}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="ed-text-sm ed-muted">No enrollments or royalty payments in the last two weeks yet.</p>
-            )}
-
-            {stats && stats.topCenters.length > 0 && (
-              <div style={{ marginTop: "1.25rem" }}>
-                <p className="ed-text-sm ed-muted" style={{ marginBottom: "0.5rem" }}>
-                  Top centers by enrollments (30d)
-                </p>
-                <DataList
-                  items={stats.topCenters.map((c) => ({ ...c, id: c.id }))}
-                  render={(c) => (
-                    <ListRow>
-                      <span>
-                        <strong>{c.name}</strong>
-                        <span className="ed-text-sm ed-muted"> · {c.slug}</span>
-                      </span>
-                      <span className="ed-text-sm">
-                        {c.enrollments30d} enrollments · {formatInrFromPaise(c.fees30dCents)} fees
-                      </span>
-                    </ListRow>
-                  )}
-                />
-              </div>
-            )}
-          </>
-        )}
-      </Card>
+      <BrandPerformanceCard
+        loading={monitoring.isLoading}
+        stats={stats}
+        subscription={sub ?? null}
+      />
 
       <Card title="Brand settings">
         <BrandEditForm

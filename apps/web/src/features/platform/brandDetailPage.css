@@ -1,0 +1,44 @@
+.ed-collapsible-card:not(.is-open) .ed-card__header {
+  margin-bottom: 0;
+}
+
+.ed-collapsible-card__header {
+  width: 100%;
+}
+
+.ed-collapsible-card__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.ed-collapsible-card__trigger:focus-visible {
+  outline: 2px solid var(--ed-focus, #2563eb);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.ed-collapsible-card__chevron {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: var(--ed-muted);
+  transition: transform 0.15s ease;
+}
+
+.ed-collapsible-card.is-open .ed-collapsible-card__chevron {
+  transform: rotate(180deg);
+}
+
+.ed-collapsible-card__body {
+  margin-top: 0;
+}
