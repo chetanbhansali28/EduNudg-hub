@@ -77,16 +77,17 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
           publicCurriculum: bundle.publicCurriculum,
           publicStats: bundle.publicStats,
           legalPages: bundle.legalPages,
+          socialConnect: bundle.socialConnect,
         }}
       />
       {showFooter && !isAbacusClassic && !isSparkAcademy ? (
-        <FooterSection config={bundle.config} legalPages={bundle.legalPages} />
+        <FooterSection config={bundle.config} legalPages={bundle.legalPages} socialConnect={bundle.socialConnect} />
       ) : null}
       {showFooter && isAbacusClassic ? (
-        <AbacusClassicFooter config={bundle.config} legalPages={bundle.legalPages} />
+        <AbacusClassicFooter config={bundle.config} legalPages={bundle.legalPages} socialConnect={bundle.socialConnect} />
       ) : null}
       {showFooter && isSparkAcademy ? (
-        <SparkAcademyFooter config={bundle.config} legalPages={bundle.legalPages} />
+        <SparkAcademyFooter config={bundle.config} legalPages={bundle.legalPages} socialConnect={bundle.socialConnect} />
       ) : null}
       {themeUsesLeadModals(theme) ? <MarketingLeadModals brandSlug={brandSlug} /> : null}
     </div>
@@ -106,4 +107,5 @@ export type BrandLandingOutletContext = {
   publicCurriculum: import("@/lib/brandCurriculumPublic").PublicCurriculumProgram[];
   publicStats: import("@/lib/brandLandingBundle").BrandPublicStats;
   legalPages: import("@/lib/brandLegalPages").BrandLegalPages;
+  socialConnect: import("@/lib/brandSocialConnect").BrandSocialConnect;
 };

@@ -627,12 +627,7 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
           phone: SPARK_FOOTER_PHONE,
           website: "www.example.com",
         },
-        socialLinks: [
-          { platform: "Facebook", url: "https://facebook.com" },
-          { platform: "Instagram", url: "https://instagram.com" },
-          { platform: "X", url: "https://x.com" },
-          { platform: "YouTube", url: "https://youtube.com" },
-        ],
+        socialLinks: [],
       },
     },
     sections: mergeSectionVisibility(undefined, SPARK_ACADEMY_SECTION_DEFAULTS),

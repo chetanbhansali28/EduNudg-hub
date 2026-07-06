@@ -50,6 +50,7 @@ describe("BrandLandingPage", () => {
       publicCurriculum: [],
       publicStats: { centersCount: 0, studentsCount: 0 },
       legalPages: {},
+      socialConnect: {},
     });
 
     expect(screen.getByText("Novu landing")).toBeDefined();
@@ -66,6 +67,7 @@ describe("BrandLandingPage", () => {
       publicCurriculum: [],
       publicStats: { centersCount: 12, studentsCount: 5000 },
       legalPages: {},
+      socialConnect: {},
     });
 
     expect(screen.getByRole("main")).toBeDefined();
@@ -87,6 +89,7 @@ describe("BrandLandingPage", () => {
       ],
       publicStats: { centersCount: 3, studentsCount: 200 },
       legalPages: {},
+      socialConnect: {},
     });
 
     expect(screen.getByRole("main")).toBeDefined();

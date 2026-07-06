@@ -1,6 +1,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { parseBrandLegalPages, parseBrandLegalPagesRecord } from "@/lib/brandLegalPages";
+import { parseBrandSocialConnect } from "@/lib/brandSocialConnect";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
@@ -22,6 +23,7 @@ type BrandLandingRow = {
   success_stories?: unknown;
   curriculum?: unknown;
   legal_pages?: unknown;
+  social_connect?: unknown;
 };
 
 function parsePublicStats(raw: unknown): BrandPublicStats {
@@ -60,6 +62,13 @@ function buildBundle(
   legalPages = parseBrandLegalPages(undefined)
 ): BrandLandingBundle {
   const canonicalName = row?.brand_name ?? brandName;
+  const landingPartial = row?.landing ?? undefined;
+  const socialConnect = parseBrandSocialConnect(
+    row?.social_connect && typeof row.social_connect === "object"
+      ? { social_connect: row.social_connect as Record<string, unknown> }
+      : undefined,
+    landingPartial
+  );
   const config = buildConfigForTheme(theme, canonicalName, row?.landing ?? undefined, row?.brand_logo_url ?? null);
   const merged = applyCanonicalSiteName(
     {
@@ -74,6 +83,7 @@ function buildBundle(
     marketingTheme: theme,
     publicStats,
     legalPages,
+    socialConnect,
   };
 }
 
@@ -83,7 +93,8 @@ function fallbackBundle(
   curriculum: PublicCurriculumProgram[],
   theme: MarketingTheme = "novu",
   publicStats: BrandPublicStats = { centersCount: 0, studentsCount: 0 },
-  legalPages = parseBrandLegalPages(undefined)
+  legalPages = parseBrandLegalPages(undefined),
+  socialConnect: ReturnType<typeof parseBrandSocialConnect> = parseBrandSocialConnect(undefined)
 ): BrandLandingBundle {
   const config = buildConfigForTheme(theme, fallbackName, undefined, undefined);
   const merged = applyCanonicalSiteName(
@@ -99,6 +110,7 @@ function fallbackBundle(
     marketingTheme: theme,
     publicStats,
     legalPages,
+    socialConnect,
   };
 }
 
@@ -127,9 +139,15 @@ export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandL
       row.legal_pages && typeof row.legal_pages === "object"
         ? parseBrandLegalPagesRecord(row.legal_pages as Record<string, unknown>)
         : parseBrandLegalPages(undefined);
+    const socialConnect = parseBrandSocialConnect(
+      row.social_connect && typeof row.social_connect === "object"
+        ? { social_connect: row.social_connect as Record<string, unknown> }
+        : undefined,
+      row.landing
+    );
 
     if (!row.brand_name) {
-      return fallbackBundle(fallbackName, stories, curriculum, theme, publicStats, legalPages);
+      return fallbackBundle(fallbackName, stories, curriculum, theme, publicStats, legalPages, socialConnect);
     }
 
     return buildBundle(fallbackName, row, stories, curriculum, theme, publicStats, legalPages);
@@ -144,6 +162,7 @@ export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandL
       marketingTheme: "novu",
       publicStats: { centersCount: 0, studentsCount: 0 },
       legalPages: {},
+      socialConnect: {},
     };
   }
 }

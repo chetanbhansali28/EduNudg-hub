@@ -132,7 +132,10 @@ describe("Abacus Classic Sprint 3 — rich footer", () => {
   it("renders manual brand stats, custom stats, presence, and head office", () => {
     render(
       <MemoryRouter>
-        <AbacusClassicFooter config={sprint3Config()} />
+        <AbacusClassicFooter
+          config={sprint3Config()}
+          socialConnect={{ facebookUrl: "https://facebook.com/example" }}
+        />
       </MemoryRouter>
     );
 

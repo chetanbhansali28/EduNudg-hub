@@ -142,6 +142,28 @@ describe("fetchBrandLandingBundle", () => {
     const bundle = await fetchBrandLandingBundle("abacusworld");
     expect(bundle?.legalPages.privacy?.fileName).toBe("privacy.pdf");
   });
+
+  it("parses social_connect from rpc payload", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Abacus World",
+        landing: {},
+        success_stories: [],
+        curriculum: [],
+        social_connect: {
+          facebookUrl: "https://facebook.com/brand",
+          whatsappPhoneE164: "+919876543210",
+          whatsappPrefillMessage: "Hello!",
+          whatsappEnabled: true,
+        },
+      },
+      error: null,
+    });
+
+    const bundle = await fetchBrandLandingBundle("abacusworld");
+    expect(bundle?.socialConnect.facebookUrl).toBe("https://facebook.com/brand");
+    expect(bundle?.socialConnect.whatsappPrefillMessage).toBe("Hello!");
+  });
 });
 
 describe("updateBrandMarketingTheme", () => {

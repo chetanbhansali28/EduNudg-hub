@@ -179,4 +179,32 @@ describe("fetchBrandMarketingEditor", () => {
     const editor = await fetchBrandMarketingEditor("brand-3");
     expect(editor.legalPages.privacy?.fileName).toBe("privacy.docx");
   });
+
+  it("loads social_connect with legacy landing socialLinks migration", async () => {
+    fromMock.mockImplementation(
+      brandsAndSettingsChain(
+        {
+          name: "Abacus World",
+          slug: "abacusworld",
+          logo_url: null,
+          marketing_theme: "novu",
+        },
+        {
+          id: "settings-1",
+          settings: {
+            landing: {
+              footer: {
+                rich: {
+                  socialLinks: [{ platform: "Instagram", url: "https://instagram.com/legacy" }],
+                },
+              },
+            },
+          },
+        }
+      )
+    );
+
+    const editor = await fetchBrandMarketingEditor("brand-4");
+    expect(editor.socialConnect.instagramUrl).toBe("https://instagram.com/legacy");
+  });
 });

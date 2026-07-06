@@ -13,6 +13,7 @@ import {
 import { getSupabase } from "@/lib/supabase";
 import { formatLastSavedLabel } from "@/lib/formatRelativeTime";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 import type { HomepageConfig } from "@/types/homepage";
 
 function configsEqual(a: HomepageConfig, b: HomepageConfig): boolean {
@@ -20,6 +21,10 @@ function configsEqual(a: HomepageConfig, b: HomepageConfig): boolean {
 }
 
 function legalPagesEqual(a: BrandLegalPages, b: BrandLegalPages): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function socialConnectEqual(a: BrandSocialConnect, b: BrandSocialConnect): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
@@ -32,6 +37,8 @@ export function BrandMarketingEditorPage() {
   const [centerBaseline, setCenterBaseline] = useState<HomepageConfig | null>(null);
   const [legalPages, setLegalPages] = useState<BrandLegalPages>({});
   const [legalPagesBaseline, setLegalPagesBaseline] = useState<BrandLegalPages>({});
+  const [socialConnect, setSocialConnect] = useState<BrandSocialConnect>({});
+  const [socialConnectBaseline, setSocialConnectBaseline] = useState<BrandSocialConnect>({});
   const [existingSettings, setExistingSettings] = useState<Record<string, unknown>>({});
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const [brandSaved, setBrandSaved] = useState(false);
@@ -54,6 +61,8 @@ export function BrandMarketingEditorPage() {
     setCenterBaseline(editor.data.centerLandingConfig);
     setLegalPages(editor.data.legalPages);
     setLegalPagesBaseline(editor.data.legalPages);
+    setSocialConnect(editor.data.socialConnect);
+    setSocialConnectBaseline(editor.data.socialConnect);
     setExistingSettings(editor.data.existingSettings);
     setSettingsId(editor.data.settingsId);
     setMarketingTheme(editor.data.marketingTheme);
@@ -62,8 +71,9 @@ export function BrandMarketingEditorPage() {
   const brandDirty = useMemo(() => {
     const configDirty = brandConfig && brandBaseline && !configsEqual(brandConfig, brandBaseline);
     const legalDirty = !legalPagesEqual(legalPages, legalPagesBaseline);
-    return Boolean(configDirty || legalDirty);
-  }, [brandConfig, brandBaseline, legalPages, legalPagesBaseline]);
+    const socialDirty = !socialConnectEqual(socialConnect, socialConnectBaseline);
+    return Boolean(configDirty || legalDirty || socialDirty);
+  }, [brandConfig, brandBaseline, legalPages, legalPagesBaseline, socialConnect, socialConnectBaseline]);
 
   const centerDirty = useMemo(
     () => centerConfig && centerBaseline && !configsEqual(centerConfig, centerBaseline),
@@ -78,6 +88,7 @@ export function BrandMarketingEditorPage() {
         ...existingSettings,
         landing: landingConfigToPartial(payload),
         legal_pages: legalPages,
+        social_connect: socialConnect,
       };
 
       if (settingsId) {
@@ -101,9 +112,11 @@ export function BrandMarketingEditorPage() {
           ...prev,
           landing: landingConfigToPartial(payload),
           legal_pages: legalPages,
+          social_connect: socialConnect,
         }));
       }
       setLegalPagesBaseline(legalPages);
+      setSocialConnectBaseline(socialConnect);
       setBrandUpdatedAt(new Date().toISOString());
       void qc.invalidateQueries({ queryKey: ["brand-marketing-editor", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
@@ -159,6 +172,8 @@ export function BrandMarketingEditorPage() {
   const brandEditorProps = {
     legalPages,
     onLegalPagesChange: setLegalPages,
+    socialConnect,
+    onSocialConnectChange: setSocialConnect,
     brandId,
   };
 
@@ -175,6 +190,7 @@ export function BrandMarketingEditorPage() {
           onDiscard={() => {
             setBrandConfig(brandBaseline);
             setLegalPages(legalPagesBaseline);
+            setSocialConnect(socialConnectBaseline);
           }}
           isDirty={brandDirty}
           savePending={saveBrand.isPending}

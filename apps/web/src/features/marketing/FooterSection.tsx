@@ -1,18 +1,21 @@
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 import { buildBrandFooterStats, resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { MarketingBackgroundMedia } from "./MarketingBackgroundMedia";
 import { FooterPresenceBlock } from "./FooterPresenceBlock";
+import { BrandSocialFooterIcons } from "./BrandSocialFooterIcons";
 import { isSectionEnabled } from "@/lib/homepageSections";
 
 type Props = {
   config: HomepageConfig;
   legalPages?: BrandLegalPages;
+  socialConnect?: BrandSocialConnect;
 };
 
-export function FooterSection({ config, legalPages = {} }: Props) {
+export function FooterSection({ config, legalPages = {}, socialConnect = {} }: Props) {
   if (!isSectionEnabled(config, "footer")) {
     return null;
   }
@@ -98,7 +101,10 @@ export function FooterSection({ config, legalPages = {} }: Props) {
           </div>
         ) : null}
         <div className="novu-site-footer__bottom">
-          <span>{config.footer.copyright}</span>
+          <div className="novu-site-footer__bottom-start">
+            <span>{config.footer.copyright}</span>
+            <BrandSocialFooterIcons socialConnect={socialConnect} variant="novu" />
+          </div>
           <div className="novu-site-footer__legal">
             {privacyHref ? <Link to={privacyHref}>Privacy Policy</Link> : null}
             {termsHref ? <Link to={termsHref}>Terms of Use</Link> : null}

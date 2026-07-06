@@ -37,6 +37,7 @@ describe("BrandPublicLayout", () => {
       marketingTheme: "novu",
       publicStats: { centersCount: 0, studentsCount: 0 },
       legalPages: {},
+      socialConnect: {},
     });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -71,6 +72,7 @@ describe("BrandPublicLayout", () => {
       marketingTheme: "abacus-classic",
       publicStats: { centersCount: 5, studentsCount: 100 },
       legalPages: {},
+      socialConnect: {},
     });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -103,6 +105,7 @@ describe("BrandPublicLayout", () => {
       marketingTheme: "spark-academy",
       publicStats: { centersCount: 2, studentsCount: 400 },
       legalPages: {},
+      socialConnect: {},
     });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

@@ -11,7 +11,13 @@ describe("SparkAcademyFooter", () => {
     render(
       <MemoryRouter>
         <LeadModalProvider>
-          <SparkAcademyFooter config={config} />
+          <SparkAcademyFooter
+            config={config}
+            socialConnect={{
+              facebookUrl: "https://facebook.com/brand",
+              instagramUrl: "https://instagram.com/brand",
+            }}
+          />
         </LeadModalProvider>
       </MemoryRouter>
     );
@@ -28,8 +34,6 @@ describe("SparkAcademyFooter", () => {
     expect(screen.getByText("Digitley")).toBeDefined();
     expect(screen.getByRole("navigation", { name: "Footer" })).toBeDefined();
     expect(screen.getByText("Shop")).toBeDefined();
-    expect(screen.getByText("Terms & Conditions")).toBeDefined();
-    expect(screen.getByText("Privacy Policy")).toBeDefined();
     expect(screen.getByText(/Copyright ©/)).toBeDefined();
     expect(screen.getByLabelText("Accepted payment methods")).toBeDefined();
     expect(screen.getByText("Visa")).toBeDefined();

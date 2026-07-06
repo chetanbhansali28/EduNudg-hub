@@ -17,7 +17,9 @@ import { isAbacusSectionEnabled, setSectionEnabled, type HomepageSectionKey } fr
 import { emptyHomepageProgramCard } from "@/lib/programsGridItems";
 import { FooterRichEditorFields } from "@/features/marketing/FooterRichEditorFields";
 import { FooterLegalPagesEditor } from "@/features/marketing/FooterLegalPagesEditor";
+import { SocialMediaConnectEditor } from "@/features/marketing/SocialMediaConnectEditor";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 import {
   EditorAccordion,
   EditorFieldSpan,
@@ -45,6 +47,8 @@ export type AbacusClassicEditorFormProps = {
   brandId?: string | null;
   legalPages?: BrandLegalPages;
   onLegalPagesChange?: (next: BrandLegalPages) => void;
+  socialConnect?: BrandSocialConnect;
+  onSocialConnectChange?: (next: BrandSocialConnect) => void;
 };
 
 export function AbacusClassicEditorForm({
@@ -58,6 +62,8 @@ export function AbacusClassicEditorForm({
   brandId = null,
   legalPages = {},
   onLegalPagesChange,
+  socialConnect = {},
+  onSocialConnectChange,
 }: AbacusClassicEditorFormProps) {
   const commit = (next: HomepageConfig) => {
     onChange(next);
@@ -701,6 +707,10 @@ export function AbacusClassicEditorForm({
           legalPages={legalPages}
           onLegalPagesChange={onLegalPagesChange}
         />
+      ) : null}
+
+      {portalMode === "brand" && onSocialConnectChange ? (
+        <SocialMediaConnectEditor socialConnect={socialConnect} onSocialConnectChange={onSocialConnectChange} />
       ) : null}
     </HomepageEditorSections>
   );

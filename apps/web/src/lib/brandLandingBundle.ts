@@ -2,6 +2,7 @@ import type { HomepageConfig } from "@/types/homepage";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicCurriculum } from "@/lib/brandCurriculumPublic";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 import type { MarketingTheme } from "@/types/homepage";
 import { parseMarketingTheme } from "@/types/homepage";
 
@@ -16,6 +17,7 @@ export type BrandLandingBundle = {
   marketingTheme: MarketingTheme;
   publicStats: BrandPublicStats;
   legalPages: BrandLegalPages;
+  socialConnect: BrandSocialConnect;
 };
 
 function isHomepageConfig(value: unknown): value is HomepageConfig {
@@ -68,6 +70,10 @@ export function normalizeBrandLandingBundle(data: unknown): BrandLandingBundle |
         record.legalPages && typeof record.legalPages === "object"
           ? (record.legalPages as BrandLegalPages)
           : {},
+      socialConnect:
+        record.socialConnect && typeof record.socialConnect === "object"
+          ? (record.socialConnect as BrandSocialConnect)
+          : {},
     };
   }
 
@@ -78,6 +84,7 @@ export function normalizeBrandLandingBundle(data: unknown): BrandLandingBundle |
       marketingTheme: "novu",
       publicStats: { centersCount: 0, studentsCount: 0 },
       legalPages: {},
+      socialConnect: {},
     };
   }
 

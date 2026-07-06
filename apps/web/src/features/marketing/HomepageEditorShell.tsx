@@ -59,6 +59,7 @@ export const HOMEPAGE_EDITOR_SECTION_META: Record<string, EditorSectionMeta> = {
   curriculumSyllabus: { icon: "menu_book", tone: "primary", description: "Published syllabus at #curriculum" },
   footerRich: { icon: "call_to_action", tone: "neutral", description: "Rich footer and contact info" },
   legalPages: { icon: "gavel", tone: "secondary", description: "Privacy policy and terms uploads" },
+  socialConnect: { icon: "share", tone: "secondary", description: "Footer social icons and WhatsApp chat" },
   ecosystemIntro: { icon: "layers", tone: "secondary", description: "Intro band below hero" },
   connectivityShowcase: { icon: "devices", tone: "primary", description: "Phone showcase and satellite cards" },
   footerCta: { icon: "campaign", tone: "neutral", description: "Pre-footer call to action" },

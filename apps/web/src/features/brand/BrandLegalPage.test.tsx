@@ -13,6 +13,7 @@ function renderLegalPage(kind: "privacy" | "terms", legalPages: BrandLandingOutl
     publicCurriculum: [],
     publicStats: { centersCount: 0, studentsCount: 0 },
     legalPages,
+    socialConnect: {},
   };
 
   render(

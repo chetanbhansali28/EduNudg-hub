@@ -35,6 +35,8 @@ describe("BrandMarketingEditorPage", () => {
       landingConfig: DEFAULT_HOMEPAGE_CONFIG,
       centerLandingConfig: DEFAULT_HOMEPAGE_CONFIG,
       marketingTheme: "novu",
+      legalPages: {},
+      socialConnect: {},
     });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -63,6 +65,8 @@ describe("BrandMarketingEditorPage", () => {
       landingConfig: mergeAbacusClassicLandingConfig("Smart Brain Abacus"),
       centerLandingConfig: DEFAULT_HOMEPAGE_CONFIG,
       marketingTheme: "abacus-classic",
+      legalPages: {},
+      socialConnect: {},
     });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

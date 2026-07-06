@@ -39,7 +39,9 @@ import {
 import { MarketingMediaField } from "./MarketingMediaField";
 import { FooterRichEditorFields } from "./FooterRichEditorFields";
 import { FooterLegalPagesEditor } from "./FooterLegalPagesEditor";
+import { SocialMediaConnectEditor } from "./SocialMediaConnectEditor";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 
 export type HomepageEditorFormProps = {
   config: HomepageConfig;
@@ -58,6 +60,8 @@ export type HomepageEditorFormProps = {
   brandId?: string | null;
   legalPages?: BrandLegalPages;
   onLegalPagesChange?: (next: BrandLegalPages) => void;
+  socialConnect?: BrandSocialConnect;
+  onSocialConnectChange?: (next: BrandSocialConnect) => void;
 };
 
 export function HomepageEditorForm({
@@ -72,6 +76,8 @@ export function HomepageEditorForm({
   brandId = null,
   legalPages = {},
   onLegalPagesChange,
+  socialConnect = {},
+  onSocialConnectChange,
 }: HomepageEditorFormProps) {
   const config = mergeHomepageConfig(rawConfig ?? DEFAULT_HOMEPAGE_CONFIG);
   const isPlatformEditor = portalMode === "platform";
@@ -900,6 +906,10 @@ export function HomepageEditorForm({
           legalPages={legalPages}
           onLegalPagesChange={onLegalPagesChange}
         />
+      ) : null}
+
+      {portalMode === "brand" && onSocialConnectChange ? (
+        <SocialMediaConnectEditor socialConnect={socialConnect} onSocialConnectChange={onSocialConnectChange} />
       ) : null}
       </HomepageEditorSections>
 

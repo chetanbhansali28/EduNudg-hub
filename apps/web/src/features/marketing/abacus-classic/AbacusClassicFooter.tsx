@@ -1,15 +1,18 @@
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 import { buildBrandFooterStats, resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
 import { FooterPresenceBlock } from "@/features/marketing/FooterPresenceBlock";
+import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIcons";
 
 type Props = {
   config: HomepageConfig;
   legalPages?: BrandLegalPages;
+  socialConnect?: BrandSocialConnect;
 };
 
-export function AbacusClassicFooter({ config, legalPages = {} }: Props) {
+export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {} }: Props) {
   const rich = config.footer.rich;
   const stats = buildBrandFooterStats(rich);
   const privacyHref = resolveFooterLegalHref("privacy", config, legalPages);
@@ -46,15 +49,7 @@ export function AbacusClassicFooter({ config, legalPages = {} }: Props) {
                 ))}
               </div>
             ) : null}
-            {rich?.socialLinks && rich.socialLinks.length > 0 ? (
-              <div className="ac-footer__social">
-                {rich.socialLinks.map((link, i) => (
-                  <a key={`${link.platform}-${i}`} href={link.url} target="_blank" rel="noreferrer">
-                    {link.platform}
-                  </a>
-                ))}
-              </div>
-            ) : null}
+            <BrandSocialFooterIcons socialConnect={socialConnect} variant="abacus-classic" />
           </div>
 
           <div>

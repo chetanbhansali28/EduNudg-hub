@@ -4,6 +4,7 @@ import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAb
 import { mergeSectionVisibility } from "@/lib/homepageSections";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
 import { parseBrandLegalPages, type BrandLegalPages } from "@/lib/brandLegalPages";
+import { parseBrandSocialConnect, type BrandSocialConnect } from "@/lib/brandSocialConnect";
 import type { HomepageConfig } from "@/types/homepage";
 
 export type BrandMarketingSettingsKey = "landing" | "center_landing";
@@ -18,6 +19,7 @@ export type BrandMarketingEditorData = {
   landingConfig: HomepageConfig;
   centerLandingConfig: HomepageConfig;
   legalPages: BrandLegalPages;
+  socialConnect: BrandSocialConnect;
 };
 
 /** Serializable subset of homepage config stored in brand_settings.settings. */
@@ -119,6 +121,7 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
               brand.logo_url
             ),
     legalPages: parseBrandLegalPages(existingSettings),
+    socialConnect: parseBrandSocialConnect(existingSettings, landingPartial),
   };
 }
 
