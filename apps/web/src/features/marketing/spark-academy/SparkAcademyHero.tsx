@@ -1,13 +1,11 @@
 import { Fragment } from "react";
 import type { HomepageConfig } from "@/types/homepage";
-import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { MarketingBackgroundMedia } from "../MarketingBackgroundMedia";
 import { SparkAcademyCta } from "./SparkAcademyCta";
 
 type Props = {
   config: HomepageConfig;
-  publicStats: BrandPublicStats;
   featuredProgram?: PublicCurriculumProgram | null;
   programCount?: number;
 };
@@ -21,7 +19,6 @@ const HERO_STAT_FALLBACKS: { value: string; label: string }[] = [
 
 function buildHeroStats(
   config: HomepageConfig,
-  publicStats: BrandPublicStats,
   programCount = 0
 ): { value: string; label: string }[] {
   const stats: { value: string; label: string }[] = [];
@@ -57,10 +54,11 @@ function buildHeroStats(
   return stats.slice(0, 4);
 }
 
-export function SparkAcademyHero({ config, publicStats, featuredProgram, programCount = 0 }: Props) {
+export function SparkAcademyHero({ config, featuredProgram, programCount = 0 }: Props) {
   const hero = config.hero;
-  const stats = buildHeroStats(config, publicStats, programCount);
+  const stats = buildHeroStats(config, programCount);
   const heroImage = hero.backgroundImageUrl?.trim() || hero.phoneFrameUrl?.trim() || "";
+  const studentDisplay = config.footer.rich?.brandStats?.studentCount?.trim();
 
   return (
     <section className="sa-hero" id="hero">
@@ -103,9 +101,9 @@ export function SparkAcademyHero({ config, publicStats, featuredProgram, program
               <strong>{featuredProgram.name}</strong>
             </div>
           ) : null}
-          {publicStats.studentsCount > 0 ? (
+          {studentDisplay ? (
             <div className="sa-hero__float-card sa-hero__float-card--stat">
-              <strong>{publicStats.studentsCount >= 1000 ? `${Math.floor(publicStats.studentsCount / 1000)}k+` : `${publicStats.studentsCount}+`}</strong>
+              <strong>{studentDisplay}</strong>
               <span>Learners</span>
             </div>
           ) : null}

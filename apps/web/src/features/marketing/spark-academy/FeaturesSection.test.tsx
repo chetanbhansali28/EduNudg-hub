@@ -29,7 +29,7 @@ describe("JourneySection", () => {
     render(
       <JourneySection
         trust={config.trustMedia!}
-        publicStats={{ centersCount: 12, studentsCount: 2_000_000 }}
+        rich={{ brandStats: { franchiseCount: "12+", studentCount: "2M+" } }}
       />
     );
 

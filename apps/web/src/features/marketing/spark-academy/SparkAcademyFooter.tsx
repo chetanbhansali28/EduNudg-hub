@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { HomepageConfig, HomepageFooterSocial } from "@/types/homepage";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import { resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
+import { FooterPresenceBlock } from "@/features/marketing/FooterPresenceBlock";
 import { useLeadModalOptional } from "@/features/marketing/abacus-classic/LeadModalContext";
 import { resolveLeadModalKind } from "@/features/marketing/abacus-classic/MarketingLeadModals";
 
 type Props = {
   config: HomepageConfig;
+  legalPages?: BrandLegalPages;
 };
 
 const DEFAULT_SOCIAL_LINKS: HomepageFooterSocial[] = [
@@ -81,11 +85,13 @@ function PaymentBadges() {
   );
 }
 
-export function SparkAcademyFooter({ config }: Props) {
+export function SparkAcademyFooter({ config, legalPages = {} }: Props) {
   const modal = useLeadModalOptional();
   const [email, setEmail] = useState("");
 
   const rich = config.footer.rich;
+  const privacyHref = resolveFooterLegalHref("privacy", config, legalPages);
+  const termsHref = resolveFooterLegalHref("terms", config, legalPages);
   const phone = rich?.headOffice?.phone?.trim() || DEFAULT_PHONE;
   const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
   const socialLinks =
@@ -203,9 +209,15 @@ export function SparkAcademyFooter({ config }: Props) {
             ))}
           </nav>
 
+          <FooterPresenceBlock
+            presence={rich?.presence ?? []}
+            className="sa-site-footer__presence"
+            regionClassName="sa-site-footer__presence-region"
+          />
+
           <div className="sa-site-footer__legal">
-            <a href={config.footer.termsHref}>Terms &amp; Conditions</a>
-            <a href={config.footer.privacyHref}>Privacy Policy</a>
+            {termsHref ? <Link to={termsHref}>Terms &amp; Conditions</Link> : null}
+            {privacyHref ? <Link to={privacyHref}>Privacy Policy</Link> : null}
           </div>
         </div>
       </div>

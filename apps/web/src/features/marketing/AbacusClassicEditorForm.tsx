@@ -15,6 +15,9 @@ import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import type { PortalMode } from "@/lib/portalMode";
 import { isAbacusSectionEnabled, setSectionEnabled, type HomepageSectionKey } from "@/lib/homepageSections";
 import { emptyHomepageProgramCard } from "@/lib/programsGridItems";
+import { FooterRichEditorFields } from "@/features/marketing/FooterRichEditorFields";
+import { FooterLegalPagesEditor } from "@/features/marketing/FooterLegalPagesEditor";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import {
   EditorAccordion,
   EditorFieldSpan,
@@ -39,6 +42,9 @@ export type AbacusClassicEditorFormProps = {
   testimonialsExternalHint?: ReactNode;
   /** Brand vs center template — affects Novu-only presets when theme is novu. */
   portalMode?: PortalMode;
+  brandId?: string | null;
+  legalPages?: BrandLegalPages;
+  onLegalPagesChange?: (next: BrandLegalPages) => void;
 };
 
 export function AbacusClassicEditorForm({
@@ -49,6 +55,9 @@ export function AbacusClassicEditorForm({
   onPersist,
   testimonialsExternalHint,
   portalMode = "brand",
+  brandId = null,
+  legalPages = {},
+  onLegalPagesChange,
 }: AbacusClassicEditorFormProps) {
   const commit = (next: HomepageConfig) => {
     onChange(next);
@@ -564,15 +573,7 @@ export function AbacusClassicEditorForm({
               onChange={(v) => onChange({ ...config, footer: { ...config.footer, rich: { ...rich, description: v } } })}
             />
           </EditorFieldSpan>
-          <EditorFieldSpan>
-            <ToggleField
-              label="Show live franchise & student counts"
-              checked={rich.showLiveStats !== false}
-              onChange={(checked) =>
-                onChange({ ...config, footer: { ...config.footer, rich: { ...rich, showLiveStats: checked } } })
-              }
-            />
-          </EditorFieldSpan>
+          <FooterRichEditorFields config={config} onChange={onChange} />
           <Input
             label="Head office address"
             value={rich.headOffice?.address ?? ""}
@@ -693,6 +694,14 @@ export function AbacusClassicEditorForm({
           ))}
         </EditorItemList>
       </EditorAccordion>
+
+      {portalMode === "brand" && onLegalPagesChange ? (
+        <FooterLegalPagesEditor
+          brandId={brandId ?? null}
+          legalPages={legalPages}
+          onLegalPagesChange={onLegalPagesChange}
+        />
+      ) : null}
     </HomepageEditorSections>
   );
 }

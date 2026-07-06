@@ -153,11 +153,18 @@ export interface HomepageFooterSocial {
   url: string;
 }
 
+export interface HomepageBrandStats {
+  franchiseCount?: string;
+  studentCount?: string;
+}
+
 export interface HomepageRichFooter {
   description?: string;
   badges?: { label: string }[];
   customStats?: HomepageFooterStat[];
+  /** @deprecated Ignored — use brandStats instead of live DB counts. */
   showLiveStats?: boolean;
+  brandStats?: HomepageBrandStats;
   presence?: HomepageFooterPresence[];
   headOffice?: { address: string; phone: string; website: string };
   socialLinks?: HomepageFooterSocial[];

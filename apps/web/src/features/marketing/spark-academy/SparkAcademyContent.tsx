@@ -50,7 +50,6 @@ export function SparkAcademyContent({
       {showHero ? (
         <SparkAcademyHero
           config={config}
-          publicStats={publicStats}
           featuredProgram={publicCurriculum[0] ?? null}
           programCount={publicCurriculum.length}
         />
@@ -71,7 +70,7 @@ export function SparkAcademyContent({
       {showJourney && config.trustMedia ? (
         <JourneySection
           trust={config.trustMedia}
-          publicStats={publicStats}
+          rich={config.footer.rich}
           highlightFounder={config.founders?.[0] ?? null}
         />
       ) : null}

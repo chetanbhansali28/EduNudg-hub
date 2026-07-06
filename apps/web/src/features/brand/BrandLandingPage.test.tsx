@@ -49,6 +49,7 @@ describe("BrandLandingPage", () => {
       marketingTheme: "novu",
       publicCurriculum: [],
       publicStats: { centersCount: 0, studentsCount: 0 },
+      legalPages: {},
     });
 
     expect(screen.getByText("Novu landing")).toBeDefined();
@@ -64,6 +65,7 @@ describe("BrandLandingPage", () => {
       marketingTheme: "abacus-classic",
       publicCurriculum: [],
       publicStats: { centersCount: 12, studentsCount: 5000 },
+      legalPages: {},
     });
 
     expect(screen.getByRole("main")).toBeDefined();
@@ -84,6 +86,7 @@ describe("BrandLandingPage", () => {
         }),
       ],
       publicStats: { centersCount: 3, studentsCount: 200 },
+      legalPages: {},
     });
 
     expect(screen.getByRole("main")).toBeDefined();

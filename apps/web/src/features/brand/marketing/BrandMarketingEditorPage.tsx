@@ -5,11 +5,21 @@ import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
 import { AbacusClassicEditorForm } from "@/features/marketing/AbacusClassicEditorForm";
 import { HomepageEditorPanel, HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
-import { fetchBrandMarketingEditor, landingConfigToPartial, saveBrandMarketingLanding } from "@/lib/brandLandingEditorApi";
+import {
+  fetchBrandMarketingEditor,
+  landingConfigToPartial,
+  saveBrandMarketingLanding,
+} from "@/lib/brandLandingEditorApi";
+import { getSupabase } from "@/lib/supabase";
 import { formatLastSavedLabel } from "@/lib/formatRelativeTime";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { HomepageConfig } from "@/types/homepage";
 
 function configsEqual(a: HomepageConfig, b: HomepageConfig): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function legalPagesEqual(a: BrandLegalPages, b: BrandLegalPages): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
@@ -20,6 +30,8 @@ export function BrandMarketingEditorPage() {
   const [centerConfig, setCenterConfig] = useState<HomepageConfig | null>(null);
   const [brandBaseline, setBrandBaseline] = useState<HomepageConfig | null>(null);
   const [centerBaseline, setCenterBaseline] = useState<HomepageConfig | null>(null);
+  const [legalPages, setLegalPages] = useState<BrandLegalPages>({});
+  const [legalPagesBaseline, setLegalPagesBaseline] = useState<BrandLegalPages>({});
   const [existingSettings, setExistingSettings] = useState<Record<string, unknown>>({});
   const [settingsId, setSettingsId] = useState<string | null>(null);
   const [brandSaved, setBrandSaved] = useState(false);
@@ -40,15 +52,19 @@ export function BrandMarketingEditorPage() {
     setCenterConfig(editor.data.centerLandingConfig);
     setBrandBaseline(editor.data.landingConfig);
     setCenterBaseline(editor.data.centerLandingConfig);
+    setLegalPages(editor.data.legalPages);
+    setLegalPagesBaseline(editor.data.legalPages);
     setExistingSettings(editor.data.existingSettings);
     setSettingsId(editor.data.settingsId);
     setMarketingTheme(editor.data.marketingTheme);
   }, [editor.data]);
 
-  const brandDirty = useMemo(
-    () => brandConfig && brandBaseline && !configsEqual(brandConfig, brandBaseline),
-    [brandConfig, brandBaseline]
-  );
+  const brandDirty = useMemo(() => {
+    const configDirty = brandConfig && brandBaseline && !configsEqual(brandConfig, brandBaseline);
+    const legalDirty = !legalPagesEqual(legalPages, legalPagesBaseline);
+    return Boolean(configDirty || legalDirty);
+  }, [brandConfig, brandBaseline, legalPages, legalPagesBaseline]);
+
   const centerDirty = useMemo(
     () => centerConfig && centerBaseline && !configsEqual(centerConfig, centerBaseline),
     [centerConfig, centerBaseline]
@@ -58,20 +74,36 @@ export function BrandMarketingEditorPage() {
     mutationFn: async (override?: HomepageConfig) => {
       const payload = override ?? brandConfig;
       if (!brandId || !payload) throw new Error("Brand required");
-      await saveBrandMarketingLanding(
-        brandId,
-        settingsId,
-        existingSettings,
-        "landing",
-        payload
-      );
+      const merged = {
+        ...existingSettings,
+        landing: landingConfigToPartial(payload),
+        legal_pages: legalPages,
+      };
+
+      if (settingsId) {
+        const { error } = await getSupabase()
+          .from("brand_settings")
+          .update({ settings: merged })
+          .eq("id", settingsId);
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await getSupabase()
+          .from("brand_settings")
+          .insert({ brand_id: brandId, settings: merged });
+        if (error) throw new Error(error.message);
+      }
     },
     onSuccess: (_data, override) => {
       const payload = override ?? brandConfig;
       if (payload) {
         setBrandBaseline(payload);
-        setExistingSettings((prev) => ({ ...prev, landing: landingConfigToPartial(payload) }));
+        setExistingSettings((prev) => ({
+          ...prev,
+          landing: landingConfigToPartial(payload),
+          legal_pages: legalPages,
+        }));
       }
+      setLegalPagesBaseline(legalPages);
       setBrandUpdatedAt(new Date().toISOString());
       void qc.invalidateQueries({ queryKey: ["brand-marketing-editor", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
@@ -124,6 +156,12 @@ export function BrandMarketingEditorPage() {
     return <p>Loading marketing pages…</p>;
   }
 
+  const brandEditorProps = {
+    legalPages,
+    onLegalPagesChange: setLegalPages,
+    brandId,
+  };
+
   return (
     <HomepageEditorShell
       title="Homepage Configuration"
@@ -134,8 +172,11 @@ export function BrandMarketingEditorPage() {
         <HomepageEditorPanel
           title="Brand site (franchise recruitment)"
           onSave={() => saveBrand.mutate(brandConfig)}
-          onDiscard={() => setBrandConfig(brandBaseline)}
-          isDirty={!!brandDirty}
+          onDiscard={() => {
+            setBrandConfig(brandBaseline);
+            setLegalPages(legalPagesBaseline);
+          }}
+          isDirty={brandDirty}
           savePending={saveBrand.isPending}
           saved={brandSaved}
           description={
@@ -161,6 +202,7 @@ export function BrandMarketingEditorPage() {
                   Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page.
                 </p>
               }
+              {...brandEditorProps}
             />
           ) : (
             <HomepageEditorForm
@@ -179,6 +221,7 @@ export function BrandMarketingEditorPage() {
                   Manage quotes on the <Link to="/app/success-stories">Success stories</Link> page.
                 </p>
               }
+              {...brandEditorProps}
             />
           )}
         </HomepageEditorPanel>

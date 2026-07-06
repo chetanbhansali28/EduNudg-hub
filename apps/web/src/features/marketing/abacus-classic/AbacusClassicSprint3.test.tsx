@@ -59,7 +59,7 @@ function sprint3Config(): HomepageConfig {
         description: "Premier abacus and Vedic maths institute.",
         badges: [{ label: "ISO 9001:2015 Certified" }],
         customStats: [{ value: "100+", label: "Awards" }],
-        showLiveStats: true,
+        brandStats: { franchiseCount: "12+", studentCount: "5k+" },
         presence: [{ region: "Maharashtra & Goa", cities: ["Pune", "Satara"] }],
         headOffice: {
           address: "123 Main Road, Pune",
@@ -129,13 +129,10 @@ describe("Abacus Classic Sprint 3 — photo gallery", () => {
 });
 
 describe("Abacus Classic Sprint 3 — rich footer", () => {
-  it("renders live DB stats, custom stats, presence, and head office", () => {
+  it("renders manual brand stats, custom stats, presence, and head office", () => {
     render(
       <MemoryRouter>
-        <AbacusClassicFooter
-          config={sprint3Config()}
-          publicStats={{ centersCount: 12, studentsCount: 5200 }}
-        />
+        <AbacusClassicFooter config={sprint3Config()} />
       </MemoryRouter>
     );
 
@@ -152,13 +149,16 @@ describe("Abacus Classic Sprint 3 — rich footer", () => {
     expect(screen.getByRole("link", { name: "Facebook" })).toBeDefined();
   });
 
-  it("hides live stats when showLiveStats is false but keeps custom stats", () => {
+  it("omits franchise and student stats when brandStats are empty but keeps custom stats", () => {
     const config = sprint3Config();
-    config.footer.rich = { ...config.footer.rich!, showLiveStats: false };
+    config.footer.rich = {
+      ...config.footer.rich!,
+      brandStats: {},
+    };
 
     render(
       <MemoryRouter>
-        <AbacusClassicFooter config={config} publicStats={{ centersCount: 12, studentsCount: 5200 }} />
+        <AbacusClassicFooter config={config} />
       </MemoryRouter>
     );
 

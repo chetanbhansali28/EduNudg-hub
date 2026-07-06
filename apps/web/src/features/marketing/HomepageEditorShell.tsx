@@ -58,6 +58,7 @@ export const HOMEPAGE_EDITOR_SECTION_META: Record<string, EditorSectionMeta> = {
   programsGrid: { icon: "school", tone: "primary", description: "Program cards and Know More details" },
   curriculumSyllabus: { icon: "menu_book", tone: "primary", description: "Published syllabus at #curriculum" },
   footerRich: { icon: "call_to_action", tone: "neutral", description: "Rich footer and contact info" },
+  legalPages: { icon: "gavel", tone: "secondary", description: "Privacy policy and terms uploads" },
   ecosystemIntro: { icon: "layers", tone: "secondary", description: "Intro band below hero" },
   connectivityShowcase: { icon: "devices", tone: "primary", description: "Phone showcase and satellite cards" },
   footerCta: { icon: "campaign", tone: "neutral", description: "Pre-footer call to action" },

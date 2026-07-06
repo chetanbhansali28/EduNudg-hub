@@ -36,6 +36,7 @@ describe("BrandPublicLayout", () => {
       publicCurriculum: [],
       marketingTheme: "novu",
       publicStats: { centersCount: 0, studentsCount: 0 },
+      legalPages: {},
     });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -59,11 +60,17 @@ describe("BrandPublicLayout", () => {
 
   it("sprint1_renders_abacus_classic_layout_for_abacus_theme", async () => {
     const { fetchBrandLandingBundle } = await import("@/lib/brandLandingApi");
+    const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
+    config.footer.rich = {
+      ...config.footer.rich!,
+      brandStats: { franchiseCount: "5+", studentCount: "100+" },
+    };
     vi.mocked(fetchBrandLandingBundle).mockResolvedValue({
-      config: mergeAbacusClassicLandingConfig("Smart Brain Abacus"),
+      config,
       publicCurriculum: [],
       marketingTheme: "abacus-classic",
       publicStats: { centersCount: 5, studentsCount: 100 },
+      legalPages: {},
     });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -95,6 +102,7 @@ describe("BrandPublicLayout", () => {
       publicCurriculum: [],
       marketingTheme: "spark-academy",
       publicStats: { centersCount: 2, studentsCount: 400 },
+      legalPages: {},
     });
 
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

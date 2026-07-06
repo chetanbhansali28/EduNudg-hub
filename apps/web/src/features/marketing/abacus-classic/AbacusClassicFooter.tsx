@@ -1,35 +1,19 @@
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
-import type { BrandPublicStats } from "@/lib/brandLandingBundle";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import { buildBrandFooterStats, resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
+import { FooterPresenceBlock } from "@/features/marketing/FooterPresenceBlock";
 
 type Props = {
   config: HomepageConfig;
-  publicStats: BrandPublicStats;
+  legalPages?: BrandLegalPages;
 };
 
-function formatStatValue(value: number): string {
-  if (value >= 1000) return `${Math.floor(value / 1000)}k+`.replace("kk+", "k+");
-  if (value > 0) return `${value}+`;
-  return "0";
-}
-
-export function AbacusClassicFooter({ config, publicStats }: Props) {
+export function AbacusClassicFooter({ config, legalPages = {} }: Props) {
   const rich = config.footer.rich;
-  const showLive = rich?.showLiveStats !== false;
-
-  const stats: { value: string; label: string }[] = [];
-
-  if (showLive && publicStats.centersCount > 0) {
-    stats.push({ value: formatStatValue(publicStats.centersCount), label: "Franchises" });
-  }
-  if (showLive && publicStats.studentsCount > 0) {
-    stats.push({ value: formatStatValue(publicStats.studentsCount), label: "Students" });
-  }
-  for (const custom of rich?.customStats ?? []) {
-    if (custom.value.trim() && custom.label.trim()) {
-      stats.push({ value: custom.value.trim(), label: custom.label.trim() });
-    }
-  }
+  const stats = buildBrandFooterStats(rich);
+  const privacyHref = resolveFooterLegalHref("privacy", config, legalPages);
+  const termsHref = resolveFooterLegalHref("terms", config, legalPages);
 
   return (
     <footer className="ac-footer">
@@ -84,17 +68,10 @@ export function AbacusClassicFooter({ config, publicStats }: Props) {
             </ul>
           </div>
 
-          {rich?.presence && rich.presence.length > 0 ? (
-            <div>
-              <h3>Our presence</h3>
-              {rich.presence.map((region, i) => (
-                <div key={`${region.region}-${i}`} className="ac-footer__presence">
-                  <strong>{region.region}</strong>
-                  <p>{region.cities.join(", ")}</p>
-                </div>
-              ))}
-            </div>
-          ) : null}
+          <FooterPresenceBlock
+            presence={rich?.presence ?? []}
+            regionClassName="ac-footer__presence"
+          />
 
           {rich?.headOffice ? (
             <div>
@@ -111,8 +88,8 @@ export function AbacusClassicFooter({ config, publicStats }: Props) {
         <div className="ac-footer__bottom">
           <span>{config.footer.copyright}</span>
           <div className="ac-footer__legal">
-            <a href={config.footer.privacyHref}>Privacy Policy</a>
-            <a href={config.footer.termsHref}>Terms of Use</a>
+            {privacyHref ? <Link to={privacyHref}>Privacy Policy</Link> : null}
+            {termsHref ? <Link to={termsHref}>Terms of Use</Link> : null}
           </div>
         </div>
       </div>

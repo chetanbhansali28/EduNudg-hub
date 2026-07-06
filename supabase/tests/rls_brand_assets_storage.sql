@@ -30,5 +30,15 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'Missing brand_assets_student_self policy';
   END IF;
+  IF NOT EXISTS (
+    SELECT 1
+    FROM storage.buckets b
+    WHERE b.id = 'brand-assets'
+      AND 'application/pdf' = ANY (b.allowed_mime_types)
+      AND 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' = ANY (b.allowed_mime_types)
+      AND 'text/html' = ANY (b.allowed_mime_types)
+  ) THEN
+    RAISE EXCEPTION 'brand-assets bucket missing legal document MIME types — apply migration 063';
+  END IF;
   RAISE NOTICE 'RLS brand-assets storage smoke test passed';
 END $$;

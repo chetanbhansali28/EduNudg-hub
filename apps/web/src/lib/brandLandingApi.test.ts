@@ -117,6 +117,30 @@ describe("fetchBrandLandingBundle", () => {
     const bundle = await fetchBrandLandingBundle("abacusworld");
     expect(bundle?.marketingTheme).toBe("novu");
     expect(bundle?.publicStats).toEqual({ centersCount: 0, studentsCount: 0 });
+    expect(bundle?.legalPages).toEqual({});
+  });
+
+  it("parses legal_pages from rpc payload", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Abacus World",
+        landing: {},
+        success_stories: [],
+        curriculum: [],
+        legal_pages: {
+          privacy: {
+            fileName: "privacy.pdf",
+            fileUrl: "https://cdn.example/privacy.pdf",
+            mimeType: "application/pdf",
+            uploadedAt: "2026-01-01",
+          },
+        },
+      },
+      error: null,
+    });
+
+    const bundle = await fetchBrandLandingBundle("abacusworld");
+    expect(bundle?.legalPages.privacy?.fileName).toBe("privacy.pdf");
   });
 });
 

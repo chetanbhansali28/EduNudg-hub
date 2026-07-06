@@ -1,5 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
 import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
+import { parseBrandLegalPages, parseBrandLegalPagesRecord } from "@/lib/brandLegalPages";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
@@ -20,6 +21,7 @@ type BrandLandingRow = {
   landing?: Partial<HomepageConfig>;
   success_stories?: unknown;
   curriculum?: unknown;
+  legal_pages?: unknown;
 };
 
 function parsePublicStats(raw: unknown): BrandPublicStats {
@@ -54,7 +56,8 @@ function buildBundle(
   stories: ReturnType<typeof parsePublicSuccessStories>,
   curriculum: PublicCurriculumProgram[],
   theme: MarketingTheme,
-  publicStats: BrandPublicStats
+  publicStats: BrandPublicStats,
+  legalPages = parseBrandLegalPages(undefined)
 ): BrandLandingBundle {
   const canonicalName = row?.brand_name ?? brandName;
   const config = buildConfigForTheme(theme, canonicalName, row?.landing ?? undefined, row?.brand_logo_url ?? null);
@@ -70,6 +73,7 @@ function buildBundle(
     publicCurriculum: curriculum,
     marketingTheme: theme,
     publicStats,
+    legalPages,
   };
 }
 
@@ -78,7 +82,8 @@ function fallbackBundle(
   stories: ReturnType<typeof parsePublicSuccessStories>,
   curriculum: PublicCurriculumProgram[],
   theme: MarketingTheme = "novu",
-  publicStats: BrandPublicStats = { centersCount: 0, studentsCount: 0 }
+  publicStats: BrandPublicStats = { centersCount: 0, studentsCount: 0 },
+  legalPages = parseBrandLegalPages(undefined)
 ): BrandLandingBundle {
   const config = buildConfigForTheme(theme, fallbackName, undefined, undefined);
   const merged = applyCanonicalSiteName(
@@ -93,6 +98,7 @@ function fallbackBundle(
     publicCurriculum: curriculum,
     marketingTheme: theme,
     publicStats,
+    legalPages,
   };
 }
 
@@ -117,12 +123,16 @@ export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandL
     const row = data as BrandLandingRow;
     const theme = parseMarketingTheme(row.marketing_theme);
     const publicStats = parsePublicStats(row.public_stats);
+    const legalPages =
+      row.legal_pages && typeof row.legal_pages === "object"
+        ? parseBrandLegalPagesRecord(row.legal_pages as Record<string, unknown>)
+        : parseBrandLegalPages(undefined);
 
     if (!row.brand_name) {
-      return fallbackBundle(fallbackName, stories, curriculum, theme, publicStats);
+      return fallbackBundle(fallbackName, stories, curriculum, theme, publicStats, legalPages);
     }
 
-    return buildBundle(fallbackName, row, stories, curriculum, theme, publicStats);
+    return buildBundle(fallbackName, row, stories, curriculum, theme, publicStats, legalPages);
   } catch {
     const config = buildBrandLandingConfig(fallbackName);
     return {
@@ -133,6 +143,7 @@ export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandL
       publicCurriculum: [],
       marketingTheme: "novu",
       publicStats: { centersCount: 0, studentsCount: 0 },
+      legalPages: {},
     };
   }
 }

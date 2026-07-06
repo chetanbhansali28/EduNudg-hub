@@ -37,6 +37,9 @@ import {
   NavLinkHrefField,
 } from "./HomepageEditorShell";
 import { MarketingMediaField } from "./MarketingMediaField";
+import { FooterRichEditorFields } from "./FooterRichEditorFields";
+import { FooterLegalPagesEditor } from "./FooterLegalPagesEditor";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
 
 export type HomepageEditorFormProps = {
   config: HomepageConfig;
@@ -52,6 +55,9 @@ export type HomepageEditorFormProps = {
   marketingTheme?: MarketingTheme;
   /** Brand vs center vs platform — controls Novu CTA anchor presets. */
   portalMode?: PortalMode;
+  brandId?: string | null;
+  legalPages?: BrandLegalPages;
+  onLegalPagesChange?: (next: BrandLegalPages) => void;
 };
 
 export function HomepageEditorForm({
@@ -63,6 +69,9 @@ export function HomepageEditorForm({
   testimonialsExternalHint,
   marketingTheme = "novu",
   portalMode = "platform",
+  brandId = null,
+  legalPages = {},
+  onLegalPagesChange,
 }: HomepageEditorFormProps) {
   const config = mergeHomepageConfig(rawConfig ?? DEFAULT_HOMEPAGE_CONFIG);
   const isPlatformEditor = portalMode === "platform";
@@ -884,6 +893,14 @@ export function HomepageEditorForm({
           ))}
         </EditorItemList>
       </EditorAccordion>
+
+      {portalMode === "brand" && onLegalPagesChange ? (
+        <FooterLegalPagesEditor
+          brandId={brandId ?? null}
+          legalPages={legalPages}
+          onLegalPagesChange={onLegalPagesChange}
+        />
+      ) : null}
       </HomepageEditorSections>
 
       <EditorStaticSection
@@ -966,6 +983,7 @@ export function HomepageEditorForm({
               />
             </>
           ) : null}
+          {!isPlatformEditor ? <FooterRichEditorFields config={config} onChange={onChange} /> : null}
           <Input
             label="Copyright"
             value={config.footer.copyright}
@@ -1024,7 +1042,13 @@ export function HomepageEditorForm({
                 }
               />
             </>
-          ) : null}
+          ) : (
+            <EditorFieldSpan>
+              <EditorSectionNote>
+                Privacy and Terms are managed under the <strong>Privacy &amp; Terms</strong> accordion above.
+              </EditorSectionNote>
+            </EditorFieldSpan>
+          )}
           <EditorFieldSpan>
             <MarketingMediaField
               label={isPlatformEditor ? "Pre-footer side image" : "Footer CTA background image or video"}

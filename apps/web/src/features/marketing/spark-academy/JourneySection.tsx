@@ -1,10 +1,9 @@
-import type { HomepageFounderProfile, HomepageTrustMedia } from "@/types/homepage";
-import type { BrandPublicStats } from "@/lib/brandLandingBundle";
+import type { HomepageFounderProfile, HomepageTrustMedia, HomepageRichFooter } from "@/types/homepage";
 import { MarketingBackgroundMedia } from "../MarketingBackgroundMedia";
 
 type Props = {
   trust: HomepageTrustMedia;
-  publicStats: BrandPublicStats;
+  rich?: HomepageRichFooter;
   highlightFounder?: HomepageFounderProfile | null;
 };
 
@@ -23,38 +22,31 @@ function JourneyRowIcon() {
   );
 }
 
-function formatLargeStat(value: number): string {
-  if (value >= 1_000_000) return `${Math.floor(value / 1_000_000)}M+`;
-  if (value >= 1000) return `${Math.floor(value / 1000)}k+`;
-  if (value > 0) return `${value}+`;
-  return "";
-}
-
-function buildHeroCardStats(publicStats: BrandPublicStats): {
+function buildHeroCardStats(rich?: HomepageRichFooter): {
   label: string;
   primary: string;
   secondary: string;
   caption: string;
 } {
-  const livePrimary = formatLargeStat(publicStats.studentsCount);
-  const liveSecondary = formatLargeStat(publicStats.centersCount);
+  const franchise = rich?.brandStats?.franchiseCount?.trim();
+  const students = rich?.brandStats?.studentCount?.trim();
 
   return {
     label: "Our learners worldwide",
-    primary: livePrimary || "20M+",
-    secondary: liveSecondary || "300+",
+    primary: students || "20M+",
+    secondary: franchise || "300+",
     caption: "Top mentors around the globe",
   };
 }
 
 export function JourneySection({
   trust,
-  publicStats,
+  rich,
   highlightFounder,
 }: Props) {
   const cards = trust.cards.slice(0, 3);
   const photoUrl = highlightFounder?.photoUrl?.trim() || "";
-  const heroStats = buildHeroCardStats(publicStats);
+  const heroStats = buildHeroCardStats(rich);
   const badge = trust.eyebrow?.trim() || "Our Success";
   const heading = [trust.title, trust.titleHighlight].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
 

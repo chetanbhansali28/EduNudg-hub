@@ -1,18 +1,25 @@
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import { buildBrandFooterStats, resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { MarketingBackgroundMedia } from "./MarketingBackgroundMedia";
+import { FooterPresenceBlock } from "./FooterPresenceBlock";
 import { isSectionEnabled } from "@/lib/homepageSections";
 
 type Props = {
   config: HomepageConfig;
+  legalPages?: BrandLegalPages;
 };
 
-export function FooterSection({ config }: Props) {
+export function FooterSection({ config, legalPages = {} }: Props) {
   if (!isSectionEnabled(config, "footer")) {
     return null;
   }
 
+  const privacyHref = resolveFooterLegalHref("privacy", config, legalPages);
+  const termsHref = resolveFooterLegalHref("terms", config, legalPages);
+  const footerStats = buildBrandFooterStats(config.footer.rich);
   const cta = config.footerCta;
   const titleParts = cta.title.match(/^(.+?)(\s*)(\S+\.?)$/);
   const titleMain = titleParts?.[1] ?? cta.title;
@@ -78,12 +85,23 @@ export function FooterSection({ config }: Props) {
               ))}
             </ul>
           </div>
+          <FooterPresenceBlock presence={config.footer.rich?.presence ?? []} />
         </div>
+        {footerStats.length > 0 ? (
+          <div className="novu-site-footer__stats">
+            {footerStats.map((stat) => (
+              <div key={`${stat.label}-${stat.value}`} className="novu-site-footer__stat">
+                <strong>{stat.value}</strong>
+                <span>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
         <div className="novu-site-footer__bottom">
           <span>{config.footer.copyright}</span>
           <div className="novu-site-footer__legal">
-            <a href={config.footer.privacyHref}>Privacy Policy</a>
-            <a href={config.footer.termsHref}>Terms of Use</a>
+            {privacyHref ? <Link to={privacyHref}>Privacy Policy</Link> : null}
+            {termsHref ? <Link to={termsHref}>Terms of Use</Link> : null}
           </div>
         </div>
       </footer>

@@ -3,6 +3,7 @@ import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAca
 import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import { mergeSectionVisibility } from "@/lib/homepageSections";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
+import { parseBrandLegalPages, type BrandLegalPages } from "@/lib/brandLegalPages";
 import type { HomepageConfig } from "@/types/homepage";
 
 export type BrandMarketingSettingsKey = "landing" | "center_landing";
@@ -16,6 +17,7 @@ export type BrandMarketingEditorData = {
   marketingTheme: MarketingTheme;
   landingConfig: HomepageConfig;
   centerLandingConfig: HomepageConfig;
+  legalPages: BrandLegalPages;
 };
 
 /** Serializable subset of homepage config stored in brand_settings.settings. */
@@ -116,7 +118,29 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
               centerLandingPartial,
               brand.logo_url
             ),
+    legalPages: parseBrandLegalPages(existingSettings),
   };
+}
+
+export async function saveBrandLegalPages(
+  brandId: string,
+  settingsId: string | null,
+  existingSettings: Record<string, unknown>,
+  legalPages: BrandLegalPages
+): Promise<void> {
+  const merged = {
+    ...existingSettings,
+    legal_pages: legalPages,
+  };
+
+  if (settingsId) {
+    const { error } = await getSupabase().from("brand_settings").update({ settings: merged }).eq("id", settingsId);
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  const { error } = await getSupabase().from("brand_settings").insert({ brand_id: brandId, settings: merged });
+  if (error) throw new Error(error.message);
 }
 
 export async function saveBrandMarketingLanding(

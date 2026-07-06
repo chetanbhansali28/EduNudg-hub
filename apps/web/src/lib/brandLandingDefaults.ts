@@ -129,8 +129,12 @@ export function buildBrandLandingConfig(
       ],
       connectLinks: [],
       copyright: `© ${new Date().getFullYear()} ${brandName}. Powered by EduNudg.`,
-      privacyHref: "#faq",
-      termsHref: "#faq",
+      privacyHref: "/legal/privacy",
+      termsHref: "/legal/terms",
+      rich: {
+        brandStats: { franchiseCount: "12+", studentCount: "5k+" },
+        presence: [{ region: "India", cities: ["Your city"] }],
+      },
     },
     ...partial,
   };
@@ -315,13 +319,13 @@ export function buildAbacusClassicLandingPartial(brandName: string): Partial<Hom
       ],
       connectLinks: [],
       copyright: `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`,
-      privacyHref: "#faq",
-      termsHref: "#faq",
+      privacyHref: "/legal/privacy",
+      termsHref: "/legal/terms",
       rich: {
         description: `${brandName} is a premier education institute delivering abacus, Vedic maths, and handwriting programs.`,
         badges: [{ label: "ISO 9001:2015 Certified" }, { label: "Est. 2013" }],
         customStats: [],
-        showLiveStats: true,
+        brandStats: { franchiseCount: "2+", studentCount: "5k+" },
         presence: [{ region: "Maharashtra & Goa", cities: ["Pune", "Satara", "Sangli"] }],
         headOffice: {
           address: "Head office address",
@@ -605,8 +609,8 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
       ],
       connectLinks: [{ label: "Contact", href: "#apply" }],
       copyright: `Copyright © ${new Date().getFullYear()} ${brandName}, All Rights Reserved.`,
-      privacyHref: "#faq",
-      termsHref: "#faq",
+      privacyHref: "/legal/privacy",
+      termsHref: "/legal/terms",
       rich: {
         description: `${brandName} delivers structured learning programs with certified instructors and proven outcomes.`,
         badges: [{ label: "Trusted partner" }],
@@ -616,7 +620,8 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
           { value: "20k+", label: "Total Courses" },
           { value: "90+", label: "Course Category" },
         ],
-        showLiveStats: true,
+        brandStats: { franchiseCount: "300+", studentCount: "20M+" },
+        presence: [{ region: "India", cities: ["Pune", "Mumbai", "Bengaluru"] }],
         headOffice: {
           address: "Head office address",
           phone: SPARK_FOOTER_PHONE,

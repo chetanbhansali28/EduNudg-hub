@@ -44,7 +44,7 @@ describe("mergeAbacusClassicLandingConfig", () => {
     expect(config.trustMedia?.cards).toHaveLength(3);
     expect(config.trustMedia?.titleHighlight).toBe("Smart Brain Abacus");
     expect(config.gallery?.images).toEqual([]);
-    expect(config.footer.rich?.showLiveStats).toBe(true);
+    expect(config.footer.rich?.brandStats?.franchiseCount).toBe("2+");
     expect(config.footer.rich?.badges?.[0]?.label).toBe("ISO 9001:2015 Certified");
     expect(config.sections?.founders).toBe(true);
     expect(config.sections?.trustMedia).toBe(true);

@@ -92,12 +92,14 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           publicStats: bundle.publicStats,
         }}
       />
-      {showFooter && !isAbacusClassic && !isSparkAcademy ? <FooterSection config={publicConfig} /> : null}
+      {showFooter && !isAbacusClassic && !isSparkAcademy ? (
+        <FooterSection config={publicConfig} legalPages={{}} />
+      ) : null}
       {showFooter && isAbacusClassic ? (
-        <AbacusClassicFooter config={publicConfig} publicStats={bundle.publicStats} />
+        <AbacusClassicFooter config={publicConfig} legalPages={{}} />
       ) : null}
       {showFooter && isSparkAcademy ? (
-        <SparkAcademyFooter config={publicConfig} />
+        <SparkAcademyFooter config={publicConfig} legalPages={{}} />
       ) : null}
       {themeUsesLeadModals(theme) ? <MarketingLeadModals brandSlug={brandSlug} /> : null}
     </div>

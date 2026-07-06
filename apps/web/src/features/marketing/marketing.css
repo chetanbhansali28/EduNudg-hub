@@ -3945,3 +3945,118 @@
     font-size: 0.75rem;
   }
 }
+
+.marketing-legal-page {
+  padding: 2rem 1.25rem 4rem;
+  background: var(--novu-bg, #f8fafc);
+  min-height: 60vh;
+}
+
+.marketing-legal-page__inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.marketing-legal-page__head {
+  margin-bottom: 1.5rem;
+}
+
+.marketing-legal-page__meta {
+  color: var(--novu-muted, #64748b);
+  font-size: 0.9rem;
+}
+
+.marketing-legal-page__download {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.marketing-legal-page__pdf,
+.marketing-legal-page__html {
+  width: 100%;
+  min-height: 70vh;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.sa-site-footer__presence {
+  min-width: 160px;
+}
+
+.sa-site-footer__presence h3 {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+.sa-site-footer__presence-region strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.sa-site-footer__presence-region p {
+  margin: 0.15rem 0 0.75rem;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.novu-site-footer__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.novu-site-footer__stat strong {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.novu-site-footer__stat span {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.ed-brand-settings-legal-slot__current {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ed-brand-settings-legal-slot__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.marketing-legal-page__body {
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
+  line-height: 1.6;
+}
+
+.marketing-legal-page__body h1,
+.marketing-legal-page__body h2,
+.marketing-legal-page__body h3 {
+  margin-top: 1.25rem;
+}
+
+.marketing-legal-page__body p {
+  margin: 0.75rem 0;
+}
+
+.marketing-legal-page__loading,
+.marketing-legal-page__error {
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
+}
+
+.ed-homepage-editor-legal-grid {
+  margin-top: 0.75rem;
+}

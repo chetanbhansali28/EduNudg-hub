@@ -7,13 +7,10 @@ import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseMaybe } from "@/lib/supabaseResult";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
-import { BrandLegalDocumentsSection } from "@/features/brand/settings/BrandLegalDocumentsSection";
 import {
   BRAND_TIMEZONE_OPTIONS,
   formatSettingsUpdated,
   normalizeStaleLeadDays,
-  parseLegalDocuments,
-  type LegalDocument,
 } from "@/features/brand/settings/brandSettingsHelpers";
 import "./settings/brandSettings.css";
 
@@ -63,14 +60,12 @@ export function BrandSettingsPage() {
   const { error, clear, capture } = useMutationError();
   const loginSaved = useSavedFlash();
   const slaSaved = useSavedFlash();
-  const legalSaved = useSavedFlash();
   const mobileSaved = useSavedFlash();
 
   const [loginHeadline, setLoginHeadline] = useState("");
   const [loginSubtext, setLoginSubtext] = useState("");
   const [leadStaleDays, setLeadStaleDays] = useState("15");
   const [timezone, setTimezone] = useState("Asia/Kolkata");
-  const [legalDocuments, setLegalDocuments] = useState<LegalDocument[]>([]);
 
   const settings = useQuery({
     queryKey: ["brand-settings", brandId],
@@ -108,7 +103,6 @@ export function BrandSettingsPage() {
     setLoginSubtext(String(s.login_subtext ?? ""));
     setLeadStaleDays(String(s.lead_stale_days ?? 15));
     setTimezone(String(s.timezone ?? "Asia/Kolkata"));
-    setLegalDocuments(parseLegalDocuments(s));
   }, [settings.data]);
 
   const saveSettings = useMutation({
@@ -132,6 +126,7 @@ export function BrandSettingsPage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["brand-settings", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-features", brandId] });
+      void qc.invalidateQueries({ queryKey: ["brand-landing"] });
     },
     onError: capture,
   });
@@ -172,9 +167,6 @@ export function BrandSettingsPage() {
       { onSuccess: () => slaSaved.flash() }
     );
 
-  const saveLegal = () =>
-    saveSettings.mutate({ legal_documents: legalDocuments }, { onSuccess: () => legalSaved.flash() });
-
   const saveAllMobile = () =>
     saveSettings.mutate(
       {
@@ -182,7 +174,6 @@ export function BrandSettingsPage() {
         login_subtext: loginSubtext.trim() || null,
         lead_stale_days: normalizeStaleLeadDays(leadStaleDays),
         timezone: timezone.trim() || "Asia/Kolkata",
-        legal_documents: legalDocuments,
       },
       { onSuccess: () => mobileSaved.flash() }
     );
@@ -304,15 +295,6 @@ export function BrandSettingsPage() {
           </section>
         </div>
 
-        <BrandLegalDocumentsSection
-          brandId={brandId}
-          documents={legalDocuments}
-          onDocumentsChange={setLegalDocuments}
-          onPersist={saveLegal}
-          persistPending={saveSettings.isPending}
-          persistSaved={legalSaved.saved}
-          showDesktopSave={isDesktop}
-        />
       </div>
 
       {isDesktop ? <p className="ed-brand-settings-page__footer">© 2024 EduNudge Platform v2.4.1</p> : null}

@@ -93,7 +93,7 @@ describe("landingConfigToPartial", () => {
     config.footer.rich = {
       description: "Footer blurb",
       customStats: [{ value: "10+", label: "Centers" }],
-      showLiveStats: true,
+      brandStats: { franchiseCount: "10+", studentCount: "1k+" },
     };
 
     const partial = landingConfigToPartial(config);
@@ -148,5 +148,35 @@ describe("fetchBrandMarketingEditor", () => {
     expect(editor.marketingTheme).toBe("novu");
     expect(editor.landingConfig.hero.line1).toBe("Own an");
     expect(editor.landingConfig.sections?.featureScroll).toBe(true);
+  });
+
+  it("loads legal_pages from brand settings", async () => {
+    fromMock.mockImplementation(
+      brandsAndSettingsChain(
+        {
+          name: "Abacus World",
+          slug: "abacusworld",
+          logo_url: null,
+          marketing_theme: "novu",
+        },
+        {
+          id: "settings-1",
+          settings: {
+            legal_pages: {
+              privacy: {
+                fileName: "privacy.docx",
+                fileUrl: "https://cdn.example/privacy.docx",
+                htmlUrl: "https://cdn.example/privacy.html",
+                mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                uploadedAt: "2026-01-01",
+              },
+            },
+          },
+        }
+      )
+    );
+
+    const editor = await fetchBrandMarketingEditor("brand-3");
+    expect(editor.legalPages.privacy?.fileName).toBe("privacy.docx");
   });
 });

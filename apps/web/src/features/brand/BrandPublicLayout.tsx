@@ -76,14 +76,17 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
           marketingTheme: bundle.marketingTheme,
           publicCurriculum: bundle.publicCurriculum,
           publicStats: bundle.publicStats,
+          legalPages: bundle.legalPages,
         }}
       />
-      {showFooter && !isAbacusClassic && !isSparkAcademy ? <FooterSection config={bundle.config} /> : null}
+      {showFooter && !isAbacusClassic && !isSparkAcademy ? (
+        <FooterSection config={bundle.config} legalPages={bundle.legalPages} />
+      ) : null}
       {showFooter && isAbacusClassic ? (
-        <AbacusClassicFooter config={bundle.config} publicStats={bundle.publicStats} />
+        <AbacusClassicFooter config={bundle.config} legalPages={bundle.legalPages} />
       ) : null}
       {showFooter && isSparkAcademy ? (
-        <SparkAcademyFooter config={bundle.config} />
+        <SparkAcademyFooter config={bundle.config} legalPages={bundle.legalPages} />
       ) : null}
       {themeUsesLeadModals(theme) ? <MarketingLeadModals brandSlug={brandSlug} /> : null}
     </div>
@@ -102,4 +105,5 @@ export type BrandLandingOutletContext = {
   marketingTheme: import("@/types/homepage").MarketingTheme;
   publicCurriculum: import("@/lib/brandCurriculumPublic").PublicCurriculumProgram[];
   publicStats: import("@/lib/brandLandingBundle").BrandPublicStats;
+  legalPages: import("@/lib/brandLegalPages").BrandLegalPages;
 };
