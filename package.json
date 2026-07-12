@@ -5,9 +5,9 @@
   "description": "EduNudg multi-tenant franchise learning OS",
   "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "dev": "cd apps/web && vite --port 8080 --strictPort --host",
-    "build": "cd apps/web && vite build",
-    "build:dev": "cd apps/web && vite build --mode development",
+    "dev": "cd apps/web && node_modules/.bin/vite --port 8080 --strictPort --host",
+    "build": "cd apps/web && node_modules/.bin/vite build",
+    "build:dev": "cd apps/web && node_modules/.bin/vite build --mode development",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
