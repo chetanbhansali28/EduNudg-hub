@@ -6,8 +6,8 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "dev": "cd apps/web && node_modules/.bin/vite --host",
-    "build": "cd apps/web && node_modules/.bin/vite build",
-    "build:dev": "cd apps/web && node_modules/.bin/vite build --mode development",
+    "build": "cd apps/web && node_modules/.bin/vite build && rm -rf ../../dist && cp -r dist ../../dist",
+    "build:dev": "cd apps/web && node_modules/.bin/vite build --mode development && rm -rf ../../dist && cp -r dist ../../dist",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
