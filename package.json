@@ -5,7 +5,7 @@
   "description": "EduNudg multi-tenant franchise learning OS",
   "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "dev": "turbo dev --filter=@edunudg/web",
+    "dev": "turbo dev --filter=@edunudg/web --",
     "build": "turbo build",
     "build:dev": "turbo build",
     "lint": "turbo lint",
