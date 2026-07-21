@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "cd apps/web && node_modules/.bin/vite --host",
     "build": "pnpm --filter @edunudg/web build",
-    "build:dev": "pnpm --filter @edunudg/web exec vite build --mode development && rm -rf dist && cp -R apps/web/dist dist",
+    "build:dev": "pnpm --filter @edunudg/web exec vite build --mode development",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
