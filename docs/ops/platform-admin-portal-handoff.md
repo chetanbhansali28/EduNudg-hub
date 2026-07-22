@@ -6,9 +6,9 @@ Platform admins (`platform_super_admin`) can open any brand, center, learn, or p
 
 | UI | Location | Lands on |
 |----|----------|----------|
-| **Brand backend** | Platform → Brands (list or brand detail toolbar) | `{brand-host}/app` |
+| **Brand backend** | Platform → Brands (list or brand detail toolbar) | `{brand-host}/app` (local) or same-origin `/app?portal=brand&brand=…` on `*.vercel.app` |
 | **Open** | Brand detail → Domains (brand / center / learn / parents rows) | Staff backend or portal home per type |
-| **Open center** | Brand detail → Franchise centers | `{center-host}/app` |
+| **Open center** | Brand detail → Franchise centers | `{center-host}/app` or same-origin `/app?portal=center&brand=…&center=…` |
 
 ## Flow
 
@@ -16,7 +16,8 @@ Platform admins (`platform_super_admin`) can open any brand, center, learn, or p
 2. SPA calls Edge Function `platform-portal-handoff` with `redirectTo` = `{origin}/auth/handoff?next={path}`.
 3. Edge Function validates `is_platform_admin()`, generates `hashed_token` via `auth.admin.generateLink`.
 4. Browser opens `{origin}/auth/handoff?token_hash=…&next=…` on the **target host** (e.g. `smart-brain-abacus.localhost:9000`).
-5. `AuthHandoffPage` runs `supabase.auth.verifyOtp({ token_hash, type: 'magiclink' })` and navigates to `next` (`/app` for brand/center, `/` for learn/parents).
+5. On single-host deploys (`*.vercel.app` without `VITE_PORTAL_BASE_DOMAIN`), step 2 uses the **platform origin** plus `portal` / `brand` / `center` query params instead of `*.localhost`.
+6. `AuthHandoffPage` runs `supabase.auth.verifyOtp({ token_hash, type: 'magiclink' })`, persists the portal override, and navigates to `next` (`/app` for brand/center, `/` for learn/parents).
 
 ## Code map
 
@@ -34,12 +35,15 @@ Platform admins (`platform_super_admin`) can open any brand, center, learn, or p
 pnpm dlx supabase functions deploy platform-portal-handoff
 ```
 
+Redeploy after this change so same-origin `portal` / `brand` / `center` query params survive token append on Vercel.
 ## Auth dashboard
 
 | Setting | Value (local) |
 |---------|----------------|
 | Site URL | `http://localhost:9000` — **not** `localhost:3000` |
 | Redirect URLs | `http://localhost:9000/**` |
+
+Also allow production: `https://edunudg-hub.vercel.app/**` (and any custom portal domains).
 
 Handoff does **not** require every `*.localhost:9000` subdomain in redirect allowlists.
 

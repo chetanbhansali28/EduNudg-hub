@@ -21,6 +21,24 @@ import { BrandsPage } from "@/features/platform/BrandsPage";
 const invokeMock = vi.fn();
 const fromMock = vi.fn();
 
+const { fetchPlatformBrandsHome } = vi.hoisted(() => ({
+  fetchPlatformBrandsHome: vi.fn(),
+}));
+
+vi.mock("@/lib/platformBrandsHomeApi", () => ({
+  fetchPlatformBrandsHome,
+}));
+
+vi.mock("@/lib/platformBrandSignupApi", () => ({
+  listPendingPlatformSignups: vi.fn(async () => []),
+  approvePlatformBrandSignup: vi.fn(),
+  rejectPlatformBrandSignup: vi.fn(),
+}));
+
+vi.mock("@/lib/manualLeadsApi", () => ({
+  createPlatformBrandSignupStaff: vi.fn(async () => ({ error: null })),
+}));
+
 const PLATFORM_ADMIN_MEMBERSHIP = {
   id: "m-platform",
   role_key: "platform_admin",
@@ -79,29 +97,30 @@ describe("CRITICAL platform admin portal access", () => {
   beforeEach(() => {
     invokeMock.mockReset();
     fromMock.mockReset();
+    fetchPlatformBrandsHome.mockReset();
+    fetchPlatformBrandsHome.mockResolvedValue({
+      brands: [{ id: "b1", slug: "demo", name: "Demo Brand", status: "active", logo_url: null }],
+      pendingSignups: 0,
+      totalStudents: 0,
+      monthlyGrowthPercent: null,
+    });
     vi.stubGlobal("open", vi.fn());
     Object.defineProperty(window, "location", {
-      value: { protocol: "http:", hostname: "localhost", port: "9000" },
+      value: { protocol: "http:", hostname: "localhost", port: "9000", origin: "http://localhost:9000" },
       writable: true,
     });
-    fromMock.mockImplementation((table: string) => {
-      if (table === "brands") {
-        const c = {
-          select: vi.fn(() => c),
-          is: vi.fn(() => c),
-          order: vi.fn(() =>
-            Promise.resolve({
-              data: [{ id: "b1", slug: "demo", name: "Demo Brand", status: "active", logo_url: null }],
-              error: null,
-            })
-          ),
-        };
-        return c;
-      }
-      return {
-        select: vi.fn(() => ({ is: vi.fn(() => ({ order: vi.fn(() => Promise.resolve({ data: [], error: null })) })) })),
-      };
-    });
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+    fromMock.mockImplementation(() => ({
+      select: vi.fn(() => ({
+        is: vi.fn(() => ({ order: vi.fn(() => Promise.resolve({ data: [], error: null })) })),
+      })),
+      update: vi.fn(() => ({ eq: vi.fn(() => Promise.resolve({ error: null })) })),
+    }));
   });
 
   afterEach(() => {
@@ -193,6 +212,41 @@ describe("CRITICAL platform admin portal access", () => {
     await waitFor(() => {
       expect(invokeMock).toHaveBeenCalledWith("platform-portal-handoff", {
         body: { redirectTo: "http://demo.localhost:9000/auth/handoff?next=%2Fapp" },
+      });
+    });
+  });
+
+  it("regression_vercel_brand_backend_handoff_uses_same_origin_query", async () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        protocol: "https:",
+        hostname: "edunudg-hub.vercel.app",
+        port: "",
+        origin: "https://edunudg-hub.vercel.app",
+      },
+      writable: true,
+    });
+    invokeMock.mockResolvedValue({ data: { url: "https://auth.example/magic" }, error: null });
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <MemoryRouter initialEntries={["/admin/brands"]}>
+        <QueryClientProvider client={qc}>
+          <Routes>
+            <Route path="/admin/brands" element={<BrandsPage />} />
+          </Routes>
+        </QueryClientProvider>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Brand backend" }));
+
+    await waitFor(() => {
+      expect(invokeMock).toHaveBeenCalledWith("platform-portal-handoff", {
+        body: {
+          redirectTo:
+            "https://edunudg-hub.vercel.app/auth/handoff?portal=brand&brand=demo&next=%2Fapp",
+        },
       });
     });
   });

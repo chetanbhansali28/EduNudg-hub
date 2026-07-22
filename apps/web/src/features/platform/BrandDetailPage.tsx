@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge, Button, Card, DataList, ListRow, PageToolbar } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { brandAdminPath, isUuid } from "@/lib/adminPaths";
-import { portalTargetFromDomain } from "@/lib/brandPortalUrl";
+import { brandPortalHostname, portalTargetFromDomain } from "@/lib/brandPortalUrl";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
 import { useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
 import { BrandEditForm } from "./BrandEditForm";
@@ -149,7 +149,11 @@ export function BrandDetailPage() {
   const primaryBrandHost =
     domains.data?.find((d) => d.portal_type === "brand" && d.is_primary)?.hostname ??
     domains.data?.find((d) => d.portal_type === "brand")?.hostname;
-  const brandBackendTarget = portalTargetFromDomain("brand", primaryBrandHost ?? `${b.slug}.localhost`, b.slug);
+  const brandBackendTarget = portalTargetFromDomain(
+    "brand",
+    primaryBrandHost ?? brandPortalHostname(b.slug),
+    b.slug
+  );
 
   const sub = subscription.data as
     | { status: string; subscription_plans?: { name: string; code: string } | null }
@@ -234,7 +238,7 @@ export function BrandDetailPage() {
             const centerHost =
               domains.data?.find(
                 (d) => d.portal_type === "center" && d.hostname.toLowerCase().startsWith(`${c.slug}.`)
-              )?.hostname ?? `${c.slug}.${b.slug}.localhost`;
+              )?.hostname ?? `${c.slug}.${brandPortalHostname(b.slug)}`;
             const target = portalTargetFromDomain("center", centerHost, b.slug);
             return (
               <ListRow aside={target ? <PortalOpenButton target={target} label="Open center" /> : undefined}>

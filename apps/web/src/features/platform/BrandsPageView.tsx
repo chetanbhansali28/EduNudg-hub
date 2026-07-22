@@ -22,7 +22,7 @@ import {
   MutationError,
 } from "@edunudg/ui";
 import { brandAdminPath } from "@/lib/adminPaths";
-import { portalTargetFromDomain } from "@/lib/brandPortalUrl";
+import { brandPortalTarget } from "@/lib/brandPortalUrl";
 import { openPortalAsPlatformAdmin, openPortalBackendFallback } from "@/lib/portalHandoffApi";
 import type { PlatformBrandRow, PlatformBrandsHome } from "@/lib/platformBrandsHelpers";
 import {
@@ -111,8 +111,7 @@ function usePortalOpen() {
   const [pendingId, setPendingId] = useState<string | null>(null);
 
   const openBrandBackend = (brand: PlatformBrandRow) => {
-    const target = portalTargetFromDomain("brand", `${brand.slug}.localhost`, brand.slug);
-    if (!target) return;
+    const target = brandPortalTarget(brand.slug);
     setPendingId(brand.id);
     void openPortalAsPlatformAdmin(target)
       .catch(() => {

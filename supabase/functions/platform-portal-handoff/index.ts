@@ -109,6 +109,11 @@ Deno.serve(async (req) => {
     const target = new URL("/auth/handoff", parsed.origin);
     target.searchParams.set("token_hash", tokenHash);
     target.searchParams.set("next", next);
+    // Preserve same-origin portal overrides (Vercel *.vercel.app without custom domains).
+    for (const key of ["portal", "brand", "center"] as const) {
+      const value = parsed.searchParams.get(key);
+      if (value) target.searchParams.set(key, value);
+    }
     handoffUrl = target.toString();
   } catch {
     return jsonResponse({ error: "Invalid redirectTo URL" }, 400);

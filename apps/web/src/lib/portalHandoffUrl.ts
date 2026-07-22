@@ -11,5 +11,9 @@ export function appendPortalHandoffToken(callbackUrl: string, tokenHash: string)
   const handoff = new URL("/auth/handoff", parsed.origin);
   handoff.searchParams.set("token_hash", tokenHash);
   handoff.searchParams.set("next", next);
+  for (const key of ["portal", "brand", "center"] as const) {
+    const value = parsed.searchParams.get(key);
+    if (value) handoff.searchParams.set(key, value);
+  }
   return handoff.toString();
 }

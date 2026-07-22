@@ -1,12 +1,15 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   brandPortalHostname,
+  brandPortalTarget,
   brandPortalUrl,
   centerPortalUrl,
   learnPortalUrl,
+  normalizePortalHostname,
   portalBackendUrl,
   portalHandoffLoginUrl,
   portalTargetFromDomain,
+  usesSameOriginPortals,
 } from "./brandPortalUrl";
 
 describe("brandPortalUrl", () => {
@@ -14,11 +17,16 @@ describe("brandPortalUrl", () => {
 
   afterEach(() => {
     Object.defineProperty(window, "location", { value: original, writable: true });
+    vi.unstubAllEnvs();
   });
 
-  function mockLocation(hostname: string, port = "9000") {
+  function mockLocation(hostname: string, port = "9000", protocol = "http:") {
+    const origin =
+      port && port !== "80" && port !== "443"
+        ? `${protocol}//${hostname}:${port}`
+        : `${protocol}//${hostname}`;
     Object.defineProperty(window, "location", {
-      value: { protocol: "http:", hostname, port },
+      value: { protocol, hostname, port, origin },
       writable: true,
     });
   }
@@ -67,11 +75,16 @@ describe("brandPortalUrl", () => {
   it("regression_portal_handoff_login_url_includes_next_path", () => {
     mockLocation("localhost");
     expect(
-      portalHandoffLoginUrl({ portalType: "brand", brandSlug: "smart-brain-abacus", hostname: "smart-brain-abacus.localhost" })
+      portalHandoffLoginUrl({
+        portalType: "brand",
+        brandSlug: "smart-brain-abacus",
+        hostname: "smart-brain-abacus.localhost",
+      })
     ).toBe("http://smart-brain-abacus.localhost:9000/auth/handoff?next=%2Fapp");
   });
 
   it("regression_portal_target_from_domain_supports_center_and_learn", () => {
+    mockLocation("localhost");
     expect(
       portalTargetFromDomain("center", "koramangala.abacusworld.localhost", "abacusworld")
     ).toEqual({
@@ -90,5 +103,43 @@ describe("brandPortalUrl", () => {
   it("builds learn portal url", () => {
     mockLocation("localhost");
     expect(learnPortalUrl("abacusworld")).toBe("http://learn.abacusworld.localhost:9000/");
+  });
+
+  it("regression_vercel_same_origin_handoff_avoids_localhost_hosts", () => {
+    mockLocation("edunudg-hub.vercel.app", "", "https:");
+    expect(usesSameOriginPortals()).toBe(true);
+    expect(
+      portalHandoffLoginUrl(brandPortalTarget("smart-brain-abacus", "smart-brain-abacus.localhost"))
+    ).toBe(
+      "https://edunudg-hub.vercel.app/auth/handoff?portal=brand&brand=smart-brain-abacus&next=%2Fapp"
+    );
+    expect(
+      portalBackendUrl({
+        portalType: "center",
+        brandSlug: "smart-brain-abacus",
+        centerSlug: "pune",
+        hostname: "pune.smart-brain-abacus.localhost",
+      })
+    ).toBe("https://edunudg-hub.vercel.app/app?portal=center&brand=smart-brain-abacus&center=pune");
+    expect(learnPortalUrl("abacusworld")).toBe(
+      "https://edunudg-hub.vercel.app/?portal=learn&brand=abacusworld"
+    );
+  });
+
+  it("regression_rewrites_localhost_domain_mappings_when_base_domain_set", () => {
+    vi.stubEnv("VITE_PORTAL_BASE_DOMAIN", "edunudg.com");
+    mockLocation("admin.edunudg.com", "", "https:");
+    expect(normalizePortalHostname("smart-brain-abacus.localhost")).toBe("smart-brain-abacus.edunudg.com");
+    expect(normalizePortalHostname("koramangala.smart-brain-abacus.localhost")).toBe(
+      "koramangala.smart-brain-abacus.edunudg.com"
+    );
+    expect(usesSameOriginPortals()).toBe(false);
+    expect(
+      portalHandoffLoginUrl({
+        portalType: "brand",
+        brandSlug: "smart-brain-abacus",
+        hostname: "smart-brain-abacus.localhost",
+      })
+    ).toBe("https://smart-brain-abacus.edunudg.com/auth/handoff?next=%2Fapp");
   });
 });

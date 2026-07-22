@@ -64,9 +64,12 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 
 ## Deploy (Vercel)
 
-1. Link repo to Vercel
+1. Link repo to Vercel (Root Directory: `apps/web`)
 2. Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (same cloud project or production project)
-3. Add custom domains per `domain_mappings`
+3. **Portal hosts** — pick one:
+   - **Same-origin (default on `*.vercel.app`)**: leave `VITE_PORTAL_BASE_DOMAIN` unset. Brand / Franchise / Student portals open on the same URL with `?portal=&brand=` (and `center=` when needed). Platform **Brand backend** handoff uses this automatically.
+   - **Real multi-host**: set `VITE_PORTAL_BASE_DOMAIN=yourdomain.com`, add wildcard DNS `*.yourdomain.com` → Vercel, and map hosts in `domain_mappings` (seed rows still use `*.localhost` for local; the SPA rewrites them when the base domain is set).
+4. Supabase Auth → add production Site URL / Redirect URLs for `https://edunudg-hub.vercel.app/**` (and custom domains when used)
 
 ## Migrations
 

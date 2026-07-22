@@ -16,4 +16,15 @@ describe("portalHandoffUrl", () => {
       )
     ).toBe("http://smart-brain-abacus.localhost:9000/auth/handoff?token_hash=abc123token&next=%2Fapp");
   });
+
+  it("regression_preserves_same_origin_portal_query_when_appending_token", () => {
+    expect(
+      appendPortalHandoffToken(
+        "https://edunudg-hub.vercel.app/auth/handoff?portal=brand&brand=demo&next=%2Fapp",
+        "tok"
+      )
+    ).toBe(
+      "https://edunudg-hub.vercel.app/auth/handoff?token_hash=tok&next=%2Fapp&portal=brand&brand=demo"
+    );
+  });
 });

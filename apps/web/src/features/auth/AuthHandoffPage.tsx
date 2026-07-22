@@ -2,10 +2,16 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button, ThemeProvider } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
+import {
+  parsePortalOverrideFromSearch,
+  portalOverrideSearchParams,
+  writePortalOverride,
+} from "@/lib/portalOverride";
 
 /**
  * Completes platform-admin portal handoff on the target host via verifyOtp.
  * Avoids Supabase action_link redirects (which fall back to Site URL when subdomains are not allowlisted).
+ * On single-host deploys (e.g. *.vercel.app), persists ?portal=&brand= override for TenantProvider.
  */
 export function AuthHandoffPage() {
   const [searchParams] = useSearchParams();
@@ -36,8 +42,12 @@ export function AuthHandoffPage() {
         return;
       }
 
+      const override = parsePortalOverrideFromSearch(searchParams.toString());
+      if (override) writePortalOverride(override);
+
       const path = next.startsWith("/") ? next : `/${next}`;
-      navigate(path, { replace: true });
+      const qs = override ? `?${portalOverrideSearchParams(override).toString()}` : "";
+      navigate(`${path}${qs}`, { replace: true });
     })();
 
     return () => {
