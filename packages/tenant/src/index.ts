@@ -16,19 +16,35 @@ export interface DomainMappingRow {
   center_id: string | null;
 }
 
+function platformTenantContext(host: string): TenantContext {
+  return {
+    hostname: host,
+    portalType: "platform",
+    brandId: null,
+    centerId: null,
+    brandSlug: null,
+    centerSlug: null,
+  };
+}
+
+/** Hosts that always resolve to the EduNudg platform portal before slug heuristics. */
+export function isPlatformHost(host: string): boolean {
+  const normalized = host.split(":")[0].toLowerCase();
+  return (
+    normalized === "localhost" ||
+    normalized === "127.0.0.1" ||
+    normalized === "admin.localhost" ||
+    normalized.endsWith(".vercel.app") ||
+    normalized.startsWith("admin.")
+  );
+}
+
 /** Dev fallback when DB has no mapping */
 export function resolveTenantFromHost(hostname: string): TenantContext {
   const host = hostname.split(":")[0].toLowerCase();
 
-  if (host === "localhost" || host === "127.0.0.1" || host === "admin.localhost") {
-    return {
-      hostname: host,
-      portalType: "platform",
-      brandId: null,
-      centerId: null,
-      brandSlug: null,
-      centerSlug: null,
-    };
+  if (isPlatformHost(host)) {
+    return platformTenantContext(host);
   }
 
   const parts = host.split(".");
@@ -76,14 +92,7 @@ export function resolveTenantFromHost(hostname: string): TenantContext {
     };
   }
 
-  return {
-    hostname: host,
-    portalType: "platform",
-    brandId: null,
-    centerId: null,
-    brandSlug: null,
-    centerSlug: null,
-  };
+  return platformTenantContext(host);
 }
 
 export function mergeDomainMapping(

@@ -3,6 +3,7 @@ dist
 .turbo
 .env
 .env.local
+.cursor/settings.json
 *.log
 .DS_Store
 playwright-report
