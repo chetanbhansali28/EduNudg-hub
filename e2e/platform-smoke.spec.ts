@@ -26,7 +26,8 @@ test("regression_login_primary_submit_name_is_exact_not_oauth", async ({ page })
 test("marketing home renders shared nav and footer", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL("/");
-  await expect(page.getByLabel("Site")).toBeVisible();
+  // exact: true — getByLabel("Site") also matches "Launch Website for FREE" CTAs
+  await expect(page.getByRole("navigation", { name: "Site", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
 });
 

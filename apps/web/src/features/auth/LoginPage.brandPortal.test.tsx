@@ -120,6 +120,18 @@ vi.mock("@/lib/homepageApi", () => ({
   fetchHomepageConfig: vi.fn(),
 }));
 
+vi.mock("@/lib/supabase", () => ({
+  getSupabase: () => ({
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: () => Promise.resolve({ data: { status: "active" }, error: null }),
+        }),
+      }),
+    }),
+  }),
+}));
+
 function renderBrandLogin(initialPath = "/login") {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createMemoryRouter(

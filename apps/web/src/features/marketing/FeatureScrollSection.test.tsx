@@ -56,14 +56,13 @@ describe("splitFeatureSectionIndices", () => {
 describe("FeatureScrollSection", () => {
   beforeEach(() => {
     mockMatchMedia(true);
-    vi.stubGlobal(
-      "IntersectionObserver",
-      vi.fn().mockImplementation(() => ({
-        observe: vi.fn(),
-        disconnect: vi.fn(),
-        unobserve: vi.fn(),
-      }))
-    );
+    class MockIntersectionObserver {
+      observe = vi.fn();
+      disconnect = vi.fn();
+      unobserve = vi.fn();
+      takeRecords = vi.fn();
+    }
+    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
   });
 
   afterEach(() => {

@@ -109,6 +109,18 @@ vi.mock("@/lib/homepageApi", () => ({
   }),
 }));
 
+vi.mock("@/lib/supabase", () => ({
+  getSupabase: () => ({
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: () => Promise.resolve({ data: { status: "active" }, error: null }),
+        }),
+      }),
+    }),
+  }),
+}));
+
 function renderLogin(initialPath = "/login") {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const router = createMemoryRouter(

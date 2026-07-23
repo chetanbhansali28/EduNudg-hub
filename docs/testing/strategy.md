@@ -25,7 +25,9 @@ Every feature and bug fix includes tests in the same PR.
 | Brand success stories page | `BrandSuccessStoriesPage.test.tsx` |
 | Workspace package type exports | `regression_workspacePackageExports.test.ts` |
 
-Vitest for `apps/web` also runs `packages/ui` tests; `@testing-library/react` must resolve (ui package devDependency + vitest alias). Setup: `apps/web/src/test/vitest.setup.ts` (jsdom stubs such as `scrollIntoView`).
+## Local package tests
+
+`pnpm test` runs `scripts/assert-workspace-test-bins.mjs` first. If `@edunudg/tenant` / `@edunudg/permissions` fail with `Cannot find module .../vitest/vitest.mjs`, the vitest symlink is broken — run **`pnpm install`** (incomplete `node_modules` after interrupted installs). Regression: `regression_workspaceVitestInstall.test.ts`.
 
 ### Playwright / Testing Library accessible names
 
@@ -38,7 +40,9 @@ See OpenSpec [`staff-login`](../../openspec/specs/staff-login/spec.md). Helper: 
 
 ## CI
 
-- GitHub: `.github/workflows/ci.yml` — audit:schema, build, typecheck, test, test:rls, e2e
+- GitHub: `.github/workflows/ci.yml` — Node **24**, audit:schema, build, typecheck, test, test:rls, e2e
+- Vitest **≥4** (workspace) — required for Node 24 + jsdom + React Router client navigations (AbortSignal/`undici` compatibility)
+- Login portal tests that mount `RequireMembership` mock `@/lib/supabase` so center status does not hit the network
 - Local mirror before push: **`pnpm ci:local`** (skill `edunudg-pre-push-ci` — auto-fix failures, then push only when green)
 
 ## Local dev

@@ -10,7 +10,7 @@
     "build:dev": "pnpm --filter @edunudg/web exec vite build --mode development",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test",
+    "test": "node scripts/assert-workspace-test-bins.mjs && pnpm -r --if-present test",
     "test:rls": "node scripts/run-rls-tests.mjs",
     "test:e2e": "playwright test",
     "ci:local": "node scripts/ci-local.mjs",

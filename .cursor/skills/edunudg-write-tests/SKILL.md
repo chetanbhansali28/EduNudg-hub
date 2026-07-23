@@ -21,6 +21,10 @@ pnpm test:rls
 pnpm test:e2e
 ```
 
+If package tests fail with missing `vitest/vitest.mjs`, run `pnpm install` (see `assert-workspace-test-bins.mjs`).
+
+Use **Vitest ≥4** (matches CI Node 24). Mock constructors with `class`, not arrow `vi.fn(() => …)` — Vitest 4 rejects arrow mocks used with `new` (e.g. `IntersectionObserver`). Auth login tests that render `RequireMembership` must mock `@/lib/supabase` (center operational status).
+
 Coverage target: ≥80% on `packages/*`.
 
 ## Before finish

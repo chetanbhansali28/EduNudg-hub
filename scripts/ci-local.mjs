@@ -29,6 +29,7 @@ function run(label, command, args) {
 console.log("EduNudg local CI (mirrors GitHub Actions CI)\n");
 
 run("install", "pnpm", ["install"]);
+run("assert workspace vitest bins", "node", ["scripts/assert-workspace-test-bins.mjs"]);
 run("audit:schema", "pnpm", ["audit:schema"]);
 run("build", "pnpm", ["build"]);
 run("typecheck", "pnpm", ["typecheck"]);

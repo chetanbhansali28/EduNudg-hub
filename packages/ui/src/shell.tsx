@@ -570,7 +570,7 @@ export function LoginLayout({
 
           <nav className="ed-login-footer" aria-label="Legal and help">
             {links.map((link, index) => (
-              <span key={link.href} className="ed-login-footer__item">
+              <span key={`${link.label}:${link.href}`} className="ed-login-footer__item">
                 {index > 0 ? <span className="ed-login-footer__sep" aria-hidden /> : null}
                 <a href={link.href}>{link.label}</a>
               </span>
