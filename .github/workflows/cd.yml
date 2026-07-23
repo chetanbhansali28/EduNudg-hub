@@ -1,6 +1,9 @@
 # Continuous deployment to Vercel (apps/web SPA).
-# Requires GitHub secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
-# See docs/ops/runbook.md → Deploy (GitHub Actions CD)
+# Requires GitHub Actions secrets (repo admin): VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+# See docs/ops/runbook.md → Deploy
+#
+# Never expand an empty --token= (Vercel CLI: "missing a value"). Quote "$VERCEL_TOKEN".
+# If secrets are unset, jobs succeed with a warning — production still deploys via Vercel Git on main.
 
 name: CD
 
@@ -12,8 +15,6 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 concurrency:
   group: cd-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.workflow_run.head_branch || github.ref }}
@@ -27,23 +28,42 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v5
 
+      - name: Check Vercel secrets
+        id: secrets
+        run: |
+          if [ -z "${VERCEL_TOKEN}" ] || [ -z "${VERCEL_ORG_ID}" ] || [ -z "${VERCEL_PROJECT_ID}" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Vercel secrets missing::Set VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID as repository Actions secrets (repo admin). See docs/ops/runbook.md. Skipping Actions preview deploy."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install Vercel CLI
+        if: steps.secrets.outputs.ready == 'true'
         run: npm install --global vercel@latest
 
       - name: Pull Vercel environment
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        if: steps.secrets.outputs.ready == 'true'
+        run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
 
       - name: Build
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        if: steps.secrets.outputs.ready == 'true'
+        run: vercel build --token="$VERCEL_TOKEN"
 
       - name: Deploy preview
+        if: steps.secrets.outputs.ready == 'true'
         id: deploy
-        run: echo "url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
 
       - name: Comment preview URL on PR
+        if: steps.secrets.outputs.ready == 'true' && steps.deploy.outputs.url != ''
         uses: actions/github-script@v7
         with:
           script: |
@@ -76,32 +96,53 @@ jobs:
 
   deploy-production:
     name: Deploy production
+    # Avoid GitHub Environment "production" for secrets: empty env secrets override
+    # repo secrets and produced --token= (Vercel missing-token-value).
     if: >
       github.event_name == 'workflow_run' &&
       github.event.workflow_run.conclusion == 'success' &&
       (github.event.workflow_run.head_branch == 'main' ||
        github.event.workflow_run.head_branch == 'master')
     runs-on: ubuntu-latest
-    environment: production
     permissions:
       contents: read
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
+      - name: Check Vercel secrets
+        id: secrets
+        run: |
+          if [ -z "${VERCEL_TOKEN}" ] || [ -z "${VERCEL_ORG_ID}" ] || [ -z "${VERCEL_PROJECT_ID}" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Vercel secrets missing::Set VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID as repository Actions secrets (repo admin). See docs/ops/runbook.md. Skipping Actions production deploy — Vercel Git still deploys main/master."
+            echo "Skipped Actions production deploy (secrets missing). Rely on Vercel Git for main." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install Vercel CLI
+        if: steps.secrets.outputs.ready == 'true'
         run: npm install --global vercel@latest
 
       - name: Pull Vercel environment
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        if: steps.secrets.outputs.ready == 'true'
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        if: steps.secrets.outputs.ready == 'true'
+        run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy production
+        if: steps.secrets.outputs.ready == 'true'
         id: deploy
-        run: echo "url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
 
       - name: Summary
+        if: steps.secrets.outputs.ready == 'true'
         run: echo "Production deployed to ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"

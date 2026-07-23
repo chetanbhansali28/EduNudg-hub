@@ -71,31 +71,40 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
    - **Real multi-host**: set `VITE_PORTAL_BASE_DOMAIN=yourdomain.com`, add wildcard DNS `*.yourdomain.com` → Vercel, and map hosts in `domain_mappings` (seed rows still use `*.localhost` for local; the SPA rewrites them when the base domain is set).
 4. Supabase Auth → add production Site URL / Redirect URLs for `https://edunudg-hub.vercel.app/**` (and custom domains when used)
 
-### Deploy (GitHub Actions CD)
+### Deploy
 
-Production and PR previews deploy via [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) (Vercel CLI + `--prebuilt`). Automatic Git deploys are disabled in `apps/web/vercel.json` so only Actions ships builds.
+**Production on `main` / `master`:** Vercel Git auto-deploy is enabled for those branches only (`apps/web/vercel.json` → `git.deploymentEnabled`). Other branches do not auto-deploy.
 
-**One-time secrets** (repo → Settings → Secrets and variables → Actions):
+**PR previews + optional Actions production:** [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) (Vercel CLI + `--prebuilt`) when repository secrets are set. If secrets are missing, CD skips the CLI deploy with a warning (does not fail on empty `--token=`).
+
+**One-time Actions secrets** — **repository** secrets (Settings → Secrets and variables → Actions). Requires **repo admin**. Empty `VERCEL_TOKEN` previously caused `You defined "--token", but it's missing a value`.
 
 | Secret | Where to get it |
 |--------|-----------------|
-| `VERCEL_TOKEN` | [Vercel → Account → Tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID` | After `vercel link` in this repo: `.vercel/project.json` → `orgId` |
+| `VERCEL_TOKEN` | [Vercel → Account → Tokens](https://vercel.com/account/tokens) (scope: full account or the EduNudg project) |
+| `VERCEL_ORG_ID` | After `vercel link`: `.vercel/project.json` → `orgId` |
 | `VERCEL_PROJECT_ID` | Same file → `projectId` |
 
 ```bash
-# From repo root (uses Root Directory apps/web on the linked project)
+# From repo root (Vercel project Root Directory should be apps/web)
 pnpm dlx vercel@latest login
-pnpm dlx vercel@latest link
-# Copy orgId + projectId from .vercel/project.json into GitHub secrets (do not commit .vercel/)
+pnpm dlx vercel@latest link --cwd apps/web
+# Do not commit apps/web/.vercel/
+
+gh secret set VERCEL_TOKEN
+node -p "require('./apps/web/.vercel/project.json').orgId" | gh secret set VERCEL_ORG_ID
+node -p "require('./apps/web/.vercel/project.json').projectId" | gh secret set VERCEL_PROJECT_ID
 ```
 
-Optional: create a GitHub Environment named **`production`** (Settings → Environments) if you want required reviewers before prod deploys.
+After Actions secrets work, you can turn off Git production deploys to avoid double builds by setting `"git": { "deploymentEnabled": false }` in `apps/web/vercel.json`.
+
+Do **not** put empty values in a GitHub Environment named `production` for these keys — empty environment secrets override repo secrets.
 
 | Event | Behavior |
 |-------|----------|
-| Pull request | Preview deploy + PR comment with URL |
-| CI success on `main` / `master` | Production deploy (`workflow_run` after [CI](../../.github/workflows/ci.yml)) |
+| Push to `main` / `master` | Vercel Git production deploy |
+| Pull request | Actions preview deploy (if secrets set) + PR comment |
+| CI success on `main` / `master` | Actions production deploy when secrets set (`workflow_run` after [CI](../../.github/workflows/ci.yml)) |
 
 ## Migrations
 
