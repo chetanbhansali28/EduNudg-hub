@@ -20,21 +20,24 @@ Every feature and bug fix includes tests in the same PR.
 | Platform admin cross-portal handoff | `platformAdminPortalAccess.critical.test.tsx`, `AuthHandoffPage.test.tsx`, `portalHandoffUrl.test.ts` |
 | Backend KPI theme (all staff dashboards) | `backendKpiTheme.test.tsx` |
 | Brand portal login / tenant scope | `LoginPage.brandPortal.test.tsx`, `resolveTenantScope.test.ts` |
-| Staff login accessible names | `LoginPage.test.tsx` (`regression_primary_submit_accessible_name_is_exact_log_in`), `e2e/platform-smoke.spec.ts` |
+| Staff login accessible names | `LoginPage.test.tsx`, `exactAccessibleName.test.ts`, `e2e/platform-smoke.spec.ts` |
 | Agent guardrails / artifact sync | `regression_agentGuardrails.test.ts` |
 | Brand success stories page | `BrandSuccessStoriesPage.test.tsx` |
 | Workspace package type exports | `regression_workspacePackageExports.test.ts` |
 
 ### Playwright / Testing Library accessible names
 
-Role queries use **substring** matching by default in Playwright. When multiple controls share a prefix (e.g. `Log in` vs `Log in with Google`), always pass **`exact: true`** (or a regex anchored to the full string). See OpenSpec [`staff-login`](../../openspec/specs/staff-login/spec.md).
+Role name prefixes collide (`Log in` vs `Log in with Google`):
+
+- **Playwright**: `{ name: "Log in", exact: true }`
+- **Testing Library**: `{ name: exactAccessibleName("Log in") }` — **never** `{ exact: true }` (fails `tsc`)
+
+See OpenSpec [`staff-login`](../../openspec/specs/staff-login/spec.md). Helper: `apps/web/src/test/exactAccessibleName.ts`.
 
 ## CI
 
-- `pnpm test`
-- `pnpm test:rls`
-- `pnpm test:e2e` (preview/dev on port **9000**)
-- `pnpm audit:schema`
+- GitHub: `.github/workflows/ci.yml` — audit:schema, build, typecheck, test, test:rls, e2e
+- Local mirror before push: **`pnpm ci:local`** (skill `edunudg-pre-push-ci` — auto-fix failures, then push only when green)
 
 ## Local dev
 

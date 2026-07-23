@@ -26,7 +26,7 @@
 ## Auth & sessions
 
 - Brand/center staff: Google + email on `/login`
-- Primary submit accessible name is exactly **`Log in`**; OAuth buttons use **`Log in with {Provider}`** — tests must query with `exact: true` (see `openspec/specs/staff-login/spec.md`)
+- Primary submit accessible name is exactly **`Log in`**; OAuth buttons use **`Log in with {Provider}`** — Playwright tests use `{ exact: true }`; Vitest/Testing Library uses `exactAccessibleName` / `/^…$/` (not `exact: true`) — see `openspec/specs/staff-login/spec.md`
 - Session length: configure Supabase JWT/refresh for ~7 days; fix “Remember me” conflated with email storage
 - **Phase C:** `RequireMembership` — session user must have active membership for resolved brand/center
 

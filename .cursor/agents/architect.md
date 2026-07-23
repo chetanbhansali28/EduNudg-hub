@@ -25,6 +25,7 @@
 - [ ] New integrations ship behind **feature flags** (default off)
 - [ ] Payment flows use gateway abstraction — brand pays platform only for subscriptions
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills/agents if process or architecture docs changed)
+- [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
 
 ## Skills
 

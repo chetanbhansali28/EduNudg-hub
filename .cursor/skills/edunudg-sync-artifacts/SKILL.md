@@ -27,9 +27,16 @@ Copy and tick mentally:
 
 ## Boundaries
 
-Respect `agent-boundaries` rule. Do not implement outside your role; sync the briefs if you change process.
+Respect `agent-boundaries` and `git-publish-gate`. Do not implement outside your role; sync the briefs if you change process.
+
+## Git
+
+Syncing artifacts does **not** authorize `git commit` or `git push`. Only the user decides when to commit/push to GitHub.
+
+When the user asks to **push**, hand off to **`edunudg-pre-push-ci`** (`pnpm ci:local` → auto-fix → green → push).
 
 ## Done when
 
 - Sync matrix in `artifact-sync` rule has no open gaps
 - CI-relevant tests for the change type are green locally (or noted blockers)
+- Changes remain local until the user explicitly asks to commit and/or push

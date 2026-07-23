@@ -22,6 +22,7 @@
 - [ ] `pnpm audit:schema` passes
 - [ ] OpenSpec / docs updated for new RPC or table behavior
 - [ ] `edunudg-sync-artifacts` run before finish
+- [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
 
 ## Skills
 

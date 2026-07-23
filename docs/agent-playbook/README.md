@@ -53,7 +53,10 @@ Use the skill matching your task before writing code. OpenSpec skills (`openspec
 |------|---------|
 | `artifact-sync` | Specs + docs + tests + skills + agents stay in sync |
 | `agent-boundaries` | Hard MAY / MUST NOT per Architect, Database, Frontend, QA |
+| `git-publish-gate` | No commit/push unless the user explicitly asks; push requires green local CI |
 | OpenSpec [`agent-artifact-sync`](../../openspec/specs/agent-artifact-sync/spec.md) | Behavioral requirements for the sync system |
+
+Local CI mirror: `pnpm ci:local` (skill `edunudg-pre-push-ci`).
 
 ## Phases
 

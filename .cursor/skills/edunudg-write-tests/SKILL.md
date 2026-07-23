@@ -27,12 +27,15 @@ Coverage target: ≥80% on `packages/*`.
 
 Run skill **`edunudg-sync-artifacts`**: update OpenSpec, docs, tests, skills/rules, and agent briefs for the change type. Standing rules: `artifact-sync`, `agent-boundaries`.
 
-## Accessible name queries (Playwright / Testing Library)
+## Accessible name queries (Playwright vs Testing Library)
 
-Playwright `getByRole(..., { name })` uses **substring** matching unless `exact: true`.
+Both need **exact** matching when labels share a prefix (`Log in` vs `Log in with Google`), but the APIs differ:
 
-- Primary staff login submit: `getByRole("button", { name: "Log in", exact: true })`
-- OAuth: full label, e.g. `{ name: "Log in with Google", exact: true }`
-- Never query bare `"Log in"` without `exact` when OAuth buttons are on the page — CI will fail with a strict-mode multiple-match error
+| Library | Exact match |
+|---------|-------------|
+| **Playwright** (`e2e/`) | `{ name: "Log in", exact: true }` |
+| **Testing Library** (Vitest) | `{ name: exactAccessibleName("Log in") }` → `/^Log in$/` |
 
-Spec: `openspec/specs/staff-login/spec.md`. Regression: `e2e/platform-smoke.spec.ts` → `regression_login_primary_submit_name_is_exact_not_oauth`.
+**Never** pass `{ exact: true }` to Testing Library `getByRole` — it is not on `ByRoleOptions` and **fails `pnpm typecheck`**. Helper: `apps/web/src/test/exactAccessibleName.ts`.
+
+Spec: `openspec/specs/staff-login/spec.md`. Regressions: `e2e/platform-smoke.spec.ts`, `apps/web/src/test/exactAccessibleName.test.ts`.

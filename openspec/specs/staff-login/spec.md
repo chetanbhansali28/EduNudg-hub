@@ -22,6 +22,20 @@ The staff login form SHALL render a primary email/password submit button whose a
 - **THEN** heading `Welcome back!`, platform account copy, Email field, and exact `Log in` submit are visible
 - **AND** `Log in with Google` is available when Google auth is enabled
 
-### Requirement: Automated tests use exact accessible names for Log in
+### Requirement: Automated tests use library-correct exact name matchers
 
-Playwright and Testing Library queries for the primary submit SHALL pass `{ name: "Log in", exact: true }` (or an equivalent exact matcher). Queries for OAuth SHALL use the full provider label. A regression E2E SHALL assert that non-exact `Log in` matches more than one button when OAuth is shown.
+Exact accessible-name matching SHALL use the API supported by each test library:
+
+| Library | Exact match for primary `Log in` |
+|---------|----------------------------------|
+| **Playwright** (`e2e/`) | `{ name: "Log in", exact: true }` |
+| **Testing Library** (Vitest) | `{ name: exactAccessibleName("Log in") }` which is `/^Log in$/` — **not** `{ exact: true }` (invalid on `ByRoleOptions`; fails `tsc`) |
+
+OAuth queries SHALL use the full provider label with the same library-specific exact matcher. A regression E2E SHALL assert that Playwright non-exact `Log in` matches more than one button when OAuth is shown. A Vitest regression SHALL fail if Testing Library role queries pass `exact: true`.
+
+#### Scenario: Testing Library rejects Playwright exact option
+
+- **GIVEN** a Vitest + Testing Library component test
+- **WHEN** `getByRole` is called with `{ name: "…", exact: true }`
+- **THEN** TypeScript SHALL report that `exact` does not exist on `ByRoleOptions`
+- **AND** authors SHALL switch to `exactAccessibleName("…")` from `@/test/exactAccessibleName`

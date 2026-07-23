@@ -6,6 +6,7 @@ import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import type { Membership } from "@/hooks/useMembership";
 import { LoginPage } from "./LoginPage";
 import { RequireMembership } from "./RequireMembership";
+import { exactAccessibleName } from "@/test/exactAccessibleName";
 
 /** IDs from supabase/seed/test-users.sql */
 const ABACUSWORLD_BRAND_ID = "a0000000-0000-4000-8000-000000000001";
@@ -165,7 +166,7 @@ describe("LoginPage brand portal", () => {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "owner@edunudg.com" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Log in", exact: true }));
+      fireEvent.click(screen.getByRole("button", { name: exactAccessibleName("Log in") }));
     });
 
     await expectRedirectTo("Brand app home");

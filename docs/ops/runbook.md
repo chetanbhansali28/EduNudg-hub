@@ -110,6 +110,7 @@ supabase db push
 pnpm test
 pnpm audit:schema
 pnpm test:e2e
+pnpm ci:local   # full GitHub CI mirror — required before push (see edunudg-pre-push-ci)
 ```
 
 RLS SQL tests (optional, against cloud DB):

@@ -31,6 +31,8 @@ Use skill `edunudg-sync-artifacts`. Same change must update every applicable row
 - [ ] **Docs** — `docs/spec`, `docs/ops`, playbook, navigation, testing as relevant
 - [ ] **Skills / rules** — `.cursor/skills/*`, `.cursor/rules/*` if convention changed
 - [ ] **Agents** — `.cursor/agents/*` + `AGENTS.md` if role/escalation changed
+- [ ] **Git** — no commit/push unless the user explicitly requested it (`git-publish-gate`)
+- [ ] **Pre-push** — if pushing: `pnpm ci:local` green after auto-fix loop (`edunudg-pre-push-ci`)
 
 ## Docs (legacy checklist — still required when applicable)
 

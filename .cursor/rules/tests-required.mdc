@@ -29,5 +29,7 @@ Before finish: `.cursor/skills/edunudg-sync-artifacts/SKILL.md` (specs, docs, te
 
 ## Locators
 
-Playwright `getByRole({ name })` is substring match by default. For shared prefixes (`Log in` vs `Log in with Google`), use `{ exact: true }` — see `openspec/specs/staff-login/spec.md`.
+- **Playwright**: `getByRole({ name })` is substring match — use `{ exact: true }` for shared prefixes (`Log in` vs `Log in with Google`).
+- **Testing Library**: do **not** pass `exact: true` (not on `ByRoleOptions`; breaks typecheck). Use `exactAccessibleName("…")` from `@/test/exactAccessibleName` (anchored `/^…$/`).
+- See `openspec/specs/staff-login/spec.md`.
 

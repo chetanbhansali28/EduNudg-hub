@@ -13,6 +13,7 @@
     "test": "pnpm -r --if-present test",
     "test:rls": "node scripts/run-rls-tests.mjs",
     "test:e2e": "playwright test",
+    "ci:local": "node scripts/ci-local.mjs",
     "audit:schema": "node scripts/audit-schema.mjs",
     "db:push": "supabase db push",
     "functions:deploy": "supabase functions deploy",

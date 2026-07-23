@@ -50,3 +50,35 @@ Agents SHALL run the `edunudg-sync-artifacts` checklist before declaring a work 
 - **WHEN** the agent prepares the final response or PR
 - **THEN** the sync checklist has been applied
 - **AND** Definition of Done sync section is satisfied
+
+### Requirement: GitHub publish requires explicit user request
+
+Agents SHALL NOT run `git push` or otherwise publish to GitHub unless the user explicitly asks. Agents SHALL NOT `git commit` unless the user explicitly asks to commit. Completing sync or fixing CI does not grant publish permission.
+
+#### Scenario: Local finish without push
+
+- **GIVEN** a change is complete locally and artifacts are synced
+- **WHEN** the user has not asked to commit or push
+- **THEN** the agent leaves changes local only
+- **AND** informs the user that commit/push awaits their explicit request
+
+### Requirement: Push runs local CI with auto-fix before publish
+
+When the user explicitly asks to push to GitHub, the agent SHALL run `pnpm ci:local` (mirror of GitHub Actions CI), automatically fix failures, re-run until green, and only then push. The agent SHALL NOT push while local CI is failing.
+
+#### Scenario: Push request with failing typecheck
+
+- **GIVEN** the user asked to push
+- **AND** `pnpm ci:local` fails at typecheck
+- **WHEN** the agent responds
+- **THEN** the agent fixes the type errors (and syncs artifacts if needed)
+- **AND** re-runs local CI until it passes
+- **AND** pushes only after `pnpm ci:local` succeeds
+
+#### Scenario: Hard blocker
+
+- **GIVEN** the user asked to push
+- **AND** a failure cannot be fixed without secrets or a human product decision
+- **WHEN** the agent cannot make CI green
+- **THEN** the agent does not push
+- **AND** reports the blocker and attempted fixes

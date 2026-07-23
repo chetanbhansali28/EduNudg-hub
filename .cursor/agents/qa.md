@@ -17,10 +17,13 @@
 
 - [ ] Every PR has tests matching change type (see `tests-required.mdc`)
 - [ ] Regression test for bugfixes
-- [ ] Playwright/Testing Library role names use `exact: true` when labels share prefixes (see `staff-login` OpenSpec + `edunudg-write-tests`)
+- [ ] Playwright/Testing Library: Playwright uses `exact: true`; Testing Library uses `exactAccessibleName` (never RTL `exact: true` — breaks typecheck)
 - [ ] `pnpm test && pnpm test:rls && pnpm test:e2e` green locally when journeys/CI change
 - [ ] `edunudg-sync-artifacts` run (testing docs / skills / agents if process changed)
+- [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
+- [ ] If pushing: `pnpm ci:local` green via `edunudg-pre-push-ci` (auto-fix loop)
 
 ## Skills
 
 - `edunudg-write-tests` (required), `edunudg-sync-artifacts` (required before finish)
+- When user asks to **push**: `edunudg-pre-push-ci` — run `pnpm ci:local`, auto-fix, re-run, then push

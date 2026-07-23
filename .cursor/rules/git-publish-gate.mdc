@@ -1,0 +1,33 @@
+---
+description: Never push to GitHub unless the user explicitly asks; then run local CI and auto-fix first
+alwaysApply: true
+---
+
+# Git Publish Gate
+
+Agents MUST NOT publish to GitHub on their own.
+
+## Required
+
+- **Do not** run `git push`, `git push --force`, or any remote publish unless the user **explicitly** asks to push/publish in that message.
+- Completing work or syncing artifacts does **not** imply push permission.
+- Local `git commit` also requires an **explicit** user request to commit.
+
+## When the user asks to push
+
+1. Load skill **`edunudg-pre-push-ci`**
+2. Run **`pnpm ci:local`** (full GitHub CI mirror)
+3. **Automatically fix** every failure and re-run until green (or report a hard blocker — no push)
+4. Only then `git push` (and only the refs the user asked for)
+
+Skipping RLS/e2e requires the user to allow that skip in the same message.
+
+## After local work (no push ask)
+
+Leave changes uncommitted/unpushed. Tell the user what is ready and wait for “commit”, “push”, or “commit and push”.
+
+## Forbidden
+
+- Pushing to “unblock CI” without a local green `ci:local`
+- Pushing knowing local CI is red
+- Treating a prior push as standing permission for the next one
