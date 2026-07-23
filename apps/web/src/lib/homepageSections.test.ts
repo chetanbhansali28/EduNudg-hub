@@ -18,9 +18,12 @@ describe("homepageSections", () => {
   });
 
   it("regression_isSectionEnabled_respects_partial_config", () => {
-    const config = setSectionEnabled(DEFAULT_HOMEPAGE_CONFIG, "highlights", false);
+    // DEFAULT_HOMEPAGE_CONFIG uses enterprise defaults (highlights off). Use an unset
+    // sections map so merge falls back to DEFAULT_HOMEPAGE_SECTION_VISIBILITY.
+    const base = { ...DEFAULT_HOMEPAGE_CONFIG, sections: undefined };
+    const config = setSectionEnabled(base, "highlights", false);
     expect(isSectionEnabled(config, "highlights")).toBe(false);
-    expect(isSectionEnabled(DEFAULT_HOMEPAGE_CONFIG, "highlights")).toBe(true);
+    expect(isSectionEnabled(base, "highlights")).toBe(true);
   });
 
   it("sprint1_abacus_defaults_disable_novu_phone_scroll_sections", () => {

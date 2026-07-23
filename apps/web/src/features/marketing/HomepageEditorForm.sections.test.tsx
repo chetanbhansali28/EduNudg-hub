@@ -71,7 +71,14 @@ describe("HomepageEditorForm section controls", () => {
       },
     };
 
-    render(<HomepageEditorForm config={config} onChange={onChange} onPersist={onPersist} />);
+    render(
+      <HomepageEditorForm
+        config={config}
+        onChange={onChange}
+        onPersist={onPersist}
+        portalMode="brand"
+      />
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /Testimonials/i }));
     fireEvent.click(screen.getAllByRole("button", { name: "Move down" })[0]!);
@@ -94,7 +101,7 @@ describe("HomepageEditorForm section controls", () => {
     };
 
     const { container } = render(
-      <HomepageEditorForm config={config} onChange={() => undefined} />
+      <HomepageEditorForm config={config} onChange={() => undefined} portalMode="brand" />
     );
 
     fireEvent.click(screen.getByRole("button", { name: /Testimonials/i }));

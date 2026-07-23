@@ -20,7 +20,10 @@
     "react-router-dom": "^7.0.0"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.1.0",
     "@types/react": "^19.0.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.1",
     "typescript": "^5.7.2"
   }

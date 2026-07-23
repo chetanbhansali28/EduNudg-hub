@@ -26,7 +26,8 @@ vi.mock("@/lib/merchandiseOrdersApi", () => ({
       status: "placed",
       payment_status: "unpaid",
       payment_method: "invoice",
-      created_at: "2026-06-15T18:00:00Z",
+      // Within last-30-days order history window (relative so the suite stays green)
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
       center_id: "center-1",
       shipping_mode: "franchise",
       shipping_address: null,

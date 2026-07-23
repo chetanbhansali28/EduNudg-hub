@@ -117,17 +117,19 @@ importers:
         version: 2.1.9(@types/node@22.19.20)(jsdom@25.0.1)
 
   packages/ui:
-    dependencies:
+    devDependencies:
+      '@testing-library/react':
+        specifier: ^16.1.0
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@types/react':
+        specifier: ^19.0.2
+        version: 19.2.15
       react:
         specifier: ^19.0.0
         version: 19.2.6
       react-dom:
         specifier: ^19.0.0
         version: 19.2.6(react@19.2.6)
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.2
-        version: 19.2.15
       react-router-dom:
         specifier: ^7.1.1
         version: 7.16.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)

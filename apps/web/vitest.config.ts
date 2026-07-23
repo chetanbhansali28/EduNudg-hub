@@ -7,6 +7,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    setupFiles: ["./src/test/vitest.setup.ts"],
     include: [
       "src/**/*.test.{ts,tsx}",
       "../../packages/ui/src/**/*.test.{ts,tsx}",
@@ -19,6 +20,8 @@ export default defineConfig({
       "@edunudg/tenant": path.resolve(__dirname, "../../packages/tenant/src/index.ts"),
       "@edunudg/permissions": path.resolve(__dirname, "../../packages/permissions/src/index.ts"),
       "@edunudg/database": path.resolve(__dirname, "../../packages/database/src/index.ts"),
+      // packages/ui tests are included here; resolve TL from the web app install
+      "@testing-library/react": path.resolve(__dirname, "./node_modules/@testing-library/react"),
     },
   },
 });
