@@ -1,6 +1,7 @@
 node_modules
 dist
 .turbo
+.vercel
 .env
 .env.local
 .cursor/settings.json

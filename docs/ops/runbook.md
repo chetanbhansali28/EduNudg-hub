@@ -71,6 +71,32 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
    - **Real multi-host**: set `VITE_PORTAL_BASE_DOMAIN=yourdomain.com`, add wildcard DNS `*.yourdomain.com` → Vercel, and map hosts in `domain_mappings` (seed rows still use `*.localhost` for local; the SPA rewrites them when the base domain is set).
 4. Supabase Auth → add production Site URL / Redirect URLs for `https://edunudg-hub.vercel.app/**` (and custom domains when used)
 
+### Deploy (GitHub Actions CD)
+
+Production and PR previews deploy via [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) (Vercel CLI + `--prebuilt`). Automatic Git deploys are disabled in `apps/web/vercel.json` so only Actions ships builds.
+
+**One-time secrets** (repo → Settings → Secrets and variables → Actions):
+
+| Secret | Where to get it |
+|--------|-----------------|
+| `VERCEL_TOKEN` | [Vercel → Account → Tokens](https://vercel.com/account/tokens) |
+| `VERCEL_ORG_ID` | After `vercel link` in this repo: `.vercel/project.json` → `orgId` |
+| `VERCEL_PROJECT_ID` | Same file → `projectId` |
+
+```bash
+# From repo root (uses Root Directory apps/web on the linked project)
+pnpm dlx vercel@latest login
+pnpm dlx vercel@latest link
+# Copy orgId + projectId from .vercel/project.json into GitHub secrets (do not commit .vercel/)
+```
+
+Optional: create a GitHub Environment named **`production`** (Settings → Environments) if you want required reviewers before prod deploys.
+
+| Event | Behavior |
+|-------|----------|
+| Pull request | Preview deploy + PR comment with URL |
+| CI success on `main` / `master` | Production deploy (`workflow_run` after [CI](../../.github/workflows/ci.yml)) |
+
 ## Migrations
 
 ```bash

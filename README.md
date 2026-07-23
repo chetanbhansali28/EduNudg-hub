@@ -8,7 +8,7 @@ Premium enterprise multi-tenant franchise learning operating system.
 |-------|------------|
 | Frontend | Vite + React 19 + React Router (SPA — **no Next.js**) |
 | Backend | Supabase (Postgres, Auth, RLS, Storage, Edge Functions) |
-| Deploy | Vercel |
+| Deploy | Vercel (GitHub Actions CD — see [runbook](docs/ops/runbook.md#deploy-github-actions-cd)) |
 
 ## Monorepo
 
