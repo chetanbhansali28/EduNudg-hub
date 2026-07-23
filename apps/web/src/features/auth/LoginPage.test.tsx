@@ -145,7 +145,15 @@ describe("LoginPage", () => {
   it("renders email login form", () => {
     renderLogin();
     expect(screen.getByText("Welcome back!")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Log in" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Log in", exact: true })).toBeDefined();
+  });
+
+  it("regression_primary_submit_accessible_name_is_exact_log_in", () => {
+    renderLogin();
+    const primary = screen.getByRole("button", { name: "Log in", exact: true });
+    expect(primary.getAttribute("type")).toBe("submit");
+    expect(screen.getByRole("button", { name: "Log in with Google", exact: true })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Log in with WhatsApp", exact: true })).toBeDefined();
   });
 
   it("regression_redirects_to_admin_after_successful_email_sign_in", async () => {
@@ -155,7 +163,7 @@ describe("LoginPage", () => {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "admin@edunudg.com" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+      fireEvent.click(screen.getByRole("button", { name: "Log in", exact: true }));
     });
 
     await expectRedirectTo("Admin home");
@@ -266,7 +274,7 @@ describe("LoginPage", () => {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "student@edunudg.com" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+      fireEvent.click(screen.getByRole("button", { name: "Log in", exact: true }));
     });
 
     await expectRedirectTo("Student dashboard");
@@ -276,8 +284,8 @@ describe("LoginPage", () => {
 
   it("regression_platform_portal_shows_oauth_buttons_directly", () => {
     renderLogin();
-    expect(screen.getByRole("button", { name: "Log in with Google" })).toBeDefined();
-    expect(screen.getByRole("button", { name: "Log in with WhatsApp" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Log in with Google", exact: true })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Log in with WhatsApp", exact: true })).toBeDefined();
     expect(screen.queryByRole("button", { name: "More sign-in options" })).toBeNull();
   });
 
@@ -286,7 +294,7 @@ describe("LoginPage", () => {
     tenantState.brandSlug = "abacusworld";
     renderLogin();
 
-    expect(screen.getByRole("button", { name: "Log in with Google" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Log in with Google", exact: true })).toBeDefined();
     expect(screen.queryByRole("button", { name: "More sign-in options" })).toBeNull();
     expect(screen.queryByText(/student dashboard/i)).toBeNull();
     expect(screen.queryByText(/student@edunudg.com/i)).toBeNull();

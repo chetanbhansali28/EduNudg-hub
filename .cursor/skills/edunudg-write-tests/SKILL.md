@@ -11,7 +11,7 @@ description: Write tests for EduNudg features and bugfixes. Required for every P
 | React component | Vitest + `@testing-library/react` |
 | User journey | Playwright `e2e/*.spec.ts` |
 | Migration / RLS | `supabase/tests/rls_*.sql` |
-| Bugfix | `regression_*` test |
+| Bug fix | `regression_*` test |
 
 ## Commands
 
@@ -22,3 +22,13 @@ pnpm test:e2e
 ```
 
 Coverage target: ≥80% on `packages/*`.
+
+## Accessible name queries (Playwright / Testing Library)
+
+Playwright `getByRole(..., { name })` uses **substring** matching unless `exact: true`.
+
+- Primary staff login submit: `getByRole("button", { name: "Log in", exact: true })`
+- OAuth: full label, e.g. `{ name: "Log in with Google", exact: true }`
+- Never query bare `"Log in"` without `exact` when OAuth buttons are on the page — CI will fail with a strict-mode multiple-match error
+
+Spec: `openspec/specs/staff-login/spec.md`. Regression: `e2e/platform-smoke.spec.ts` → `regression_login_primary_submit_name_is_exact_not_oauth`.

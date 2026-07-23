@@ -24,3 +24,8 @@ No feature or bugfix merges without tests in the same change.
 - `pnpm test:e2e` — Playwright
 
 Use skill: `.cursor/skills/edunudg-write-tests/SKILL.md`
+
+## Locators
+
+Playwright `getByRole({ name })` is substring match by default. For shared prefixes (`Log in` vs `Log in with Google`), use `{ exact: true }` — see `openspec/specs/staff-login/spec.md`.
+

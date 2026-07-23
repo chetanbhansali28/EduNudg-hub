@@ -33,5 +33,6 @@ Requires **Node.js ≥ 20.19**. Opt out of telemetry: `OPENSPEC_TELEMETRY=0` or 
 - `franchise-applications` — franchise inquiry → center provisioning
 - `student-leads` — brand/center lead pipeline, SLA, convert
 - `center-public-profile` — franchise public profile settings and landing
+- `staff-login` — `/login` primary vs OAuth accessible names; exact match in tests
 
 See [`docs/spec/README.md`](../docs/spec/README.md) for what lives in OpenSpec vs `docs/`.

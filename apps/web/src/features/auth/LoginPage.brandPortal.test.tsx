@@ -165,7 +165,7 @@ describe("LoginPage brand portal", () => {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "owner@edunudg.com" } });
     fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+      fireEvent.click(screen.getByRole("button", { name: "Log in", exact: true }));
     });
 
     await expectRedirectTo("Brand app home");

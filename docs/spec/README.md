@@ -23,6 +23,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [data-flow.md](./data-flow.md) | Records between platform / brand / center / student |
 | [functional-requirements.md](./functional-requirements.md) | FR ID index → links to `openspec/specs/` |
 | OpenSpec behavioral specs | [`openspec/specs/`](../../openspec/specs/) | GIVEN/WHEN/THEN requirements; supersedes FR tables over time |
+| [staff-login](../../openspec/specs/staff-login/spec.md) | Platform/brand/center `/login` labels + exact accessible-name testing |
 | [rpc-catalog.md](./rpc-catalog.md) | Supabase RPC signatures |
 | [data-model-extensions.md](./data-model-extensions.md) | Migration 016+ tables/columns |
 | [technical-architecture.md](./technical-architecture.md) | Stack, timezone, security |

@@ -22,6 +22,7 @@
 - [ ] **Feature flag** gates nav + route for new modules/integrations
 - [ ] Component tests added
 - [ ] E2E updated for user journeys when UI flow changes
+- [ ] Role-based locators use `exact: true` when button/link labels share a prefix (e.g. `Log in` vs `Log in with Google`)
 
 ## Skills
 

@@ -5,12 +5,22 @@ test("login page renders split-screen form", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Welcome back!" })).toBeVisible();
   await expect(page.getByText(/EduNudg platform account/i)).toBeVisible();
   await expect(page.getByLabel("Email")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Log in" })).toBeVisible();
+  // exact: true — "Log in with Google/Facebook" also match substring "Log in"
+  await expect(page.getByRole("button", { name: "Log in", exact: true })).toBeVisible();
 });
 
 test("login page exposes default alternate sign-in options", async ({ page }) => {
   await page.goto("/login");
-  await expect(page.getByRole("button", { name: "Log in with Google" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Log in with Google", exact: true })).toBeVisible();
+});
+
+test("regression_login_primary_submit_name_is_exact_not_oauth", async ({ page }) => {
+  await page.goto("/login");
+  const primary = page.getByRole("button", { name: "Log in", exact: true });
+  await expect(primary).toBeVisible();
+  await expect(primary).toHaveAttribute("type", "submit");
+  // Substring "Log in" also matches OAuth buttons — callers must use exact: true
+  expect(await page.getByRole("button", { name: "Log in" }).count()).toBeGreaterThan(1);
 });
 
 test("marketing home renders shared nav and footer", async ({ page }) => {
