@@ -10,7 +10,12 @@
     "noEmit": true,
     "isolatedModules": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@edunudg/ui": ["../../packages/ui/src"],
+      "@edunudg/ui/*": ["../../packages/ui/src/*"],
+      "@edunudg/tenant": ["../../packages/tenant/src/index.ts"],
+      "@edunudg/permissions": ["../../packages/permissions/src/index.ts"],
+      "@edunudg/database": ["../../packages/database/src/index.ts"]
     }
   },
   "include": ["src", "src/vite-env.d.ts"]
