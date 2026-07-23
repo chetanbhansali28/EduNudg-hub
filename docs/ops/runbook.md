@@ -81,20 +81,33 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 
 | Secret | Where to get it |
 |--------|-----------------|
-| `VERCEL_TOKEN` | [Vercel → Account → Tokens](https://vercel.com/account/tokens) (scope: full account or the EduNudg project) |
-| `VERCEL_ORG_ID` | After `vercel link`: `.vercel/project.json` → `orgId` |
-| `VERCEL_PROJECT_ID` | Same file → `projectId` |
+| `VERCEL_TOKEN` | [Vercel → Account → Tokens](https://vercel.com/account/tokens) (create a token; MCP cannot mint this) |
+| `VERCEL_ORG_ID` | Vercel team id (`team_…`) — MCP `list_teams`, or `.vercel/project.json` → `orgId` |
+| `VERCEL_PROJECT_ID` | Project id (`prj_…`) — MCP `list_projects` / `get_project`, or `.vercel/project.json` → `projectId` |
+
+Current production project (team **chetanbhansali-3860's projects**): project **edunudg-hub** → `https://edunudg-hub.vercel.app`.
 
 ```bash
-# From repo root (Vercel project Root Directory should be apps/web)
+# Prefer pnpm dlx if `vercel` is not on PATH (no global install required)
 pnpm dlx vercel@latest login
 pnpm dlx vercel@latest link --cwd apps/web
 # Do not commit apps/web/.vercel/
 
+# Token: paste when prompted (from https://vercel.com/account/tokens)
 gh secret set VERCEL_TOKEN
+
+# Or set org/project from MCP / dashboard without linking:
+#   VERCEL_ORG_ID     = team_…   (list_teams → id)
+#   VERCEL_PROJECT_ID = prj_…    (list_projects → id for edunudg-hub)
+printf '%s' 'team_…' | gh secret set VERCEL_ORG_ID
+printf '%s' 'prj_…'  | gh secret set VERCEL_PROJECT_ID
+
+# After link:
 node -p "require('./apps/web/.vercel/project.json').orgId" | gh secret set VERCEL_ORG_ID
 node -p "require('./apps/web/.vercel/project.json').projectId" | gh secret set VERCEL_PROJECT_ID
 ```
+
+CD installs **pnpm 9.15.0** on the runner before `vercel build` (monorepo). Manual re-run: Actions → CD → **Run workflow**.
 
 After Actions secrets work, you can turn off Git production deploys to avoid double builds by setting `"git": { "deploymentEnabled": false }` in `apps/web/vercel.json`.
 

@@ -9,6 +9,7 @@ name: CD
 
 on:
   pull_request:
+  workflow_dispatch:
   workflow_run:
     workflows: [CI]
     types: [completed]
@@ -44,6 +45,17 @@ jobs:
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - uses: pnpm/action-setup@v6
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v5
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version: "24"
+          cache: "pnpm"
 
       - name: Install Vercel CLI
         if: steps.secrets.outputs.ready == 'true'
@@ -99,10 +111,11 @@ jobs:
     # Avoid GitHub Environment "production" for secrets: empty env secrets override
     # repo secrets and produced --token= (Vercel missing-token-value).
     if: >
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      (github.event.workflow_run.head_branch == 'main' ||
-       github.event.workflow_run.head_branch == 'master')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       (github.event.workflow_run.head_branch == 'main' ||
+        github.event.workflow_run.head_branch == 'master'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -113,7 +126,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Check Vercel secrets
         id: secrets
@@ -125,6 +138,17 @@ jobs:
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - uses: pnpm/action-setup@v6
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v5
+        if: steps.secrets.outputs.ready == 'true'
+        with:
+          node-version: "24"
+          cache: "pnpm"
 
       - name: Install Vercel CLI
         if: steps.secrets.outputs.ready == 'true'
