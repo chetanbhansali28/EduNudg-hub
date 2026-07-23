@@ -26,6 +26,7 @@
   "devDependencies": {
     "@fission-ai/openspec": "^1.4.1",
     "@playwright/test": "^1.49.1",
+    "nanoid": "^6.0.0",
     "pg": "^8.21.0",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
