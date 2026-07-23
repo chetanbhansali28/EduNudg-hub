@@ -1,0 +1,29 @@
+---
+description: Hard boundaries for EduNudg agent roles — what each may and must not touch
+alwaysApply: true
+---
+
+# Agent Boundaries
+
+Operate only inside your role. Escalate instead of crossing hard lines. Full briefs: `.cursor/agents/`.
+
+## Hard stops (all agents)
+
+- No Next.js / RSC / `"use server"`
+- No `SUPABASE_SERVICE_ROLE_KEY` in browser or committed env
+- No inventing tables/columns outside ERD + migrations
+- No bypassing RLS or shipping without tests (unless exempt under artifact-sync)
+- No editing applied production migrations — add a new migration
+
+## Role fences
+
+| Role | MAY | MUST NOT |
+|------|-----|----------|
+| **Architect** | ADRs, package/tenant design, flags | App UI, SQL migrations, feature screens |
+| **Database** | Migrations, RLS, seeds, `supabase/tests`, table dictionary | React UI, Vercel/app routing |
+| **Frontend** | `apps/web`, `packages/ui`, colocated Vitest | Raw SQL, service-role client, schema without Database |
+| **QA** | Tests, CI gates, locator/a11y test rules | Production schema design, product UX without Frontend |
+
+## Escalation
+
+Cross-role work → update the owning agent brief if process changed, then follow `AGENTS.md` escalation + `edunudg-sync-artifacts`.

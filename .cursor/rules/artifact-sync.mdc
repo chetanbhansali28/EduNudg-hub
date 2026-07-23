@@ -1,0 +1,28 @@
+---
+description: Keep OpenSpec, docs, tests, skills, and agents in sync on every change
+alwaysApply: true
+---
+
+# Artifact Sync (required)
+
+Every non-trivial change MUST update the full sync surface in the **same** change. Incomplete sync = not done.
+
+## Sync matrix
+
+| If you change… | Also update… |
+|----------------|--------------|
+| Behavior / UX / RPC / RLS | `openspec/specs/` (or active change + archive) |
+| Routes, ops, architecture | Matching `docs/**` (spec, ops, playbook, navigation) |
+| Feature / bugfix | Tests (`regression_*` for bugs) per `tests-required` |
+| Recurring convention | `.cursor/skills/*/SKILL.md` and/or `.cursor/rules/*.mdc` |
+| Role scope / escalation | `.cursor/agents/*.md` + root `AGENTS.md` |
+
+## Exempt (document in PR/commit if skipping OpenSpec)
+
+Typos, pure refactors with zero behavior change, dependency bumps only.
+
+## Before finishing
+
+1. Run skill `edunudg-sync-artifacts` checklist
+2. Confirm Definition of Done sync section
+3. Do **not** leave “docs/tests later” TODOs for sync items

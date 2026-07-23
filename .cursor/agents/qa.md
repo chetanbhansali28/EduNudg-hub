@@ -7,13 +7,20 @@
 - RLS tests in `supabase/tests/`
 - CI workflow coverage gates
 
+## Boundary (hard)
+
+- **MAY**: Tests, CI workflows, locator/a11y conventions, coverage gates, regression naming
+- **MUST NOT**: Design product UX alone, invent schema, bypass Frontend/Database ownership
+- Escalate product behavior → Frontend + OpenSpec; schema → Database
+
 ## Checklist
 
 - [ ] Every PR has tests matching change type (see `tests-required.mdc`)
 - [ ] Regression test for bugfixes
 - [ ] Playwright/Testing Library role names use `exact: true` when labels share prefixes (see `staff-login` OpenSpec + `edunudg-write-tests`)
-- [ ] `pnpm test && pnpm test:rls && pnpm test:e2e` green locally
+- [ ] `pnpm test && pnpm test:rls && pnpm test:e2e` green locally when journeys/CI change
+- [ ] `edunudg-sync-artifacts` run (testing docs / skills / agents if process changed)
 
 ## Skills
 
-- `edunudg-write-tests` (required)
+- `edunudg-write-tests` (required), `edunudg-sync-artifacts` (required before finish)

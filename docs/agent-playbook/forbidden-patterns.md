@@ -10,6 +10,8 @@
 6. Delete or edit production-applied migrations — add new migration instead
 7. Store student academic history only on `center_id` without `enrollment_id`
 8. Skip `updated_by` on mutable tables
+9. Ship behavior/process changes without syncing OpenSpec, docs, skills, and agents (`artifact-sync`)
+10. Cross agent role fences without escalation (`agent-boundaries`)
 
 ## Avoid
 
@@ -21,6 +23,7 @@
 - `getSupabase()` / OAuth / payment SDK calls directly in page components — use `services/`
 - Shipping integrations without an OFF feature flag
 - Center marking leads lost from brand UI (center only); brand reopening without `reopen_lead` RPC
+- “Docs/tests/skills later” — sync in the same change
 
 ## Vibe-coding red flags
 
@@ -28,3 +31,4 @@
 - "Quick mock auth for now"
 - Inventing column names not in ERD
 - Duplicate Supabase clients per component
+- "Skip OpenSpec / agent brief updates this once"

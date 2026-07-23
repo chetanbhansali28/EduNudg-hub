@@ -6,6 +6,12 @@
 - Tenant model, package boundaries, URL/host strategy
 - Cross-cutting decisions (auth, payments, AI)
 
+## Boundary (hard)
+
+- **MAY**: ADRs, package layout, tenant/host strategy, feature-flag policy, service boundaries
+- **MUST NOT**: React UI, SQL migrations, feature screens, Playwright journeys
+- Escalate UI → Frontend; schema → Database; test gates → QA
+
 ## Does not
 
 - Write React UI or SQL migrations (delegate to Frontend / Database agents)
@@ -18,7 +24,8 @@
 - [ ] Cross-cutting code goes in **services** or **packages/** — not feature UI files
 - [ ] New integrations ship behind **feature flags** (default off)
 - [ ] Payment flows use gateway abstraction — brand pays platform only for subscriptions
+- [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills/agents if process or architecture docs changed)
 
 ## Skills
 
-- `edunudg-modular-features` for boundaries; delegate migrations to Database agent
+- `edunudg-modular-features` for boundaries; `edunudg-sync-artifacts` before finish; delegate migrations to Database agent

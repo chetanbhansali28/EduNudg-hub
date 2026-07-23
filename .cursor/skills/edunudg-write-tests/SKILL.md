@@ -23,6 +23,10 @@ pnpm test:e2e
 
 Coverage target: ≥80% on `packages/*`.
 
+## Before finish
+
+Run skill **`edunudg-sync-artifacts`**: update OpenSpec, docs, tests, skills/rules, and agent briefs for the change type. Standing rules: `artifact-sync`, `agent-boundaries`.
+
 ## Accessible name queries (Playwright / Testing Library)
 
 Playwright `getByRole(..., { name })` uses **substring** matching unless `exact: true`.

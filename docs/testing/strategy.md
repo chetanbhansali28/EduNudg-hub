@@ -21,6 +21,7 @@ Every feature and bug fix includes tests in the same PR.
 | Backend KPI theme (all staff dashboards) | `backendKpiTheme.test.tsx` |
 | Brand portal login / tenant scope | `LoginPage.brandPortal.test.tsx`, `resolveTenantScope.test.ts` |
 | Staff login accessible names | `LoginPage.test.tsx` (`regression_primary_submit_accessible_name_is_exact_log_in`), `e2e/platform-smoke.spec.ts` |
+| Agent guardrails / artifact sync | `regression_agentGuardrails.test.ts` |
 | Brand success stories page | `BrandSuccessStoriesPage.test.tsx` |
 | Workspace package type exports | `regression_workspacePackageExports.test.ts` |
 
