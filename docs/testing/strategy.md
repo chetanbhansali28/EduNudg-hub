@@ -23,6 +23,7 @@ Every feature and bug fix includes tests in the same PR.
 | Staff login accessible names | `LoginPage.test.tsx`, `exactAccessibleName.test.ts`, `e2e/platform-smoke.spec.ts` |
 | Agent guardrails / artifact sync | `regression_agentGuardrails.test.ts` |
 | Brand success stories page | `BrandSuccessStoriesPage.test.tsx` |
+| Platform dashboard signup queries (PostgREST column names) | `platformDashboardApi.test.ts` |
 | Workspace package type exports | `regression_workspacePackageExports.test.ts` |
 
 ## Local package tests

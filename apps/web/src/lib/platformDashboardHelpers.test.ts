@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   brandOnboardingMeta,
   brandOnboardingStatus,
+  buildPlatformActivityFeed,
   countTrendLabel,
   platformDashboardGreeting,
 } from "./platformDashboardHelpers";
@@ -28,5 +29,17 @@ describe("platformDashboardHelpers", () => {
     expect(countTrendLabel(5, 3)).toBe("+2");
     expect(countTrendLabel(3, 5)).toBe("-2");
     expect(countTrendLabel(4, 4)).toBeNull();
+  });
+
+  it("regression_activity_feed_uses_signup_requested_name", () => {
+    const now = new Date("2026-06-22T12:00:00Z").getTime();
+    const activities = buildPlatformActivityFeed(
+      [],
+      [{ id: "signup-1", requested_name: "Abacus World", created_at: "2026-06-21T12:00:00Z" }],
+      now
+    );
+    expect(activities.map((activity) => activity.description)).toContain(
+      "Abacus World submitted a platform signup."
+    );
   });
 });

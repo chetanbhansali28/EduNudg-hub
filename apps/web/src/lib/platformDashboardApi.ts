@@ -38,7 +38,7 @@ type BrandSubscriptionRow = {
 
 type SignupRow = {
   id: string;
-  brand_name: string;
+  requested_name: string;
   created_at: string;
   status: string;
 };
@@ -148,8 +148,8 @@ export async function fetchPlatformDashboardHome(now = new Date()): Promise<Plat
       .order("created_at", { ascending: true }),
     sb
       .from("platform_brand_signups")
-      .select("id, brand_name, created_at, status")
-      .eq("status", "converted")
+      .select("id, requested_name, created_at, status")
+      .eq("status", "approved")
       .gte("created_at", weekAgo.toISOString()),
     sb
       .from("brands")
@@ -159,7 +159,7 @@ export async function fetchPlatformDashboardHome(now = new Date()): Promise<Plat
       .limit(6),
     sb
       .from("platform_brand_signups")
-      .select("id, brand_name, created_at, status")
+      .select("id, requested_name, created_at, status")
       .order("created_at", { ascending: false })
       .limit(4),
     sb

@@ -76,7 +76,7 @@ export function brandOnboardingMeta(status: string, createdAt: string, nowMs = D
 
 export function buildPlatformActivityFeed(
   brands: { id: string; name: string; slug: string; created_at: string }[],
-  signups: { id: string; brand_name: string; created_at: string }[],
+  signups: { id: string; requested_name: string; created_at: string }[],
   nowMs = Date.now()
 ): PlatformDashboardActivity[] {
   const items: PlatformDashboardActivity[] = [];
@@ -97,7 +97,7 @@ export function buildPlatformActivityFeed(
       id: `signup-${signup.id}`,
       kind: "signup",
       title: "Brand Signup Request",
-      description: `${signup.brand_name} submitted a platform signup.`,
+      description: `${signup.requested_name} submitted a platform signup.`,
       occurredAt: signup.created_at,
       href: "/admin/brands",
     });
