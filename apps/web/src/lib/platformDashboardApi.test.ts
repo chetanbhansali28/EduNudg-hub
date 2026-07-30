@@ -8,6 +8,7 @@ type QueryRecord = {
 };
 
 const queries: QueryRecord[] = [];
+let errorByTable: Record<string, { message: string; code?: string } | null> = {};
 
 const SIGNUP_ROWS = [
   {
@@ -26,7 +27,11 @@ function createBuilder(table: string) {
   const record: QueryRecord = { table, columns: "", eq: [] };
   queries.push(record);
 
-  const result = { data: rowsFor(table), error: null, count: 0 };
+  const result = {
+    data: errorByTable[table] ? null : rowsFor(table),
+    error: errorByTable[table] ?? null,
+    count: 0,
+  };
   const builder = {
     select(columns: string) {
       record.columns = columns;
@@ -58,6 +63,7 @@ function signupQueries(): QueryRecord[] {
 describe("platformDashboardApi", () => {
   beforeEach(() => {
     queries.length = 0;
+    errorByTable = {};
   });
 
   it("critical_signup_queries_select_requested_name_not_brand_name", async () => {
@@ -87,5 +93,18 @@ describe("platformDashboardApi", () => {
     expect(home.activities.map((activity) => activity.description)).toContain(
       "Abacus World submitted a platform signup."
     );
+  });
+
+  it("critical_throws_when_signup_query_returns_postgrest_error", async () => {
+    errorByTable = {
+      platform_brand_signups: {
+        message: "column platform_brand_signups.brand_name does not exist",
+        code: "42703",
+      },
+    };
+
+    await expect(fetchPlatformDashboardHome(new Date("2026-06-22T12:00:00Z"))).rejects.toMatchObject({
+      message: "column platform_brand_signups.brand_name does not exist",
+    });
   });
 });

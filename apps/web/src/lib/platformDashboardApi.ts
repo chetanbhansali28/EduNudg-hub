@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { throwFirstSupabaseError } from "@/lib/supabaseResult";
 import {
   brandOnboardingMeta,
   brandOnboardingStatus,
@@ -187,6 +188,21 @@ export async function fetchPlatformDashboardHome(now = new Date()): Promise<Plat
       .gte("created_at", twoWeeksAgo.toISOString())
       .lt("created_at", weekAgo.toISOString()),
   ]);
+
+  throwFirstSupabaseError(
+    brandsRes,
+    centersRes,
+    plansRes,
+    subscriptionsRes,
+    enrollmentsRes,
+    signupsRes,
+    recentBrandsRes,
+    recentSignupsRes,
+    activeWeekRes,
+    activePriorRes,
+    centersWeekRes,
+    centersPriorRes
+  );
 
   const brands = (brandsRes.data ?? []) as BrandRow[];
   const centers = (centersRes.data ?? []) as CenterRow[];

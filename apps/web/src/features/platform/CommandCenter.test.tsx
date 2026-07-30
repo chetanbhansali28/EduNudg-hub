@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@edunudg/ui";
 import { PlatformLayout } from "@/features/platform/PlatformLayout";
 import { CommandCenter } from "@/features/platform/CommandCenter";
+import { fetchPlatformDashboardHome } from "@/lib/platformDashboardApi";
 import type { PlatformDashboardHome } from "@/lib/platformDashboardHelpers";
 
 const mockDashboard: PlatformDashboardHome = {
@@ -111,6 +112,8 @@ function renderDashboard(ui: ReactNode) {
 
 describe("CommandCenter", () => {
   beforeEach(() => {
+    vi.mocked(fetchPlatformDashboardHome).mockReset();
+    vi.mocked(fetchPlatformDashboardHome).mockResolvedValue(mockDashboard);
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
       matches: false,
       media: query,
@@ -135,5 +138,25 @@ describe("CommandCenter", () => {
     expect(screen.getByText("Recent Brand Onboarding")).toBeDefined();
     expect(screen.getByText("Alpha Academy")).toBeDefined();
     expect(document.querySelector(".ed-dash")).toBeTruthy();
+  });
+
+  it("critical_shows_error_message_and_retry_when_dashboard_fetch_fails", async () => {
+    vi.mocked(fetchPlatformDashboardHome).mockRejectedValue(
+      new Error("column platform_brand_signups.brand_name does not exist")
+    );
+
+    renderDashboard(
+      <Routes>
+        <Route path="/admin" element={<PlatformLayout />}>
+          <Route index element={<CommandCenter />} />
+        </Route>
+      </Routes>
+    );
+
+    expect(
+      await screen.findByText("column platform_brand_signups.brand_name does not exist")
+    ).toBeDefined();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeDefined();
+    expect(screen.getByRole("alert")).toBeDefined();
   });
 });
