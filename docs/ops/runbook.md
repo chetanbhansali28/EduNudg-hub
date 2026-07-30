@@ -75,7 +75,9 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 
 **Production on `main` / `master`:** Vercel Git auto-deploy is enabled for those branches only (`apps/web/vercel.json` → `git.deploymentEnabled`). Other branches do not auto-deploy.
 
-**PR previews + optional Actions production:** [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) (Vercel CLI + `--prebuilt`) when repository secrets are set. If secrets are missing, CD skips the CLI deploy with a warning (does not fail on empty `--token=`).
+**PR previews + optional Actions production:** [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) uses remote Vercel builds when repository secrets are set. If secrets are missing, CD skips the CLI deploy with a warning (does not fail on empty `--token=`).
+
+Do not use local `vercel build` + `vercel deploy --prebuilt` for this Vite SPA when `VITE_*` settings are marked **Sensitive** in Vercel. `vercel pull` intentionally downloads those values as `[SENSITIVE]`; a local build then embeds that marker in the browser bundle. Remote `vercel deploy` builds inside Vercel with the real protected values.
 
 **One-time Actions secrets** — **repository** secrets (Settings → Secrets and variables → Actions). Requires **repo admin**. Empty `VERCEL_TOKEN` previously caused `You defined "--token", but it's missing a value`.
 
@@ -107,7 +109,7 @@ node -p "require('./apps/web/.vercel/project.json').orgId" | gh secret set VERCE
 node -p "require('./apps/web/.vercel/project.json').projectId" | gh secret set VERCEL_PROJECT_ID
 ```
 
-CD installs **pnpm 9.15.0** on the runner before `vercel build` (monorepo). Manual re-run: Actions → CD → **Run workflow**.
+CD uploads source with `vercel deploy` so Vercel performs the build with protected environment variables available. Manual re-run: Actions → CD → **Run workflow**.
 
 After Actions secrets work, you can turn off Git production deploys to avoid double builds by setting `"git": { "deploymentEnabled": false }` in `apps/web/vercel.json`.
 

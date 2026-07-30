@@ -3,6 +3,8 @@
 # See docs/ops/runbook.md → Deploy
 #
 # Never expand an empty --token= (Vercel CLI: "missing a value"). Quote "$VERCEL_TOKEN".
+# Build remotely: `vercel pull` redacts protected VITE_* values as [SENSITIVE],
+# so a local `vercel build --prebuilt` would bake invalid values into the SPA.
 # If secrets are unset, jobs succeed with a warning — production still deploys via Vercel Git on main.
 
 name: CD
@@ -65,14 +67,10 @@ jobs:
         if: steps.secrets.outputs.ready == 'true'
         run: vercel pull --yes --environment=preview --token="$VERCEL_TOKEN"
 
-      - name: Build
-        if: steps.secrets.outputs.ready == 'true'
-        run: vercel build --token="$VERCEL_TOKEN"
-
       - name: Deploy preview
         if: steps.secrets.outputs.ready == 'true'
         id: deploy
-        run: echo "url=$(vercel deploy --prebuilt --token="$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(vercel deploy --token="$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
 
       - name: Comment preview URL on PR
         if: steps.secrets.outputs.ready == 'true' && steps.deploy.outputs.url != ''
@@ -158,14 +156,10 @@ jobs:
         if: steps.secrets.outputs.ready == 'true'
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
-      - name: Build
-        if: steps.secrets.outputs.ready == 'true'
-        run: vercel build --prod --token="$VERCEL_TOKEN"
-
       - name: Deploy production
         if: steps.secrets.outputs.ready == 'true'
         id: deploy
-        run: echo "url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(vercel deploy --prod --token="$VERCEL_TOKEN")" >> "$GITHUB_OUTPUT"
 
       - name: Summary
         if: steps.secrets.outputs.ready == 'true'

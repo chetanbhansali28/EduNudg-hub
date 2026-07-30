@@ -85,4 +85,12 @@ describe("regression_agentGuardrails", () => {
     expect(script).toMatch(/test:rls/);
     expect(script).toMatch(/test:e2e/);
   });
+
+  it("critical_vercel_cd_builds_remotely_for_protected_vite_env", () => {
+    const cd = read(".github/workflows/cd.yml");
+    expect(cd).not.toMatch(/run: vercel build/);
+    expect(cd).not.toMatch(/url=.*vercel deploy --prebuilt/);
+    expect(cd).toMatch(/vercel deploy --token/);
+    expect(cd).toMatch(/vercel deploy --prod --token/);
+  });
 });
