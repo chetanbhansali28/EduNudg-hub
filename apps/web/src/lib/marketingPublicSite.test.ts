@@ -121,6 +121,21 @@ describe("scrollToMarketingHash", () => {
   });
 });
 
+describe("resolveMarketingSectionHref", () => {
+  it("regression_keeps_hash_on_homepage", async () => {
+    const { resolveMarketingSectionHref } = await import("./marketingPublicSite");
+    expect(resolveMarketingSectionHref("#pricing", "/")).toBe("#pricing");
+    expect(resolveMarketingSectionHref("#faq", "")).toBe("#faq");
+  });
+
+  it("regression_points_hash_links_at_homepage_from_login", async () => {
+    const { resolveMarketingSectionHref } = await import("./marketingPublicSite");
+    expect(resolveMarketingSectionHref("#pricing", "/login")).toBe("/#pricing");
+    expect(resolveMarketingSectionHref("#features", "/login")).toBe("/#features");
+    expect(resolveMarketingSectionHref("/legal/terms", "/login")).toBe("/legal/terms");
+  });
+});
+
 describe("toYoutubeEmbedUrl", () => {
   it("parses watch URLs", async () => {
     const { toYoutubeEmbedUrl } = await import("./marketingPublicSite");

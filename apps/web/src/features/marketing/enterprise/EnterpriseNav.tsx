@@ -1,12 +1,14 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
+import { resolveMarketingSectionHref } from "@/lib/marketingPublicSite";
 
 type Props = {
   config: HomepageConfig;
 };
 
 export function EnterpriseNav({ config }: Props) {
+  const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
@@ -62,17 +64,20 @@ export function EnterpriseNav({ config }: Props) {
 
           {menuOpen ? (
             <div id={menuId} className="ent-nav__dropdown" role="menu">
-              {config.nav.links.map((l, i) => (
-                <a
-                  key={`${l.label}-${l.href}-${i}`}
-                  href={l.href}
-                  className="ent-nav__dropdown-link"
-                  role="menuitem"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {l.label}
-                </a>
-              ))}
+              {config.nav.links.map((l, i) => {
+                const href = resolveMarketingSectionHref(l.href, pathname);
+                return (
+                  <a
+                    key={`${l.label}-${l.href}-${i}`}
+                    href={href}
+                    className="ent-nav__dropdown-link"
+                    role="menuitem"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {l.label}
+                  </a>
+                );
+              })}
               <Link
                 to="/login"
                 className="ent-nav__dropdown-link"
@@ -98,7 +103,11 @@ export function EnterpriseNav({ config }: Props) {
 
         <div className="ent-nav__links" aria-label="Primary">
           {config.nav.links.map((l, i) => (
-            <a key={`${l.label}-${l.href}-${i}`} href={l.href} className="ent-nav__link">
+            <a
+              key={`${l.label}-${l.href}-${i}`}
+              href={resolveMarketingSectionHref(l.href, pathname)}
+              className="ent-nav__link"
+            >
               {l.label}
             </a>
           ))}
@@ -108,7 +117,7 @@ export function EnterpriseNav({ config }: Props) {
           <Link to="/login" className="ent-nav__sign-in">
             Login
           </Link>
-          <a href={config.nav.ctaHref} className="ent-nav__cta">
+          <a href={resolveMarketingSectionHref(config.nav.ctaHref, pathname)} className="ent-nav__cta">
             {config.nav.ctaLabel}
           </a>
         </div>

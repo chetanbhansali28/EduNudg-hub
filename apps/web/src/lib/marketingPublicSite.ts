@@ -177,6 +177,18 @@ export function applyCurriculumNavLink(config: HomepageConfig, hasCurriculum: bo
   });
 }
 
+/**
+ * Hash-only marketing links (e.g. `#pricing`) must target the homepage when the
+ * current route is something else (e.g. `/login`), otherwise the browser stays on
+ * `/login#pricing` and never shows the section.
+ */
+export function resolveMarketingSectionHref(href: string, pathname: string): string {
+  const trimmed = href.trim();
+  if (!trimmed.startsWith("#") || trimmed === "#") return href;
+  if (pathname === "/" || pathname === "") return trimmed;
+  return `/${trimmed}`;
+}
+
 /** Scroll to in-page section after marketing bundle loads (fixes /#curriculum on async landing). */
 export function scrollToMarketingHash(hash: string | undefined): void {
   if (!hash || hash === "#") return;

@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
 import { isPlatformSectionEnabled } from "@/lib/homepageSections";
+import { scrollToMarketingHash } from "@/lib/marketingPublicSite";
 import type { HomepageConfig } from "@/types/homepage";
 import { EnterpriseNav } from "./enterprise/EnterpriseNav";
 import { EnterpriseSiteFooter } from "./enterprise/EnterpriseSiteFooter";
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function MarketingPublicLayout({ showFooter = true }: Props) {
+  const location = useLocation();
   const { data: config, isLoading } = useQuery({
     queryKey: ["marketing-homepage"],
     queryFn: fetchHomepageConfig,
@@ -38,6 +40,12 @@ export function MarketingPublicLayout({ showFooter = true }: Props) {
       `"${config.meta.fontSerif}", Georgia, serif`
     );
   }, [config]);
+
+  useEffect(() => {
+    if (isLoading || !config) return;
+    if (location.pathname !== "/") return;
+    scrollToMarketingHash(location.hash);
+  }, [isLoading, config, location.pathname, location.hash]);
 
   if (isLoading || !config) {
     return (

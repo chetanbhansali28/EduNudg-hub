@@ -1,18 +1,21 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
-import { sanitizePublicFooterLinks } from "@/lib/marketingPublicSite";
+import { resolveMarketingSectionHref, sanitizePublicFooterLinks } from "@/lib/marketingPublicSite";
 
 type Props = {
   config: HomepageConfig;
 };
 
 function FooterLink({ href, label }: { href: string; label: string }) {
-  if (href.startsWith("/") && !href.startsWith("//")) {
-    return <Link to={href}>{label}</Link>;
+  const { pathname } = useLocation();
+  const resolved = resolveMarketingSectionHref(href, pathname);
+
+  if (resolved.startsWith("/") && !resolved.startsWith("//")) {
+    return <Link to={resolved}>{label}</Link>;
   }
 
   return (
-    <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
+    <a href={resolved} target={resolved.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
       {label}
     </a>
   );
