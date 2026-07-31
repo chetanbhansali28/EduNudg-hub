@@ -47,7 +47,16 @@ export function AuthHandoffPage() {
 
       const path = next.startsWith("/") ? next : `/${next}`;
       const qs = override ? `?${portalOverrideSearchParams(override).toString()}` : "";
-      navigate(`${path}${qs}`, { replace: true });
+      const destination = `${path}${qs}`;
+
+      // Same-origin portals need a full reload so TenantProvider remounts with the override.
+      // Client-side navigate leaves portalType=platform and /app falls through to the homepage.
+      if (override) {
+        window.location.replace(destination);
+        return;
+      }
+
+      navigate(destination, { replace: true });
     })();
 
     return () => {

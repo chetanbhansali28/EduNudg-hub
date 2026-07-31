@@ -73,6 +73,14 @@ export function EnterpriseNav({ config }: Props) {
                   {l.label}
                 </a>
               ))}
+              <Link
+                to="/login"
+                className="ent-nav__dropdown-link"
+                role="menuitem"
+                onClick={() => setMenuOpen(false)}
+              >
+                Login
+              </Link>
             </div>
           ) : null}
 
@@ -97,6 +105,9 @@ export function EnterpriseNav({ config }: Props) {
         </div>
 
         <div className="ent-nav__actions">
+          <Link to="/login" className="ent-nav__sign-in">
+            Login
+          </Link>
           <a href={config.nav.ctaHref} className="ent-nav__cta">
             {config.nav.ctaLabel}
           </a>

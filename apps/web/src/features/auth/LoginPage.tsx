@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button, IconGoogle, IconWhatsApp, Input, LoginLayout, PasswordInput, ThemeProvider } from "@edunudg/ui";
 import { useAuth } from "@/bootstrap/AuthProvider";
@@ -12,6 +12,7 @@ import { fetchHomepageConfig } from "@/lib/homepageApi";
 import { hasPortalMembership } from "@/lib/portalMembership";
 import { resolveLoginBranding } from "@/lib/portalBranding";
 import { learnPortalLoginUrl } from "@/lib/centerPublicNavUrls";
+import type { MarketingPublicOutletContext } from "@/features/marketing/MarketingPublicLayout";
 import { postLoginPath } from "./postLoginPath";
 
 const REMEMBER_KEY = "edunudg_remember_email";
@@ -23,13 +24,15 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const marketingOutlet = useOutletContext<MarketingPublicOutletContext | undefined>();
+  const inMarketingChrome = marketingOutlet?.marketingChrome === true;
   const { data: memberships, isLoading: membershipsLoading } = useMembership();
   const brandingQuery = usePortalBranding();
   const integrations = usePlatformIntegrations();
   const homepageQuery = useQuery({
     queryKey: ["marketing-homepage"],
     queryFn: fetchHomepageConfig,
-    enabled: tenant.portalType === "platform",
+    enabled: tenant.portalType === "platform" && !inMarketingChrome,
   });
 
   const [email, setEmail] = useState(() => {
@@ -73,7 +76,7 @@ export function LoginPage() {
     [tenant.portalType, tenant.brandSlug, tenant.centerSlug, brandingQuery.data]
   );
 
-  const homepage = homepageQuery.data;
+  const homepage = inMarketingChrome ? marketingOutlet?.config : homepageQuery.data;
   const portalType = tenant.portalType;
   const isStudentPortal = portalType === "learn" || portalType === "parents";
   const accessPending =
@@ -120,13 +123,15 @@ export function LoginPage() {
     }
   };
 
-  const footerLinks = homepage
-    ? [
-        { label: "Terms", href: homepage.footer.termsHref },
-        { label: "Privacy", href: homepage.footer.privacyHref },
-        { label: "Help", href: "/help" },
-      ]
-    : undefined;
+  const footerLinks = inMarketingChrome
+    ? []
+    : homepage
+      ? [
+          { label: "Terms", href: homepage.footer.termsHref },
+          { label: "Privacy", href: homepage.footer.privacyHref },
+          { label: "Help", href: "/help" },
+        ]
+      : undefined;
 
   const showEmailAuth = integrations.auth_email;
   const showGoogleAuth = integrations.auth_google;
@@ -136,6 +141,7 @@ export function LoginPage() {
 
   return (
     <ThemeProvider>
+      <div className={inMarketingChrome ? "ed-login-page--marketing" : undefined}>
       <LoginLayout
         branding={branding}
         footerLinks={footerLinks}
@@ -256,11 +262,11 @@ export function LoginPage() {
           </div>
         ) : null}
 
-        {tenant.portalType === "platform" && (
+        {tenant.portalType === "platform" && !inMarketingChrome ? (
           <p className="ed-login-form__extra">
             <Link to="/">← Back to homepage</Link>
           </p>
-        )}
+        ) : null}
         {tenant.portalType === "center" && tenant.brandSlug ? (
           <p className="ed-login-form__extra">
             Parent or student?{" "}
@@ -270,6 +276,7 @@ export function LoginPage() {
           </p>
         ) : null}
       </LoginLayout>
+      </div>
     </ThemeProvider>
   );
 }

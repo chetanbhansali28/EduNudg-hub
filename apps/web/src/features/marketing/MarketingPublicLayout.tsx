@@ -3,10 +3,17 @@ import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { fetchHomepageConfig } from "@/lib/homepageApi";
 import { isPlatformSectionEnabled } from "@/lib/homepageSections";
+import type { HomepageConfig } from "@/types/homepage";
 import { EnterpriseNav } from "./enterprise/EnterpriseNav";
 import { EnterpriseSiteFooter } from "./enterprise/EnterpriseSiteFooter";
 import "./marketing.css";
 import "./enterprise/enterprise.css";
+
+export type MarketingPublicOutletContext = {
+  config: HomepageConfig;
+  /** True when page is wrapped by enterprise marketing nav/footer. */
+  marketingChrome: true;
+};
 
 type Props = {
   showFooter?: boolean;
@@ -41,11 +48,12 @@ export function MarketingPublicLayout({ showFooter = true }: Props) {
   }
 
   const showSiteFooter = showFooter && isPlatformSectionEnabled(config, "footer");
+  const outletContext: MarketingPublicOutletContext = { config, marketingChrome: true };
 
   return (
     <div className="marketing-page marketing-page--enterprise">
       <EnterpriseNav config={config} />
-      <Outlet context={{ config }} />
+      <Outlet context={outletContext} />
       {showSiteFooter ? <EnterpriseSiteFooter config={config} /> : null}
     </div>
   );

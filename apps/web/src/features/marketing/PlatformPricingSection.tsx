@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
 import { usePlatformIntegration } from "@/hooks/usePlatformIntegration";
 import type { HomepageConfig } from "@/types/homepage";
 import { fetchPublicSubscriptionPlans } from "@/lib/subscriptionPlansApi";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { pricingFeatureBullets } from "@/lib/subscriptionPlanFeatures";
 import { MarketingCtaLink } from "./MarketingCtaLink";
+import { useQuery } from "@tanstack/react-query";
 
 type Props = {
   ctaHref: HomepageConfig["nav"]["ctaHref"];
@@ -44,6 +44,11 @@ export function PlatformPricingSection({ ctaHref, ctaLabel }: Props) {
 
   if (items.length === 0) return null;
 
+  const mostPopularCode =
+    items.find((plan) => plan.code === "growth")?.code ??
+    items.find((plan) => plan.is_default)?.code ??
+    null;
+
   return (
     <section id="pricing" data-nav-theme="light" className="novu-pricing-section">
       <div className="novu-pricing-section__wrap">
@@ -56,15 +61,15 @@ export function PlatformPricingSection({ ctaHref, ctaLabel }: Props) {
         <div className="novu-pricing-grid">
           {items.map((plan) => {
             const bullets = pricingFeatureBullets(plan.features);
-            const highlight = plan.code === "growth" || plan.is_default;
+            const highlight = mostPopularCode !== null && plan.code === mostPopularCode;
             return (
               <article
                 key={plan.code}
                 className={`novu-pricing-card${highlight ? " novu-pricing-card--highlight" : ""}`}
               >
-                {plan.code === "growth" && !plan.is_default && (
+                {highlight ? (
                   <span className="novu-pricing-card__badge">Most popular</span>
-                )}
+                ) : null}
                 <h3 className="novu-pricing-card__name">{plan.name}</h3>
                 <p className="novu-pricing-card__price">
                   {formatInrFromPaise(plan.price_cents, plan.currency)}

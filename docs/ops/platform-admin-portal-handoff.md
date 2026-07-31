@@ -54,6 +54,7 @@ Handoff does **not** require every `*.localhost:9000` subdomain in redirect allo
 | Redirect to `localhost:3000` / connection refused | Redeploy `platform-portal-handoff`; ensure app uses `/auth/handoff` (not raw `action_link`). Set Site URL to port **9000**. |
 | Handoff page: “incomplete link” | Re-click **Open** from Brands while signed in as platform admin. |
 | Lands on login, not `/app` | Confirm `platform-portal-handoff` deployed; check browser network for function errors. |
+| Lands on **platform homepage** on `*.vercel.app` | Same-origin mode needs `?portal=&brand=` on the handoff URL. Client now re-appends those params if missing and full-reloads after verify. Redeploy the web app; optionally redeploy `platform-portal-handoff`. |
 | Access denied after handoff | User must have active `memberships` row with `scope_type = 'platform'`. |
 
 ## Tests (critical)

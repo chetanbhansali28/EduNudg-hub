@@ -113,13 +113,18 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/auth/handoff" element={<AuthHandoffPage />} />
-      <Route path="/login" element={<LoginPage />} />
+
+      {tenant.portalType === "platform" ? (
+        <Route element={<MarketingPublicLayout />}>
+          <Route path="/" element={<MarketingHomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Route>
+      ) : (
+        <Route path="/login" element={<LoginPage />} />
+      )}
 
       {tenant.portalType === "platform" && (
         <>
-          <Route element={<MarketingPublicLayout />}>
-            <Route path="/" element={<MarketingHomePage />} />
-          </Route>
           <Route
             path="/admin"
             element={

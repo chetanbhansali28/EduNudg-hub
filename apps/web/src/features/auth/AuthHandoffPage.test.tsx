@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { AuthHandoffPage } from "./AuthHandoffPage";
 import { expectRedirectTo } from "./expectRedirectTo";
@@ -17,6 +17,7 @@ vi.mock("@/lib/supabase", () => ({
 describe("AuthHandoffPage", () => {
   beforeEach(() => {
     verifyOtpMock.mockReset();
+    sessionStorage.clear();
   });
 
   it("critical_verifies_token_hash_and_redirects_to_next", async () => {
@@ -34,6 +35,32 @@ describe("AuthHandoffPage", () => {
 
     await expectRedirectTo("Staff backend");
     expect(verifyOtpMock).toHaveBeenCalledWith({ token_hash: "test-hash", type: "magiclink" });
+  });
+
+  it("regression_same_origin_override_uses_full_page_reload", async () => {
+    verifyOtpMock.mockResolvedValue({ error: null });
+    const replace = vi.fn();
+    const original = window.location;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { ...original, replace },
+    });
+
+    const router = createMemoryRouter([{ path: "/auth/handoff", element: <AuthHandoffPage /> }], {
+      initialEntries: ["/auth/handoff?token_hash=test-hash&next=/app&portal=brand&brand=demo"],
+    });
+
+    render(<RouterProvider router={router} />);
+
+    await waitFor(() => {
+      expect(replace).toHaveBeenCalledWith("/app?portal=brand&brand=demo");
+    });
+    expect(sessionStorage.getItem("edunudg.portalOverride")).toContain("demo");
+
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: original,
+    });
   });
 
   it("regression_shows_error_when_verify_otp_fails", async () => {

@@ -88,4 +88,43 @@ describe("PlatformPricingSection", () => {
     expect(cards[2]?.className).toContain("novu-pricing-card");
     expect(cards[2]?.className).not.toContain("novu-pricing-card--highlight");
   });
+
+  it("regression_only_most_popular_plan_is_highlighted", async () => {
+    fetchPublicSubscriptionPlans.mockResolvedValue([
+      {
+        code: "starter",
+        name: "Starter",
+        price_cents: 0,
+        currency: "INR",
+        billing_interval: "month",
+        features: STARTER_PLAN_FEATURES,
+        is_default: true,
+      },
+      {
+        code: "growth",
+        name: "Growth",
+        price_cents: 99900,
+        currency: "INR",
+        billing_interval: "month",
+        features: STARTER_PLAN_FEATURES,
+        is_default: false,
+      },
+      {
+        code: "enterprise",
+        name: "Enterprise",
+        price_cents: 799900,
+        currency: "INR",
+        billing_interval: "month",
+        features: STARTER_PLAN_FEATURES,
+        is_default: false,
+      },
+    ]);
+    renderPricing();
+    await screen.findByText("Enterprise");
+    const highlighted = document.querySelectorAll(".novu-pricing-card--highlight");
+    expect(highlighted).toHaveLength(1);
+    expect(highlighted[0]?.textContent).toContain("Growth");
+    expect(highlighted[0]?.textContent).toContain("Most popular");
+    expect(screen.getAllByText("Most popular")).toHaveLength(1);
+  });
 });
