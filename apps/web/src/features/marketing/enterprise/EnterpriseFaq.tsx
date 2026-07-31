@@ -12,8 +12,11 @@ export function EnterpriseFaq({ items }: Props) {
       <h2>Got questions?</h2>
       <div className="ent-faq__list">
         {items.map((item) => (
-          <details key={item.question} className="ent-faq__item">
-            <summary className="ent-faq__question">{item.question}</summary>
+          <details key={item.question} className="ent-faq__item" name="ent-faq">
+            <summary className="ent-faq__question">
+              {item.question}
+              <span className="ent-faq__icon" aria-hidden />
+            </summary>
             <p className="ent-faq__answer">{item.answer}</p>
           </details>
         ))}

@@ -11,6 +11,10 @@ const ICONS: Record<string, string> = {
   message: "chat",
   sync: "sync",
   globe: "public",
+  how_to_reg: "how_to_reg",
+  event_available: "event_available",
+  trending_up: "trending_up",
+  chat: "chat",
 };
 
 type Props = {

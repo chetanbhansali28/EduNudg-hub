@@ -207,24 +207,32 @@ export function MarketingMediaField({
           playsInline
         />
       ) : null}
-      {fileInput}
-      {value ? (
-        <p className="ed-text-sm ed-muted ed-marketing-media-url" title={value}>
-          Current: {value.length > 72 ? `${value.slice(0, 69)}…` : value}
-        </p>
-      ) : (
-        <p className="ed-text-sm ed-muted">No file selected yet. Upload PNG, JPEG, or MP4.</p>
-      )}
+      <div className="ed-marketing-media-hero__footer">
+        {fileInput}
+        <Button variant="secondary" onClick={() => inputRef.current?.click()} disabled={disabled || pending}>
+          <span className="material-symbols-outlined" aria-hidden>
+            upload
+          </span>
+          {value ? "Replace file" : "Upload file"}
+        </Button>
+        {value ? (
+          <>
+            <p className="ed-text-sm ed-muted ed-marketing-media-url" title={value}>
+              Current: {fileNameFromUrl(value)}
+            </p>
+            <button type="button" className="ed-link-button ed-text-sm" onClick={() => onChange("")}>
+              Remove file
+            </button>
+          </>
+        ) : (
+          <p className="ed-text-sm ed-muted">No file selected yet. Upload PNG, JPEG, or MP4.</p>
+        )}
+      </div>
       {pending ? <p className="ed-text-sm ed-muted">Uploading…</p> : null}
       {error ? (
         <p className="ed-text-sm" role="alert">
           {error}
         </p>
-      ) : null}
-      {value ? (
-        <button type="button" className="ed-link-button ed-text-sm" onClick={() => onChange("")}>
-          Remove file
-        </button>
       ) : null}
     </div>
   );

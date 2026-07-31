@@ -28,6 +28,8 @@ describe("EnterprisePlatformContent", () => {
     expect(document.getElementById("features")).toBeTruthy();
     expect(document.getElementById("connectivity")).toBeTruthy();
     expect(document.getElementById("brand-signup")).toBeTruthy();
+    expect(screen.getByText("Connected Education Ecosystem")).toBeDefined();
+    expect(screen.getByText(/Hobby classes that feel personal/i)).toBeDefined();
   });
 
   it("regression_omits_novu_phone_scroll_sections", () => {

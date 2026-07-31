@@ -21,6 +21,10 @@ export function EnterpriseBrandSignupSection({ copy }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
+  const visibleSteps = copy.steps
+    .map((label) => label.trim())
+    .filter((label) => label.length > 0);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -49,18 +53,29 @@ export function EnterpriseBrandSignupSection({ copy }: Props) {
       <div className="ent-section__inner">
         <div className="ent-signup__grid">
           <div className="ent-signup__promo">
-            <h2>{copy.promoTitle}</h2>
-            <p>{copy.promoSubtitle}</p>
-            <ol className="ent-signup__steps" aria-label="Signup steps">
-              {copy.steps.map((label, i) => (
-                <li key={label} className="ent-signup__step">
-                  <span className="ent-signup__step-num" aria-hidden>
-                    {i + 1}
-                  </span>
-                  <span className="ent-signup__step-label">{label}</span>
-                </li>
-              ))}
-            </ol>
+            {copy.promoTitle.trim() ? <h2>{copy.promoTitle}</h2> : null}
+            {(copy.promoSubtitle ?? "").trim() ? <p>{copy.promoSubtitle}</p> : null}
+            {copy.promoImageUrl ? (
+              <div className="ent-signup__promo-media">
+                <img
+                  className="ent-signup__promo-image"
+                  src={copy.promoImageUrl}
+                  alt=""
+                />
+              </div>
+            ) : null}
+            {visibleSteps.length > 0 ? (
+              <ol className="ent-signup__steps" aria-label="Signup steps">
+                {visibleSteps.map((label, i) => (
+                  <li key={`${i}-${label}`} className="ent-signup__step">
+                    <span className="ent-signup__step-num" aria-hidden>
+                      {i + 1}
+                    </span>
+                    <span className="ent-signup__step-label">{label}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : null}
           </div>
 
           <div className="ent-signup__card">

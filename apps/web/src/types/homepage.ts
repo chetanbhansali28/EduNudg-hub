@@ -46,6 +46,8 @@ export interface HomepageConnectivityShowcase {
 export interface HomepageBrandSignupCopy {
   promoTitle: string;
   promoSubtitle: string;
+  /** Optional image shown below promo title/subtitle on the public homepage. */
+  promoImageUrl?: string;
   steps: [string, string, string];
   formTitle: string;
   formSubtitle: string;

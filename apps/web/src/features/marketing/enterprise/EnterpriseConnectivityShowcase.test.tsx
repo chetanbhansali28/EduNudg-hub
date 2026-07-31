@@ -20,4 +20,15 @@ describe("EnterpriseConnectivityShowcase", () => {
     expect(document.querySelector(".ent-connectivity__layout")).toBeTruthy();
     expect(document.querySelectorAll(".ent-connectivity__card")).toHaveLength(showcase.cards.length);
   });
+
+  it("regression_family_journey_connectivity_copy", () => {
+    const showcase = DEFAULT_HOMEPAGE_CONFIG.connectivityShowcase!;
+    render(<EnterpriseConnectivityShowcase showcase={showcase} />);
+
+    expect(screen.getByRole("heading", { name: "From trial class to proud parent" })).toBeDefined();
+    expect(screen.getByText(/Enrollment, progress, and communication stay connected/i)).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Easy enroll" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Stay close" })).toBeDefined();
+    expect(showcase.cards).toHaveLength(4);
+  });
 });

@@ -1,9 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import type { HomepageConfig } from "@/types/homepage";
 import { HomepageEditorForm } from "./HomepageEditorForm";
 import { HomepageEditorShell } from "./HomepageEditorShell";
+
+vi.mock("@/lib/marketingMediaStorage", () => ({
+  uploadMarketingMedia: vi.fn(async () => "https://cdn.example.com/uploaded.png"),
+}));
 
 describe("HomepageEditorForm", () => {
   it("regression_static_sections_and_collapsed_accordions", () => {
@@ -28,7 +32,88 @@ describe("HomepageEditorForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /Hero.*Main banner content/i }));
     expect(screen.queryByLabelText("Hero background image URL")).toBeNull();
     expect(screen.getByLabelText("Hero side image")).toBeDefined();
+    expect(screen.getAllByRole("button", { name: /Upload file|Replace file/i }).length).toBeGreaterThanOrEqual(1);
     expect(container.querySelector(".ed-editable-form .ed-form-grid")).toBeTruthy();
+  });
+
+  it("critical_homepage_media_fields_use_visible_file_pickers", () => {
+    render(
+      <HomepageEditorShell title="Homepage Configuration">
+        <HomepageEditorForm
+          config={DEFAULT_HOMEPAGE_CONFIG}
+          onChange={() => undefined}
+          portalMode="platform"
+        />
+      </HomepageEditorShell>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Hero.*Main banner content/i }));
+
+    expect(screen.getByLabelText("Hero side image").getAttribute("type")).toBe("file");
+    expect(screen.getByLabelText("Connectivity phone image").getAttribute("type")).toBe("file");
+    expect(screen.getByLabelText("Pre-footer side image").getAttribute("type")).toBe("file");
+
+    const uploadButtons = screen.getAllByRole("button", { name: /Upload file|Replace file/i });
+    expect(uploadButtons.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("critical_media_upload_stays_draft_until_page_save", async () => {
+    const onChange = vi.fn();
+    const onPersist = vi.fn();
+    const { uploadMarketingMedia } = await import("@/lib/marketingMediaStorage");
+    vi.mocked(uploadMarketingMedia).mockResolvedValue("https://cdn.example.com/draft-footer.png");
+
+    render(
+      <HomepageEditorShell title="Homepage Configuration">
+        <HomepageEditorForm
+          config={DEFAULT_HOMEPAGE_CONFIG}
+          onChange={onChange}
+          onPersist={onPersist}
+          portalMode="platform"
+        />
+      </HomepageEditorShell>
+    );
+
+    const input = screen.getByLabelText("Pre-footer side image");
+    const file = new File(["img"], "draft-footer.png", { type: "image/png" });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+    });
+    const next = onChange.mock.calls.at(-1)?.[0] as HomepageConfig;
+    expect(next.footerCta.backgroundImageUrl).toBe("https://cdn.example.com/draft-footer.png");
+    expect(onPersist).not.toHaveBeenCalled();
+  });
+
+  it("critical_hero_media_upload_stays_draft_until_page_save", async () => {
+    const onChange = vi.fn();
+    const onPersist = vi.fn();
+    const { uploadMarketingMedia } = await import("@/lib/marketingMediaStorage");
+    vi.mocked(uploadMarketingMedia).mockResolvedValue("https://cdn.example.com/draft-hero.png");
+
+    render(
+      <HomepageEditorShell title="Homepage Configuration">
+        <HomepageEditorForm
+          config={DEFAULT_HOMEPAGE_CONFIG}
+          onChange={onChange}
+          onPersist={onPersist}
+          portalMode="platform"
+        />
+      </HomepageEditorShell>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Hero.*Main banner content/i }));
+    const input = screen.getByLabelText("Hero side image");
+    const file = new File(["img"], "draft-hero.png", { type: "image/png" });
+    fireEvent.change(input, { target: { files: [file] } });
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
+    });
+    const next = onChange.mock.calls.at(-1)?.[0] as HomepageConfig;
+    expect(next.hero.backgroundImageUrl).toBe("https://cdn.example.com/draft-hero.png");
+    expect(onPersist).not.toHaveBeenCalled();
   });
 
   it("regression_form_fields_expose_id_and_name_for_autofill", () => {

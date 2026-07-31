@@ -724,6 +724,12 @@
   align-items: start;
 }
 
+.ent-signup__promo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .ent-signup__promo h2 {
   font-family: var(--ent-font-serif);
   font-size: clamp(1.75rem, 4vw, 2.25rem);
@@ -732,7 +738,28 @@
 
 .ent-signup__promo > p {
   color: var(--ent-muted);
-  margin: 0 0 2rem;
+  margin: 0 0 1.5rem;
+}
+
+.ent-signup__promo-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  margin: 0 0 1.5rem;
+  border-radius: var(--ent-radius);
+  overflow: hidden;
+  border: 1px solid var(--ent-border);
+  background: #fff;
+}
+
+.ent-signup__promo-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% 25%;
 }
 
 .ent-signup__steps {
@@ -800,8 +827,43 @@
 }
 
 @media (min-width: 1024px) {
+  .ent-signup.ent-section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .ent-signup .ent-section__inner {
+    max-width: none;
+  }
+
   .ent-signup__grid {
-    grid-template-columns: 1fr 1.1fr;
+    grid-template-columns: 50vw minmax(0, 1fr);
+    gap: 2.5rem;
+    align-items: stretch;
+    padding-right: clamp(1.25rem, 4vw, 3rem);
+  }
+
+  .ent-signup__promo {
+    height: 100%;
+    /* Keep title, image, and steps on the same left edge. */
+    padding-left: clamp(1.25rem, 4vw, 3rem);
+    padding-right: 0.5rem;
+  }
+
+  .ent-signup__promo-media {
+    /* Grow to fill remaining column height; prefer a taller frame than before. */
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: clamp(16rem, 34vh, 22rem);
+    max-height: 100%;
+    aspect-ratio: auto;
+    margin-bottom: 1.25rem;
+    border-radius: var(--ent-radius);
+    border-left: 1px solid var(--ent-border);
+  }
+
+  .ent-signup__steps {
+    margin-top: auto;
   }
 
   .ent-signup__form-grid--two {
@@ -1008,6 +1070,11 @@
   border-bottom: 1px solid var(--ent-border);
 }
 
+/* Explicit collapse — some embeds/UAs leave closed <details> children visible. */
+.ent-faq__item:not([open]) > *:not(summary) {
+  display: none;
+}
+
 .ent-faq__question {
   padding: 1.25rem 0;
   font-weight: 600;
@@ -1021,6 +1088,36 @@
 
 .ent-faq__question::-webkit-details-marker {
   display: none;
+}
+
+.ent-faq__icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--ent-border);
+  border-radius: 50%;
+  position: relative;
+}
+
+.ent-faq__icon::before,
+.ent-faq__icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 1.5px;
+  background: var(--ent-text);
+  transform: translate(-50%, -50%);
+  transition: transform 0.25s;
+}
+
+.ent-faq__icon::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.ent-faq__item[open] .ent-faq__icon::after {
+  transform: translate(-50%, -50%) rotate(0);
 }
 
 .ent-faq__answer {

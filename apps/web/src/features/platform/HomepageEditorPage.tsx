@@ -64,7 +64,6 @@ export function HomepageEditorPage() {
           config={config}
           onChange={setConfig}
           uploadScope={{ kind: "platform" }}
-          onPersist={(next) => save.mutate(next)}
           portalMode="platform"
         />
       </HomepageEditorShell>

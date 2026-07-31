@@ -70,7 +70,10 @@ export function AbacusClassicEditorForm({
     void onPersist?.(next);
   };
 
-  const commitMedia = (next: HomepageConfig) => commit(next);
+  /** Media edits stay local until the editor Save / Discard actions. */
+  const commitMedia = (next: HomepageConfig) => {
+    onChange(next);
+  };
 
   const setSection = (key: HomepageSectionKey, enabled: boolean) => {
     commit(setSectionEnabled(config, key, enabled));
@@ -115,6 +118,7 @@ export function AbacusClassicEditorForm({
               mediaType="image"
               uploadSubdir=""
               uploadScope={uploadScope}
+              layout="logo"
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>
@@ -201,6 +205,7 @@ export function AbacusClassicEditorForm({
               mediaType="image"
               uploadSubdir="hero-background"
               uploadScope={uploadScope}
+              layout="hero"
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>

@@ -48,7 +48,7 @@ export type HomepageEditorFormProps = {
   onChange: (config: HomepageConfig) => void;
   /** Where uploaded images/videos are stored in Supabase Storage. */
   uploadScope?: MarketingUploadScope;
-  /** Persist config after a media upload (e.g. save to database immediately). */
+  /** Optional: persist non-media structural edits (e.g. section visibility). Media uploads stay draft until the page Save action. */
   onPersist?: (config: HomepageConfig) => void | Promise<void>;
   /** When true, testimonial quotes are managed elsewhere (e.g. success stories). */
   testimonialsManagedExternally?: boolean;
@@ -89,8 +89,9 @@ export function HomepageEditorForm({
     void onPersist?.(next);
   };
 
+  /** Media edits stay local until the editor Save / Discard actions. */
   const commitMedia = (next: HomepageConfig) => {
-    commit(next);
+    onChange(next);
   };
 
   const setSection = (key: HomepageSectionKey, enabled: boolean) => {
@@ -277,6 +278,7 @@ export function HomepageEditorForm({
               mediaType="image"
               uploadSubdir="hero-background"
               uploadScope={uploadScope}
+              layout="hero"
             />
           </EditorFieldSpan>
           <EditorFieldSpan>
@@ -287,6 +289,7 @@ export function HomepageEditorForm({
               mediaType="image"
               uploadSubdir="hero-phone-frame"
               uploadScope={uploadScope}
+              layout="hero"
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>
@@ -371,6 +374,7 @@ export function HomepageEditorForm({
                   mediaType="image"
                   uploadSubdir="connectivity-center"
                   uploadScope={uploadScope}
+                  layout="hero"
                 />
               </EditorFieldSpan>
             </EditorFieldsGrid>
@@ -554,6 +558,25 @@ export function HomepageEditorForm({
                   onChange({ ...config, brandSignup: { ...config.brandSignup!, promoSubtitle: v } })
                 }
               />
+              <EditorFieldSpan>
+                <MarketingMediaField
+                  label="Promo image"
+                  value={config.brandSignup?.promoImageUrl ?? ""}
+                  onChange={(v) =>
+                    commitMedia({
+                      ...config,
+                      brandSignup: {
+                        ...config.brandSignup!,
+                        promoImageUrl: v || undefined,
+                      },
+                    })
+                  }
+                  mediaType="image"
+                  uploadSubdir="brand-signup-promo"
+                  uploadScope={uploadScope}
+                  layout="hero"
+                />
+              </EditorFieldSpan>
               <Input
                 label="Step 1 label"
                 value={config.brandSignup?.steps[0] ?? ""}
@@ -692,6 +715,7 @@ export function HomepageEditorForm({
                     mediaType="video"
                     uploadSubdir={`feature-${section.id}`}
                     uploadScope={uploadScope}
+                    layout="hero"
                   />
                 </EditorFieldSpan>
               </EditorFieldsGrid>
@@ -781,6 +805,7 @@ export function HomepageEditorForm({
                     mediaType="image"
                     uploadSubdir={`showcase-${card.id}-bg`}
                     uploadScope={uploadScope}
+                    layout="hero"
                   />
                 </EditorFieldSpan>
                 <EditorFieldSpan>
@@ -795,6 +820,7 @@ export function HomepageEditorForm({
                     mediaType="image"
                     uploadSubdir={`showcase-${card.id}-phone`}
                     uploadScope={uploadScope}
+                    layout="hero"
                   />
                 </EditorFieldSpan>
               </EditorFieldsGrid>
