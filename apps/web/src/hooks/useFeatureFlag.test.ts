@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { FEATURE_FLAG_DEFAULTS, resolveFeatureFlags } from "@/hooks/useFeatureFlag";
 
-describe("resolveFeatureFlags", () => {
-  it("uses stored value when present", () => {
+describe("resolveFeatureFlags (FF-01..03)", () => {
+  it("FF-03 uses stored value when present", () => {
     expect(resolveFeatureFlags({ campaigns: true }, "campaigns")).toBe(true);
   });
 
-  it("regression_falls_back_to_defaults", () => {
+  it("FF-01 / FF-02 regression_falls_back_to_defaults", () => {
     expect(resolveFeatureFlags({}, "student_leads")).toBe(FEATURE_FLAG_DEFAULTS.student_leads);
     expect(resolveFeatureFlags(undefined, "merchandise")).toBe(false);
     expect(resolveFeatureFlags({ kits: true }, "merchandise")).toBe(true);

@@ -29,11 +29,11 @@ flowchart LR
 
 - **Stale:** no center status change within `lead_stale_days` (default 15, IST) after assign → brand **Stale leads** → reallocate.
 - **Lost:** **center only** marks lost with **reason**; brand views all lost leads.
-- **Reopen:** **brand only** (`reopen_lead`); prior lost reason in timeline.
+- **Reopen:** **brand only** via `reopen_lead`, or **auto** when the same WhatsApp re-applies (`reopened_merge`); prior lost reason in timeline.
 
 ## Duplicate WhatsApp
 
-Second submission **merges** into existing lead; does not reset assign unless rules in [data-flow](../spec/data-flow.md).
+Second submission **merges** into existing lead (logs `merged`). If the lead was **lost**, merge **auto-reopens** to `new`. If already **converted**, the RPC **rejects** (no soft-merge). See [data-flow](../spec/data-flow.md).
 
 ## Related
 

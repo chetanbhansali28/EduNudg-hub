@@ -13,6 +13,7 @@
     "test": "node scripts/assert-workspace-test-bins.mjs && pnpm -r --if-present test",
     "test:rls": "node scripts/run-rls-tests.mjs",
     "test:e2e": "playwright test",
+    "test:e2e:local-hosts": "E2E_USE_LOCAL_HOSTS=1 playwright test",
     "ci:local": "node scripts/ci-local.mjs",
     "audit:schema": "node scripts/audit-schema.mjs",
     "db:push": "supabase db push",

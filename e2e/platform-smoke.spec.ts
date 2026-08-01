@@ -23,7 +23,7 @@ test("regression_login_primary_submit_name_is_exact_not_oauth", async ({ page })
   expect(await page.getByRole("button", { name: "Log in" }).count()).toBeGreaterThan(1);
 });
 
-test("marketing home renders shared nav and footer", async ({ page }) => {
+test("P-PUB-01 / UX-01 marketing home renders shared nav and footer", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL("/");
   // exact: true — getByLabel("Site") also matches "Launch Website for FREE" CTAs

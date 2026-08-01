@@ -5,14 +5,24 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  timeout: 60_000,
   use: {
-    baseURL: "http://127.0.0.1:9000",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:9000",
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "setup", testMatch: /auth\.setup\.ts/ },
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+      testIgnore: /auth\.setup\.ts/,
+      dependencies: ["setup"],
+    },
+  ],
   webServer: {
     command: "pnpm --filter @edunudg/web preview",
     url: "http://127.0.0.1:9000",
     reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
 });

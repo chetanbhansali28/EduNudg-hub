@@ -46,7 +46,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-B13 | B | Reallocate stale leads | After configurable SLA days without center status change |
 | FR-B14 | B | **Lost leads** visible with **reason** | Read-only list; shows `lost_reason` set by center |
 | FR-B15 | B | **Reopen** lost lead | **Brand only** — `reopen_lead` RPC; prior `lost_reason` kept in `lead_events` |
-| FR-B15b | B | WhatsApp re-application after lost | Merge/reopen rules: if lead `lost`, brand may reopen explicitly; auto-reopen on merge optional — default require brand **Reopen** action |
+| FR-B15b | B | WhatsApp re-application after lost | Merge **auto-reopens** lost → `new` (`reopened_merge` event; prior reason in payload). Brand may also call `reopen_lead` without a new application. Converted WhatsApp re-apply **rejects**. |
 | FR-B18 | B | **Billing** — pay platform subscription | `/app/billing` via payment gateway service; updates `platform_invoices` / subscription period |
 | FR-B16 | B | Configurable SLA days | `brand_settings.lead_stale_days` default **15** |
 | FR-B17 | B | SLA uses brand timezone | Default `Asia/Kolkata`; stale computed in that zone |

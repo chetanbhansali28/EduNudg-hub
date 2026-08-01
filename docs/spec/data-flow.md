@@ -87,12 +87,12 @@ sequenceDiagram
 
 | Scenario | Behaviour |
 |----------|-----------|
-| Same WhatsApp, second brand application | Merge fields; append `lead_events` |
+| Same WhatsApp, second brand application | Merge fields; append `lead_events` (`merged`) |
 | Brand apply then center register | Set `center_id` from center payload |
 | Center marks `lost` | `mark_lead_lost` + `lost_reason` — **center only** |
 | Brand **reopen** | `reopen_lead` — `lost` → `new`; prior reason in `lead_events` |
-| WhatsApp re-apply after `lost` | Merge fields; status stays `lost` until brand reopens |
-| Re-apply after `converted` | Merge notes only; do not reopen enrollment |
+| WhatsApp re-apply after `lost` | Merge fields; **auto-reopen** to `new` (`reopened_merge`; prior reason in payload) |
+| Re-apply after `converted` | **Reject** with enrolled error; no duplicate enrollment |
 
 ## Flow 6 — Stale lead (brand SLA)
 

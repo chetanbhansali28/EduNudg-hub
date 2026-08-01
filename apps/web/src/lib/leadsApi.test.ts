@@ -1,5 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { reassignLead, convertLeadToStudent, countStaleBrandLeads, submitBrandStudentApplication } from "./leadsApi";
+import {
+  reassignLead,
+  convertLeadToStudent,
+  countStaleBrandLeads,
+  submitBrandStudentApplication,
+  assignLeadToCenter,
+  markLeadLost,
+  reopenLead,
+  updateLeadStatus,
+} from "./leadsApi";
 
 const rpc = vi.fn();
 
@@ -12,7 +21,7 @@ describe("leadsApi", () => {
     rpc.mockReset();
   });
 
-  it("submitBrandStudentApplication calls RPC with required fields", async () => {
+  it("B-PUB / submitBrandStudentApplication calls RPC with required fields", async () => {
     rpc.mockResolvedValue({ data: "lead-1", error: null });
 
     const result = await submitBrandStudentApplication("abacusworld", {
@@ -53,14 +62,23 @@ describe("leadsApi", () => {
     expect(result.error).toBe("Brand not found");
   });
 
-  it("countStaleBrandLeads calls count_stale_brand_leads RPC", async () => {
+  it("E2E-06 / B-01 countStaleBrandLeads calls count_stale_brand_leads RPC", async () => {
     rpc.mockResolvedValue({ data: 3, error: null });
     const count = await countStaleBrandLeads("brand-1");
     expect(count).toBe(3);
     expect(rpc).toHaveBeenCalledWith("count_stale_brand_leads", { p_brand_id: "brand-1" });
   });
 
-  it("reassignLead calls reassign_lead RPC", async () => {
+  it("B-06 assignLeadToCenter calls assign_lead_to_center RPC", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    await assignLeadToCenter("lead-1", "center-1");
+    expect(rpc).toHaveBeenCalledWith("assign_lead_to_center", {
+      p_lead_id: "lead-1",
+      p_center_id: "center-1",
+    });
+  });
+
+  it("B-08 reassignLead calls reassign_lead RPC", async () => {
     rpc.mockResolvedValue({ data: null, error: null });
     await reassignLead("lead-1", "center-1");
     expect(rpc).toHaveBeenCalledWith("reassign_lead", {
@@ -69,7 +87,31 @@ describe("leadsApi", () => {
     });
   });
 
-  it("convertLeadToStudent passes overrides jsonb", async () => {
+  it("C-08 markLeadLost calls mark_lead_lost with reason", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    await markLeadLost("lead-1", "Not interested");
+    expect(rpc).toHaveBeenCalledWith("mark_lead_lost", {
+      p_lead_id: "lead-1",
+      p_reason: "Not interested",
+    });
+  });
+
+  it("B-09 / E2E-05 reopenLead calls reopen_lead RPC", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    await reopenLead("lead-1");
+    expect(rpc).toHaveBeenCalledWith("reopen_lead", { p_lead_id: "lead-1" });
+  });
+
+  it("C-04 updateLeadStatus calls update_lead_status RPC", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    await updateLeadStatus("lead-1", "contacted");
+    expect(rpc).toHaveBeenCalledWith("update_lead_status", {
+      p_lead_id: "lead-1",
+      p_status: "contacted",
+    });
+  });
+
+  it("C-07 convertLeadToStudent passes overrides jsonb", async () => {
     rpc.mockResolvedValue({ data: "student-1", error: null });
     await convertLeadToStudent("lead-1", {
       parentName: "Parent",

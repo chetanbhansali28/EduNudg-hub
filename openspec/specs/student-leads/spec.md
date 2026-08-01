@@ -107,7 +107,9 @@ Traceability: FR-B15b
 
 - **WHEN** a parent re-applies with the same WhatsApp while the lead is lost
 - **THEN** fields merge into the existing lead
-- **AND** status remains `lost` until brand explicitly reopens
+- **AND** status auto-reopens to `new` (`reopened_merge` event)
+- **AND** prior `lost_reason` is preserved in the event payload (cleared on the lead row)
+- **AND** brand may still call `reopen_lead` explicitly without a new application
 
 ### Requirement: Center leads workspace
 
@@ -161,7 +163,7 @@ Traceability: FR-X02
 
 - **WHEN** a second student application uses the same WhatsApp for the same brand
 - **THEN** the system merges into the existing lead and logs `lead_events`
-- **AND** does not create duplicate enrollments if already converted
+- **AND** if the lead is already `converted`, the RPC rejects with an enrolled error (no soft-merge, no duplicate enrollment)
 
 ### Requirement: Manual student lead entry
 

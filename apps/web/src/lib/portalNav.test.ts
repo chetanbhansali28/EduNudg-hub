@@ -3,14 +3,14 @@ import { brandNavSections, centerNavSections, filterNavByFeatureFlags, platformN
 import { FEATURE_FLAG_DEFAULTS } from "@/hooks/useFeatureFlag";
 
 describe("portalNav", () => {
-  it("marks platform home active on /admin", () => {
+  it("NAV-01 marks platform home active on /admin", () => {
     const sections = platformNavSections("/admin");
     const home = sections[0]?.items[0];
     expect(home?.active).toBe(true);
     expect(home?.label).toBe("Home");
   });
 
-  it("regression_platform_home_inactive_on_admin_brands", () => {
+  it("NAV-01 regression_platform_home_inactive_on_admin_brands", () => {
     const sections = platformNavSections("/admin/brands");
     const home = sections[0]?.items[0];
     const brands = sections[1]?.items.find((i) => i.label === "Brands");
@@ -130,7 +130,7 @@ describe("portalNav", () => {
     expect(leads?.items.some((i) => i.href === "/app/leads")).toBe(true);
   });
 
-  it("regression_filterNav_hides_leads_section_when_both_lead_flags_off", () => {
+  it("FF-01 / NAV-05 regression_filterNav_hides_leads_section_when_both_lead_flags_off", () => {
     const sections = filterNavByFeatureFlags(
       brandNavSections("/app"),
       { ...FEATURE_FLAG_DEFAULTS, student_leads: false, franchise_applications: false },
@@ -139,7 +139,7 @@ describe("portalNav", () => {
     expect(sections.some((s) => s.title === "Leads")).toBe(false);
   });
 
-  it("student learn nav has dashboard, progress, competitions, activity, and profile", () => {
+  it("S-02 / E2E-09 student learn nav has dashboard, progress, competitions, activity, and profile", () => {
     const sections = studentNavSections("/progress");
     const main = sections[0]?.items ?? [];
     expect(main.map((i) => i.label)).toEqual([

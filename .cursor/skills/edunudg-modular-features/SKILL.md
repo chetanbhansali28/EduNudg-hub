@@ -51,7 +51,7 @@ description: Add EduNudg features using modular files, service layer, base theme
 ## Lead lost (reference)
 
 - **Only center** marks lead `lost` (`mark_lead_lost` + `lost_reason`).
-- **Only brand** reopens (`reopen_lead`) — see FR-B15 / FR-C11b.
+- **Brand reopens** via `reopen_lead`, or WhatsApp re-apply **auto-reopens** lost leads — see FR-B15 / FR-B15b / FR-C11b.
 - Brand **Billing** uses `services/payments/` — brand pays platform subscription only.
 
 ## Manual leads (staff)

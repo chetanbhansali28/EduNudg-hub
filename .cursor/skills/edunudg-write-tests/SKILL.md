@@ -9,9 +9,11 @@ description: Write tests for EduNudg features and bugfixes. Required for every P
 |--------|-------|
 | `packages/*` logic | Vitest `*.test.ts` |
 | React component | Vitest + `@testing-library/react` |
-| User journey | Playwright `e2e/*.spec.ts` |
+| User journey | Playwright `e2e/*.spec.ts` — tag with UAT IDs (`E2E-01`, …); see `docs/testing/uat-scenarios.md` |
 | Migration / RLS | `supabase/tests/rls_*.sql` |
 | Bug fix | `regression_*` test |
+
+Use portal helpers in `e2e/helpers/portal.ts` (CI overrides; `E2E_USE_LOCAL_HOSTS=1` for subdomains). Skip OAuth/payment live flows. Golden paths require Supabase env.
 
 ## Commands
 

@@ -24,7 +24,7 @@
 - Adding major flows by editing unrelated existing page files — use a new feature module
 - `getSupabase()` / OAuth / payment SDK calls directly in page components — use `services/`
 - Shipping integrations without an OFF feature flag
-- Center marking leads lost from brand UI (center only); brand reopening without `reopen_lead` RPC
+- Center marking leads lost from brand UI (center only); brand may reopen via `reopen_lead` or WhatsApp re-apply auto-reopens
 - “Docs/tests/skills later” — sync in the same change
 
 ## Vibe-coding red flags

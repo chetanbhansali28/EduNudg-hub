@@ -9,6 +9,23 @@
 | RLS | `supabase/tests/*.sql` |
 | E2E | Playwright |
 
+## UAT scenario IDs
+
+Checklist IDs (`E2E-01`, `P-01`, `B-03`, `NEG-01`, …) live in [`uat-scenarios.md`](./uat-scenarios.md). Prefer tagging new tests with the ID in the `describe`/`test` title.
+
+**Locked product rules for leads:** WhatsApp merge auto-reopens **lost** leads; **converted** re-apply is rejected. Learn portal asserts production routes (dashboard, progress, competitions, activity, profile).
+
+## Playwright hosts (hybrid)
+
+| Mode | How |
+|------|-----|
+| **CI / default** | `http://127.0.0.1:9000/…?portal=brand&brand=…` via `e2e/helpers/portal.ts` |
+| **Local UAT** | `E2E_USE_LOCAL_HOSTS=1` → `{brand}.localhost:9000` subdomains |
+
+Auth storage: `e2e/auth.setup.ts` → `e2e/.auth/*.json` (gitignored). Seed users: [`docs/ops/test-users.md`](../ops/test-users.md).
+
+Golden paths **skip** when `VITE_SUPABASE_URL` / anon key are missing. OAuth (AUTH-08) and live Razorpay checkout (B-26 / C-25) are **manual-skip**. Stale SLA tests backdate via SQL (`e2e/helpers/sql.ts`) — never wait calendar days.
+
 ## Policy
 
 Every feature and bug fix includes tests in the same PR.

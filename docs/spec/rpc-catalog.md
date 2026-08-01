@@ -19,7 +19,7 @@ All functions `SECURITY DEFINER`, `SET search_path = public`, validate tenant fr
 | Function | Description |
 |----------|-------------|
 | `normalize_phone_e164(p_raw text)` | Shared validation |
-| `upsert_lead_by_whatsapp(p_brand_id, p_whatsapp, p_payload jsonb)` | Insert or merge; reopen from `lost` to `new` with event; set `center_id` if incoming center registration |
+| `upsert_lead_by_whatsapp(p_brand_id, p_whatsapp, p_payload jsonb)` | Insert or merge; **auto-reopen** `lost` → `new` (`reopened_merge`, prior reason in payload); **reject** if `converted`; set `center_id` if incoming center registration |
 
 ## Staff manual entry (authenticated)
 

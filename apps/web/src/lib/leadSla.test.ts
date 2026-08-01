@@ -14,7 +14,7 @@ const baseLead: Pick<
   created_at: "2026-05-01T00:00:00Z",
 };
 
-describe("isLeadStale", () => {
+describe("isLeadStale (E2E-06)", () => {
   const now = new Date("2026-05-20T00:00:00Z").getTime();
 
   it("regression_stale_when_past_stale_at_and_no_center_action", () => {
@@ -49,7 +49,7 @@ describe("leadAgeDays", () => {
   });
 });
 
-describe("isIndiaPincode", () => {
+describe("isIndiaPincode (NEG-01)", () => {
   it("accepts 6 digits", () => {
     expect(isIndiaPincode("560001")).toBe(true);
   });
