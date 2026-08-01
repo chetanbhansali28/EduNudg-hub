@@ -76,6 +76,19 @@ describe("AuthHandoffPage", () => {
     expect(screen.queryByText("Staff backend")).toBeNull();
   });
 
+  it("regression_shows_error_when_getSupabase_throws", async () => {
+    verifyOtpMock.mockRejectedValue(new Error("Missing VITE_SUPABASE_URL"));
+    // Force getSupabase path: verifyOtp is on the client; mock the whole call chain via reject above.
+    // If verifyOtp throws (network / misconfig), handoff must not stay on "Signing you in…".
+    const router = createMemoryRouter([{ path: "/auth/handoff", element: <AuthHandoffPage /> }], {
+      initialEntries: ["/auth/handoff?token_hash=bad-hash&next=/app"],
+    });
+
+    render(<RouterProvider router={router} />);
+
+    expect((await screen.findByRole("alert")).textContent).toMatch(/missing vite_supabase_url/i);
+  });
+
   it("regression_shows_error_when_token_hash_missing", async () => {
     const router = createMemoryRouter([{ path: "/auth/handoff", element: <AuthHandoffPage /> }], {
       initialEntries: ["/auth/handoff?next=/app"],

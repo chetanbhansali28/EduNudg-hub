@@ -30,33 +30,39 @@ export function AuthHandoffPage() {
     let cancelled = false;
 
     void (async () => {
-      const { error: verifyError } = await getSupabase().auth.verifyOtp({
-        token_hash: tokenHash,
-        type: "magiclink",
-      });
+      try {
+        const { error: verifyError } = await getSupabase().auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "magiclink",
+        });
 
-      if (cancelled) return;
+        if (cancelled) return;
 
-      if (verifyError) {
-        setError(verifyError.message || "Could not complete portal sign-in.");
-        return;
+        if (verifyError) {
+          setError(verifyError.message || "Could not complete portal sign-in.");
+          return;
+        }
+
+        const override = parsePortalOverrideFromSearch(searchParams.toString());
+        if (override) writePortalOverride(override);
+
+        const path = next.startsWith("/") ? next : `/${next}`;
+        const qs = override ? `?${portalOverrideSearchParams(override).toString()}` : "";
+        const destination = `${path}${qs}`;
+
+        // Same-origin portals need a full reload so TenantProvider remounts with the override.
+        // Client-side navigate leaves portalType=platform and /app falls through to the homepage.
+        if (override) {
+          window.location.replace(destination);
+          return;
+        }
+
+        navigate(destination, { replace: true });
+      } catch (err) {
+        if (cancelled) return;
+        const message = err instanceof Error ? err.message : "Could not complete portal sign-in.";
+        setError(message || "Could not complete portal sign-in.");
       }
-
-      const override = parsePortalOverrideFromSearch(searchParams.toString());
-      if (override) writePortalOverride(override);
-
-      const path = next.startsWith("/") ? next : `/${next}`;
-      const qs = override ? `?${portalOverrideSearchParams(override).toString()}` : "";
-      const destination = `${path}${qs}`;
-
-      // Same-origin portals need a full reload so TenantProvider remounts with the override.
-      // Client-side navigate leaves portalType=platform and /app falls through to the homepage.
-      if (override) {
-        window.location.replace(destination);
-        return;
-      }
-
-      navigate(destination, { replace: true });
     })();
 
     return () => {

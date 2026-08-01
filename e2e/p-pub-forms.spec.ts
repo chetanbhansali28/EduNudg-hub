@@ -20,9 +20,15 @@ test.describe("P-PUB — platform public marketing", () => {
 
   test("P-PUB-03 Sign in CTA goes to /login", async ({ page }) => {
     await page.goto(platformUrl("/"));
-    const signIn = page.getByRole("link", { name: /sign in|log in/i }).first();
-    await expect(signIn).toBeVisible({ timeout: 15_000 });
-    await signIn.click();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
+
+    // Platform chrome always exposes at least one /login entry:
+    // - nav "Login" (EnterpriseNav)
+    // - footer "Sign in" (CMS product links, when configured)
+    // - default nav CTA "Get Started" → /login (DEFAULT_HOMEPAGE_CONFIG)
+    const loginCta = page.locator('a[href="/login"]').first();
+    await expect(loginCta).toBeVisible({ timeout: 15_000 });
+    await loginCta.click();
     await expect(page).toHaveURL(/\/login/);
   });
 });

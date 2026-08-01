@@ -35,10 +35,10 @@ test.describe("NEG — negative & edge cases", () => {
   });
 
   test("NEG-08 invalid auth handoff token shows clear error", async ({ page }) => {
+    // Invalid token_hash forces verifyOtp failure (or env throw in CI without Supabase).
     await page.goto(platformUrl("/auth/handoff?token_hash=invalid-e2e-token&next=/app"));
-    await expect(page.getByText(/invalid|expired|error|failed|unable/i).first()).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(page.getByRole("alert")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("link", { name: /go to login/i })).toBeVisible();
   });
 
   test("NEG-10 refresh on /app/leads does not crash (with auth)", async ({ page }) => {
