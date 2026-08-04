@@ -51,6 +51,7 @@ describe("BrandFeatureTogglesCard", () => {
     expect(screen.getByText("Features")).toBeDefined();
     expect(screen.getByText("Student leads")).toBeDefined();
     expect(screen.getByText("Merchandise catalog & orders")).toBeDefined();
+    expect(screen.getByText("Batches")).toBeDefined();
   });
 
   it("regression_saves_feature_flags_to_brand_settings", async () => {

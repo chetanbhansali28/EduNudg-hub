@@ -16,4 +16,10 @@ describe("resolveFeatureFlags (FF-01..03)", () => {
     expect(resolveFeatureFlags(undefined, "student_leads")).toBe(true);
     expect(resolveFeatureFlags({}, "campaigns")).toBe(false);
   });
+
+  it("regression_batches_defaults_off_until_enabled", () => {
+    expect(resolveFeatureFlags({}, "batches")).toBe(false);
+    expect(resolveFeatureFlags(undefined, "batches")).toBe(false);
+    expect(resolveFeatureFlags({ batches: true }, "batches")).toBe(true);
+  });
 });

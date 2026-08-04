@@ -10,6 +10,7 @@ export const FEATURE_FLAG_DEFAULTS: Record<string, boolean> = {
   merchandise: false,
   kits: false,
   campaigns: false,
+  batches: false,
   platform_brand_signup: true,
 };
 

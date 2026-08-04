@@ -27,6 +27,7 @@ export const CENTER_FEATURE_FLAGS: Record<string, string> = {
   "/app/merchandise": "merchandise",
   "/app/kits": "merchandise",
   "/app/campaigns": "campaigns",
+  "/app/batches": "batches",
 };
 
 export function filterNavByFeatureFlags(

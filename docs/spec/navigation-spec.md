@@ -58,7 +58,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | Main menu | Home | `/app` | Exists — open leads KPI |
 | Features | **Leads** | `/app/leads` | Exists — manual add, convert, mark lost |
 | | Students | `/app/students` | Exists |
-| | Batches | `/app/batches` | Exists |
+| | Batches | `/app/batches` | Exists — gated by brand feature `batches` (default off) |
 | | Fees & Payments | `/app/fees` | Exists |
 | | Merchandise | `/app/merchandise` | Exists — shop, checkout, order history |
 | | Assessments | `/app/assessments` | Phase D |

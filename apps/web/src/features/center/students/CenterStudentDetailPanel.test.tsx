@@ -3,6 +3,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CenterStudentDetailPanel } from "./CenterStudentDetailPanel";
 
+vi.mock("@/hooks/useFeatureFlag", () => ({
+  useFeatureFlag: () => true,
+  useBrandFeatureFlags: () => ({ batches: true }),
+  FEATURE_FLAG_DEFAULTS: { batches: false },
+  resolveFeatureFlags: () => true,
+}));
+
 vi.mock("@/lib/studentPortalAdminApi", () => ({
   inviteStudentPortalAccess: vi.fn(),
   pinEnrollmentProgram: vi.fn(),

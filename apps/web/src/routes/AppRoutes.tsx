@@ -255,7 +255,14 @@ export function AppRoutes() {
             />
             <Route path="assessments" element={<CenterAssessmentsRedirect />} />
             <Route path="reports" element={<CenterReportsPage />} />
-            <Route path="batches" element={<BatchesPage />} />
+            <Route
+              path="batches"
+              element={
+                <FeatureFlagRoute flag="batches">
+                  <BatchesPage />
+                </FeatureFlagRoute>
+              }
+            />
             <Route path="curriculum" element={<CenterCurriculumPage />} />
             <Route path="fees" element={<FeesPage />} />
             <Route path="inventory" element={<InventoryPage />} />

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import type { DashboardActionItem, DashboardBatchCard } from "@/lib/centerDashboardHelpers";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import type { CenterDashboardHome } from "@/lib/centerDashboardHomeApi";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import "@/features/center/dashboard/centerDashboard.css";
 
 const CHEVRON = (
@@ -127,7 +128,7 @@ function KpiCard({
   );
 }
 
-function DashboardKpiRow({ data }: { data: CenterDashboardHome }) {
+function DashboardKpiRow({ data, batchesEnabled }: { data: CenterDashboardHome; batchesEnabled: boolean }) {
   const leadsBadge = data.leadsToday > 0 ? `+${data.leadsToday} today` : undefined;
   const batchesBadge = data.nextBatchTime ? `Next: ${data.nextBatchTime}` : undefined;
   const feesBadge =
@@ -151,15 +152,17 @@ function DashboardKpiRow({ data }: { data: CenterDashboardHome }) {
         className="ed-center-dash__kpi--leads"
       />
       <div className="ed-center-dash__kpi-row">
-        <KpiCard
-          href="/app/batches"
-          iconClass="ed-center-dash__kpi-icon--batches"
-          icon={<KpiIconBatches />}
-          label="Batches Today"
-          value={String(data.batchesToday)}
-          badge={batchesBadge}
-          badgeClass="ed-center-dash__kpi-badge--batches"
-        />
+        {batchesEnabled ? (
+          <KpiCard
+            href="/app/batches"
+            iconClass="ed-center-dash__kpi-icon--batches"
+            icon={<KpiIconBatches />}
+            label="Batches Today"
+            value={String(data.batchesToday)}
+            badge={batchesBadge}
+            badgeClass="ed-center-dash__kpi-badge--batches"
+          />
+        ) : null}
         <KpiCard
           href="/app/fees"
           iconClass="ed-center-dash__kpi-icon--fees"
@@ -282,23 +285,30 @@ export function CenterDashboardView({
   data: CenterDashboardHome;
   dateLabel: string;
 }) {
+  const batchesEnabled = useFeatureFlag("batches");
+  const actionItems = batchesEnabled
+    ? data.actionItems
+    : data.actionItems.filter((item) => item.href !== "/app/batches" && item.kind !== "batch");
+
   return (
     <div className="ed-center-dash">
       <header>
         <p className="ed-center-dash__date">{dateLabel}</p>
         <div className="ed-center-dash__title-row">
           <h1 className="ed-center-dash__title">Today&apos;s Schedule</h1>
-          <Link to="/app/batches" className="ed-center-dash__link">
-            View All
-          </Link>
+          {batchesEnabled ? (
+            <Link to="/app/batches" className="ed-center-dash__link">
+              View All
+            </Link>
+          ) : null}
         </div>
       </header>
 
-      <DashboardKpiRow data={data} />
+      <DashboardKpiRow data={data} batchesEnabled={batchesEnabled} />
 
       <div className="ed-center-dash__main">
-        <BatchesSection batches={data.batches} />
-        <ActionItemsPanel items={data.actionItems} />
+        {batchesEnabled ? <BatchesSection batches={data.batches} /> : null}
+        <ActionItemsPanel items={actionItems} />
       </div>
 
       <Link to="/app/leads" className="ed-center-dash__fab" aria-label="Add lead">

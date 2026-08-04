@@ -7,7 +7,7 @@ ON/OFF control for product modules and integrations. Flags must gate **nav**, **
 | Scope | Location | Example keys |
 |-------|----------|----------------|
 | Platform | `platform_settings.settings.features` jsonb | `platform_brand_signup`, `payment_gateway` |
-| Brand | `brand_settings.settings.features` jsonb | `student_leads`, `franchise_applications`, `campaigns`, `merchandise` |
+| Brand | `brand_settings.settings.features` jsonb | `student_leads`, `franchise_applications`, `campaigns`, `merchandise`, `batches` |
 | Brand integrations | `brand_settings.settings.integrations` jsonb | `google_auth`, `whatsapp_otp`, `payment_razorpay` |
 | Env fallback | `import.meta.env` | Dev overrides only — not sole source in prod |
 
@@ -22,6 +22,7 @@ Default for **new** keys: `false` until explicitly enabled in Settings UI or see
 | `brand_billing` | true | Settings/Billing — pay platform subscription |
 | `campaigns` | false | Phase E |
 | `merchandise` | false | Phase D — catalog (incl. product photos), center shop, orders, payments |
+| `batches` | false | Center Batches module, student self-join, batch RPCs / RLS |
 
 ## Integration flags
 

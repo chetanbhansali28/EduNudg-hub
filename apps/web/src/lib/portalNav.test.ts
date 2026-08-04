@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { brandNavSections, centerNavSections, filterNavByFeatureFlags, platformNavSections, studentBottomNavItems, studentNavSections, BRAND_FEATURE_FLAGS, staffBottomNavFromSections } from "./portalNav";
+import {
+  brandNavSections,
+  centerNavSections,
+  filterNavByFeatureFlags,
+  platformNavSections,
+  studentBottomNavItems,
+  studentNavSections,
+  BRAND_FEATURE_FLAGS,
+  CENTER_FEATURE_FLAGS,
+  staffBottomNavFromSections,
+} from "./portalNav";
 import { FEATURE_FLAG_DEFAULTS } from "@/hooks/useFeatureFlag";
 
 describe("portalNav", () => {
@@ -137,6 +147,26 @@ describe("portalNav", () => {
       BRAND_FEATURE_FLAGS
     );
     expect(sections.some((s) => s.title === "Leads")).toBe(false);
+  });
+
+  it("regression_filterNav_hides_center_batches_when_flag_off", () => {
+    const sections = filterNavByFeatureFlags(
+      centerNavSections("/app"),
+      { ...FEATURE_FLAG_DEFAULTS, batches: false },
+      CENTER_FEATURE_FLAGS
+    );
+    const features = sections.find((s) => s.title === "Features");
+    expect(features?.items.some((i) => i.href === "/app/batches")).toBe(false);
+  });
+
+  it("regression_filterNav_shows_center_batches_when_flag_on", () => {
+    const sections = filterNavByFeatureFlags(
+      centerNavSections("/app"),
+      { ...FEATURE_FLAG_DEFAULTS, batches: true },
+      CENTER_FEATURE_FLAGS
+    );
+    const features = sections.find((s) => s.title === "Features");
+    expect(features?.items.some((i) => i.href === "/app/batches")).toBe(true);
   });
 
   it("S-02 / E2E-09 student learn nav has dashboard, progress, competitions, activity, and profile", () => {

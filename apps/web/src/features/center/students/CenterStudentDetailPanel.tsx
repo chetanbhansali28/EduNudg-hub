@@ -23,6 +23,7 @@ import { fetchLevels } from "@/lib/curriculumApi";
 import { initialsFromName } from "@/lib/welcomeMessage";
 import { CenterStudentAssessmentPanel } from "@/features/center/assessments/CenterStudentAssessmentPanel";
 import type { CenterStudentDetailTab } from "@/features/center/students/centerStudentDetailTabs";
+import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 
 type Props = {
   student: CenterStudentRow;
@@ -82,6 +83,7 @@ export function CenterStudentDetailPanel({
 }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const batchesEnabled = useFeatureFlag("batches");
   const [activeTab, setActiveTab] = useState<CenterStudentDetailTab>(initialTab);
   const [loginEmail, setLoginEmail] = useState(student.login_email ?? "");
   const [address, setAddress] = useState({
@@ -98,6 +100,7 @@ export function CenterStudentDetailPanel({
 
   const batches = useQuery({
     queryKey: ["center-batches", centerId],
+    enabled: batchesEnabled,
     queryFn: () => fetchCenterBatches(centerId),
   });
 
@@ -343,36 +346,38 @@ export function CenterStudentDetailPanel({
         </OpsSectionCard>
       </div>
 
-      <OpsSectionCard
-        icon={ICON_USERS}
-        title="Batch assignments"
-        footer={`Slots available: ${openBatchSlots}`}
-      >
-        {(batches.data ?? []).map((batch) => (
-          <div key={batch.id} className="ed-ops-batch-row">
-            <div>
-              <p className="ed-ops-batch-row__name">
-                {batch.name}
-                {batch.is_open_for_enrollment ? " (open)" : ""}
-              </p>
-              <p className="ed-ops-batch-row__meta">{formatBatchSchedule(batch)}</p>
+      {batchesEnabled ? (
+        <OpsSectionCard
+          icon={ICON_USERS}
+          title="Batch assignments"
+          footer={`Slots available: ${openBatchSlots}`}
+        >
+          {(batches.data ?? []).map((batch) => (
+            <div key={batch.id} className="ed-ops-batch-row">
+              <div>
+                <p className="ed-ops-batch-row__name">
+                  {batch.name}
+                  {batch.is_open_for_enrollment ? " (open)" : ""}
+                </p>
+                <p className="ed-ops-batch-row__meta">{formatBatchSchedule(batch)}</p>
+              </div>
+              <ToggleField
+                label={`Assign ${batch.name}`}
+                checked={selectedBatches.includes(batch.id)}
+                onChange={() => toggleBatch(batch.id)}
+              />
             </div>
-            <ToggleField
-              label={`Assign ${batch.name}`}
-              checked={selectedBatches.includes(batch.id)}
-              onChange={() => toggleBatch(batch.id)}
-            />
-          </div>
-        ))}
-        {(batches.data ?? []).length === 0 ? (
-          <p className="ed-text-sm ed-muted">Create batches first to assign this student.</p>
-        ) : null}
-        <FormActions>
-          <Button onClick={() => saveBatches.mutate()} disabled={saveBatches.isPending}>
-            Save batches
-          </Button>
-        </FormActions>
-      </OpsSectionCard>
+          ))}
+          {(batches.data ?? []).length === 0 ? (
+            <p className="ed-text-sm ed-muted">Create batches first to assign this student.</p>
+          ) : null}
+          <FormActions>
+            <Button onClick={() => saveBatches.mutate()} disabled={saveBatches.isPending}>
+              Save batches
+            </Button>
+          </FormActions>
+        </OpsSectionCard>
+      ) : null}
 
       <OpsSectionCard icon={ICON_KEY} title="Delivery address" description="Used for kit and merchandise shipping.">
         <FormGrid columns={2}>

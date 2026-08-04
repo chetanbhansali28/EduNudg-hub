@@ -10,7 +10,17 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
   useTenant: () => ({
     portalType: "center",
     centerId: "center-1",
+    brandId: "brand-1",
   }),
+}));
+
+const featureFlags = vi.hoisted(() => ({ batches: true }));
+
+vi.mock("@/hooks/useFeatureFlag", () => ({
+  useFeatureFlag: (key: string) => (key === "batches" ? featureFlags.batches : true),
+  useBrandFeatureFlags: () => ({ batches: featureFlags.batches }),
+  FEATURE_FLAG_DEFAULTS: { batches: false },
+  resolveFeatureFlags: () => featureFlags.batches,
 }));
 
 const sampleHome: CenterDashboardHome = {
@@ -90,6 +100,7 @@ vi.mock("@/lib/centerDashboardHomeApi", () => ({
 
 describe("CenterDashboard", () => {
   it("regression_center_home_schedule_dashboard", async () => {
+    featureFlags.batches = true;
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <MemoryRouter>
@@ -112,6 +123,7 @@ describe("CenterDashboard", () => {
 
 describe("CenterDashboardView", () => {
   it("renders desktop schedule sections from payload", () => {
+    featureFlags.batches = true;
     render(
       <MemoryRouter>
         <CenterDashboardView data={sampleHome} dateLabel="TUESDAY, OCT 24" />
@@ -124,5 +136,20 @@ describe("CenterDashboardView", () => {
     expect(screen.getByText("3 Overdue")).toBeDefined();
     expect(screen.getByText("Data Science A")).toBeDefined();
     expect(screen.getByRole("link", { name: "View All" }).getAttribute("href")).toBe("/app/batches");
+  });
+
+  it("regression_hides_batch_surfaces_when_batches_flag_off", () => {
+    featureFlags.batches = false;
+    render(
+      <MemoryRouter>
+        <CenterDashboardView data={sampleHome} dateLabel="TUESDAY, OCT 24" />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByText("Batches Today")).toBeNull();
+    expect(screen.queryByRole("link", { name: "View All" })).toBeNull();
+    expect(screen.queryByText("Live & Upcoming Batches")).toBeNull();
+    expect(screen.queryByText("Review batch joins")).toBeNull();
+    expect(screen.getByText("Follow up on Lead")).toBeDefined();
   });
 });

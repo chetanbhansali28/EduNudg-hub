@@ -11,6 +11,7 @@ export const BRAND_FEATURE_TOGGLES: { key: string; label: string }[] = [
   { key: "brand_billing", label: "Platform billing" },
   { key: "campaigns", label: "Campaigns" },
   { key: "merchandise", label: "Merchandise catalog & orders" },
+  { key: "batches", label: "Batches" },
 ];
 
 type Props = {
