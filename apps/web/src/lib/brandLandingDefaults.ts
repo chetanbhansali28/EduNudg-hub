@@ -448,6 +448,18 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
         body: "Clear milestones, competitions, and parent updates—so improvement never feels invisible.",
       },
     ],
+    featuresShowcase: {
+      imageUrl: "",
+      eyebrow: "Our Key Features",
+      title: "Powerful Features for Your Learning Journey",
+      subtitle:
+        "From personalized recommendations to interactive content, we've got everything you need to succeed.",
+      floatStatsLabel: "Last month",
+      floatStatsValue: "25.20%",
+      floatStatsAction: "View all →",
+      floatProgressLabel: "Learning Progress",
+      floatProgressValue: "55%",
+    },
     trustMedia: {
       eyebrow: "Our Success",
       title: "Our Journey to",
@@ -455,6 +467,12 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
       intro:
         "At the core of our platform is a commitment to helping each student succeed. We take pride in the tangible results our learners achieve.",
       youtubeUrl: "",
+      imageUrl:
+        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=480&h=600&q=80",
+      highlightLabel: "Our Investment Fund Raised",
+      highlightPrimary: "1000+",
+      highlightSecondary: "20+",
+      highlightCaption: "Top mentors around the globe",
       cards: [
         {
           title: "2 Million Learners",
@@ -653,6 +671,10 @@ export function mergeSparkAcademyLandingConfig(
     nav: { ...base.nav!, ...partial?.nav, links: partial?.nav?.links ?? base.nav!.links },
     hero: { ...base.hero!, ...partial?.hero },
     featureSections: partial?.featureSections ?? base.featureSections,
+    featuresShowcase: {
+      ...base.featuresShowcase!,
+      ...partial?.featuresShowcase,
+    },
     trustMedia: {
       ...base.trustMedia!,
       ...partial?.trustMedia,

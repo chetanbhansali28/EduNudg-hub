@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "./brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "./brandLandingDefaults";
 import { fetchBrandMarketingEditor, landingConfigToPartial } from "./brandLandingEditorApi";
 
 const fromMock = vi.fn();
@@ -103,6 +103,38 @@ describe("landingConfigToPartial", () => {
     expect(partial.trustMedia?.youtubeUrl).toContain("youtu.be");
     expect(partial.footer?.rich?.description).toBe("Footer blurb");
     expect(partial.footer?.rich?.customStats?.[0]?.label).toBe("Centers");
+  });
+
+  it("preserves_trust_media_journey_highlight_fields", () => {
+    const config = mergeAbacusClassicLandingConfig("Brand");
+    config.trustMedia = {
+      ...config.trustMedia!,
+      imageUrl: "https://cdn.example/journey.jpg",
+      highlightLabel: "Raised",
+      highlightPrimary: "1000+",
+      highlightSecondary: "20+",
+      highlightCaption: "Mentors",
+    };
+    const partial = landingConfigToPartial(config);
+    expect(partial.trustMedia?.imageUrl).toBe("https://cdn.example/journey.jpg");
+    expect(partial.trustMedia?.highlightLabel).toBe("Raised");
+    expect(partial.trustMedia?.highlightPrimary).toBe("1000+");
+    expect(partial.trustMedia?.highlightSecondary).toBe("20+");
+    expect(partial.trustMedia?.highlightCaption).toBe("Mentors");
+  });
+
+  it("preserves_features_showcase_fields", () => {
+    const config = mergeSparkAcademyLandingConfig("Brand");
+    config.featuresShowcase = {
+      imageUrl: "https://cdn.example/features.jpg",
+      floatStatsLabel: "Q1",
+      floatStatsValue: "10%",
+      floatProgressValue: "80%",
+    };
+    const partial = landingConfigToPartial(config);
+    expect(partial.featuresShowcase?.imageUrl).toBe("https://cdn.example/features.jpg");
+    expect(partial.featuresShowcase?.floatStatsLabel).toBe("Q1");
+    expect(partial.featuresShowcase?.floatProgressValue).toBe("80%");
   });
 });
 

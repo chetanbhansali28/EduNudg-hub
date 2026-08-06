@@ -18,6 +18,19 @@ export interface HomepageFeatureSection {
   iconKeys?: string[];
 }
 
+/** Spark Academy “Why us” showcase: left visual + overlay stats on the features section. */
+export interface HomepageFeaturesShowcase {
+  imageUrl?: string;
+  floatStatsLabel?: string;
+  floatStatsValue?: string;
+  floatStatsAction?: string;
+  floatProgressLabel?: string;
+  floatProgressValue?: string;
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+}
+
 export interface HomepageHeroOverlayCard {
   eyebrow: string;
   value: string;
@@ -106,6 +119,16 @@ export interface HomepageTrustMedia {
   cards: HomepageTrustCard[];
   ctaLabel?: string;
   ctaHref?: string;
+  /** Journey highlight photo (Spark Academy). Falls back to first founder photo when empty. */
+  imageUrl?: string;
+  /** Journey highlight card label, e.g. "Our Investment Fund Raised". */
+  highlightLabel?: string;
+  /** Large primary figure on the journey highlight card. */
+  highlightPrimary?: string;
+  /** Secondary figure on the journey highlight card. */
+  highlightSecondary?: string;
+  /** Caption under the secondary figure. */
+  highlightCaption?: string;
 }
 
 export interface HomepageGalleryImage {
@@ -217,6 +240,8 @@ export interface HomepageConfig {
     phoneFrameUrl: string;
   };
   featureSections: HomepageFeatureSection[];
+  /** Spark Academy features section header + left visual overlays. */
+  featuresShowcase?: HomepageFeaturesShowcase;
   showcaseCards: HomepageShowcaseCard[];
   privacy: { title: string; body: string };
   testimonials: {

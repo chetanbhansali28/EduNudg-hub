@@ -18,20 +18,6 @@ type Props = {
 
 const DEFAULT_PHONE = "(222) 545-4543";
 
-function PaymentBadges() {
-  const brands = ["Klarna", "Visa", "PayPal", "Amex", "Discover", "Mastercard"];
-
-  return (
-    <div className="sa-site-footer__payments" aria-label="Accepted payment methods">
-      {brands.map((brand) => (
-        <span key={brand} className="sa-site-footer__payment-badge">
-          {brand}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {} }: Props) {
   const modal = useLeadModalOptional();
   const [email, setEmail] = useState("");
@@ -161,7 +147,6 @@ export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {}
       <div className="sa-site-footer__bottom-band">
         <div className="sa-site-footer__inner sa-site-footer__bottom-row">
           <p>{copyrightText}</p>
-          <PaymentBadges />
         </div>
       </div>
     </footer>

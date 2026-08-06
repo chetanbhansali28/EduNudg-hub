@@ -34,6 +34,7 @@ export function landingConfigToPartial(config: HomepageConfig): Partial<Homepage
     },
     hero: { ...config.hero },
     featureSections: config.featureSections.map((section) => ({ ...section })),
+    featuresShowcase: config.featuresShowcase ? { ...config.featuresShowcase } : undefined,
     showcaseCards: config.showcaseCards.map((card) => ({ ...card })),
     testimonials: {
       ...config.testimonials,

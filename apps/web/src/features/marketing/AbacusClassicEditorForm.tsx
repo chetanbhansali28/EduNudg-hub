@@ -301,6 +301,120 @@ export function AbacusClassicEditorForm({
         enabled={isAbacusSectionEnabled(config, "featureGrid")}
         onEnabledChange={(e) => setSection("featureGrid", e)}
       >
+        {marketingTheme === "spark-academy" ? (
+          <EditorFieldsGrid>
+            <EditorFieldSpan>
+              <EditorSectionNote>
+                Left visual on “Powerful Features…” — upload an image and edit the overlay stats. Section heading
+                fields apply to the right column.
+              </EditorSectionNote>
+            </EditorFieldSpan>
+            <EditorFieldSpan>
+              <MarketingMediaField
+                label="Features image"
+                value={config.featuresShowcase?.imageUrl ?? ""}
+                onChange={(v) =>
+                  commitMedia({
+                    ...config,
+                    featuresShowcase: { ...config.featuresShowcase, imageUrl: v },
+                  })
+                }
+                mediaType="image"
+                uploadSubdir="features-showcase"
+                uploadScope={uploadScope}
+              />
+            </EditorFieldSpan>
+            <Input
+              label="Eyebrow"
+              value={config.featuresShowcase?.eyebrow ?? ""}
+              onChange={(v) =>
+                onChange({
+                  ...config,
+                  featuresShowcase: { ...config.featuresShowcase, eyebrow: v },
+                })
+              }
+              placeholder="Our Key Features"
+            />
+            <Input
+              label="Section title"
+              value={config.featuresShowcase?.title ?? ""}
+              onChange={(v) =>
+                onChange({
+                  ...config,
+                  featuresShowcase: { ...config.featuresShowcase, title: v },
+                })
+              }
+              placeholder="Powerful Features for Your Learning Journey"
+            />
+            <EditorFieldSpan>
+              <Input
+                label="Section subtitle"
+                value={config.featuresShowcase?.subtitle ?? ""}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    featuresShowcase: { ...config.featuresShowcase, subtitle: v },
+                  })
+                }
+              />
+            </EditorFieldSpan>
+            <Input
+              label="Stats card label"
+              value={config.featuresShowcase?.floatStatsLabel ?? ""}
+              onChange={(v) =>
+                onChange({
+                  ...config,
+                  featuresShowcase: { ...config.featuresShowcase, floatStatsLabel: v },
+                })
+              }
+              placeholder="Last month"
+            />
+            <Input
+              label="Stats card value"
+              value={config.featuresShowcase?.floatStatsValue ?? ""}
+              onChange={(v) =>
+                onChange({
+                  ...config,
+                  featuresShowcase: { ...config.featuresShowcase, floatStatsValue: v },
+                })
+              }
+              placeholder="25.20%"
+            />
+            <Input
+              label="Stats card action"
+              value={config.featuresShowcase?.floatStatsAction ?? ""}
+              onChange={(v) =>
+                onChange({
+                  ...config,
+                  featuresShowcase: { ...config.featuresShowcase, floatStatsAction: v },
+                })
+              }
+              placeholder="View all →"
+            />
+            <Input
+              label="Progress card label"
+              value={config.featuresShowcase?.floatProgressLabel ?? ""}
+              onChange={(v) =>
+                onChange({
+                  ...config,
+                  featuresShowcase: { ...config.featuresShowcase, floatProgressLabel: v },
+                })
+              }
+              placeholder="Learning Progress"
+            />
+            <Input
+              label="Progress card value"
+              value={config.featuresShowcase?.floatProgressValue ?? ""}
+              onChange={(v) =>
+                onChange({
+                  ...config,
+                  featuresShowcase: { ...config.featuresShowcase, floatProgressValue: v },
+                })
+              }
+              placeholder="55%"
+            />
+          </EditorFieldsGrid>
+        ) : null}
         <EditorItemList
           onAdd={() =>
             onChange({
@@ -397,6 +511,62 @@ export function AbacusClassicEditorForm({
               onChange={(v) => onChange({ ...config, trustMedia: { ...config.trustMedia!, youtubeUrl: v } })}
             />
           </EditorFieldSpan>
+          {marketingTheme === "spark-academy" ? (
+            <>
+              <EditorFieldSpan>
+                <EditorSectionNote>
+                  Journey highlight card (right side of “Our Journey to Excellence”): image and figures below.
+                </EditorSectionNote>
+              </EditorFieldSpan>
+              <EditorFieldSpan>
+                <MarketingMediaField
+                  label="Journey highlight image"
+                  value={config.trustMedia?.imageUrl ?? ""}
+                  onChange={(v) =>
+                    commitMedia({
+                      ...config,
+                      trustMedia: { ...config.trustMedia!, imageUrl: v },
+                    })
+                  }
+                  mediaType="image"
+                  uploadSubdir="trust-journey"
+                  uploadScope={uploadScope}
+                />
+              </EditorFieldSpan>
+              <Input
+                label="Highlight label"
+                value={config.trustMedia?.highlightLabel ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, trustMedia: { ...config.trustMedia!, highlightLabel: v } })
+                }
+                placeholder="Our Investment Fund Raised"
+              />
+              <Input
+                label="Highlight primary figure"
+                value={config.trustMedia?.highlightPrimary ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, trustMedia: { ...config.trustMedia!, highlightPrimary: v } })
+                }
+                placeholder="e.g. 1000+"
+              />
+              <Input
+                label="Highlight secondary figure"
+                value={config.trustMedia?.highlightSecondary ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, trustMedia: { ...config.trustMedia!, highlightSecondary: v } })
+                }
+                placeholder="e.g. 20+"
+              />
+              <Input
+                label="Highlight caption"
+                value={config.trustMedia?.highlightCaption ?? ""}
+                onChange={(v) =>
+                  onChange({ ...config, trustMedia: { ...config.trustMedia!, highlightCaption: v } })
+                }
+                placeholder="Top mentors around the globe"
+              />
+            </>
+          ) : null}
         </EditorFieldsGrid>
         <EditorItemList
           onAdd={() =>

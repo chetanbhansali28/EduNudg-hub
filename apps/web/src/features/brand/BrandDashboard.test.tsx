@@ -98,7 +98,7 @@ describe("BrandDashboardView", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole("link", { name: "+ New Center Proposal" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "+ New Franchise" }).getAttribute("href")).toBe(
       "/app/franchise-applications"
     );
     expect(screen.getAllByText("₹1.2Cr").length).toBeGreaterThan(0);

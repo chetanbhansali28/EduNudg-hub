@@ -232,7 +232,7 @@ export function BrandDashboardView({
           <p className="ed-brand-dash__greeting ed-brand-dash__greeting--desktop">{greeting}</p>
         </div>
         <Link to="/app/franchise-applications" className="ed-brand-dash__cta">
-          + New Center Proposal
+          + New Franchise
         </Link>
       </header>
 

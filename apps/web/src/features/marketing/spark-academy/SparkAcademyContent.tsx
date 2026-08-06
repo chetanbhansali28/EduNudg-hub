@@ -39,7 +39,7 @@ export function SparkAcademyContent({
   const showTestimonials = isSparkSectionEnabled(config, "testimonials");
   const showFaq = isSparkSectionEnabled(config, "faq") && config.faq.length > 0;
 
-  const featureImage =
+  const featureImageFallback =
     config.hero.backgroundImageUrl?.trim() ||
     config.gallery?.images[0]?.url?.trim() ||
     config.founders?.[0]?.photoUrl?.trim() ||
@@ -64,7 +64,11 @@ export function SparkAcademyContent({
       ) : null}
 
       {showFeatures ? (
-        <FeaturesSection sections={config.featureSections} imageUrl={featureImage || undefined} />
+        <FeaturesSection
+          sections={config.featureSections}
+          showcase={config.featuresShowcase}
+          imageUrlFallback={featureImageFallback || undefined}
+        />
       ) : null}
 
       {showJourney && config.trustMedia ? (

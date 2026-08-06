@@ -6,7 +6,7 @@ import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModal
 import { SparkAcademyFooter } from "./SparkAcademyFooter";
 
 describe("SparkAcademyFooter", () => {
-  it("regression_renders_dark_footer_with_cta_contact_social_and_payments", () => {
+  it("regression_renders_dark_footer_with_cta_contact_and_social", () => {
     const config = mergeSparkAcademyLandingConfig("Digitley");
     render(
       <MemoryRouter>
@@ -35,8 +35,8 @@ describe("SparkAcademyFooter", () => {
     expect(screen.getByRole("navigation", { name: "Footer" })).toBeDefined();
     expect(screen.getByText("Shop")).toBeDefined();
     expect(screen.getByText(/Copyright ©/)).toBeDefined();
-    expect(screen.getByLabelText("Accepted payment methods")).toBeDefined();
-    expect(screen.getByText("Visa")).toBeDefined();
-    expect(screen.getByText("Mastercard")).toBeDefined();
+    expect(screen.queryByLabelText("Accepted payment methods")).toBeNull();
+    expect(screen.queryByText("Visa")).toBeNull();
+    expect(screen.queryByText("Mastercard")).toBeNull();
   });
 });

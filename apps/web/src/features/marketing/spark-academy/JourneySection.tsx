@@ -4,6 +4,7 @@ import { MarketingBackgroundMedia } from "../MarketingBackgroundMedia";
 type Props = {
   trust: HomepageTrustMedia;
   rich?: HomepageRichFooter;
+  /** @deprecated Prefer trust.imageUrl — kept as fallback for older configs. */
   highlightFounder?: HomepageFounderProfile | null;
 };
 
@@ -22,7 +23,7 @@ function JourneyRowIcon() {
   );
 }
 
-function buildHeroCardStats(rich?: HomepageRichFooter): {
+export function buildJourneyHighlight(trust: HomepageTrustMedia, rich?: HomepageRichFooter): {
   label: string;
   primary: string;
   secondary: string;
@@ -32,11 +33,18 @@ function buildHeroCardStats(rich?: HomepageRichFooter): {
   const students = rich?.brandStats?.studentCount?.trim();
 
   return {
-    label: "Our learners worldwide",
-    primary: students || "20M+",
-    secondary: franchise || "300+",
-    caption: "Top mentors around the globe",
+    label: trust.highlightLabel?.trim() || "Our Investment Fund Raised",
+    primary: trust.highlightPrimary?.trim() || students || "20M+",
+    secondary: trust.highlightSecondary?.trim() || franchise || "300+",
+    caption: trust.highlightCaption?.trim() || "Top mentors around the globe",
   };
+}
+
+export function resolveJourneyImageUrl(
+  trust: HomepageTrustMedia,
+  highlightFounder?: HomepageFounderProfile | null
+): string {
+  return trust.imageUrl?.trim() || highlightFounder?.photoUrl?.trim() || "";
 }
 
 export function JourneySection({
@@ -45,8 +53,8 @@ export function JourneySection({
   highlightFounder,
 }: Props) {
   const cards = trust.cards.slice(0, 3);
-  const photoUrl = highlightFounder?.photoUrl?.trim() || "";
-  const heroStats = buildHeroCardStats(rich);
+  const photoUrl = resolveJourneyImageUrl(trust, highlightFounder);
+  const heroStats = buildJourneyHighlight(trust, rich);
   const badge = trust.eyebrow?.trim() || "Our Success";
   const heading = [trust.title, trust.titleHighlight].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
 
@@ -76,7 +84,7 @@ export function JourneySection({
 
         <article className="sa-journey__highlight-card">
           <div className="sa-journey__highlight-copy">
-            <p className="sa-journey__highlight-label">Our Investment Fund Raised</p>
+            <p className="sa-journey__highlight-label">{heroStats.label}</p>
             <strong className="sa-journey__highlight-primary">{heroStats.primary}</strong>
             <strong className="sa-journey__highlight-secondary">{heroStats.secondary}</strong>
             <span className="sa-journey__highlight-caption">{heroStats.caption}</span>

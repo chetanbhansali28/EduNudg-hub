@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mergeAbacusClassicLandingConfig } from "./brandLandingDefaults";
+import { mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "./brandLandingDefaults";
 
 describe("mergeAbacusClassicLandingConfig", () => {
   it("includes dual CTAs and trust media defaults", () => {
@@ -50,5 +50,24 @@ describe("mergeAbacusClassicLandingConfig", () => {
     expect(config.sections?.trustMedia).toBe(true);
     expect(config.sections?.gallery).toBe(true);
     expect(config.sections?.footerRich).toBe(true);
+  });
+});
+
+describe("mergeSparkAcademyLandingConfig", () => {
+  it("includes_journey_highlight_fields_on_trust_media", () => {
+    const config = mergeSparkAcademyLandingConfig("Abacus World");
+    expect(config.trustMedia?.imageUrl).toContain("unsplash.com");
+    expect(config.trustMedia?.highlightLabel).toBe("Our Investment Fund Raised");
+    expect(config.trustMedia?.highlightPrimary).toBe("1000+");
+    expect(config.trustMedia?.highlightSecondary).toBe("20+");
+    expect(config.trustMedia?.highlightCaption).toBe("Top mentors around the globe");
+  });
+
+  it("includes_features_showcase_defaults", () => {
+    const config = mergeSparkAcademyLandingConfig("Abacus World");
+    expect(config.featuresShowcase?.floatStatsLabel).toBe("Last month");
+    expect(config.featuresShowcase?.floatStatsValue).toBe("25.20%");
+    expect(config.featuresShowcase?.floatProgressLabel).toBe("Learning Progress");
+    expect(config.featuresShowcase?.title).toContain("Powerful Features");
   });
 });

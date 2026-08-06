@@ -181,6 +181,10 @@ export function mergeSparkAcademyCenterLandingConfig(
       ctaHref: centerBase.hero.ctaHref,
     },
     featureSections: partial?.featureSections ?? centerBase.featureSections,
+    featuresShowcase: {
+      ...sparkBase.featuresShowcase!,
+      ...partial?.featuresShowcase,
+    },
     trustMedia: {
       ...sparkBase.trustMedia!,
       ...partial?.trustMedia,
