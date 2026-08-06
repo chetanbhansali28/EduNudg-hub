@@ -8,8 +8,25 @@
 
 .ed-success-stories-page__header {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ed-success-stories-page__header-copy {
+  display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
+.ed-success-stories-page__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
 }
 
 .ed-success-stories-page__title {

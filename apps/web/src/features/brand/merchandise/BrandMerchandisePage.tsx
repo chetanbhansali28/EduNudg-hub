@@ -55,7 +55,7 @@ export function BrandMerchandisePage() {
             <button
               type="button"
               className="ed-brand-merch-page__fab"
-              aria-label="Add catalog item"
+              aria-label="Add Merchandise"
               onClick={() => setCatalogAddOpen(true)}
             >
               +
@@ -69,7 +69,7 @@ export function BrandMerchandisePage() {
           title="Merchandise Catalog"
           actions={
             activeTab === "catalog" ? (
-              <Button onClick={() => setCatalogAddOpen(true)}>+ Add catalog item</Button>
+              <Button onClick={() => setCatalogAddOpen(true)}>+ Add Merchandise</Button>
             ) : null
           }
         />

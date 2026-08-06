@@ -418,11 +418,14 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
             : "Manage parent inquiries and track conversion pipeline."
         }
         actions={
-          isMobile ? (
-            <Button onClick={() => setAddLeadOpen(true)}>Add lead</Button>
-          ) : (
-            <Button onClick={() => downloadLeadsCsv(allLeads)}>Export List</Button>
-          )
+          <>
+            {!isMobile ? (
+              <Button variant="secondary" onClick={() => downloadLeadsCsv(allLeads)}>
+                Export List
+              </Button>
+            ) : null}
+            <Button onClick={() => setAddLeadOpen(true)}>+ New Lead</Button>
+          </>
         }
       />
       <MutationError message={error} />
@@ -472,7 +475,7 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
         </div>
       ) : null}
 
-      {addLeadOpen ? (
+      {addLeadOpen && isMobile ? (
         <div className="ed-ops-mobile-detail" role="dialog" aria-modal aria-label="Add lead">
           <div className="ed-ops-mobile-detail__bar">
             <button type="button" className="ed-ops-mobile-detail__back" onClick={() => setAddLeadOpen(false)}>
@@ -484,6 +487,19 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
             brandId={brandId}
             invalidateKey={["brand-leads", brandId]}
             formOpen
+            onFormOpenChange={setAddLeadOpen}
+            hideTrigger
+          />
+        </div>
+      ) : null}
+
+      {addLeadOpen && !isMobile ? (
+        <div className="ed-student-leads__add-form">
+          <ManualStudentLeadCard
+            scope="brand"
+            brandId={brandId}
+            invalidateKey={["brand-leads", brandId]}
+            formOpen={addLeadOpen}
             onFormOpenChange={setAddLeadOpen}
             hideTrigger
           />

@@ -50,6 +50,7 @@ describe("StudentLeadsPage", () => {
     expect(screen.getByRole("tablist", { name: "Lead filter" })).toBeDefined();
     expect(screen.getByRole("tab", { name: "Needs attention (0)" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Export List" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "+ New Lead" })).toBeDefined();
     expect(screen.getByText("Follow-up Insights")).toBeDefined();
     expect(screen.queryByLabelText("Show")).toBeNull();
   });

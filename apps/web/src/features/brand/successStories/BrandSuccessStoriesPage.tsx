@@ -45,6 +45,7 @@ export function BrandSuccessStoriesPage() {
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const [addOpen, setAddOpen] = useState(false);
   const { bindClose, closeAddForm } = useAddFormCloser();
 
   const stories = useQuery({
@@ -84,6 +85,7 @@ export function BrandSuccessStoriesPage() {
       invalidate();
       setForm(emptyForm);
       closeAddForm();
+      setAddOpen(false);
     },
     onError: capture,
   });
@@ -133,16 +135,27 @@ export function BrandSuccessStoriesPage() {
   return (
     <div className="ed-success-stories-page">
       <header className="ed-success-stories-page__header">
-        <h1 className="ed-success-stories-page__title">Success stories</h1>
-        <p className="ed-success-stories-page__subtitle">
-          Quotes published here appear on your brand marketing site testimonials. Configure homepage placement in{" "}
-          <Link to="/app/homepage">Homepage</Link>.
-        </p>
+        <div className="ed-success-stories-page__header-copy">
+          <h1 className="ed-success-stories-page__title">Success stories</h1>
+          <p className="ed-success-stories-page__subtitle">
+            Quotes published here appear on your brand marketing site testimonials. Configure homepage placement in{" "}
+            <Link to="/app/homepage">Homepage</Link>.
+          </p>
+        </div>
+        <div className="ed-success-stories-page__header-actions">
+          <Button onClick={() => setAddOpen(true)}>+ Add success story</Button>
+        </div>
       </header>
 
       <MutationError message={error} />
 
-      <AddFormSection buttonLabel="Add success story" panelTitle="Add success story">
+      <AddFormSection
+        buttonLabel="+ Add success story"
+        panelTitle="Add success story"
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        hideTrigger
+      >
         {({ close }) => {
           bindClose(close);
           return (

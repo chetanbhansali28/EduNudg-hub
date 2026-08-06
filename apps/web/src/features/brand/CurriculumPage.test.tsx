@@ -120,10 +120,10 @@ describe("CurriculumPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Add course" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "+ Add Curriculum" })).toBeDefined();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Add course" }));
+    fireEvent.click(screen.getByRole("button", { name: "+ Add Curriculum" }));
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Add course" })).toBeDefined();

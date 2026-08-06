@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandSuccessStoriesPage } from "./BrandSuccessStoriesPage";
@@ -44,12 +44,29 @@ describe("BrandSuccessStoriesPage", () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findByRole("button", { name: "Add success story" })).toBeDefined();
+    expect(await screen.findByRole("button", { name: "+ Add success story" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Success stories" })).toBeDefined();
     expect(screen.getByText(/appear on your brand marketing site testimonials/i)).toBeDefined();
     expect(consoleError).not.toHaveBeenCalledWith(
       expect.stringContaining("useAddFormCloser is not defined")
     );
     consoleError.mockRestore();
+  });
+
+  it("opens_add_form_from_header_button", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    render(
+      <MemoryRouter>
+        <QueryClientProvider client={qc}>
+          <BrandSuccessStoriesPage />
+        </QueryClientProvider>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "+ Add success story" }));
+    expect(await screen.findByRole("heading", { name: "Add success story" })).toBeDefined();
+    expect(screen.getByLabelText("Title")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Create story" })).toBeDefined();
   });
 });

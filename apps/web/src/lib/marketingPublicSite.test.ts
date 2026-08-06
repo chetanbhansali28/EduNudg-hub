@@ -185,7 +185,12 @@ describe("isLegacyPlatformHomepageSeed", () => {
     expect(
       isLegacyPlatformHomepageSeed({
         theme: { bgGradient: "linear-gradient(180deg, #f7f3ec, #e8dfd0)" } as never,
-        meta: { siteName: "EduNudg", themeNote: "Novu-inspired" },
+        meta: {
+          siteName: "EduNudg",
+          fontSans: "Inter",
+          fontSerif: "Playfair Display",
+          themeNote: "Novu-inspired",
+        },
       })
     ).toBe(true);
 

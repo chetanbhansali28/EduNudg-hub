@@ -258,7 +258,7 @@ export function FranchiseApplicationsPage() {
       <PipelinePageHeader
         title="Franchise Applications"
         subtitle="Review and manage incoming center requests."
-        actions={<Button onClick={() => setAddFormOpen(true)}>+ Add franchise application</Button>}
+        actions={<Button onClick={() => setAddFormOpen(true)}>+ Add Franchise</Button>}
       />
       <MutationError message={error} />
 
@@ -340,7 +340,7 @@ export function FranchiseApplicationsPage() {
       <button
         type="button"
         className="ed-franchise-apps-page__fab"
-        aria-label="Add franchise application"
+        aria-label="Add Franchise"
         onClick={() => setAddFormOpen(true)}
       >
         +

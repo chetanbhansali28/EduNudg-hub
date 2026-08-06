@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CurriculumBuilderHeader, CurriculumFab, MutationError } from "@edunudg/ui";
+import { Button, CurriculumBuilderHeader, CurriculumFab, MutationError } from "@edunudg/ui";
 import { CurriculumAddCoursePanel } from "@/features/brand/curriculum/CurriculumAddCoursePanel";
 import {
   archiveProgram,
@@ -344,6 +344,11 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
           variant="page"
           title="Curriculum Builder"
           subtitle="Design and manage your franchise's educational blueprint. Changes here update across all authorized centers and student portals."
+          actions={
+            !readOnly ? (
+              <Button onClick={openAddCourse}>+ Add Curriculum</Button>
+            ) : null
+          }
         />
       ) : null}
 
