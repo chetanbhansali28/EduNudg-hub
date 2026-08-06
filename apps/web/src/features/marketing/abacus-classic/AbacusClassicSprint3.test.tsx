@@ -152,6 +152,19 @@ describe("Abacus Classic Sprint 3 — rich footer", () => {
     expect(screen.getByRole("link", { name: "Facebook" })).toBeDefined();
   });
 
+  it("regression_footer_stats_row_separate_from_brand_column", () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AbacusClassicFooter config={sprint3Config()} />
+      </MemoryRouter>
+    );
+
+    const brand = container.querySelector(".ac-footer__brand");
+    const statsRow = container.querySelector(".ac-footer__stats");
+    expect(brand?.querySelector(".ac-footer__stat")).toBeNull();
+    expect(statsRow?.querySelectorAll(".ac-footer__stat").length).toBeGreaterThan(0);
+  });
+
   it("omits franchise and student stats when brandStats are empty but keeps custom stats", () => {
     const config = sprint3Config();
     config.footer.rich = {

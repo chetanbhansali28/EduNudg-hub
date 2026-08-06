@@ -24,12 +24,15 @@ export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {
       <div className="ac-footer__inner">
         <div className="ac-footer__grid">
           <div className="ac-footer__brand">
-            {config.meta.logoUrl ? (
-              <img src={config.meta.logoUrl} alt="" className="ac-footer__logo" width={56} height={56} />
-            ) : (
-              <span className="ac-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
-            )}
-            {rich?.description ? <p>{rich.description}</p> : null}
+            <div className="ac-footer__brand-mark">
+              {config.meta.logoUrl ? (
+                <img src={config.meta.logoUrl} alt="" className="ac-footer__logo" width={56} height={56} />
+              ) : (
+                <span className="ac-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
+              )}
+              <strong className="ac-footer__brand-name">{config.meta.siteName}</strong>
+            </div>
+            {rich?.description ? <p className="ac-footer__description">{rich.description}</p> : null}
             {rich?.badges && rich.badges.length > 0 ? (
               <div className="ac-footer__badges">
                 {rich.badges.map((badge, i) => (
@@ -39,20 +42,10 @@ export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {
                 ))}
               </div>
             ) : null}
-            {stats.length > 0 ? (
-              <div className="ac-footer__stats">
-                {stats.map((stat, i) => (
-                  <div key={`${stat.label}-${i}`} className="ac-footer__stat">
-                    <strong>{stat.value}</strong>
-                    <span>{stat.label}</span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
             <BrandSocialFooterIcons socialConnect={socialConnect} variant="abacus-classic" />
           </div>
 
-          <div>
+          <div className="ac-footer__col">
             <h3>Quick links</h3>
             <ul>
               {config.footer.productLinks.map((link) => (
@@ -65,11 +58,12 @@ export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {
 
           <FooterPresenceBlock
             presence={rich?.presence ?? []}
+            className="ac-footer__col"
             regionClassName="ac-footer__presence"
           />
 
           {rich?.headOffice ? (
-            <div>
+            <div className="ac-footer__col">
               <h3>Head office</h3>
               <address className="ac-footer__office">
                 <p>{rich.headOffice.address}</p>
@@ -79,6 +73,17 @@ export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {
             </div>
           ) : null}
         </div>
+
+        {stats.length > 0 ? (
+          <div className="ac-footer__stats">
+            {stats.map((stat, i) => (
+              <div key={`${stat.label}-${i}`} className="ac-footer__stat">
+                <strong>{stat.value}</strong>
+                <span>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
 
         <div className="ac-footer__bottom">
           <span>{config.footer.copyright}</span>
