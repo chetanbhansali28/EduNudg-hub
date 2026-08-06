@@ -50,11 +50,36 @@ describe("HomepageEditorForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /Hero.*Main banner content/i }));
 
     expect(screen.getByLabelText("Hero side image").getAttribute("type")).toBe("file");
-    expect(screen.getByLabelText("Connectivity phone image").getAttribute("type")).toBe("file");
+    expect(screen.queryByLabelText("Connectivity phone image")).toBeNull();
     expect(screen.getByLabelText("Pre-footer side image").getAttribute("type")).toBe("file");
 
+    fireEvent.click(screen.getByRole("button", { name: /Connectivity showcase.*Phone showcase/i }));
+    expect(screen.getByLabelText("Center phone image").getAttribute("type")).toBe("file");
+
     const uploadButtons = screen.getAllByRole("button", { name: /Upload file|Replace file/i });
-    expect(uploadButtons.length).toBeGreaterThanOrEqual(3);
+    expect(uploadButtons.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("regression_platform_connectivity_phone_image_lives_in_connectivity_section", () => {
+    render(
+      <HomepageEditorShell title="Homepage Configuration">
+        <HomepageEditorForm
+          config={DEFAULT_HOMEPAGE_CONFIG}
+          onChange={() => undefined}
+          portalMode="platform"
+        />
+      </HomepageEditorShell>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Hero.*Main banner content/i }));
+    expect(screen.queryByLabelText("Connectivity phone image")).toBeNull();
+    expect(screen.queryByLabelText("Phone frame image")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /Connectivity showcase.*Phone showcase/i }));
+    expect(screen.getByLabelText("Center phone image")).toBeDefined();
+    expect(
+      screen.getByText(/Center phone image appears beside the connectivity cards/i)
+    ).toBeDefined();
   });
 
   it("critical_media_upload_stays_draft_until_page_save", async () => {

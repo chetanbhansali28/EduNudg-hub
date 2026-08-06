@@ -21,6 +21,21 @@ describe("EnterpriseConnectivityShowcase", () => {
     expect(document.querySelectorAll(".ent-connectivity__card")).toHaveLength(showcase.cards.length);
   });
 
+  it("regression_falls_back_to_hero_phone_frame_when_center_image_missing", () => {
+    const showcase = {
+      ...DEFAULT_HOMEPAGE_CONFIG.connectivityShowcase!,
+      centerImageUrl: undefined,
+    };
+    render(
+      <EnterpriseConnectivityShowcase
+        showcase={showcase}
+        fallbackCenterImage="https://cdn.example.com/legacy-phone.png"
+      />
+    );
+
+    expect(screen.getByTestId("connectivity-phone")).toBeDefined();
+  });
+
   it("regression_family_journey_connectivity_copy", () => {
     const showcase = DEFAULT_HOMEPAGE_CONFIG.connectivityShowcase!;
     render(<EnterpriseConnectivityShowcase showcase={showcase} />);

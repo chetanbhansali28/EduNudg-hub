@@ -281,17 +281,19 @@ export function HomepageEditorForm({
               layout="hero"
             />
           </EditorFieldSpan>
-          <EditorFieldSpan>
-            <MarketingMediaField
-              label={isPlatformEditor ? "Connectivity phone image" : "Phone frame image"}
-              value={config.hero.phoneFrameUrl}
-              onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, phoneFrameUrl: v } })}
-              mediaType="image"
-              uploadSubdir="hero-phone-frame"
-              uploadScope={uploadScope}
-              layout="hero"
-            />
-          </EditorFieldSpan>
+          {!isPlatformEditor ? (
+            <EditorFieldSpan>
+              <MarketingMediaField
+                label="Phone frame image"
+                value={config.hero.phoneFrameUrl}
+                onChange={(v) => commitMedia({ ...config, hero: { ...config.hero, phoneFrameUrl: v } })}
+                mediaType="image"
+                uploadSubdir="hero-phone-frame"
+                uploadScope={uploadScope}
+                layout="hero"
+              />
+            </EditorFieldSpan>
+          ) : null}
         </EditorFieldsGrid>
       </EditorAccordion>
 
@@ -360,7 +362,7 @@ export function HomepageEditorForm({
               </EditorFieldSpan>
               <EditorFieldSpan>
                 <MarketingMediaField
-                  label="Center phone image (optional override)"
+                  label="Center phone image"
                   value={config.connectivityShowcase?.centerImageUrl ?? ""}
                   onChange={(v) =>
                     commitMedia({
@@ -378,6 +380,9 @@ export function HomepageEditorForm({
                 />
               </EditorFieldSpan>
             </EditorFieldsGrid>
+            <EditorSectionNote>
+              Center phone image appears beside the connectivity cards on the public homepage (#connectivity). It is not used in the hero banner.
+            </EditorSectionNote>
             <EditorItemList
               onAdd={() =>
                 commit({
