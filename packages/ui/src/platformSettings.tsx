@@ -141,11 +141,13 @@ export function PlatformSettingsActionButton({
   label,
   onClick,
   href,
+  disabled,
 }: {
   icon?: ReactNode;
   label: string;
   onClick?: () => void;
   href?: string;
+  disabled?: boolean;
 }) {
   const className = "ed-pfset-action-btn";
   const content = (
@@ -165,7 +167,7 @@ export function PlatformSettingsActionButton({
     );
   }
   return (
-    <button type="button" className={className} onClick={onClick}>
+    <button type="button" className={className} onClick={onClick} disabled={disabled}>
       {content}
     </button>
   );

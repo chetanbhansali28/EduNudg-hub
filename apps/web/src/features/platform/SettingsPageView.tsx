@@ -60,10 +60,12 @@ function SettingsCards({
   flags,
   onToggle,
   onExport,
+  exportPending,
 }: {
   flags: Record<PlatformIntegrationKey, boolean>;
   onToggle: (key: PlatformIntegrationKey, checked: boolean) => void;
   onExport: () => void;
+  exportPending?: boolean;
 }) {
   const connected = paymentGatewayConnected(flags);
   const domain = platformSettingsDomain();
@@ -94,7 +96,12 @@ function SettingsCards({
       <PlatformSettingsCard>
         <PlatformSettingsCardHeader title="Maintenance" />
         <PlatformSettingsActionButton icon={ICON_AUDIT} label="Audit Logs" href="/admin/audit" />
-        <PlatformSettingsActionButton icon={ICON_EXPORT} label="Export Data" onClick={onExport} />
+        <PlatformSettingsActionButton
+          icon={ICON_EXPORT}
+          label={exportPending ? "Exporting…" : "Export Data"}
+          onClick={onExport}
+          disabled={exportPending}
+        />
       </PlatformSettingsCard>
 
       <PlatformSettingsCard>
@@ -167,6 +174,8 @@ export function SettingsPageView({
   saved,
   error,
   loading,
+  onExport,
+  exportPending,
 }: {
   flags: Record<PlatformIntegrationKey, boolean>;
   savedFlags: Record<PlatformIntegrationKey, boolean>;
@@ -177,21 +186,13 @@ export function SettingsPageView({
   saved: boolean;
   error: string | null;
   loading?: boolean;
+  onExport: () => void;
+  exportPending?: boolean;
 }) {
   const dirty = useMemo(() => integrationsDirty(flags, savedFlags), [flags, savedFlags]);
 
   const toggle = (key: PlatformIntegrationKey, checked: boolean) => {
     onFlagsChange({ ...flags, [key]: checked });
-  };
-
-  const exportData = () => {
-    const blob = new Blob([JSON.stringify(flags, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "platform-settings-export.json";
-    link.click();
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -215,7 +216,7 @@ export function SettingsPageView({
       {loading ? (
         <p className="ed-pfset-loading">Loading platform settings…</p>
       ) : (
-        <SettingsCards flags={flags} onToggle={toggle} onExport={exportData} />
+        <SettingsCards flags={flags} onToggle={toggle} onExport={onExport} exportPending={exportPending} />
       )}
     </PlatformSettingsShell>
   );

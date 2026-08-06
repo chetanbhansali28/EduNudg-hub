@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { mergePlatformIntegrations } from "@/lib/platformIntegrations";
+import { exportPlatformData } from "@/lib/platformDataExportHelpers";
 import { fetchPlatformIntegrations, savePlatformIntegrations } from "@/lib/platformIntegrationsApi";
 import { useMutationError } from "./hooks/useMutationError";
 import { SettingsPageView } from "./SettingsPageView";
@@ -37,6 +38,14 @@ export function SettingsPage() {
     onError: capture,
   });
 
+  const exportData = useMutation({
+    mutationFn: async () => {
+      clear();
+      await exportPlatformData("xlsx");
+    },
+    onError: capture,
+  });
+
   return (
     <SettingsPageView
       flags={flags}
@@ -48,6 +57,8 @@ export function SettingsPage() {
       saved={saved}
       error={error}
       loading={integrations.isLoading}
+      onExport={() => exportData.mutate()}
+      exportPending={exportData.isPending}
     />
   );
 }

@@ -10,9 +10,17 @@ const { savePlatformIntegrations, fetchPlatformIntegrations } = vi.hoisted(() =>
   fetchPlatformIntegrations: vi.fn(async () => mergePlatformIntegrations(undefined)),
 }));
 
+const { exportPlatformData } = vi.hoisted(() => ({
+  exportPlatformData: vi.fn(async () => undefined),
+}));
+
 vi.mock("@/lib/platformIntegrationsApi", () => ({
   fetchPlatformIntegrations,
   savePlatformIntegrations,
+}));
+
+vi.mock("@/lib/platformDataExportHelpers", () => ({
+  exportPlatformData,
 }));
 
 function renderSettings() {
@@ -29,6 +37,7 @@ function renderSettings() {
 describe("SettingsPage", () => {
   beforeEach(() => {
     savePlatformIntegrations.mockClear();
+    exportPlatformData.mockClear();
   });
 
   it("regression_no_marketing_homepage_section", async () => {
@@ -62,5 +71,12 @@ describe("SettingsPage", () => {
     expect((saveButton as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(saveButton);
     await waitFor(() => expect(savePlatformIntegrations).toHaveBeenCalledOnce());
+  });
+
+  it("regression_platform_settings_export_downloads_tenant_workbook", async () => {
+    renderSettings();
+    const exportButton = await screen.findByRole("button", { name: "Export Data" });
+    fireEvent.click(exportButton);
+    await waitFor(() => expect(exportPlatformData).toHaveBeenCalledWith("xlsx"));
   });
 });
