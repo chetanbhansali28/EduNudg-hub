@@ -221,26 +221,22 @@ export function DirectoryStatusBadge({
   return <span className={`ed-directory-status ed-directory-status--${tone}`}>{label}</span>;
 }
 
-export function DirectorySlugLink({ slug, href }: { slug: string; href?: string }) {
-  const content = (
-    <>
+export function DirectoryFrontendLink({ href, slug }: { href: string; slug?: string }) {
+  return (
+    <a
+      href={href}
+      className="ed-directory-slug"
+      target="_blank"
+      rel="noopener noreferrer"
+      title={slug ? `${slug} public site` : undefined}
+    >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
         <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
         <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
       </svg>
-      slug: {slug}
-    </>
+      View Frontend ↗
+    </a>
   );
-
-  if (href) {
-    return (
-      <Link to={href} className="ed-directory-slug">
-        {content}
-      </Link>
-    );
-  }
-
-  return <span className="ed-directory-slug">{content}</span>;
 }
 
 export function DirectoryBrandList({ children }: { children: ReactNode }) {
@@ -251,7 +247,7 @@ export function DirectoryBrandRow({
   icon,
   name,
   slug,
-  slugHref,
+  frontendHref,
   status,
   backendAction,
   editAction,
@@ -261,7 +257,7 @@ export function DirectoryBrandRow({
   icon?: ReactNode;
   name: string;
   slug: string;
-  slugHref?: string;
+  frontendHref?: string;
   status: ReactNode;
   backendAction: ReactNode;
   editAction: ReactNode;
@@ -284,7 +280,7 @@ export function DirectoryBrandRow({
           {nameNode}
           {status}
         </div>
-        <DirectorySlugLink slug={slug} href={slugHref} />
+        {frontendHref ? <DirectoryFrontendLink href={frontendHref} slug={slug} /> : null}
       </div>
       <div className="ed-directory-brand-row__actions">
         {backendAction}

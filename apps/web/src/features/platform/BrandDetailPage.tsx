@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge, Button, Card, DataList, ListRow, PageToolbar } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { brandAdminPath, isUuid } from "@/lib/adminPaths";
-import { brandPortalHostname, portalTargetFromDomain } from "@/lib/brandPortalUrl";
+import { brandPortalHostname, portalOriginUrl, portalTargetFromDomain } from "@/lib/brandPortalUrl";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
 import { useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
 import { BrandEditForm } from "./BrandEditForm";
@@ -183,6 +183,16 @@ export function BrandDetailPage() {
         <Link to="/admin/brands">
           <Button variant="ghost">All brands</Button>
         </Link>
+        {brandBackendTarget ? (
+          <a
+            href={portalOriginUrl(brandBackendTarget)}
+            className="ed-btn ed-btn--ghost"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Frontend ↗
+          </a>
+        ) : null}
         {brandBackendTarget ? <PortalOpenButton target={brandBackendTarget} label="Open brand backend" /> : null}
       </PageToolbar>
 

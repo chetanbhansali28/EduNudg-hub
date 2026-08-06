@@ -47,8 +47,9 @@ Seeded demo brand login remains `owner@edunudg.com` / `admin` at http://abacuswo
 
 As `admin@edunudg.com` on http://localhost:9000/admin/brands:
 
-1. Click **Brand backend** on a row (or **Open** on brand detail → Domains) — should open `{slug}.localhost:9000/app` signed in as platform admin.
-2. Requires Edge Function `platform-portal-handoff` deployed (see [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md)).
+1. Click **View Frontend ↗** on a row — opens `{slug}.localhost:9000/` (public marketing site).
+2. Click **Brand backend** on a row (or **Open** on brand detail → Domains) — should open `{slug}.localhost:9000/app` signed in as platform admin.
+3. Requires Edge Function `platform-portal-handoff` deployed (see [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md)).
 
 | Issue | Fix |
 |-------|-----|

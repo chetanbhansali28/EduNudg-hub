@@ -64,3 +64,20 @@ Platform admins SHALL be able to create pending brand signups manually from `/ad
 - **WHEN** a platform admin creates a signup via `create_platform_brand_signup_staff`
 - **THEN** a pending `platform_brand_signups` row appears in the approval queue
 - **AND** the same approve flow provisions the brand
+
+### Requirement: Platform admin brand frontend link
+
+On `/admin/brands`, each active brand row SHALL expose a **View Frontend ↗** link that opens the brand public marketing site (`portalOriginUrl` for the brand portal) in a new tab. The slug label SHALL NOT link to the platform admin detail page.
+
+#### Scenario: Open brand frontend from brands list
+
+- **GIVEN** platform admin is on `/admin/brands`
+- **WHEN** they click **View Frontend ↗** on a brand row
+- **THEN** the browser opens `{slug}.localhost:9000/` (local dev) or the brand primary domain (production)
+- **AND** the link uses `target="_blank"` with `rel="noopener noreferrer"`
+
+#### Scenario: Open brand frontend from brand detail
+
+- **GIVEN** platform admin is on `/admin/brands/:slug`
+- **WHEN** they click **View Frontend ↗** in the page toolbar
+- **THEN** the browser opens the same brand public marketing URL as the brands list link

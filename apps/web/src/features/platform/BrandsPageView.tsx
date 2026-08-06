@@ -22,7 +22,7 @@ import {
   MutationError,
 } from "@edunudg/ui";
 import { brandAdminPath } from "@/lib/adminPaths";
-import { brandPortalTarget } from "@/lib/brandPortalUrl";
+import { brandPortalTarget, brandPortalUrl } from "@/lib/brandPortalUrl";
 import { openPortalAsPlatformAdmin, openPortalBackendFallback } from "@/lib/portalHandoffApi";
 import type { PlatformBrandRow, PlatformBrandsHome } from "@/lib/platformBrandsHelpers";
 import {
@@ -66,6 +66,13 @@ const ICON_BACKEND = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <polyline points="16 18 22 12 16 6" />
     <polyline points="8 6 2 12 8 18" />
+  </svg>
+);
+
+const ICON_FRONTEND = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
   </svg>
 );
 
@@ -229,6 +236,12 @@ export function BrandsPageView({
     <DirectoryMobileActionBar
       items={[
         {
+          key: "frontend",
+          label: "Frontend",
+          icon: ICON_FRONTEND,
+          onClick: () => window.open(brandPortalUrl(brand.slug), "_blank", "noopener,noreferrer"),
+        },
+        {
           key: "backend",
           label: "Backend",
           icon: ICON_BACKEND,
@@ -312,7 +325,7 @@ export function BrandsPageView({
                     icon={<BrandIcon brand={brand} />}
                     name={brand.name}
                     slug={brand.slug}
-                    slugHref={brandAdminPath(brand.slug)}
+                    frontendHref={brandPortalUrl(brand.slug)}
                     nameHref={brandAdminPath(brand.slug)}
                     status={
                       <DirectoryStatusBadge label={brandStatusLabel(brand.status)} tone={brandStatusTone(brand.status)} />

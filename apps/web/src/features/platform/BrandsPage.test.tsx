@@ -112,6 +112,15 @@ describe("BrandsPage", () => {
     expect(screen.getAllByRole("button", { name: "Brand backend" }).length).toBeGreaterThan(0);
   });
 
+  it("regression_brands_page_frontend_link_opens_public_site", async () => {
+    renderBrands();
+    await screen.findAllByText("Demo Brand");
+    const frontendLinks = screen.getAllByRole("link", { name: "View Frontend ↗" });
+    expect(frontendLinks.length).toBeGreaterThan(0);
+    expect(frontendLinks[0]?.getAttribute("href")).toMatch(/^http:\/\/demo\.localhost(?::\d+)?\/$/);
+    expect(frontendLinks[0]?.getAttribute("target")).toBe("_blank");
+  });
+
   it("regression_brands_list_omits_website_theme_controls", async () => {
     renderBrands();
     await screen.findAllByText("Demo Brand");

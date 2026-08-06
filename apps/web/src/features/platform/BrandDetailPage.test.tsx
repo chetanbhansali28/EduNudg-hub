@@ -155,6 +155,9 @@ describe("BrandDetailPage", () => {
   it("renders brand view with monitoring and backend action", async () => {
     renderDetail("demo");
     expect(await screen.findByText("Performance (last 30 days)")).toBeDefined();
+    expect(screen.getByRole("link", { name: "View Frontend ↗" }).getAttribute("href")).toMatch(
+      /^http:\/\/demo\.localhost(?::\d+)?\/$/
+    );
     expect(screen.getByRole("button", { name: "Open brand backend" })).toBeDefined();
     expect(screen.getByText("Brand settings")).toBeDefined();
     expect(screen.queryByText("Marketing theme")).toBeNull();

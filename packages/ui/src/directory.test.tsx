@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import {
   DirectoryBrandRow,
+  DirectoryFrontendLink,
   DirectoryNoticePanel,
   DirectoryPageHeader,
   DirectoryShell,
@@ -43,6 +44,7 @@ describe("directory primitives", () => {
           <DirectoryBrandRow
             name="Alpha Academy"
             slug="alpha"
+            frontendHref="http://alpha.localhost:9000/"
             status={<span>ACTIVE</span>}
             backendAction={<button type="button">Brand backend</button>}
             editAction={<button type="button">Edit</button>}
@@ -53,9 +55,23 @@ describe("directory primitives", () => {
     );
 
     expect(screen.getByText("Alpha Academy")).toBeDefined();
+    expect(screen.getByRole("link", { name: "View Frontend ↗" }).getAttribute("href")).toBe(
+      "http://alpha.localhost:9000/"
+    );
     expect(screen.getByRole("button", { name: "Brand backend" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Edit" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Delete" })).toBeDefined();
     expect(document.querySelector(".ed-directory")).toBeTruthy();
+  });
+
+  it("renders frontend link as external anchor", () => {
+    render(
+      <DirectoryFrontendLink href="http://demo.localhost:9000/" slug="demo" />
+    );
+
+    const link = screen.getByRole("link", { name: "View Frontend ↗" });
+    expect(link.getAttribute("href")).toBe("http://demo.localhost:9000/");
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toBe("noopener noreferrer");
   });
 });
