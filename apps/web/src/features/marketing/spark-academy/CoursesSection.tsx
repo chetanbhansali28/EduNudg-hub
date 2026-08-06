@@ -26,14 +26,24 @@ export function CourseCard({
   const palette = programCardPalette(index);
   const lessonLabel = programLessonLabel(program);
   const isBestSeller = index === 0;
+  const imageUrl = program.marketingImageUrl?.trim() || null;
 
   return (
     <article className="sa-course-card">
-      <div className="sa-course-card__media" style={{ background: `linear-gradient(135deg, ${palette.bg}, #1e3a8a)` }}>
+      <div
+        className={`sa-course-card__media${imageUrl ? " sa-course-card__media--image" : ""}`}
+        style={
+          imageUrl
+            ? { backgroundImage: `url(${imageUrl})` }
+            : { background: `linear-gradient(135deg, ${palette.bg}, #1e3a8a)` }
+        }
+      >
         {isBestSeller ? <span className="sa-course-card__tag">Best seller</span> : null}
-        <span className="sa-course-card__icon" aria-hidden>
-          {palette.icon}
-        </span>
+        {!imageUrl ? (
+          <span className="sa-course-card__icon" aria-hidden>
+            {palette.icon}
+          </span>
+        ) : null}
       </div>
       <div className="sa-course-card__body">
         <div className="sa-course-card__meta">

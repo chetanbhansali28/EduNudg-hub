@@ -33,6 +33,22 @@ export type PublicCurriculumProgram = {
   levels: PublicCurriculumLevel[];
 };
 
+function pickString(row: Record<string, unknown>, ...keys: string[]): string | null {
+  for (const key of keys) {
+    const value = row[key];
+    if (typeof value === "string") return value;
+  }
+  return null;
+}
+
+function pickNumber(row: Record<string, unknown>, ...keys: string[]): number | null {
+  for (const key of keys) {
+    const value = row[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
 function parseTopics(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter((t): t is string => typeof t === "string" && t.trim().length > 0);
@@ -49,8 +65,8 @@ function parseLesson(raw: unknown): PublicCurriculumLesson | null {
   if (typeof row.title !== "string") return null;
   return {
     title: row.title,
-    durationMinutes: typeof row.duration_minutes === "number" ? row.duration_minutes : null,
-    contentType: typeof row.content_type === "string" ? row.content_type : null,
+    durationMinutes: pickNumber(row, "duration_minutes", "durationMinutes"),
+    contentType: pickString(row, "content_type", "contentType"),
   };
 }
 
@@ -72,11 +88,11 @@ function parseLevel(raw: unknown): PublicCurriculumLevel | null {
   const modulesRaw = Array.isArray(row.modules) ? row.modules : [];
   return {
     name: row.name,
-    levelCode: typeof row.level_code === "string" ? row.level_code : null,
-    topicsCovered: parseTopics(row.topics_covered),
-    whyTake: typeof row.why_take === "string" ? row.why_take : null,
-    whatYouLearn: typeof row.what_you_learn === "string" ? row.what_you_learn : null,
-    marketingVideoUrl: typeof row.marketing_video_url === "string" ? row.marketing_video_url : null,
+    levelCode: pickString(row, "level_code", "levelCode"),
+    topicsCovered: parseTopics(row.topics_covered ?? row.topicsCovered),
+    whyTake: pickString(row, "why_take", "whyTake"),
+    whatYouLearn: pickString(row, "what_you_learn", "whatYouLearn"),
+    marketingVideoUrl: pickString(row, "marketing_video_url", "marketingVideoUrl"),
     modules: modulesRaw.map(parseModule).filter((m): m is PublicCurriculumModule => m !== null),
   };
 }
@@ -85,19 +101,19 @@ function parseProgram(raw: unknown): PublicCurriculumProgram | null {
   if (typeof raw !== "object" || raw === null) return null;
   const row = raw as Record<string, unknown>;
   if (typeof row.name !== "string") return null;
-  const versionNumber = typeof row.version_number === "number" ? row.version_number : 0;
+  const versionNumber = pickNumber(row, "version_number", "versionNumber") ?? 0;
   const levelsRaw = Array.isArray(row.levels) ? row.levels : [];
   const levels = levelsRaw.map(parseLevel).filter((l): l is PublicCurriculumLevel => l !== null);
   return {
     name: row.name,
-    description: typeof row.description === "string" ? row.description : null,
-    whyTake: typeof row.why_take === "string" ? row.why_take : null,
-    whatYouLearn: typeof row.what_you_learn === "string" ? row.what_you_learn : null,
-    marketingVideoUrl: typeof row.marketing_video_url === "string" ? row.marketing_video_url : null,
-    marketingImageUrl: typeof row.marketing_image_url === "string" ? row.marketing_image_url : null,
-    ageLabel: typeof row.age_label === "string" ? row.age_label : null,
-    marketingBenefits: parseBenefits(row.marketing_benefits),
-    scholarshipHighlight: typeof row.scholarship_highlight === "string" ? row.scholarship_highlight : null,
+    description: pickString(row, "description"),
+    whyTake: pickString(row, "why_take", "whyTake"),
+    whatYouLearn: pickString(row, "what_you_learn", "whatYouLearn"),
+    marketingVideoUrl: pickString(row, "marketing_video_url", "marketingVideoUrl"),
+    marketingImageUrl: pickString(row, "marketing_image_url", "marketingImageUrl"),
+    ageLabel: pickString(row, "age_label", "ageLabel"),
+    marketingBenefits: parseBenefits(row.marketing_benefits ?? row.marketingBenefits),
+    scholarshipHighlight: pickString(row, "scholarship_highlight", "scholarshipHighlight"),
     versionNumber,
     levels,
   };

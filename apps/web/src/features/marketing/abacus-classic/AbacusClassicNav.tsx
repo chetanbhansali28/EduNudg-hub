@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { centerPublicLoginHrefs } from "@/features/marketing/CenterPublicNavLogins";
@@ -13,7 +14,6 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
   const logins = brandSlug ? centerPublicLoginHrefs(brandSlug) : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
-  const menuWrapRef = useRef<HTMLDivElement>(null);
   const logoUrl = config.meta.logoUrl?.trim() || null;
 
   useEffect(() => {
@@ -25,13 +25,60 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
+  useEffect(() => {
+    document.body.classList.toggle("ac-nav-drawer-open", menuOpen);
+    return () => document.body.classList.remove("ac-nav-drawer-open");
+  }, [menuOpen]);
+
+  const closeMenu = () => setMenuOpen(false);
   const secondaryLabel = config.nav.secondaryCtaLabel ?? "Apply franchise";
   const secondaryHref = config.nav.secondaryCtaHref ?? "apply";
 
+  const drawer =
+    menuOpen && typeof document !== "undefined"
+      ? createPortal(
+          <>
+            <button
+              type="button"
+              className="ac-nav__drawer-backdrop"
+              aria-label="Close menu"
+              onClick={closeMenu}
+            />
+            <div
+              id={menuId}
+              className="ac-nav__drawer"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
+            >
+              <div className="ac-nav__drawer-head">
+                <span className="ac-nav__drawer-title">{config.meta.siteName}</span>
+                <button type="button" className="ac-nav__drawer-close" aria-label="Close menu" onClick={closeMenu}>
+                  ×
+                </button>
+              </div>
+              <div className="ac-nav__drawer-links">
+                {config.nav.links.map((link, i) => (
+                  <a key={`${link.label}-${i}`} href={link.href} onClick={closeMenu}>
+                    {link.label}
+                  </a>
+                ))}
+                {logins ? (
+                  <a href={logins.studentLoginHref} onClick={closeMenu}>
+                    Student Login
+                  </a>
+                ) : null}
+              </div>
+            </div>
+          </>,
+          document.body
+        )
+      : null;
+
   return (
-    <header className="ac-nav">
+    <header className={`ac-nav${menuOpen ? " ac-nav--menu-open" : ""}`}>
       <div className="ac-nav__inner">
-        <div className="ac-nav__brand" ref={menuWrapRef}>
+        <div className="ac-nav__brand">
           <button
             type="button"
             className="ac-nav__menu-toggle"
@@ -42,21 +89,6 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
           >
             <span className="ac-nav__menu-icon" aria-hidden />
           </button>
-
-          {menuOpen ? (
-            <div id={menuId} className="ac-nav__dropdown">
-              {config.nav.links.map((link, i) => (
-                <a key={`${link.label}-${i}`} href={link.href} onClick={() => setMenuOpen(false)}>
-                  {link.label}
-                </a>
-              ))}
-              {logins ? (
-                <a href={logins.studentLoginHref} onClick={() => setMenuOpen(false)}>
-                  Student Login
-                </a>
-              ) : null}
-            </div>
-          ) : null}
 
           <Link to="/" className="ac-nav__logo-link">
             {logoUrl ? (
@@ -86,6 +118,8 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
           <AbacusCtaButton label={secondaryLabel} href={secondaryHref} variant="nav-apply" />
         </div>
       </div>
+
+      {drawer}
     </header>
   );
 }

@@ -1,6 +1,6 @@
 import { Button, Input, PipelineDetailPanel } from "@edunudg/ui";
 import { PhoneLink } from "@edunudg/ui";
-import { mapsSearchUrl } from "./franchiseApplicationsHelpers";
+import { mapsEmbedUrl, mapsSearchUrl } from "./franchiseApplicationsHelpers";
 
 export interface FranchiseInquiry {
   id: string;
@@ -136,7 +136,8 @@ export function FranchiseInquiryDetailCard({
 }: Props) {
   const title = inquiry.proposed_franchise_name ?? inquiry.full_name;
   const mapUrl = mapsSearchUrl(inquiry);
-  const locationLabel = [inquiry.city, inquiry.state].filter(Boolean).join(", ") || "View on map";
+  const embedUrl = mapsEmbedUrl(inquiry);
+  const locationLabel = [inquiry.city, inquiry.state].filter(Boolean).join(", ") || "View on Google Maps";
 
   return (
     <PipelineDetailPanel title={title} onBack={onBack}>
@@ -168,14 +169,29 @@ export function FranchiseInquiryDetailCard({
               <DetailField label="Pincode" value={inquiry.pincode} />
               <DetailField label="Address" value={inquiry.address_line} />
             </div>
-            {mapUrl ? (
-              <a className="ed-franchise-app-detail__map" href={mapUrl} target="_blank" rel="noreferrer">
-                <span className="ed-franchise-app-detail__map-label">
+            {embedUrl && mapUrl ? (
+              <div className="ed-franchise-app-detail__map">
+                <iframe
+                  title={`Google Map for ${locationLabel}`}
+                  src={embedUrl}
+                  className="ed-franchise-app-detail__map-frame"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                />
+                <a
+                  className="ed-franchise-app-detail__map-label"
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   {ICON_PIN}
-                  {locationLabel}
-                </span>
-              </a>
-            ) : null}
+                  Open {locationLabel} in Google Maps
+                </a>
+              </div>
+            ) : (
+              <p className="ed-franchise-app-detail__map-empty">No location details provided yet.</p>
+            )}
           </section>
 
           <section className="ed-franchise-app-detail__card ed-franchise-app-detail__card--wide">
@@ -224,7 +240,7 @@ export function FranchiseInquiryDetailCard({
 
         {!rejectMode && pending ? (
           <p className="ed-franchise-app-detail__meta">
-            Approving creates a franchise center and <code>{`{center}.{brand}`}</code> domain mapping. The center slug
+            Approving creates a franchise center and maps a subdomain under your brand domain. The center slug
             is generated automatically from the franchise name and city.
           </p>
         ) : null}

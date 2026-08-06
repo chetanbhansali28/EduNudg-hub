@@ -7,6 +7,8 @@ import {
   inquiryLocationLine,
   inquiryStatusPresentation,
   isPendingInquiry,
+  mapsEmbedUrl,
+  mapsSearchUrl,
 } from "./franchiseApplicationsHelpers";
 import type { FranchiseInquiry } from "./FranchiseInquiryDetailCard";
 
@@ -61,5 +63,13 @@ describe("franchiseApplicationsHelpers", () => {
     expect(inquiryStatusPresentation({ ...base, status: "contacted" }).tone).toBe("pending");
     expect(isPendingInquiry({ ...base, status: "qualified" })).toBe(true);
     expect(inquiryLocationLine(base)).toBe("Pune, Maharashtra");
+  });
+
+  it("builds google maps search and embed urls from location fields", () => {
+    expect(mapsSearchUrl(base)).toContain("google.com/maps/search");
+    expect(mapsSearchUrl(base)).toContain(encodeURIComponent("42 FC Road, Pune, Maharashtra, 411001"));
+    expect(mapsEmbedUrl(base)).toContain("maps.google.com/maps");
+    expect(mapsEmbedUrl(base)).toContain("output=embed");
+    expect(mapsEmbedUrl({ ...base, address_line: null, city: null, state: null, pincode: null })).toBeNull();
   });
 });

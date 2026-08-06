@@ -123,46 +123,155 @@ export function HomepageEditorShell({
   );
 }
 
+type PagePanelGroupContextValue = {
+  openId: string | null;
+  setOpenId: (id: string | null) => void;
+};
+
+const PagePanelGroupContext = createContext<PagePanelGroupContextValue | null>(null);
+
+/** Single-open accordion group for Brand / Center homepage panels (separate from section accordions). */
+export function HomepageEditorPanels({
+  children,
+  defaultOpenId = null,
+}: {
+  children: ReactNode;
+  defaultOpenId?: string | null;
+}) {
+  const [openId, setOpenId] = useState<string | null>(defaultOpenId);
+  const value = useMemo(() => ({ openId, setOpenId }), [openId]);
+  return (
+    <PagePanelGroupContext.Provider value={value}>
+      <div className="ed-homepage-editor-pages">{children}</div>
+    </PagePanelGroupContext.Provider>
+  );
+}
+
 type PanelProps = {
+  panelId: string;
   title: string;
   description?: ReactNode;
+  icon?: string;
+  iconTone?: EditorSectionTone;
   onSave: () => void;
   onDiscard?: () => void;
   isDirty?: boolean;
   savePending?: boolean;
   saved?: boolean;
   saveLabel?: string;
+  /** When true and no page-panel group is present, start expanded. */
+  defaultOpen?: boolean;
   children: ReactNode;
 };
 
-/** One editable site (brand or center template) inside the marketing pages editor. */
+/** One editable site (brand or center template) as a themed accordion panel. */
 export function HomepageEditorPanel({
+  panelId,
   title,
   description,
+  icon = "web",
+  iconTone = "primary",
   onSave,
   onDiscard,
   isDirty = false,
   savePending,
   saved,
   saveLabel = "Save changes",
+  defaultOpen = true,
   children,
 }: PanelProps) {
+  const group = useContext(PagePanelGroupContext);
+  const bodyId = useId();
+  const [localOpen, setLocalOpen] = useState(defaultOpen);
+  const isOpen = group ? group.openId === panelId : localOpen;
+  const toneClass = `ed-editor-accordion__icon--${iconTone === "error" ? "neutral" : iconTone}`;
+
+  const toggle = useCallback(() => {
+    if (group) {
+      group.setOpenId(isOpen ? null : panelId);
+      return;
+    }
+    setLocalOpen((open) => !open);
+  }, [group, isOpen, panelId]);
+
+  const descriptionText =
+    typeof description === "string" || description == null ? description : undefined;
+
   return (
-    <section className="ed-homepage-editor-panel">
-      <div className="ed-homepage-editor-panel__head">
-        <h3 className="ed-homepage-editor-panel__title">{title}</h3>
-        {description ? <p className="ed-homepage-editor-panel__desc">{description}</p> : null}
-      </div>
-      {children}
-      <EditorSaveBar
-        isDirty={isDirty}
-        onDiscard={onDiscard}
-        onSave={onSave}
-        savePending={savePending}
-        saved={saved}
-        saveLabel={saveLabel}
-        inline
-      />
+    <section
+      className={[
+        "ed-homepage-editor-panel",
+        "ed-editor-accordion",
+        isOpen ? "ed-editor-accordion--open" : "",
+        isDirty ? "ed-homepage-editor-panel--dirty" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {!isOpen ? (
+        <button
+          type="button"
+          className="ed-editor-accordion__trigger"
+          aria-expanded={false}
+          aria-controls={bodyId}
+          onClick={toggle}
+        >
+          <span className={["ed-editor-accordion__icon", toneClass].join(" ")}>
+            <MaterialIcon name={icon} />
+          </span>
+          <span className="ed-editor-accordion__heading">
+            <span className="ed-editor-accordion__title">
+              {title}
+              {isDirty ? <span className="ed-homepage-editor-panel__dirty-badge">Unsaved</span> : null}
+            </span>
+            {descriptionText ? (
+              <span className="ed-editor-accordion__description">{descriptionText}</span>
+            ) : description ? (
+              <span className="ed-editor-accordion__description">{description}</span>
+            ) : null}
+          </span>
+          <MaterialIcon name="add" />
+        </button>
+      ) : (
+        <>
+          <div className="ed-editor-accordion__open-header">
+            <div className="ed-editor-accordion__open-title">
+              <span className={["ed-editor-accordion__icon", toneClass].join(" ")}>
+                <MaterialIcon name={icon} filled />
+              </span>
+              <div className="ed-homepage-editor-panel__open-copy">
+                <h3 className="ed-editor-accordion__title">{title}</h3>
+                {description ? <p className="ed-homepage-editor-panel__desc">{description}</p> : null}
+              </div>
+            </div>
+            <div className="ed-editor-accordion__open-actions">
+              {isDirty ? <span className="ed-homepage-editor-panel__dirty-badge">Unsaved</span> : null}
+              <button
+                type="button"
+                className="ed-editor-accordion__collapse"
+                aria-expanded
+                aria-controls={bodyId}
+                aria-label={`Collapse ${title}`}
+                onClick={toggle}
+              >
+                <MaterialIcon name="remove" />
+              </button>
+            </div>
+          </div>
+          <div id={bodyId} className="ed-editor-accordion__body ed-homepage-editor-panel__body">
+            {children}
+            <EditorSaveBar
+              isDirty={isDirty}
+              onDiscard={onDiscard}
+              onSave={onSave}
+              savePending={savePending}
+              saved={saved}
+              saveLabel={saveLabel}
+              inline
+            />
+          </div>
+        </>
+      )}
     </section>
   );
 }

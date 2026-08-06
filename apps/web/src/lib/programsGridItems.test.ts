@@ -45,6 +45,32 @@ describe("resolveProgramsGridItems", () => {
     expect(items[0]?.benefits).toEqual(["Fast math"]);
   });
 
+  it("fills missing homepage card images from matching curriculum programs", () => {
+    const items = resolveProgramsGridItems(
+      {
+        cards: [
+          {
+            id: "a",
+            name: "Abacus",
+            description: "Homepage blurb",
+            ageLabel: "Age 6–14",
+            benefits: ["Fast math"],
+          },
+        ],
+      },
+      [
+        {
+          ...sampleCurriculum("Abacus"),
+          marketingImageUrl: "https://cdn.example/abacus.jpg",
+        },
+      ]
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.name).toBe("Abacus");
+    expect(items[0]?.imageUrl).toBe("https://cdn.example/abacus.jpg");
+  });
+
   it("falls back to curriculum when no homepage cards", () => {
     const items = resolveProgramsGridItems(undefined, [sampleCurriculum("Junior Abacus")]);
     expect(items).toHaveLength(1);

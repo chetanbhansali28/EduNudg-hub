@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
 import { AbacusClassicEditorForm } from "@/features/marketing/AbacusClassicEditorForm";
-import { HomepageEditorPanel, HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
+import {
+  HomepageEditorPanel,
+  HomepageEditorPanels,
+  HomepageEditorShell,
+} from "@/features/marketing/HomepageEditorShell";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import {
   fetchBrandMarketingEditor,
@@ -166,7 +170,7 @@ export function BrandMarketingEditorPage() {
   }
 
   if (editor.isLoading || !brandConfig || !centerConfig || !brandBaseline || !centerBaseline) {
-    return <p>Loading marketing pages…</p>;
+    return <p className="ed-empty">Loading marketing pages…</p>;
   }
 
   const brandEditorProps = {
@@ -183,9 +187,12 @@ export function BrandMarketingEditorPage() {
       subtitle="Manage your public brand recruitment site and center enrollment templates."
       lastSavedLabel={lastSavedLabel}
     >
-      <div className="ed-homepage-editor-pages">
+      <HomepageEditorPanels defaultOpenId="brand">
         <HomepageEditorPanel
+          panelId="brand"
           title="Brand site (franchise recruitment)"
+          icon="storefront"
+          iconTone="primary"
           onSave={() => saveBrand.mutate(brandConfig)}
           onDiscard={() => {
             setBrandConfig(brandBaseline);
@@ -243,7 +250,10 @@ export function BrandMarketingEditorPage() {
         </HomepageEditorPanel>
 
         <HomepageEditorPanel
+          panelId="center"
           title="Center sites (parent enrollment template)"
+          icon="apartment"
+          iconTone="secondary"
           onSave={() => saveCenter.mutate(centerConfig)}
           onDiscard={() => setCenterConfig(centerBaseline)}
           isDirty={!!centerDirty}
@@ -277,7 +287,7 @@ export function BrandMarketingEditorPage() {
             />
           )}
         </HomepageEditorPanel>
-      </div>
+      </HomepageEditorPanels>
     </HomepageEditorShell>
   );
 }

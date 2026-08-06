@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HomepageEditorForm } from "@/features/marketing/HomepageEditorForm";
-import { HomepageEditorShell } from "@/features/marketing/HomepageEditorShell";
+import {
+  HomepageEditorPanel,
+  HomepageEditorPanels,
+  HomepageEditorShell,
+} from "@/features/marketing/HomepageEditorShell";
 import { fetchHomepageEditorBundle, saveHomepageConfig } from "@/lib/homepageApi";
 import { formatLastSavedLabel } from "@/lib/formatRelativeTime";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
@@ -46,27 +50,35 @@ export function HomepageEditorPage() {
     },
   });
 
-  if (isLoading) return <p>Loading homepage config…</p>;
+  if (isLoading) return <p className="ed-empty">Loading homepage config…</p>;
 
   return (
-    <>
-      <HomepageEditorShell
-        title="Homepage Configuration"
-        subtitle="Manage your public brand recruitment site and center enrollment templates."
-        lastSavedLabel={formatLastSavedLabel(updatedAt)}
-        onSave={() => save.mutate(undefined)}
-        onDiscard={() => setConfig(baseline)}
-        isDirty={isDirty}
-        savePending={save.isPending}
-        saved={saved}
-      >
-        <HomepageEditorForm
-          config={config}
-          onChange={setConfig}
-          uploadScope={{ kind: "platform" }}
-          portalMode="platform"
-        />
-      </HomepageEditorShell>
-    </>
+    <HomepageEditorShell
+      title="Homepage Configuration"
+      subtitle="Manage the EduNudg platform marketing site (enterprise base theme)."
+      lastSavedLabel={formatLastSavedLabel(updatedAt)}
+    >
+      <HomepageEditorPanels defaultOpenId="platform">
+        <HomepageEditorPanel
+          panelId="platform"
+          title="Platform site"
+          description="Public homepage for localhost / EduNudg marketing. Content starts from the enterprise base theme."
+          icon="domain"
+          iconTone="primary"
+          onSave={() => save.mutate(undefined)}
+          onDiscard={() => setConfig(baseline)}
+          isDirty={isDirty}
+          savePending={save.isPending}
+          saved={saved}
+        >
+          <HomepageEditorForm
+            config={config}
+            onChange={setConfig}
+            uploadScope={{ kind: "platform" }}
+            portalMode="platform"
+          />
+        </HomepageEditorPanel>
+      </HomepageEditorPanels>
+    </HomepageEditorShell>
   );
 }

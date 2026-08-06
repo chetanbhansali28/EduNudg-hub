@@ -151,7 +151,8 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
     mutationFn: async () => {
       if (!selectedId || !assignCenterId) return;
       clear();
-      if (isReallocate) await reassignLead(selectedId, assignCenterId);
+      // Reassign when the lead already has a center (reallocate or reassign).
+      if (selected?.center_id) await reassignLead(selectedId, assignCenterId);
       else await assignLeadToCenter(selectedId, assignCenterId);
     },
     onSuccess: () => {
@@ -206,9 +207,15 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
         onStartAssign={(reallocate) => {
           setAssignMode(true);
           setIsReallocate(reallocate);
-          setAssignCenterId(selected.center_id ?? "");
+          // Preserve a center the user already picked in the panel; only
+          // prefill the current assignment when nothing is selected yet.
+          setAssignCenterId((prev) => prev || selected.center_id || "");
         }}
-        onCancelAssign={() => setAssignMode(false)}
+        onCancelAssign={() => {
+          setAssignMode(false);
+          setIsReallocate(false);
+          setAssignCenterId("");
+        }}
         onConfirmAssign={() => assign.mutate()}
         onReopen={() => reopen.mutate(selected.id)}
       />
@@ -414,12 +421,7 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
           isMobile ? (
             <Button onClick={() => setAddLeadOpen(true)}>Add lead</Button>
           ) : (
-            <>
-              <Button variant="secondary" onClick={() => setFilter(filter)}>
-                Filters
-              </Button>
-              <Button onClick={() => downloadLeadsCsv(allLeads)}>Export List</Button>
-            </>
+            <Button onClick={() => downloadLeadsCsv(allLeads)}>Export List</Button>
           )
         }
       />

@@ -42,7 +42,9 @@ function curriculumToDisplay(program: PublicCurriculumProgram, index: number): P
   };
 }
 
-/** Homepage cards take precedence; otherwise fall back to published brand curriculum. */
+/** Homepage cards take precedence; otherwise fall back to published brand curriculum.
+ *  When a homepage card has no image, fill from a curriculum program with the same name.
+ */
 export function resolveProgramsGridItems(
   programsSection: HomepageProgramsSection | undefined,
   curriculum: PublicCurriculumProgram[]
@@ -50,7 +52,15 @@ export function resolveProgramsGridItems(
   const cards = programsSection?.cards ?? [];
   const namedCards = cards.filter((c) => c.name.trim().length > 0);
   if (namedCards.length > 0) {
-    return namedCards.map(cardToDisplay);
+    return namedCards.map((card) => {
+      const display = cardToDisplay(card);
+      if (display.imageUrl) return display;
+      const match = curriculum.find(
+        (program) => program.name.trim().toLowerCase() === card.name.trim().toLowerCase()
+      );
+      const curriculumImage = match?.marketingImageUrl?.trim() || null;
+      return curriculumImage ? { ...display, imageUrl: curriculumImage } : display;
+    });
   }
   return curriculum.map(curriculumToDisplay);
 }

@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { CenterPublicNavLogins } from "./CenterPublicNavLogins";
@@ -29,7 +30,6 @@ export function MarketingNav({ config, brandSlug }: Props) {
   const navCtaVariant = isLightBg ? "on-light" : "on-dark";
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
-  const menuWrapRef = useRef<HTMLDivElement>(null);
   const logoUrl = config.meta.logoUrl?.trim() || null;
 
   useEffect(() => {
@@ -42,17 +42,60 @@ export function MarketingNav({ config, brandSlug }: Props) {
   }, [menuOpen]);
 
   useEffect(() => {
-    if (!menuOpen) return;
-    const onPointerDown = (e: MouseEvent) => {
-      if (!menuWrapRef.current?.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
+    document.body.classList.toggle("novu-nav-drawer-open", menuOpen);
+    return () => document.body.classList.remove("novu-nav-drawer-open");
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
+
+  const drawer =
+    menuOpen && typeof document !== "undefined"
+      ? createPortal(
+          <>
+            <button
+              type="button"
+              className={`novu-nav-bar__drawer-backdrop novu-nav-bar--${theme}`}
+              aria-label="Close menu"
+              onClick={closeMenu}
+            />
+            <div
+              id={menuId}
+              className={`novu-nav-bar__drawer novu-nav-bar--${theme}`}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site menu"
+            >
+              <div className="novu-nav-bar__drawer-head">
+                <span className="novu-nav-bar__drawer-title">{config.meta.siteName}</span>
+                <button
+                  type="button"
+                  className="novu-nav-bar__drawer-close"
+                  aria-label="Close menu"
+                  onClick={closeMenu}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="novu-nav-bar__drawer-links">
+                {config.nav.links.map((l, i) => (
+                  <a
+                    key={`${l.label}-${l.href}-${i}`}
+                    href={l.href}
+                    className="novu-nav-bar__drawer-link"
+                    onClick={closeMenu}
+                  >
+                    {l.label}
+                  </a>
+                ))}
+                {brandSlug ? (
+                  <CenterPublicNavLogins brandSlug={brandSlug} inDropdown onNavigate={closeMenu} />
+                ) : null}
+              </div>
+            </div>
+          </>,
+          document.body
+        )
+      : null;
 
   return (
     <nav
@@ -60,7 +103,7 @@ export function MarketingNav({ config, brandSlug }: Props) {
       aria-label="Site"
     >
       <div className="novu-nav-bar__inner">
-        <div className="novu-nav-bar__brand" ref={menuWrapRef}>
+        <div className="novu-nav-bar__brand">
           <button
             type="button"
             className="novu-nav-bar__menu-toggle"
@@ -71,29 +114,6 @@ export function MarketingNav({ config, brandSlug }: Props) {
           >
             <MenuIcon open={menuOpen} />
           </button>
-
-          {menuOpen ? (
-            <div id={menuId} className="novu-nav-bar__dropdown" role="menu">
-              {config.nav.links.map((l, i) => (
-                <a
-                  key={`${l.label}-${l.href}-${i}`}
-                  href={l.href}
-                  className="novu-nav-bar__dropdown-link"
-                  role="menuitem"
-                  onClick={closeMenu}
-                >
-                  {l.label}
-                </a>
-              ))}
-              {brandSlug ? (
-                <CenterPublicNavLogins
-                  brandSlug={brandSlug}
-                  inDropdown
-                  onNavigate={closeMenu}
-                />
-              ) : null}
-            </div>
-          ) : null}
 
           <Link to="/" className="novu-nav-bar__logo" aria-label={`${config.meta.siteName} home`}>
             {logoUrl ? (
@@ -130,6 +150,8 @@ export function MarketingNav({ config, brandSlug }: Props) {
           className="novu-nav-bar__cta-mobile"
         />
       </div>
+
+      {drawer}
     </nav>
   );
 }

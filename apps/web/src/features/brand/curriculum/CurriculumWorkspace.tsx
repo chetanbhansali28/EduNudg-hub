@@ -237,11 +237,6 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
     onError: capture,
   });
 
-  const archiveBlockedReason =
-    impact.data && impact.data.authorizedCenters > 0
-      ? `Cannot archive while ${impact.data.authorizedCenters} center(s) are authorized for this course. Remove authorization on Centers first.`
-      : null;
-
   const openMobileCourse = (courseId: string, levelId?: string) => {
     setAddCourseOpen(false);
     setSelectedCourseId(courseId);
@@ -280,7 +275,6 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       onSaveCourse={() => saveCourse.mutate()}
       saveCoursePending={saveCourse.isPending}
       onArchiveCourse={() => archiveCourse.mutate()}
-      archiveBlockedReason={archiveBlockedReason}
       selectedLevelId={selectedLevelId}
       onSelectLevel={setSelectedLevelId}
       addLevel={addLevel}

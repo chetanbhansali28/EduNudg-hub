@@ -53,7 +53,7 @@ export function StudentLeadDetailView({
   isMobile,
   assignedCenterName,
   stale,
-  unassigned,
+  unassigned: _unassigned,
   assignMode,
   isReallocate,
   assignCenterId,
@@ -106,6 +106,13 @@ export function StudentLeadDetailView({
     />
   );
 
+  const pickCenter = (centerId: string) => {
+    onAssignCenterIdChange(centerId);
+    if (!assignMode && lead.status !== "converted" && lead.status !== "lost") {
+      onStartAssign(Boolean(lead.center_id) && stale);
+    }
+  };
+
   const suggestionCards = (
     <>
       {noSuggestions ? (
@@ -123,7 +130,7 @@ export function StudentLeadDetailView({
               tag="Exact Match"
               tone="primary"
               selected={assignCenterId === center.center_id}
-              onSelect={() => onAssignCenterIdChange(center.center_id)}
+              onSelect={() => pickCenter(center.center_id)}
             />
           ))}
           {nearSuggestions.map((center) => (
@@ -135,7 +142,7 @@ export function StudentLeadDetailView({
               tag="Nearby"
               tone="secondary"
               selected={assignCenterId === center.center_id}
-              onSelect={() => onAssignCenterIdChange(center.center_id)}
+              onSelect={() => pickCenter(center.center_id)}
             />
           ))}
         </>
@@ -149,7 +156,7 @@ export function StudentLeadDetailView({
       <Select
         label="Center"
         value={assignCenterId}
-        onChange={onAssignCenterIdChange}
+        onChange={pickCenter}
         options={centers.map((center) => ({
           value: center.id,
           label: `${center.display_name ?? center.name}${center.city ? ` · ${center.city}` : ""}`,
@@ -161,7 +168,7 @@ export function StudentLeadDetailView({
 
   const assignActions = (
     <div className="ed-lead-detail-actions">
-      {assignMode ? (
+      {assignMode || assignCenterId ? (
         <>
           <Button onClick={onConfirmAssign} disabled={!assignCenterId || assignPending}>
             {isReallocate ? "Confirm & Reallocate Lead" : "Confirm & Assign Lead"}
@@ -175,7 +182,7 @@ export function StudentLeadDetailView({
           Reopen
         </Button>
       ) : lead.status !== "converted" ? (
-        <Button onClick={() => onStartAssign(stale && !unassigned)}>
+        <Button onClick={() => onStartAssign(Boolean(lead.center_id) && stale)}>
           {!lead.center_id ? "Assign Lead" : stale ? "Reallocate" : "Reassign"}
         </Button>
       ) : null}
@@ -195,7 +202,7 @@ export function StudentLeadDetailView({
           {suggestionCards}
         </>
       }
-      manualSelect={lead.status !== "converted" && lead.status !== "lost" ? manualSelect : undefined}
+      manualSelect={lead.status !== "converted" && lead.status !== "lost" ? manualSelect : null}
       footer={assignActions}
     />
   );

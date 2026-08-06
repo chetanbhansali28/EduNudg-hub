@@ -47,7 +47,9 @@ describe("FranchiseInquiryDetailCard", () => {
     expect(screen.getByText("Tutoring background")).toBeDefined();
     expect(screen.getByRole("link", { name: "+919876543210" }).getAttribute("href")).toBe("tel:+919876543210");
     expect(screen.queryByLabelText("Center slug (optional)")).toBeNull();
-    expect(screen.getByText(/slug is generated automatically/i)).toBeDefined();
+    expect(screen.getByText(/maps a subdomain under your brand domain/i)).toBeDefined();
+    expect(screen.queryByText(/\{center\}\.\{brand\}/)).toBeNull();
+    expect(screen.getByTitle(/Google Map for Pune, Maharashtra/i)).toBeDefined();
     fireEvent.click(screen.getByRole("button", { name: "Approve & create center" }));
     expect(onApprove).toHaveBeenCalled();
   });

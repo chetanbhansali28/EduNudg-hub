@@ -18,7 +18,7 @@ import {
   Select,
   Textarea,
 } from "@edunudg/ui";
-import { portalBackendUrl } from "@/lib/brandPortalUrl";
+import { centerPortalUrl, portalBackendUrl } from "@/lib/brandPortalUrl";
 import {
   type BrandCenterRow,
   fetchCenterStats,
@@ -134,6 +134,8 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
     center.status === "active"
       ? portalBackendUrl({ portalType: "center", brandSlug, centerSlug: center.slug })
       : null;
+  const centerFrontendUrl =
+    center.status === "active" ? centerPortalUrl(brandSlug, center.slug) : null;
   const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm);
 
   const saveProfile = useMutation({
@@ -212,28 +214,19 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
 
   const resetForm = () => setForm(savedForm);
 
-  const heroActions = (
-    <>
-      {centerBackendUrl ? (
-        <Button
-          variant="secondary"
-          onClick={() => window.open(`${centerBackendUrl}/students`, "_blank", "noopener,noreferrer")}
-        >
-          View Students
-        </Button>
-      ) : (
-        <Button variant="secondary" disabled>
-          View Students
-        </Button>
-      )}
-      {centerBackendUrl ? (
-        <Button onClick={() => window.open(centerBackendUrl, "_blank", "noopener,noreferrer")}>
-          Assign Faculty
-        </Button>
-      ) : (
-        <Button disabled>Assign Faculty</Button>
-      )}
-    </>
+  const frontendLink = centerFrontendUrl ? (
+    <a
+      className="ed-center-detail-hero__frontend-link"
+      href={centerFrontendUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      View Frontend ↗
+    </a>
+  ) : (
+    <span className="ed-center-detail-hero__frontend-link" aria-disabled="true">
+      View Frontend
+    </span>
   );
 
   return (
@@ -244,6 +237,7 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
           imageUrl={form.photoUrl}
           title={title}
           slug={center.slug}
+          titleAction={frontendLink}
         />
       ) : (
         <CenterDetailHero
@@ -252,11 +246,13 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
           title={title}
           franchiseId={centerFranchiseId(center)}
           status={<CenterStatusBadge status={centerStatusTone(center.status)} />}
-          actions={heroActions}
+          titleAction={frontendLink}
         />
       )}
 
-      {stats.data ? <CenterDetailStatsRow items={centerStatsItems(stats.data)} /> : null}
+      {stats.data ? (
+        <CenterDetailStatsRow items={centerStatsItems(stats.data, centerBackendUrl)} />
+      ) : null}
 
       <MutationError message={error} />
 

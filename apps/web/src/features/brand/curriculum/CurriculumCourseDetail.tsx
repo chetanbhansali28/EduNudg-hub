@@ -40,7 +40,6 @@ type Props = {
   onSaveCourse: () => void;
   saveCoursePending: boolean;
   onArchiveCourse: () => void;
-  archiveBlockedReason?: string | null;
   selectedLevelId: string | null;
   onSelectLevel: (id: string | null) => void;
   addLevel: LevelForm;
@@ -73,7 +72,6 @@ export function CurriculumCourseDetail({
   onEditCourseChange,
   onSaveCourse,
   saveCoursePending,
-  archiveBlockedReason,
   selectedLevelId,
   onSelectLevel,
   addLevel,
@@ -127,12 +125,6 @@ export function CurriculumCourseDetail({
           title="Curriculum Builder"
           subtitle="Structure courses, programs, and chapters for your franchise network."
         />
-      ) : null}
-
-      {archiveBlockedReason ? (
-        <p className="ed-text-sm ed-muted" role="status">
-          {archiveBlockedReason}
-        </p>
       ) : null}
 
       <CurriculumGeneralInfoCard

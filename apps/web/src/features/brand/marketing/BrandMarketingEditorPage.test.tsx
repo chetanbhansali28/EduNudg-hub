@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandMarketingEditorPage } from "./BrandMarketingEditorPage";
@@ -48,13 +48,17 @@ describe("BrandMarketingEditorPage", () => {
       </MemoryRouter>
     );
     expect(await screen.findByText("Homepage Configuration")).toBeDefined();
-    expect(await screen.findByText("Brand site (franchise recruitment)")).toBeDefined();
-    expect(screen.getByText("Center sites (parent enrollment template)")).toBeDefined();
-    expect(screen.getAllByRole("button", { name: "Save changes" })).toHaveLength(2);
+    expect(await screen.findByRole("heading", { name: "Brand site (franchise recruitment)" })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Center sites \(parent enrollment template\)/i })).toBeDefined();
+    expect(screen.getAllByRole("button", { name: "Save changes" })).toHaveLength(1);
+    expect(screen.getByText("Novu editor form")).toBeDefined();
     expect(screen.queryByRole("link", { name: /preview/i })).toBeNull();
     expect(screen.queryByRole("tab")).toBeNull();
     expect(screen.queryByRole("tablist")).toBeNull();
-    expect(screen.getAllByText("Novu editor form")).toHaveLength(2);
+
+    fireEvent.click(screen.getByRole("button", { name: /Center sites \(parent enrollment template\)/i }));
+    expect(await screen.findAllByText("Novu editor form")).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Save changes" })).toHaveLength(1);
   });
 
   it("sprint1_renders_abacus_classic_editor_when_theme_is_abacus_classic", async () => {
@@ -78,7 +82,7 @@ describe("BrandMarketingEditorPage", () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findAllByText("Abacus Classic editor form")).toHaveLength(2);
+    expect(await screen.findByText("Abacus Classic editor form")).toBeDefined();
     expect(screen.queryByText("Novu editor form")).toBeNull();
   });
 });

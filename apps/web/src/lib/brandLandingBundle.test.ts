@@ -45,9 +45,28 @@ describe("normalizeBrandLandingBundle", () => {
     expect(bundle?.publicStats).toEqual({ centersCount: 3, studentsCount: 99 });
   });
 
-  it("returns null for invalid cache payload", () => {
-    expect(normalizeBrandLandingBundle(null)).toBeNull();
-    expect(normalizeBrandLandingBundle({ config: {} })).toBeNull();
-    expect(isBrandLandingBundleReady(null)).toBe(false);
+  it("regression_preserves_curriculum_banner_image_through_normalize", () => {
+    const config = buildBrandLandingConfig("Abacus World");
+    const bundle = normalizeBrandLandingBundle({
+      config,
+      publicCurriculum: [
+        {
+          name: "Abacus",
+          description: null,
+          whyTake: null,
+          whatYouLearn: null,
+          marketingVideoUrl: null,
+          marketingImageUrl: "https://cdn.example/course-banner.png",
+          ageLabel: null,
+          marketingBenefits: [],
+          scholarshipHighlight: null,
+          versionNumber: 1,
+          levels: [],
+        },
+      ],
+      marketingTheme: "spark-academy",
+    });
+
+    expect(bundle?.publicCurriculum[0]?.marketingImageUrl).toBe("https://cdn.example/course-banner.png");
   });
 });

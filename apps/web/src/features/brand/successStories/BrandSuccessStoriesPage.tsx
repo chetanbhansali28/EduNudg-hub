@@ -1,41 +1,29 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Badge,
   Button,
-  Card,
-  DataList,
   FormGrid,
   Input,
-  ListRow,
   MutationError,
-  PageGridFull,
-  PageTitle,
   Textarea,
   ToggleField,
 } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
-import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
+import {
+  SuccessStoryCard,
+  type StoryForm,
+  type StoryRow,
+} from "./SuccessStoryCard";
+import "./brandSuccessStories.css";
 
-interface Story {
-  id: string;
-  title: string;
-  quote: string;
-  author_name: string;
-  author_role: string | null;
-  rating: number | null;
-  image_url: string | null;
-  sort_order: number;
-  is_published: boolean;
-}
-
-const emptyForm = {
+const emptyForm: StoryForm = {
   title: "",
   quote: "",
   authorName: "",
@@ -45,6 +33,10 @@ const emptyForm = {
   sortOrder: "0",
   isPublished: true,
 };
+
+function isStoryFormValid(form: StoryForm) {
+  return Boolean(form.title.trim() && form.quote.trim() && form.authorName.trim());
+}
 
 export function BrandSuccessStoriesPage() {
   const { brandId, missingBrand } = useBrandScope();
@@ -65,7 +57,7 @@ export function BrandSuccessStoriesPage() {
         .eq("brand_id", brandId!)
         .order("sort_order")
         .order("created_at", { ascending: false });
-      return supabaseList(data, qErr) as Story[];
+      return supabaseList(data, qErr) as StoryRow[];
     },
   });
 
@@ -127,117 +119,121 @@ export function BrandSuccessStoriesPage() {
       const { error: mErr } = await getSupabase().from("brand_success_stories").delete().eq("id", id);
       if (mErr) throw mErr;
     },
-    onSuccess: invalidate,
+    onSuccess: () => {
+      if (editingId) setEditingId(null);
+      invalidate();
+    },
     onError: capture,
   });
 
   if (missingBrand) return <p className="ed-empty">Brand context not found.</p>;
 
+  const rows = stories.data ?? [];
+
   return (
-    <>
-      <PageTitle>Success stories</PageTitle>
+    <div className="ed-success-stories-page">
+      <header className="ed-success-stories-page__header">
+        <h1 className="ed-success-stories-page__title">Success stories</h1>
+        <p className="ed-success-stories-page__subtitle">
+          Quotes published here appear on your brand marketing site testimonials. Configure homepage placement in{" "}
+          <Link to="/app/homepage">Homepage</Link>.
+        </p>
+      </header>
+
       <MutationError message={error} />
 
-      <PageGridFull>
-        <AddFormSection buttonLabel="Add success story" panelTitle="Add success story">
-          {({ close }) => {
-            bindClose(close);
-            return (
-              <>
-                <FormGrid>
-                  <Input label="Title" value={form.title} onChange={(v) => setForm((f) => ({ ...f, title: v }))} />
-                  <Input label="Author name" value={form.authorName} onChange={(v) => setForm((f) => ({ ...f, authorName: v }))} />
-                  <Input label="Author role" value={form.authorRole} onChange={(v) => setForm((f) => ({ ...f, authorRole: v }))} />
-                  <Input label="Rating (1–5)" value={form.rating} onChange={(v) => setForm((f) => ({ ...f, rating: v }))} />
-                  <Input label="Sort order" value={form.sortOrder} onChange={(v) => setForm((f) => ({ ...f, sortOrder: v }))} />
-                </FormGrid>
-                <MarketingMediaField
-                  label="Story image"
-                  value={form.imageUrl}
-                  onChange={(v) => setForm((f) => ({ ...f, imageUrl: v }))}
-                  mediaType="image"
-                  uploadSubdir="success-stories/new"
-                  uploadScope={{ kind: "brand", brandId: brandId! }}
+      <AddFormSection buttonLabel="Add success story" panelTitle="Add success story">
+        {({ close }) => {
+          bindClose(close);
+          return (
+            <>
+              <FormGrid>
+                <Input label="Title" value={form.title} onChange={(v) => setForm((f) => ({ ...f, title: v }))} />
+                <Input
+                  label="Author name"
+                  value={form.authorName}
+                  onChange={(v) => setForm((f) => ({ ...f, authorName: v }))}
                 />
-                <Textarea label="Quote" value={form.quote} onChange={(v) => setForm((f) => ({ ...f, quote: v }))} rows={4} />
-                <ToggleField
-                  label="Published"
-                  description="Show on brand marketing site (#testimonials)"
-                  checked={form.isPublished}
-                  onChange={(checked) => setForm((f) => ({ ...f, isPublished: checked }))}
+                <Input
+                  label="Author role"
+                  value={form.authorRole}
+                  onChange={(v) => setForm((f) => ({ ...f, authorRole: v }))}
                 />
-                <Button
-                  onClick={() => create.mutate()}
-                  disabled={!form.title.trim() || !form.quote.trim() || !form.authorName.trim() || create.isPending}
-                >
-                  Create story
-                </Button>
-              </>
-            );
-          }}
-        </AddFormSection>
-      </PageGridFull>
+                <Input label="Rating (1–5)" value={form.rating} onChange={(v) => setForm((f) => ({ ...f, rating: v }))} />
+                <Input
+                  label="Sort order"
+                  value={form.sortOrder}
+                  onChange={(v) => setForm((f) => ({ ...f, sortOrder: v }))}
+                />
+              </FormGrid>
+              <MarketingMediaField
+                label="Story image"
+                value={form.imageUrl}
+                onChange={(v) => setForm((f) => ({ ...f, imageUrl: v }))}
+                mediaType="image"
+                uploadSubdir="success-stories/new"
+                uploadScope={{ kind: "brand", brandId: brandId! }}
+              />
+              <Textarea
+                label="Quote"
+                value={form.quote}
+                onChange={(v) => setForm((f) => ({ ...f, quote: v }))}
+                rows={4}
+              />
+              <ToggleField
+                label="Published"
+                description="Show on brand marketing site (#testimonials)"
+                checked={form.isPublished}
+                onChange={(checked) => setForm((f) => ({ ...f, isPublished: checked }))}
+              />
+              <Button
+                onClick={() => create.mutate()}
+                disabled={!isStoryFormValid(form) || create.isPending}
+              >
+                {create.isPending ? "Creating…" : "Create story"}
+              </Button>
+            </>
+          );
+        }}
+      </AddFormSection>
 
-      <PageGridFull>
-        <Card title="Success stories">
-          <DataList
-            items={stories.data ?? []}
-            empty="No success stories yet."
-            render={(s) => {
-              const editing = editingId === s.id;
-              return (
-                <ListRow
-                  aside={
-                    <CrudRowActions
-                      editing={editing}
-                      onEdit={() => {
-                        setEditingId(s.id);
-                        setEditForm({
-                          title: s.title,
-                          quote: s.quote,
-                          authorName: s.author_name,
-                          authorRole: s.author_role ?? "",
-                          rating: s.rating != null ? String(s.rating) : "",
-                          imageUrl: s.image_url ?? "",
-                          sortOrder: String(s.sort_order),
-                          isPublished: s.is_published,
-                        });
-                      }}
-                      onSave={() => update.mutate(s.id)}
-                      onCancel={() => setEditingId(null)}
-                      onDelete={() => remove.mutate(s.id)}
-                      saveDisabled={!editForm.title.trim() || update.isPending}
-                    />
-                  }
-                >
-                  {editing ? (
-                    <>
-                      <Textarea label="Quote" value={editForm.quote} onChange={(v) => setEditForm((f) => ({ ...f, quote: v }))} />
-                      <MarketingMediaField
-                        label="Story image"
-                        value={editForm.imageUrl}
-                        onChange={(v) => setEditForm((f) => ({ ...f, imageUrl: v }))}
-                        mediaType="image"
-                        uploadSubdir={`success-stories/${s.id}`}
-                        uploadScope={{ kind: "brand", brandId: brandId! }}
-                      />
-                    </>
-                  ) : (
-                    <div>
-                      <strong>{s.title}</strong>
-                      <Badge tone={s.is_published ? "success" : "default"}>
-                        {s.is_published ? "Published" : "Draft"}
-                      </Badge>
-                      <p className="ed-text-sm ed-muted">{s.author_name}{s.author_role ? ` · ${s.author_role}` : ""}</p>
-                      <p className="ed-text-sm">“{s.quote.slice(0, 120)}{s.quote.length > 120 ? "…" : ""}”</p>
-                    </div>
-                  )}
-                </ListRow>
-              );
-            }}
-          />
-        </Card>
-      </PageGridFull>
-    </>
+      <section className="ed-success-stories-page__list" aria-label="Success stories">
+        {rows.length === 0 ? (
+          <p className="ed-success-stories-page__empty">No success stories yet. Add one to feature on your homepage.</p>
+        ) : (
+          rows.map((story) => {
+            const editing = editingId === story.id;
+            return (
+              <SuccessStoryCard
+                key={story.id}
+                story={story}
+                brandId={brandId!}
+                editing={editing}
+                editForm={editForm}
+                saveDisabled={!isStoryFormValid(editForm)}
+                savePending={update.isPending}
+                onEdit={() => {
+                  setEditingId(story.id);
+                  setEditForm({
+                    title: story.title,
+                    quote: story.quote,
+                    authorName: story.author_name,
+                    authorRole: story.author_role ?? "",
+                    rating: story.rating != null ? String(story.rating) : "",
+                    imageUrl: story.image_url ?? "",
+                    sortOrder: String(story.sort_order),
+                    isPublished: story.is_published,
+                  });
+                }}
+                onCancelEdit={() => setEditingId(null)}
+                onSave={() => update.mutate(story.id)}
+                onDelete={() => remove.mutate(story.id)}
+                onEditFormChange={setEditForm}
+              />
+            );
+          })
+        )}
+      </section>
+    </div>
   );
 }

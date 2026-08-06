@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandSuccessStoriesPage } from "./BrandSuccessStoriesPage";
 
@@ -36,13 +37,16 @@ describe("BrandSuccessStoriesPage", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
     render(
-      <QueryClientProvider client={qc}>
-        <BrandSuccessStoriesPage />
-      </QueryClientProvider>
+      <MemoryRouter>
+        <QueryClientProvider client={qc}>
+          <BrandSuccessStoriesPage />
+        </QueryClientProvider>
+      </MemoryRouter>
     );
 
     expect(await screen.findByRole("button", { name: "Add success story" })).toBeDefined();
-    expect(screen.getAllByRole("heading", { name: "Success stories" }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Success stories" })).toBeDefined();
+    expect(screen.getByText(/appear on your brand marketing site testimonials/i)).toBeDefined();
     expect(consoleError).not.toHaveBeenCalledWith(
       expect.stringContaining("useAddFormCloser is not defined")
     );

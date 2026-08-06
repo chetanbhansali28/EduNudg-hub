@@ -56,15 +56,34 @@ export function filterCenters(centers: BrandCenterRow[], filter: CenterFilter): 
   return centers;
 }
 
-export function centerStatsItems(stats: {
-  openLeads: number;
-  students: number;
-  activeEnrollments: number;
-}) {
+export function centerStatsItems(
+  stats: {
+    openLeads: number;
+    students: number;
+    activeEnrollments: number;
+  },
+  backendBaseUrl?: string | null
+) {
+  const base = backendBaseUrl?.replace(/\/$/, "") || null;
   return [
-    { key: "leads", label: "Open Leads", value: stats.openLeads },
-    { key: "students", label: "Students", value: stats.students },
-    { key: "enrollments", label: "Active Enr.", value: stats.activeEnrollments },
+    {
+      key: "leads",
+      label: "Open Leads",
+      value: stats.openLeads,
+      href: base ? `${base}/leads` : null,
+    },
+    {
+      key: "students",
+      label: "Students",
+      value: stats.students,
+      href: base ? `${base}/students` : null,
+    },
+    {
+      key: "enrollments",
+      label: "Active Enr.",
+      value: stats.activeEnrollments,
+      href: base ? `${base}/students` : null,
+    },
   ];
 }
 

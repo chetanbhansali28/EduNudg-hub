@@ -176,3 +176,19 @@ describe("sanitizePublicFooter", () => {
     expect(filtered).toEqual([{ label: "FAQ", href: "#faq" }]);
   });
 });
+
+describe("isLegacyPlatformHomepageSeed", () => {
+  it("detects novu seed markers and treats enterprise config as current", async () => {
+    const { isLegacyPlatformHomepageSeed } = await import("./homepageApi");
+    const { DEFAULT_HOMEPAGE_CONFIG } = await import("./homepageDefaults");
+
+    expect(
+      isLegacyPlatformHomepageSeed({
+        theme: { bgGradient: "linear-gradient(180deg, #f7f3ec, #e8dfd0)" } as never,
+        meta: { siteName: "EduNudg", themeNote: "Novu-inspired" },
+      })
+    ).toBe(true);
+
+    expect(isLegacyPlatformHomepageSeed(DEFAULT_HOMEPAGE_CONFIG)).toBe(false);
+  });
+});

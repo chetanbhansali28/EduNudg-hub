@@ -1,6 +1,10 @@
 import { getSupabase } from "@/lib/supabase";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
-import { mergeSectionVisibility } from "@/lib/homepageSections";
+import {
+  ENTERPRISE_PLATFORM_SECTION_DEFAULTS,
+  mergeSectionVisibility,
+  type HomepageSectionKey,
+} from "@/lib/homepageSections";
 import { sanitizePublicFooter } from "@/lib/marketingPublicSite";
 import type { HomepageConfig, HomepageShowcaseCard, HomepageTestimonial } from "@/types/homepage";
 
@@ -10,6 +14,28 @@ export type HomepageEditorBundle = {
   config: HomepageConfig;
   updatedAt: string | null;
 };
+
+export type MergeHomepageConfigOptions = {
+  sectionDefaults?: Record<HomepageSectionKey, boolean>;
+};
+
+/** True when stored platform homepage JSON is still the old Novu seed (pre-enterprise). */
+export function isLegacyPlatformHomepageSeed(partial: Partial<HomepageConfig> | null | undefined): boolean {
+  if (!partial || typeof partial !== "object") return false;
+  const theme = partial.theme as Record<string, unknown> | undefined;
+  if (theme && typeof theme.bgGradient === "string") return true;
+
+  const meta = partial.meta as Record<string, unknown> | undefined;
+  if (typeof meta?.themeNote === "string" && /novu/i.test(meta.themeNote)) return true;
+
+  const hasEnterpriseBlocks = Boolean(
+    partial.ecosystemIntro || partial.connectivityShowcase || partial.brandSignup || partial.heroOverlayCard
+  );
+  if (hasEnterpriseBlocks) return false;
+
+  // Seed/partial content without enterprise blocks — treat as legacy Novu platform config.
+  return Boolean(partial.hero || partial.nav || partial.featureSections || partial.meta);
+}
 
 export async function fetchHomepageEditorBundle(): Promise<HomepageEditorBundle> {
   try {
@@ -22,8 +48,16 @@ export async function fetchHomepageEditorBundle(): Promise<HomepageEditorBundle>
     if (error || !data?.value) {
       return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: data?.updated_at ?? null };
     }
+
+    const stored = data.value as Partial<HomepageConfig>;
+    if (isLegacyPlatformHomepageSeed(stored)) {
+      return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: data.updated_at ?? null };
+    }
+
     return {
-      config: mergeHomepageConfig(data.value as Partial<HomepageConfig>),
+      config: mergeHomepageConfig(stored, {
+        sectionDefaults: ENTERPRISE_PLATFORM_SECTION_DEFAULTS,
+      }),
       updatedAt: data.updated_at ?? null,
     };
   } catch {
@@ -44,7 +78,10 @@ export async function saveHomepageConfig(config: HomepageConfig): Promise<void> 
   if (error) throw new Error(error.message);
 }
 
-export function mergeHomepageConfig(partial: Partial<HomepageConfig>): HomepageConfig {
+export function mergeHomepageConfig(
+  partial: Partial<HomepageConfig>,
+  options?: MergeHomepageConfigOptions
+): HomepageConfig {
   const legacy = partial as Partial<HomepageConfig> & {
     hero?: Partial<HomepageConfig["hero"]> & { line2?: string; ctaPrimary?: { label: string; href: string } };
     testimonials?: HomepageTestimonial[] | HomepageConfig["testimonials"];
@@ -139,6 +176,6 @@ export function mergeHomepageConfig(partial: Partial<HomepageConfig>): HomepageC
     faq: partial.faq ?? DEFAULT_HOMEPAGE_CONFIG.faq,
     footerCta: { ...DEFAULT_HOMEPAGE_CONFIG.footerCta, ...partial.footerCta },
     footer: sanitizePublicFooter({ ...DEFAULT_HOMEPAGE_CONFIG.footer, ...partial.footer }),
-    sections: mergeSectionVisibility(partial.sections),
+    sections: mergeSectionVisibility(partial.sections, options?.sectionDefaults),
   };
 }

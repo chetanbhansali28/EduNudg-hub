@@ -182,6 +182,7 @@ export function CenterDetailHero({
   title,
   franchiseId,
   status,
+  titleAction,
   actions,
 }: {
   initials: string;
@@ -189,6 +190,7 @@ export function CenterDetailHero({
   title: string;
   franchiseId?: string;
   status?: ReactNode;
+  titleAction?: ReactNode;
   actions?: ReactNode;
 }) {
   return (
@@ -199,6 +201,7 @@ export function CenterDetailHero({
           <div className="ed-center-detail-hero__title-row">
             <h2 className="ed-center-detail-hero__title">{title}</h2>
             {status}
+            {titleAction}
           </div>
           {franchiseId ? <p className="ed-center-detail-hero__id">Franchise ID: {franchiseId}</p> : null}
         </div>
@@ -213,17 +216,22 @@ export function CenterMobileHeroBanner({
   imageUrl,
   title,
   slug,
+  titleAction,
 }: {
   initials: string;
   imageUrl?: string | null;
   title: string;
   slug: string;
+  titleAction?: ReactNode;
 }) {
   return (
     <div className="ed-center-mobile-hero">
       <CenterAvatar initials={initials} imageUrl={imageUrl} tone="blue" />
       <div>
-        <h2 className="ed-center-mobile-hero__title">{title}</h2>
+        <div className="ed-center-mobile-hero__title-row">
+          <h2 className="ed-center-mobile-hero__title">{title}</h2>
+          {titleAction}
+        </div>
         <p className="ed-center-mobile-hero__slug">slug: {slug}</p>
       </div>
     </div>
@@ -233,16 +241,36 @@ export function CenterMobileHeroBanner({
 export function CenterDetailStatsRow({
   items,
 }: {
-  items: { key: string; label: string; value: number | string }[];
+  items: { key: string; label: string; value: number | string; href?: string | null }[];
 }) {
   return (
     <div className="ed-center-detail-stats">
-      {items.map((item) => (
-        <div key={item.key} className="ed-center-detail-stats__item">
-          <p className="ed-center-detail-stats__value">{item.value}</p>
-          <p className="ed-center-detail-stats__label">{item.label}</p>
-        </div>
-      ))}
+      {items.map((item) => {
+        const content = (
+          <>
+            <p className="ed-center-detail-stats__value">{item.value}</p>
+            <p className="ed-center-detail-stats__label">{item.label}</p>
+          </>
+        );
+        if (item.href) {
+          return (
+            <a
+              key={item.key}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ed-center-detail-stats__item ed-center-detail-stats__item--link"
+            >
+              {content}
+            </a>
+          );
+        }
+        return (
+          <div key={item.key} className="ed-center-detail-stats__item">
+            {content}
+          </div>
+        );
+      })}
     </div>
   );
 }

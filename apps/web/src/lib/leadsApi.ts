@@ -89,7 +89,15 @@ export async function submitCenterStudentRegistration(
 export async function suggestCentersForLead(leadId: string) {
   const { data, error } = await getSupabase().rpc("suggest_centers_for_lead", { p_lead_id: leadId });
   if (error) throw error;
-  return data as { exact: SuggestedCenter[]; near: SuggestedCenter[] };
+  const payload = typeof data === "string" ? (JSON.parse(data) as unknown) : data;
+  const record = (payload && typeof payload === "object" ? payload : {}) as {
+    exact?: SuggestedCenter[];
+    near?: SuggestedCenter[];
+  };
+  return {
+    exact: Array.isArray(record.exact) ? record.exact : [],
+    near: Array.isArray(record.near) ? record.near : [],
+  };
 }
 
 export interface SuggestedCenter {

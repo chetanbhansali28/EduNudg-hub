@@ -125,13 +125,15 @@ export function BrandDetailPage() {
     };
   }, [brand.data?.name]);
 
-  if (brand.isLoading) return <p className="ed-empty">Loading brand…</p>;
+  if (brand.isLoading || (brand.isFetching && !brand.data)) return <p className="ed-empty">Loading brand…</p>;
 
   if (brand.data && lookupById && brand.data.slug !== brandSlug) {
     return <Navigate to={brandAdminPath(brand.data.slug)} replace />;
   }
 
+  // After a rename, keep showing the previous brand while navigating to the new slug URL.
   if (!brand.data) {
+    if (brand.isFetching) return <p className="ed-empty">Loading brand…</p>;
     return (
       <>
         <PageToolbar title="Brand not found">
@@ -193,6 +195,7 @@ export function BrandDetailPage() {
       <Card title="Brand settings">
         <BrandEditForm
           brandId={b.id}
+          slug={b.slug}
           name={b.name}
           status={b.status as "draft" | "active" | "suspended" | "archived"}
           logoUrl={b.logo_url}

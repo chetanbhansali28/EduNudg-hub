@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 
 export type LeadBadgeTone = "new" | "converted" | "center" | "brand" | "lost" | "attention" | "neutral";
 
@@ -396,7 +396,7 @@ export function LeadAssignmentPanel({
   title?: string;
   pincode?: string;
   suggestions: ReactNode;
-  manualSelect: ReactNode;
+  manualSelect?: ReactNode;
   footer?: ReactNode;
 }) {
   return (
@@ -406,7 +406,7 @@ export function LeadAssignmentPanel({
         {pincode ? <span className="ed-lead-assignment-panel__pincode">Pincode: {pincode}</span> : null}
       </div>
       <div className="ed-lead-assignment-panel__suggestions">{suggestions}</div>
-      <div className="ed-lead-assignment-panel__manual">{manualSelect}</div>
+      {manualSelect ? <div className="ed-lead-assignment-panel__manual">{manualSelect}</div> : null}
       {footer ? <div className="ed-lead-assignment-panel__footer">{footer}</div> : null}
     </section>
   );
@@ -448,8 +448,23 @@ export function LeadGridCard({
   footer?: ReactNode;
   onSelect?: () => void;
 }) {
-  const content = (
-    <>
+  const onKeyDown = onSelect
+    ? (event: KeyboardEvent<HTMLElement>) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }
+    : undefined;
+
+  return (
+    <article
+      className="ed-lead-grid-card"
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+      onClick={onSelect}
+      onKeyDown={onKeyDown}
+    >
       <div className="ed-lead-grid-card__head">
         <LeadAvatar initials={initials} tone={avatarTone} />
         <div className="ed-lead-grid-card__copy">
@@ -469,17 +484,11 @@ export function LeadGridCard({
           </div>
         ))}
       </div>
-      {footer ? <div className="ed-lead-grid-card__footer">{footer}</div> : null}
-    </>
+      {footer ? (
+        <div className="ed-lead-grid-card__footer" onClick={(event) => event.stopPropagation()}>
+          {footer}
+        </div>
+      ) : null}
+    </article>
   );
-
-  if (onSelect) {
-    return (
-      <button type="button" className="ed-lead-grid-card" onClick={onSelect}>
-        {content}
-      </button>
-    );
-  }
-
-  return <article className="ed-lead-grid-card">{content}</article>;
 }

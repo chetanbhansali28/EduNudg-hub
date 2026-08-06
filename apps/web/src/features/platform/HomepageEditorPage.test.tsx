@@ -29,6 +29,7 @@ describe("HomepageEditorPage", () => {
     );
 
     expect(await screen.findByText("Homepage Configuration")).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Platform site" })).toBeDefined();
     expect(screen.queryByText("Brand marketing themes")).toBeNull();
     expect(screen.queryByLabelText("Website theme")).toBeNull();
   });

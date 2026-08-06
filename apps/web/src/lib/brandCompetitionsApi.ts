@@ -63,3 +63,11 @@ export async function upsertBrandCompetition(
   if (error) throw error;
   return data as string;
 }
+
+export async function deleteBrandCompetition(brandId: string, competitionId: string): Promise<void> {
+  const { error } = await getSupabase().rpc("delete_brand_competition", {
+    p_brand_id: brandId,
+    p_id: competitionId,
+  });
+  if (error) throw error;
+}

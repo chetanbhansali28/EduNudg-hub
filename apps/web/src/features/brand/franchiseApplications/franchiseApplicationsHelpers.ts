@@ -117,3 +117,10 @@ export function mapsSearchUrl(row: FranchiseInquiry): string | null {
   if (parts.length === 0) return null;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(", "))}`;
 }
+
+/** Embeddable Google Maps URL (no API key) for the proposed location preview. */
+export function mapsEmbedUrl(row: FranchiseInquiry): string | null {
+  const parts = [row.address_line, row.city, row.state, row.pincode].filter(Boolean);
+  if (parts.length === 0) return null;
+  return `https://maps.google.com/maps?q=${encodeURIComponent(parts.join(", "))}&z=14&output=embed`;
+}

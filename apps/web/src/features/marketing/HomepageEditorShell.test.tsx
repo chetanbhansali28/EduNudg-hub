@@ -8,6 +8,7 @@ import {
   EditorItemPanel,
   EditorStaticSection,
   HomepageEditorPanel,
+  HomepageEditorPanels,
   HomepageEditorSections,
   HomepageEditorShell,
 } from "./HomepageEditorShell";
@@ -42,15 +43,41 @@ describe("HomepageEditorShell", () => {
     const onSave = vi.fn();
     render(
       <HomepageEditorShell title="Homepage Configuration">
-        <HomepageEditorPanel title="Brand site" description="Franchise recruitment" onSave={onSave} isDirty>
+        <HomepageEditorPanel
+          panelId="brand"
+          title="Brand site"
+          description="Franchise recruitment"
+          onSave={onSave}
+          isDirty
+        >
           <p>Editor fields</p>
         </HomepageEditorPanel>
       </HomepageEditorShell>
     );
-    expect(screen.getByText("Brand site")).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Brand site" })).toBeDefined();
     expect(document.querySelector(".ed-editor-save-bar--inline")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Save changes/i }));
     expect(onSave).toHaveBeenCalled();
+  });
+
+  it("regression_page_panels_are_single_open_accordions", () => {
+    render(
+      <HomepageEditorPanels defaultOpenId="brand">
+        <HomepageEditorPanel panelId="brand" title="Brand site" onSave={vi.fn()}>
+          <p>Brand fields</p>
+        </HomepageEditorPanel>
+        <HomepageEditorPanel panelId="center" title="Center sites" onSave={vi.fn()}>
+          <p>Center fields</p>
+        </HomepageEditorPanel>
+      </HomepageEditorPanels>
+    );
+
+    expect(screen.getByText("Brand fields")).toBeDefined();
+    expect(screen.queryByText("Center fields")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /Center sites/i }));
+    expect(screen.queryByText("Brand fields")).toBeNull();
+    expect(screen.getByText("Center fields")).toBeDefined();
   });
 });
 

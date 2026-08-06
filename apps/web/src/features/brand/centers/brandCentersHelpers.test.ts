@@ -50,9 +50,34 @@ describe("brandCentersHelpers", () => {
   it("maps status tone and stats items", () => {
     expect(centerStatusTone("active")).toBe("active");
     expect(centerStatsItems({ openLeads: 128, students: 540, activeEnrollments: 412 })).toEqual([
-      { key: "leads", label: "Open Leads", value: 128 },
-      { key: "students", label: "Students", value: 540 },
-      { key: "enrollments", label: "Active Enr.", value: 412 },
+      { key: "leads", label: "Open Leads", value: 128, href: null },
+      { key: "students", label: "Students", value: 540, href: null },
+      { key: "enrollments", label: "Active Enr.", value: 412, href: null },
+    ]);
+    expect(
+      centerStatsItems(
+        { openLeads: 1, students: 2, activeEnrollments: 3 },
+        "http://koramangala.abacusworld.localhost:9000/app"
+      )
+    ).toEqual([
+      {
+        key: "leads",
+        label: "Open Leads",
+        value: 1,
+        href: "http://koramangala.abacusworld.localhost:9000/app/leads",
+      },
+      {
+        key: "students",
+        label: "Students",
+        value: 2,
+        href: "http://koramangala.abacusworld.localhost:9000/app/students",
+      },
+      {
+        key: "enrollments",
+        label: "Active Enr.",
+        value: 3,
+        href: "http://koramangala.abacusworld.localhost:9000/app/students",
+      },
     ]);
   });
 
