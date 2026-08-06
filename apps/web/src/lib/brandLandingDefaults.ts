@@ -131,6 +131,7 @@ export function buildBrandLandingConfig(
       copyright: `© ${new Date().getFullYear()} ${brandName}. Powered by EduNudg.`,
       privacyHref: "/legal/privacy",
       termsHref: "/legal/terms",
+      refundHref: "/legal/refund",
       rich: {
         brandStats: { franchiseCount: "12+", studentCount: "5k+" },
         presence: [{ region: "India", cities: ["Your city"] }],
@@ -321,6 +322,7 @@ export function buildAbacusClassicLandingPartial(brandName: string): Partial<Hom
       copyright: `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`,
       privacyHref: "/legal/privacy",
       termsHref: "/legal/terms",
+      refundHref: "/legal/refund",
       rich: {
         description: `${brandName} is a premier education institute delivering abacus, Vedic maths, and handwriting programs.`,
         badges: [{ label: "ISO 9001:2015 Certified" }, { label: "Est. 2013" }],
@@ -629,6 +631,7 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
       copyright: `Copyright © ${new Date().getFullYear()} ${brandName}, All Rights Reserved.`,
       privacyHref: "/legal/privacy",
       termsHref: "/legal/terms",
+      refundHref: "/legal/refund",
       rich: {
         description: `${brandName} delivers structured learning programs with certified instructors and proven outcomes.`,
         badges: [{ label: "Trusted partner" }],

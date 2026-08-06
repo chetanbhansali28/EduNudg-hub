@@ -1,63 +1,32 @@
 import { Link, useLocation } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
-import { resolveMarketingSectionHref, sanitizePublicFooterLinks } from "@/lib/marketingPublicSite";
+import { sanitizePublicFooterLinks } from "@/lib/marketingPublicSite";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
+import { FooterLinkColumn } from "@/features/marketing/footer/FooterLinkColumn";
+import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
 
 type Props = {
   config: HomepageConfig;
+  legalPages?: BrandLegalPages;
 };
 
-function FooterLink({ href, label }: { href: string; label: string }) {
-  const { pathname } = useLocation();
-  const resolved = resolveMarketingSectionHref(href, pathname);
-
-  if (resolved.startsWith("/") && !resolved.startsWith("//")) {
-    return <Link to={resolved}>{label}</Link>;
-  }
-
-  return (
-    <a href={resolved} target={resolved.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
-      {label}
-    </a>
-  );
-}
-
-function FooterColumn({ title, links }: { title: string; links: { label: string; href: string }[] }) {
-  return (
-    <div>
-      <h3>{title}</h3>
-      <ul>
-        {links.map((l) => (
-          <li key={`${title}-${l.label}-${l.href}`}>
-            <FooterLink href={l.href} label={l.label} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export function EnterpriseSiteFooter({ config }: Props) {
+export function EnterpriseSiteFooter({ config, legalPages = {} }: Props) {
   const productLinks = sanitizePublicFooterLinks(config.footer.productLinks);
   const companyLinks = sanitizePublicFooterLinks(config.footer.companyLinks);
   const connectLinks = sanitizePublicFooterLinks(config.footer.connectLinks);
 
   return (
-    <footer className="ent-footer">
+    <footer className="ent-footer mkt-footer-shell">
       <div className="ent-footer__grid">
-        <FooterColumn title="Product" links={productLinks} />
-        <FooterColumn title="Company" links={companyLinks} />
-        <FooterColumn title="Connect" links={connectLinks} />
-        <div>
-          <h3>Legal</h3>
-          <ul>
-            <li>
-              <FooterLink href={config.footer.privacyHref} label="Privacy" />
-            </li>
-            <li>
-              <FooterLink href={config.footer.termsHref} label="Terms" />
-            </li>
-          </ul>
-        </div>
+        <FooterLinkColumn title="Product" links={productLinks} />
+        <FooterLinkColumn title="Company" links={companyLinks} />
+        <FooterLinkColumn title="Connect" links={connectLinks} />
+        <FooterLegalLinks
+          config={config}
+          legalPages={legalPages}
+          asList
+          heading="Legal"
+        />
       </div>
       <div className="ent-footer__bottom">
         <span>{config.footer.copyright}</span>

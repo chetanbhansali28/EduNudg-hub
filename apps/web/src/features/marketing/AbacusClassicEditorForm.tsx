@@ -878,7 +878,7 @@ export function AbacusClassicEditorForm({
 
       {portalMode === "brand" && onLegalPagesChange ? (
         <FooterLegalPagesEditor
-          brandId={brandId ?? null}
+          uploadScope={{ mode: "brand", brandId: brandId ?? null }}
           legalPages={legalPages}
           onLegalPagesChange={onLegalPagesChange}
         />

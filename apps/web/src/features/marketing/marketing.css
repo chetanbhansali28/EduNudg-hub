@@ -4493,3 +4493,163 @@ body.ac-nav-drawer-open {
   width: 1.75rem;
   height: 1.75rem;
 }
+
+/* ─── Shared marketing footer shell (platform + brand themes) ─── */
+.mkt-footer-shell {
+  --mkt-footer-heading-font: var(--novu-font-serif, Georgia, serif);
+  --mkt-footer-heading-size: 1.25rem;
+  --mkt-footer-heading-weight: 400;
+  --mkt-footer-heading-transform: none;
+  --mkt-footer-heading-letter-spacing: -0.01em;
+  --mkt-footer-link-size: 0.9375rem;
+  --mkt-footer-link-weight: 500;
+}
+
+.marketing-page--enterprise .mkt-footer-shell {
+  --mkt-footer-heading-font: var(--ent-font-sans, var(--novu-font-sans));
+  --mkt-footer-heading-size: 0.8rem;
+  --mkt-footer-heading-weight: 700;
+  --mkt-footer-heading-transform: uppercase;
+  --mkt-footer-heading-letter-spacing: 0.06em;
+  --mkt-footer-link-size: 0.9rem;
+  --mkt-footer-link-weight: 400;
+}
+
+.marketing-page--abacus-classic .mkt-footer-shell {
+  --mkt-footer-heading-font: var(--novu-font-sans, Inter, system-ui, sans-serif);
+  --mkt-footer-heading-size: 0.875rem;
+  --mkt-footer-heading-weight: 600;
+  --mkt-footer-heading-transform: uppercase;
+  --mkt-footer-heading-letter-spacing: 0.06em;
+  --mkt-footer-link-size: 0.9375rem;
+}
+
+.marketing-page--spark-academy .mkt-footer-shell {
+  --mkt-footer-heading-font: var(--novu-font-sans, Inter, system-ui, sans-serif);
+  --mkt-footer-heading-size: 0.75rem;
+  --mkt-footer-heading-weight: 600;
+  --mkt-footer-heading-transform: uppercase;
+  --mkt-footer-heading-letter-spacing: 0.08em;
+  --mkt-footer-link-size: 0.9375rem;
+}
+
+.mkt-footer-shell__heading {
+  font-family: var(--mkt-footer-heading-font);
+  font-size: var(--mkt-footer-heading-size);
+  font-weight: var(--mkt-footer-heading-weight);
+  text-transform: var(--mkt-footer-heading-transform);
+  letter-spacing: var(--mkt-footer-heading-letter-spacing);
+  margin: 0 0 1rem;
+}
+
+.mkt-footer-shell__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mkt-footer-shell__link {
+  font-size: var(--mkt-footer-link-size);
+  font-weight: var(--mkt-footer-link-weight);
+  text-decoration: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.novu-site-footer.mkt-footer-shell .mkt-footer-shell__heading {
+  color: #fff;
+}
+
+.novu-site-footer.mkt-footer-shell .mkt-footer-shell__link {
+  color: rgb(255 255 255 / 0.9);
+}
+
+.novu-site-footer.mkt-footer-shell .mkt-footer-shell__link:hover {
+  opacity: 0.8;
+}
+
+.marketing-page--enterprise .mkt-footer-shell .mkt-footer-shell__heading {
+  color: var(--ent-muted);
+}
+
+.marketing-page--enterprise .mkt-footer-shell .mkt-footer-shell__link {
+  color: var(--ent-text);
+  opacity: 0.85;
+}
+
+.marketing-page--enterprise .mkt-footer-shell .mkt-footer-shell__link:hover {
+  opacity: 1;
+}
+
+.ac-footer.mkt-footer-shell .mkt-footer-shell__heading {
+  color: var(--ac-yellow);
+}
+
+.ac-footer.mkt-footer-shell .mkt-footer-shell__link {
+  color: inherit;
+}
+
+.ac-footer.mkt-footer-shell .mkt-footer-shell__link:hover {
+  color: #fff;
+}
+
+.mkt-footer-shell__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: center;
+}
+
+.mkt-footer-shell__stats {
+  max-width: 80rem;
+  margin: 1rem auto 1.5rem;
+  padding: 0 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .mkt-footer-shell__stats {
+    padding: 0 2.5rem;
+  }
+
+  .mkt-footer-shell__heading {
+    font-size: calc(var(--mkt-footer-heading-size) * 1.08);
+  }
+
+  .novu-site-footer.mkt-footer-shell .mkt-footer-shell__link {
+    font-size: 1.0625rem;
+  }
+}
+
+.ac-footer__presence strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.ac-footer__presence p {
+  margin: 0.15rem 0 0.75rem;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.sa-site-footer__nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: var(--mkt-footer-link-size);
+  font-weight: var(--mkt-footer-link-weight);
+}
+
+.sa-site-footer__nav-link:hover {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.sa-site-footer__legal-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: var(--mkt-footer-link-size);
+}
+
+.sa-site-footer__legal-link:hover {
+  color: rgba(255, 255, 255, 0.75);
+}

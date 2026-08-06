@@ -48,6 +48,7 @@ import { FeesPage } from "@/features/center/FeesPage";
 import { InventoryPage } from "@/features/center/InventoryPage";
 import { MarketingHomePage } from "@/features/marketing/MarketingHomePage";
 import { MarketingPublicLayout } from "@/features/marketing/MarketingPublicLayout";
+import { MarketingLegalPage } from "@/features/marketing/MarketingLegalPage";
 import { HomepageEditorPage } from "@/features/platform/HomepageEditorPage";
 import { StudentLearnLayout } from "@/features/learn/StudentLearnLayout";
 import { StudentHomePage } from "@/features/learn/StudentHomePage";
@@ -118,6 +119,7 @@ export function AppRoutes() {
         <Route element={<MarketingPublicLayout />}>
           <Route path="/" element={<MarketingHomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/legal/:kind" element={<MarketingLegalPage />} />
         </Route>
       ) : (
         <Route path="/login" element={<LoginPage />} />
@@ -221,6 +223,7 @@ export function AppRoutes() {
         <>
           <Route element={<CenterPublicLayout />}>
             <Route path="/" element={<CenterLandingPage />} />
+            <Route path="/legal/:kind" element={<BrandLegalPage />} />
           </Route>
           <Route
             path="/app"

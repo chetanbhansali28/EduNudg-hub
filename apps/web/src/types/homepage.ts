@@ -264,6 +264,7 @@ export interface HomepageConfig {
     copyright: string;
     privacyHref: string;
     termsHref: string;
+    refundHref: string;
     rich?: HomepageRichFooter;
   };
   /** Abacus Classic theme sections (ignored by Novu layout). */

@@ -6,6 +6,8 @@ import {
   type HomepageSectionKey,
 } from "@/lib/homepageSections";
 import { sanitizePublicFooter } from "@/lib/marketingPublicSite";
+import { fetchPlatformLegalPages } from "@/lib/platformLegalApi";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { HomepageConfig, HomepageShowcaseCard, HomepageTestimonial } from "@/types/homepage";
 
 const HOMEPAGE_KEY = "marketing_homepage";
@@ -13,6 +15,12 @@ const HOMEPAGE_KEY = "marketing_homepage";
 export type HomepageEditorBundle = {
   config: HomepageConfig;
   updatedAt: string | null;
+  legalPages: BrandLegalPages;
+};
+
+export type MarketingPublicBundle = {
+  config: HomepageConfig;
+  legalPages: BrandLegalPages;
 };
 
 export type MergeHomepageConfigOptions = {
@@ -46,23 +54,31 @@ export async function fetchHomepageEditorBundle(): Promise<HomepageEditorBundle>
       .maybeSingle();
 
     if (error || !data?.value) {
-      return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: data?.updated_at ?? null };
+      return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: data?.updated_at ?? null, legalPages: {} };
     }
 
     const stored = data.value as Partial<HomepageConfig>;
     if (isLegacyPlatformHomepageSeed(stored)) {
-      return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: data.updated_at ?? null };
+      const legalPages = await fetchPlatformLegalPages();
+      return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: data.updated_at ?? null, legalPages };
     }
 
+    const legalPages = await fetchPlatformLegalPages();
     return {
       config: mergeHomepageConfig(stored, {
         sectionDefaults: ENTERPRISE_PLATFORM_SECTION_DEFAULTS,
       }),
       updatedAt: data.updated_at ?? null,
+      legalPages,
     };
   } catch {
-    return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: null };
+    return { config: DEFAULT_HOMEPAGE_CONFIG, updatedAt: null, legalPages: {} };
   }
+}
+
+export async function fetchMarketingPublicBundle(): Promise<MarketingPublicBundle> {
+  const [config, legalPages] = await Promise.all([fetchHomepageConfig(), fetchPlatformLegalPages()]);
+  return { config, legalPages };
 }
 
 export async function fetchHomepageConfig(): Promise<HomepageConfig> {

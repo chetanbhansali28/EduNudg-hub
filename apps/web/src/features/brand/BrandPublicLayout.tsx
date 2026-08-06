@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchBrandLandingBundle } from "@/lib/brandLandingApi";
 import { isBrandLandingBundleReady, normalizeBrandLandingBundle } from "@/lib/brandLandingBundle";
+import { applyMarketingThemeVariables } from "@/lib/applyMarketingFonts";
 import { scrollToMarketingHash } from "@/lib/marketingPublicSite";
 import { marketingPageClassName, themeUsesLeadModals } from "@/lib/marketingThemeLayout";
 import { FooterSection } from "@/features/marketing/FooterSection";
@@ -42,8 +43,7 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
 
   useEffect(() => {
     if (bundle?.config) {
-      document.documentElement.style.setProperty("--novu-yellow", bundle.config.theme.yellowGlow);
-      document.documentElement.style.setProperty("--novu-radius-section", bundle.config.theme.radiusSection);
+      applyMarketingThemeVariables(bundle.config);
     }
   }, [bundle?.config]);
 

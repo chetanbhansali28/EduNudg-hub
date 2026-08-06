@@ -933,7 +933,15 @@ export function HomepageEditorForm({
 
       {portalMode === "brand" && onLegalPagesChange ? (
         <FooterLegalPagesEditor
-          brandId={brandId ?? null}
+          uploadScope={{ mode: "brand", brandId: brandId ?? null }}
+          legalPages={legalPages}
+          onLegalPagesChange={onLegalPagesChange}
+        />
+      ) : null}
+
+      {isPlatformEditor && onLegalPagesChange ? (
+        <FooterLegalPagesEditor
+          uploadScope={{ mode: "platform" }}
           legalPages={legalPages}
           onLegalPagesChange={onLegalPagesChange}
         />
@@ -1082,13 +1090,50 @@ export function HomepageEditorForm({
                   onChange({ ...config, footer: { ...config.footer, termsHref: v } })
                 }
               />
+              <NavLinkHrefField
+                label="Legal — Refund link"
+                value={config.footer.refundHref}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+                onChange={(v) =>
+                  onChange({ ...config, footer: { ...config.footer, refundHref: v } })
+                }
+              />
             </>
           ) : (
-            <EditorFieldSpan>
-              <EditorSectionNote>
-                Privacy and Terms are managed under the <strong>Privacy &amp; Terms</strong> accordion above.
-              </EditorSectionNote>
-            </EditorFieldSpan>
+            <>
+              <EditorFieldSpan>
+                <EditorSectionNote>
+                  Privacy, Terms, and Refund policies are managed under the <strong>Privacy, Terms &amp; Refund</strong> accordion above.
+                  Footer link columns are editable below.
+                </EditorSectionNote>
+              </EditorFieldSpan>
+              <FooterColumnLinksEditor
+                title="Product links"
+                links={config.footer.productLinks}
+                onChange={(links) => updateFooterLinks("productLinks", links)}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+              />
+              <FooterColumnLinksEditor
+                title="Company links"
+                links={config.footer.companyLinks}
+                onChange={(links) => updateFooterLinks("companyLinks", links)}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+              />
+              <FooterColumnLinksEditor
+                title="Connect links"
+                links={config.footer.connectLinks}
+                onChange={(links) => updateFooterLinks("connectLinks", links)}
+                marketingTheme={marketingTheme}
+                portalMode={portalMode}
+                sections={sections}
+              />
+            </>
           )}
           <EditorFieldSpan>
             <MarketingMediaField

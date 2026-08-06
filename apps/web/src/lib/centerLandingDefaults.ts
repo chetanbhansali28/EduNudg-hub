@@ -132,6 +132,7 @@ export function buildCenterLandingConfig(
       copyright: `© ${new Date().getFullYear()} ${centerName}. Part of ${brandName}.`,
       privacyHref: "#faq",
       termsHref: "#faq",
+      refundHref: "/legal/refund",
     },
     ...partial,
   };

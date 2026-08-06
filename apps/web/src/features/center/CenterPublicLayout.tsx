@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchCenterLandingBundle } from "@/lib/centerLandingApi";
 import { sanitizeCenterPublicNavConfig } from "@/lib/centerPublicNav";
+import { applyMarketingThemeVariables } from "@/lib/applyMarketingFonts";
 import { scrollToMarketingHash } from "@/lib/marketingPublicSite";
 import { marketingPageClassName, themeUsesLeadModals } from "@/lib/marketingThemeLayout";
 import { FooterSection } from "@/features/marketing/FooterSection";
@@ -33,6 +34,8 @@ export type CenterLandingOutletContext = {
   marketingTheme: import("@/types/homepage").MarketingTheme;
   publicCurriculum: import("@/lib/brandCurriculumPublic").PublicCurriculumProgram[];
   publicStats: import("@/lib/brandLandingBundle").BrandPublicStats;
+  legalPages: import("@/lib/brandLegalPages").BrandLegalPages;
+  socialConnect: import("@/lib/brandSocialConnect").BrandSocialConnect;
 };
 
 export function CenterPublicLayout({ showFooter = true }: Props) {
@@ -52,8 +55,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
 
   useEffect(() => {
     if (bundle?.config) {
-      document.documentElement.style.setProperty("--novu-yellow", bundle.config.theme.yellowGlow);
-      document.documentElement.style.setProperty("--novu-radius-section", bundle.config.theme.radiusSection);
+      applyMarketingThemeVariables(bundle.config);
     }
   }, [bundle?.config]);
 
@@ -90,16 +92,30 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           marketingTheme: bundle.marketingTheme,
           publicCurriculum: bundle.publicCurriculum,
           publicStats: bundle.publicStats,
+          legalPages: bundle.legalPages,
+          socialConnect: bundle.socialConnect,
         }}
       />
       {showFooter && !isAbacusClassic && !isSparkAcademy ? (
-        <FooterSection config={publicConfig} legalPages={{}} />
+        <FooterSection
+          config={publicConfig}
+          legalPages={bundle.legalPages}
+          socialConnect={bundle.socialConnect}
+        />
       ) : null}
       {showFooter && isAbacusClassic ? (
-        <AbacusClassicFooter config={publicConfig} legalPages={{}} />
+        <AbacusClassicFooter
+          config={publicConfig}
+          legalPages={bundle.legalPages}
+          socialConnect={bundle.socialConnect}
+        />
       ) : null}
       {showFooter && isSparkAcademy ? (
-        <SparkAcademyFooter config={publicConfig} legalPages={{}} />
+        <SparkAcademyFooter
+          config={publicConfig}
+          legalPages={bundle.legalPages}
+          socialConnect={bundle.socialConnect}
+        />
       ) : null}
       {themeUsesLeadModals(theme) ? <MarketingLeadModals brandSlug={brandSlug} /> : null}
     </div>

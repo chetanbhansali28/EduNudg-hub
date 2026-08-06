@@ -1,4 +1,6 @@
-export type BrandLegalPageKind = "privacy" | "terms";
+export type BrandLegalPageKind = "privacy" | "terms" | "refund";
+
+export const BRAND_LEGAL_PAGE_KINDS: BrandLegalPageKind[] = ["privacy", "terms", "refund"];
 
 export type BrandLegalPageDocument = {
   fileName: string;
@@ -11,11 +13,13 @@ export type BrandLegalPageDocument = {
 export type BrandLegalPages = {
   privacy?: BrandLegalPageDocument;
   terms?: BrandLegalPageDocument;
+  refund?: BrandLegalPageDocument;
 };
 
 export const BRAND_LEGAL_PAGE_LABELS: Record<BrandLegalPageKind, string> = {
   privacy: "Privacy Policy",
-  terms: "Terms of Use",
+  terms: "Terms & Conditions",
+  refund: "Refund Policy",
 };
 
 export const BRAND_LEGAL_UPLOAD_ACCEPT = ".pdf,.doc,.docx";
@@ -31,6 +35,7 @@ export function parseBrandLegalPagesRecord(raw: Record<string, unknown>): BrandL
   return {
     privacy: parseLegalPageDocument(raw.privacy),
     terms: parseLegalPageDocument(raw.terms),
+    refund: parseLegalPageDocument(raw.refund),
   };
 }
 
@@ -84,4 +89,9 @@ export function isWordDocument(doc: BrandLegalPageDocument): boolean {
 export function legalPageRenderUrl(doc: BrandLegalPageDocument): string {
   if (isWordDocument(doc) && doc.htmlUrl) return doc.htmlUrl;
   return doc.fileUrl;
+}
+
+export function parseLegalPageKind(value: string | undefined): BrandLegalPageKind | null {
+  if (value === "privacy" || value === "terms" || value === "refund") return value;
+  return null;
 }

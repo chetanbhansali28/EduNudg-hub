@@ -1,8 +1,20 @@
 import type { HomepageConfig, HomepageRichFooter } from "@/types/homepage";
-import type { BrandLegalPages } from "@/lib/brandLegalPages";
-import { hasBrandLegalPage } from "@/lib/brandLegalPages";
+import type { BrandLegalPages, BrandLegalPageKind } from "@/lib/brandLegalPages";
+import { BRAND_LEGAL_PAGE_KINDS, BRAND_LEGAL_PAGE_LABELS, hasBrandLegalPage } from "@/lib/brandLegalPages";
 
 export type FooterStatItem = { value: string; label: string };
+
+export type FooterLegalLink = {
+  kind: BrandLegalPageKind;
+  label: string;
+  href: string;
+};
+
+const CONFIGURED_HREF_KEYS: Record<BrandLegalPageKind, "privacyHref" | "termsHref" | "refundHref"> = {
+  privacy: "privacyHref",
+  terms: "termsHref",
+  refund: "refundHref",
+};
 
 export function buildBrandFooterStats(rich: HomepageRichFooter | undefined): FooterStatItem[] {
   const stats: FooterStatItem[] = [];
@@ -39,10 +51,22 @@ export function formatPresenceCitiesInput(cities: string[]): string {
 }
 
 export function resolveFooterLegalHref(
-  kind: "privacy" | "terms",
-  _config: HomepageConfig,
+  kind: BrandLegalPageKind,
+  config: HomepageConfig,
   legalPages: BrandLegalPages
 ): string | null {
-  if (!hasBrandLegalPage(legalPages, kind)) return null;
-  return kind === "privacy" ? "/legal/privacy" : "/legal/terms";
+  if (hasBrandLegalPage(legalPages, kind)) {
+    return `/legal/${kind}`;
+  }
+
+  const configured = config.footer[CONFIGURED_HREF_KEYS[kind]]?.trim();
+  return configured || null;
+}
+
+export function buildFooterLegalLinks(config: HomepageConfig, legalPages: BrandLegalPages): FooterLegalLink[] {
+  return BRAND_LEGAL_PAGE_KINDS.flatMap((kind) => {
+    const href = resolveFooterLegalHref(kind, config, legalPages);
+    if (!href) return [];
+    return [{ kind, label: BRAND_LEGAL_PAGE_LABELS[kind], href }];
+  });
 }

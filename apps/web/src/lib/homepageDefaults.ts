@@ -255,6 +255,7 @@ export const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
     copyright: "© 2026 EduNudg. All rights reserved.",
     privacyHref: "/legal/privacy",
     termsHref: "/legal/terms",
+    refundHref: "/legal/refund",
   },
   sections: { ...ENTERPRISE_PLATFORM_SECTION_DEFAULTS },
 };

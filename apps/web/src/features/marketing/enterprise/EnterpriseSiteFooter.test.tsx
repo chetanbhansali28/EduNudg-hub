@@ -1,14 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { EnterpriseSiteFooter } from "./EnterpriseSiteFooter";
-import { EnterprisePreFooterCta } from "./EnterprisePreFooterCta";
 
-function renderFooter(config = DEFAULT_HOMEPAGE_CONFIG) {
+function renderFooter(config = DEFAULT_HOMEPAGE_CONFIG, legalPages = {}) {
   return render(
     <MemoryRouter>
-      <EnterpriseSiteFooter config={config} />
+      <EnterpriseSiteFooter config={config} legalPages={legalPages} />
     </MemoryRouter>
   );
 }
@@ -24,10 +23,10 @@ describe("EnterpriseSiteFooter", () => {
     expect(screen.getByRole("link", { name: "Contact" }).getAttribute("href")).toBe(
       "mailto:support@edunudg.com"
     );
-    expect(screen.getByRole("link", { name: "Privacy" }).getAttribute("href")).toBe("/legal/privacy");
-    expect(screen.getByRole("link", { name: "Terms" }).getAttribute("href")).toBe("/legal/terms");
+    expect(screen.getByRole("link", { name: "Privacy Policy" }).getAttribute("href")).toBe("/legal/privacy");
+    expect(screen.getByRole("link", { name: "Terms & Conditions" }).getAttribute("href")).toBe("/legal/terms");
+    expect(screen.getByRole("link", { name: "Refund Policy" }).getAttribute("href")).toBe("/legal/refund");
     expect(screen.getByText(DEFAULT_HOMEPAGE_CONFIG.footer.copyright)).toBeDefined();
-    expect(screen.queryByText("Privacy Policy")).toBeNull();
     expect(screen.queryByText("Platform admin")).toBeNull();
     expect(screen.queryByText("Edit homepage")).toBeNull();
   });
@@ -59,10 +58,23 @@ describe("EnterpriseSiteFooter", () => {
     expect(screen.queryByText("Edit homepage")).toBeNull();
     expect(screen.getByRole("link", { name: "Contact" })).toBeDefined();
   });
+
+  it("regression_footer_legal_prefers_uploaded_document_route", () => {
+    renderFooter(DEFAULT_HOMEPAGE_CONFIG, {
+      privacy: {
+        fileName: "privacy.pdf",
+        fileUrl: "https://cdn.example/privacy.pdf",
+        mimeType: "application/pdf",
+        uploadedAt: "2026-01-01T00:00:00.000Z",
+      },
+    });
+    expect(screen.getByRole("link", { name: "Privacy Policy" }).getAttribute("href")).toBe("/legal/privacy");
+  });
 });
 
 describe("EnterprisePreFooterCta", () => {
-  it("regression_prefooter_uses_footer_cta_not_hero", () => {
+  it("regression_prefooter_uses_footer_cta_not_hero", async () => {
+    const { EnterprisePreFooterCta } = await import("./EnterprisePreFooterCta");
     const config = {
       ...DEFAULT_HOMEPAGE_CONFIG,
       footerCta: {

@@ -5,6 +5,8 @@ import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
 import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPublicSite";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
+import { parseBrandLegalPagesRecord, type BrandLegalPages } from "@/lib/brandLegalPages";
+import { parseBrandSocialConnect, type BrandSocialConnect } from "@/lib/brandSocialConnect";
 import type { HomepageConfig, MarketingTheme } from "@/types/homepage";
 import { parseMarketingTheme } from "@/types/homepage";
 
@@ -36,6 +38,8 @@ export type CenterLandingBundle = {
   publicCurriculum: PublicCurriculumProgram[];
   marketingTheme: MarketingTheme;
   publicStats: BrandPublicStats;
+  legalPages: BrandLegalPages;
+  socialConnect: BrandSocialConnect;
 };
 
 type CenterLandingRow = {
@@ -56,6 +60,8 @@ type CenterLandingRow = {
   center_photo_url?: string | null;
   center_short_description?: string | null;
   center_social_links?: CenterSocialLink[] | null;
+  legal_pages?: unknown;
+  social_connect?: unknown;
   landing?: Partial<HomepageConfig>;
   success_stories?: unknown;
   curriculum?: unknown;
@@ -99,6 +105,26 @@ function parseCenterSocialLinks(raw: unknown): CenterSocialLink[] {
     })
     .filter((x): x is CenterSocialLink => x !== null);
 }
+
+function parseCenterBrandMarketingExtras(row: CenterLandingRow | undefined): {
+  legalPages: BrandLegalPages;
+  socialConnect: BrandSocialConnect;
+} {
+  if (!row) return { legalPages: {}, socialConnect: {} };
+  const legalPages =
+    row.legal_pages && typeof row.legal_pages === "object"
+      ? parseBrandLegalPagesRecord(row.legal_pages as Record<string, unknown>)
+      : {};
+  const socialConnect = parseBrandSocialConnect(
+    row.social_connect && typeof row.social_connect === "object"
+      ? { social_connect: row.social_connect }
+      : undefined,
+    row.landing
+  );
+  return { legalPages, socialConnect };
+}
+
+const EMPTY_CENTER_MARKETING = { legalPages: {} as BrandLegalPages, socialConnect: {} as BrandSocialConnect };
 
 function parsePublicStats(raw: unknown): BrandPublicStats {
   if (typeof raw !== "object" || raw === null) {
@@ -196,12 +222,14 @@ export async function fetchCenterLandingBundle(
         publicCurriculum: curriculum,
         marketingTheme: "novu",
         publicStats: { centersCount: 0, studentsCount: 0 },
+        ...EMPTY_CENTER_MARKETING,
       };
     }
 
     const row = data as CenterLandingRow;
     const theme = parseMarketingTheme(row.marketing_theme);
     const publicStats = parsePublicStats(row.public_stats);
+    const { legalPages, socialConnect } = parseCenterBrandMarketingExtras(row);
 
     if (!row.center_name || !row.brand_name) {
       return {
@@ -219,6 +247,8 @@ export async function fetchCenterLandingBundle(
         publicCurriculum: curriculum,
         marketingTheme: theme,
         publicStats,
+        legalPages,
+        socialConnect,
       };
     }
 
@@ -252,6 +282,8 @@ export async function fetchCenterLandingBundle(
       publicCurriculum: curriculum,
       marketingTheme: theme,
       publicStats,
+      legalPages,
+      socialConnect,
     };
   } catch {
     const config = buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
@@ -264,6 +296,7 @@ export async function fetchCenterLandingBundle(
       publicCurriculum: [],
       marketingTheme: "novu",
       publicStats: { centersCount: 0, studentsCount: 0 },
+      ...EMPTY_CENTER_MARKETING,
     };
   }
 }

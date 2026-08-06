@@ -160,6 +160,7 @@ describe("sanitizePublicFooter", () => {
         copyright: "© Test",
         privacyHref: "/legal/privacy",
         termsHref: "/legal/terms",
+        refundHref: "/legal/refund",
       },
     });
 

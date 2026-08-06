@@ -4,9 +4,10 @@ import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 import { hasBrandSocialFooterIcons } from "@/lib/brandSocialConnect";
-import { resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
 import { FooterPresenceBlock } from "@/features/marketing/FooterPresenceBlock";
 import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIcons";
+import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
+import { MarketingFooterLink } from "@/features/marketing/footer/FooterLinkColumn";
 import { useLeadModalOptional } from "@/features/marketing/abacus-classic/LeadModalContext";
 import { resolveLeadModalKind } from "@/features/marketing/abacus-classic/MarketingLeadModals";
 
@@ -23,8 +24,6 @@ export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {}
   const [email, setEmail] = useState("");
 
   const rich = config.footer.rich;
-  const privacyHref = resolveFooterLegalHref("privacy", config, legalPages);
-  const termsHref = resolveFooterLegalHref("terms", config, legalPages);
   const phone = rich?.headOffice?.phone?.trim() || DEFAULT_PHONE;
   const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
   const showSocial = hasBrandSocialFooterIcons(socialConnect);
@@ -60,7 +59,7 @@ export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {}
     : config.footer.copyright.replace(/^©\s*/, "Copyright © ");
 
   return (
-    <footer className="sa-site-footer">
+    <footer className="sa-site-footer mkt-footer-shell">
       <div className="sa-site-footer__cta-band">
         <div className="sa-site-footer__inner">
           <div className="sa-site-footer__cta-grid">
@@ -125,9 +124,12 @@ export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {}
 
           <nav className="sa-site-footer__nav" aria-label="Footer">
             {navLinks.map((link) => (
-              <a key={`${link.label}-${link.href}`} href={link.href}>
-                {link.label}
-              </a>
+              <MarketingFooterLink
+                key={`${link.label}-${link.href}`}
+                href={link.href}
+                label={link.label}
+                className="sa-site-footer__nav-link"
+              />
             ))}
           </nav>
 
@@ -137,10 +139,12 @@ export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {}
             regionClassName="sa-site-footer__presence-region"
           />
 
-          <div className="sa-site-footer__legal">
-            {termsHref ? <Link to={termsHref}>Terms &amp; Conditions</Link> : null}
-            {privacyHref ? <Link to={privacyHref}>Privacy Policy</Link> : null}
-          </div>
+          <FooterLegalLinks
+            config={config}
+            legalPages={legalPages}
+            className="sa-site-footer__legal"
+            linkClassName="sa-site-footer__legal-link"
+          />
         </div>
       </div>
 

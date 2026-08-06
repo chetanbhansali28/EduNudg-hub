@@ -1,12 +1,13 @@
-import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
-import { buildBrandFooterStats, resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
+import { buildBrandFooterStats } from "@/lib/marketingFooterHelpers";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { MarketingBackgroundMedia } from "./MarketingBackgroundMedia";
 import { FooterPresenceBlock } from "./FooterPresenceBlock";
 import { BrandSocialFooterIcons } from "./BrandSocialFooterIcons";
+import { FooterLinkColumn } from "@/features/marketing/footer/FooterLinkColumn";
+import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
 import { isSectionEnabled } from "@/lib/homepageSections";
 
 type Props = {
@@ -20,8 +21,6 @@ export function FooterSection({ config, legalPages = {}, socialConnect = {} }: P
     return null;
   }
 
-  const privacyHref = resolveFooterLegalHref("privacy", config, legalPages);
-  const termsHref = resolveFooterLegalHref("terms", config, legalPages);
   const footerStats = buildBrandFooterStats(config.footer.rich);
   const cta = config.footerCta;
   const titleParts = cta.title.match(/^(.+?)(\s*)(\S+\.?)$/);
@@ -48,50 +47,15 @@ export function FooterSection({ config, legalPages = {}, socialConnect = {} }: P
         />
       </div>
 
-      <footer className="novu-site-footer">
+      <footer className="novu-site-footer mkt-footer-shell">
         <div className="novu-site-footer__grid">
-          <div>
-            <h3>Product</h3>
-            <ul>
-              {config.footer.productLinks.map((l) => (
-                <li key={l.href}>
-                  {l.href.startsWith("/") ? <Link to={l.href}>{l.label}</Link> : <a href={l.href}>{l.label}</a>}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3>Company</h3>
-            <ul>
-              {config.footer.companyLinks.map((l) =>
-                l.href.startsWith("/") ? (
-                  <li key={l.href}>
-                    <Link to={l.href}>{l.label}</Link>
-                  </li>
-                ) : (
-                  <li key={l.href}>
-                    <a href={l.href}>{l.label}</a>
-                  </li>
-                )
-              )}
-            </ul>
-          </div>
-          <div>
-            <h3>Connect</h3>
-            <ul>
-              {config.footer.connectLinks.map((l) => (
-                <li key={l.href}>
-                  <a href={l.href} target="_blank" rel="noreferrer">
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <FooterLinkColumn title="Product" links={config.footer.productLinks} />
+          <FooterLinkColumn title="Company" links={config.footer.companyLinks} />
+          <FooterLinkColumn title="Connect" links={config.footer.connectLinks} />
           <FooterPresenceBlock presence={config.footer.rich?.presence ?? []} />
         </div>
         {footerStats.length > 0 ? (
-          <div className="novu-site-footer__stats">
+          <div className="novu-site-footer__stats mkt-footer-shell__stats">
             {footerStats.map((stat) => (
               <div key={`${stat.label}-${stat.value}`} className="novu-site-footer__stat">
                 <strong>{stat.value}</strong>
@@ -105,10 +69,7 @@ export function FooterSection({ config, legalPages = {}, socialConnect = {} }: P
             <span>{config.footer.copyright}</span>
             <BrandSocialFooterIcons socialConnect={socialConnect} variant="novu" />
           </div>
-          <div className="novu-site-footer__legal">
-            {privacyHref ? <Link to={privacyHref}>Privacy Policy</Link> : null}
-            {termsHref ? <Link to={termsHref}>Terms of Use</Link> : null}
-          </div>
+          <FooterLegalLinks config={config} legalPages={legalPages} className="novu-site-footer__legal" />
         </div>
       </footer>
     </section>

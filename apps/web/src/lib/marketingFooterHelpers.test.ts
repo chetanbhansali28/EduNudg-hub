@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildBrandFooterStats, parsePresenceCitiesInput, resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
+import {
+  buildBrandFooterStats,
+  buildFooterLegalLinks,
+  parsePresenceCitiesInput,
+  resolveFooterLegalHref,
+} from "@/lib/marketingFooterHelpers";
 import { mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
 
 describe("marketingFooterHelpers", () => {
@@ -23,9 +28,9 @@ describe("marketingFooterHelpers", () => {
     ]);
   });
 
-  it("resolveFooterLegalHref returns route only when document is published", () => {
+  it("resolveFooterLegalHref returns route when document is published", () => {
     const config = mergeAbacusClassicLandingConfig("Test");
-    expect(resolveFooterLegalHref("privacy", config, {})).toBeNull();
+    expect(resolveFooterLegalHref("privacy", config, {})).toBe("/legal/privacy");
     expect(
       resolveFooterLegalHref("privacy", config, {
         privacy: {
@@ -36,6 +41,18 @@ describe("marketingFooterHelpers", () => {
         },
       })
     ).toBe("/legal/privacy");
+  });
+
+  it("regression_footer_refund_href_from_config", () => {
+    const config = mergeAbacusClassicLandingConfig("Test");
+    config.footer.refundHref = "/legal/refund";
+    expect(resolveFooterLegalHref("refund", config, {})).toBe("/legal/refund");
+  });
+
+  it("buildFooterLegalLinks includes privacy terms and refund from config defaults", () => {
+    const config = mergeAbacusClassicLandingConfig("Test");
+    const labels = buildFooterLegalLinks(config, {}).map((link) => link.label);
+    expect(labels).toEqual(["Privacy Policy", "Terms & Conditions", "Refund Policy"]);
   });
 
   it("parsePresenceCitiesInput splits comma-separated cities", () => {

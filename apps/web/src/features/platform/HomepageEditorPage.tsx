@@ -7,11 +7,17 @@ import {
   HomepageEditorShell,
 } from "@/features/marketing/HomepageEditorShell";
 import { fetchHomepageEditorBundle, saveHomepageConfig } from "@/lib/homepageApi";
+import { savePlatformLegalPages } from "@/lib/platformLegalApi";
 import { formatLastSavedLabel } from "@/lib/formatRelativeTime";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
+import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { HomepageConfig } from "@/types/homepage";
 
 function configsEqual(a: HomepageConfig, b: HomepageConfig): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function legalPagesEqual(a: BrandLegalPages, b: BrandLegalPages): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
@@ -25,6 +31,8 @@ export function HomepageEditorPage() {
   });
   const [config, setConfig] = useState<HomepageConfig>(DEFAULT_HOMEPAGE_CONFIG);
   const [baseline, setBaseline] = useState<HomepageConfig>(DEFAULT_HOMEPAGE_CONFIG);
+  const [legalPages, setLegalPages] = useState<BrandLegalPages>({});
+  const [legalPagesBaseline, setLegalPagesBaseline] = useState<BrandLegalPages>({});
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -32,16 +40,25 @@ export function HomepageEditorPage() {
     if (!data?.config) return;
     setConfig(data.config);
     setBaseline(data.config);
+    setLegalPages(data.legalPages);
+    setLegalPagesBaseline(data.legalPages);
     setUpdatedAt(data.updatedAt);
   }, [data]);
 
-  const isDirty = useMemo(() => !configsEqual(config, baseline), [config, baseline]);
+  const isDirty = useMemo(
+    () => !configsEqual(config, baseline) || !legalPagesEqual(legalPages, legalPagesBaseline),
+    [config, baseline, legalPages, legalPagesBaseline]
+  );
 
   const save = useMutation({
-    mutationFn: (override?: HomepageConfig) => saveHomepageConfig(override ?? config),
-    onSuccess: (_data, override) => {
-      const next = override ?? config;
+    mutationFn: async (override?: HomepageConfig) => {
+      const nextConfig = override ?? config;
+      await Promise.all([saveHomepageConfig(nextConfig), savePlatformLegalPages(legalPages)]);
+      return nextConfig;
+    },
+    onSuccess: (next) => {
       setBaseline(next);
+      setLegalPagesBaseline(legalPages);
       setUpdatedAt(new Date().toISOString());
       void qc.invalidateQueries({ queryKey: HOMEPAGE_EDITOR_QUERY_KEY });
       void qc.invalidateQueries({ queryKey: ["marketing-homepage"] });
@@ -66,7 +83,10 @@ export function HomepageEditorPage() {
           icon="domain"
           iconTone="primary"
           onSave={() => save.mutate(undefined)}
-          onDiscard={() => setConfig(baseline)}
+          onDiscard={() => {
+            setConfig(baseline);
+            setLegalPages(legalPagesBaseline);
+          }}
           isDirty={isDirty}
           savePending={save.isPending}
           saved={saved}
@@ -76,6 +96,8 @@ export function HomepageEditorPage() {
             onChange={setConfig}
             uploadScope={{ kind: "platform" }}
             portalMode="platform"
+            legalPages={legalPages}
+            onLegalPagesChange={setLegalPages}
           />
         </HomepageEditorPanel>
       </HomepageEditorPanels>

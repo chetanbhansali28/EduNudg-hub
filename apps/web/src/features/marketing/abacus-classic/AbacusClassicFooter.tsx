@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
-import { buildBrandFooterStats, resolveFooterLegalHref } from "@/lib/marketingFooterHelpers";
+import { buildBrandFooterStats } from "@/lib/marketingFooterHelpers";
 import { FooterPresenceBlock } from "@/features/marketing/FooterPresenceBlock";
 import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIcons";
+import { FooterLinkColumn } from "@/features/marketing/footer/FooterLinkColumn";
+import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
 
 type Props = {
   config: HomepageConfig;
@@ -15,24 +16,19 @@ type Props = {
 export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {} }: Props) {
   const rich = config.footer.rich;
   const stats = buildBrandFooterStats(rich);
-  const privacyHref = resolveFooterLegalHref("privacy", config, legalPages);
-  const termsHref = resolveFooterLegalHref("terms", config, legalPages);
 
   return (
-    <footer className="ac-footer">
+    <footer className="ac-footer mkt-footer-shell">
       <div className="ac-footer__wave" aria-hidden />
       <div className="ac-footer__inner">
         <div className="ac-footer__grid">
           <div className="ac-footer__brand">
-            <div className="ac-footer__brand-mark">
-              {config.meta.logoUrl ? (
-                <img src={config.meta.logoUrl} alt="" className="ac-footer__logo" width={56} height={56} />
-              ) : (
-                <span className="ac-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
-              )}
-              <strong className="ac-footer__brand-name">{config.meta.siteName}</strong>
-            </div>
-            {rich?.description ? <p className="ac-footer__description">{rich.description}</p> : null}
+            {config.meta.logoUrl ? (
+              <img src={config.meta.logoUrl} alt="" className="ac-footer__logo" width={56} height={56} />
+            ) : (
+              <span className="ac-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
+            )}
+            {rich?.description ? <p>{rich.description}</p> : null}
             {rich?.badges && rich.badges.length > 0 ? (
               <div className="ac-footer__badges">
                 {rich.badges.map((badge, i) => (
@@ -45,26 +41,27 @@ export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {
             <BrandSocialFooterIcons socialConnect={socialConnect} variant="abacus-classic" />
           </div>
 
-          <div className="ac-footer__col">
-            <h3>Quick links</h3>
-            <ul>
-              {config.footer.productLinks.map((link) => (
-                <li key={link.href}>
-                  {link.href.startsWith("/") ? <Link to={link.href}>{link.label}</Link> : <a href={link.href}>{link.label}</a>}
-                </li>
+          {stats.length > 0 ? (
+            <div className="ac-footer__stats">
+              {stats.map((stat, i) => (
+                <div key={`${stat.label}-${i}`} className="ac-footer__stat">
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                </div>
               ))}
-            </ul>
-          </div>
+            </div>
+          ) : null}
+
+          <FooterLinkColumn title="Quick links" links={config.footer.productLinks} />
 
           <FooterPresenceBlock
             presence={rich?.presence ?? []}
-            className="ac-footer__col"
             regionClassName="ac-footer__presence"
           />
 
           {rich?.headOffice ? (
-            <div className="ac-footer__col">
-              <h3>Head office</h3>
+            <div>
+              <h3 className="mkt-footer-shell__heading">Head office</h3>
               <address className="ac-footer__office">
                 <p>{rich.headOffice.address}</p>
                 <p>{rich.headOffice.phone}</p>
@@ -74,23 +71,9 @@ export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {
           ) : null}
         </div>
 
-        {stats.length > 0 ? (
-          <div className="ac-footer__stats">
-            {stats.map((stat, i) => (
-              <div key={`${stat.label}-${i}`} className="ac-footer__stat">
-                <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
-              </div>
-            ))}
-          </div>
-        ) : null}
-
         <div className="ac-footer__bottom">
           <span>{config.footer.copyright}</span>
-          <div className="ac-footer__legal">
-            {privacyHref ? <Link to={privacyHref}>Privacy Policy</Link> : null}
-            {termsHref ? <Link to={termsHref}>Terms of Use</Link> : null}
-          </div>
+          <FooterLegalLinks config={config} legalPages={legalPages} className="ac-footer__legal" />
         </div>
       </div>
     </footer>
