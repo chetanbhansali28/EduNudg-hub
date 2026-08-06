@@ -129,6 +129,28 @@ describe("EditorAccordion", () => {
     expect(screen.getByText("FAQ fields")).toBeDefined();
   });
 
+  it("regression_scrolls_opened_accordion_into_view", async () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+
+    renderAccordion(
+      <>
+        <EditorAccordion sectionId="hero" title="Hero">
+          <p>Hero fields</p>
+        </EditorAccordion>
+        <EditorAccordion sectionId="faq" title="FAQ">
+          <p>FAQ fields</p>
+        </EditorAccordion>
+      </>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /FAQ/i }));
+
+    await vi.waitFor(() => {
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
+    });
+  });
+
   it("regression_shows_icon_subtitle_and_visibility_when_open", () => {
     const { container } = renderAccordion(
       <EditorAccordion sectionId="faq" title="FAQ" enabled onEnabledChange={() => undefined}>

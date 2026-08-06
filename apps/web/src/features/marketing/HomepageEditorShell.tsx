@@ -2,11 +2,14 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
   type DragEvent,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { Button, EditorPageHeader, EditorSaveBar, EditorSectionCard, FormGrid, Input, Select, Toggle } from "@edunudg/ui";
 import type { MarketingTheme } from "@/types/homepage";
@@ -65,6 +68,36 @@ export const HOMEPAGE_EDITOR_SECTION_META: Record<string, EditorSectionMeta> = {
   footerCta: { icon: "campaign", tone: "neutral", description: "Pre-footer call to action" },
   brandSignup: { icon: "person_add", tone: "primary", description: "Brand signup promo and form copy" },
 };
+
+/** Scroll accordion header into view after sibling panels collapse and layout settles. */
+function scrollEditorAccordionIntoView(element: HTMLElement | null): void {
+  if (!element) return;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+/** When `isOpen` becomes true after a user click, scroll the section to the top of the viewport. */
+function useScrollAccordionOnOpen(
+  isOpen: boolean,
+  sectionRef: RefObject<HTMLElement | null>
+): () => void {
+  const scrollOnOpenRef = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen || !scrollOnOpenRef.current) return;
+    scrollOnOpenRef.current = false;
+    scrollEditorAccordionIntoView(sectionRef.current);
+  }, [isOpen, sectionRef]);
+
+  const markScrollOnOpen = useCallback(() => {
+    scrollOnOpenRef.current = true;
+  }, []);
+
+  return markScrollOnOpen;
+}
 
 function MaterialIcon({ name, filled }: { name: string; filled?: boolean }) {
   return (
@@ -182,23 +215,28 @@ export function HomepageEditorPanel({
 }: PanelProps) {
   const group = useContext(PagePanelGroupContext);
   const bodyId = useId();
+  const sectionRef = useRef<HTMLElement>(null);
   const [localOpen, setLocalOpen] = useState(defaultOpen);
   const isOpen = group ? group.openId === panelId : localOpen;
   const toneClass = `ed-editor-accordion__icon--${iconTone === "error" ? "neutral" : iconTone}`;
+  const markScrollOnOpen = useScrollAccordionOnOpen(isOpen, sectionRef);
 
   const toggle = useCallback(() => {
     if (group) {
+      if (!isOpen) markScrollOnOpen();
       group.setOpenId(isOpen ? null : panelId);
       return;
     }
+    if (!isOpen) markScrollOnOpen();
     setLocalOpen((open) => !open);
-  }, [group, isOpen, panelId]);
+  }, [group, isOpen, markScrollOnOpen, panelId]);
 
   const descriptionText =
     typeof description === "string" || description == null ? description : undefined;
 
   return (
     <section
+      ref={sectionRef}
       className={[
         "ed-homepage-editor-panel",
         "ed-editor-accordion",
@@ -512,6 +550,7 @@ export function EditorAccordion({
 }: AccordionProps) {
   const group = useContext(AccordionGroupContext);
   const bodyId = useId();
+  const sectionRef = useRef<HTMLElement>(null);
   const meta = HOMEPAGE_EDITOR_SECTION_META[sectionId];
   const title = titleOverride ?? sectionId;
   const description = descriptionOverride ?? meta?.description ?? "";
@@ -519,16 +558,19 @@ export function EditorAccordion({
   const tone = toneOverride ?? meta?.tone ?? "neutral";
   const isOpen = group?.openId === sectionId;
   const showToggle = onEnabledChange != null;
+  const markScrollOnOpen = useScrollAccordionOnOpen(isOpen, sectionRef);
 
   const toggle = useCallback(() => {
     if (!group) return;
+    if (!isOpen) markScrollOnOpen();
     group.setOpenId(isOpen ? null : sectionId);
-  }, [group, isOpen, sectionId]);
+  }, [group, isOpen, markScrollOnOpen, sectionId]);
 
   const toneClass = `ed-editor-accordion__icon--${tone}`;
 
   return (
     <section
+      ref={sectionRef}
       className={[
         "ed-editor-accordion",
         isOpen ? "ed-editor-accordion--open" : "",

@@ -4743,6 +4743,7 @@
 
 .ed-editor-accordion {
   overflow: hidden;
+  scroll-margin-top: 1rem;
   border: 1px solid color-mix(in srgb, var(--ed-outline-variant) 70%, transparent);
   border-radius: var(--ed-radius-editor);
   background: var(--ed-surface-container-lowest);
@@ -8166,6 +8167,12 @@ body.ed-nav-open {
     --ed-mobile-bar-height: 3.25rem;
     --ed-mobile-content-gap: 0.75rem;
     --ed-mobile-content-inline: 1rem;
+  }
+
+  .ed-shell--bottom-nav .ed-editor-accordion,
+  .ed-shell--commerce .ed-editor-accordion,
+  .ed-shell--mobile-chrome .ed-editor-accordion {
+    scroll-margin-top: calc(var(--ed-mobile-bar-height) + var(--ed-mobile-content-gap));
   }
 
   .ed-shell--bottom-nav,
