@@ -9,6 +9,7 @@ How a new brand customer (e.g. Abacus World) joins EduNudg as a B2B subscriber â
 - Journey: [`docs/journeys/platform-brand-onboarding.md`](../../../docs/journeys/platform-brand-onboarding.md)
 - Data flow: [`docs/spec/data-flow.md`](../../../docs/spec/data-flow.md) Flow 1
 - Portal matrix: [`docs/spec/portal-host-matrix.md`](../../../docs/spec/portal-host-matrix.md)
+- Franchise center CSV import: [`openspec/specs/franchise-center-csv-import/spec.md`](../franchise-center-csv-import/spec.md)
 
 ## Requirements
 

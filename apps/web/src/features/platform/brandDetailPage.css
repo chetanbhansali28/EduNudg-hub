@@ -42,3 +42,106 @@
 .ed-collapsible-card__body {
   margin-top: 0;
 }
+
+.ed-brand-detail__center-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ed-import-dialog {
+  border: none;
+  padding: 0;
+  max-width: min(960px, calc(100vw - 2rem));
+  width: 100%;
+  background: transparent;
+}
+
+.ed-import-dialog::backdrop {
+  background: rgb(15 23 42 / 0.45);
+}
+
+.ed-import-dialog__panel {
+  background: var(--ed-surface, #fff);
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 45px rgb(15 23 42 / 0.18);
+  overflow: hidden;
+}
+
+.ed-import-dialog__header,
+.ed-import-dialog__footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.ed-import-dialog__footer {
+  align-items: center;
+  border-top: 1px solid var(--ed-border, #e2e8f0);
+}
+
+.ed-import-dialog__header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+}
+
+.ed-import-dialog__close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ed-muted);
+}
+
+.ed-import-dialog__body {
+  padding: 0 1.25rem 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ed-import-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ed-import-dialog__file-label {
+  display: inline-flex;
+}
+
+.ed-import-dialog__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.ed-import-preview {
+  overflow: auto;
+  max-height: 320px;
+  border: 1px solid var(--ed-border, #e2e8f0);
+  border-radius: 0.5rem;
+}
+
+.ed-import-preview__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.ed-import-preview__table th,
+.ed-import-preview__table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--ed-border, #e2e8f0);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ed-import-preview__row--error {
+  background: rgb(254 242 242);
+}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge, Button, Card, DataList, ListRow, PageToolbar } from "@edunudg/ui";
@@ -11,6 +11,8 @@ import { BrandEditForm } from "./BrandEditForm";
 import { BrandFeatureTogglesCard } from "./BrandFeatureTogglesCard";
 import { BrandPerformanceCard } from "./BrandPerformanceCard";
 import { PortalOpenButton } from "./PortalOpenButton";
+import { FranchiseCenterImportDialog } from "./FranchiseCenterImportDialog";
+import "./brandDetailPage.css";
 
 interface BrandRow {
   id: string;
@@ -42,6 +44,7 @@ export function BrandDetailPage() {
   const brandSlug = brandSlugParam?.trim() ?? "";
   const lookupById = isUuid(brandSlug);
   const qc = useQueryClient();
+  const [importOpen, setImportOpen] = useState(false);
 
   const brand = useQuery({
     queryKey: ["brand", lookupById ? "id" : "slug", brandSlug],
@@ -243,10 +246,19 @@ export function BrandDetailPage() {
         />
       </Card>
 
-      <Card title="Franchise centers">
+      <Card
+        title="Franchise centers"
+        actions={
+          <div className="ed-brand-detail__center-actions">
+            <Button type="button" variant="secondary" onClick={() => setImportOpen(true)}>
+              Import CSV
+            </Button>
+          </div>
+        }
+      >
         <DataList
           items={centers.data ?? []}
-          empty="No centers yet."
+          empty="No centers yet. Import a CSV to onboard franchise locations."
           render={(c) => {
             const centerHost =
               domains.data?.find(
@@ -268,6 +280,17 @@ export function BrandDetailPage() {
           }}
         />
       </Card>
+
+      <FranchiseCenterImportDialog
+        brandId={b.id}
+        brandSlug={b.slug}
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => {
+          void qc.invalidateQueries({ queryKey: ["brand-centers", brandId] });
+          void qc.invalidateQueries({ queryKey: ["brand-domains", brandId] });
+        }}
+      />
     </>
   );
 }

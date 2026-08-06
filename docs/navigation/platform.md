@@ -12,7 +12,7 @@ See [Navigation spec](../spec/navigation-spec.md).
 
 - Command Center (Home) — compact KPI grid
 - Brands — manual signup, pending approvals, brand list; **Edit** → `/admin/brands/:slug` (**Brand settings** includes **Website theme**)
-- Brand detail — performance KPIs, **Brand settings** (name, status, logo, login, **Website theme**), domains, franchise centers
+- Brand detail — performance KPIs, **Brand settings** (name, status, logo, login, **Website theme**), domains, franchise centers (**Import CSV** bulk onboarding)
 - Subscriptions & Billing
 - Revenue & Usage — compact KPI grid
 - Audit Logs

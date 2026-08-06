@@ -249,6 +249,12 @@ describe("BrandDetailPage", () => {
     ).toBeDefined();
   });
 
+  it("regression_brand_detail_shows_franchise_center_csv_import", async () => {
+    renderDetail("demo");
+    expect(await screen.findByRole("button", { name: "Import CSV" })).toBeDefined();
+    expect(screen.getByText(/Import a CSV to onboard franchise locations/)).toBeDefined();
+  });
+
   it("regression_domains_section_shows_open_for_all_portal_types", async () => {
     fromMock.mockImplementation((table: string) => {
       if (table === "brands") {
