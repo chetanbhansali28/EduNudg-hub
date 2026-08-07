@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge, Button, FormGrid, Input, Textarea, ToggleField } from "@edunudg/ui";
+import { Badge, Button, FormGrid, Input, SaveButton, Textarea, ToggleField } from "@edunudg/ui";
 import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
 import { ConfirmDeleteDialog } from "@/features/shared/ConfirmDeleteDialog";
 
@@ -39,6 +39,7 @@ type Props = {
   editForm: StoryForm;
   saveDisabled: boolean;
   savePending: boolean;
+  saveSaved?: boolean;
   onEdit: () => void;
   onCancelEdit: () => void;
   onSave: () => void;
@@ -65,6 +66,7 @@ export function SuccessStoryCard({
   editForm,
   saveDisabled,
   savePending,
+  saveSaved = false,
   onEdit,
   onCancelEdit,
   onSave,
@@ -181,9 +183,13 @@ export function SuccessStoryCard({
           />
 
           <div className="ed-success-story-card__edit-actions">
-            <Button onClick={onSave} disabled={saveDisabled || savePending}>
-              {savePending ? "Saving…" : "Save changes"}
-            </Button>
+            <SaveButton
+              onClick={onSave}
+              disabled={saveDisabled}
+              pending={savePending}
+              saved={saveSaved}
+              label="Save changes"
+            />
             <Button variant="ghost" onClick={onCancelEdit}>
               Cancel
             </Button>

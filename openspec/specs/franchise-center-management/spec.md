@@ -34,6 +34,27 @@ Brand staff SHALL edit franchise details except slug.
 - **THEN** `franchise_centers` fields update via authorized RPCs
 - **AND** slug is not modified
 
+### Requirement: Center owner login credentials
+
+Brand staff SHALL view and set the franchise center login email and password from Franchise Identity on `/app/centers`. Credentials SHALL provision Supabase Auth and an active `center_owner` membership so the same email/password work on the center host `/login`. Login email SHALL NOT be stored on `franchise_centers`; source of truth is Auth + `profiles` + memberships. Profile-only saves SHALL NOT call `center-owner-credentials`.
+
+#### Scenario: Show login email from database
+
+- **WHEN** brand staff open a franchise detail panel
+- **THEN** Franchise Identity shows the active `center_owner` login email from `get_center_owner_login`
+- **AND** helper text names the center host login URL
+
+#### Scenario: Create or reset franchise password
+
+- **WHEN** brand staff enter a login email and password (password required when no prior login exists) and save
+- **THEN** the SPA invokes `center-owner-credentials` to create or update the Auth user and sync `center_owner` membership
+- **AND** that email and password can sign in at `{center}.{brand}` `/login`
+
+#### Scenario: Profile-only save skips credentials
+
+- **WHEN** brand staff save name, photo, or description without intentionally editing login fields
+- **THEN** the SPA does not invoke `upsertCenterOwnerCredentials` / `center-owner-credentials`
+
 ### Requirement: No franchise delete
 
 Brand staff SHALL NOT delete franchise centers from the UI.

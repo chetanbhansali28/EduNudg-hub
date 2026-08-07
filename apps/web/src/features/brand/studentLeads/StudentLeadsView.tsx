@@ -315,6 +315,7 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
         filtered.map((lead) => {
           const status = leadStatusPresentation(lead);
           const source = leadSourcePresentation(lead.lead_source);
+          const centerName = lead.center_id ? centerNameById.get(lead.center_id) : undefined;
           const unassigned = !lead.center_id && lead.status !== "lost" && lead.status !== "converted";
           const stale = isLeadStale(lead, now);
           return (
@@ -326,7 +327,7 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
               when={formatLeadSubmittedRelative(lead.created_at, now)}
               statusBadge={<LeadStatusBadge tone={status.tone}>{status.label}</LeadStatusBadge>}
               sourceBadge={<LeadStatusBadge tone={source.tone}>{source.label}</LeadStatusBadge>}
-              fields={leadGridFields(lead).map((field) =>
+              fields={leadGridFields(lead, centerName).map((field) =>
                 field.label === "Contact"
                   ? {
                       ...field,

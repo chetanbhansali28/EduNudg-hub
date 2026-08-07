@@ -39,6 +39,7 @@ type Props = {
   onEditCourseChange: (v: ProgramMarketingInput) => void;
   onSaveCourse: () => void;
   saveCoursePending: boolean;
+  saveCourseSaved?: boolean;
   onArchiveCourse: () => void;
   selectedLevelId: string | null;
   onSelectLevel: (id: string | null) => void;
@@ -50,6 +51,7 @@ type Props = {
   createLevelPending: boolean;
   onUpdateLevel: (id: string) => void;
   updateLevelPending: boolean;
+  updateLevelSaved?: boolean;
   onDeleteLevel: (id: string) => void;
   onReorderLevels: (ordered: CurriculumLevel[]) => void;
   reorderPending: boolean;
@@ -72,6 +74,7 @@ export function CurriculumCourseDetail({
   onEditCourseChange,
   onSaveCourse,
   saveCoursePending,
+  saveCourseSaved = false,
   selectedLevelId,
   onSelectLevel,
   addLevel,
@@ -82,6 +85,7 @@ export function CurriculumCourseDetail({
   createLevelPending,
   onUpdateLevel,
   updateLevelPending,
+  updateLevelSaved = false,
   onDeleteLevel,
   onReorderLevels,
   reorderPending,
@@ -111,7 +115,13 @@ export function CurriculumCourseDetail({
       embedded
       saveAction={
         !readOnly ? (
-          <SaveButton onClick={onSaveCourse} pending={saveCoursePending} disabled={!editCourse.name.trim()} label="Save Changes" />
+          <SaveButton
+            onClick={onSaveCourse}
+            pending={saveCoursePending}
+            saved={saveCourseSaved}
+            disabled={!editCourse.name.trim()}
+            label="Save Changes"
+          />
         ) : null
       }
     />
@@ -224,6 +234,7 @@ export function CurriculumCourseDetail({
         createPending={createLevelPending}
         onUpdateLevel={onUpdateLevel}
         updatePending={updateLevelPending}
+        updateSaved={updateLevelSaved}
         onDeleteLevel={onDeleteLevel}
         onReorderLevels={onReorderLevels}
         reorderPending={reorderPending}

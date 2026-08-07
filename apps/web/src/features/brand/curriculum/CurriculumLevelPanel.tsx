@@ -35,6 +35,7 @@ type Props = {
   createPending: boolean;
   onUpdateLevel: (id: string) => void;
   updatePending: boolean;
+  updateSaved?: boolean;
   onDeleteLevel: (id: string) => void;
   onReorderLevels: (ordered: CurriculumLevel[]) => void;
   reorderPending: boolean;
@@ -102,6 +103,7 @@ export function CurriculumLevelPanel({
   createPending,
   onUpdateLevel,
   updatePending,
+  updateSaved = false,
   onDeleteLevel,
   onReorderLevels,
   reorderPending,
@@ -253,6 +255,7 @@ export function CurriculumLevelPanel({
                         <SaveButton
                           onClick={() => onUpdateLevel(level.id)}
                           pending={updatePending}
+                          saved={updateSaved}
                           disabled={!editLevel.name.trim()}
                           label="Save program"
                         />

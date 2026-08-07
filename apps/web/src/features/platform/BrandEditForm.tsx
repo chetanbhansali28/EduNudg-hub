@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Button, FormGrid, Input, MutationError, PasswordInput, Select } from "@edunudg/ui";
+import { FormGrid, Input, MutationError, PasswordInput, SaveButton, Select } from "@edunudg/ui";
 import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
 import { fetchBrandOwnerLoginEmail, shouldSyncBrandOwnerCredentials, upsertBrandOwnerCredentials } from "@/lib/brandOwnerCredentialsApi";
 import { updateBrandMarketingTheme } from "@/lib/brandLandingApi";
@@ -9,6 +9,7 @@ import { brandAdminPath } from "@/lib/adminPaths";
 import { slugifyBrandName, uniqueBrandSlug } from "@/lib/brandSlug";
 import { getSupabase } from "@/lib/supabase";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { marketingThemeSelectOptions } from "./BrandMarketingThemesPanel";
 import { useMutationError } from "./hooks/useMutationError";
 
@@ -34,6 +35,7 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const brandSaved = useSavedFlash();
   const savedTheme = parseMarketingTheme(marketingTheme);
   const [form, setForm] = useState({
     name,
@@ -141,6 +143,7 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
       void qc.invalidateQueries({ queryKey: ["brand-marketing-editor"] });
       setForm((prev) => ({ ...prev, password: "" }));
       setLoginFieldsTouched(false);
+      brandSaved.flash();
       if (result.slug !== slug) {
         navigate(brandAdminPath(result.slug), { replace: true });
       }
@@ -217,12 +220,13 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
         </p>
       ) : null}
       <div style={{ marginTop: "0.75rem" }}>
-        <Button
+        <SaveButton
           onClick={() => saveBrand.mutate()}
-          disabled={!form.name.trim() || saveBrand.isPending || !dirty}
-        >
-          {saveBrand.isPending ? "Saving…" : "Save changes"}
-        </Button>
+          disabled={!form.name.trim() || !dirty}
+          pending={saveBrand.isPending}
+          saved={brandSaved.saved}
+          label="Save changes"
+        />
       </div>
     </div>
   );

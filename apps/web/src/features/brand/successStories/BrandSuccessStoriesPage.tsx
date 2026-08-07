@@ -15,6 +15,7 @@ import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
 import {
   SuccessStoryCard,
@@ -42,6 +43,7 @@ export function BrandSuccessStoriesPage() {
   const { brandId, missingBrand } = useBrandScope();
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const storySaved = useSavedFlash();
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
@@ -110,7 +112,8 @@ export function BrandSuccessStoriesPage() {
     },
     onSuccess: () => {
       invalidate();
-      setEditingId(null);
+      storySaved.flash();
+      window.setTimeout(() => setEditingId(null), 1500);
     },
     onError: capture,
   });
@@ -225,6 +228,7 @@ export function BrandSuccessStoriesPage() {
                 editForm={editForm}
                 saveDisabled={!isStoryFormValid(editForm)}
                 savePending={update.isPending}
+                saveSaved={storySaved.saved && editing}
                 onEdit={() => {
                   setEditingId(story.id);
                   setEditForm({

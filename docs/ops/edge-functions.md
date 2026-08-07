@@ -7,9 +7,12 @@ EduNudg functions live in [`supabase/functions/`](../../supabase/functions/):
 | `whatsapp-otp` | Send/verify WhatsApp OTP (stub — wire Twilio/Gupshup later) |
 | `passkey-verify` | WebAuthn login (`login-options` / `login-verify`; wire `@simplewebauthn/server` for production sessions) |
 | `brand-owner-credentials` | Platform admin: create/update brand owner Auth user + membership |
-
-**SPA rule:** `BrandEditForm` calls this function only when login email or password fields change (`credentialsChanged`). Saving website theme, name, or status alone must not invoke credentials — otherwise edge 400s block unrelated brand edits.
+| `center-owner-credentials` | Brand staff (or platform admin): create/update center owner Auth user + `center_owner` membership |
 | `platform-portal-handoff` | Platform admin: one-time `hashed_token` for cross-host `/auth/handoff` sign-in |
+
+**SPA rule:** `BrandEditForm` calls `brand-owner-credentials` only when login email or password fields change (`credentialsChanged`). Saving website theme, name, or status alone must not invoke credentials — otherwise edge 400s block unrelated brand edits.
+
+**SPA rule:** `CenterDetailPanel` (Franchise Identity) calls `center-owner-credentials` only when login email or password fields were intentionally edited (`loginFieldsTouched` + `shouldSyncCenterOwnerCredentials`). Profile-only saves must not invoke credentials.
 
 No Docker required. Deploy with the **Supabase CLI** against your linked cloud project.
 
@@ -33,6 +36,7 @@ supabase functions deploy whatsapp-otp
 supabase functions deploy passkey-verify
 supabase functions deploy platform-portal-handoff
 supabase functions deploy brand-owner-credentials
+supabase functions deploy center-owner-credentials
 ```
 
 ## Deploy all functions

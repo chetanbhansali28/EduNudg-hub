@@ -21,6 +21,7 @@ import {
 import { parseTopicsComma } from "@/lib/curriculumHelpers";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { CurriculumCourseList } from "@/features/brand/curriculum/CurriculumCourseList";
 import {
@@ -47,6 +48,8 @@ interface CurriculumWorkspaceProps {
 export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWorkspaceProps) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const courseSaved = useSavedFlash();
+  const levelSaved = useSavedFlash();
   const courseCloser = useAddFormCloser();
   const levelCloser = useAddFormCloser();
   const { isMobile } = useOpsBreakpoint();
@@ -165,6 +168,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
     onSuccess: () => {
       clear();
       invalidateAll();
+      courseSaved.flash();
     },
     onError: capture,
   });
@@ -217,7 +221,10 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
         whatYouLearn: editLevel.whatYouLearn,
         videoUrl: editLevel.videoUrl,
       }),
-    onSuccess: invalidateAll,
+    onSuccess: () => {
+      invalidateAll();
+      levelSaved.flash();
+    },
     onError: capture,
   });
 
@@ -274,6 +281,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       onEditCourseChange={setEditCourse}
       onSaveCourse={() => saveCourse.mutate()}
       saveCoursePending={saveCourse.isPending}
+      saveCourseSaved={courseSaved.saved}
       onArchiveCourse={() => archiveCourse.mutate()}
       selectedLevelId={selectedLevelId}
       onSelectLevel={setSelectedLevelId}
@@ -285,6 +293,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       createLevelPending={createLevelMutation.isPending}
       onUpdateLevel={(id) => updateLevelMutation.mutate(id)}
       updateLevelPending={updateLevelMutation.isPending}
+      updateLevelSaved={levelSaved.saved}
       onDeleteLevel={(id) => deleteLevelMutation.mutate(id)}
       onReorderLevels={(ordered) => reorderLevelMutation.mutate(ordered)}
       reorderPending={reorderLevelMutation.isPending}

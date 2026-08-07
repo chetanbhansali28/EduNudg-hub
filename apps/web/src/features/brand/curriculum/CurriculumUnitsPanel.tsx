@@ -12,6 +12,7 @@ import {
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { DeleteConfirmButton } from "@/features/shared/DeleteConfirmButton";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 
 type Props = {
   brandId: string;
@@ -35,9 +36,11 @@ function unitToDraft(unit: CurriculumUnit): ChapterDraft {
 export function CurriculumUnitsPanel({ brandId, levelId, canEdit, onError }: Props) {
   const qc = useQueryClient();
   const chapterCloser = useAddFormCloser();
+  const chapterSaved = useSavedFlash();
   const [addTitle, setAddTitle] = useState("");
   const [addDuration, setAddDuration] = useState("");
   const [drafts, setDrafts] = useState<Record<string, ChapterDraft>>({});
+  const [savedChapterId, setSavedChapterId] = useState<string | null>(null);
 
   const chapters = useQuery({
     queryKey: ["level-units", levelId],
@@ -77,6 +80,8 @@ export function CurriculumUnitsPanel({ brandId, levelId, canEdit, onError }: Pro
         delete next[unit.id];
         return next;
       });
+      setSavedChapterId(unit.id);
+      chapterSaved.flash();
     },
     onError,
   });
@@ -185,6 +190,7 @@ export function CurriculumUnitsPanel({ brandId, levelId, canEdit, onError }: Pro
                     <SaveButton
                       onClick={() => save.mutate(chapter)}
                       pending={save.isPending && save.variables?.id === chapter.id}
+                      saved={chapterSaved.saved && savedChapterId === chapter.id}
                       disabled={!draft.title.trim()}
                       label="Save chapter"
                     />

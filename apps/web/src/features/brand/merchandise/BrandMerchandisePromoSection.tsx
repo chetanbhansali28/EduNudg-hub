@@ -18,6 +18,7 @@ import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 
 type PromoRow = {
   id: string;
@@ -50,6 +51,7 @@ function discountLabel(row: PromoRow): string {
 export function BrandMerchandisePromoSection({ brandId }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const promoSaved = useSavedFlash();
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
@@ -107,7 +109,8 @@ export function BrandMerchandisePromoSection({ brandId }: Props) {
     },
     onSuccess: () => {
       invalidate();
-      setEditingId(null);
+      promoSaved.flash();
+      window.setTimeout(() => setEditingId(null), 1500);
     },
     onError: capture,
   });
@@ -197,7 +200,9 @@ export function BrandMerchandisePromoSection({ brandId }: Props) {
                       }}
                       onSave={() => update.mutate(row.id)}
                       onCancel={() => setEditingId(null)}
-                      saveDisabled={!editForm.code.trim() || update.isPending}
+                      saveDisabled={!editForm.code.trim()}
+                      savePending={update.isPending}
+                      saveSaved={promoSaved.saved && editing}
                     />
                   }
                 >

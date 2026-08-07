@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Button, FormGrid, Input, ToggleField } from "@edunudg/ui";
+import { Button, FormGrid, Input, SaveButton, ToggleField } from "@edunudg/ui";
 import {
   catalogItemDescription,
   catalogStatusBadge,
@@ -41,6 +41,7 @@ type Props = {
   editForm: CatalogItemForm;
   saveDisabled: boolean;
   savePending: boolean;
+  saveSaved?: boolean;
   onEdit: () => void;
   onCancelEdit: () => void;
   onSave: () => void;
@@ -56,6 +57,7 @@ export function BrandMerchandiseCatalogCard({
   editForm,
   saveDisabled,
   savePending,
+  saveSaved = false,
   onEdit,
   onCancelEdit,
   onSave,
@@ -137,9 +139,13 @@ export function BrandMerchandiseCatalogCard({
                 onChange={(checked) => onEditFormChange({ ...editForm, isActive: checked })}
               />
               <div className="ed-brand-merch-card__edit-actions">
-                <Button onClick={onSave} disabled={saveDisabled || savePending}>
-                  Save changes
-                </Button>
+                <SaveButton
+                  onClick={onSave}
+                  disabled={saveDisabled}
+                  pending={savePending}
+                  saved={saveSaved}
+                  label="Save changes"
+                />
                 <Button variant="ghost" onClick={onCancelEdit}>
                   Cancel
                 </Button>

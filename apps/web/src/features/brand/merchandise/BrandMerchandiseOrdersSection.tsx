@@ -19,6 +19,7 @@ import {
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 
 type Props = { brandId: string };
 
@@ -102,6 +103,7 @@ function orderToEditForm(order: MerchandiseOrderRow): OrderEditForm {
 export function BrandMerchandiseOrdersSection({ brandId }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const orderSaved = useSavedFlash();
   const [overdueOnly, setOverdueOnly] = useState(false);
   const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
   const [carrier, setCarrier] = useState("");
@@ -141,10 +143,11 @@ export function BrandMerchandiseOrdersSection({ brandId }: Props) {
     },
     onSuccess: () => {
       invalidate();
+      orderSaved.flash();
       setShippingOrderId(null);
       setCarrier("");
       setTrackingNumber("");
-      setEditingId(null);
+      window.setTimeout(() => setEditingId(null), 1500);
     },
     onError: capture,
   });
@@ -276,6 +279,8 @@ export function BrandMerchandiseOrdersSection({ brandId }: Props) {
                             deleteTitle="Cancel order"
                             deleteDescription="This cancels the merchandise order. It cannot be undone from this screen."
                             saveDisabled={statusUpdate.isPending}
+                            savePending={statusUpdate.isPending}
+                            saveSaved={orderSaved.saved && editing}
                             saveLabel="Save order"
                           />
                         </div>

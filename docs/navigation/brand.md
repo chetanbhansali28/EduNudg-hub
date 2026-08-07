@@ -13,7 +13,7 @@ See [Navigation spec](../spec/navigation-spec.md).
 - Home (dashboard — unassigned / stale lead KPIs)
 - **Student Leads** (`/app/leads`) — assign, stale queue, manual add
 - **Franchise Applications** (`/app/franchise-applications`) — approve/reject, manual add
-- Franchise Centers (`/app/centers`) — edit existing; new centers via franchise application approval only
+- Franchise Centers (`/app/centers`) — edit existing (including Franchise Identity login email/password for center portal); new centers via franchise application approval only
 - Curriculum (abacus level metadata, topics, marketing video)
 - Royalties & Finance
 - Analytics

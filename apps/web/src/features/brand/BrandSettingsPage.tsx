@@ -4,6 +4,7 @@ import { Input, MutationError, SaveButton, Select, Textarea } from "@edunudg/ui"
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseMaybe } from "@/lib/supabaseResult";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -13,15 +14,6 @@ import {
   normalizeStaleLeadDays,
 } from "@/features/brand/settings/brandSettingsHelpers";
 import "./settings/brandSettings.css";
-
-function useSavedFlash() {
-  const [saved, setSaved] = useState(false);
-  const flash = () => {
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 3000);
-  };
-  return { saved, flash };
-}
 
 const ICON_BRUSH = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>

@@ -11,6 +11,8 @@ export function CrudRowActions({
   deleteDescription,
   deleteTitle,
   saveDisabled,
+  savePending,
+  saveSaved,
   saveLabel = "Save",
 }: {
   editing: boolean;
@@ -21,6 +23,8 @@ export function CrudRowActions({
   deleteDescription?: string;
   deleteTitle?: string;
   saveDisabled?: boolean;
+  savePending?: boolean;
+  saveSaved?: boolean;
   saveLabel?: string;
 }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -28,7 +32,13 @@ export function CrudRowActions({
   if (editing) {
     return (
       <>
-        <SaveButton onClick={onSave} disabled={saveDisabled} label={saveLabel} />
+        <SaveButton
+          onClick={onSave}
+          disabled={saveDisabled}
+          pending={savePending}
+          saved={saveSaved}
+          label={saveLabel}
+        />
         <Button variant="ghost" onClick={onCancel}>
           Cancel
         </Button>

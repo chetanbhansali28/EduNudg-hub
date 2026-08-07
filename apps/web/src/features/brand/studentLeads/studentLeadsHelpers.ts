@@ -129,13 +129,18 @@ export function childAgeFromDob(dob: string | null): string | null {
   return `${dob} (${years} Years)`;
 }
 
-export function leadGridFields(lead: LeadRow): { label: string; value: string }[] {
-  return [
+export function leadGridFields(
+  lead: LeadRow,
+  centerName?: string
+): { label: string; value: string }[] {
+  const fields: { label: string; value: string }[] = [
     { label: "Student Name", value: lead.child_name ?? "—" },
     { label: "DOB", value: lead.child_dob ?? "—" },
     { label: "Contact", value: lead.whatsapp_e164 ?? "—" },
     { label: "Location", value: [lead.city, lead.pincode].filter(Boolean).join(", ") || "—" },
   ];
+  if (centerName) fields.push({ label: "Assigned", value: centerName });
+  return fields;
 }
 
 export function leadListLines(

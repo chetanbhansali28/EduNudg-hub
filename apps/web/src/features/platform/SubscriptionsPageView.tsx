@@ -6,6 +6,7 @@ import {
   DirectoryPagination,
   FormGrid,
   MutationError,
+  SaveButton,
   Select,
   SubscriptionAccordion,
   SubscriptionBillingToggle,
@@ -146,6 +147,7 @@ export function SubscriptionsPageView({
   onDiscardPlanEdit,
   onSavePlan,
   savePlanPending,
+  savePlanSaved = false,
   createPlanForm,
   onCreatePlanFormChange,
   onCreatePlan,
@@ -164,6 +166,8 @@ export function SubscriptionsPageView({
   onEditSubChange,
   onCancelSubEdit,
   onSaveSub,
+  saveSubPending = false,
+  saveSubSaved = false,
   onDeletePlan,
   onDeleteSub,
   deletePlanPending,
@@ -180,6 +184,7 @@ export function SubscriptionsPageView({
   onDiscardPlanEdit: () => void;
   onSavePlan: () => void;
   savePlanPending: boolean;
+  savePlanSaved?: boolean;
   createPlanForm: PlanForm;
   onCreatePlanFormChange: (form: PlanForm) => void;
   onCreatePlan: () => void;
@@ -198,6 +203,8 @@ export function SubscriptionsPageView({
   onEditSubChange: (form: { brand_id: string; plan_id: string; status: SubStatus }) => void;
   onCancelSubEdit: () => void;
   onSaveSub: () => void;
+  saveSubPending?: boolean;
+  saveSubSaved?: boolean;
   onDeletePlan: (planId: string) => void;
   onDeleteSub: (subId: string) => void;
   deletePlanPending: boolean;
@@ -301,9 +308,12 @@ export function SubscriptionsPageView({
                   <Button variant="ghost" onClick={onDiscardPlanEdit}>
                     Discard
                   </Button>
-                  <Button onClick={onSavePlan} disabled={savePlanPending}>
-                    Save Changes
-                  </Button>
+                  <SaveButton
+                    onClick={onSavePlan}
+                    pending={savePlanPending}
+                    saved={savePlanSaved}
+                    label="Save Changes"
+                  />
                 </div>
               </SubscriptionAccordion>
             ) : null}
@@ -373,7 +383,12 @@ export function SubscriptionsPageView({
                   <Button variant="ghost" onClick={onCancelSubEdit}>
                     Cancel
                   </Button>
-                  <Button onClick={onSaveSub}>Save Changes</Button>
+                  <SaveButton
+                    onClick={onSaveSub}
+                    pending={saveSubPending}
+                    saved={saveSubSaved}
+                    label="Save Changes"
+                  />
                 </div>
               </Card>
             ) : null}
@@ -415,6 +430,7 @@ export function SubscriptionsPageView({
                 onDiscard={onDiscardPlanEdit}
                 onSave={onSavePlan}
                 savePending={savePlanPending}
+                saved={savePlanSaved}
                 saveDisabled={!editPlan.code.trim() || !editPlan.name.trim()}
               >
                 <SubscriptionPlanEditorFields
@@ -514,7 +530,12 @@ export function SubscriptionsPageView({
                     <Button variant="ghost" onClick={onCancelSubEdit}>
                       Cancel
                     </Button>
-                    <Button onClick={onSaveSub}>Save Changes</Button>
+                    <SaveButton
+                      onClick={onSaveSub}
+                      pending={saveSubPending}
+                      saved={saveSubSaved}
+                      label="Save Changes"
+                    />
                   </div>
                 </Card>
               ) : null}

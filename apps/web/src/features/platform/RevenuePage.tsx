@@ -4,6 +4,7 @@ import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { paiseToRupeesInput, rupeesToPaise } from "@/lib/inrCurrency";
 import { useMutationError } from "./hooks/useMutationError";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import {
   RevenuePageView,
   type BrandMetric,
@@ -23,6 +24,8 @@ const emptyMetric = {
 export function RevenuePage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const invoiceSaved = useSavedFlash();
+  const metricSaved = useSavedFlash();
   const [invoiceForm, setInvoiceForm] = useState(emptyInvoice);
   const [createInvoiceOpen, setCreateInvoiceOpen] = useState(false);
   const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
@@ -119,7 +122,8 @@ export function RevenuePage() {
     },
     onSuccess: () => {
       invalidateInvoices();
-      setEditingInvoiceId(null);
+      invoiceSaved.flash();
+      window.setTimeout(() => setEditingInvoiceId(null), 1500);
     },
     onError: capture,
   });
@@ -171,7 +175,8 @@ export function RevenuePage() {
     },
     onSuccess: () => {
       invalidateMetrics();
-      setEditingMetricId(null);
+      metricSaved.flash();
+      window.setTimeout(() => setEditingMetricId(null), 1500);
     },
     onError: capture,
   });
@@ -216,6 +221,8 @@ export function RevenuePage() {
       onSaveInvoice={() => {
         if (editingInvoiceId) updateInvoice.mutate(editingInvoiceId);
       }}
+      saveInvoicePending={updateInvoice.isPending}
+      saveInvoiceSaved={invoiceSaved.saved}
       onDeleteInvoice={(invoiceId) => deleteInvoice.mutate(invoiceId)}
       deleteInvoicePending={deleteInvoice.isPending}
       metricForm={metricForm}
@@ -242,6 +249,8 @@ export function RevenuePage() {
       onSaveMetric={() => {
         if (editingMetricId) updateMetric.mutate(editingMetricId);
       }}
+      saveMetricPending={updateMetric.isPending}
+      saveMetricSaved={metricSaved.saved}
       onDeleteMetric={(metricId) => deleteMetric.mutate(metricId)}
       deleteMetricPending={deleteMetric.isPending}
     />

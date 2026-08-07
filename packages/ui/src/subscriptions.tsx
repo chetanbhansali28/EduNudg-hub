@@ -149,6 +149,7 @@ export function SubscriptionEditorPanel({
   onDiscard,
   onSave,
   savePending = false,
+  saved = false,
   saveDisabled = false,
   children,
 }: {
@@ -157,6 +158,7 @@ export function SubscriptionEditorPanel({
   onDiscard?: () => void;
   onSave: () => void;
   savePending?: boolean;
+  saved?: boolean;
   saveDisabled?: boolean;
   children: ReactNode;
 }) {
@@ -179,7 +181,7 @@ export function SubscriptionEditorPanel({
             onClick={onSave}
             disabled={saveDisabled || savePending}
           >
-            {savePending ? "Saving…" : "Save Changes"}
+            {savePending ? "Saving…" : saved ? "Saved" : "Save Changes"}
           </button>
         </div>
       </div>

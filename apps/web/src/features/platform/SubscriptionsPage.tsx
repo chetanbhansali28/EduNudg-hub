@@ -11,6 +11,7 @@ import {
 } from "@/lib/subscriptionPlanFeatures";
 import { useMutationError } from "./hooks/useMutationError";
 import { logPlatformAudit } from "@/lib/platformAuditApi";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import {
   SubscriptionsPageView,
   type BrandSubscription,
@@ -59,6 +60,8 @@ function formToPayload(form: PlanForm) {
 export function SubscriptionsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const planSaved = useSavedFlash();
+  const subSaved = useSavedFlash();
   const [planForm, setPlanForm] = useState<PlanForm>(emptyPlanForm());
   const [createPlanOpen, setCreatePlanOpen] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
@@ -134,7 +137,8 @@ export function SubscriptionsPage() {
     },
     onSuccess: (_data, id) => {
       invalidatePlans();
-      setEditingPlanId(null);
+      planSaved.flash();
+      window.setTimeout(() => setEditingPlanId(null), 1500);
       void logPlatformAudit({ action: "update", resource_type: "subscription_plan", resource_id: id });
     },
     onError: capture,
@@ -194,7 +198,8 @@ export function SubscriptionsPage() {
     },
     onSuccess: (_data, id) => {
       invalidateSubs();
-      setEditingSubId(null);
+      subSaved.flash();
+      window.setTimeout(() => setEditingSubId(null), 1500);
       void logPlatformAudit({
         action: "update",
         resource_type: "brand_subscription",
@@ -238,6 +243,7 @@ export function SubscriptionsPage() {
         if (editingPlanId) updatePlan.mutate(editingPlanId);
       }}
       savePlanPending={updatePlan.isPending}
+      savePlanSaved={planSaved.saved}
       createPlanForm={planForm}
       onCreatePlanFormChange={setPlanForm}
       onCreatePlan={() => createPlan.mutate()}
@@ -262,6 +268,8 @@ export function SubscriptionsPage() {
       onSaveSub={() => {
         if (editingSubId) updateSub.mutate(editingSubId);
       }}
+      saveSubPending={updateSub.isPending}
+      saveSubSaved={subSaved.saved}
       onDeletePlan={(planId) => deletePlan.mutate(planId)}
       onDeleteSub={(subId) => deleteSub.mutate(subId)}
       deletePlanPending={deletePlan.isPending}

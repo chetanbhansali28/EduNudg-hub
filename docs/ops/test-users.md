@@ -41,6 +41,19 @@ pnpm dlx supabase@2.104.0 db push
 pnpm dlx supabase@2.104.0 functions deploy brand-owner-credentials
 ```
 
+## Franchise (center) login credentials (brand staff)
+
+On **Brand → Franchise Centers** (`/app/centers`), open a center and use **Franchise Identity** → **Login email** / **Password**. Password is required only when creating a new login; leave blank to keep the existing password.
+
+The franchise signs in at `{center}.{brand}.localhost:9000/login` (dev) using that email and password. This provisions Auth + `center_owner` membership via `center-owner-credentials`:
+
+```bash
+pnpm dlx supabase@2.104.0 db push
+pnpm dlx supabase@2.104.0 functions deploy center-owner-credentials
+```
+
+If center login fails after setting credentials: confirm migration `073_center_owner_credentials.sql` is applied and the edge function is deployed.
+
 Seeded demo brand login remains `owner@edunudg.com` / `admin` at http://abacusworld.localhost:9000/login when `test-users.sql` has been applied.
 
 ## Platform admin cross-portal handoff
@@ -99,6 +112,7 @@ DELETE FROM auth.users WHERE email LIKE '%@edunudg.com';
 | `ERR_NAME_NOT_RESOLVED` / `your_project_ref.supabase.co` | Set real `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `apps/web/.env`, restart dev server |
 | Login "Invalid credentials" | Re-run `test-users.sql` or reset password in Dashboard; use `admin@edunudg.com` / `admin` |
 | Brand login not working after platform edit | Deploy `brand-owner-credentials` Edge Function; set login email + password on Brands → Edit |
+| Center login not working after brand centers edit | Deploy `center-owner-credentials`; apply migration `073`; set Login email + Password under Franchise Identity |
 | No data after login | Check `memberships.status = 'active'` |
 | Brand/center portal wrong | Use subdomain hosts above; run `test-users.sql` for `domain_mappings` |
 | Brand login access denied (owner) | App resolves brand via slug + `get_portal_branding`; ensure `test-users.sql` brand id matches domain slug |

@@ -7,6 +7,7 @@ import {
   syncCenterProgramEnablement,
 } from "@/lib/centerProgramApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 
 type Props = {
   centerId: string;
@@ -17,6 +18,7 @@ type Props = {
 export function CenterProgramAuthPanel({ centerId, centerName, brandId }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const authSaved = useSavedFlash();
 
   const programs = useQuery({
     queryKey: ["brand-programs-for-auth", brandId],
@@ -46,6 +48,7 @@ export function CenterProgramAuthPanel({ centerId, centerName, brandId }: Props)
       void qc.invalidateQueries({ queryKey: ["center-program-auth", centerId] });
       void qc.invalidateQueries({ queryKey: ["authorized-curricula", centerId] });
       setDirty(false);
+      authSaved.flash();
     },
     onError: capture,
   });
@@ -92,15 +95,22 @@ export function CenterProgramAuthPanel({ centerId, centerName, brandId }: Props)
           );
         })}
       </div>
-      {dirty && (
+      {(dirty || authSaved.saved) && (
         <div style={{ marginTop: "0.75rem" }}>
-          <SaveButton onClick={() => save.mutate()} disabled={save.isPending} label="Save authorization" />
-          <Button variant="ghost" onClick={() => {
-            setSelected(new Set((authorized.data ?? []).map((a) => a.programId)));
-            setDirty(false);
-          }}>
-            Reset
-          </Button>
+          <SaveButton
+            onClick={() => save.mutate()}
+            pending={save.isPending}
+            saved={authSaved.saved}
+            label="Save authorization"
+          />
+          {dirty ? (
+            <Button variant="ghost" onClick={() => {
+              setSelected(new Set((authorized.data ?? []).map((a) => a.programId)));
+              setDirty(false);
+            }}>
+              Reset
+            </Button>
+          ) : null}
         </div>
       )}
     </div>

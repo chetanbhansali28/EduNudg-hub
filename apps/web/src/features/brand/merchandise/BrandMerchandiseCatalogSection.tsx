@@ -10,6 +10,7 @@ import { paiseToRupeesInput, rupeesToPaise } from "@/lib/inrCurrency";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { BrandMerchandiseAddCatalogPanel } from "./BrandMerchandiseAddCatalogPanel";
 import {
   BrandMerchandiseCatalogCard,
@@ -29,6 +30,7 @@ type Props = {
 export function BrandMerchandiseCatalogSection({ brandId, formOpen, onFormOpenChange }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const catalogSaved = useSavedFlash();
   const [form, setForm] = useState(emptyForm);
   const [savedItemId, setSavedItemId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -108,7 +110,8 @@ export function BrandMerchandiseCatalogSection({ brandId, formOpen, onFormOpenCh
     },
     onSuccess: () => {
       invalidate();
-      setEditingId(null);
+      catalogSaved.flash();
+      window.setTimeout(() => setEditingId(null), 1500);
     },
     onError: capture,
   });
@@ -169,6 +172,7 @@ export function BrandMerchandiseCatalogSection({ brandId, formOpen, onFormOpenCh
             editForm={editForm}
             saveDisabled={!editForm.sku.trim() || !editForm.name.trim()}
             savePending={update.isPending}
+            saveSaved={catalogSaved.saved && editingId === item.id}
             onEdit={() => startEdit(item)}
             onCancelEdit={() => setEditingId(null)}
             onSave={() => update.mutate(item.id)}

@@ -14,6 +14,7 @@ import {
   FormGrid,
   Input,
   MutationError,
+  PasswordInput,
   SaveButton,
   Select,
   Textarea,
@@ -26,6 +27,11 @@ import {
   updateFranchiseCenter,
 } from "@/lib/centerCentersApi";
 import type { CenterPublicProfileInput } from "@/lib/centerProfileFields";
+import {
+  fetchCenterOwnerLoginEmail,
+  shouldSyncCenterOwnerCredentials,
+  upsertCenterOwnerCredentials,
+} from "@/lib/centerOwnerCredentialsApi";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import {
@@ -33,6 +39,7 @@ import {
   setCenterCourseAuthorized,
 } from "@/lib/centerCurriculumApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { CenterPhotoUpload } from "@/features/center/settings/CenterPhotoUpload";
 import {
   centerFranchiseId,
@@ -84,11 +91,17 @@ type Props = {
 export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStatusChanged }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const profileSaved = useSavedFlash();
   const [form, setForm] = useState(() => centerToForm(center));
   const [savedForm, setSavedForm] = useState(() => centerToForm(center));
   const [suspendMode, setSuspendMode] = useState(false);
   const [suspendReason, setSuspendReason] = useState("");
   const [pendingProgramId, setPendingProgramId] = useState<string | null>(null);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [originalLoginEmail, setOriginalLoginEmail] = useState<string | null>(null);
+  const [credentialsLoaded, setCredentialsLoaded] = useState(false);
+  const [loginFieldsTouched, setLoginFieldsTouched] = useState(false);
 
   useEffect(() => {
     const next = centerToForm(center);
@@ -97,6 +110,32 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
     setSuspendMode(false);
     setSuspendReason("");
   }, [center]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setCredentialsLoaded(false);
+    setLoginFieldsTouched(false);
+    setPassword("");
+    void (async () => {
+      try {
+        const email = (await fetchCenterOwnerLoginEmail(center.id)) ?? "";
+        if (!cancelled) {
+          setOriginalLoginEmail(email || null);
+          setLoginEmail(email);
+        }
+      } catch {
+        if (!cancelled) {
+          setOriginalLoginEmail(null);
+          setLoginEmail("");
+        }
+      } finally {
+        if (!cancelled) setCredentialsLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [center.id]);
 
   const stats = useQuery({
     queryKey: ["brand-center-stats", center.id],
@@ -136,15 +175,44 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
       : null;
   const centerFrontendUrl =
     center.status === "active" ? centerPortalUrl(brandSlug, center.slug) : null;
-  const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm);
+  const credentialsDirty =
+    loginEmail.trim() !== (originalLoginEmail ?? "") || Boolean(password.trim());
+  const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm) || credentialsDirty;
 
   const saveProfile = useMutation({
     mutationFn: async () => {
       clear();
       await updateFranchiseCenter(center.id, form);
+
+      const shouldSyncCredentials = shouldSyncCenterOwnerCredentials({
+        loginEmail,
+        password,
+        originalLoginEmail,
+        credentialsLoaded,
+        loginFieldsTouched,
+      });
+
+      // Profile-only saves must not invoke center-owner-credentials (edge 400s block unrelated edits).
+      if (shouldSyncCredentials) {
+        if (!originalLoginEmail && !password.trim()) {
+          throw new Error("Password required for a new franchise login");
+        }
+        const { error: credErr } = await upsertCenterOwnerCredentials({
+          centerId: center.id,
+          brandId,
+          email: loginEmail.trim(),
+          password: password.trim() || undefined,
+          fullName: form.name.trim() || center.name,
+        });
+        if (credErr) throw new Error(credErr);
+      }
     },
     onSuccess: () => {
       setSavedForm(form);
+      setPassword("");
+      setOriginalLoginEmail(loginEmail.trim() || null);
+      setLoginFieldsTouched(false);
+      profileSaved.flash();
       void qc.invalidateQueries({ queryKey: ["centers", brandId] });
     },
     onError: capture,
@@ -212,7 +280,12 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
     }));
   };
 
-  const resetForm = () => setForm(savedForm);
+  const resetForm = () => {
+    setForm(savedForm);
+    setLoginEmail(originalLoginEmail ?? "");
+    setPassword("");
+    setLoginFieldsTouched(false);
+  };
 
   const frontendLink = centerFrontendUrl ? (
     <a
@@ -287,7 +360,37 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
             placeholder={center.name}
             editable
           />
+          <Input
+            label="Login email"
+            value={loginEmail}
+            onChange={(v) => {
+              setLoginFieldsTouched(true);
+              setLoginEmail(v);
+            }}
+            type="email"
+            editable
+            disabled={!credentialsLoaded}
+          />
+          <PasswordInput
+            label="Password"
+            value={password}
+            onChange={(v) => {
+              setLoginFieldsTouched(true);
+              setPassword(v);
+            }}
+            placeholder={
+              originalLoginEmail ? "Leave blank to keep current password" : "Required for new login"
+            }
+            disabled={!credentialsLoaded}
+          />
         </FormGrid>
+        <p className="ed-text-sm ed-muted">
+          Franchise staff sign in with this email and password at{" "}
+          <code>
+            {center.slug}.{brandSlug}.localhost:9000/login
+          </code>
+          .
+        </p>
         <Textarea
           label="Short Description"
           value={form.shortDescription}
@@ -390,6 +493,7 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
             onClick={() => saveProfile.mutate()}
             disabled={!form.name.trim() || saveProfile.isPending || !isDirty}
             pending={saveProfile.isPending}
+            saved={profileSaved.saved}
             label="Save Changes"
             block
           />
@@ -426,6 +530,7 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
               onClick={() => saveProfile.mutate()}
               disabled={!form.name.trim() || saveProfile.isPending || !isDirty}
               pending={saveProfile.isPending}
+              saved={profileSaved.saved}
               label="Save Changes"
             />
           }

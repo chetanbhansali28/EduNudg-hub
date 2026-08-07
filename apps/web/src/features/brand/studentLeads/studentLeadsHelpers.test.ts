@@ -4,6 +4,8 @@ import {
   filterLeads,
   filterTabOptions,
   leadCounts,
+  leadGridFields,
+  leadListLines,
   leadListMeta,
   leadListTitle,
   leadSourcePresentation,
@@ -104,5 +106,17 @@ describe("studentLeadsHelpers", () => {
     const csv = leadsExportCsv([lead()]);
     expect(csv.split("\n")[0]).toBe("Parent,WhatsApp,Email,Child,City,Pincode,Status,Source,Created");
     expect(csv).toContain('"Arti Rathi"');
+  });
+
+  it("leadGridFields and leadListLines include assigned franchise when provided", () => {
+    expect(leadGridFields(lead())).not.toContainEqual({ label: "Assigned", value: "Pune West" });
+    expect(leadGridFields(lead(), "Pune West")).toContainEqual({
+      label: "Assigned",
+      value: "Pune West",
+    });
+    expect(leadListLines(lead(), "Pune West")).toEqual([
+      { label: "Child", value: "Yug Rathi" },
+      { label: "Assigned", value: "Pune West" },
+    ]);
   });
 });

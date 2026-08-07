@@ -39,11 +39,14 @@ See [manual-leads.md](./manual-leads.md).
 | `approve_platform_brand_signup(p_signup_id)` | Brand + slug + domain + `brand_subscriptions` + **membership brand_owner** + auth invite |
 | `reject_platform_brand_signup(p_signup_id, p_reason)` | |
 | `purge_ephemeral_e2e_brands()` | Hard-delete `E2E Brand …` / `e2e-brand-*` tenants + `brand_subscriptions` + matching signups/audit (platform admin or service_role; never seed plans/brands) |
+| `get_brand_owner_login(p_brand_id)` | Active `brand_owner` login email (platform admin) |
 
 ## Brand staff
 
 | Function | Description |
 |----------|-------------|
+| `get_center_owner_login(p_center_id)` | Active `center_owner` login email (brand access or platform admin) |
+| `sync_center_owner_membership(...)` | Service-role only — upsert profile + unique `center_owner` after `center-owner-credentials` |
 | `suggest_centers_for_lead(p_lead_id)` | Exact + near pincode list |
 | `assign_lead_to_center(p_lead_id, p_center_id)` | Manual; sets `assigned_at`, `stale_at` from `lead_stale_days` + brand TZ |
 | `reassign_lead(p_lead_id, p_center_id)` | Rejects if `converted`; resets SLA timestamps |

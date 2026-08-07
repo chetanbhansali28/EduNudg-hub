@@ -29,6 +29,7 @@ import {
   RevenueStatGrid,
   RevenueTableActions,
   RevenueVisibility,
+  SaveButton,
   Select,
 } from "@edunudg/ui";
 import { AddFormSection } from "@/features/shared/AddFormSection";
@@ -186,6 +187,8 @@ export function RevenuePageView({
   onEditInvoiceChange,
   onCancelInvoiceEdit,
   onSaveInvoice,
+  saveInvoicePending = false,
+  saveInvoiceSaved = false,
   onDeleteInvoice,
   deleteInvoicePending,
   metricForm,
@@ -200,6 +203,8 @@ export function RevenuePageView({
   onEditMetricChange,
   onCancelMetricEdit,
   onSaveMetric,
+  saveMetricPending = false,
+  saveMetricSaved = false,
   onDeleteMetric,
   deleteMetricPending,
 }: {
@@ -221,6 +226,8 @@ export function RevenuePageView({
   onEditInvoiceChange: (form: { brand_id: string; amount_rupees: string; status: InvoiceStatus }) => void;
   onCancelInvoiceEdit: () => void;
   onSaveInvoice: () => void;
+  saveInvoicePending?: boolean;
+  saveInvoiceSaved?: boolean;
   onDeleteInvoice: (invoiceId: string) => void;
   deleteInvoicePending: boolean;
   metricForm: {
@@ -259,6 +266,8 @@ export function RevenuePageView({
   }) => void;
   onCancelMetricEdit: () => void;
   onSaveMetric: () => void;
+  saveMetricPending?: boolean;
+  saveMetricSaved?: boolean;
   onDeleteMetric: (metricId: string) => void;
   deleteMetricPending: boolean;
 }) {
@@ -473,7 +482,12 @@ export function RevenuePageView({
                     <Button variant="ghost" onClick={onCancelInvoiceEdit}>
                       Cancel
                     </Button>
-                    <Button onClick={onSaveInvoice}>Save Changes</Button>
+                    <SaveButton
+                      onClick={onSaveInvoice}
+                      pending={saveInvoicePending}
+                      saved={saveInvoiceSaved}
+                      label="Save Changes"
+                    />
                   </div>
                 </Card>
               </div>
@@ -522,7 +536,12 @@ export function RevenuePageView({
                           <Button variant="ghost" onClick={onCancelInvoiceEdit}>
                             Cancel
                           </Button>
-                          <Button onClick={onSaveInvoice}>Save Changes</Button>
+                          <SaveButton
+                            onClick={onSaveInvoice}
+                            pending={saveInvoicePending}
+                            saved={saveInvoiceSaved}
+                            label="Save Changes"
+                          />
                         </div>
                       </Card>
                     </div>
@@ -586,7 +605,12 @@ export function RevenuePageView({
                     <Button variant="ghost" onClick={onCancelMetricEdit}>
                       Cancel
                     </Button>
-                    <Button onClick={onSaveMetric}>Save Changes</Button>
+                    <SaveButton
+                      onClick={onSaveMetric}
+                      pending={saveMetricPending}
+                      saved={saveMetricSaved}
+                      label="Save Changes"
+                    />
                   </div>
                 </Card>
               </div>
