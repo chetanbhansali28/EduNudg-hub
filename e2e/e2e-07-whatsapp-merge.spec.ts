@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { hasDatabaseUrl, hasE2EBackend } from "./helpers/env";
+import { hasE2EBackend } from "./helpers/env";
 import { brandUrl, SEED } from "./helpers/portal";
 import { fillBrandStudentLead, expectLeadFormReady } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeadsViaSql,
+  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
@@ -12,9 +12,8 @@ test.describe("E2E-07 — WhatsApp duplicate merge", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
 
   test.afterAll(async () => {
-    if (!hasDatabaseUrl()) return;
     try {
-      await hardDeleteEphemeralE2ELeadsViaSql();
+      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
     } catch {
       // Non-fatal
     }

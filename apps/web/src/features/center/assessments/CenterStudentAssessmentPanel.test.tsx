@@ -118,10 +118,19 @@ describe("CenterStudentAssessmentPanel", () => {
       </QueryClientProvider>
     );
 
-    const typeSelect = await screen.findByLabelText("Type");
+    // Wait for default level (l1) to pre-fill before switching — avoids racing async populate.
+    const scoreInput = await screen.findByLabelText("Score");
+    await waitFor(() => {
+      expect((scoreInput as HTMLInputElement).value).toBe("90");
+    });
+
+    const typeSelect = screen.getByLabelText("Type");
     fireEvent.change(typeSelect, { target: { value: "l2" } });
 
-    const scoreInput = await screen.findByLabelText("Score");
+    await waitFor(() => {
+      expect((scoreInput as HTMLInputElement).value).toBe("");
+    });
+
     fireEvent.change(scoreInput, { target: { value: "85" } });
 
     await waitFor(() => {

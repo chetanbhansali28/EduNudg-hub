@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { authStatePath, hasE2EBackend, hasDatabaseUrl } from "./helpers/env";
+import { authStatePath, hasE2EBackend } from "./helpers/env";
 import { platformUrl, brandUrl, SEED } from "./helpers/portal";
 import {
   cleanupEphemeralE2EBrand,
-  hardDeleteEphemeralE2EBrandsViaSql,
+  hardDeleteEphemeralE2EBrands,
 } from "./helpers/brandCleanup";
 
 test.describe("E2E-01 — New brand onboarding", () => {
@@ -12,12 +12,11 @@ test.describe("E2E-01 — New brand onboarding", () => {
   test.use({ storageState: authStatePath("platform") });
 
   test.afterAll(async () => {
-    // Sweep leftovers from retries / interrupted runs when SQL is available.
-    if (!hasDatabaseUrl()) return;
+    // Sweep leftovers (SQL or platform RPC) so /admin/subscriptions stays clean.
     try {
-      await hardDeleteEphemeralE2EBrandsViaSql();
+      await hardDeleteEphemeralE2EBrands();
     } catch {
-      // Non-fatal: individual tests still clean up via UI.
+      // Non-fatal: individual tests still clean up via cleanupEphemeralE2EBrand.
     }
   });
 

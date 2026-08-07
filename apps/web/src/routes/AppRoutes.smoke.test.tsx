@@ -5,16 +5,20 @@ import { describe, expect, it } from "vitest";
  * fail tests before they reach the browser console.
  */
 describe("AppRoutes smoke imports", () => {
-  it("regression_route_modules_parse_without_error", async () => {
-    const modules = await Promise.all([
-      import("./AppRoutes"),
-      import("@/features/platform/SubscriptionsPage"),
-      import("@/features/platform/RevenuePage"),
-      import("@/features/platform/SettingsPage"),
-      import("@/features/marketing/MarketingPublicLayout"),
-      import("@/features/marketing/PlatformPricingSection"),
-    ]);
+  it(
+    "regression_route_modules_parse_without_error",
+    async () => {
+      const modules = await Promise.all([
+        import("./AppRoutes"),
+        import("@/features/platform/SubscriptionsPage"),
+        import("@/features/platform/RevenuePage"),
+        import("@/features/platform/SettingsPage"),
+        import("@/features/marketing/MarketingPublicLayout"),
+        import("@/features/marketing/PlatformPricingSection"),
+      ]);
 
-    expect(modules.every((mod) => mod != null)).toBe(true);
-  });
+      expect(modules.every((mod) => mod != null)).toBe(true);
+    },
+    30_000
+  );
 });

@@ -191,10 +191,15 @@ Staff SHALL create leads without public forms via manual entry cards and staff R
 
 ### Requirement: Ephemeral E2E student lead hard purge
 
-The system SHALL expose `purge_ephemeral_e2e_leads()` to permanently delete test student leads whose email matches `e2e-lead-…@example.com` (or legacy `path-a-|path-b-|lost-|merge-|stale-|manual-…@example.com`), or whose parent/child names match `E2E Parent` / `E2E Child` (and documented legacy E2E name patterns). Before delete, `students.source_lead_id` referencing those leads SHALL be nulled. `lead_events` and `lead_assignment_history` cascade. Authenticated callers MUST be platform admins; direct DB / service-role callers MAY invoke without a JWT. Playwright specs that create leads SHALL use `makeE2ELeadFields` and call `cleanupEphemeralE2ELead` after the test.
+The system SHALL expose `purge_ephemeral_e2e_leads()` (platform admin) and `purge_ephemeral_e2e_leads_for_brand(brand_id)` (platform admin or brand access) to permanently delete test student leads whose email matches `e2e-lead-…@example.com` (or legacy `path-a-|path-b-|lost-|merge-|stale-|manual-|neg-…@example.com`), or whose parent/child/full names match `E2E Parent` / `E2E Child` (and documented legacy E2E name patterns). Before delete, `students.source_lead_id` referencing those leads SHALL be nulled. Matching converted E2E students on seed brands MAY be hard-deleted. `lead_events` and `lead_assignment_history` cascade. Direct DB / service-role callers MAY invoke without a JWT. Playwright SHALL call these RPCs via seed login when `DATABASE_URL` is unavailable, and SHALL run a global teardown sweep.
 
 #### Scenario: Purge leftover E2E student leads
 
 - **WHEN** a platform admin or service-role caller invokes `purge_ephemeral_e2e_leads()`
 - **THEN** matching leads on brand and center `/app/leads` are hard-deleted
-- **AND** the function returns `{ leads_deleted, students_unlinked }`
+- **AND** the function returns `{ leads_deleted, students_unlinked, students_deleted }`
+
+#### Scenario: Brand-scoped E2E lead purge without DATABASE_URL
+
+- **WHEN** Playwright cleanup signs in as brand owner and calls `purge_ephemeral_e2e_leads_for_brand` for the seed brand
+- **THEN** matching E2E leads for that brand are hard-deleted even if `DATABASE_URL` is unset

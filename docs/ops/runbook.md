@@ -220,6 +220,20 @@ pnpm exec openspec archive <change-name> -y
 
 See [`openspec/README.md`](../../openspec/README.md) and [`docs/agent-playbook/README.md`](../agent-playbook/README.md).
 
+## Ephemeral E2E cleanup (local / shared Supabase)
+
+After Playwright (or interrupted runs), wipe leftover `E2E Brand …` rows so `/admin/brands`, `/admin/subscriptions`, and `/admin/audit` stay clean. Seed plans (`starter` / `growth` / `enterprise`) are never deleted.
+
+```bash
+pnpm db:push   # applies migrations 069–072 (purge RPCs)
+```
+
+- Prefer RPC: `SELECT public.purge_ephemeral_e2e_brands();` (also clears `brand_subscriptions`)
+- One-shot SQL Editor script: [`scripts/purge-ephemeral-e2e-brand-subscriptions.sql`](../../scripts/purge-ephemeral-e2e-brand-subscriptions.sql)
+- Leads: [`scripts/purge-ephemeral-e2e-leads.sql`](../../scripts/purge-ephemeral-e2e-leads.sql) or `purge_ephemeral_e2e_leads()`
+
+E2E suites hard-delete via `e2e/helpers/brandCleanup.ts` + `globalTeardown` (SQL when `DATABASE_URL` is set, else platform-admin RPC).
+
 ## Security
 
 - Never commit `service_role` key or `DATABASE_URL` to git

@@ -5,7 +5,7 @@ import { backdateLeadStale, findLeadIdByWhatsapp } from "./helpers/sql";
 import { fillBrandStudentLead } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeadsViaSql,
+  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
@@ -14,9 +14,8 @@ test.describe("E2E-06 — Stale lead & reallocation", () => {
   test.skip(!hasDatabaseUrl(), "Requires DATABASE_URL for stale backdate");
 
   test.afterAll(async () => {
-    if (!hasDatabaseUrl()) return;
     try {
-      await hardDeleteEphemeralE2ELeadsViaSql();
+      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
     } catch {
       // Non-fatal
     }
