@@ -23,6 +23,7 @@ Every non-trivial change MUST update the full sync surface in the **same** chang
 | Recurring convention | `.cursor/skills/*/SKILL.md` and/or `.cursor/rules/*.mdc` |
 | Role scope / escalation | `.cursor/agents/*.md` + root `AGENTS.md` |
 | Pre-push / CI gates | `.githooks/`, `.cursor/hooks/gate-git-push.sh`, `scripts/ci-local.mjs`, `edunudg-pre-push-ci`, `git-publish-gate` |
+| Platform homepage media / legacy seed | `marketing-homepage-media`, `homepageApi.ts`, OpenSpec `marketing-homepage` |
 
 ## Exempt (note in commit/PR if skipping OpenSpec)
 

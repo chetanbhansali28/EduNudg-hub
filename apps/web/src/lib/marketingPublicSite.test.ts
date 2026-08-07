@@ -179,7 +179,7 @@ describe("sanitizePublicFooter", () => {
 });
 
 describe("isLegacyPlatformHomepageSeed", () => {
-  it("detects novu seed markers and treats enterprise config as current", async () => {
+  it("detects virgin novu seed markers and treats enterprise config as current", async () => {
     const { isLegacyPlatformHomepageSeed } = await import("./homepageApi");
     const { DEFAULT_HOMEPAGE_CONFIG } = await import("./homepageDefaults");
 
@@ -192,9 +192,45 @@ describe("isLegacyPlatformHomepageSeed", () => {
           fontSerif: "Playfair Display",
           themeNote: "Novu-inspired",
         },
+        hero: { line1: "Hello" } as never,
       })
     ).toBe(true);
 
     expect(isLegacyPlatformHomepageSeed(DEFAULT_HOMEPAGE_CONFIG)).toBe(false);
+  });
+
+  it("keeps customized rows that still carry Novu theme markers (assets must not be discarded)", async () => {
+    const { isLegacyPlatformHomepageSeed, hasCustomPlatformMarketingMedia } = await import(
+      "./homepageApi"
+    );
+
+    const customized = {
+      theme: { bgGradient: "linear-gradient(180deg, #f7f3ec, #e8dfd0)" } as never,
+      meta: {
+        siteName: "EduNudg",
+        fontSans: "Inter",
+        fontSerif: "Playfair Display",
+        themeNote: "Novu-inspired",
+        logoUrl:
+          "https://example.supabase.co/storage/v1/object/public/brand-assets/platform-logo.png",
+      },
+      hero: {
+        backgroundImageUrl:
+          "https://example.supabase.co/storage/v1/object/public/brand-assets/platform/marketing/hero-background/asset.jpeg",
+      },
+      ecosystemIntro: { title: "Connected", subtitle: "Ecosystem" },
+      connectivityShowcase: {
+        title: "t",
+        subtitle: "s",
+        centerImageUrl:
+          "https://example.supabase.co/storage/v1/object/public/brand-assets/platform/marketing/connectivity-center/asset.jpg",
+        cards: [],
+      },
+      brandSignup: { title: "t", subtitle: "s", steps: [] },
+      heroOverlayCard: { eyebrow: "e", value: "v", progressPercent: 1 },
+    };
+
+    expect(hasCustomPlatformMarketingMedia(customized as never)).toBe(true);
+    expect(isLegacyPlatformHomepageSeed(customized as never)).toBe(false);
   });
 });

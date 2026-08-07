@@ -9,7 +9,7 @@ Instructions for humans and AI agents working on EduNudg.
 3. [Modular architecture](./modular-architecture.md) — theme, services, flags, one-feature-per-folder
 4. [AGENTS.md](../../AGENTS.md) at repo root — roles, boundaries, escalation
 5. [Spec index](../spec/README.md) — franchise/student journey FRs
-6. Always-apply rules: `artifact-sync`, `agent-boundaries` in `.cursor/rules/`
+6. Always-apply rules: `artifact-sync`, `agent-boundaries`, `git-publish-gate`, `marketing-homepage-media` in `.cursor/rules/`
 
 ## Frontend docs
 
@@ -56,6 +56,7 @@ Use the skill matching your task before writing code. OpenSpec skills (`openspec
 | `artifact-sync` | Specs + docs + tests + skills + agents stay in sync |
 | `agent-boundaries` | Hard MAY / MUST NOT per Architect, Database, Frontend, QA |
 | `git-publish-gate` | No commit/push unless the user explicitly asks; push requires green local CI |
+| `marketing-homepage-media` | Never discard platform/brand/center `brand-assets` URLs or landing JSON |
 | OpenSpec [`agent-artifact-sync`](../../openspec/specs/agent-artifact-sync/spec.md) | Behavioral requirements for the sync system |
 
 Local CI mirror: `pnpm ci:local` (skill `edunudg-pre-push-ci` — **mandatory before every push**). Cursor: `.cursor/hooks/gate-git-push.sh` **denies** push without a green stamp; stop finish-gate fails turns that pushed without CI. Git backup: `.githooks/pre-push` (`pnpm hooks:install`).

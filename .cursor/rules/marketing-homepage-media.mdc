@@ -1,0 +1,41 @@
+---
+description: Never discard platform/brand/center/student marketing content or brand-assets media
+alwaysApply: true
+---
+
+# Tenant Marketing Content Safety
+
+Copy and media URLs live in JSON settings — Storage files only render when those URLs stay linked.
+
+| Surface | Source of truth |
+|---------|-----------------|
+| Platform `/` + `/admin/homepage` | `platform_settings.marketing_homepage` |
+| Brand public + `/app/homepage` | `brand_settings.settings.landing` |
+| Franchise/center public | `brand_settings.settings.center_landing` (fallback brand `landing`) |
+| Login / student portal chrome | `brands.logo_url`, portal branding RPC, `login_headline` / `login_subtext` |
+
+Bucket: `brand-assets` (`platform/marketing/…`, `{brandId}/marketing/…`, logos, center/student photos).
+
+## MUST
+
+- Always **merge** stored partials into theme defaults — never return pure defaults when landing JSON or `brand-assets` URLs exist.
+- Brand/center RPC fallbacks must still pass `row.landing` / logo when names are incomplete.
+- Editor saves (`saveHomepageConfig`, `saveBrandMarketingLanding`) must run `preserveCustomMarketingMediaUrls` so Unsplash/stock cannot overwrite uploaded media.
+- Seed / upserts of `brand_settings` must prefer existing settings (`EXCLUDED.settings || brand_settings.settings`) — never full-replace.
+- Theme switch updates `brands.marketing_theme` only — do not clear landing JSON.
+- Keep `regression_*` coverage for platform + brand/center media preservation.
+
+## MUST NOT
+
+- Discard config solely for Novu `bgGradient` / `themeNote` (platform legacy gate).
+- Drop `landing` on brand/center fallback paths.
+- `ON CONFLICT … DO UPDATE SET settings = EXCLUDED.settings` for `brand_settings`.
+- Save an editor while the UI is showing stock defaults over customized DB content.
+- Delete Storage objects to “fix” missing images — fix JSON URLs.
+
+## Code / specs
+
+- Guard helpers: `apps/web/src/lib/marketingMediaGuard.ts`
+- Platform: `homepageApi.ts` + OpenSpec `marketing-homepage`
+- Brand/center: `brandLandingApi.ts`, `centerLandingApi.ts`, `brandLandingEditorApi.ts`
+- Docs: `docs/frontend/marketing-landing.md`, `docs/ops/runbook.md`

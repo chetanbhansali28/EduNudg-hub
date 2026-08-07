@@ -29,6 +29,7 @@
 - [ ] Component tests added
 - [ ] E2E updated for user journeys when UI flow changes
 - [ ] Role-based locators: Playwright `{ exact: true }`; Testing Library `exactAccessibleName("…")` — never RTL `exact: true`
+- [ ] Platform / brand / center marketing changes respect `marketing-homepage-media` (never discard `brand-assets` URLs or landing JSON)
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills as needed)
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
 - [ ] If pushing: mandatory `edunudg-pre-push-ci` (`pnpm ci:local` green before `git push`)
@@ -37,3 +38,4 @@
 
 - `edunudg-modular-features`, `edunudg-write-tests`, `edunudg-rbac-check`, `edunudg-sync-artifacts`
 - Push requests: `edunudg-pre-push-ci` (never skip)
+- Homepage defaults / legacy seed: rule `marketing-homepage-media` + OpenSpec `marketing-homepage`

@@ -17,6 +17,7 @@ Update specs, docs, tests, skills, rules, and agents in the **same turn** as the
 - After OpenSpec propose/apply/archive
 - When adding a recurring convention agents must follow
 - When changing CI / pre-push gates
+- When changing platform homepage defaults / legacy-seed detection (`marketing-homepage-media`)
 
 ## Checklist (all that apply)
 

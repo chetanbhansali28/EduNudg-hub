@@ -9,6 +9,18 @@ import { sanitizePublicFooter } from "@/lib/marketingPublicSite";
 import { fetchPlatformLegalPages } from "@/lib/platformLegalApi";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { HomepageConfig, HomepageShowcaseCard, HomepageTestimonial } from "@/types/homepage";
+import {
+  hasCustomMarketingMedia,
+  hasCustomPlatformMarketingMedia,
+  preserveCustomMarketingMediaUrls,
+  type MarketingConfigPartial,
+} from "@/lib/marketingMediaGuard";
+
+export {
+  hasCustomMarketingMedia,
+  hasCustomPlatformMarketingMedia,
+  preserveCustomMarketingMediaUrls,
+} from "@/lib/marketingMediaGuard";
 
 const HOMEPAGE_KEY = "marketing_homepage";
 
@@ -33,22 +45,32 @@ export type MergeHomepageConfigOptions = {
   sectionDefaults?: Record<HomepageSectionKey, boolean>;
 };
 
-/** True when stored platform homepage JSON is still the old Novu seed (pre-enterprise). */
-export function isLegacyPlatformHomepageSeed(partial: Partial<HomepageConfig> | null | undefined): boolean {
+/**
+ * True when stored platform homepage JSON is still the virgin Novu seed (pre-enterprise)
+ * with no admin customization. Must NOT discard rows that already have enterprise blocks
+ * or uploaded brand-assets URLs — that caused homepage/admin to show Unsplash defaults
+ * while files remained in the bucket.
+ */
+export function isLegacyPlatformHomepageSeed(
+  partial: Partial<HomepageConfig> | MarketingConfigPartial | null | undefined
+): boolean {
   if (!partial || typeof partial !== "object") return false;
-  const theme = partial.theme as Record<string, unknown> | undefined;
-  if (theme && typeof theme.bgGradient === "string") return true;
-
-  const meta = partial.meta as Record<string, unknown> | undefined;
-  if (typeof meta?.themeNote === "string" && /novu/i.test(meta.themeNote)) return true;
+  const row = partial as Partial<HomepageConfig> & MarketingConfigPartial & Record<string, unknown>;
 
   const hasEnterpriseBlocks = Boolean(
-    partial.ecosystemIntro || partial.connectivityShowcase || partial.brandSignup || partial.heroOverlayCard
+    row.ecosystemIntro || row.connectivityShowcase || row.brandSignup || row.heroOverlayCard
   );
-  if (hasEnterpriseBlocks) return false;
+  // Customized / migrated rows win over Novu markers (bgGradient / themeNote).
+  if (hasEnterpriseBlocks || hasCustomMarketingMedia(row)) return false;
+
+  const theme = row.theme as Record<string, unknown> | undefined;
+  if (theme && typeof theme.bgGradient === "string") return true;
+
+  const meta = row.meta as Record<string, unknown> | undefined;
+  if (typeof meta?.themeNote === "string" && /novu/i.test(meta.themeNote)) return true;
 
   // Seed/partial content without enterprise blocks — treat as legacy Novu platform config.
-  return Boolean(partial.hero || partial.nav || partial.featureSections || partial.meta);
+  return Boolean(row.hero || row.nav || row.featureSections || row.meta);
 }
 
 export async function fetchHomepageEditorBundle(): Promise<HomepageEditorBundle> {
@@ -93,9 +115,20 @@ export async function fetchHomepageConfig(): Promise<HomepageConfig> {
 }
 
 export async function saveHomepageConfig(config: HomepageConfig): Promise<void> {
+  const { data: existing } = await getSupabase()
+    .from("platform_settings")
+    .select("value")
+    .eq("key", HOMEPAGE_KEY)
+    .maybeSingle();
+
+  const toSave = preserveCustomMarketingMediaUrls(
+    (existing?.value as Partial<HomepageConfig> | undefined) ?? null,
+    config
+  );
+
   const { error } = await getSupabase()
     .from("platform_settings")
-    .upsert({ key: HOMEPAGE_KEY, value: config }, { onConflict: "key" });
+    .upsert({ key: HOMEPAGE_KEY, value: toSave }, { onConflict: "key" });
 
   if (error) throw new Error(error.message);
 }

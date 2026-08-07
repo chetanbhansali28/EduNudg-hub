@@ -29,6 +29,8 @@ Use **Vitest ≥4** (matches CI Node 24). Mock constructors with `class`, not ar
 
 When mocking `@/lib/homepageApi`, use `importOriginal` and spread `...actual` so query-key constants (`MARKETING_HOMEPAGE_CONFIG_QUERY_KEY`, `MARKETING_PUBLIC_BUNDLE_QUERY_KEY`) remain defined. Never reuse the config-only key for `{ config, legalPages }` bundles — see `openspec/specs/marketing-homepage/spec.md`.
 
+**Platform homepage media:** never treat customized `platform_settings.marketing_homepage` as legacy solely due to Novu `bgGradient` / `themeNote`. `isLegacyPlatformHomepageSeed` must return false when enterprise blocks or `brand-assets` URLs exist (`hasCustomMarketingMedia`). Same rule for brand `landing` / center `center_landing` — use `marketingMediaGuard` (`preserveCustomMarketingMediaUrls` on save; never drop `row.landing` on fallbacks). Rule: `marketing-homepage-media`. Regressions: `regression_homepageLegacySeedKeepsBrandAssets`, `regression_tenantMarketingContentPreservesBrandAssets`.
+
 Spark Academy / Abacus Classic public lead forms live in modals — Playwright helpers: `e2e/helpers/leadModals.ts` (dialog-scoped fills; deep links `#enroll`, `#enroll-student`, `#register`, `#apply`). Mapping: `resolveLeadModalKind.ts`; hash open: `LeadModalHashOpener`. Center Path B passes `centerSlug` so enroll submits `submitCenterStudentRegistration`.
 
 Platform brand settings: theme/name/status saves must not call `brand-owner-credentials` unless login fields changed (`BrandEditForm` `credentialsChanged`).

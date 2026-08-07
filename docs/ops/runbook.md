@@ -162,6 +162,8 @@ pnpm test:rls
 
 - Public config key: `platform_settings.marketing_homepage` (migration `009_marketing_homepage.sql`)
 - Anonymous users can **read**; platform admins can **read/write** via RLS
+- Virgin Novu seed (no enterprise blocks / no `brand-assets` URLs) is replaced at read time with `DEFAULT_HOMEPAGE_CONFIG`. Customized rows that still carry Novu markers (`theme.bgGradient`, `meta.themeNote`) are **kept** and merged — otherwise uploaded hero/logo assets appear “reset” while files remain in Storage. Never Save from `/admin/homepage` while viewing substituted defaults.
+- Brand/center landings: always merge `landing` / `center_landing`; saves use `preserveCustomMarketingMediaUrls`; seed uses `EXCLUDED.settings || brand_settings.settings` so existing content wins. Rule: `marketing-homepage-media`.
 - Edit platform homepage at **Platform → Homepage** (`/admin/homepage`) after signing in as `admin@edunudg.com`
 - **Brand marketing themes** (Novu / Abacus Classic / Spark Academy) are assigned on **Platform → Brands → Edit** → **Brand settings** → **Website theme**
 - Saving theme/name/status alone does **not** call `brand-owner-credentials` — only when login email/password fields change (see [edge-functions](./edge-functions.md))

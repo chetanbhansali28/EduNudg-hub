@@ -47,3 +47,33 @@ Navigating from the platform public homepage to `/login` SHALL NOT leave the log
 - **WHEN** a visitor loads platform `/` then navigates to `/login`
 - **THEN** the login form (Email field) becomes available
 - **AND** the page is not stuck on a loading state caused by homepage query-cache collision
+
+### Requirement: Legacy Novu seed discard must not drop uploaded media
+
+`isLegacyPlatformHomepageSeed` SHALL return false when the stored row already has enterprise platform blocks or public URLs under `brand-assets`. Only virgin Novu seed (Novu theme markers without enterprise/custom media) MAY be replaced with `DEFAULT_HOMEPAGE_CONFIG` at read time.
+
+#### Scenario: Customized row with Novu markers keeps brand-assets URLs
+
+- **GIVEN** `platform_settings.marketing_homepage` still has `theme.bgGradient` or a Novu `themeNote`
+- **AND** the row includes enterprise blocks or `brand-assets` media URLs
+- **WHEN** the public homepage or `/admin/homepage` loads config
+- **THEN** the client merges the stored config (including hero/logo media URLs)
+- **AND** does not substitute stock Unsplash defaults
+
+### Requirement: Brand and center landings preserve stored media
+
+Brand and center public/editor loads SHALL merge stored `landing` / `center_landing` partials. Fallbacks SHALL pass available landing JSON. Saves SHALL preserve existing `brand-assets` URLs over stock Unsplash. Seed upserts SHALL not full-replace `brand_settings.settings`.
+
+#### Scenario: Incomplete brand name still keeps landing media
+
+- **GIVEN** `get_brand_landing_public` returns landing JSON with `brand-assets` URLs
+- **AND** `brand_name` is missing
+- **WHEN** the public brand landing loads
+- **THEN** the fallback path still merges the landing partial (media URLs remain)
+
+#### Scenario: Brand marketing save does not overwrite uploads with Unsplash
+
+- **GIVEN** stored `landing.hero.backgroundImageUrl` points at `brand-assets`
+- **AND** the editor draft contains an Unsplash default for that field
+- **WHEN** `saveBrandMarketingLanding` runs
+- **THEN** the stored `brand-assets` URL is kept

@@ -2,6 +2,7 @@ import { getSupabase } from "@/lib/supabase";
 import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "@/lib/centerLandingDefaults";
 import { mergeSectionVisibility } from "@/lib/homepageSections";
+import { preserveCustomMarketingMediaUrls } from "@/lib/marketingMediaGuard";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
 import { parseBrandLegalPages, type BrandLegalPages } from "@/lib/brandLegalPages";
 import { parseBrandSocialConnect, type BrandSocialConnect } from "@/lib/brandSocialConnect";
@@ -154,9 +155,11 @@ export async function saveBrandMarketingLanding(
   key: BrandMarketingSettingsKey,
   config: HomepageConfig
 ): Promise<void> {
+  const existingPartial = (existingSettings[key] ?? {}) as Partial<HomepageConfig>;
+  const nextPartial = preserveCustomMarketingMediaUrls(existingPartial, landingConfigToPartial(config));
   const merged = {
     ...existingSettings,
-    [key]: landingConfigToPartial(config),
+    [key]: nextPartial,
   };
 
   if (settingsId) {

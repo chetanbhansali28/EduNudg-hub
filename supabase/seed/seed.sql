@@ -63,7 +63,9 @@ SELECT
   '{"timezone":"Asia/Kolkata","landing":{"hero":{"subtitle":"Train young minds with a proven abacus program—launch your Abacus World center with full curriculum and ops support."}}}'::jsonb
 FROM public.brands b
 WHERE b.slug = 'abacusworld'
-ON CONFLICT (brand_id) DO UPDATE SET settings = EXCLUDED.settings;
+-- Existing settings win: never wipe customized landing / center_landing / legal on re-seed.
+ON CONFLICT (brand_id) DO UPDATE SET
+  settings = EXCLUDED.settings || brand_settings.settings;
 
 INSERT INTO public.brand_themes (brand_id, tokens)
 SELECT b.id, '{"primary":"#2563eb","radius":"0.5rem"}'::jsonb
@@ -92,7 +94,9 @@ INSERT INTO public.brand_settings (brand_id, settings)
 SELECT b.id, '{"timezone":"Asia/Kolkata"}'::jsonb
 FROM public.brands b
 WHERE b.slug = 'smart-brain-abacus'
-ON CONFLICT (brand_id) DO UPDATE SET settings = EXCLUDED.settings;
+-- Existing settings win: never wipe customized landing / center_landing / legal on re-seed.
+ON CONFLICT (brand_id) DO UPDATE SET
+  settings = EXCLUDED.settings || brand_settings.settings;
 
 INSERT INTO public.brand_themes (brand_id, tokens)
 SELECT b.id, '{"primary":"#2563eb","radius":"0.5rem"}'::jsonb

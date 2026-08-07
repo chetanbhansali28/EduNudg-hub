@@ -55,6 +55,22 @@ description: Add EduNudg features using modular files, service layer, base theme
 - Deep links: `#enroll` / `#enroll-student` / `#register` → enroll; `#apply` → franchise (brand only).
 - Docs: `docs/frontend/abacus-classic.md`, `docs/frontend/spark-academy.md`.
 
+## Platform homepage (`/admin/homepage`)
+
+- Config JSON is source of truth; Storage `brand-assets` only holds files.
+- **Never** discard stored media when migrating defaults — rule `marketing-homepage-media`.
+- `isLegacyPlatformHomepageSeed`: enterprise blocks / `brand-assets` URLs win over Novu markers.
+- Do not Save the editor while it is showing Unsplash/stock defaults over a customized DB row.
+
+## Brand / franchise / student marketing
+
+- Brand: `brand_settings.settings.landing` — always merge; fallbacks must pass `landing` partial.
+- Center/franchise: `center_landing` (else brand `landing`) — same preserve rules.
+- Saves: `preserveCustomMarketingMediaUrls` so stock Unsplash cannot overwrite uploads.
+- Seed: `ON CONFLICT` must use `EXCLUDED.settings || brand_settings.settings` (existing wins).
+- Student/login chrome: never clear `logo_url` / login copy when patching unrelated settings.
+- Helpers: `apps/web/src/lib/marketingMediaGuard.ts`.
+
 ## Lead lost (reference)
 
 - **Only center** marks lead `lost` (`mark_lead_lost` + `lost_reason`).

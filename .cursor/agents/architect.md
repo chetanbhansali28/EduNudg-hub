@@ -27,6 +27,7 @@
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills/agents if process or architecture docs changed)
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
 - [ ] If pushing: mandatory `edunudg-pre-push-ci` (`pnpm ci:local` green before `git push`)
+- [ ] Homepage / marketing process changes: sync rule `marketing-homepage-media` when relevant
 
 ## Skills
 

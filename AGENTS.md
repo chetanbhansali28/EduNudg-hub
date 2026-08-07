@@ -34,6 +34,7 @@ Standing rule: [`.cursor/rules/agent-boundaries.mdc`](.cursor/rules/agent-bounda
 4. Any feature / bugfix → `edunudg-write-tests` (required)
 5. Before done → `edunudg-sync-artifacts` (required)
 6. Process/convention change → update skills, rules, and agent briefs in the same change
+7. Platform/brand/center marketing content → rule **`marketing-homepage-media`** (never discard `brand-assets` URLs or landing JSON)
 
 ## Artifact sync
 

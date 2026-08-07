@@ -33,6 +33,7 @@ Use skill `edunudg-sync-artifacts`. Same change must update every applicable row
 - [ ] **Agents** — `.cursor/agents/*` + `AGENTS.md` if role/escalation changed
 - [ ] **Git** — no commit/push unless the user explicitly requested it (`git-publish-gate`)
 - [ ] **Pre-push** — if pushing: `pnpm ci:local` green after auto-fix (`edunudg-pre-push-ci`) **before** `git push`; Cursor denies without stamp; `.githooks/pre-push` backup
+- [ ] **Homepage media** — if touching platform/brand/center marketing: keep `brand-assets` URLs + landing JSON (`marketing-homepage-media`)
 - [ ] **Sync is automatic** — do not ask the user to approve docs/tests/skills updates
 
 ## Docs (legacy checklist — still required when applicable)

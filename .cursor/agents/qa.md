@@ -22,6 +22,7 @@
 - [ ] `edunudg-sync-artifacts` run (testing docs / skills / agents if process changed)
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
 - [ ] If pushing: **always** `pnpm ci:local` green via `edunudg-pre-push-ci` before any `git push` (auto-fix loop). Cursor `gate-git-push` denies without stamp; `.githooks/pre-push` is backup
+- [ ] Homepage / brand / center marketing regressions stay green (`marketing-homepage-media` — never drop `brand-assets` or landing JSON)
 - [ ] Sync specs/docs/tests/skills without asking the user (`artifact-sync`)
 
 ## Skills

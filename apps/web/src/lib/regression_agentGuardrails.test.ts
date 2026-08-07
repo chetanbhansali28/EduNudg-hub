@@ -100,4 +100,49 @@ describe("regression_agentGuardrails", () => {
     expect(cd).toMatch(/vercel deploy --token/);
     expect(cd).toMatch(/vercel deploy --prod --token/);
   });
+
+  it("regression_homepage_media_guardrails_prevent_legacy_seed_discard", () => {
+    expect(exists(".cursor/rules/marketing-homepage-media.mdc")).toBe(true);
+    const rule = read(".cursor/rules/marketing-homepage-media.mdc");
+    expect(rule).toMatch(/alwaysApply:\s*true/);
+    expect(rule).toMatch(/brand-assets/);
+    expect(rule).toMatch(/isLegacyPlatformHomepageSeed|landing|center_landing/);
+    expect(rule).toMatch(/MUST NOT/);
+    expect(rule).toMatch(/brand_settings|center_landing/);
+    expect(rule).toMatch(/preserveCustomMarketingMediaUrls|marketingMediaGuard|Never discard/);
+
+    const api = read("apps/web/src/lib/homepageApi.ts");
+    const enterpriseIdx = api.indexOf("hasEnterpriseBlocks");
+    const customMediaIdx = api.indexOf("hasCustomMarketingMedia");
+    const bgGradientIdx = api.indexOf("theme.bgGradient");
+    expect(enterpriseIdx).toBeGreaterThan(-1);
+    expect(customMediaIdx).toBeGreaterThan(-1);
+    expect(bgGradientIdx).toBeGreaterThan(-1);
+    // Enterprise / custom-media checks must win before Novu bgGradient short-circuit.
+    expect(Math.min(enterpriseIdx, customMediaIdx)).toBeLessThan(bgGradientIdx);
+
+    expect(exists("apps/web/src/lib/marketingMediaGuard.ts")).toBe(true);
+    const guard = read("apps/web/src/lib/marketingMediaGuard.ts");
+    expect(guard).toMatch(/preserveCustomMarketingMediaUrls/);
+    expect(guard).toMatch(/hasCustomMarketingMedia/);
+
+    const brandApi = read("apps/web/src/lib/brandLandingApi.ts");
+    expect(brandApi).toMatch(/landingPartial/);
+
+    const centerApi = read("apps/web/src/lib/centerLandingApi.ts");
+    expect(centerApi).toMatch(/row\.landing/);
+
+    const seed = read("supabase/seed/seed.sql");
+    expect(seed).toMatch(/EXCLUDED\.settings \|\| brand_settings\.settings/);
+
+    const forbidden = read("docs/agent-playbook/forbidden-patterns.md");
+    expect(forbidden).toMatch(/marketing-homepage-media/);
+    expect(forbidden).toMatch(/brand-assets/);
+
+    const writeTests = read(".cursor/skills/edunudg-write-tests/SKILL.md");
+    expect(writeTests).toMatch(/hasCustomPlatformMarketingMedia|marketing-homepage-media|marketingMediaGuard/);
+
+    const frontend = read(".cursor/agents/frontend.md");
+    expect(frontend).toMatch(/marketing-homepage-media/);
+  });
 });

@@ -234,16 +234,22 @@ export async function fetchCenterLandingBundle(
     if (!row.center_name || !row.brand_name) {
       return {
         config: buildConfigWithStories(
-          fallbackCenter,
-          fallbackBrand,
-          null,
-          undefined,
-          null,
+          row.center_name ?? fallbackCenter,
+          row.brand_name ?? fallbackBrand,
+          row.center_city ?? null,
+          row.landing ?? undefined,
+          row.brand_logo_url ?? null,
           stories,
           curriculum,
           theme
         ),
-        profile: fallbackProfile(brandSlug, centerSlug),
+        profile: {
+          ...fallbackProfile(brandSlug, centerSlug),
+          centerName: row.center_name ?? fallbackCenter,
+          brandName: row.brand_name ?? fallbackBrand,
+          city: row.center_city ?? null,
+          photoUrl: row.center_photo_url ?? null,
+        },
         publicCurriculum: curriculum,
         marketingTheme: theme,
         publicStats,

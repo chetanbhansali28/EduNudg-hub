@@ -8,6 +8,10 @@ Public marketing landings share one UI kit under `apps/web/src/features/marketin
 | Brand | `BrandPublicLayout` | RPC `get_brand_landing_public` + `buildBrandLandingConfig` |
 | Center | `CenterPublicLayout` | RPC `get_center_landing_public` + theme-aware merge (`mergeAbacusClassicCenterLandingConfig`, `mergeSparkAcademyCenterLandingConfig`, or `buildCenterLandingConfig`) |
 
+**Platform legacy gate:** `isLegacyPlatformHomepageSeed()` only replaces the virgin Novu seed. Rows with enterprise blocks or uploaded `brand-assets` URLs are merged as-is (Novu `bgGradient` / `themeNote` alone must not discard media).
+
+**Brand / center content safety:** public + editor paths must always merge stored `landing` / `center_landing`. Fallbacks must not drop landing JSON. Saves use `preserveCustomMarketingMediaUrls`. Seed must not full-replace `brand_settings.settings`. See rule `marketing-homepage-media` and `marketingMediaGuard.ts`.
+
 ## Brand marketing themes
 
 Platform admins assign a theme per brand at **Platform → Brands → Edit** (`/admin/brands/:slug`) in **Brand settings** → **Website theme**. Stored on `brands.marketing_theme`.

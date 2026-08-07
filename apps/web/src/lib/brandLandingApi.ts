@@ -94,9 +94,12 @@ function fallbackBundle(
   theme: MarketingTheme = "novu",
   publicStats: BrandPublicStats = { centersCount: 0, studentsCount: 0 },
   legalPages = parseBrandLegalPages(undefined),
-  socialConnect: ReturnType<typeof parseBrandSocialConnect> = parseBrandSocialConnect(undefined)
+  socialConnect: ReturnType<typeof parseBrandSocialConnect> = parseBrandSocialConnect(undefined),
+  /** Never drop stored landing JSON when names/RPC are incomplete. */
+  landingPartial?: Partial<HomepageConfig>,
+  logoUrl?: string | null
 ): BrandLandingBundle {
-  const config = buildConfigForTheme(theme, fallbackName, undefined, undefined);
+  const config = buildConfigForTheme(theme, fallbackName, landingPartial, logoUrl);
   const merged = applyCanonicalSiteName(
     {
       ...config,
@@ -147,7 +150,17 @@ export async function fetchBrandLandingBundle(brandSlug: string): Promise<BrandL
     );
 
     if (!row.brand_name) {
-      return fallbackBundle(fallbackName, stories, curriculum, theme, publicStats, legalPages, socialConnect);
+      return fallbackBundle(
+        fallbackName,
+        stories,
+        curriculum,
+        theme,
+        publicStats,
+        legalPages,
+        socialConnect,
+        row.landing ?? undefined,
+        row.brand_logo_url ?? null
+      );
     }
 
     return buildBundle(fallbackName, row, stories, curriculum, theme, publicStats, legalPages);
