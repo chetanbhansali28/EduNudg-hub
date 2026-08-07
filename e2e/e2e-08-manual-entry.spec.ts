@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
-import { authStatePath, hasDatabaseUrl, hasE2EBackend } from "./helpers/env";
+import { authStatePath, hasE2EBackend } from "./helpers/env";
 import { brandUrl, centerUrl, platformUrl, SEED } from "./helpers/portal";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeadsViaSql,
+  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
@@ -11,9 +11,8 @@ test.describe("E2E-08 — Manual staff lead entry", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
 
   test.afterAll(async () => {
-    if (!hasDatabaseUrl()) return;
     try {
-      await hardDeleteEphemeralE2ELeadsViaSql();
+      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
     } catch {
       // Non-fatal
     }
