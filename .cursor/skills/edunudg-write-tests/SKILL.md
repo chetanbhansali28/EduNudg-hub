@@ -33,6 +33,10 @@ When mocking `@/lib/homepageApi`, use `importOriginal` and spread `...actual` so
 
 Spark Academy / Abacus Classic public lead forms live in modals — Playwright helpers: `e2e/helpers/leadModals.ts` (dialog-scoped fills; deep links `#enroll`, `#enroll-student`, `#register`, `#apply`). Mapping: `resolveLeadModalKind.ts`; hash open: `LeadModalHashOpener`. Center Path B passes `centerSlug` so enroll submits `submitCenterStudentRegistration`.
 
+**E2E brand cleanup:** any test that approves a platform brand signup must call `cleanupEphemeralE2EBrand` (see `e2e/helpers/brandCleanup.ts`) so `/admin/brands` and `/admin/audit` do not accumulate `E2E Brand …` / `e2e-brand-…` rows. Prefer hard-delete via `hardDeleteEphemeralE2EBrandsViaSql` / `purge_ephemeral_e2e_brands()` (brands, signups, and matching `platform_audit_logs` — not soft archive). Matchers: `e2eEphemeralBrand.ts`.
+
+**E2E student lead cleanup:** any test that creates a student lead (brand Path A, center Path B, manual entry, merge, stale) must use `makeE2ELeadFields` and call `cleanupEphemeralE2ELead` in `finally` (plus suite `afterAll` sweep). Hard-delete via `hardDeleteEphemeralE2ELeadsViaSql` / `purge_ephemeral_e2e_leads()` so brand and center `/app/leads` (e.g. Koramangala) do not accumulate garbage. Matchers: `e2eEphemeralLead.ts`.
+
 Platform brand settings: theme/name/status saves must not call `brand-owner-credentials` unless login fields changed (`BrandEditForm` `credentialsChanged`).
 
 Franchise CSV import: validate client-side then `import_franchise_centers` RPC — see `docs/ops/franchise-center-csv-import.md`.

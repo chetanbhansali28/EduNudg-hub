@@ -1,42 +1,60 @@
 import { test, expect } from "@playwright/test";
-import { hasE2EBackend } from "./helpers/env";
-import { uniqueWhatsApp } from "./helpers/auth";
+import { hasDatabaseUrl, hasE2EBackend } from "./helpers/env";
 import { brandUrl, SEED } from "./helpers/portal";
 import { fillBrandStudentLead, expectLeadFormReady } from "./helpers/leadModals";
+import {
+  cleanupEphemeralE2ELead,
+  hardDeleteEphemeralE2ELeadsViaSql,
+  makeE2ELeadFields,
+} from "./helpers/leadCleanup";
 
 test.describe("E2E-07 — WhatsApp duplicate merge", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
 
+  test.afterAll(async () => {
+    if (!hasDatabaseUrl()) return;
+    try {
+      await hardDeleteEphemeralE2ELeadsViaSql();
+    } catch {
+      // Non-fatal
+    }
+  });
+
   test("second application same WhatsApp merges (success, no duplicate toast of two creates)", async ({
     page,
   }) => {
-    const wa = uniqueWhatsApp();
+    const tag = `merge-${Date.now().toString(36)}`;
+    const fields = makeE2ELeadFields({ tag });
     const enrollUrl = brandUrl(SEED.brandSlug, "/#enroll-student");
 
-    async function submit(child: string) {
-      await fillBrandStudentLead(
-        page,
-        {
-          parentName: "Merge Parent",
-          whatsapp: wa,
-          email: `merge-${wa}@example.com`,
-          city: "Bengaluru",
-          pincode: "560001",
-          childName: child,
-        },
-        enrollUrl
-      );
+    try {
+      async function submit(childSuffix: string) {
+        await fillBrandStudentLead(
+          page,
+          {
+            parentName: fields.parentName,
+            whatsapp: fields.whatsapp,
+            email: fields.email,
+            city: fields.city,
+            pincode: fields.pincode,
+            childName: `E2E Child ${tag}-${childSuffix}`,
+          },
+          enrollUrl
+        );
+      }
+
+      await submit("a");
+      await expect(page.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
+        timeout: 20_000,
+      });
+
+      await submit("b");
+      await expect(page.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
+        timeout: 20_000,
+      });
+    } finally {
+      await cleanupEphemeralE2ELead({ brandId: SEED.brandId, whatsapp: fields.whatsapp });
     }
-
-    await submit("Merge Child A");
-    await expect(page.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
-      timeout: 20_000,
-    });
-
-    await submit("Merge Child B");
-    await expect(page.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
-      timeout: 20_000,
-    });
   });
 
   test("re-apply after converted shows enrolled error (C1)", async ({ page }) => {
