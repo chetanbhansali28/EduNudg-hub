@@ -24,7 +24,7 @@ Checklist IDs (`E2E-01`, `P-01`, `B-03`, `NEG-01`, …) live in [`uat-scenarios.
 
 Auth storage: `e2e/auth.setup.ts` → `e2e/.auth/*.json` (gitignored). Seed users: [`docs/ops/test-users.md`](../ops/test-users.md).
 
-Golden paths **skip** when `VITE_SUPABASE_URL` / anon key are missing. OAuth (AUTH-08) and live Razorpay checkout (B-26 / C-25) are **manual-skip**. Stale SLA tests backdate via SQL (`e2e/helpers/sql.ts`) — never wait calendar days.
+Golden paths **skip** when `VITE_SUPABASE_URL` / anon key are missing. OAuth (AUTH-08) and live Razorpay checkout (B-26 / C-25) are **manual-skip**. Stale SLA tests backdate via SQL (`e2e/helpers/sql.ts`) — never wait calendar days. **E2E-01** **hard-deletes** ephemeral `E2E Brand …` tenants after approve (`e2e/helpers/brandCleanup.ts` → `purge_ephemeral_e2e_brands` / inline SQL): removes matching `platform_brand_signups`, `brands`, and `platform_audit_logs` rows (including previously soft-archived brands). Seed brands are never deleted. UI-only fallback soft-archives when `DATABASE_URL` is unavailable. **E2E-03–08** create student leads with `makeE2ELeadFields` (`E2E Parent` / `E2E Child` / `e2e-lead-…@example.com`) and **hard-delete** them via `cleanupEphemeralE2ELead` / `purge_ephemeral_e2e_leads` so brand and center `/app/leads` stay clean.
 
 ## Policy
 
@@ -39,6 +39,8 @@ Every feature and bug fix includes tests in the same PR.
 | Brand portal login / tenant scope | `LoginPage.brandPortal.test.tsx`, `resolveTenantScope.test.ts` |
 | Staff login accessible names | `LoginPage.test.tsx`, `exactAccessibleName.test.ts`, `e2e/platform-smoke.spec.ts` |
 | Agent guardrails / artifact sync | `regression_agentGuardrails.test.ts` |
+| E2E ephemeral brand matchers / cleanup | `e2eEphemeralBrand.test.ts`, `e2e/helpers/brandCleanup.ts` |
+| E2E ephemeral student lead matchers / cleanup | `e2eEphemeralLead.test.ts`, `e2e/helpers/leadCleanup.ts` |
 | Brand success stories page | `BrandSuccessStoriesPage.test.tsx` |
 | Platform dashboard signup queries (PostgREST column names) | `platformDashboardApi.test.ts` |
 | Workspace package type exports | `regression_workspacePackageExports.test.ts` |

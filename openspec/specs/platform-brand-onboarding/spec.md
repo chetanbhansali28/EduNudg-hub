@@ -97,3 +97,14 @@ On `/admin/brands`, each active brand row SHALL expose a **View Frontend ↗** l
 - **GIVEN** platform admin is on `/admin/brands/:slug`
 - **WHEN** they click **View Frontend ↗** in the page toolbar
 - **THEN** the browser opens the same brand public marketing URL as the brands list link
+
+### Requirement: Ephemeral E2E brand hard purge
+
+The system SHALL expose `purge_ephemeral_e2e_brands()` to permanently delete test tenants whose name matches `^E2E Brand\b` or slug matches `^e2e-brand-`, plus matching `platform_brand_signups` rows (`e2e-brand-…@example.com` / `E2E Brand …`). The same purge SHALL hard-delete matching `platform_audit_logs` rows (by `brand_id` and/or payload `requested_name` / `email` / `slug` E2E markers) so `/admin/audit` does not retain E2E brand noise. Seed slugs `abacusworld` and `smart-brain-abacus` SHALL never be deleted. Non-CASCADE FKs (`platform_invoices`, `financial_events`, `enrollment_history`, `transfer_requests`, `support_tickets`, signup `converted_brand_id`) SHALL be cleared before brand delete. Authenticated callers MUST be platform admins; direct DB / service-role callers MAY invoke without a JWT.
+
+#### Scenario: Purge leftover E2E brands
+
+- **WHEN** a platform admin or service-role caller invokes `purge_ephemeral_e2e_brands()`
+- **THEN** matching brands, signup rows, and platform audit log rows are hard-deleted (not soft-archived)
+- **AND** seed brands remain intact
+- **AND** the function returns `{ brands_deleted, signups_deleted, audit_logs_deleted }`
