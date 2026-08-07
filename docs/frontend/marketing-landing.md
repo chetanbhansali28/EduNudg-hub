@@ -24,6 +24,8 @@ Platform admins assign a theme per brand at **Platform → Brands → Edit** (`/
 
 Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme selection is platform-only (brand detail **Brand settings**, not the brands list).
 
+When a brand switches from Novu to Abacus Classic or Spark Academy, stored `landing` JSON is merged with the new theme defaults. **Novu-era section toggles do not disable Abacus/Spark sections** until the brand owner saves from the alternate-theme editor (detected via Abacus/Spark-specific fields in JSON). Shared copy (hero, FAQ, testimonials, features) is preserved. See `mergeAbacusClassicSectionVisibility()` in `homepageSections.ts`.
+
 Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, domains, and franchise centers — not marketing theme.
 
 Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → rich footer (live center/student counts + custom stats).

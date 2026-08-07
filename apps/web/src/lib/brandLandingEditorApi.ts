@@ -1,7 +1,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "@/lib/centerLandingDefaults";
-import { mergeSectionVisibility } from "@/lib/homepageSections";
+import { mergeSectionVisibility, ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, DEFAULT_HOMEPAGE_SECTION_VISIBILITY } from "@/lib/homepageSections";
 import { preserveCustomMarketingMediaUrls } from "@/lib/marketingMediaGuard";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
 import { parseBrandLegalPages, type BrandLegalPages } from "@/lib/brandLegalPages";
@@ -24,14 +24,27 @@ export type BrandMarketingEditorData = {
 };
 
 /** Serializable subset of homepage config stored in brand_settings.settings. */
-export function landingConfigToPartial(config: HomepageConfig): Partial<HomepageConfig> {
+export function landingConfigToPartial(
+  config: HomepageConfig,
+  options?: { marketingTheme?: MarketingTheme }
+): Partial<HomepageConfig> {
+  const sectionDefaults =
+    options?.marketingTheme === "abacus-classic"
+      ? ABACUS_CLASSIC_SECTION_DEFAULTS
+      : options?.marketingTheme === "spark-academy"
+        ? SPARK_ACADEMY_SECTION_DEFAULTS
+        : DEFAULT_HOMEPAGE_SECTION_VISIBILITY;
+
   return {
     meta: { ...config.meta },
+    theme: { ...config.theme },
     nav: {
       links: config.nav.links.map((link) => ({ ...link })),
       ctaLabel: config.nav.ctaLabel,
       ctaHref: config.nav.ctaHref,
       adminHref: config.nav.adminHref,
+      ...(config.nav.secondaryCtaLabel ? { secondaryCtaLabel: config.nav.secondaryCtaLabel } : {}),
+      ...(config.nav.secondaryCtaHref ? { secondaryCtaHref: config.nav.secondaryCtaHref } : {}),
     },
     hero: { ...config.hero },
     featureSections: config.featureSections.map((section) => ({ ...section })),
@@ -45,7 +58,7 @@ export function landingConfigToPartial(config: HomepageConfig): Partial<Homepage
     privacy: { ...config.privacy },
     footerCta: { ...config.footerCta },
     footer: { ...config.footer },
-    sections: { ...mergeSectionVisibility(config.sections) },
+    sections: { ...mergeSectionVisibility(config.sections, sectionDefaults) },
     founders: config.founders?.map((f) => ({ ...f, statBadge: f.statBadge ? { ...f.statBadge } : undefined })),
     trustMedia: config.trustMedia
       ? {
@@ -153,10 +166,14 @@ export async function saveBrandMarketingLanding(
   settingsId: string | null,
   existingSettings: Record<string, unknown>,
   key: BrandMarketingSettingsKey,
-  config: HomepageConfig
+  config: HomepageConfig,
+  options?: { marketingTheme?: MarketingTheme }
 ): Promise<void> {
   const existingPartial = (existingSettings[key] ?? {}) as Partial<HomepageConfig>;
-  const nextPartial = preserveCustomMarketingMediaUrls(existingPartial, landingConfigToPartial(config));
+  const nextPartial = preserveCustomMarketingMediaUrls(
+    existingPartial,
+    landingConfigToPartial(config, options)
+  );
   const merged = {
     ...existingSettings,
     [key]: nextPartial,

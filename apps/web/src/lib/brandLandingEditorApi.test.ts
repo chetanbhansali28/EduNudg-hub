@@ -136,6 +136,19 @@ describe("landingConfigToPartial", () => {
     expect(partial.featuresShowcase?.floatStatsLabel).toBe("Q1");
     expect(partial.featuresShowcase?.floatProgressValue).toBe("80%");
   });
+
+  it("regression_landing_partial_includes_nav_secondary_ctas_theme_and_abacus_sections", () => {
+    const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
+    config.nav.secondaryCtaLabel = "Partner with us";
+    config.nav.secondaryCtaHref = "apply";
+    config.theme.accent = "#112233";
+    const partial = landingConfigToPartial(config, { marketingTheme: "abacus-classic" });
+    expect(partial.nav?.secondaryCtaLabel).toBe("Partner with us");
+    expect(partial.nav?.secondaryCtaHref).toBe("apply");
+    expect(partial.theme?.accent).toBe("#112233");
+    expect(partial.sections?.curriculumSyllabus).toBe(true);
+    expect(partial.sections?.featureScroll).toBe(false);
+  });
 });
 
 describe("fetchBrandMarketingEditor", () => {

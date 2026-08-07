@@ -90,7 +90,7 @@ export function BrandMarketingEditorPage() {
       if (!brandId || !payload) throw new Error("Brand required");
       const merged = {
         ...existingSettings,
-        landing: landingConfigToPartial(payload),
+        landing: landingConfigToPartial(payload, { marketingTheme }),
         legal_pages: legalPages,
         social_connect: socialConnect,
       };
@@ -114,7 +114,7 @@ export function BrandMarketingEditorPage() {
         setBrandBaseline(payload);
         setExistingSettings((prev) => ({
           ...prev,
-          landing: landingConfigToPartial(payload),
+          landing: landingConfigToPartial(payload, { marketingTheme }),
           legal_pages: legalPages,
           social_connect: socialConnect,
         }));
@@ -138,7 +138,8 @@ export function BrandMarketingEditorPage() {
         settingsId,
         existingSettings,
         "center_landing",
-        payload
+        payload,
+        { marketingTheme }
       );
     },
     onSuccess: (_data, override) => {
@@ -147,7 +148,7 @@ export function BrandMarketingEditorPage() {
         setCenterBaseline(payload);
         setExistingSettings((prev) => ({
           ...prev,
-          center_landing: landingConfigToPartial(payload),
+          center_landing: landingConfigToPartial(payload, { marketingTheme }),
         }));
       }
       setCenterUpdatedAt(new Date().toISOString());

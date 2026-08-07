@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "./brandLandingDefaults";
+import { mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig, buildBrandLandingConfig } from "./brandLandingDefaults";
+import { isAbacusSectionEnabled } from "./homepageSections";
+import { landingConfigToPartial } from "./brandLandingEditorApi";
 
 describe("mergeAbacusClassicLandingConfig", () => {
   it("includes dual CTAs and trust media defaults", () => {
@@ -50,6 +52,17 @@ describe("mergeAbacusClassicLandingConfig", () => {
     expect(config.sections?.trustMedia).toBe(true);
     expect(config.sections?.gallery).toBe(true);
     expect(config.sections?.footerRich).toBe(true);
+  });
+
+  it("regression_novu_landing_keeps_shared_copy_and_abacus_sections_on_theme_merge", () => {
+    const novuPartial = landingConfigToPartial(buildBrandLandingConfig("Abacus World 2"));
+    novuPartial.hero!.line1 = "Custom hero from Novu editor";
+    const config = mergeAbacusClassicLandingConfig("Abacus World 2", novuPartial);
+    expect(config.hero.line1).toBe("Custom hero from Novu editor");
+    expect(config.founders).toHaveLength(1);
+    expect(config.programsSection?.cards).toHaveLength(3);
+    expect(isAbacusSectionEnabled(config, "curriculumSyllabus")).toBe(true);
+    expect(isAbacusSectionEnabled(config, "programsGrid")).toBe(true);
   });
 });
 

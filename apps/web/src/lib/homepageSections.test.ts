@@ -4,11 +4,13 @@ import {
   DEFAULT_HOMEPAGE_SECTION_VISIBILITY,
   isAbacusSectionEnabled,
   isSectionEnabled,
+  mergeAbacusClassicSectionVisibility,
   mergeSectionVisibility,
   setSectionEnabled,
 } from "./homepageSections";
 import { DEFAULT_HOMEPAGE_CONFIG } from "./homepageDefaults";
-import { mergeAbacusClassicLandingConfig } from "./brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "./brandLandingDefaults";
+import { landingConfigToPartial } from "./brandLandingEditorApi";
 
 describe("homepageSections", () => {
   it("defaults all sections to enabled", () => {
@@ -44,5 +46,25 @@ describe("homepageSections", () => {
   it("maps legacy programsMarquee toggle to programsGrid", () => {
     expect(mergeSectionVisibility({ programsMarquee: false }).programsGrid).toBe(false);
     expect(mergeSectionVisibility({ programsMarquee: true, programsGrid: false }).programsGrid).toBe(false);
+  });
+
+  it("regression_novu_saved_sections_do_not_disable_abacus_syllabus", () => {
+    const novuPartial = landingConfigToPartial(buildBrandLandingConfig("Abacus World 2"));
+    const abacusSections = mergeAbacusClassicSectionVisibility(novuPartial);
+    expect(abacusSections.curriculumSyllabus).toBe(true);
+    expect(abacusSections.programsGrid).toBe(true);
+    expect(abacusSections.founders).toBe(true);
+  });
+
+  it("regression_abacus_saved_sections_honor_editor_toggles", () => {
+    const abacusPartial = landingConfigToPartial(
+      mergeAbacusClassicLandingConfig("Smart Brain Abacus"),
+      { marketingTheme: "abacus-classic" }
+    );
+    abacusPartial.sections = { ...abacusPartial.sections, gallery: false, curriculumSyllabus: false };
+    const abacusSections = mergeAbacusClassicSectionVisibility(abacusPartial);
+    expect(abacusSections.gallery).toBe(false);
+    expect(abacusSections.curriculumSyllabus).toBe(false);
+    expect(abacusSections.programsGrid).toBe(true);
   });
 });

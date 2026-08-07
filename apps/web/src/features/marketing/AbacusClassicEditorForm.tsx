@@ -13,7 +13,7 @@ import type {
 } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import type { PortalMode } from "@/lib/portalMode";
-import { isAbacusSectionEnabled, setSectionEnabled, type HomepageSectionKey } from "@/lib/homepageSections";
+import { isAbacusSectionEnabled, setSectionEnabled, ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, type HomepageSectionKey } from "@/lib/homepageSections";
 import { emptyHomepageProgramCard } from "@/lib/programsGridItems";
 import { FooterRichEditorFields } from "@/features/marketing/FooterRichEditorFields";
 import { FooterLegalPagesEditor } from "@/features/marketing/FooterLegalPagesEditor";
@@ -75,8 +75,11 @@ export function AbacusClassicEditorForm({
     onChange(next);
   };
 
+  const sectionDefaults =
+    marketingTheme === "spark-academy" ? SPARK_ACADEMY_SECTION_DEFAULTS : ABACUS_CLASSIC_SECTION_DEFAULTS;
+
   const setSection = (key: HomepageSectionKey, enabled: boolean) => {
-    commit(setSectionEnabled(config, key, enabled));
+    commit(setSectionEnabled(config, key, enabled, sectionDefaults));
   };
 
   const updateNavLinks = (links: HomepageLink[]) => {

@@ -1,6 +1,6 @@
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
-import { ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeSectionVisibility } from "@/lib/homepageSections";
+import { ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeAbacusClassicSectionVisibility, mergeSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig } from "@/types/homepage";
 
@@ -377,7 +377,7 @@ export function mergeAbacusClassicLandingConfig(
       ...partial?.footer,
       rich: { ...base.footer!.rich, ...partial?.footer?.rich },
     },
-    sections: mergeSectionVisibility(partial?.sections, ABACUS_CLASSIC_SECTION_DEFAULTS),
+    sections: mergeAbacusClassicSectionVisibility(partial),
   });
 }
 
@@ -691,6 +691,6 @@ export function mergeSparkAcademyLandingConfig(
       ...partial?.footer,
       rich: { ...base.footer!.rich, ...partial?.footer?.rich },
     },
-    sections: mergeSectionVisibility(partial?.sections, SPARK_ACADEMY_SECTION_DEFAULTS),
+    sections: mergeSparkAcademySectionVisibility(partial),
   });
 }

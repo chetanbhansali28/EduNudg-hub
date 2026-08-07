@@ -103,6 +103,24 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   footerCta: false,
 };
 
+/** Section toggles honored when alternate-theme landing JSON was saved from that theme's editor. */
+const ABACUS_CLASSIC_SHARED_SECTION_KEYS: HomepageSectionKey[] = [
+  "hero",
+  "testimonials",
+  "faq",
+  "featureGrid",
+  "programsGrid",
+  "founders",
+  "trustMedia",
+  "gallery",
+  "curriculumSyllabus",
+  "footerRich",
+];
+
+const SPARK_ACADEMY_SHARED_SECTION_KEYS: HomepageSectionKey[] = [
+  ...ABACUS_CLASSIC_SHARED_SECTION_KEYS,
+];
+
 export type HomepageSectionVisibilityInput = HomepageSectionVisibility & {
   /** @deprecated Renamed to programsGrid — still read from saved brand_settings JSON. */
   programsMarquee?: boolean;
@@ -125,6 +143,72 @@ export function mergeSectionVisibility(
 ): Record<HomepageSectionKey, boolean> {
   const normalized = normalizeSectionPartial(partial);
   return { ...themeDefaults, ...normalized };
+}
+
+/** True when stored landing JSON includes Abacus Classic editor fields (not Novu-only). */
+export function hasAbacusClassicLandingMarkers(partial?: Partial<HomepageConfig>): boolean {
+  if (!partial) return false;
+  return Boolean(
+    (partial.founders?.length ?? 0) > 0 ||
+    partial.trustMedia?.eyebrow ||
+    (partial.gallery?.images?.length ?? 0) > 0 ||
+    partial.programsSection?.cards?.some((card) => card.name.trim().length > 0)
+  );
+}
+
+/** True when stored landing JSON includes Spark Academy editor fields (not Novu-only). */
+export function hasSparkAcademyLandingMarkers(partial?: Partial<HomepageConfig>): boolean {
+  if (!partial) return false;
+  return Boolean(
+    partial.featuresShowcase?.title ||
+    partial.trustMedia?.highlightPrimary ||
+    (partial.founders?.length ?? 0) > 0 ||
+    partial.programsSection?.cards?.some((card) => card.name.trim().length > 0)
+  );
+}
+
+function mergeAlternateThemeSectionVisibility(
+  partial: Partial<HomepageConfig> | undefined,
+  themeDefaults: Record<HomepageSectionKey, boolean>,
+  sharedKeys: HomepageSectionKey[],
+  hasThemeMarkers: (partial?: Partial<HomepageConfig>) => boolean
+): Record<HomepageSectionKey, boolean> {
+  const defaults = { ...themeDefaults };
+  if (!hasThemeMarkers(partial)) {
+    return defaults;
+  }
+  const normalized = normalizeSectionPartial(partial?.sections);
+  if (!normalized) return defaults;
+  for (const key of sharedKeys) {
+    if (normalized[key] !== undefined) {
+      defaults[key] = normalized[key]!;
+    }
+  }
+  return defaults;
+}
+
+/** Abacus public/editor merge: ignore Novu-era section toggles until Abacus content exists in JSON. */
+export function mergeAbacusClassicSectionVisibility(
+  partial?: Partial<HomepageConfig>
+): Record<HomepageSectionKey, boolean> {
+  return mergeAlternateThemeSectionVisibility(
+    partial,
+    ABACUS_CLASSIC_SECTION_DEFAULTS,
+    ABACUS_CLASSIC_SHARED_SECTION_KEYS,
+    hasAbacusClassicLandingMarkers
+  );
+}
+
+/** Spark public/editor merge: ignore Novu-era section toggles until Spark content exists in JSON. */
+export function mergeSparkAcademySectionVisibility(
+  partial?: Partial<HomepageConfig>
+): Record<HomepageSectionKey, boolean> {
+  return mergeAlternateThemeSectionVisibility(
+    partial,
+    SPARK_ACADEMY_SECTION_DEFAULTS,
+    SPARK_ACADEMY_SHARED_SECTION_KEYS,
+    hasSparkAcademyLandingMarkers
+  );
 }
 
 export function isSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {
