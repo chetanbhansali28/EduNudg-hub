@@ -15,11 +15,13 @@ Instructions for humans and AI agents working on EduNudg.
 
 - [Marketing landing pages](../frontend/marketing-landing.md) — platform / brand / center public `/` theme
 - [Abacus Classic theme](../frontend/abacus-classic.md) — brand marketing theme variant
+- [Spark Academy theme](../frontend/spark-academy.md) — Educat-style theme + shared lead modals
 - [UI shell standards](../spec/ui-shell-standards.md) — backend KPI grid, forms, accessibility
 
 ## Operations
 
-- [Runbook](../ops/runbook.md) — local URLs (port 9000)
+- [Runbook](../ops/runbook.md) — local URLs (port 9000), git + Cursor push gates
+- [Franchise center CSV import](../ops/franchise-center-csv-import.md)
 - [Platform admin portal handoff](../ops/platform-admin-portal-handoff.md) — cross-host support login
 - [Test users](../ops/test-users.md) — seeded accounts and troubleshooting
 
@@ -56,7 +58,7 @@ Use the skill matching your task before writing code. OpenSpec skills (`openspec
 | `git-publish-gate` | No commit/push unless the user explicitly asks; push requires green local CI |
 | OpenSpec [`agent-artifact-sync`](../../openspec/specs/agent-artifact-sync/spec.md) | Behavioral requirements for the sync system |
 
-Local CI mirror: `pnpm ci:local` (skill `edunudg-pre-push-ci`). Git hook: `.githooks/pre-push` (`pnpm hooks:install`).
+Local CI mirror: `pnpm ci:local` (skill `edunudg-pre-push-ci` — **mandatory before every push**). Cursor: `.cursor/hooks/gate-git-push.sh` **denies** push without a green stamp; stop finish-gate fails turns that pushed without CI. Git backup: `.githooks/pre-push` (`pnpm hooks:install`).
 Artifact sync is automatic — do not ask the user to approve docs/tests/skills updates.
 
 ## Phases

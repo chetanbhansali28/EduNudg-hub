@@ -50,7 +50,22 @@ In **Navigation & CTAs** (Abacus/Spark) or **Navigation Management** (Novu), eac
 
 See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
 
-See `apps/web/src/features/marketing/abacus-classic/`.
+See [Spark Academy theme](./spark-academy.md) for Educat-style sections and shared lead-modal deep links.
+
+See `apps/web/src/features/marketing/abacus-classic/` and `apps/web/src/features/marketing/spark-academy/`.
+
+## Platform React Query keys (do not collapse)
+
+| Key constant | Value | Consumers | Cache shape |
+|--------------|-------|-----------|-------------|
+| `MARKETING_HOMEPAGE_CONFIG_QUERY_KEY` | `["marketing-homepage"]` | Favicon, shell branding, editors | `HomepageConfig` |
+| `MARKETING_PUBLIC_BUNDLE_QUERY_KEY` | `["marketing-homepage", "public-bundle"]` | `MarketingPublicLayout` | `{ config, legalPages }` |
+
+Sharing one key caused login to stick on **Loading…** after visiting the public homepage. Spec: [`openspec/specs/marketing-homepage/spec.md`](../../openspec/specs/marketing-homepage/spec.md).
+
+## Lead modals (Abacus / Spark)
+
+Deep links `#enroll`, `#enroll-student`, `#register` → enroll modal; `#apply` → franchise modal. Center Path B passes `centerSlug` so enroll submits `submit_center_student_registration`. See [spark-academy.md](./spark-academy.md) and [abacus-classic.md](./abacus-classic.md).
 
 Staff apps live under `/login` (public) and `/app` (authenticated) for brand and center portals.
 

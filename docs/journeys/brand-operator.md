@@ -9,8 +9,8 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 | Home | Compact KPI grid: unassigned leads, stale leads, new franchise applications |
 | **Student Leads** | Assign, reallocate, view lost with reasons |
 | **Franchise Applications** | Approve/reject; provisions center + domain |
-| Franchise Centers | List/edit centers; pincode required for suggestions |
-| Curriculum | Programs, levels (existing) |
+| Franchise Centers | Master-detail `/app/centers` — profile, suspend/re-enable, curriculum enablement |
+| Curriculum | Master-detail `/app/curriculum` — courses/levels/units with draft publish safety |
 | Royalties | Brand ↔ franchise money (not EduNudg subscription) |
 | Analytics | Cross-center metrics |
 | Settings | Logo, theme, **`lead_stale_days`**, **timezone**, feature/integration toggles |

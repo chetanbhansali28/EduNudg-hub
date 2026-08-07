@@ -16,7 +16,7 @@ Operate only inside your role. Escalate instead of crossing hard lines. Full bri
 - No editing applied production migrations — add a new migration
 - No `git push` / remote publish unless the user **explicitly** asks (see `git-publish-gate`)
 - No `git commit` unless the user **explicitly** asks to commit
-- When pushing: green `pnpm ci:local` after auto-fix (`edunudg-pre-push-ci`) — never push red
+- When pushing: always run `pnpm ci:local` first (`edunudg-pre-push-ci`); Cursor denies push without a green stamp — never push red or unvalidated
 
 ## Role fences
 

@@ -1,3 +1,5 @@
+> **Status:** Shipped — mainline spec at [`openspec/specs/brand-curriculum-workspace/spec.md`](../../specs/brand-curriculum-workspace/spec.md). Archive via `/opsx:archive` when convenient.
+
 ## 1. Database
 
 - [x] Migration 052: `clone_curriculum_version_to_draft`, `assert_level_deletable`

@@ -36,13 +36,13 @@ Traceability: FR-P02
 
 ### Requirement: Platform admin approval
 
-Platform admins SHALL review pending signups at `/admin/brands` and approve them to provision a live brand.
+Platform admins SHALL review pending signups at `/admin/brands` via `BrandsSignupReviewSection` (master-detail queue with class `ed-brands-signup-review`) and approve them to provision a live brand. Detail actions use `PlatformSignupDetailCard`.
 
 Traceability: FR-P03, FR-P04
 
 #### Scenario: Approve pending signup
 
-- **WHEN** a platform admin approves a pending brand signup
+- **WHEN** a platform admin approves a pending brand signup from the signup review queue
 - **THEN** the system creates a `brands` row with slug `slugify(name)-slugify(city)`
 - **AND** creates `domain_mappings` for `{slug}.localhost:9000` (or production equivalent)
 - **AND** creates a draft `brand_subscriptions` row
@@ -55,6 +55,21 @@ Traceability: FR-P03, FR-P04
 - **THEN** the system appends `-2`, `-3`, or higher numeric suffix after the city-suffixed base
 
 Traceability: FR-P05
+
+### Requirement: Brand settings save without rewriting owner credentials
+
+Saving brand settings (name, status, marketing theme, etc.) on `/admin/brands/:slug` SHALL NOT call `brand-owner-credentials` unless the login email or password fields actually changed. Theme-only saves MUST succeed even when credential edge validation would fail.
+
+#### Scenario: Theme save skips credentials edge function
+
+- **WHEN** a platform admin changes **Website theme** (or other non-credential fields) and saves
+- **THEN** the SPA updates marketing theme / brand fields
+- **AND** does not invoke `upsertBrandOwnerCredentials` / `brand-owner-credentials`
+
+#### Scenario: Credential fields change triggers edge function
+
+- **WHEN** a platform admin changes login email or password and saves
+- **THEN** the SPA calls `brand-owner-credentials` to create or update the owner Auth user
 
 ### Requirement: Manual platform brand signup
 

@@ -31,7 +31,9 @@
 - [ ] Role-based locators: Playwright `{ exact: true }`; Testing Library `exactAccessibleName("…")` — never RTL `exact: true`
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills as needed)
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
+- [ ] If pushing: mandatory `edunudg-pre-push-ci` (`pnpm ci:local` green before `git push`)
 
 ## Skills
 
 - `edunudg-modular-features`, `edunudg-write-tests`, `edunudg-rbac-check`, `edunudg-sync-artifacts`
+- Push requests: `edunudg-pre-push-ci` (never skip)

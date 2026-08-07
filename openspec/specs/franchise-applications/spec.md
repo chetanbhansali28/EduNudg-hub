@@ -14,7 +14,9 @@ Prospective franchise owners apply to open a center under a brand via the brand 
 
 ### Requirement: Public franchise application form
 
-The brand host SHALL expose a franchise application form (`#apply`) with extended fields: applicant name, email, phone, proposed franchise name, address, city, state, pincode, and experience.
+The brand host SHALL expose a franchise application (`#apply`) with extended fields: applicant name, email, phone, proposed franchise name, address, city, state, pincode, and experience.
+
+On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`). URL hash `#apply` and CTA href `apply` SHALL open the apply modal via `resolveLeadModalKind` / `LeadModalHashOpener`. Center hosts SHALL NOT expose the franchise apply modal.
 
 Traceability: FR-B01, FR-B03
 
@@ -23,6 +25,12 @@ Traceability: FR-B01, FR-B03
 - **WHEN** a visitor submits the franchise application on the brand public homepage
 - **THEN** the system persists the inquiry via `submit_franchise_inquiry_v2` into `franchise_inquiries`
 - **AND** the form is available when the brand is active with domain mapped, without gating on paid subscription
+
+#### Scenario: Deep link opens apply modal (Abacus/Spark)
+
+- **WHEN** a visitor opens the brand public site with hash `#apply`
+- **THEN** `LeadModalHashOpener` opens the franchise apply modal
+- **AND** submitting calls `submit_franchise_inquiry` / `submit_franchise_inquiry_v2`
 
 #### Scenario: Applicant does not use wrong portal
 

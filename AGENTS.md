@@ -45,8 +45,9 @@ Do not ship code-only changes for behavior or process. Sync matrix: [`.cursor/ru
 
 - **Never** `git push` (or otherwise publish to GitHub) unless the user explicitly asks in that turn.
 - **Never** `git commit` unless the user explicitly asks to commit.
-- When the user asks to **push**: run skill **`edunudg-pre-push-ci`** — `pnpm ci:local`, auto-fix failures, re-run until green, then push.
-- Mechanical gate: **`.githooks/pre-push`** runs `pnpm ci:local` on every push (install via `pnpm hooks:install` / `prepare`).
+- When the user asks to **push**: skill **`edunudg-pre-push-ci` is mandatory** — run `pnpm ci:local` as its own command, auto-fix until green, **then** push. Never `commit && push` without CI in between.
+- Cursor gate: **`.cursor/hooks/gate-git-push.sh`** **denies** `git push` without a recent green `ci:local` stamp for HEAD.
+- Git backup: **`.githooks/pre-push`** still runs `pnpm ci:local` (install via `pnpm hooks:install` / `prepare`).
 - Rule: [`.cursor/rules/git-publish-gate.mdc`](.cursor/rules/git-publish-gate.mdc).
 
 ## Local dev

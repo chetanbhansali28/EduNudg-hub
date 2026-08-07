@@ -13,8 +13,9 @@
 9. Ship behavior/process changes without syncing OpenSpec, docs, skills, and agents (`artifact-sync`)
 10. Cross agent role fences without escalation (`agent-boundaries`)
 11. `git push` / publish to GitHub (or commit) without an explicit user request (`git-publish-gate`)
-12. Push while local CI is red, or skip `pnpm ci:local` / auto-fix when the user asked to push (`edunudg-pre-push-ci`)
+12. Push without a green `pnpm ci:local` for current HEAD, skip auto-fix, or chain `commit && push` without CI in between (`edunudg-pre-push-ci` / `git-publish-gate`)
 13. Ask the user for permission to update specs/docs/tests/skills — sync automatically (`artifact-sync`)
+14. Invent `SKIP_CI_LOCAL=1` without explicit user emergency approval
 
 ## Avoid
 

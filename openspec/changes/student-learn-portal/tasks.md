@@ -1,3 +1,5 @@
+> **Status:** Shipped to mainline — see [`openspec/specs/student-learn-portal/spec.md`](../../specs/student-learn-portal/spec.md) and [`docs/journeys/student-learn-portal.md`](../../../docs/journeys/student-learn-portal.md). Tasks below are historical checklist (implementations landed in `features/learn/`, migration `048+`, e2e-09). Prefer archiving this change folder via `/opsx:archive` rather than re-checking boxes.
+
 ## 1. OpenSpec & docs traceability
 
 - [ ] 1.1 Validate change: `pnpm exec openspec validate student-learn-portal --strict`

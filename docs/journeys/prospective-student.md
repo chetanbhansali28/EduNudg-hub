@@ -13,6 +13,8 @@ flowchart LR
 ```
 
 1. Parent submits on `http://{brand}.localhost:9000/` — **required:** WhatsApp, city, pincode, child DOB, etc.
+   - **Novu:** inline application section.
+   - **Abacus Classic / Spark Academy:** enroll modal (CTA `enroll` or deep links `#enroll` / `#enroll-student` / `#register`) via `LeadModalHashOpener`.
 2. `submit_brand_student_application` → `leads` (`lead_source = brand`, `center_id` null).
 3. Brand uses **Student Leads** → pincode suggestions → **manual assign**.
 4. Franchise sees lead on center `/app/leads`; updates **status** (resets SLA clock).
@@ -21,7 +23,7 @@ flowchart LR
 
 ## Path B — Center registration
 
-1. Parent opens `http://{center}.{brand}.localhost:9000/` → **Register** (`#register`).
+1. Parent opens `http://{center}.{brand}.localhost:9000/` → **Register** (`#register` / `#enroll-student`; Abacus/Spark open the enroll modal with center Path B submit).
 2. `submit_center_student_registration` → merge by WhatsApp, `lead_source = center`.
 3. Franchise converts in `/app/leads`.
 

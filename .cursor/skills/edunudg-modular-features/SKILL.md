@@ -48,6 +48,13 @@ description: Add EduNudg features using modular files, service layer, base theme
 - Shipping integration without OFF switch
 - Payment provider SDK imported in random feature folders
 
+## Marketing themes (Abacus / Spark)
+
+- Theme assigned by platform admin on brand detail (`brands.marketing_theme`).
+- Abacus/Spark public CTAs use **modals** (`MarketingLeadModals` + `LeadModalHashOpener`), not Novu inline forms.
+- Deep links: `#enroll` / `#enroll-student` / `#register` → enroll; `#apply` → franchise (brand only).
+- Docs: `docs/frontend/abacus-classic.md`, `docs/frontend/spark-academy.md`.
+
 ## Lead lost (reference)
 
 - **Only center** marks lead `lost` (`mark_lead_lost` + `lost_reason`).

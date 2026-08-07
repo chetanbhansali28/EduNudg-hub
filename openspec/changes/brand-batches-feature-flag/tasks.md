@@ -1,3 +1,5 @@
+> **Status:** Shipped — mainline spec at [`openspec/specs/brand-batches-feature-flag/spec.md`](../../specs/brand-batches-feature-flag/spec.md). Archive via `/opsx:archive` when convenient.
+
 ## 1. Client flag + admin UI
 
 - [x] 1.1 Add `batches: false` to `FEATURE_FLAG_DEFAULTS` and tests

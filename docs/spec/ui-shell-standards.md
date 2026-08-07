@@ -122,9 +122,9 @@ Franchise applications, student leads (brand + center), and platform brand signu
 
 Styles use admin theme tokens (`--ed-primary-soft`, `--ed-card`, etc.) for light and dark mode.
 
-Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `PlatformSignupRequestsPanel`.
+Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `BrandsSignupReviewSection` (on `/admin/brands`; detail via `PlatformSignupDetailCard`).
 
-Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `PlatformSignupRequestsPanel.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`.
+Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `BrandsSignupReviewSection.test.tsx`, `PlatformSignupDetailCard.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`.
 
 ## Backend catalog workspace
 

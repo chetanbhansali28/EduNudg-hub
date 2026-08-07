@@ -26,7 +26,9 @@
 - [ ] Payment flows use gateway abstraction — brand pays platform only for subscriptions
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills/agents if process or architecture docs changed)
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
+- [ ] If pushing: mandatory `edunudg-pre-push-ci` (`pnpm ci:local` green before `git push`)
 
 ## Skills
 
 - `edunudg-modular-features` for boundaries; `edunudg-sync-artifacts` before finish; delegate migrations to Database agent
+- Push requests: `edunudg-pre-push-ci` (never skip)

@@ -1,5 +1,7 @@
 # Franchise center CSV import
 
+> **Status:** Mainline OpenSpec + ops doc shipped — [`openspec/specs/franchise-center-csv-import/spec.md`](../../specs/franchise-center-csv-import/spec.md), [`docs/ops/franchise-center-csv-import.md`](../../../docs/ops/franchise-center-csv-import.md). This proposal folder is orphan; archive/remove when convenient.
+
 ## What & why
 
 Platform admins onboarding a brand (e.g. Abacus World) need to bulk-create franchise centers with center portal hostnames. Today creation is one-by-one via franchise inquiry approval. CSV import on `/admin/brands/:slug` mirrors approval side effects with strict validation and no raw file storage.

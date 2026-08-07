@@ -2,27 +2,56 @@ import type { Page, Locator } from "@playwright/test";
 import { expect } from "@playwright/test";
 
 /**
- * Spark Academy / Abacus Classic put public lead forms in <dialog> modals.
- * Deep links (#enroll-student, #register, #apply) open them via LeadModalHashOpener.
- * Prefer dialog-scoped locators so closed/hidden dialog inputs are never filled.
+ * Public lead forms:
+ * - Abacus Classic / Spark Academy → <dialog> modals (LeadModalHashOpener)
+ * - Novu → inline sections (#enroll-student, #register, #apply, #enroll)
+ *
+ * Seeded E2E brand `abacusworld` uses Novu, so helpers must support both.
  */
 export function leadDialog(page: Page): Locator {
   return page.locator("dialog[open]").first();
 }
 
-export async function expectLeadDialogOpen(page: Page) {
-  const dialog = leadDialog(page);
-  await expect(dialog).toBeVisible({ timeout: 15_000 });
-  await expect(dialog.getByLabel("Parent name").or(dialog.getByLabel("Full name"))).toBeVisible({
-    timeout: 5_000,
-  });
-  return dialog;
+function sectionIdFromHash(hash: string): string {
+  const raw = hash.replace(/^#/, "").trim().toLowerCase() || "enroll-student";
+  if (raw === "enroll") return "enroll-student";
+  return raw;
 }
 
-/** Navigate so hash openers always fire (same-hash goto is a no-op for React Router). */
+export function leadInlineSection(page: Page, hash: string): Locator {
+  return page.locator(`#${sectionIdFromHash(hash)}`);
+}
+
+/** Visible lead form: open dialog (modal themes) or inline section (Novu). */
+export async function expectLeadFormReady(page: Page, hash = "#enroll-student"): Promise<Locator> {
+  const dialog = leadDialog(page);
+  const section = leadInlineSection(page, hash);
+
+  await expect(dialog.or(section).first()).toBeVisible({ timeout: 20_000 });
+
+  if (await dialog.isVisible().catch(() => false)) {
+    await expect(dialog.getByLabel("Parent name").or(dialog.getByLabel("Full name"))).toBeVisible({
+      timeout: 5_000,
+    });
+    return dialog;
+  }
+
+  await expect(section).toBeVisible({ timeout: 5_000 });
+  await expect(section.getByLabel("Parent name").or(section.getByLabel("Full name"))).toBeVisible({
+    timeout: 5_000,
+  });
+  return section;
+}
+
+/** @deprecated Prefer expectLeadFormReady — kept for specs that still name this. */
+export async function expectLeadDialogOpen(page: Page, hash = "#enroll-student") {
+  return expectLeadFormReady(page, hash);
+}
+
+/** Navigate so hash openers / scroll targets always resolve after landing HTML is ready. */
 export async function openLeadDeepLink(page: Page, url: string) {
   const target = new URL(url);
-  const hash = target.hash || "#enroll";
+  const hash = target.hash || "#enroll-student";
   await page.goto(`${target.origin}${target.pathname}${target.search}`);
   await page.waitForLoadState("domcontentloaded");
   await page.evaluate((nextHash) => {
@@ -31,8 +60,11 @@ export async function openLeadDeepLink(page: Page, url: string) {
     }
     window.location.hash = nextHash;
   }, hash);
-  return expectLeadDialogOpen(page);
+  return expectLeadFormReady(page, hash);
 }
+
+const SUBMIT_NAME =
+  /book free demo|request a free trial|register for a free trial|submit|apply|enroll|register/i;
 
 export async function fillBrandStudentLead(
   page: Page,
@@ -46,16 +78,19 @@ export async function fillBrandStudentLead(
   },
   deepLinkUrl?: string
 ) {
+  const hash = deepLinkUrl ? new URL(deepLinkUrl).hash || "#enroll-student" : "#enroll-student";
   if (deepLinkUrl) await openLeadDeepLink(page, deepLinkUrl);
-  else await expectLeadDialogOpen(page);
-  const dialog = leadDialog(page);
-  await dialog.getByLabel("Parent name").fill(fields.parentName);
-  await dialog.getByLabel("WhatsApp number").fill(fields.whatsapp);
-  await dialog.getByLabel("Email").fill(fields.email);
-  await dialog.getByLabel("Child name").fill(fields.childName);
-  await dialog.getByLabel("City", { exact: true }).fill(fields.city);
-  await dialog.getByLabel("Pincode", { exact: true }).fill(fields.pincode);
-  await dialog.getByRole("button", { name: /book free demo|submit|apply|enroll/i }).click();
+  else await expectLeadFormReady(page, hash);
+  const form = (await leadDialog(page).isVisible().catch(() => false))
+    ? leadDialog(page)
+    : leadInlineSection(page, hash);
+  await form.getByLabel("Parent name").fill(fields.parentName);
+  await form.getByLabel("WhatsApp number").fill(fields.whatsapp);
+  await form.getByLabel("Email").fill(fields.email);
+  await form.getByLabel("Child name").fill(fields.childName);
+  await form.getByLabel("City", { exact: true }).fill(fields.city);
+  await form.getByLabel("Pincode", { exact: true }).fill(fields.pincode);
+  await form.getByRole("button", { name: SUBMIT_NAME }).click();
 }
 
 export async function fillCenterStudentRegistration(
@@ -68,14 +103,17 @@ export async function fillCenterStudentRegistration(
   },
   deepLinkUrl?: string
 ) {
+  const hash = deepLinkUrl ? new URL(deepLinkUrl).hash || "#register" : "#register";
   if (deepLinkUrl) await openLeadDeepLink(page, deepLinkUrl);
-  else await expectLeadDialogOpen(page);
-  const dialog = leadDialog(page);
-  await dialog.getByLabel("Parent name").fill(fields.parentName);
-  await dialog.getByLabel("WhatsApp number").fill(fields.whatsapp);
-  await dialog.getByLabel("Email").fill(fields.email);
-  await dialog.getByLabel("Child name").fill(fields.childName);
-  await dialog.getByRole("button", { name: /register|submit/i }).click();
+  else await expectLeadFormReady(page, hash);
+  const form = (await leadDialog(page).isVisible().catch(() => false))
+    ? leadDialog(page)
+    : leadInlineSection(page, hash);
+  await form.getByLabel("Parent name").fill(fields.parentName);
+  await form.getByLabel("WhatsApp number").fill(fields.whatsapp);
+  await form.getByLabel("Email").fill(fields.email);
+  await form.getByLabel("Child name").fill(fields.childName);
+  await form.getByRole("button", { name: SUBMIT_NAME }).click();
 }
 
 export async function fillFranchiseApplication(
@@ -89,15 +127,18 @@ export async function fillFranchiseApplication(
   },
   deepLinkUrl?: string
 ) {
+  const hash = deepLinkUrl ? new URL(deepLinkUrl).hash || "#apply" : "#apply";
   if (deepLinkUrl) await openLeadDeepLink(page, deepLinkUrl);
-  else await expectLeadDialogOpen(page);
-  const dialog = leadDialog(page);
-  await dialog.getByLabel("Full name").fill(fields.fullName);
-  await dialog.getByLabel("Email").fill(fields.email);
-  await dialog.getByLabel("WhatsApp number").fill(fields.whatsapp);
-  await dialog.getByLabel("City", { exact: true }).fill(fields.city);
+  else await expectLeadFormReady(page, hash);
+  const form = (await leadDialog(page).isVisible().catch(() => false))
+    ? leadDialog(page)
+    : leadInlineSection(page, hash);
+  await form.getByLabel("Full name").fill(fields.fullName);
+  await form.getByLabel("Email").fill(fields.email);
+  await form.getByLabel("WhatsApp number").fill(fields.whatsapp);
+  await form.getByLabel("City", { exact: true }).fill(fields.city);
   if (fields.qualification) {
-    await dialog.getByLabel("Educational qualification").fill(fields.qualification);
+    await form.getByLabel("Educational qualification").fill(fields.qualification);
   }
-  await dialog.getByRole("button", { name: /apply for franchise|submit|apply/i }).click();
+  await form.getByRole("button", { name: /apply for franchise|submit|apply/i }).click();
 }

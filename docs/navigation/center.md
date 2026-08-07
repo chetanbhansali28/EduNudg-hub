@@ -13,9 +13,8 @@ See [Navigation spec](../spec/navigation-spec.md).
 - Operations Dashboard
 - **Leads** (`/app/leads`) — replaces Admissions; assign convert
 - Students & Transfers
-- Batches & Schedule
+- **Batches & Schedule** (`/app/batches`) — only when brand feature flag `batches` is ON (default off)
 - Fees & Payments
-- Inventory (kits Phase D)
-- **Kit orders** (`/app/kits`) — when brand enables `kits` feature
+- **Merchandise** (`/app/merchandise`) — when brand enables `merchandise` (legacy `/app/kits` redirects)
 - **Settings** (`/app/settings`) — edit public center profile (photo, address, phone, social links); login email from auth
 - Assessments / Reports — Phase D

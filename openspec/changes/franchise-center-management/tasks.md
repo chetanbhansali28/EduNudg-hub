@@ -1,3 +1,5 @@
+> **Status:** Shipped — mainline spec at [`openspec/specs/franchise-center-management/spec.md`](../../specs/franchise-center-management/spec.md). Archive via `/opsx:archive` when convenient.
+
 ## 1. Schema
 
 - [x] 1.1 Migration `052_franchise_center_lifecycle.sql` — lifecycle + curriculum enablement

@@ -15,7 +15,9 @@ Parents enter the pipeline via brand student applications or direct center regis
 
 ### Requirement: Brand public student application
 
-The brand host SHALL expose a student application form with required fields: parent name, WhatsApp, email, child name, child DOB, city, and India 6-digit pincode; school name optional.
+The brand host SHALL expose a student application with required fields: parent name, WhatsApp, email, child name, child DOB, city, and India 6-digit pincode; school name optional.
+
+On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`), not an inline Novu section. CTA hrefs and URL hashes `#enroll`, `#enroll-student`, and `#register` SHALL map to the enroll modal via `resolveLeadModalKind` / `LeadModalHashOpener`.
 
 Traceability: FR-B02, FR-B03, FR-B04
 
@@ -25,15 +27,23 @@ Traceability: FR-B02, FR-B03, FR-B04
 - **THEN** the system creates or merges a lead via `submit_brand_student_application`
 - **AND** sets `lead_source = brand` with `center_id` null
 
+#### Scenario: Deep link opens enroll modal (Abacus/Spark)
+
+- **WHEN** a visitor opens the brand public site with hash `#enroll`, `#enroll-student`, or `#register`
+- **THEN** `LeadModalHashOpener` opens the enroll modal
+- **AND** submitting calls `submit_brand_student_application` (brand host, no `centerSlug`)
+
 ### Requirement: Center public student registration
 
 The center host SHALL expose student registration only — no franchise application form.
+
+On Abacus/Spark themes, registration SHALL use the same enroll modal with `centerSlug` set so submit calls `submit_center_student_registration` (Path B).
 
 Traceability: FR-C01, FR-C02, FR-C03, FR-C04
 
 #### Scenario: Parent registers on center site
 
-- **WHEN** a parent submits registration on `{center}.{brand}` public homepage (`#register`)
+- **WHEN** a parent submits registration on `{center}.{brand}` public homepage (`#register` or `#enroll-student`)
 - **THEN** the system upserts a lead via `submit_center_student_registration`
 - **AND** sets `lead_source = center` with `center_id` set to the hosting center
 - **AND** the public nav shows the brand logo only

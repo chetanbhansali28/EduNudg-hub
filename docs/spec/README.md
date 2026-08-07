@@ -24,6 +24,17 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [functional-requirements.md](./functional-requirements.md) | FR ID index → links to `openspec/specs/` |
 | OpenSpec behavioral specs | [`openspec/specs/`](../../openspec/specs/) | GIVEN/WHEN/THEN requirements; supersedes FR tables over time |
 | [staff-login](../../openspec/specs/staff-login/spec.md) | Platform/brand/center `/login` labels + exact accessible-name testing |
+| [marketing-homepage](../../openspec/specs/marketing-homepage/spec.md) | Platform public bundle vs config-only React Query keys |
+| [marketing-footer](../../openspec/specs/marketing-footer/spec.md) | Public footer columns + legal pages |
+| [platform-settings](../../openspec/specs/platform-settings/spec.md) | Platform settings / feature flags |
+| [platform-brand-onboarding](../../openspec/specs/platform-brand-onboarding/spec.md) | Brand signup approve + credential-skip on theme save |
+| [student-leads](../../openspec/specs/student-leads/spec.md) | Brand/center student leads + Abacus/Spark modals |
+| [franchise-applications](../../openspec/specs/franchise-applications/spec.md) | Franchise apply + approve provision |
+| [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace |
+| [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform CSV bulk center import |
+| [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` draft/publish |
+| [brand-batches-feature-flag](../../openspec/specs/brand-batches-feature-flag/spec.md) | Per-brand Batches module gate |
+| [student-learn-portal](../../openspec/specs/student-learn-portal/spec.md) | Learn host enrollment-gated portal |
 | [agent-artifact-sync](../../openspec/specs/agent-artifact-sync/spec.md) | Mandatory sync of specs/docs/tests/skills/agents; agent boundaries |
 | [rpc-catalog.md](./rpc-catalog.md) | Supabase RPC signatures |
 | [data-model-extensions.md](./data-model-extensions.md) | Migration 016+ tables/columns |
@@ -42,4 +53,5 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 - [franchise-owner.md](../journeys/franchise-owner.md)
 - [prospective-student.md](../journeys/prospective-student.md)
 - [brand-operator.md](../journeys/brand-operator.md)
+- [student-learn-portal.md](../journeys/student-learn-portal.md)
 - [center-enrollment.md](../journeys/center-enrollment.md) — legacy; superseded by prospective-student for v1

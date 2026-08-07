@@ -29,10 +29,17 @@ Requires **Node.js ≥ 20.19**. Opt out of telemetry: `OPENSPEC_TELEMETRY=0` or 
 
 ## Capabilities (baseline)
 
-- `platform-brand-onboarding` — EduNudg B2B brand signup and approval
-- `franchise-applications` — franchise inquiry → center provisioning
-- `student-leads` — brand/center lead pipeline, SLA, convert
+- `platform-brand-onboarding` — EduNudg B2B brand signup and approval; credential-skip on theme save
+- `franchise-applications` — franchise inquiry → center provisioning (incl. Abacus/Spark modals)
+- `student-leads` — brand/center lead pipeline, SLA, convert; modal deep links
 - `center-public-profile` — franchise public profile settings and landing
+- `franchise-center-management` — brand `/app/centers` lifecycle + curriculum enablement
+- `franchise-center-csv-import` — platform CSV bulk center import
+- `brand-curriculum-workspace` — `/app/curriculum` draft/publish safety
+- `brand-batches-feature-flag` — per-brand Batches module gate
+- `student-learn-portal` — learn host enrollment-gated portal
+- `marketing-homepage` — platform public-bundle vs config-only React Query keys
+- `marketing-footer` / `platform-settings` — public footer + platform settings
 - `staff-login` — `/login` primary vs OAuth accessible names; exact match in tests
 - `agent-artifact-sync` — keep OpenSpec, docs, tests, skills, and agents in sync; role boundaries
 

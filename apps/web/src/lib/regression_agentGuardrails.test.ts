@@ -71,14 +71,21 @@ describe("regression_agentGuardrails", () => {
   it("pre-push CI skill and script mirror GitHub CI", () => {
     expect(exists(".cursor/skills/edunudg-pre-push-ci/SKILL.md")).toBe(true);
     expect(exists("scripts/ci-local.mjs")).toBe(true);
+    expect(exists(".githooks/pre-push")).toBe(true);
+    expect(exists(".cursor/hooks.json")).toBe(true);
+    expect(exists(".cursor/hooks/gate-git-push.sh")).toBe(true);
     const skill = read(".cursor/skills/edunudg-pre-push-ci/SKILL.md");
     const gate = read(".cursor/rules/git-publish-gate.mdc");
     const pkg = read("package.json");
+    const hooksJson = read(".cursor/hooks.json");
     expect(skill).toMatch(/pnpm ci:local/);
     expect(skill).toMatch(/Automatically fix|auto-fix/i);
+    expect(skill).toMatch(/gate-git-push/);
     expect(gate).toMatch(/edunudg-pre-push-ci/);
     expect(gate).toMatch(/ci:local/);
     expect(pkg).toMatch(/"ci:local"/);
+    expect(hooksJson).toMatch(/gate-git-push\.sh/);
+    expect(hooksJson).toMatch(/beforeShellExecution/);
     const script = read("scripts/ci-local.mjs");
     expect(script).toMatch(/audit:schema/);
     expect(script).toMatch(/typecheck/);

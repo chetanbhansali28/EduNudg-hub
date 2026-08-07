@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { hasE2EBackend } from "./helpers/env";
 import { uniqueWhatsApp } from "./helpers/auth";
 import { brandUrl, SEED } from "./helpers/portal";
-import { fillBrandStudentLead, expectLeadDialogOpen, leadDialog } from "./helpers/leadModals";
+import { fillBrandStudentLead, expectLeadFormReady } from "./helpers/leadModals";
 
 test.describe("E2E-07 — WhatsApp duplicate merge", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
@@ -41,9 +41,11 @@ test.describe("E2E-07 — WhatsApp duplicate merge", () => {
 
   test("re-apply after converted shows enrolled error (C1)", async ({ page }) => {
     await page.goto(brandUrl(SEED.brandSlug, "/#enroll-student"));
-    const dialog = await expectLeadDialogOpen(page);
-    const submit = dialog.getByRole("button", { name: /book free demo|submit|apply|enroll/i });
+    const form = await expectLeadFormReady(page, "#enroll-student");
+    const submit = form.getByRole("button", {
+      name: /book free demo|request a free trial|submit|apply|enroll/i,
+    });
     await expect(submit).toBeDisabled();
-    await expect(leadDialog(page).getByLabel("Parent name")).toBeVisible();
+    await expect(form.getByLabel("Parent name")).toBeVisible();
   });
 });

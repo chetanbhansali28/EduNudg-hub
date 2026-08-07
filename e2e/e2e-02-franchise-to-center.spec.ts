@@ -41,8 +41,8 @@ test.describe("E2E-02 — Franchise application → center live", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByLabel("Proposed franchise name")).toHaveCount(0);
     await page.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/#register"));
-    const dialog = await expectLeadDialogOpen(page);
-    await expect(dialog.getByLabel("Parent name")).toBeVisible({ timeout: 15_000 });
+    const form = await expectLeadDialogOpen(page, "#register");
+    await expect(form.getByLabel("Parent name")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByLabel("Proposed franchise name")).toHaveCount(0);
   });
 });

@@ -75,7 +75,7 @@ Agents SHALL NOT run `git push` or otherwise publish to GitHub unless the user e
 
 ### Requirement: Push runs local CI with auto-fix before publish
 
-When the user explicitly asks to push to GitHub, the agent SHALL run `pnpm ci:local` (mirror of GitHub Actions CI), automatically fix failures, re-run until green, and only then push. The agent SHALL NOT push while local CI is failing. The repository git `pre-push` hook SHALL also run `pnpm ci:local` (or accept a recent green stamp for the same HEAD) before allowing the push.
+When the user explicitly asks to push to GitHub, the agent SHALL run `pnpm ci:local` (mirror of GitHub Actions CI) as a separate command before any `git push`, automatically fix failures, re-run until green, and only then push. The agent SHALL NOT push while local CI is failing or unrun. The agent SHALL NOT chain `git commit && git push` without a successful `pnpm ci:local` after the commit. Cursor `beforeShellExecution` SHALL deny `git push` without a recent green stamp for HEAD. The repository git `pre-push` hook SHALL also run `pnpm ci:local` (or accept a recent green stamp for the same HEAD) before allowing the push.
 
 #### Scenario: Push request with failing typecheck
 
@@ -93,6 +93,16 @@ When the user explicitly asks to push to GitHub, the agent SHALL run `pnpm ci:lo
 - **WHEN** the pre-push hook runs
 - **THEN** `pnpm ci:local` executes
 - **AND** the push is aborted if local CI fails
+
+#### Scenario: Cursor shell hook denies git push without green stamp
+
+- **GIVEN** Cursor agent tooling runs a `git push` shell command
+- **AND** there is no recent green `ci:local` stamp for the current HEAD
+- **WHEN** `.cursor/hooks.json` `beforeShellExecution` matches
+- **THEN** `.cursor/hooks/gate-git-push.sh` returns deny
+- **AND** the agent_message instructs running `pnpm ci:local` via `edunudg-pre-push-ci` before retrying push
+- **AND** a push containing `SKIP_CI_LOCAL=1` requires explicit user confirmation
+- **AND** the agent stop hook fails the turn if the user asked to push but local CI was skipped
 
 #### Scenario: Hard blocker
 

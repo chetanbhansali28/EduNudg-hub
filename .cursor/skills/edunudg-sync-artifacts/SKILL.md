@@ -36,7 +36,7 @@ Respect `agent-boundaries` and `git-publish-gate`. Do not implement outside your
 
 Syncing artifacts does **not** authorize `git commit` or `git push`. Only the user decides when to commit/push to GitHub.
 
-When the user asks to **push**, hand off to **`edunudg-pre-push-ci`** (`pnpm ci:local` → auto-fix → green → push; git `pre-push` hook also enforces).
+When the user asks to **push**, hand off to **`edunudg-pre-push-ci`** (mandatory): run `pnpm ci:local` as its own command → auto-fix → green → then push. Cursor `gate-git-push` denies without stamp; git `pre-push` is backup. Never chain commit&&push without CI in between.
 
 ## Done when
 

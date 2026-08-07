@@ -23,7 +23,9 @@
 - [ ] OpenSpec / docs updated for new RPC or table behavior
 - [ ] `edunudg-sync-artifacts` run before finish
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
+- [ ] If pushing: mandatory `edunudg-pre-push-ci` (`pnpm ci:local` green before `git push`)
 
 ## Skills
 
 - `edunudg-add-migration`, `edunudg-rls-policy`, `edunudg-sync-artifacts`
+- Push requests: `edunudg-pre-push-ci` (never skip)

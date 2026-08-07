@@ -1,11 +1,11 @@
 ---
-description: Never push to GitHub unless the user explicitly asks; then run local CI and auto-fix first. Git pre-push also enforces ci:local.
+description: Never push to GitHub unless the user explicitly asks; ALWAYS run pnpm ci:local first. Cursor + git hooks enforce.
 alwaysApply: true
 ---
 
 # Git Publish Gate
 
-Agents MUST NOT publish to GitHub on their own.
+Agents MUST NOT publish to GitHub on their own. When they do push (user-requested), local CI is mandatory every time.
 
 ## Required
 
@@ -15,12 +15,20 @@ Agents MUST NOT publish to GitHub on their own.
 
 ## When the user asks to push
 
-1. Load skill **`edunudg-pre-push-ci`**
-2. Run **`pnpm ci:local`** (full GitHub CI mirror) — writes a stamp so the git hook can skip a duplicate run
-3. **Automatically fix** every failure and re-run until green (or report a hard blocker — no push)
-4. Only then `git push` (and only the refs the user asked for)
+1. Load skill **`edunudg-pre-push-ci`** (required — not optional)
+2. Commit first **only if** the user also asked to commit
+3. Run **`pnpm ci:local`** as a **separate** shell command (full GitHub CI mirror) until exit 0 — auto-fix failures; do not ask permission to fix
+4. Only then `git push` (only the refs the user asked for)
 
-The repo **`.githooks/pre-push`** also runs `pnpm ci:local` on every push (human or agent). Bypass only with user-approved `SKIP_CI_LOCAL=1`.
+### Enforcement layers (all active)
+
+| Layer | Behavior |
+|-------|----------|
+| This rule + `edunudg-pre-push-ci` | Agent must run CI before attempting push |
+| `.cursor/hooks/gate-git-push.sh` | **Denies** `git push` without a recent green `.git/edunudg-ci-local.ok` stamp for HEAD |
+| `.githooks/pre-push` | Runs `pnpm ci:local` (or accepts recent stamp) before allowing the push |
+
+Bypass only with user-approved `SKIP_CI_LOCAL=1` (Cursor hook asks for confirmation).
 
 Skipping RLS/e2e requires the user to allow that skip in the same message.
 
@@ -30,7 +38,9 @@ Leave changes uncommitted/unpushed. Tell the user what is ready and wait for “
 
 ## Forbidden
 
-- Pushing to “unblock CI” without a local green `ci:local`
-- Pushing knowing local CI is red
-- Treating a prior push as standing permission for the next one
+- Pushing without a green `pnpm ci:local` for the **current HEAD**
+- Chaining `git commit && git push` without `pnpm ci:local` in between
+- Pushing to “unblock CI” while local CI is red or unrun
+- Treating a prior push or prior CI run as standing permission for the next one
 - Asking whether to run local CI before push — just run it
+- Inventing `SKIP_CI_LOCAL=1` without explicit user emergency approval

@@ -127,10 +127,17 @@ supabase db push   # applies 042_program_marketing_fields.sql
 
 ## Lead modal behavior
 
-- **Enroll** (`ctaHref: "enroll"`): student demo form → `submitBrandStudentApplication`
-- **Franchise** (`secondaryCtaHref: "apply"`): franchise inquiry → `submitFranchiseInquiry`
-- Modal routing: `resolveLeadModalKind()` in `MarketingLeadModals.tsx`
-- Provider wraps Abacus layout only: `LeadModalProvider` in `BrandPublicLayout`
+Shared by Abacus Classic and Spark Academy public layouts (`BrandPublicLayout` / `CenterPublicLayout`).
+
+| Deep link / CTA href | Modal | Brand host | Center host (`centerSlug`) |
+|----------------------|-------|------------|----------------------------|
+| `enroll`, `#enroll`, `#enroll-student`, `#register` | Enroll | `submitBrandStudentApplication` | `submitCenterStudentRegistration` |
+| `apply`, `#apply` | Franchise | `submitFranchiseInquiry` | Not available |
+
+- Mapping: `resolveLeadModalKind.ts` (re-exported from `MarketingLeadModals.tsx`)
+- Hash opener: `LeadModalHashOpener` — opens modal when URL hash matches
+- Provider wraps Abacus/Spark layouts: `LeadModalProvider` + `MarketingLeadModals`
+- Playwright helpers: `e2e/helpers/leadModals.ts`
 
 ## Automated tests
 

@@ -19,14 +19,14 @@ flowchart LR
 
 ## Steps
 
-1. Visitor opens `http://{brand}.localhost:9000/` → **Franchise application** (`#apply`).
+1. Visitor opens `http://{brand}.localhost:9000/` → **Franchise application** (`#apply`; Abacus/Spark open the apply modal via `LeadModalHashOpener`).
 2. Submit → `submit_franchise_inquiry_v2` → `franchise_inquiries`.
 3. Brand owner opens **Franchise Applications** (`/app/franchise-applications`).
 4. **Approve** → single RPC transaction:
    - `franchise_centers` row (slug from proposed name)
    - `domain_mappings`: `{center_slug}.{brand_slug}.localhost`
    - Center operator membership + auth invite
-5. Franchise operator logs in on **center host** `/app` — configures fees, kits, leads (no public franchise branding).
+5. Franchise operator logs in on **center host** `/app` — configures fees, merchandise (when flagged), leads (no public franchise branding).
 
 ## Success criteria
 

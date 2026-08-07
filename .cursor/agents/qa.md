@@ -21,10 +21,10 @@
 - [ ] `pnpm test && pnpm test:rls && pnpm test:e2e` green locally when journeys/CI change
 - [ ] `edunudg-sync-artifacts` run (testing docs / skills / agents if process changed)
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
-- [ ] If pushing: `pnpm ci:local` green via `edunudg-pre-push-ci` (auto-fix loop); `.githooks/pre-push` also enforces
+- [ ] If pushing: **always** `pnpm ci:local` green via `edunudg-pre-push-ci` before any `git push` (auto-fix loop). Cursor `gate-git-push` denies without stamp; `.githooks/pre-push` is backup
 - [ ] Sync specs/docs/tests/skills without asking the user (`artifact-sync`)
 
 ## Skills
 
 - `edunudg-write-tests` (required), `edunudg-sync-artifacts` (required before finish — automatic, do not ask)
-- When user asks to **push**: `edunudg-pre-push-ci` — run `pnpm ci:local`, auto-fix, re-run, then push
+- When user asks to **push**: **`edunudg-pre-push-ci` (mandatory)** — `pnpm ci:local` as its own command → auto-fix → green → then push. Never chain commit&&push without CI in between.

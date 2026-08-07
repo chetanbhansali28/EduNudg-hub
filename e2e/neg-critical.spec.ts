@@ -1,28 +1,32 @@
 import { test, expect } from "@playwright/test";
 import { hasE2EBackend } from "./helpers/env";
 import { brandUrl, centerUrl, platformUrl, SEED } from "./helpers/portal";
-import { expectLeadDialogOpen, leadDialog } from "./helpers/leadModals";
+import { expectLeadFormReady } from "./helpers/leadModals";
 
 test.describe("NEG — negative & edge cases", () => {
   test("NEG-01 invalid pincode shows validation; no success", async ({ page }) => {
     await page.goto(brandUrl(SEED.brandSlug, "/#enroll-student"));
-    const dialog = await expectLeadDialogOpen(page);
-    await dialog.getByLabel("Parent name").fill("Neg Parent");
-    await dialog.getByLabel("WhatsApp number").fill("9890123456");
-    await dialog.getByLabel("Email").fill("neg-pincode@example.com");
-    await dialog.getByLabel("Child name").fill("Neg Child");
-    await dialog.getByLabel("City", { exact: true }).fill("Bengaluru");
-    await dialog.getByLabel("Pincode", { exact: true }).fill("12");
-    await expect(dialog.getByRole("button", { name: /book free demo|submit/i })).toBeDisabled();
+    const form = await expectLeadFormReady(page, "#enroll-student");
+    await form.getByLabel("Parent name").fill("Neg Parent");
+    await form.getByLabel("WhatsApp number").fill("9890123456");
+    await form.getByLabel("Email").fill("neg-pincode@example.com");
+    await form.getByLabel("Child name").fill("Neg Child");
+    await form.getByLabel("City", { exact: true }).fill("Bengaluru");
+    await form.getByLabel("Pincode", { exact: true }).fill("12");
+    await expect(
+      form.getByRole("button", { name: /book free demo|request a free trial|submit/i })
+    ).toBeDisabled();
     await expect(page.getByText(/application received/i)).toHaveCount(0);
   });
 
   test("NEG-02 missing required fields → inline errors", async ({ page }) => {
     await page.goto(brandUrl(SEED.brandSlug, "/#enroll-student"));
-    const dialog = await expectLeadDialogOpen(page);
-    const submit = dialog.getByRole("button", { name: /book free demo|submit|apply|enroll/i });
+    const form = await expectLeadFormReady(page, "#enroll-student");
+    const submit = form.getByRole("button", {
+      name: /book free demo|request a free trial|submit|apply|enroll/i,
+    });
     await expect(submit).toBeDisabled();
-    await expect(leadDialog(page).getByLabel("Parent name")).toBeVisible();
+    await expect(form.getByLabel("Parent name")).toBeVisible();
   });
 
   test("NEG-08 invalid auth handoff token shows clear error", async ({ page }) => {

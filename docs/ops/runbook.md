@@ -138,7 +138,18 @@ pnpm ci:local   # full GitHub CI mirror — required before push (see edunudg-pr
 pnpm hooks:install  # installs .githooks/pre-push (also runs on pnpm install via prepare)
 ```
 
-`git push` is blocked until `pnpm ci:local` is green (or a recent stamp exists for the same HEAD). Emergency bypass: `SKIP_CI_LOCAL=1 git push`.
+`git push` is blocked until `pnpm ci:local` is green (or a recent stamp exists for the same HEAD). Emergency bypass: `SKIP_CI_LOCAL=1 git push` (user-approved only).
+
+**Enforcement layers:**
+
+| File | Role |
+|------|------|
+| `.cursor/skills/edunudg-pre-push-ci` | Agent must run `pnpm ci:local` → auto-fix → green **before** push |
+| `.cursor/hooks.json` | `beforeShellExecution` on `git push` → `gate-git-push.sh`; `stop` finish-gate also checks push+CI |
+| `.cursor/hooks/gate-git-push.sh` | **Denies** `git push` without a recent green stamp for HEAD; **asks** for `SKIP_CI_LOCAL=1` |
+| `.githooks/pre-push` | Backup: runs `pnpm ci:local` (or accepts stamp) before allowing the push |
+
+Skill: `edunudg-pre-push-ci`. OpenSpec: [`agent-artifact-sync`](../../openspec/specs/agent-artifact-sync/spec.md).
 
 RLS SQL tests (optional, against cloud DB):
 
@@ -153,8 +164,14 @@ pnpm test:rls
 - Anonymous users can **read**; platform admins can **read/write** via RLS
 - Edit platform homepage at **Platform → Homepage** (`/admin/homepage`) after signing in as `admin@edunudg.com`
 - **Brand marketing themes** (Novu / Abacus Classic / Spark Academy) are assigned on **Platform → Brands → Edit** → **Brand settings** → **Website theme**
+- Saving theme/name/status alone does **not** call `brand-owner-credentials` — only when login email/password fields change (see [edge-functions](./edge-functions.md))
+- React Query: keep `MARKETING_HOMEPAGE_CONFIG_QUERY_KEY` vs `MARKETING_PUBLIC_BUNDLE_QUERY_KEY` separate ([marketing-homepage OpenSpec](../../openspec/specs/marketing-homepage/spec.md))
 - Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
 - Brand owners edit page **content** at `{brand}.localhost:9000/app/homepage`
+
+## Franchise center CSV import
+
+Bulk-onboard centers from brand detail — see [franchise-center-csv-import](./franchise-center-csv-import.md).
 
 ## Merchandise product photos
 
