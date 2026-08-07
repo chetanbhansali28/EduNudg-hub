@@ -76,7 +76,20 @@ describe("BatchesPage", () => {
     expect(await screen.findByText("Morning batch")).toBeDefined();
     expect(screen.getByText("5/20 Students")).toBeDefined();
     expect(document.querySelector(".ed-catalog-workspace")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "+ Add Batch" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Add Batch" })).toBeDefined();
+  });
+
+  it("opens_add_batch_form_from_header_button", async () => {
+    renderPage();
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "+ Add Batch" })).toBeDefined());
+    fireEvent.click(screen.getByRole("button", { name: "+ Add Batch" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Add Batch" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "Create Batch" })).toBeDefined();
+    });
   });
 
   it("regression_edit_opens_batch_form_with_existing_values", async () => {

@@ -336,13 +336,25 @@ export function BatchesPage() {
         title="Active Batches"
         subtitle="Manage schedules, enrollment status, and course progression."
         actions={
-          <Button
-            variant="secondary"
-            onClick={() => exportBatchesCsv(visibleBatches, counts)}
-            disabled={visibleBatches.length === 0}
-          >
-            Export List
-          </Button>
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => exportBatchesCsv(visibleBatches, counts)}
+              disabled={visibleBatches.length === 0}
+            >
+              Export List
+            </Button>
+            <Button
+              onClick={() => {
+                setEditingId(null);
+                setForm(emptyForm);
+                openForm();
+              }}
+              disabled={noPrograms}
+            >
+              + Add Batch
+            </Button>
+          </>
         }
       />
       <MutationError message={error} />

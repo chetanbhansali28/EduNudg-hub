@@ -1584,10 +1584,10 @@ body.sa-nav-drawer-open {
   }
 
   .sa-hero__stats-bar {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.25rem 0.75rem;
-    padding: 1.5rem 1rem;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 0.25rem;
+    padding: 1.25rem 0.75rem;
   }
 
   .sa-hero__stats-dot {
@@ -1595,8 +1595,40 @@ body.sa-nav-drawer-open {
   }
 
   .sa-hero__stat {
-    flex: 1 1 calc(50% - 1rem);
-    min-width: 7rem;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 0.2rem;
+  }
+
+  .sa-hero__stat strong {
+    font-size: clamp(1.05rem, 4.2vw, 1.35rem);
+    margin-bottom: 0.25rem;
+  }
+
+  .sa-hero__stat span {
+    font-size: clamp(0.5625rem, 2.4vw, 0.6875rem);
+    line-height: 1.25;
+  }
+
+  .sa-mentors__header {
+    padding: 0 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .sa-mentors__track {
+    gap: 1rem;
+    /* Left gutter only; ::after provides matching trailing scroll space. */
+    padding: 0 0 0.75rem 1.25rem;
+    scroll-padding-inline: 1.25rem;
+  }
+
+  .sa-mentors__track::after {
+    content: "";
+    flex: 0 0 1.25rem;
+  }
+
+  .sa-mentor-card {
+    flex: 0 0 min(11.5rem, 68vw);
   }
 
   .sa-courses__grid {
@@ -1639,6 +1671,34 @@ body.sa-nav-drawer-open {
     display: none;
   }
 
+  .sa-hero__stats {
+    padding: 0 0.875rem 2rem;
+  }
+
+  .sa-hero__stats-bar {
+    flex-wrap: nowrap;
+    padding: 1rem 0.4rem;
+  }
+
+  .sa-hero__stat {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 0.15rem;
+  }
+
+  .sa-mentors__header {
+    padding: 0 1.25rem;
+  }
+
+  .sa-mentors__track {
+    padding: 0 0 0.75rem 1.25rem;
+    scroll-padding-inline: 1.25rem;
+  }
+
+  .sa-mentors__track::after {
+    flex-basis: 1.25rem;
+  }
+
   .sa-site-footer__bottom-row {
     flex-direction: column;
     align-items: center;
@@ -1647,10 +1707,6 @@ body.sa-nav-drawer-open {
 
   .sa-testimonials__grid {
     grid-template-columns: 1fr;
-  }
-
-  .sa-hero__stat {
-    flex: 1 1 100%;
   }
 }
 
