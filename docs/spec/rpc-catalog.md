@@ -38,6 +38,7 @@ See [manual-leads.md](./manual-leads.md).
 |----------|-------------|
 | `approve_platform_brand_signup(p_signup_id)` | Brand + slug + domain + `brand_subscriptions` + **membership brand_owner** + auth invite |
 | `reject_platform_brand_signup(p_signup_id, p_reason)` | |
+| `purge_ephemeral_e2e_brands()` | Hard-delete `E2E Brand …` / `e2e-brand-*` tenants + `brand_subscriptions` + matching signups/audit (platform admin or service_role; never seed plans/brands) |
 
 ## Brand staff
 
