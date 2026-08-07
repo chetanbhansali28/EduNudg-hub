@@ -55,9 +55,53 @@ pnpm dlx supabase functions deploy platform-portal-handoff
 
 Add production URLs when you deploy.
 
-Google / Facebook: configure under **Authentication → Providers** in the dashboard (not required for email/password).
+Google / Facebook: configure under **Authentication → Providers** in the dashboard (see [OAuth providers](#5-oauth-providers-google--facebook) below).
 
-## 5. Run the app
+## 5. OAuth providers (Google & Facebook)
+
+Enable each provider in **Supabase Dashboard → Authentication → Providers**.
+
+### Google
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → **APIs & Services → Credentials** → **Create OAuth client ID** (Web application).
+2. **Authorized redirect URI** (required):
+   ```
+   https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
+   ```
+   Example: `https://vwfhcfxnbtpfcvbuebll.supabase.co/auth/v1/callback`
+3. Supabase → **Authentication → Providers → Google** → enable, paste **Client ID** and **Client Secret**.
+4. **Authentication → URL configuration**:
+   | Setting | Local dev value |
+   |---------|-----------------|
+   | Site URL | `http://localhost:9000` |
+   | Redirect URLs | `http://localhost:9000/**` |
+
+If Google is disabled in Supabase, `/login` → **Log in with Google** returns:
+`Unsupported provider: provider is not enabled`.
+
+### Facebook
+
+1. [Meta for Developers](https://developers.facebook.com/) → create app → add **Facebook Login** product.
+2. **Valid OAuth Redirect URIs**:
+   ```
+   https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback
+   ```
+3. Supabase → **Authentication → Providers → Facebook** → enable, paste **App ID** and **App Secret**.
+4. Use the same **Site URL** and **Redirect URLs** as Google (section above).
+
+### Platform toggles (`/admin/settings`)
+
+OAuth buttons on `/login` respect platform integration flags in `platform_settings.integrations`:
+
+| Toggle | Login control |
+|--------|----------------|
+| Google SSO | Log in with Google |
+| Facebook SSO | Log in with Facebook |
+| Passkeys | Log in with passkey (secondary; requires deployed `passkey-verify` Edge Function) |
+
+Email/password remains the primary method when **Email & Password** is enabled.
+
+## 6. Run the app
 
 ```bash
 pnpm install

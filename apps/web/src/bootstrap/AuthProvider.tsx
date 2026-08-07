@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
+import { signInWithPasskey as passkeySignIn } from "@/services/auth/passkeyService";
 
 interface AuthState {
   session: Session | null;
@@ -9,6 +10,7 @@ interface AuthState {
   signInWithOAuth: (provider: "google" | "facebook") => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithOtpPhone: (phone: string) => Promise<{ error: Error | null }>;
+  signInWithPasskey: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -68,6 +70,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error as Error | null };
   };
 
+  const signInWithPasskey = async () => passkeySignIn();
+
   const signOut = async () => {
     await getSupabase().auth.signOut();
   };
@@ -81,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signInWithOAuth,
         signInWithEmail,
         signInWithOtpPhone,
+        signInWithPasskey,
         signOut,
       }}
     >

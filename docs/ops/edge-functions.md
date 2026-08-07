@@ -5,7 +5,7 @@ EduNudg functions live in [`supabase/functions/`](../../supabase/functions/):
 | Function | Purpose |
 |----------|---------|
 | `whatsapp-otp` | Send/verify WhatsApp OTP (stub — wire Twilio/Gupshup later) |
-| `passkey-verify` | WebAuthn verify (stub — wire `@simplewebauthn/server` later) |
+| `passkey-verify` | WebAuthn login (`login-options` / `login-verify`; wire `@simplewebauthn/server` for production sessions) |
 | `brand-owner-credentials` | Platform admin: create/update brand owner Auth user + membership |
 
 **SPA rule:** `BrandEditForm` calls this function only when login email or password fields change (`credentialsChanged`). Saving website theme, name, or status alone must not invoke credentials — otherwise edge 400s block unrelated brand edits.

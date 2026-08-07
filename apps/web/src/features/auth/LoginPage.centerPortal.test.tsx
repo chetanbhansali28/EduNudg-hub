@@ -73,6 +73,7 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
       return result;
     },
     signInWithOtpPhone: vi.fn().mockResolvedValue({ error: null }),
+    signInWithPasskey: vi.fn().mockResolvedValue({ error: null }),
   }),
 }));
 

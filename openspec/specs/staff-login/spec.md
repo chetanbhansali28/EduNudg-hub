@@ -6,7 +6,7 @@ Platform, brand, and center staff sign in at `/login` with email/password and op
 
 ### Requirement: Login form exposes a unique primary submit control
 
-The staff login form SHALL render a primary email/password submit button whose accessible name is exactly `Log in` (or `Signing in…` while the request is in flight). OAuth actions SHALL use distinct accessible names that include the provider (`Log in with Google`, `Log in with Facebook`, `Log in with WhatsApp`).
+The staff login form SHALL render a primary email/password submit button whose accessible name is exactly `Log in` (or `Signing in…` while the request is in flight). OAuth actions SHALL use distinct accessible names that include the provider (`Log in with Google`, `Log in with Facebook`, `Log in with WhatsApp`). When passkeys are enabled, a secondary **Log in with passkey** control SHALL appear below social providers.
 
 #### Scenario: Primary submit is distinguishable from OAuth
 

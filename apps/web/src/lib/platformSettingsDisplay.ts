@@ -3,6 +3,7 @@ import type { PlatformIntegrationKey } from "./platformIntegrations";
 export const PLATFORM_AUTH_SETTING_KEYS = [
   "auth_email",
   "auth_google",
+  "auth_facebook",
   "auth_whatsapp_otp",
   "passkeys",
 ] as const satisfies readonly PlatformIntegrationKey[];
@@ -22,6 +23,11 @@ export const PLATFORM_AUTH_SETTING_LABELS: Record<
     title: "Google SSO",
     description: "Enable one-tap login via Google Workspace.",
     icon: "G",
+  },
+  auth_facebook: {
+    title: "Facebook SSO",
+    description: "Enable sign-in with Facebook accounts.",
+    icon: "f",
   },
   auth_whatsapp_otp: {
     title: "WhatsApp OTP",

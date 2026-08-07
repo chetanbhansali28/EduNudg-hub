@@ -35,6 +35,7 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
     signInWithOAuth: vi.fn(),
     signInWithEmail: vi.fn(),
     signInWithOtpPhone: vi.fn(),
+    signInWithPasskey: vi.fn(),
   }),
 }));
 

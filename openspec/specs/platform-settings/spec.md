@@ -9,6 +9,8 @@ WHEN they change authentication, payment, or public website toggles and click **
 THEN the values persist in `platform_settings` key `integrations`
 AND the UI reflects saved state after reload.
 
+The Authentication card SHALL include toggles for Email & Password, Google SSO, Facebook SSO, WhatsApp OTP, and Passkeys.
+
 ## Maintenance export
 
 GIVEN a platform admin on `/admin/settings`

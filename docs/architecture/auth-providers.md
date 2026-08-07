@@ -15,7 +15,8 @@ Supabase `signInWithOAuth({ provider: 'google' | 'facebook' })`. Link row in `au
 
 1. Register: `@simplewebauthn/browser` → Edge Function `passkey-register`
 2. Store in `passkey_credentials`
-3. Login: challenge/verify via `passkey-verify`
+3. Login: `/login` **Log in with passkey** (secondary) → `passkeyService` → Edge Function `passkey-verify` (`login-options` / `login-verify`)
+4. Until `passkey-verify` is wired with `@simplewebauthn/server`, the client shows a clear configuration error.
 
 ## Email
 

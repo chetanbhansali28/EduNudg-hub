@@ -51,6 +51,9 @@ describe("SettingsPage", () => {
     renderSettings();
     expect(await screen.findByText("Authentication")).toBeDefined();
     expect(screen.getByText("Email & Password")).toBeDefined();
+    expect(screen.getByText("Google SSO")).toBeDefined();
+    expect(screen.getByText("Facebook SSO")).toBeDefined();
+    expect(screen.getByText("Passkeys")).toBeDefined();
     expect(screen.getByText("Public Website")).toBeDefined();
     expect(screen.getByText("Brand Signup Forms")).toBeDefined();
     expect(screen.queryByLabelText("Value (JSON)")).toBeNull();

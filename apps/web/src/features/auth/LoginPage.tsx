@@ -18,7 +18,7 @@ import { postLoginPath } from "./postLoginPath";
 const REMEMBER_KEY = "edunudg_remember_email";
 
 export function LoginPage() {
-  const { session, signInWithOAuth, signInWithEmail, signInWithOtpPhone } = useAuth();
+  const { session, signInWithOAuth, signInWithEmail, signInWithOtpPhone, signInWithPasskey } = useAuth();
   const tenant = useTenant();
   const { tenant: portalTenant, isResolving: portalTenantResolving } = useResolvedPortalTenant();
   const navigate = useNavigate();
@@ -137,7 +137,9 @@ export function LoginPage() {
   const showGoogleAuth = integrations.auth_google;
   const showFacebookAuth = integrations.auth_facebook;
   const showWhatsappAuth = integrations.auth_whatsapp_otp;
-  const showAlternateAuth = showGoogleAuth || showFacebookAuth || showWhatsappAuth;
+  const showPasskeyAuth = integrations.passkeys;
+  const showSocialAuth = showGoogleAuth || showFacebookAuth || showWhatsappAuth;
+  const showAlternateAuth = showSocialAuth || showPasskeyAuth;
 
   return (
     <ThemeProvider>
@@ -221,45 +223,74 @@ export function LoginPage() {
         {showEmailAuth && showAlternateAuth ? <div className="ed-login-form__divider">or</div> : null}
 
         {showAlternateAuth ? (
-          <div className="ed-login-form__oauth">
-            {showGoogleAuth ? (
-              <Button
-                variant="oauth-google"
-                block
-                onClick={() => signInWithOAuth("google").catch((e) => setError(e.message))}
-              >
-                <IconGoogle aria-hidden />
-                Log in with Google
-              </Button>
-            ) : null}
-            {showFacebookAuth ? (
-              <Button variant="ghost" block onClick={() => signInWithOAuth("facebook").catch((e) => setError(e.message))}>
-                Log in with Facebook
-              </Button>
-            ) : null}
-            {showWhatsappAuth ? (
-              <>
-                {showWhatsappPhone ? (
-                  <Input label="Mobile number" value={phone} onChange={setPhone} placeholder="9890200000" />
+          <>
+            {showSocialAuth ? (
+              <div className="ed-login-form__oauth">
+                {showGoogleAuth ? (
+                  <Button
+                    variant="oauth-google"
+                    block
+                    onClick={() => signInWithOAuth("google").catch((e) => setError(e.message))}
+                  >
+                    <IconGoogle aria-hidden />
+                    Log in with Google
+                  </Button>
                 ) : null}
-                <Button
-                  variant="oauth-whatsapp"
-                  block
-                  onClick={async () => {
-                    if (!showWhatsappPhone) {
-                      setShowWhatsappPhone(true);
-                      return;
-                    }
-                    const { error: err } = await signInWithOtpPhone(phone);
-                    setError(err?.message ?? "OTP sent — check WhatsApp");
-                  }}
-                >
-                  <IconWhatsApp aria-hidden />
-                  Log in with WhatsApp
-                </Button>
-              </>
+                {showFacebookAuth ? (
+                  <Button
+                    variant="ghost"
+                    block
+                    onClick={() => signInWithOAuth("facebook").catch((e) => setError(e.message))}
+                  >
+                    Log in with Facebook
+                  </Button>
+                ) : null}
+                {showWhatsappAuth ? (
+                  <>
+                    {showWhatsappPhone ? (
+                      <Input label="Mobile number" value={phone} onChange={setPhone} placeholder="9890200000" />
+                    ) : null}
+                    <Button
+                      variant="oauth-whatsapp"
+                      block
+                      onClick={async () => {
+                        if (!showWhatsappPhone) {
+                          setShowWhatsappPhone(true);
+                          return;
+                        }
+                        const { error: err } = await signInWithOtpPhone(phone);
+                        setError(err?.message ?? "OTP sent — check WhatsApp");
+                      }}
+                    >
+                      <IconWhatsApp aria-hidden />
+                      Log in with WhatsApp
+                    </Button>
+                  </>
+                ) : null}
+              </div>
             ) : null}
-          </div>
+            {showPasskeyAuth ? (
+              <Button
+                variant="secondary"
+                block
+                disabled={submitting}
+                onClick={async () => {
+                  setSubmitting(true);
+                  setError(null);
+                  try {
+                    const { error: err } = await signInWithPasskey();
+                    if (err) setError(err.message);
+                  } catch (e) {
+                    setError(e instanceof Error ? e.message : "Passkey sign-in failed.");
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+              >
+                Log in with passkey
+              </Button>
+            ) : null}
+          </>
         ) : null}
 
         {tenant.portalType === "platform" && !inMarketingChrome ? (

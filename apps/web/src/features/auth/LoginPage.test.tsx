@@ -8,33 +8,52 @@ import { LoginPage } from "./LoginPage";
 import { RequireMembership } from "./RequireMembership";
 import { exactAccessibleName } from "@/test/exactAccessibleName";
 
-const { signInWithEmail, authState, membershipState, tenantState, portalBrandingState, rerenderRef } =
-  vi.hoisted(() => ({
-    signInWithEmail: vi.fn(),
-    authState: {
-      session: null as { user: { id: string } } | null,
-      user: null as { id: string } | null,
-    },
-    membershipState: {
-      data: [] as Membership[],
-      isLoading: false,
-    },
-    tenantState: {
-      portalType: "platform" as "platform" | "learn" | "brand" | "center" | "parents",
-      hostname: "localhost",
-      brandId: null as string | null,
-      centerId: null as string | null,
-      brandSlug: null as string | null,
-      centerSlug: null as string | null,
-    },
-    portalBrandingState: {
-      data: undefined,
-      isLoading: false,
-      isFetched: true,
-      isFetching: false,
-    },
-    rerenderRef: { current: () => {} },
-  }));
+const {
+  signInWithEmail,
+  signInWithPasskey,
+  authState,
+  membershipState,
+  tenantState,
+  portalBrandingState,
+  integrationState,
+  rerenderRef,
+} = vi.hoisted(() => ({
+  signInWithEmail: vi.fn(),
+  signInWithPasskey: vi.fn().mockResolvedValue({ error: null }),
+  authState: {
+    session: null as { user: { id: string } } | null,
+    user: null as { id: string } | null,
+  },
+  membershipState: {
+    data: [] as Membership[],
+    isLoading: false,
+  },
+  tenantState: {
+    portalType: "platform" as "platform" | "learn" | "brand" | "center" | "parents",
+    hostname: "localhost",
+    brandId: null as string | null,
+    centerId: null as string | null,
+    brandSlug: null as string | null,
+    centerSlug: null as string | null,
+  },
+  portalBrandingState: {
+    data: undefined,
+    isLoading: false,
+    isFetched: true,
+    isFetching: false,
+  },
+  integrationState: {
+    auth_email: true,
+    auth_google: true,
+    auth_facebook: true,
+    auth_whatsapp_otp: true,
+    passkeys: false,
+    payment_gateway: false,
+    platform_brand_signup: true,
+    public_pricing: true,
+  },
+  rerenderRef: { current: () => {} },
+}));
 
 vi.mock("@/bootstrap/AuthProvider", () => ({
   useAuth: () => ({
@@ -60,6 +79,7 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
       return result;
     },
     signInWithOtpPhone: vi.fn().mockResolvedValue({ error: null }),
+    signInWithPasskey,
   }),
 }));
 
@@ -91,16 +111,7 @@ vi.mock("@/hooks/useResolvedPortalTenant", async (importOriginal) => {
 });
 
 vi.mock("@/hooks/usePlatformIntegration", () => ({
-  usePlatformIntegrations: () => ({
-    auth_email: true,
-    auth_google: true,
-    auth_facebook: true,
-    auth_whatsapp_otp: true,
-    passkeys: false,
-    payment_gateway: false,
-    platform_brand_signup: true,
-    public_pricing: true,
-  }),
+  usePlatformIntegrations: () => integrationState,
 }));
 
 vi.mock("@/lib/homepageApi", async (importOriginal) => {
@@ -150,6 +161,7 @@ function renderLogin(initialPath = "/login") {
 describe("LoginPage", () => {
   beforeEach(() => {
     signInWithEmail.mockReset();
+    signInWithPasskey.mockClear();
     authState.session = null;
     authState.user = null;
     membershipState.data = [];
@@ -157,6 +169,11 @@ describe("LoginPage", () => {
     portalBrandingState.isFetched = true;
     portalBrandingState.isFetching = false;
     portalBrandingState.isLoading = false;
+    integrationState.auth_email = true;
+    integrationState.auth_google = true;
+    integrationState.auth_facebook = true;
+    integrationState.auth_whatsapp_otp = true;
+    integrationState.passkeys = false;
   });
 
   it("renders email login form", () => {
@@ -297,6 +314,15 @@ describe("LoginPage", () => {
     await expectRedirectTo("Student dashboard");
     tenantState.portalType = "platform";
     tenantState.brandSlug = null;
+  });
+
+  it("regression_shows_passkey_button_when_passkeys_enabled", () => {
+    integrationState.auth_google = false;
+    integrationState.auth_facebook = false;
+    integrationState.auth_whatsapp_otp = false;
+    integrationState.passkeys = true;
+    renderLogin();
+    expect(screen.getByRole("button", { name: exactAccessibleName("Log in with passkey") })).toBeDefined();
   });
 
   it("regression_platform_portal_shows_oauth_buttons_directly", () => {
