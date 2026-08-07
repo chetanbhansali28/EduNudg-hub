@@ -12,6 +12,12 @@ import type { HomepageConfig, HomepageShowcaseCard, HomepageTestimonial } from "
 
 const HOMEPAGE_KEY = "marketing_homepage";
 
+/** Raw HomepageConfig cache (favicon, shell branding, editors). */
+export const MARKETING_HOMEPAGE_CONFIG_QUERY_KEY = ["marketing-homepage"] as const;
+
+/** Public chrome bundle `{ config, legalPages }` — must not share config-only cache. */
+export const MARKETING_PUBLIC_BUNDLE_QUERY_KEY = ["marketing-homepage", "public-bundle"] as const;
+
 export type HomepageEditorBundle = {
   config: HomepageConfig;
   updatedAt: string | null;

@@ -7,9 +7,13 @@ vi.mock("./enterprise/EnterprisePlatformContent", () => ({
   EnterprisePlatformContent: () => <div data-testid="enterprise-content" />,
 }));
 
-vi.mock("@/lib/homepageApi", () => ({
-  fetchHomepageConfig: vi.fn().mockResolvedValue(DEFAULT_HOMEPAGE_CONFIG),
-}));
+vi.mock("@/lib/homepageApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/homepageApi")>();
+  return {
+    ...actual,
+    fetchHomepageConfig: vi.fn().mockResolvedValue(DEFAULT_HOMEPAGE_CONFIG),
+  };
+});
 
 describe("MarketingHomePage", () => {
   it("regression_platform_uses_enterprise_layout", async () => {

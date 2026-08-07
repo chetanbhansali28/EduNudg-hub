@@ -83,21 +83,33 @@ andheri-west,Andheri West,Mumbai,owner@example.com`;
 });
 
 describe("downloadFranchiseCenterImportTemplate", () => {
-  it("creates a downloadable blob URL", async () => {
+  it("regression_creates_downloadable_csv_via_anchor_click", async () => {
     const { downloadFranchiseCenterImportTemplate, franchiseCenterImportTemplateCsv } = await import(
       "./franchiseCenterImportHelpers"
     );
     const click = vi.fn();
-    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
-    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
-    vi.spyOn(document, "createElement").mockReturnValue({
+    const anchor = {
       click,
       href: "",
       download: "",
-    } as HTMLAnchorElement);
+    } as unknown as HTMLAnchorElement;
+    const createElement = vi.spyOn(document, "createElement").mockReturnValue(anchor);
+    const createObjectURL = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
+    const revokeObjectURL = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
 
-    downloadFranchiseCenterImportTemplate("abacusworld");
-    expect(franchiseCenterImportTemplateCsv()).toContain("center_slug,name,city");
-    expect(click).toHaveBeenCalled();
+    try {
+      downloadFranchiseCenterImportTemplate("abacusworld");
+      expect(franchiseCenterImportTemplateCsv()).toContain("center_slug,name,city");
+      expect(createElement).toHaveBeenCalledWith("a");
+      expect(createObjectURL).toHaveBeenCalled();
+      expect(anchor.download).toBe("franchise-centers-import-abacusworld.csv");
+      expect(anchor.href).toBe("blob:mock");
+      expect(click).toHaveBeenCalled();
+      expect(revokeObjectURL).toHaveBeenCalledWith("blob:mock");
+    } finally {
+      createElement.mockRestore();
+      createObjectURL.mockRestore();
+      revokeObjectURL.mockRestore();
+    }
   });
 });

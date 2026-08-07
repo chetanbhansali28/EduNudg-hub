@@ -8,7 +8,7 @@ import { useMembership } from "@/hooks/useMembership";
 import { usePlatformIntegrations } from "@/hooks/usePlatformIntegration";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { useResolvedPortalTenant } from "@/hooks/useResolvedPortalTenant";
-import { fetchHomepageConfig } from "@/lib/homepageApi";
+import { fetchHomepageConfig, MARKETING_HOMEPAGE_CONFIG_QUERY_KEY } from "@/lib/homepageApi";
 import { hasPortalMembership } from "@/lib/portalMembership";
 import { resolveLoginBranding } from "@/lib/portalBranding";
 import { learnPortalLoginUrl } from "@/lib/centerPublicNavUrls";
@@ -30,7 +30,7 @@ export function LoginPage() {
   const brandingQuery = usePortalBranding();
   const integrations = usePlatformIntegrations();
   const homepageQuery = useQuery({
-    queryKey: ["marketing-homepage"],
+    queryKey: MARKETING_HOMEPAGE_CONFIG_QUERY_KEY,
     queryFn: fetchHomepageConfig,
     enabled: tenant.portalType === "platform" && !inMarketingChrome,
   });

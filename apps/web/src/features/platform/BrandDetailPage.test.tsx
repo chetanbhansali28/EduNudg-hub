@@ -6,9 +6,12 @@ import { BrandDetailPage } from "./BrandDetailPage";
 
 const fromMock = vi.fn();
 
-const { updateBrandMarketingThemeMock } = vi.hoisted(() => ({
-  updateBrandMarketingThemeMock: vi.fn(),
-}));
+const { updateBrandMarketingThemeMock, upsertBrandOwnerCredentialsMock, fetchBrandOwnerLoginEmailMock } =
+  vi.hoisted(() => ({
+    updateBrandMarketingThemeMock: vi.fn(),
+    upsertBrandOwnerCredentialsMock: vi.fn(),
+    fetchBrandOwnerLoginEmailMock: vi.fn(),
+  }));
 
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({
@@ -25,8 +28,8 @@ vi.mock("@/lib/brandLandingApi", async (importOriginal) => {
 });
 
 vi.mock("@/lib/brandOwnerCredentialsApi", () => ({
-  fetchBrandOwnerLoginEmail: vi.fn().mockResolvedValue("owner@demo.com"),
-  upsertBrandOwnerCredentials: vi.fn().mockResolvedValue({ error: null }),
+  fetchBrandOwnerLoginEmail: (...args: unknown[]) => fetchBrandOwnerLoginEmailMock(...args),
+  upsertBrandOwnerCredentials: (...args: unknown[]) => upsertBrandOwnerCredentialsMock(...args),
 }));
 
 vi.mock("./PortalOpenButton", () => ({
@@ -84,6 +87,10 @@ describe("BrandDetailPage", () => {
     fromMock.mockReset();
     updateBrandMarketingThemeMock.mockReset();
     updateBrandMarketingThemeMock.mockResolvedValue(undefined);
+    upsertBrandOwnerCredentialsMock.mockReset();
+    upsertBrandOwnerCredentialsMock.mockResolvedValue({ error: null });
+    fetchBrandOwnerLoginEmailMock.mockReset();
+    fetchBrandOwnerLoginEmailMock.mockResolvedValue("owner@demo.com");
     fromMock.mockImplementation((table: string) => {
       if (table === "brands") {
         return chain({
@@ -232,11 +239,30 @@ describe("BrandDetailPage", () => {
   it("regression_brand_settings_saves_marketing_theme", async () => {
     renderDetail("demo");
     const themeSelect = await screen.findByLabelText("Website theme");
+    await waitFor(() => expect(screen.getByDisplayValue("owner@demo.com")).toBeDefined());
     fireEvent.change(themeSelect, { target: { value: "abacus-classic" } });
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
 
     await waitFor(() => {
       expect(updateBrandMarketingThemeMock).toHaveBeenCalledWith("b1", "abacus-classic");
+    });
+    expect(upsertBrandOwnerCredentialsMock).not.toHaveBeenCalled();
+  });
+
+  it("regression_brand_settings_updates_credentials_only_when_login_fields_change", async () => {
+    renderDetail("demo");
+    await waitFor(() => expect(screen.getByDisplayValue("owner@demo.com")).toBeDefined());
+
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "new-secret-123" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() => {
+      expect(upsertBrandOwnerCredentialsMock).toHaveBeenCalledWith({
+        brandId: "b1",
+        email: "owner@demo.com",
+        password: "new-secret-123",
+        fullName: "Demo Brand",
+      });
     });
   });
 

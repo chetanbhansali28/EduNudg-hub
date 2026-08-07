@@ -5,6 +5,7 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "declaration": true,
+    "rootDir": "./src",
     "outDir": "dist",
     "strict": true,
     "skipLibCheck": true

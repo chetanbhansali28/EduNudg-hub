@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { fetchMarketingPublicBundle } from "@/lib/homepageApi";
+import {
+  fetchMarketingPublicBundle,
+  MARKETING_PUBLIC_BUNDLE_QUERY_KEY,
+} from "@/lib/homepageApi";
 import { applyMarketingThemeVariables } from "@/lib/applyMarketingFonts";
 import { isPlatformSectionEnabled } from "@/lib/homepageSections";
 import { scrollToMarketingHash } from "@/lib/marketingPublicSite";
@@ -25,8 +28,8 @@ type Props = {
 
 export function MarketingPublicLayout({ showFooter = true }: Props) {
   const location = useLocation();
-  const { data: bundle, isLoading } = useQuery({
-    queryKey: ["marketing-homepage"],
+  const { data: bundle, isLoading, isError } = useQuery({
+    queryKey: MARKETING_PUBLIC_BUNDLE_QUERY_KEY,
     queryFn: fetchMarketingPublicBundle,
   });
 
@@ -44,10 +47,18 @@ export function MarketingPublicLayout({ showFooter = true }: Props) {
     scrollToMarketingHash(location.hash);
   }, [isLoading, config, location.pathname, location.hash]);
 
-  if (isLoading || !config) {
+  if (isLoading) {
     return (
       <div className="marketing-page marketing-page--enterprise marketing-page--loading">
         <p>Loading…</p>
+      </div>
+    );
+  }
+
+  if (isError || !config) {
+    return (
+      <div className="marketing-page marketing-page--enterprise marketing-page--loading">
+        <p>Unable to load marketing site. Please refresh.</p>
       </div>
     );
   }

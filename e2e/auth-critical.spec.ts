@@ -63,14 +63,19 @@ test.describe("AUTH — critical access", () => {
 
   test("AUTH-09 remember email persists across refresh", async ({ page }) => {
     await page.goto(platformUrl("/login"));
-    await page.getByLabel("Email").fill("remember-me@example.com");
+    await expect(page.getByText("Loading…")).toHaveCount(0, { timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: "Welcome back!" })).toBeVisible({
+      timeout: 15_000,
+    });
+    await page.getByLabel("Email", { exact: true }).fill("remember-me@example.com");
     const remember = page.getByLabel(/remember/i);
     if (await remember.isVisible().catch(() => false)) {
       await remember.check();
     }
     await page.reload();
+    await expect(page.getByText("Loading…")).toHaveCount(0, { timeout: 15_000 });
     // Soft: value may restore only after successful login; checkbox exists
-    await expect(page.getByLabel("Email")).toBeVisible();
+    await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   });
 
   test("AUTH-08 Google OAuth skipped (C7)", async () => {

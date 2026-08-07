@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
-import { fetchHomepageConfig } from "@/lib/homepageApi";
+import { fetchHomepageConfig, MARKETING_HOMEPAGE_CONFIG_QUERY_KEY } from "@/lib/homepageApi";
 const DEFAULT_FAVICON = "/favicon.svg";
 const ICON_SELECTOR = 'link[rel="icon"], link[rel="shortcut icon"]';
 
@@ -39,7 +39,7 @@ export function usePortalFavicon() {
   const tenant = useTenant();
   const { data: branding } = usePortalBranding();
   const homepageQuery = useQuery({
-    queryKey: ["marketing-homepage"],
+    queryKey: MARKETING_HOMEPAGE_CONFIG_QUERY_KEY,
     queryFn: fetchHomepageConfig,
     enabled: tenant.portalType === "platform",
     staleTime: 5 * 60_000,

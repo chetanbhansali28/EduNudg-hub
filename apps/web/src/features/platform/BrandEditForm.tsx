@@ -105,7 +105,12 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
       }
 
       const loginEmail = form.loginEmail.trim();
-      if (loginEmail) {
+      const credentialsChanged =
+        loginEmail !== (originalLoginEmail ?? "") || Boolean(form.password.trim());
+
+      // Only touch Auth when login fields changed — theme/status/name saves must not
+      // re-invoke brand-owner-credentials (edge function 400s can block unrelated edits).
+      if (loginEmail && credentialsChanged) {
         if (!originalLoginEmail && !form.password.trim()) {
           throw new Error("Password required for a new brand login");
         }
