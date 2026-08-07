@@ -59,7 +59,7 @@ describe("BrandBillingPage", () => {
     expect(screen.getByRole("button", { name: "Pay platform subscription" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Invoices", level: 2 })).toBeDefined();
     expect(screen.getByText("No invoices yet.")).toBeDefined();
-    expect(screen.getByText("Need more seats?")).toBeDefined();
-    expect(screen.getByText("Security Deposit")).toBeDefined();
+    expect(screen.queryByText("Need more seats?")).toBeNull();
+    expect(screen.queryByText("Security Deposit")).toBeNull();
   });
 });

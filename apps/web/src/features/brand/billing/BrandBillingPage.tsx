@@ -3,8 +3,6 @@ import {
   BillingInvoiceRow,
   BillingInvoicesPanel,
   BillingPageHeader,
-  BillingPromoCard,
-  BillingPromoGrid,
   BillingStack,
   BillingStatusBadge,
   BillingSubscriptionCard,
@@ -46,19 +44,6 @@ const INVOICES_EMPTY_ICON = (
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
     <path d="M14 2v6h6" />
     <path d="m9 15 2 2 4-4" />
-  </svg>
-);
-
-const PROMO_SEATS_ICON = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <path d="m3 17 6-6 4 4 7-7" />
-    <path d="M14 8h6v6" />
-  </svg>
-);
-
-const PROMO_SHIELD_ICON = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
 
@@ -145,25 +130,6 @@ export function BrandBillingPage() {
             />
           ))}
         </BillingInvoicesPanel>
-
-        <BillingPromoGrid>
-          <BillingPromoCard
-            accent="blue"
-            icon={PROMO_SEATS_ICON}
-            title="Need more seats?"
-            description="Upgrade to the 'Pro' plan to manage up to 5 additional franchise centers with advanced analytics."
-            actionLabel="Explore Plans"
-            actionHref="/app/settings"
-          />
-          <BillingPromoCard
-            accent="purple"
-            icon={PROMO_SHIELD_ICON}
-            title="Security Deposit"
-            description="Maintain a minimum balance to ensure uninterrupted access to the curriculum repository."
-            actionLabel="View Balance"
-            actionHref="/app/settings"
-          />
-        </BillingPromoGrid>
       </BillingStack>
     </div>
   );
