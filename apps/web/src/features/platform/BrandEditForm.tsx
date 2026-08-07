@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Button, FormGrid, Input, MutationError, PasswordInput, Select } from "@edunudg/ui";
 import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
-import { fetchBrandOwnerLoginEmail, upsertBrandOwnerCredentials } from "@/lib/brandOwnerCredentialsApi";
+import { fetchBrandOwnerLoginEmail, shouldSyncBrandOwnerCredentials, upsertBrandOwnerCredentials } from "@/lib/brandOwnerCredentialsApi";
 import { updateBrandMarketingTheme } from "@/lib/brandLandingApi";
 import { brandAdminPath } from "@/lib/adminPaths";
 import { slugifyBrandName, uniqueBrandSlug } from "@/lib/brandSlug";
@@ -44,6 +44,7 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
   });
   const [originalLoginEmail, setOriginalLoginEmail] = useState<string | null>(null);
   const [credentialsLoaded, setCredentialsLoaded] = useState(false);
+  const [loginFieldsTouched, setLoginFieldsTouched] = useState(false);
 
   useEffect(() => {
     setForm((prev) => ({ ...prev, name, status, marketingTheme: parseMarketingTheme(marketingTheme) }));
@@ -52,6 +53,7 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
   useEffect(() => {
     let cancelled = false;
     setCredentialsLoaded(false);
+    setLoginFieldsTouched(false);
     void (async () => {
       try {
         const loginEmail = (await fetchBrandOwnerLoginEmail(brandId)) ?? "";
@@ -105,12 +107,17 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
       }
 
       const loginEmail = form.loginEmail.trim();
-      const credentialsChanged =
-        loginEmail !== (originalLoginEmail ?? "") || Boolean(form.password.trim());
+      const shouldSyncCredentials = shouldSyncBrandOwnerCredentials({
+        loginEmail,
+        password: form.password,
+        originalLoginEmail,
+        credentialsLoaded,
+        loginFieldsTouched,
+      });
 
-      // Only touch Auth when login fields changed — theme/status/name saves must not
-      // re-invoke brand-owner-credentials (edge function 400s can block unrelated edits).
-      if (loginEmail && credentialsChanged) {
+      // Only touch Auth when login fields were intentionally edited — theme/status/name
+      // saves must not re-invoke brand-owner-credentials (edge function 400s block unrelated edits).
+      if (shouldSyncCredentials) {
         if (!originalLoginEmail && !form.password.trim()) {
           throw new Error("Password required for a new brand login");
         }
@@ -131,7 +138,9 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
       void qc.invalidateQueries({ queryKey: ["platform-stats"] });
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
       void qc.invalidateQueries({ queryKey: ["center-landing"] });
+      void qc.invalidateQueries({ queryKey: ["brand-marketing-editor"] });
       setForm((prev) => ({ ...prev, password: "" }));
+      setLoginFieldsTouched(false);
       if (result.slug !== slug) {
         navigate(brandAdminPath(result.slug), { replace: true });
       }
@@ -171,7 +180,10 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
         <Input
           label="Login email"
           value={form.loginEmail}
-          onChange={(v) => setForm((f) => ({ ...f, loginEmail: v }))}
+          onChange={(v) => {
+            setLoginFieldsTouched(true);
+            setForm((f) => ({ ...f, loginEmail: v }));
+          }}
           type="email"
           editable
           disabled={!credentialsLoaded}
@@ -179,7 +191,10 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
         <PasswordInput
           label="Password"
           value={form.password}
-          onChange={(v) => setForm((f) => ({ ...f, password: v }))}
+          onChange={(v) => {
+            setLoginFieldsTouched(true);
+            setForm((f) => ({ ...f, password: v }));
+          }}
           placeholder={originalLoginEmail ? "Leave blank to keep current password" : "Required for new login"}
           disabled={!credentialsLoaded}
         />

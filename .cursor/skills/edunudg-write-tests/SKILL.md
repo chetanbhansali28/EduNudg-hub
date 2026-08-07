@@ -37,7 +37,7 @@ Spark Academy / Abacus Classic public lead forms live in modals — Playwright h
 
 **E2E student lead cleanup:** any test that creates a student lead (brand Path A, center Path B, manual entry, merge, stale) must use `makeE2ELeadFields` and call `cleanupEphemeralE2ELead` in `finally` (plus suite `afterAll` sweep). Hard-delete via `hardDeleteEphemeralE2ELeadsViaSql` / `purge_ephemeral_e2e_leads()` so brand and center `/app/leads` (e.g. Koramangala) do not accumulate garbage. Matchers: `e2eEphemeralLead.ts`.
 
-Platform brand settings: theme/name/status saves must not call `brand-owner-credentials` unless login fields changed (`BrandEditForm` `credentialsChanged`).
+Platform brand settings: theme/name/status saves must not call `brand-owner-credentials` unless login fields were intentionally edited (`BrandEditForm` `loginFieldsTouched` + `shouldSyncBrandOwnerCredentials`).
 
 Franchise CSV import: validate client-side then `import_franchise_centers` RPC — see `docs/ops/franchise-center-csv-import.md`.
 

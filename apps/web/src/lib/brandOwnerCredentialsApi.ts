@@ -15,6 +15,23 @@ export interface UpsertBrandOwnerCredentialsInput {
   fullName?: string;
 }
 
+/** True when the admin intentionally edited login email or password (ignores autofill on theme-only saves). */
+export function shouldSyncBrandOwnerCredentials(input: {
+  loginEmail: string;
+  password: string;
+  originalLoginEmail: string | null;
+  credentialsLoaded: boolean;
+  loginFieldsTouched: boolean;
+}): boolean {
+  if (!input.credentialsLoaded || !input.loginFieldsTouched) return false;
+  const email = input.loginEmail.trim();
+  if (!email) return false;
+  const original = (input.originalLoginEmail ?? "").trim().toLowerCase();
+  const emailChanged = email.toLowerCase() !== original;
+  const passwordEntered = Boolean(input.password.trim());
+  return emailChanged || passwordEntered;
+}
+
 export async function upsertBrandOwnerCredentials(
   input: UpsertBrandOwnerCredentialsInput
 ): Promise<{ error: string | null }> {

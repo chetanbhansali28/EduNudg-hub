@@ -27,10 +27,14 @@ vi.mock("@/lib/brandLandingApi", async (importOriginal) => {
   };
 });
 
-vi.mock("@/lib/brandOwnerCredentialsApi", () => ({
-  fetchBrandOwnerLoginEmail: (...args: unknown[]) => fetchBrandOwnerLoginEmailMock(...args),
-  upsertBrandOwnerCredentials: (...args: unknown[]) => upsertBrandOwnerCredentialsMock(...args),
-}));
+vi.mock("@/lib/brandOwnerCredentialsApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/brandOwnerCredentialsApi")>();
+  return {
+    ...actual,
+    fetchBrandOwnerLoginEmail: (...args: unknown[]) => fetchBrandOwnerLoginEmailMock(...args),
+    upsertBrandOwnerCredentials: (...args: unknown[]) => upsertBrandOwnerCredentialsMock(...args),
+  };
+});
 
 vi.mock("./PortalOpenButton", () => ({
   PortalOpenButton: ({ label = "Open" }: { label?: string }) => (

@@ -1,5 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fetchBrandOwnerLoginEmail, upsertBrandOwnerCredentials } from "./brandOwnerCredentialsApi";
+import {
+  fetchBrandOwnerLoginEmail,
+  shouldSyncBrandOwnerCredentials,
+  upsertBrandOwnerCredentials,
+} from "./brandOwnerCredentialsApi";
 
 const rpcMock = vi.fn();
 const invokeMock = vi.fn();
@@ -54,5 +58,55 @@ describe("brandOwnerCredentialsApi", () => {
       email: "new@brand.com",
     });
     expect(result.error).toBe("Password required for a new brand login");
+  });
+});
+
+describe("shouldSyncBrandOwnerCredentials", () => {
+  it("regression_skips_sync_for_theme_only_save_even_when_autofill_populates_email", () => {
+    expect(
+      shouldSyncBrandOwnerCredentials({
+        loginEmail: "admin@edunudg.com",
+        password: "",
+        originalLoginEmail: null,
+        credentialsLoaded: true,
+        loginFieldsTouched: false,
+      })
+    ).toBe(false);
+  });
+
+  it("syncs_when_password_field_was_edited", () => {
+    expect(
+      shouldSyncBrandOwnerCredentials({
+        loginEmail: "owner@demo.com",
+        password: "new-secret",
+        originalLoginEmail: "owner@demo.com",
+        credentialsLoaded: true,
+        loginFieldsTouched: true,
+      })
+    ).toBe(true);
+  });
+
+  it("syncs_when_login_email_changed_case_insensitively", () => {
+    expect(
+      shouldSyncBrandOwnerCredentials({
+        loginEmail: "Owner@Demo.com",
+        password: "",
+        originalLoginEmail: "owner@demo.com",
+        credentialsLoaded: true,
+        loginFieldsTouched: true,
+      })
+    ).toBe(false);
+  });
+
+  it("syncs_when_login_email_changed", () => {
+    expect(
+      shouldSyncBrandOwnerCredentials({
+        loginEmail: "new-owner@demo.com",
+        password: "secret",
+        originalLoginEmail: "owner@demo.com",
+        credentialsLoaded: true,
+        loginFieldsTouched: true,
+      })
+    ).toBe(true);
   });
 });
