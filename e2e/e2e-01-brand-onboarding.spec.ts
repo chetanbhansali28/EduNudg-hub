@@ -52,16 +52,21 @@ test.describe("E2E-01 — New brand onboarding", () => {
         timeout: 30_000,
       });
 
-      // Approved brand appears in the active list — then must be cleaned up.
-      await expect(page.getByText(orgName, { exact: true }).first()).toBeVisible({
-        timeout: 20_000,
-      });
+      // Approved brand appears in the active list (desktop row; mobile card is display:none).
+      await expect(
+        page.locator("article.ed-directory-brand-row").filter({ hasText: orgName })
+      ).toBeVisible({ timeout: 20_000 });
     } finally {
       await cleanupEphemeralE2EBrand({ page, orgName });
     }
 
     await page.goto(platformUrl("/admin/brands"));
-    await expect(page.getByText(orgName, { exact: true })).toHaveCount(0, { timeout: 15_000 });
+    await expect(page.locator("article.ed-directory-brand-row").filter({ hasText: orgName })).toHaveCount(0, {
+      timeout: 15_000,
+    });
+    await expect(page.locator(".ed-brands-signup-review").getByText(orgName, { exact: true })).toHaveCount(0, {
+      timeout: 5_000,
+    });
   });
 
   test("seeded brand host loads public marketing (slug + domain mapping)", async ({ page }) => {
