@@ -7,13 +7,17 @@ vi.mock("@/features/marketing/HomepageEditorForm", () => ({
   HomepageEditorForm: () => <div>Homepage form stub</div>,
 }));
 
-vi.mock("@/lib/homepageApi", () => ({
-  fetchHomepageEditorBundle: vi.fn().mockResolvedValue({
-    config: { meta: { siteName: "EduNudg" } },
-    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  }),
-  saveHomepageConfig: vi.fn(),
-}));
+vi.mock("@/lib/homepageApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/homepageApi")>();
+  return {
+    ...actual,
+    fetchHomepageEditorBundle: vi.fn().mockResolvedValue({
+      config: { meta: { siteName: "EduNudg" } },
+      updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    }),
+    saveHomepageConfig: vi.fn(),
+  };
+});
 
 describe("HomepageEditorPage", () => {
   beforeEach(() => {

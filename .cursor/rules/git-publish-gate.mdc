@@ -1,5 +1,5 @@
 ---
-description: Never push to GitHub unless the user explicitly asks; then run local CI and auto-fix first
+description: Never push to GitHub unless the user explicitly asks; then run local CI and auto-fix first. Git pre-push also enforces ci:local.
 alwaysApply: true
 ---
 
@@ -16,9 +16,11 @@ Agents MUST NOT publish to GitHub on their own.
 ## When the user asks to push
 
 1. Load skill **`edunudg-pre-push-ci`**
-2. Run **`pnpm ci:local`** (full GitHub CI mirror)
+2. Run **`pnpm ci:local`** (full GitHub CI mirror) — writes a stamp so the git hook can skip a duplicate run
 3. **Automatically fix** every failure and re-run until green (or report a hard blocker — no push)
 4. Only then `git push` (and only the refs the user asked for)
+
+The repo **`.githooks/pre-push`** also runs `pnpm ci:local` on every push (human or agent). Bypass only with user-approved `SKIP_CI_LOCAL=1`.
 
 Skipping RLS/e2e requires the user to allow that skip in the same message.
 
@@ -31,3 +33,4 @@ Leave changes uncommitted/unpushed. Tell the user what is ready and wait for “
 - Pushing to “unblock CI” without a local green `ci:local`
 - Pushing knowing local CI is red
 - Treating a prior push as standing permission for the next one
+- Asking whether to run local CI before push — just run it

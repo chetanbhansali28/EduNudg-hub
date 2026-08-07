@@ -39,11 +39,14 @@ Standing rule: [`.cursor/rules/agent-boundaries.mdc`](.cursor/rules/agent-bounda
 
 Do not ship code-only changes for behavior or process. Sync matrix: [`.cursor/rules/artifact-sync.mdc`](.cursor/rules/artifact-sync.mdc). Spec: [`openspec/specs/agent-artifact-sync/spec.md`](openspec/specs/agent-artifact-sync/spec.md).
 
+**Automatic:** update OpenSpec, docs, tests, skills, rules, and agents in the same turn — never ask the user for permission to sync.
+
 ## Git publish
 
 - **Never** `git push` (or otherwise publish to GitHub) unless the user explicitly asks in that turn.
 - **Never** `git commit` unless the user explicitly asks to commit.
 - When the user asks to **push**: run skill **`edunudg-pre-push-ci`** — `pnpm ci:local`, auto-fix failures, re-run until green, then push.
+- Mechanical gate: **`.githooks/pre-push`** runs `pnpm ci:local` on every push (install via `pnpm hooks:install` / `prepare`).
 - Rule: [`.cursor/rules/git-publish-gate.mdc`](.cursor/rules/git-publish-gate.mdc).
 
 ## Local dev

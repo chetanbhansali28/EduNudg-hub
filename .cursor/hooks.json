@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/gate-git-push.sh",
+        "matcher": "git\\s+push",
+        "failClosed": true
+      }
+    ],
+    "stop": [
+      {
+        "type": "prompt",
+        "timeout": 15,
+        "loop_limit": 2,
+        "prompt": "You are the EduNudg finish gate. Review the agent turn that just finished.\n\nIf the turn changed product behavior, UX, schema/RPC/RLS, routing, auth, CI, tests, or agent process, verify that OpenSpec/docs/tests/skills/rules/agents were updated in the SAME turn without asking the user (artifact-sync). Incomplete sync is a fail.\n\nIf sync is incomplete, return a followup_message that tells the agent to complete edunudg-sync-artifacts now — do not ask the user for permission.\n\nIf the turn only answered a question, made no code changes, or was typo/refactor/dep-bump exempt, allow stop with no follow-up.\n\nHook input: $ARGUMENTS"
+      }
+    ]
+  }
+}

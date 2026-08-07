@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Blocks git push unless pnpm ci:local is green for the current HEAD.
+# Bypass (emergencies only): SKIP_CI_LOCAL=1 git push
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+if [[ "${SKIP_CI_LOCAL:-}" == "1" ]]; then
+  echo "pre-push: SKIP_CI_LOCAL=1 — skipping pnpm ci:local (not recommended)"
+  exit 0
+fi
+
+HEAD="$(git rev-parse HEAD)"
+STAMP="${ROOT}/.git/edunudg-ci-local.ok"
+MAX_AGE_SEC="${CI_LOCAL_STAMP_MAX_AGE_SEC:-1800}"
+
+if [[ -f "$STAMP" ]]; then
+  # Format: <sha> <unix_ts>
+  read -r stamp_sha stamp_ts <"$STAMP" || true
+  now="$(date +%s)"
+  if [[ -n "${stamp_sha:-}" && -n "${stamp_ts:-}" && "$stamp_sha" == "$HEAD" ]]; then
+    age=$((now - stamp_ts))
+    if (( age >= 0 && age < MAX_AGE_SEC )); then
+      echo "pre-push: recent green ci:local for ${HEAD:0:7} (${age}s ago) — skipping re-run"
+      exit 0
+    fi
+  fi
+fi
+
+echo "pre-push: running pnpm ci:local (GitHub CI mirror)…"
+pnpm ci:local

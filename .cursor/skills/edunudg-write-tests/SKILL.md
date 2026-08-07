@@ -27,6 +27,10 @@ If package tests fail with missing `vitest/vitest.mjs`, run `pnpm install` (see 
 
 Use **Vitest ≥4** (matches CI Node 24). Mock constructors with `class`, not arrow `vi.fn(() => …)` — Vitest 4 rejects arrow mocks used with `new` (e.g. `IntersectionObserver`). Auth login tests that render `RequireMembership` must mock `@/lib/supabase` (center operational status).
 
+When mocking `@/lib/homepageApi`, use `importOriginal` and spread `...actual` so query-key constants (`MARKETING_HOMEPAGE_CONFIG_QUERY_KEY`, etc.) remain defined.
+
+Spark Academy / Abacus Classic public lead forms live in modals — Playwright helpers: `e2e/helpers/leadModals.ts` (dialog-scoped fills; deep links `#enroll-student`, `#register`, `#apply`).
+
 Coverage target: ≥80% on `packages/*`.
 
 ## Before finish

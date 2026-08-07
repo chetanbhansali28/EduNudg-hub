@@ -14,6 +14,7 @@
 10. Cross agent role fences without escalation (`agent-boundaries`)
 11. `git push` / publish to GitHub (or commit) without an explicit user request (`git-publish-gate`)
 12. Push while local CI is red, or skip `pnpm ci:local` / auto-fix when the user asked to push (`edunudg-pre-push-ci`)
+13. Ask the user for permission to update specs/docs/tests/skills — sync automatically (`artifact-sync`)
 
 ## Avoid
 

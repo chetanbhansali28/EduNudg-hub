@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { hasE2EBackend } from "./helpers/env";
 import { uniqueWhatsApp } from "./helpers/auth";
 import { brandUrl, SEED } from "./helpers/portal";
+import { fillBrandStudentLead, expectLeadDialogOpen, leadDialog } from "./helpers/leadModals";
 
 test.describe("E2E-07 — WhatsApp duplicate merge", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
@@ -10,34 +11,39 @@ test.describe("E2E-07 — WhatsApp duplicate merge", () => {
     page,
   }) => {
     const wa = uniqueWhatsApp();
+    const enrollUrl = brandUrl(SEED.brandSlug, "/#enroll-student");
 
-    async function submit(notes: string, child: string) {
-      await page.goto(brandUrl(SEED.brandSlug, "/#enroll-student"));
-      await page.getByLabel("Parent name").fill("Merge Parent");
-      await page.getByLabel("WhatsApp number").fill(wa);
-      await page.getByLabel("Email").fill(`merge-${wa}@example.com`);
-      await page.getByLabel("City").fill("Bengaluru");
-      await page.getByLabel("Pincode").fill("560001");
-      await page.getByLabel("Child name").fill(child);
-      await page.getByLabel("Child date of birth").fill("2017-06-15");
-      await page.getByLabel("Notes (optional)").fill(notes);
-      await page.getByRole("button", { name: /submit|apply|enroll/i }).first().click();
+    async function submit(child: string) {
+      await fillBrandStudentLead(
+        page,
+        {
+          parentName: "Merge Parent",
+          whatsapp: wa,
+          email: `merge-${wa}@example.com`,
+          city: "Bengaluru",
+          pincode: "560001",
+          childName: child,
+        },
+        enrollUrl
+      );
     }
 
-    await submit("first-notes", "Merge Child A");
-    await expect(page.getByText(/received|contact you/i).first()).toBeVisible({ timeout: 20_000 });
+    await submit("Merge Child A");
+    await expect(page.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
+      timeout: 20_000,
+    });
 
-    await submit("second-notes", "Merge Child B");
-    await expect(page.getByText(/received|contact you/i).first()).toBeVisible({ timeout: 20_000 });
+    await submit("Merge Child B");
+    await expect(page.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
+      timeout: 20_000,
+    });
   });
 
   test("re-apply after converted shows enrolled error (C1)", async ({ page }) => {
-    // Smoke: form validation path for already-enrolled is covered in RLS;
-    // here we only assert public form still validates required fields.
     await page.goto(brandUrl(SEED.brandSlug, "/#enroll-student"));
-    await page.getByRole("button", { name: /submit|apply|enroll/i }).first().click();
-    await expect(
-      page.getByText(/required|pincode|whatsapp|enter/i).first()
-    ).toBeVisible({ timeout: 10_000 });
+    const dialog = await expectLeadDialogOpen(page);
+    const submit = dialog.getByRole("button", { name: /book free demo|submit|apply|enroll/i });
+    await expect(submit).toBeDisabled();
+    await expect(leadDialog(page).getByLabel("Parent name")).toBeVisible();
   });
 });

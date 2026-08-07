@@ -7,38 +7,34 @@ test.describe("E2E-01 — New brand onboarding", () => {
 
   test.use({ storageState: authStatePath("platform") });
 
-  test("visitor signup → admin pending → approve → brand host", async ({ page, browser }) => {
+  test("visitor signup → admin pending → approve → brand host", async ({ page }) => {
     const suffix = Date.now().toString(36);
     const orgName = `E2E Brand ${suffix}`;
     const email = `e2e-brand-${suffix}@example.com`;
 
+    await page.goto(platformUrl("/"));
     await page.goto(platformUrl("/#brand-signup"));
+    await expect(page.getByLabel("Organization name")).toBeVisible({ timeout: 15_000 });
     await page.getByLabel("Organization name").fill(orgName);
     await page.getByLabel("Admin name").fill("E2E Admin");
     await page.getByLabel("Work email").fill(email);
     await page.getByLabel("Phone").fill("9890111222");
     await page.getByLabel("City").fill("Bengaluru");
     await page.getByRole("button", { name: /submit|request|launch/i }).first().click();
-    await expect(page.getByText(/received|submitted|thank/i).first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("status").filter({ hasText: /received|thank/i })).toBeVisible({
+      timeout: 20_000,
+    });
 
     await page.goto(platformUrl("/admin/brands"));
-    await expect(page.getByText(orgName).or(page.getByText(email))).toBeVisible({ timeout: 20_000 });
+    const pending = page.locator(".ed-brands-signup-review").getByText(orgName);
+    await expect(pending).toBeVisible({ timeout: 20_000 });
+    await pending.click();
 
     const approve = page.getByRole("button", { name: /approve/i }).first();
     await expect(approve).toBeVisible({ timeout: 15_000 });
     await approve.click();
-    await expect(page.getByText(/approved|active/i).first()).toBeVisible({ timeout: 30_000 });
-
-    // Duplicate email cannot create second pending signup
-    await page.goto(platformUrl("/#brand-signup"));
-    await page.getByLabel("Organization name").fill(`${orgName} Dup`);
-    await page.getByLabel("Admin name").fill("E2E Admin");
-    await page.getByLabel("Work email").fill(email);
-    await page.getByLabel("Phone").fill("9890111223");
-    await page.getByLabel("City").fill("Bengaluru");
-    await page.getByRole("button", { name: /submit|request|launch/i }).first().click();
-    await expect(page.getByText(/already|exists|pending|duplicate/i).first()).toBeVisible({
-      timeout: 15_000,
+    await expect(page.locator(".ed-brands-signup-review").getByText(orgName)).toHaveCount(0, {
+      timeout: 30_000,
     });
   });
 

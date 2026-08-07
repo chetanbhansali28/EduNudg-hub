@@ -21,16 +21,20 @@ vi.mock("@/hooks/useStaffShellWelcome", () => ({
   }),
 }));
 
-vi.mock("@/lib/homepageApi", () => ({
-  fetchHomepageConfig: vi.fn().mockResolvedValue({
-    meta: {
-      siteName: "Abacus World HQ",
-      logoUrl: "https://cdn.example/platform-logo.png",
-      fontSans: "Inter",
-      fontSerif: "Instrument Serif",
-    },
-  }),
-}));
+vi.mock("@/lib/homepageApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/homepageApi")>();
+  return {
+    ...actual,
+    fetchHomepageConfig: vi.fn().mockResolvedValue({
+      meta: {
+        siteName: "Abacus World HQ",
+        logoUrl: "https://cdn.example/platform-logo.png",
+        fontSans: "Inter",
+        fontSerif: "Instrument Serif",
+      },
+    }),
+  };
+});
 
 function renderPlatformShell() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

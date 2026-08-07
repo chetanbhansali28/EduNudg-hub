@@ -116,9 +116,13 @@ vi.mock("@/hooks/usePlatformIntegration", () => ({
   }),
 }));
 
-vi.mock("@/lib/homepageApi", () => ({
-  fetchHomepageConfig: vi.fn(),
-}));
+vi.mock("@/lib/homepageApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/homepageApi")>();
+  return {
+    ...actual,
+    fetchHomepageConfig: vi.fn(),
+  };
+});
 
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({

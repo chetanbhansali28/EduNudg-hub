@@ -40,6 +40,7 @@ import {
 } from "@/lib/platformBrandsHelpers";
 import { ConfirmDeleteDialog } from "@/features/shared/ConfirmDeleteDialog";
 import { ManualPlatformBrandSignupCard } from "@/features/platform/brandSignups/ManualPlatformBrandSignupCard";
+import { BrandsSignupReviewSection } from "@/features/platform/brandSignups/BrandsSignupReviewSection";
 import "./brandsPage.css";
 
 const ICON_CLIPBOARD = (
@@ -267,6 +268,8 @@ export function BrandsPageView({
   return (
     <DirectoryShell className="ed-brands-page">
       <MutationError message={error} />
+
+      <BrandsSignupReviewSection />
 
       <DirectoryVisibility
         mobile={

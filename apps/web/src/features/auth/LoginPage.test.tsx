@@ -103,11 +103,15 @@ vi.mock("@/hooks/usePlatformIntegration", () => ({
   }),
 }));
 
-vi.mock("@/lib/homepageApi", () => ({
-  fetchHomepageConfig: vi.fn().mockResolvedValue({
-    footer: { privacyHref: "/privacy", termsHref: "/terms" },
-  }),
-}));
+vi.mock("@/lib/homepageApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/homepageApi")>();
+  return {
+    ...actual,
+    fetchHomepageConfig: vi.fn().mockResolvedValue({
+      footer: { privacyHref: "/privacy", termsHref: "/terms" },
+    }),
+  };
+});
 
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({

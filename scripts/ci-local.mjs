@@ -4,13 +4,28 @@
  * Exit non-zero on first failure. Agents use this before git push.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const skipE2e = process.argv.includes("--skip-e2e");
 const skipRls = process.argv.includes("--skip-rls");
+
+/** Stamp consumed by .githooks/pre-push to avoid double-running after a green agent run. */
+function writeCiLocalStamp() {
+  const gitDir = join(root, ".git");
+  if (!existsSync(gitDir)) return;
+  const head = spawnSync("git", ["rev-parse", "HEAD"], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  if (head.status !== 0) return;
+  const sha = head.stdout.trim();
+  if (!sha) return;
+  mkdirSync(gitDir, { recursive: true });
+  writeFileSync(join(gitDir, "edunudg-ci-local.ok"), `${sha} ${Math.floor(Date.now() / 1000)}\n`);
+}
 
 function run(label, command, args) {
   console.log(`\n==> ${label}\n$ ${command} ${args.join(" ")}\n`);
@@ -53,4 +68,5 @@ if (!skipE2e) {
   console.log("\n==> test:e2e SKIPPED (--skip-e2e)\n");
 }
 
+writeCiLocalStamp();
 console.log("\nci:local PASSED (matches CI jobs build-test + e2e)\n");

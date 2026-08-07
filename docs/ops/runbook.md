@@ -135,7 +135,10 @@ pnpm test
 pnpm audit:schema
 pnpm test:e2e
 pnpm ci:local   # full GitHub CI mirror — required before push (see edunudg-pre-push-ci)
+pnpm hooks:install  # installs .githooks/pre-push (also runs on pnpm install via prepare)
 ```
+
+`git push` is blocked until `pnpm ci:local` is green (or a recent stamp exists for the same HEAD). Emergency bypass: `SKIP_CI_LOCAL=1 git push`.
 
 RLS SQL tests (optional, against cloud DB):
 

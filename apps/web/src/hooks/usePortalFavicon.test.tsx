@@ -35,11 +35,15 @@ vi.mock("@/hooks/usePortalBranding", () => ({
   usePortalBranding: () => brandingState,
 }));
 
-vi.mock("@/lib/homepageApi", () => ({
-  fetchHomepageConfig: vi.fn().mockResolvedValue({
-    meta: { logoUrl: "https://cdn.example/platform-logo.png", siteName: "EduNudg" },
-  }),
-}));
+vi.mock("@/lib/homepageApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/homepageApi")>();
+  return {
+    ...actual,
+    fetchHomepageConfig: vi.fn().mockResolvedValue({
+      meta: { logoUrl: "https://cdn.example/platform-logo.png", siteName: "EduNudg" },
+    }),
+  };
+});
 
 function FaviconProbe() {
   usePortalFavicon();

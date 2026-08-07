@@ -5,6 +5,8 @@
   "description": "EduNudg multi-tenant franchise learning OS",
   "packageManager": "pnpm@9.15.0",
   "scripts": {
+    "prepare": "node scripts/install-git-hooks.mjs",
+    "hooks:install": "node scripts/install-git-hooks.mjs",
     "dev": "cd apps/web && node_modules/.bin/vite --host",
     "build": "pnpm --filter @edunudg/web build",
     "build:dev": "pnpm --filter @edunudg/web exec vite build --mode development",

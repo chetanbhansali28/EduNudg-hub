@@ -14,6 +14,7 @@ import {
   AbacusClassicFooter,
   LeadModalProvider,
   MarketingLeadModals,
+  LeadModalHashOpener,
 } from "@/features/marketing/abacus-classic";
 import {
   SparkAcademyNav,
@@ -94,7 +95,12 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
   );
 
   if (themeUsesLeadModals(theme)) {
-    return <LeadModalProvider>{layoutInner}</LeadModalProvider>;
+    return (
+      <LeadModalProvider>
+        <LeadModalHashOpener />
+        {layoutInner}
+      </LeadModalProvider>
+    );
   }
 
   return layoutInner;

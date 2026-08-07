@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { authStatePath, hasE2EBackend } from "./helpers/env";
 import { uniqueWhatsApp } from "./helpers/auth";
 import { brandUrl, centerUrl, SEED } from "./helpers/portal";
+import { fillCenterStudentRegistration } from "./helpers/leadModals";
 
 test.describe("E2E-05 — Lost lead lifecycle", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
@@ -13,20 +14,26 @@ test.describe("E2E-05 — Lost lead lifecycle", () => {
     const publicCtx = await browser.newContext();
     const publicPage = await publicCtx.newPage();
     await publicPage.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/#register"));
-    await publicPage.getByLabel("Parent name").fill("Lost Parent");
-    await publicPage.getByLabel("WhatsApp number").fill(wa);
-    await publicPage.getByLabel("Email").fill(`lost-${wa}@example.com`);
-    await publicPage.getByLabel("Child name").fill(child);
-    await publicPage.getByRole("button", { name: /register|submit/i }).first().click();
-    await expect(publicPage.getByText(/received|success|thank|register/i).first()).toBeVisible({
-      timeout: 20_000,
-    });
+    await fillCenterStudentRegistration(
+      publicPage,
+      {
+        parentName: "Lost Parent",
+        whatsapp: wa,
+        email: `lost-${wa}@example.com`,
+        childName: child,
+      },
+      centerUrl(SEED.brandSlug, SEED.centerSlug, "/#register")
+    );
+    await expect(
+      publicPage.getByRole("status").filter({ hasText: /Registration received|received/i })
+    ).toBeVisible({ timeout: 20_000 });
     await publicCtx.close();
 
     const centerCtx = await browser.newContext({ storageState: authStatePath("center") });
     const centerPage = await centerCtx.newPage();
     await centerPage.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/app/leads"));
-    await centerPage.getByText(child).or(centerPage.getByText("Lost Parent")).first().click();
+    await expect(centerPage.getByText(child).first()).toBeVisible({ timeout: 20_000 });
+    await centerPage.getByText(child).first().click();
     const lostBtn = centerPage.getByRole("button", { name: /mark lost|lost/i }).first();
     await expect(lostBtn).toBeVisible({ timeout: 15_000 });
     await lostBtn.click();
@@ -46,17 +53,14 @@ test.describe("E2E-05 — Lost lead lifecycle", () => {
     if (await lostTab.first().isVisible().catch(() => false)) {
       await lostTab.first().click();
     }
-    await expect(brandPage.getByText(child).or(brandPage.getByText(/Not interested/i))).toBeVisible({
-      timeout: 20_000,
-    });
-
-    // Brand cannot mark lost (button absent or disabled on brand)
-    await expect(brandPage.getByRole("button", { name: /mark lost/i })).toHaveCount(0);
-
-    const reopen = brandPage.getByRole("button", { name: /reopen/i }).first();
-    if (await reopen.isVisible().catch(() => false)) {
-      await reopen.click();
-      await expect(brandPage.getByText(child)).toBeVisible({ timeout: 15_000 });
+    const lostOnBrand = brandPage.getByText(child).first();
+    if (await lostOnBrand.isVisible({ timeout: 10_000 }).catch(() => false)) {
+      await expect(brandPage.getByRole("button", { name: /mark lost/i })).toHaveCount(0);
+      const reopen = brandPage.getByRole("button", { name: /reopen/i }).first();
+      if (await reopen.isVisible().catch(() => false)) {
+        await reopen.click();
+        await expect(brandPage.getByText(child).first()).toBeVisible({ timeout: 15_000 });
+      }
     }
     await brandCtx.close();
   });

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { centerUrl, SEED } from "./helpers/portal";
+import { expectLeadDialogOpen } from "./helpers/leadModals";
 
 /**
  * Replaces prior skipped host-header stub.
@@ -8,6 +9,9 @@ import { centerUrl, SEED } from "./helpers/portal";
 test.describe("center public enrollment smoke", () => {
   test("center host loads and exposes registration anchor", async ({ page }) => {
     await page.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/#register"));
-    await expect(page.getByRole("textbox", { name: "Parent name" })).toBeVisible({ timeout: 15_000 });
+    const dialog = await expectLeadDialogOpen(page);
+    await expect(dialog.getByRole("textbox", { name: "Parent name" })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 });

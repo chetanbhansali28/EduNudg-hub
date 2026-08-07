@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, Input, MutationError } from "@edunudg/ui";
 import { submitFranchiseInquiry } from "@/lib/brandLandingApi";
-import { submitBrandStudentApplication } from "@/lib/leadsApi";
+import { submitBrandStudentApplication, submitCenterStudentRegistration } from "@/lib/leadsApi";
 import { isIndiaPincode } from "@/lib/leadSla";
 import { useLeadModal, type LeadModalKind } from "./LeadModalContext";
+import { resolveLeadModalKind } from "./resolveLeadModalKind";
+
+export { resolveLeadModalKind };
 
 type Props = {
   brandSlug: string;
+  /** When set, enroll modal submits center registration (Path B) instead of brand application. */
+  centerSlug?: string;
 };
 
 export function AcModalShell({
@@ -49,7 +54,15 @@ export function AcModalShell({
   );
 }
 
-function EnrollForm({ brandSlug, onSuccess }: { brandSlug: string; onSuccess: () => void }) {
+function EnrollForm({
+  brandSlug,
+  centerSlug,
+  onSuccess,
+}: {
+  brandSlug: string;
+  centerSlug?: string;
+  onSuccess: () => void;
+}) {
   const [parentName, setParentName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
@@ -60,27 +73,43 @@ function EnrollForm({ brandSlug, onSuccess }: { brandSlug: string; onSuccess: ()
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  const pincodeValid = isIndiaPincode(pincode);
+  const isCenter = Boolean(centerSlug);
+  const pincodeValid = isCenter
+    ? !pincode.trim() || isIndiaPincode(pincode)
+    : isIndiaPincode(pincode);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pincodeValid) {
-      setError("Enter a valid 6-digit India pincode.");
+      setError(
+        isCenter
+          ? "Enter a valid 6-digit India pincode or leave blank."
+          : "Enter a valid 6-digit India pincode."
+      );
       return;
     }
     setSubmitting(true);
     setError(null);
-    const { error: err } = await submitBrandStudentApplication(brandSlug, {
-      parentName,
-      whatsappE164: whatsapp,
-      email,
-      city,
-      pincode,
-      childName,
-    });
+    const result = isCenter && centerSlug
+      ? await submitCenterStudentRegistration(brandSlug, centerSlug, {
+          parentName,
+          whatsappE164: whatsapp,
+          email,
+          city: city || undefined,
+          pincode: pincode || undefined,
+          childName,
+        })
+      : await submitBrandStudentApplication(brandSlug, {
+          parentName,
+          whatsappE164: whatsapp,
+          email,
+          city,
+          pincode,
+          childName,
+        });
     setSubmitting(false);
-    if (err) {
-      setError(err);
+    if (result.error) {
+      setError(result.error);
       return;
     }
     setDone(true);
@@ -90,7 +119,9 @@ function EnrollForm({ brandSlug, onSuccess }: { brandSlug: string; onSuccess: ()
   if (done) {
     return (
       <p className="ac-modal__success" role="status">
-        Application received. A center will contact you on WhatsApp.
+        {isCenter
+          ? "Registration received. Expect a call from our center soon."
+          : "Application received. A center will contact you on WhatsApp."}
       </p>
     );
   }
@@ -102,18 +133,38 @@ function EnrollForm({ brandSlug, onSuccess }: { brandSlug: string; onSuccess: ()
         <Input label="Parent name" value={parentName} onChange={setParentName} />
         <Input label="WhatsApp number" value={whatsapp} onChange={setWhatsapp} />
         <Input label="Email" value={email} onChange={setEmail} type="email" />
-        <Input label="City" value={city} onChange={setCity} />
-        <Input label="Pincode" value={pincode} onChange={setPincode} placeholder="6 digits" />
         <Input label="Child name" value={childName} onChange={setChildName} />
+        <Input
+          label={isCenter ? "City (optional)" : "City"}
+          value={city}
+          onChange={setCity}
+        />
+        <Input
+          label={isCenter ? "Pincode (optional)" : "Pincode"}
+          value={pincode}
+          onChange={setPincode}
+          placeholder="6 digits"
+        />
       </div>
       <Button
         type="submit"
         block
         disabled={
-          submitting || !parentName.trim() || !whatsapp.trim() || !email.trim() || !city.trim() || !pincodeValid
+          submitting ||
+          !parentName.trim() ||
+          !whatsapp.trim() ||
+          !email.trim() ||
+          !childName.trim() ||
+          (!isCenter && !city.trim()) ||
+          (!isCenter && !pincodeValid) ||
+          (isCenter && !pincodeValid)
         }
       >
-        {submitting ? "Submitting…" : "Book free demo"}
+        {submitting
+          ? "Submitting…"
+          : isCenter
+            ? "Register for a free trial"
+            : "Book free demo"}
       </Button>
     </form>
   );
@@ -183,25 +234,24 @@ const MODAL_TITLES: Record<Exclude<LeadModalKind, null>, string> = {
   apply: "Apply for franchise",
 };
 
-export function MarketingLeadModals({ brandSlug }: Props) {
+export function MarketingLeadModals({ brandSlug, centerSlug }: Props) {
   const { activeModal, closeModal } = useLeadModal();
+  const enrollTitle = centerSlug ? "Book a free trial at this center" : MODAL_TITLES.enroll;
 
   return (
     <>
-      <AcModalShell title={MODAL_TITLES.enroll} open={activeModal === "enroll"} onClose={closeModal}>
-        <EnrollForm brandSlug={brandSlug} onSuccess={() => setTimeout(closeModal, 2000)} />
+      <AcModalShell title={enrollTitle} open={activeModal === "enroll"} onClose={closeModal}>
+        <EnrollForm
+          brandSlug={brandSlug}
+          centerSlug={centerSlug}
+          onSuccess={() => setTimeout(closeModal, 2000)}
+        />
       </AcModalShell>
       <AcModalShell title={MODAL_TITLES.apply} open={activeModal === "apply"} onClose={closeModal}>
         <FranchiseForm brandSlug={brandSlug} onSuccess={() => setTimeout(closeModal, 2000)} />
       </AcModalShell>
     </>
   );
-}
-
-export function resolveLeadModalKind(href: string): Exclude<LeadModalKind, null> | null {
-  const normalized = href.replace(/^#/, "").trim().toLowerCase();
-  if (normalized === "enroll" || normalized === "apply") return normalized;
-  return null;
 }
 
 export function AbacusCtaButton({

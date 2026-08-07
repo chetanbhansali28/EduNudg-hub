@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { authStatePath, hasE2EBackend } from "./helpers/env";
 import { uniqueWhatsApp } from "./helpers/auth";
 import { brandUrl, centerUrl, SEED } from "./helpers/portal";
+import { fillFranchiseApplication, expectLeadDialogOpen } from "./helpers/leadModals";
 
 test.describe("E2E-02 — Franchise application → center live", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
@@ -9,12 +10,17 @@ test.describe("E2E-02 — Franchise application → center live", () => {
   test("applicant submits franchise application on brand public site", async ({ page }) => {
     const suffix = Date.now().toString(36);
     await page.goto(brandUrl(SEED.brandSlug, "/#apply"));
-    await page.getByLabel("Full name").fill(`Franchise Applicant ${suffix}`);
-    await page.getByLabel("Email").fill(`franchise-${suffix}@example.com`);
-    await page.getByLabel("Phone").fill(uniqueWhatsApp());
-    await page.getByLabel("Preferred city").fill("Bengaluru");
-    await page.getByLabel("Proposed franchise name").fill(`Center ${suffix}`);
-    await page.getByRole("button", { name: /submit|apply/i }).first().click();
+    await fillFranchiseApplication(
+      page,
+      {
+        fullName: `Franchise Applicant ${suffix}`,
+        email: `franchise-${suffix}@example.com`,
+        whatsapp: uniqueWhatsApp(),
+        city: "Bengaluru",
+        qualification: `Center ${suffix}`,
+      },
+      brandUrl(SEED.brandSlug, "/#apply")
+    );
     await expect(page.getByText(/received|submitted|thank|success/i).first()).toBeVisible({
       timeout: 20_000,
     });
@@ -35,8 +41,8 @@ test.describe("E2E-02 — Franchise application → center live", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByLabel("Proposed franchise name")).toHaveCount(0);
     await page.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/#register"));
-    await expect(page.getByLabel("Parent name").or(page.getByLabel("WhatsApp number"))).toBeVisible({
-      timeout: 15_000,
-    });
+    const dialog = await expectLeadDialogOpen(page);
+    await expect(dialog.getByLabel("Parent name")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByLabel("Proposed franchise name")).toHaveCount(0);
   });
 });

@@ -1,21 +1,24 @@
 ---
 name: edunudg-sync-artifacts
-description: Keep OpenSpec specs, docs, tests, Cursor skills, rules, and agent briefs in sync after any EduNudg change. Use before finishing a feature, bugfix, or process change.
+description: Keep OpenSpec specs, docs, tests, Cursor skills, rules, and agent briefs in sync after any EduNudg change. Use automatically before finishing — never wait for the user to ask.
 ---
 
 # Sync Artifacts
 
 Use this skill before declaring work done. Incomplete sync violates always-apply rule `artifact-sync`.
 
+## Automatic — do not ask
+
+Update specs, docs, tests, skills, rules, and agents in the **same turn** as the code change. Do not ask the user for permission to sync. Do not offer sync as an optional follow-up.
+
 ## When
 
 - Any behavior, UI, RPC, RLS, routing, auth, or agent-process change
 - After OpenSpec propose/apply/archive
 - When adding a recurring convention agents must follow
+- When changing CI / pre-push gates
 
 ## Checklist (all that apply)
-
-Copy and tick mentally:
 
 1. **OpenSpec** — `openspec/specs/<capability>/spec.md` updated, or change proposed/archived; skip only for typo/refactor/dep-bump
 2. **Docs** — `docs/spec`, `docs/ops`, `docs/agent-playbook`, `docs/navigation`, `docs/testing` as relevant
@@ -33,7 +36,7 @@ Respect `agent-boundaries` and `git-publish-gate`. Do not implement outside your
 
 Syncing artifacts does **not** authorize `git commit` or `git push`. Only the user decides when to commit/push to GitHub.
 
-When the user asks to **push**, hand off to **`edunudg-pre-push-ci`** (`pnpm ci:local` → auto-fix → green → push).
+When the user asks to **push**, hand off to **`edunudg-pre-push-ci`** (`pnpm ci:local` → auto-fix → green → push; git `pre-push` hook also enforces).
 
 ## Done when
 

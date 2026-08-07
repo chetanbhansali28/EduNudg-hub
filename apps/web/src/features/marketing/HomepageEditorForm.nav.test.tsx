@@ -50,8 +50,13 @@ describe("HomepageEditorForm navigation", () => {
 
     render(<HomepageEditorForm config={config} onChange={() => undefined} portalMode="brand" />);
 
-    expect(screen.getByLabelText("Custom link")).toBeDefined();
-    expect((screen.getByLabelText("Link") as HTMLSelectElement).value).toBe("__custom__");
+    const navHeading = screen.getByRole("heading", { name: "Navigation Management" });
+    const navCard = navHeading.closest(".ed-editor-section-card");
+    expect(navCard).not.toBeNull();
+    expect(within(navCard as HTMLElement).getByLabelText("Custom link")).toBeDefined();
+    expect((within(navCard as HTMLElement).getByLabelText("Link") as HTMLSelectElement).value).toBe(
+      "__custom__"
+    );
   });
 });
 

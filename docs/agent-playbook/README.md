@@ -56,7 +56,8 @@ Use the skill matching your task before writing code. OpenSpec skills (`openspec
 | `git-publish-gate` | No commit/push unless the user explicitly asks; push requires green local CI |
 | OpenSpec [`agent-artifact-sync`](../../openspec/specs/agent-artifact-sync/spec.md) | Behavioral requirements for the sync system |
 
-Local CI mirror: `pnpm ci:local` (skill `edunudg-pre-push-ci`).
+Local CI mirror: `pnpm ci:local` (skill `edunudg-pre-push-ci`). Git hook: `.githooks/pre-push` (`pnpm hooks:install`).
+Artifact sync is automatic — do not ask the user to approve docs/tests/skills updates.
 
 ## Phases
 
