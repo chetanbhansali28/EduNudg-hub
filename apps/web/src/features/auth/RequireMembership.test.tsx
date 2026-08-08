@@ -11,8 +11,8 @@ const { authState, membershipState, tenantState, portalBrandingState, signOut } 
   authState: {
     session: { user: { id: "user-1", email: "stranger@gmail.com" } } as {
       user: { id: string; email?: string };
-    },
-    user: { id: "user-1", email: "stranger@gmail.com" } as { id: string; email?: string },
+    } | null,
+    user: { id: "user-1", email: "stranger@gmail.com" } as { id: string; email?: string } | null,
   },
   membershipState: {
     data: [] as Membership[],
