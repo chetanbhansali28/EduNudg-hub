@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button, MutationError } from "@edunudg/ui";
 import {
   downloadFranchiseCenterImportTemplate,
@@ -17,6 +17,33 @@ type Props = {
   onImported: () => void;
 };
 
+function ImportStep({
+  step,
+  title,
+  hint,
+  children,
+}: {
+  step: number;
+  title: string;
+  hint?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <li className="ed-import-step">
+      <span className="ed-import-step__badge" aria-hidden="true">
+        {step}
+      </span>
+      <div className="ed-import-step__body">
+        <div className="ed-import-step__copy">
+          <span className="ed-import-step__title">{title}</span>
+          {hint ? <span className="ed-import-step__hint">{hint}</span> : null}
+        </div>
+        {children ? <div className="ed-import-step__action">{children}</div> : null}
+      </div>
+    </li>
+  );
+}
+
 function ImportPreviewTable({ preview }: { preview: FranchiseCenterImportPreview }) {
   if (preview.rows.length === 0) return null;
 
@@ -25,7 +52,7 @@ function ImportPreviewTable({ preview }: { preview: FranchiseCenterImportPreview
       <table className="ed-import-preview__table">
         <thead>
           <tr>
-            <th scope="col">Row</th>
+            <th scope="col">#</th>
             <th scope="col">Slug</th>
             <th scope="col">Name</th>
             <th scope="col">City</th>
@@ -52,10 +79,12 @@ export function FranchiseCenterImportDialog({ brandId, brandSlug, open, onClose,
   const dialogRef = useRef<HTMLDialogElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<FranchiseCenterImportPreview | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [resultSummary, setResultSummary] = useState<string | null>(null);
+  const [importSucceeded, setImportSucceeded] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -67,9 +96,11 @@ export function FranchiseCenterImportDialog({ brandId, brandSlug, open, onClose,
   useEffect(() => {
     if (!open) {
       setPreview(null);
+      setUploadedFileName(null);
       setFileError(null);
       setSubmitError(null);
       setResultSummary(null);
+      setImportSucceeded(false);
       setSubmitting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -82,11 +113,14 @@ export function FranchiseCenterImportDialog({ brandId, brandSlug, open, onClose,
 
   const handleFileChange = async (file: File | null) => {
     setPreview(null);
+    setUploadedFileName(null);
     setFileError(null);
     setSubmitError(null);
     setResultSummary(null);
 
     if (!file) return;
+
+    setUploadedFileName(file.name);
 
     const { text, error } = await readImportCsvFile(file);
     if (error || !text) {
@@ -109,6 +143,7 @@ export function FranchiseCenterImportDialog({ brandId, brandSlug, open, onClose,
     setSubmitting(true);
     setSubmitError(null);
     setResultSummary(null);
+    setImportSucceeded(false);
 
     const { result, error } = await importFranchiseCenters(
       brandId,
@@ -124,11 +159,20 @@ export function FranchiseCenterImportDialog({ brandId, brandSlug, open, onClose,
 
     const createdCount = result.created.length;
     const errorCount = result.errors.length;
-    setResultSummary(`Imported ${createdCount} center${createdCount === 1 ? "" : "s"}.${errorCount ? ` ${errorCount} row(s) failed on the server.` : ""}`);
 
     if (createdCount > 0) {
+      const summary =
+        errorCount > 0
+          ? `Imported ${createdCount} center${createdCount === 1 ? "" : "s"}. ${errorCount} row${errorCount === 1 ? "" : "s"} failed.`
+          : `Imported ${createdCount} franchise center${createdCount === 1 ? "" : "s"}.`;
+      setResultSummary(summary);
+      setImportSucceeded(true);
       onImported();
+      window.setTimeout(() => onClose(), 1500);
+      return;
     }
+
+    setResultSummary(errorCount ? `${errorCount} row${errorCount === 1 ? "" : "s"} failed on the server.` : "Import failed.");
   };
 
   const validCount = preview?.validRows.length ?? 0;
@@ -138,68 +182,92 @@ export function FranchiseCenterImportDialog({ brandId, brandSlug, open, onClose,
     <dialog
       ref={dialogRef}
       className="ed-import-dialog"
+      aria-labelledby="franchise-import-title"
       onClose={handleClose}
       onClick={(e) => e.target === dialogRef.current && handleClose()}
     >
       <div className="ed-import-dialog__panel" role="document">
         <header className="ed-import-dialog__header">
-          <div>
-            <h2 id="franchise-import-title">Import franchise centers</h2>
-            <p className="ed-text-sm ed-muted">
-              Upload a CSV to create centers and center portal hostnames for {brandSlug}. Files are parsed locally; only
-              validated rows are sent to the server.
-            </p>
-          </div>
+          <h2 id="franchise-import-title">Import franchise centers</h2>
           <button type="button" className="ed-import-dialog__close" aria-label="Close" onClick={handleClose}>
             ×
           </button>
         </header>
 
         <div className="ed-import-dialog__body">
-          <div className="ed-import-dialog__actions">
-            <Button type="button" variant="secondary" onClick={() => downloadFranchiseCenterImportTemplate(brandSlug)}>
-              Download template
-            </Button>
-            <label className="ed-import-dialog__file-label">
-              <span className="ed-btn ed-btn--secondary">Choose CSV file</span>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv,text/csv"
-                className="ed-import-dialog__file-input"
-                onChange={(e) => void handleFileChange(e.target.files?.[0] ?? null)}
-              />
-            </label>
-          </div>
-
-          <p className="ed-text-sm ed-muted">
-            Required columns: center_slug, name, city. Optional: display_name, region, country, address, pincode,
-            contact_phone, short_description, owner_email. Max 500 rows, 2 MB.
-          </p>
-
-          {fileError ? <MutationError message={fileError} /> : null}
-          {submitError ? <MutationError message={submitError} /> : null}
-          {resultSummary ? <p role="status">{resultSummary}</p> : null}
-
-          {preview ? (
+          {importSucceeded ? (
+            <p className="ed-import-dialog__success" role="status">
+              {resultSummary}
+            </p>
+          ) : (
             <>
-              <p className="ed-text-sm">
-                {validCount} row{validCount === 1 ? "" : "s"} ready to import
-                {invalidCount > 0 ? ` · ${invalidCount} row${invalidCount === 1 ? "" : "s"} with errors` : ""}
+              <p className="ed-import-dialog__intro">
+                Bulk onboard centers for <strong>{brandSlug}</strong>. CSV only · max 500 rows · 2 MB.
               </p>
-              <ImportPreviewTable preview={preview} />
+
+              <ol className="ed-import-steps" aria-label="Import steps">
+                <ImportStep step={1} title="Download the format" hint="Template with headers and sample row.">
+                  <Button type="button" variant="secondary" onClick={() => downloadFranchiseCenterImportTemplate(brandSlug)}>
+                    Download template
+                  </Button>
+                </ImportStep>
+
+                <ImportStep
+                  step={2}
+                  title="Add your data"
+                  hint="Required: center_slug, name, city. Optional: display_name, region, country, address, pincode, contact_phone, short_description, owner_email."
+                />
+
+                <ImportStep step={3} title="Upload franchise data" hint={uploadedFileName ? `Selected: ${uploadedFileName}` : "Save as .csv, then upload."}>
+                  <label className="ed-import-dialog__file-label">
+                    <span className="ed-btn ed-btn--secondary">Upload Franchise Data</span>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".csv,text/csv"
+                      className="ed-import-dialog__file-input"
+                      onChange={(e) => void handleFileChange(e.target.files?.[0] ?? null)}
+                    />
+                  </label>
+                </ImportStep>
+
+                {preview ? (
+                  <ImportStep
+                    step={4}
+                    title="Review and import"
+                    hint={`${validCount} ready${invalidCount > 0 ? ` · ${invalidCount} with errors` : ""}`}
+                  />
+                ) : null}
+              </ol>
+
+              {fileError ? <MutationError message={fileError} /> : null}
+              {preview ? (
+                <>
+                  <ImportPreviewTable preview={preview} />
+                  {submitError ? <MutationError message={submitError} /> : null}
+                  {resultSummary && !importSucceeded ? (
+                    <p className="ed-import-dialog__note" role="status">
+                      {resultSummary}
+                    </p>
+                  ) : null}
+                </>
+              ) : null}
             </>
-          ) : null}
+          )}
         </div>
 
-        <footer className="ed-import-dialog__footer">
-          <Button type="button" variant="ghost" onClick={handleClose} disabled={submitting}>
-            Cancel
-          </Button>
-          <Button type="button" onClick={() => void handleImport()} disabled={submitting || validCount === 0}>
-            {submitting ? "Importing…" : `Import ${validCount || ""} center${validCount === 1 ? "" : "s"}`.trim()}
-          </Button>
-        </footer>
+        {!importSucceeded ? (
+          <footer className="ed-import-dialog__footer">
+            <Button type="button" variant="ghost" onClick={handleClose} disabled={submitting}>
+              Cancel
+            </Button>
+            {preview ? (
+              <Button type="button" onClick={() => void handleImport()} disabled={submitting || validCount === 0}>
+                {submitting ? "Importing…" : `Import ${validCount} center${validCount === 1 ? "" : "s"}`}
+              </Button>
+            ) : null}
+          </footer>
+        ) : null}
       </div>
     </dialog>
   );

@@ -111,8 +111,8 @@ describe("SubscriptionsPage", () => {
 
   it("renders plans with CRUD controls", async () => {
     renderSubs();
-    const createPlanButton = await screen.findByRole("button", { name: "Create plan" });
-    expect(createPlanButton.classList.contains("ed-sub-primary-btn")).toBe(true);
+    const createPlanButtons = await screen.findAllByRole("button", { name: "Create plan" });
+    expect(createPlanButtons.some((button) => button.classList.contains("ed-sub-primary-btn"))).toBe(true);
     expect(screen.getAllByText("Available Plans").length).toBeGreaterThan(0);
     await screen.findAllByRole("button", { name: "Edit Plan" });
     expect(screen.getAllByRole("button", { name: "Edit Plan" }).length).toBeGreaterThan(0);
@@ -132,7 +132,10 @@ describe("SubscriptionsPage", () => {
     });
 
     renderSubs();
-    fireEvent.click(await screen.findByRole("button", { name: "Create plan" }));
+    const desktopHeader = document.querySelector(".ed-sub-only-desktop .ed-sub-header__action");
+    const createPlanButton = desktopHeader?.querySelector("button");
+    expect(createPlanButton?.textContent).toBe("Create plan");
+    fireEvent.click(createPlanButton!);
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
     expect(screen.getByRole("button", { name: "Cancel" })).toBeDefined();
     expect(screen.getAllByRole("button", { name: "Create plan" }).length).toBeGreaterThan(1);

@@ -7,14 +7,19 @@ export function SubscriptionShell({ children, className }: { children: ReactNode
 export function SubscriptionPageHeader({
   title,
   subtitle,
+  action,
 }: {
   title: string;
   subtitle?: string;
+  action?: ReactNode;
 }) {
   return (
     <header className="ed-sub-header">
-      <h1 className="ed-sub-header__title">{title}</h1>
-      {subtitle ? <p className="ed-sub-header__subtitle">{subtitle}</p> : null}
+      <div className="ed-sub-header__copy">
+        <h1 className="ed-sub-header__title">{title}</h1>
+        {subtitle ? <p className="ed-sub-header__subtitle">{subtitle}</p> : null}
+      </div>
+      {action ? <div className="ed-sub-header__action">{action}</div> : null}
     </header>
   );
 }

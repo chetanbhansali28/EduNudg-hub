@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { FranchiseCenterImportDialog } from "./FranchiseCenterImportDialog";
 
@@ -27,6 +27,10 @@ describe("FranchiseCenterImportDialog", () => {
     });
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("shows template actions when open", () => {
     render(
       <FranchiseCenterImportDialog
@@ -40,17 +44,21 @@ describe("FranchiseCenterImportDialog", () => {
 
     expect(screen.getByRole("heading", { name: "Import franchise centers" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Download template" })).toBeDefined();
-    expect(screen.getByText("Choose CSV file")).toBeDefined();
+    expect(screen.getByText("Upload Franchise Data")).toBeDefined();
+    expect(screen.getByText("Download the format")).toBeDefined();
+    expect(screen.getByText("Add your data")).toBeDefined();
+    expect(screen.getByText("Upload franchise data")).toBeDefined();
   });
 
-  it("previews valid CSV and imports ready rows", async () => {
+  it("previews valid CSV, imports ready rows, and auto-closes on success", async () => {
     const onImported = vi.fn();
+    const onClose = vi.fn();
     render(
       <FranchiseCenterImportDialog
         brandId="b1"
         brandSlug="abacusworld"
         open
-        onClose={() => undefined}
+        onClose={onClose}
         onImported={onImported}
       />
     );
@@ -63,7 +71,7 @@ andheri-west,Andheri West,Mumbai`;
     fireEvent.change(input, { target: { files: [file] } });
 
     await waitFor(() => {
-      expect(screen.getByText("1 row ready to import")).toBeDefined();
+      expect(screen.getByText("1 ready")).toBeDefined();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Import 1 center" }));
@@ -73,7 +81,10 @@ andheri-west,Andheri West,Mumbai`;
         expect.objectContaining({ center_slug: "andheri-west", name: "Andheri West", city: "Mumbai" }),
       ]);
       expect(onImported).toHaveBeenCalled();
+      expect(screen.getByText(/Imported 1 franchise center/)).toBeDefined();
     });
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled(), { timeout: 2500 });
   });
 
   it("regression_rejects_malicious_csv_extension", async () => {

@@ -251,7 +251,7 @@ export function BrandDetailPage() {
         actions={
           <div className="ed-brand-detail__center-actions">
             <Button type="button" variant="secondary" onClick={() => setImportOpen(true)}>
-              Import CSV
+              Import Franchise
             </Button>
           </div>
         }

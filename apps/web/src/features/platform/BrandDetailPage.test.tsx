@@ -281,7 +281,7 @@ describe("BrandDetailPage", () => {
 
   it("regression_brand_detail_shows_franchise_center_csv_import", async () => {
     renderDetail("demo");
-    expect(await screen.findByRole("button", { name: "Import CSV" })).toBeDefined();
+    expect(await screen.findByRole("button", { name: "Import Franchise" })).toBeDefined();
     expect(screen.getByText(/Import a CSV to onboard franchise locations/)).toBeDefined();
   });
 

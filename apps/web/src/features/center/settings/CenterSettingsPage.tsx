@@ -36,11 +36,14 @@ export function CenterSettingsPage() {
     queryFn: () => fetchCenterPublicProfile(tenant.centerId!),
   });
 
+  const ownerEmail = profile.data?.ownerEmail?.trim() || user?.email || "";
+
   const resetPassword = useMutation({
     mutationFn: async () => {
-      if (!user?.email) throw new Error("No sign-in email found for this account.");
+      const email = ownerEmail.trim();
+      if (!email) throw new Error("No owner email found for this center.");
       clear();
-      await sendOwnerPasswordReset(user.email);
+      await sendOwnerPasswordReset(email);
     },
     onSuccess: () => setResetSent(true),
     onError: capture,
@@ -109,12 +112,12 @@ export function CenterSettingsPage() {
                 items={[
                   { label: "Center ID", value: centerDisplayId },
                   { label: "Account status", value: formatCenterStatusLabel(p.status) },
-                  { label: "Owner email", value: user?.email ?? "—" },
+                  { label: "Owner email", value: ownerEmail || "—" },
                 ]}
               />
               <FormFields
                 centerDisplayId={centerDisplayId}
-                ownerEmail={user?.email ?? ""}
+                ownerEmail={ownerEmail}
                 resetSent={resetSent}
                 resetPending={resetPassword.isPending}
                 onReset={() => resetPassword.mutate()}
@@ -123,7 +126,7 @@ export function CenterSettingsPage() {
             <MutationError message={error} />
             {resetSent ? (
               <p className="ed-text-sm ed-muted" role="status">
-                Password reset link sent to {user?.email}.
+                Password reset link sent to {ownerEmail}.
               </p>
             ) : null}
           </SettingsSection>

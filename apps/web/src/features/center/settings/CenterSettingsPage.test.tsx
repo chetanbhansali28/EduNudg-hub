@@ -24,6 +24,7 @@ vi.mock("@/lib/centerProfileApi", () => ({
     name: "Koramangala",
     slug: "koramangala",
     status: "active",
+    ownerEmail: "franchise.owner@example.com",
     updatedAt: "2026-06-15T10:42:00Z",
     displayName: "Abacus Koramangala",
     shortDescription: "South Bengaluru center",
@@ -58,7 +59,7 @@ describe("CenterSettingsPage", () => {
     expect(await screen.findByText("Account")).toBeDefined();
     expect(await screen.findByText("Public Center Profile")).toBeDefined();
     expect(await screen.findByLabelText("Center ID")).toBeDefined();
-    expect(await screen.findByLabelText("Owner email")).toHaveProperty("value", "owner@gmail.com");
+    expect(await screen.findByLabelText("Owner email")).toHaveProperty("value", "franchise.owner@example.com");
     expect(screen.getByRole("button", { name: "Send reset link" })).toBeDefined();
     expect(screen.getByDisplayValue("Abacus Koramangala")).toBeDefined();
     expect(screen.getByRole("button", { name: "Save profile" })).toBeDefined();

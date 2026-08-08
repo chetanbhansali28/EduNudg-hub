@@ -224,6 +224,9 @@ export function SubscriptionsPageView({
 
   const openAssignSubscription = () => onAssignOpenChange(true);
   const openCreatePlan = () => onCreatePlanOpenChange(true);
+  const createPlanAction = (
+    <SubscriptionPrimaryButton onClick={openCreatePlan}>Create plan</SubscriptionPrimaryButton>
+  );
 
   useEffect(() => {
     if (!createPlanOpen) return;
@@ -277,6 +280,7 @@ export function SubscriptionsPageView({
             <SubscriptionPageHeader
               title="Subscriptions"
               subtitle="Manage franchise pricing and feature limits."
+              action={createPlanAction}
             />
 
             <SubscriptionSectionHeader
@@ -399,19 +403,13 @@ export function SubscriptionsPageView({
             <SubscriptionPageHeader
               title="Subscriptions & Billing"
               subtitle="Prices are in Indian Rupees (₹). The default plan is assigned automatically when a brand signup is approved."
+              action={createPlanAction}
             />
 
             <section className="ed-sub-plans-section">
               <SubscriptionSectionHeader
                 title="Available Plans"
-                action={
-                  <div className="ed-sub-plans-section__actions">
-                    <SubscriptionPrimaryButton onClick={openCreatePlan}>
-                      Create plan
-                    </SubscriptionPrimaryButton>
-                    <SubscriptionBillingToggle value={billingPeriod} onChange={setBillingPeriod} />
-                  </div>
-                }
+                action={<SubscriptionBillingToggle value={billingPeriod} onChange={setBillingPeriod} />}
               />
               <SubscriptionPlanGrid>
                 <PlanCards
