@@ -7,7 +7,7 @@
   "scripts": {
     "prepare": "node scripts/install-git-hooks.mjs",
     "hooks:install": "node scripts/install-git-hooks.mjs",
-    "dev": "cd apps/web && node_modules/.bin/vite --host",
+    "dev": "pnpm --filter @edunudg/web dev",
     "build": "pnpm --filter @edunudg/web build",
     "build:dev": "pnpm --filter @edunudg/web exec vite build --mode development",
     "lint": "pnpm -r --if-present lint",

@@ -27,6 +27,7 @@ import {
 import {
   computeLeadPipelineStats,
   convertedPipelineHint,
+  countEligibleBulkConvertLeads,
   filterCenterLeads,
   formatLeadContactWhen,
   LEAD_FILTER_OPTIONS,
@@ -39,14 +40,17 @@ import {
   openPipelineHint,
   paginateItems,
   paginationLabel,
+  summarizeBulkConvertResult,
   telHref,
   whatsappHref,
   type LeadFilter,
 } from "@/lib/centerLeadsHelpers";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { bulkConvertCenterLeads } from "@/lib/centerStudentLeadImportApi";
 import { initialsFromName } from "@/lib/welcomeMessage";
 import { CenterLeadDetailPanel } from "./CenterLeadDetailPanel";
+import { CenterStudentLeadImportDialog } from "./CenterStudentLeadImportDialog";
 import "./centerLeads.css";
 
 function slaHint(lead: LeadRow, now: number): string | null {
@@ -91,10 +95,14 @@ const ICON_CONVERTED = (
 export function CenterLeadsPage() {
   const tenant = useTenant();
   const centerId = tenant.centerId;
+  const centerSlug = tenant.centerSlug ?? "center";
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<LeadFilter>("open");
   const [addLeadOpen, setAddLeadOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [convertAllMode, setConvertAllMode] = useState(false);
+  const [bulkConvertMessage, setBulkConvertMessage] = useState<string | null>(null);
   const addFormRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -105,6 +113,7 @@ export function CenterLeadsPage() {
   const invalidate = () => {
     void qc.invalidateQueries({ queryKey: ["center-leads", centerId] });
     void qc.invalidateQueries({ queryKey: ["center-dashboard-home", centerId] });
+    void qc.invalidateQueries({ queryKey: ["center-students"] });
     void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
   };
 
@@ -187,9 +196,29 @@ export function CenterLeadsPage() {
     onError: capture,
   });
 
+  const bulkConvert = useMutation({
+    mutationFn: async () => {
+      if (!centerId) return null;
+      clear();
+      setBulkConvertMessage(null);
+      const { result, error: rpcError } = await bulkConvertCenterLeads(centerId);
+      if (rpcError || !result) throw new Error(rpcError ?? "Bulk convert failed.");
+      return result;
+    },
+    onSuccess: (result) => {
+      if (!result) return;
+      setBulkConvertMessage(summarizeBulkConvertResult(result));
+      setConvertAllMode(false);
+      invalidate();
+      closeDetail();
+    },
+    onError: capture,
+  });
+
   const now = Date.now();
   const allLeads = leads.data ?? [];
   const stats = useMemo(() => computeLeadPipelineStats(allLeads, now), [allLeads, now]);
+  const eligibleBulkConvertCount = useMemo(() => countEligibleBulkConvertLeads(allLeads), [allLeads]);
 
   const filtered = useMemo(() => {
     return filterCenterLeads(allLeads, filter, "");
@@ -226,9 +255,21 @@ export function CenterLeadsPage() {
       <PipelinePageHeader
         title="Leads"
         subtitle="Call parents on WhatsApp, update status, then convert when enrolled."
-        actions={<Button onClick={openAddLead}>+ Add Lead</Button>}
+        actions={
+          <div className="ed-center-leads-page__header-actions">
+            <Button variant="secondary" onClick={() => setImportOpen(true)}>
+              Import CSV
+            </Button>
+            <Button onClick={openAddLead}>+ Add Lead</Button>
+          </div>
+        }
       />
       <MutationError message={error} />
+      {bulkConvertMessage ? (
+        <p className="ed-text-sm ed-center-leads-page__bulk-message" role="status">
+          {bulkConvertMessage}
+        </p>
+      ) : null}
 
       <PipelineMetricStrip>
         <PipelineMetricCard
@@ -284,12 +325,38 @@ export function CenterLeadsPage() {
                   onChange={(value) => {
                     setFilter(value);
                     setPage(1);
+                    setConvertAllMode(false);
                   }}
                   aria-label="Lead filter"
                 />
               }
               meta={paginationLabel(filtered.length, page, LEAD_PAGE_SIZE)}
             />
+
+            {filter === "open" && eligibleBulkConvertCount > 0 ? (
+              <div className="ed-center-leads-page__bulk-bar">
+                {convertAllMode ? (
+                  <>
+                    <p className="ed-text-sm ed-muted">
+                      Convert {eligibleBulkConvertCount} open lead{eligibleBulkConvertCount === 1 ? "" : "s"} with
+                      parent and child names to enrolled students?
+                    </p>
+                    <div className="ed-center-leads-page__bulk-actions">
+                      <Button onClick={() => bulkConvert.mutate()} disabled={bulkConvert.isPending}>
+                        {bulkConvert.isPending ? "Converting…" : "Confirm convert all"}
+                      </Button>
+                      <Button variant="ghost" onClick={() => setConvertAllMode(false)} disabled={bulkConvert.isPending}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <Button variant="secondary" onClick={() => setConvertAllMode(true)}>
+                    Convert all eligible ({eligibleBulkConvertCount})
+                  </Button>
+                )}
+              </div>
+            ) : null}
 
             <div className="ed-pipeline-table-head" aria-hidden>
               <span>Parent Name</span>
@@ -434,6 +501,14 @@ export function CenterLeadsPage() {
           />
         </div>
       ) : null}
+
+      <CenterStudentLeadImportDialog
+        centerId={centerId}
+        centerSlug={centerSlug}
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={invalidate}
+      />
 
       <button
         type="button"

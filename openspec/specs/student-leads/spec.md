@@ -189,6 +189,18 @@ Staff SHALL create leads without public forms via manual entry cards and staff R
 - **WHEN** center staff create a lead via `create_center_student_lead_staff`
 - **THEN** a lead with `lead_source = center` and `center_id` set appears in center Leads
 
+#### Scenario: Center CSV import
+
+- **WHEN** center staff import leads via `import_center_student_leads` on `/app/leads`
+- **THEN** valid rows appear in the Open Pipeline
+- **AND** duplicate WhatsApp merges per brand with `csv_imported_merge` events
+
+#### Scenario: Center bulk convert
+
+- **WHEN** center staff confirm convert all eligible open leads
+- **THEN** `bulk_convert_center_leads` enrolls leads with parent and child names
+- **AND** enrolled students appear on `/app/students`
+
 ### Requirement: Ephemeral E2E student lead hard purge
 
 The system SHALL expose `purge_ephemeral_e2e_leads()` (platform admin) and `purge_ephemeral_e2e_leads_for_brand(brand_id)` (platform admin or brand access) to permanently delete test student leads whose email matches `e2e-lead-…@example.com` (or legacy `path-a-|path-b-|lost-|merge-|stale-|manual-|neg-…@example.com`), or whose parent/child/full names match `E2E Parent` / `E2E Child` (and documented legacy E2E name patterns). Before delete, `students.source_lead_id` referencing those leads SHALL be nulled. Matching converted E2E students on seed brands MAY be hard-deleted. `lead_events` and `lead_assignment_history` cascade. Direct DB / service-role callers MAY invoke without a JWT. Playwright SHALL call these RPCs via seed login when `DATABASE_URL` is unavailable, and SHALL run a global teardown sweep.

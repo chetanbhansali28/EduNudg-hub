@@ -200,7 +200,7 @@ export function Card({ title, children, actions }: { title?: string; children: R
       {(title || actions) && (
         <div className="ed-card__header">
           {title && <h2 className="ed-card__title">{title}</h2>}
-          {actions}
+          {actions ? <div className="ed-card__actions">{actions}</div> : null}
         </div>
       )}
       {children}

@@ -269,3 +269,34 @@ export const LEAD_STATUS_OPTIONS: { value: LeadStatus; label: string }[] = [
   { value: "contacted", label: "Contacted" },
   { value: "qualified", label: "Qualified" },
 ];
+
+const OPEN_LEAD_STATUSES = new Set<LeadStatus>(["new", "contacted", "qualified"]);
+
+export function isLeadEligibleForBulkConvert(lead: LeadRow): boolean {
+  if (!OPEN_LEAD_STATUSES.has(lead.status)) return false;
+  const parentName = (lead.parent_name ?? lead.full_name ?? "").trim();
+  const childName = (lead.child_name ?? "").trim();
+  return Boolean(parentName && childName);
+}
+
+export function countEligibleBulkConvertLeads(leads: LeadRow[]): number {
+  return leads.filter(isLeadEligibleForBulkConvert).length;
+}
+
+export function summarizeBulkConvertResult(result: {
+  converted: Array<{ lead_id: string; student_id: string }>;
+  errors: Array<{ lead_id: string; message: string }>;
+}): string {
+  const parts: string[] = [];
+  const convertedCount = result.converted.length;
+  const errorCount = result.errors.length;
+
+  if (convertedCount > 0) {
+    parts.push(`${convertedCount} lead${convertedCount === 1 ? "" : "s"} converted to students`);
+  }
+  if (errorCount > 0) {
+    parts.push(`${errorCount} skipped`);
+  }
+
+  return parts.length > 0 ? parts.join(". ") + "." : "No leads converted.";
+}

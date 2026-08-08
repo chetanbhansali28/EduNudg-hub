@@ -18,6 +18,11 @@ vi.mock("@/features/shared/manualLeads/ManualStudentLeadCard", () => ({
   ManualStudentLeadCard: () => <div>Add student lead manually</div>,
 }));
 
+vi.mock("@/features/center/leads/CenterStudentLeadImportDialog", () => ({
+  CenterStudentLeadImportDialog: ({ open }: { open: boolean }) =>
+    open ? <div>Import student leads dialog</div> : null,
+}));
+
 const sampleLead = {
   id: "lead-1",
   brand_id: "brand-1",
@@ -95,5 +100,19 @@ describe("CenterLeadsPage", () => {
     await waitFor(() => {
       expect(scrollIntoView).toHaveBeenCalled();
     });
+  });
+
+  it("regression_center_leads_import_csv_opens_dialog", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <CenterLeadsPage />
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Import CSV" }));
+    expect(screen.getByText("Import student leads dialog")).toBeDefined();
   });
 });

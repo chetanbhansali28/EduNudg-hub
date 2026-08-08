@@ -1007,6 +1007,15 @@
   font-weight: 600;
 }
 
+.ed-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 .ed-form-actions {
   display: flex;
   flex-wrap: wrap;
@@ -7145,6 +7154,7 @@ body.ed-nav-open {
   padding: 1rem 1.125rem;
   text-align: left;
   color: inherit;
+  min-width: 0;
 }
 
 .ed-pipeline-metric--clickable {
@@ -7218,6 +7228,9 @@ body.ed-nav-open {
   margin: 0.35rem 0 0;
   font-size: 0.75rem;
   color: var(--ed-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ed-pipeline-metric__hint--danger {
@@ -7258,14 +7271,15 @@ body.ed-nav-open {
   background: var(--ed-card);
   box-shadow: var(--ed-shadow);
   padding: 1rem 1.125rem 1.125rem;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .ed-pipeline-table-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
   margin-bottom: 0.875rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--ed-border);
@@ -7273,11 +7287,13 @@ body.ed-nav-open {
 
 .ed-pipeline-table-toolbar__tabs {
   min-width: 0;
-  flex: 1;
+  width: 100%;
 }
 
 .ed-pipeline-table-toolbar__tabs .ed-filter-tabs {
   margin-bottom: 0;
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
 }
 
 .ed-pipeline-table-toolbar__tabs .ed-filter-tabs--segmented {
@@ -7305,19 +7321,27 @@ body.ed-nav-open {
   margin: 0;
   font-size: 0.75rem;
   color: var(--ed-muted);
-  white-space: nowrap;
+  align-self: flex-end;
+  text-align: right;
 }
 
 .ed-pipeline-table-head {
   display: none;
-  grid-template-columns: minmax(10rem, 1.2fr) minmax(8rem, 1fr) 7rem 9rem;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 5.5rem) minmax(0, 6.5rem);
   gap: 0.75rem;
-  padding: 0 0.75rem 0.5rem;
+  padding: 0 0.25rem 0.5rem;
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--ed-muted);
   text-transform: uppercase;
+}
+
+.ed-pipeline-table-head > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (min-width: 900px) {
@@ -7330,6 +7354,7 @@ body.ed-nav-open {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .ed-pipeline-lead-row {
@@ -7341,6 +7366,7 @@ body.ed-nav-open {
   text-align: left;
   color: inherit;
   cursor: pointer;
+  min-width: 0;
   transition:
     border-color 0.15s ease,
     background 0.15s ease;
@@ -7358,13 +7384,17 @@ body.ed-nav-open {
 @media (min-width: 900px) {
   .ed-pipeline-lead-row {
     display: grid;
-    grid-template-columns: minmax(10rem, 1.2fr) minmax(8rem, 1fr) 7rem 9rem;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 5.5rem) minmax(0, 6.5rem);
     gap: 0.75rem;
     align-items: center;
     border-radius: var(--ed-radius);
     border-color: transparent;
     border-bottom-color: var(--ed-border);
     box-shadow: none;
+  }
+
+  .ed-pipeline-lead-row > * {
+    min-width: 0;
   }
 
   .ed-pipeline-lead-row--selected {
@@ -7379,6 +7409,11 @@ body.ed-nav-open {
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
+}
+
+.ed-pipeline-lead-row__parent > div:last-child {
+  min-width: 0;
+  flex: 1;
 }
 
 .ed-pipeline-lead-row__avatar {
@@ -7398,12 +7433,18 @@ body.ed-nav-open {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ed-pipeline-lead-row__phone {
   margin: 0.1rem 0 0;
   font-size: 0.75rem;
   color: var(--ed-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ed-phone-link {
@@ -7473,17 +7514,31 @@ body.ed-nav-open {
   margin: 0;
   font-size: 0.8125rem;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ed-pipeline-lead-row__interest-sub {
   margin: 0.1rem 0 0;
   font-size: 0.75rem;
   color: var(--ed-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ed-pipeline-lead-row__contact {
   font-size: 0.75rem;
   color: var(--ed-muted);
+  min-width: 0;
+}
+
+.ed-pipeline-lead-row__contact p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ed-pipeline-lead-row__followup {
@@ -7535,6 +7590,8 @@ body.ed-nav-open {
 
 .ed-pipeline-status-badge {
   display: inline-flex;
+  align-items: center;
+  max-width: 100%;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   font-size: 0.6875rem;

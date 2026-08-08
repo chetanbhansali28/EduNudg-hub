@@ -2,12 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   buildLeadTimeline,
   computeLeadPipelineStats,
+  countEligibleBulkConvertLeads,
   filterCenterLeads,
   formatLeadContactWhen,
+  isLeadEligibleForBulkConvert,
   leadStatusPresentation,
   leadStudentInterest,
   paginateItems,
   paginationLabel,
+  summarizeBulkConvertResult,
 } from "@/lib/centerLeadsHelpers";
 import type { LeadRow } from "@/lib/leadsApi";
 
@@ -91,5 +94,21 @@ describe("centerLeadsHelpers", () => {
 
   it("leadStudentInterest uses child name and status subtitle", () => {
     expect(leadStudentInterest(sampleLead({ status: "qualified" })).subtitle).toBe("Trial pending");
+  });
+
+  it("isLeadEligibleForBulkConvert requires open status and names", () => {
+    expect(isLeadEligibleForBulkConvert(sampleLead())).toBe(true);
+    expect(isLeadEligibleForBulkConvert(sampleLead({ status: "converted" }))).toBe(false);
+    expect(isLeadEligibleForBulkConvert(sampleLead({ child_name: "" }))).toBe(false);
+    expect(countEligibleBulkConvertLeads([sampleLead(), sampleLead({ id: "lead-2", child_name: null })])).toBe(1);
+  });
+
+  it("summarizeBulkConvertResult reports converted and skipped counts", () => {
+    expect(
+      summarizeBulkConvertResult({
+        converted: [{ lead_id: "a", student_id: "s1" }],
+        errors: [{ lead_id: "b", message: "Missing child name" }],
+      })
+    ).toBe("1 lead converted to students. 1 skipped.");
   });
 });
