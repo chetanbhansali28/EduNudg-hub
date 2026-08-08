@@ -7,10 +7,12 @@ import type { Membership } from "@/hooks/useMembership";
 import { LoginPage } from "./LoginPage";
 import { RequireMembership } from "./RequireMembership";
 
-const { authState, membershipState, tenantState, portalBrandingState } = vi.hoisted(() => ({
+const { authState, membershipState, tenantState, portalBrandingState, signOut } = vi.hoisted(() => ({
   authState: {
-    session: { user: { id: "user-1" } } as { user: { id: string } },
-    user: { id: "user-1" } as { id: string },
+    session: { user: { id: "user-1", email: "stranger@gmail.com" } } as {
+      user: { id: string; email?: string };
+    },
+    user: { id: "user-1", email: "stranger@gmail.com" } as { id: string; email?: string },
   },
   membershipState: {
     data: [] as Membership[],
@@ -30,6 +32,10 @@ const { authState, membershipState, tenantState, portalBrandingState } = vi.hois
     isFetched: true,
     isFetching: false,
   },
+  signOut: vi.fn().mockImplementation(async () => {
+    authState.session = null;
+    authState.user = null;
+  }),
 }));
 
 vi.mock("@/bootstrap/AuthProvider", () => ({
@@ -40,6 +46,7 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
     signInWithEmail: vi.fn(),
     signInWithOtpPhone: vi.fn().mockResolvedValue({ error: null }),
     signInWithPasskey: vi.fn().mockResolvedValue({ error: null }),
+    signOut,
   }),
 }));
 
@@ -133,6 +140,9 @@ function renderProtectedRoute(
 
 describe("RequireMembership", () => {
   beforeEach(() => {
+    signOut.mockClear();
+    authState.session = { user: { id: "user-1", email: "stranger@gmail.com" } };
+    authState.user = { id: "user-1", email: "stranger@gmail.com" };
     membershipState.data = [];
     membershipState.isLoading = false;
     tenantState.portalType = "platform";
@@ -148,7 +158,8 @@ describe("RequireMembership", () => {
     renderProtectedRoute("/admin");
 
     await waitFor(() => {
-      expect(screen.getByText(/do not have access to this portal/i)).toBeDefined();
+      expect(signOut).toHaveBeenCalled();
+      expect(screen.getByRole("alert").textContent).toMatch(/stranger@gmail.com is not authorized/i);
     });
 
     expect(screen.queryByText("Admin home")).toBeNull();
