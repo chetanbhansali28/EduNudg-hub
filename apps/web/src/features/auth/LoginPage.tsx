@@ -16,6 +16,7 @@ import type { MarketingPublicOutletContext } from "@/features/marketing/Marketin
 import { postLoginPath } from "./postLoginPath";
 import { formatLoginAccessDeniedMessage } from "./loginAccessMessage";
 import { buildStaffOAuthRedirectUrl } from "@/services/auth/oauthRedirect";
+import { resolveSafeInternalPath } from "@/lib/safeInternalPath";
 
 const REMEMBER_KEY = "edunudg_remember_email";
 
@@ -89,8 +90,7 @@ export function LoginPage() {
     !session || accessPending ? false : hasPortalMembership(memberships, portalTenant);
 
   const goAfterLogin = useCallback(() => {
-    const next = searchParams.get("next");
-    const path = next?.startsWith("/") ? next : postLoginPath({ portalType });
+    const path = resolveSafeInternalPath(searchParams.get("next"), postLoginPath({ portalType }));
     navigate(path, { replace: true });
   }, [navigate, portalType, searchParams]);
 

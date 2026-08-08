@@ -89,6 +89,22 @@ describe("AuthHandoffPage", () => {
     expect((await screen.findByRole("alert")).textContent).toMatch(/missing vite_supabase_url/i);
   });
 
+  it("regression_rejects_unsafe_next_on_handoff", async () => {
+    verifyOtpMock.mockResolvedValue({ error: null });
+
+    const router = createMemoryRouter(
+      [
+        { path: "/auth/handoff", element: <AuthHandoffPage /> },
+        { path: "/", element: <div>Portal home</div> },
+      ],
+      { initialEntries: ["/auth/handoff?token_hash=test-hash&next=//evil.com"] }
+    );
+
+    render(<RouterProvider router={router} />);
+
+    await expectRedirectTo("Portal home");
+  });
+
   it("regression_shows_error_when_token_hash_missing", async () => {
     const router = createMemoryRouter([{ path: "/auth/handoff", element: <AuthHandoffPage /> }], {
       initialEntries: ["/auth/handoff?next=/app"],

@@ -257,7 +257,8 @@ pnpm dlx supabase functions deploy center-owner-credentials
 |----------|--------|
 | OAuth `redirectTo` → `/login` (keeps safe `?next=`) | Done — `buildStaffOAuthRedirectUrl` |
 | Legacy OAuth hash on `/` → redirect to `/login` | Done — `OAuthReturnRedirect` |
-| Unauthorized message names signed-in email + **Sign out** | Done — auto sign-out + inline error on `/login` |
+| Unauthorized message + auto sign-out | Done — inline error on `/login` |
+| `?next=` open-redirect hardening | Done — `isSafeInternalPath` rejects `//` and absolute URLs |
 | Student Google on learn | Deferred — RPC gate only |
 
 Track regressions: `regression_google_oauth_uses_login_redirect_url`, `regression_oauth_hash_on_homepage_redirects_to_login`.

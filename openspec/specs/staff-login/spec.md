@@ -21,7 +21,7 @@ The staff login form SHALL render a primary email/password submit button whose a
 - **WHEN** the user completes Google OAuth
 - **THEN** Supabase SHALL redirect to `{origin}/login` (preserving safe `?next=` when present)
 - **AND** if the user lacks portal membership the app SHALL sign them out automatically and show: `{email} is not authorized for this website. Contact your administrator to request access.`
-- **AND** if the user has membership they SHALL redirect to the portal app route (`/admin`, `/app`, or `/`)
+- **AND** post-login `?next=` values MUST be same-origin relative paths (`/admin`, `/app`) — protocol-relative (`//…`) and absolute URLs are rejected
 
 #### Scenario: Split-screen platform login smoke
 

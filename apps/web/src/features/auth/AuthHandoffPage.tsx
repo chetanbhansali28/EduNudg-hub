@@ -7,6 +7,7 @@ import {
   portalOverrideSearchParams,
   writePortalOverride,
 } from "@/lib/portalOverride";
+import { resolveSafeInternalPath } from "@/lib/safeInternalPath";
 
 /**
  * Completes platform-admin portal handoff on the target host via verifyOtp.
@@ -20,7 +21,7 @@ export function AuthHandoffPage() {
 
   useEffect(() => {
     const tokenHash = searchParams.get("token_hash")?.trim();
-    const next = searchParams.get("next")?.trim() || "/";
+    const next = resolveSafeInternalPath(searchParams.get("next"), "/");
 
     if (!tokenHash) {
       setError("This sign-in link is incomplete. Open the portal again from the admin Brands page.");
@@ -46,7 +47,7 @@ export function AuthHandoffPage() {
         const override = parsePortalOverrideFromSearch(searchParams.toString());
         if (override) writePortalOverride(override);
 
-        const path = next.startsWith("/") ? next : `/${next}`;
+        const path = next;
         const qs = override ? `?${portalOverrideSearchParams(override).toString()}` : "";
         const destination = `${path}${qs}`;
 

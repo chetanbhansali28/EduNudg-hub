@@ -248,6 +248,36 @@ describe("LoginPage", () => {
     });
   });
 
+  it("regression_rejects_protocol_relative_next_redirect", async () => {
+    authState.session = { user: { id: "user-1" } };
+    authState.user = { id: "user-1" };
+    membershipState.data = [
+      {
+        id: "1",
+        role_key: "platform_admin",
+        scope_type: "platform",
+        brand_id: null,
+        center_id: null,
+      },
+    ];
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const router = createMemoryRouter(
+      [
+        { path: "/login", element: <LoginPage /> },
+        { path: "/admin", element: <div>Admin home</div> },
+      ],
+      { initialEntries: ["/login?next=//evil.com"] }
+    );
+    render(
+      <QueryClientProvider client={qc}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    );
+
+    await expectRedirectTo("Admin home");
+  });
+
   it("regression_honors_next_query_param_after_login", async () => {
     authState.session = { user: { id: "user-1" } };
     authState.user = { id: "user-1" };

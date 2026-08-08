@@ -3,17 +3,18 @@ import { buildStaffOAuthRedirectUrl, isOAuthCallbackHash } from "./oauthRedirect
 
 describe("oauthRedirect", () => {
   it("buildStaffOAuthRedirectUrl targets /login on current origin", () => {
-    expect(buildStaffOAuthRedirectUrl("")).toBe("http://localhost:9000/login");
+    expect(buildStaffOAuthRedirectUrl("")).toBe(`${window.location.origin}/login`);
   });
 
   it("preserves safe next query param", () => {
     expect(buildStaffOAuthRedirectUrl("?next=%2Fadmin")).toBe(
-      "http://localhost:9000/login?next=%2Fadmin"
+      `${window.location.origin}/login?next=%2Fadmin`
     );
   });
 
   it("ignores unsafe next values", () => {
-    expect(buildStaffOAuthRedirectUrl("?next=https://evil.test")).toBe("http://localhost:9000/login");
+    expect(buildStaffOAuthRedirectUrl("?next=https://evil.test")).toBe(`${window.location.origin}/login`);
+    expect(buildStaffOAuthRedirectUrl("?next=//evil.com")).toBe(`${window.location.origin}/login`);
   });
 
   it("detects OAuth callback hash fragments", () => {

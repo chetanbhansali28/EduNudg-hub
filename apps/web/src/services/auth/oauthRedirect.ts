@@ -1,3 +1,5 @@
+import { isSafeInternalPath } from "@/lib/safeInternalPath";
+
 /** OAuth return URL for staff portals — always `/login` so membership gate runs. */
 export function buildStaffOAuthRedirectUrl(search = ""): string {
   const params = new URLSearchParams(search);
@@ -7,8 +9,8 @@ export function buildStaffOAuthRedirectUrl(search = ""): string {
       : "http://localhost:9000";
   const url = new URL("/login", origin);
   const next = params.get("next");
-  if (next?.startsWith("/")) {
-    url.searchParams.set("next", next);
+  if (isSafeInternalPath(next)) {
+    url.searchParams.set("next", next.trim());
   }
   return url.toString();
 }
