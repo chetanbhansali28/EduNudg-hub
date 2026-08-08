@@ -13,10 +13,17 @@ Supabase `signInWithOAuth({ provider: 'google' | 'facebook' })`. Link row in `au
 
 ## Passkeys (WebAuthn)
 
-1. Register: `@simplewebauthn/browser` → Edge Function `passkey-register`
-2. Store in `passkey_credentials`
-3. Login: `/login` **Log in with passkey** (secondary) → `passkeyService` → Edge Function `passkey-verify` (`login-options` / `login-verify`)
-4. Until `passkey-verify` is wired with `@simplewebauthn/server`, the client shows a clear configuration error.
+1. **Register** (while signed in): Settings → **Passkeys** → **Add passkey on this device** — works on desktop (Touch ID / Windows Hello) and mobile (Face ID / fingerprint) over HTTPS.
+2. Store credential in `passkey_credentials` via Edge Function `passkey-verify` (`register-options` / `register-verify`).
+3. **Login**: `/login` **Log in with passkey** → `passkeyService` → `passkey-verify` (`login-options` / `login-verify`) → `verifyOtp` session.
+4. Deploy after schema push:
+
+```bash
+pnpm dlx supabase@2.104.0 db push
+pnpm dlx supabase@2.104.0 functions deploy passkey-verify
+```
+
+RP ID: `localhost` for `*.localhost` dev hosts; production hostname (e.g. `edunudg-hub.vercel.app`) for Vercel. Add production origin to Supabase Auth redirect URLs.
 
 ## Email
 

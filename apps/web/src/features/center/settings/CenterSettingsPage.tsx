@@ -11,6 +11,7 @@ import {
   SettingsStack,
 } from "@edunudg/ui";
 import { useAuth } from "@/bootstrap/AuthProvider";
+import { PasskeySecurityCard } from "@/features/auth/PasskeySecurityCard";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchCenterPublicProfile, updateCenterPublicProfile } from "@/lib/centerProfileApi";
 import {
@@ -132,6 +133,7 @@ export function CenterSettingsPage() {
           </SettingsSection>
 
           <CenterPublicProfileForm brandId={tenant.brandId} centerId={tenant.centerId} profile={p} />
+          <PasskeySecurityCard />
         </SettingsStack>
       )}
     </div>

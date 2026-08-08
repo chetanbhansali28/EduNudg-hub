@@ -97,7 +97,7 @@ OAuth buttons on `/login` respect platform integration flags in `platform_settin
 |--------|----------------|
 | Google SSO | Log in with Google |
 | Facebook SSO | Log in with Facebook |
-| Passkeys | Log in with passkey (secondary; requires deployed `passkey-verify` Edge Function) |
+| Passkeys | Log in with passkey (secondary; requires deployed `passkey-verify` Edge Function + user registers passkey in Settings) |
 
 Email/password remains the primary method when **Email & Password** is enabled.
 

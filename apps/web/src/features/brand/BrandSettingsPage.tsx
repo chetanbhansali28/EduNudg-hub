@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input, MutationError, SaveButton, Select, Textarea } from "@edunudg/ui";
+import { PasskeySecurityCard } from "@/features/auth/PasskeySecurityCard";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
@@ -287,6 +288,7 @@ export function BrandSettingsPage() {
           </section>
         </div>
 
+        <PasskeySecurityCard />
       </div>
 
       {isDesktop ? <p className="ed-brand-settings-page__footer">© 2024 EduNudge Platform v2.4.1</p> : null}

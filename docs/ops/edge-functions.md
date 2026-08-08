@@ -5,7 +5,7 @@ EduNudg functions live in [`supabase/functions/`](../../supabase/functions/):
 | Function | Purpose |
 |----------|---------|
 | `whatsapp-otp` | Send/verify WhatsApp OTP (stub — wire Twilio/Gupshup later) |
-| `passkey-verify` | WebAuthn login (`login-options` / `login-verify`; wire `@simplewebauthn/server` for production sessions) |
+| `passkey-verify` | WebAuthn login + registration (`login-options`, `login-verify`, `register-options`, `register-verify`, `list`, `delete`) |
 | `brand-owner-credentials` | Platform admin: create/update brand owner Auth user + membership |
 | `center-owner-credentials` | Brand staff (or platform admin): create/update center owner Auth user + `center_owner` membership |
 | `platform-portal-handoff` | Platform admin: one-time `hashed_token` for cross-host `/auth/handoff` sign-in |

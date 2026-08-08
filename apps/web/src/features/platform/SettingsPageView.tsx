@@ -31,6 +31,7 @@ import {
   PLATFORM_PUBLIC_SETTING_LABELS,
   platformSettingsDomain,
 } from "@/lib/platformSettingsDisplay";
+import { PasskeySecurityCard } from "@/features/auth/PasskeySecurityCard";
 import "./settingsPage.css";
 
 const ICON_SHIELD = (
@@ -216,7 +217,12 @@ export function SettingsPageView({
       {loading ? (
         <p className="ed-pfset-loading">Loading platform settings…</p>
       ) : (
-        <SettingsCards flags={flags} onToggle={toggle} onExport={onExport} exportPending={exportPending} />
+        <>
+          <SettingsCards flags={flags} onToggle={toggle} onExport={onExport} exportPending={exportPending} />
+          <div style={{ marginTop: "1.5rem" }}>
+            <PasskeySecurityCard />
+          </div>
+        </>
       )}
     </PlatformSettingsShell>
   );

@@ -6,7 +6,21 @@ Platform, brand, and center staff sign in at `/login` with email/password and op
 
 ### Requirement: Login form exposes a unique primary submit control
 
-The staff login form SHALL render a primary email/password submit button whose accessible name is exactly `Log in` (or `Signing in…` while the request is in flight). OAuth actions SHALL use distinct accessible names that include the provider (`Log in with Google`, `Log in with Facebook`, `Log in with WhatsApp`). When passkeys are enabled, a secondary **Log in with passkey** control SHALL appear below social providers.
+The staff login form SHALL render a primary email/password submit button whose accessible name is exactly `Log in` (or `Signing in…` while the request is in flight). OAuth actions SHALL use distinct accessible names that include the provider (`Log in with Google`, `Log in with Facebook`, `Log in with WhatsApp`). When passkeys are enabled, a secondary **Log in with passkey** control SHALL appear below social providers. Users MUST register a passkey while signed in (Settings → Passkeys) before passkey login succeeds.
+
+#### Scenario: Passkey login requires prior registration
+
+- **GIVEN** passkeys are enabled and the user has no `passkey_credentials` row
+- **WHEN** they choose **Log in with passkey**
+- **THEN** the app SHALL show a clear error (no passkey found / not registered)
+- **AND** SHALL NOT create a session
+
+#### Scenario: Passkey registration while signed in
+
+- **GIVEN** a signed-in staff user on platform, brand, or center settings
+- **WHEN** they add a passkey from Settings
+- **THEN** the SPA SHALL call `passkey-verify` with `register-options` and `register-verify`
+- **AND** store the credential in `passkey_credentials`
 
 #### Scenario: Primary submit is distinguishable from OAuth
 
