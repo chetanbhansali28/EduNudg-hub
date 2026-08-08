@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button, IconGoogle, IconWhatsApp, Input, LoginLayout, PasswordInput, ThemeProvider } from "@edunudg/ui";
@@ -14,11 +14,14 @@ import { resolveLoginBranding } from "@/lib/portalBranding";
 import { learnPortalLoginUrl } from "@/lib/centerPublicNavUrls";
 import type { MarketingPublicOutletContext } from "@/features/marketing/MarketingPublicLayout";
 import { postLoginPath } from "./postLoginPath";
+import { formatLoginAccessDeniedMessage } from "./loginAccessMessage";
+import { buildStaffOAuthRedirectUrl } from "@/services/auth/oauthRedirect";
 
 const REMEMBER_KEY = "edunudg_remember_email";
 
 export function LoginPage() {
-  const { session, signInWithOAuth, signInWithEmail, signInWithOtpPhone, signInWithPasskey } = useAuth();
+  const { session, user, signInWithOAuth, signInWithEmail, signInWithOtpPhone, signInWithPasskey, signOut } =
+    useAuth();
   const tenant = useTenant();
   const { tenant: portalTenant, isResolving: portalTenantResolving } = useResolvedPortalTenant();
   const navigate = useNavigate();
@@ -54,6 +57,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showWhatsappPhone, setShowWhatsappPhone] = useState(false);
+  const accessDeniedHandled = useRef(false);
 
   const branding = useMemo(
     () =>
@@ -95,6 +99,23 @@ export function LoginPage() {
     goAfterLogin();
   }, [session, location.pathname, accessPending, hasAccess, goAfterLogin]);
 
+  useEffect(() => {
+    if (isStudentPortal || accessPending) return;
+
+    if (!session) {
+      accessDeniedHandled.current = false;
+      return;
+    }
+
+    if (hasAccess || accessDeniedHandled.current) return;
+
+    accessDeniedHandled.current = true;
+    const deniedEmail = user?.email ?? session.user.email;
+    void signOut().finally(() => {
+      setError(formatLoginAccessDeniedMessage(deniedEmail));
+    });
+  }, [session, user?.email, hasAccess, accessPending, isStudentPortal, signOut]);
+
   const handleEmailSignIn = async () => {
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !password) {
@@ -132,6 +153,11 @@ export function LoginPage() {
           { label: "Help", href: "/help" },
         ]
       : undefined;
+
+  const oauthRedirectTo = useMemo(() => {
+    const query = searchParams.toString();
+    return buildStaffOAuthRedirectUrl(query ? `?${query}` : "");
+  }, [searchParams]);
 
   const showEmailAuth = integrations.auth_email;
   const showGoogleAuth = integrations.auth_google;
@@ -208,12 +234,6 @@ export function LoginPage() {
           </form>
         ) : null}
 
-        {session && !accessPending && !hasAccess ? (
-          <p role="alert" className="ed-login__error">
-            You are signed in but do not have access to this portal. Contact your administrator.
-          </p>
-        ) : null}
-
         {error && (
           <p role="alert" className="ed-login__error">
             {error}
@@ -230,7 +250,9 @@ export function LoginPage() {
                   <Button
                     variant="oauth-google"
                     block
-                    onClick={() => signInWithOAuth("google").catch((e) => setError(e.message))}
+                    onClick={() =>
+                      signInWithOAuth("google", { redirectTo: oauthRedirectTo }).catch((e) => setError(e.message))
+                    }
                   >
                     <IconGoogle aria-hidden />
                     Log in with Google
@@ -240,7 +262,9 @@ export function LoginPage() {
                   <Button
                     variant="ghost"
                     block
-                    onClick={() => signInWithOAuth("facebook").catch((e) => setError(e.message))}
+                    onClick={() =>
+                      signInWithOAuth("facebook", { redirectTo: oauthRedirectTo }).catch((e) => setError(e.message))
+                    }
                   >
                     Log in with Facebook
                   </Button>

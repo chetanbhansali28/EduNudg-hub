@@ -4,6 +4,7 @@ import { ThemeProvider } from "@edunudg/ui";
 import { AuthProvider } from "@/bootstrap/AuthProvider";
 import { TenantProvider, useTenant } from "@/bootstrap/TenantProvider";
 import { PortalDocumentHead } from "@/components/PortalDocumentHead";
+import { OAuthReturnRedirect } from "@/features/auth/OAuthReturnRedirect";
 import { shouldUseAdminThemeProvider } from "@/lib/appThemeShell";
 import { AppRoutes } from "@/routes/AppRoutes";
 
@@ -20,6 +21,7 @@ export function App() {
       <PortalDocumentHead />
       <AuthProvider>
         <BrowserRouter>
+          <OAuthReturnRedirect />
           <AppThemeShell>
             <AppRoutes />
           </AppThemeShell>

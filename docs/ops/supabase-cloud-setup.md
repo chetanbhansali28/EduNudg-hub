@@ -55,7 +55,7 @@ pnpm dlx supabase functions deploy platform-portal-handoff
 
 Add production URLs when you deploy.
 
-Google / Facebook: configure under **Authentication → Providers** in the dashboard (see [OAuth providers](#5-oauth-providers-google--facebook) below).
+Google / Facebook: configure under **Authentication → Providers** in the dashboard (see [OAuth providers](./supabase-cloud-setup.md#5-oauth-providers-google--facebook)). Rollout per persona: [google-oauth-rollout-runbook.md](./google-oauth-rollout-runbook.md).
 
 ## 5. OAuth providers (Google & Facebook)
 

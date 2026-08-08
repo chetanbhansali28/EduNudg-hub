@@ -24,6 +24,8 @@ Staff fallback: `signInWithPassword` / magic link invites.
 
 Post-login redirect honors `?next=` on `/login` (used after platform-admin handoff).
 
+OAuth staff sign-in (`signInWithOAuth`) redirects to `{origin}/login` so membership checks run before `/admin` or `/app`. Legacy returns to `/` with `#access_token` are forwarded to `/login` by `OAuthReturnRedirect`.
+
 ## Platform admin cross-portal handoff
 
 Platform admins open brand/center/learn/parents hosts without a separate password:

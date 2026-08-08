@@ -62,6 +62,8 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 - Site URL: `http://localhost:9000` (not `localhost:3000`)
 - Redirect URLs: `http://localhost:9000/**`
 
+**Google / social login rollout:** [google-oauth-rollout-runbook.md](./google-oauth-rollout-runbook.md) — access tables, SQL to grant platform membership, per-portal test checklists.
+
 ## Deploy (Vercel)
 
 1. Link repo to Vercel (Root Directory: `apps/web`)

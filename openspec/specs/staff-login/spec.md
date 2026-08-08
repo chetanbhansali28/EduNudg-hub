@@ -15,6 +15,14 @@ The staff login form SHALL render a primary email/password submit button whose a
 - **THEN** using an **exact** name match resolves to the primary email submit control only
 - **AND** substring matching without exactness also matches OAuth buttons whose names start with `Log in with …`
 
+#### Scenario: OAuth returns to login for membership gate
+
+- **GIVEN** a staff portal with Google auth enabled
+- **WHEN** the user completes Google OAuth
+- **THEN** Supabase SHALL redirect to `{origin}/login` (preserving safe `?next=` when present)
+- **AND** if the user lacks portal membership the app SHALL sign them out automatically and show: `{email} is not authorized for this website. Contact your administrator to request access.`
+- **AND** if the user has membership they SHALL redirect to the portal app route (`/admin`, `/app`, or `/`)
+
 #### Scenario: Split-screen platform login smoke
 
 - **GIVEN** the platform marketing login page

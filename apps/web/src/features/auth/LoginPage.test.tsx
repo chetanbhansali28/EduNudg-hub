@@ -11,6 +11,8 @@ import { exactAccessibleName } from "@/test/exactAccessibleName";
 const {
   signInWithEmail,
   signInWithPasskey,
+  signInWithOAuth,
+  signOut,
   authState,
   membershipState,
   tenantState,
@@ -20,9 +22,19 @@ const {
 } = vi.hoisted(() => ({
   signInWithEmail: vi.fn(),
   signInWithPasskey: vi.fn().mockResolvedValue({ error: null }),
+  signInWithOAuth: vi.fn().mockResolvedValue(undefined),
+  signOut: vi.fn().mockImplementation(async () => {
+    authState.session = null;
+    authState.user = null;
+    try {
+      rerenderRef.current();
+    } catch {
+      // Router unmounted during async sign-out in tests
+    }
+  }),
   authState: {
-    session: null as { user: { id: string } } | null,
-    user: null as { id: string } | null,
+    session: null as { user: { id: string; email?: string } } | null,
+    user: null as { id: string; email?: string } | null,
   },
   membershipState: {
     data: [] as Membership[],
@@ -59,7 +71,6 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
   useAuth: () => ({
     session: authState.session,
     user: authState.user,
-    signInWithOAuth: vi.fn(),
     signInWithEmail: async (email: string, password: string) => {
       const result = await signInWithEmail(email, password);
       if (!result.error) {
@@ -78,8 +89,10 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
       }
       return result;
     },
+    signInWithOAuth,
     signInWithOtpPhone: vi.fn().mockResolvedValue({ error: null }),
     signInWithPasskey,
+    signOut,
   }),
 }));
 
@@ -162,6 +175,8 @@ describe("LoginPage", () => {
   beforeEach(() => {
     signInWithEmail.mockReset();
     signInWithPasskey.mockClear();
+    signInWithOAuth.mockClear();
+    signOut.mockClear();
     authState.session = null;
     authState.user = null;
     membershipState.data = [];
@@ -204,23 +219,33 @@ describe("LoginPage", () => {
     expect(signInWithEmail).toHaveBeenCalledWith("admin@edunudg.com", "admin");
   });
 
-  it("regression_does_not_redirect_when_session_lacks_portal_membership", async () => {
-    authState.session = { user: { id: "user-1" } };
-    authState.user = { id: "user-1" };
+  it("regression_unauthorized_user_is_signed_out_with_access_denied_message", async () => {
+    authState.session = { user: { id: "user-1", email: "stranger@gmail.com" } };
+    authState.user = { id: "user-1", email: "stranger@gmail.com" };
     membershipState.data = [];
 
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     renderLogin("/login");
 
     await waitFor(() => {
-      expect(screen.getByText(/do not have access to this portal/i)).toBeDefined();
+      expect(signOut).toHaveBeenCalled();
+      expect(screen.getByRole("alert").textContent).toContain("stranger@gmail.com is not authorized");
     });
 
+    expect(screen.queryByRole("button", { name: exactAccessibleName("Sign out") })).toBeNull();
     expect(screen.queryByText("Admin home")).toBeNull();
     expect(consoleSpy).not.toHaveBeenCalledWith(
       expect.stringContaining("Maximum update depth exceeded")
     );
     consoleSpy.mockRestore();
+  });
+
+  it("regression_google_oauth_uses_login_redirect_url", () => {
+    renderLogin("/login?next=%2Fadmin");
+    fireEvent.click(screen.getByRole("button", { name: exactAccessibleName("Log in with Google") }));
+    expect(signInWithOAuth).toHaveBeenCalledWith("google", {
+      redirectTo: `${window.location.origin}/login?next=%2Fadmin`,
+    });
   });
 
   it("regression_honors_next_query_param_after_login", async () => {

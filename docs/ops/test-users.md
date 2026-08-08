@@ -7,6 +7,8 @@
 3. Copy [`apps/web/.env.example`](../../apps/web/.env.example) → `apps/web/.env` with your Supabase **Project URL** and **anon** key
 4. `pnpm dev` → open **http://localhost:9000/login** and sign in
 
+Google OAuth per portal (tables, SQL, test checklists): [google-oauth-rollout-runbook.md](./google-oauth-rollout-runbook.md).
+
 **Password for all seeded accounts:** `admin`
 
 ## Accounts
