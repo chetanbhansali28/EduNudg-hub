@@ -34,6 +34,8 @@ Abacus Classic sections (in order): hero → programs grid (from brand curriculu
 
 Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_theme` and show the same programs grid from brand curriculum. Center copy (hero, city) comes from `mergeAbacusClassicCenterLandingConfig()` merged with `brand_settings.center_landing`.
 
+**Franchise apply is brand-only:** center public layouts run `sanitizeCenterPublicNavConfig()` so **Apply franchise** / `#apply` secondary CTAs never appear on center hosts (Vercel `?portal=center` or `{center}.{brand}.localhost`). Brand landings keep dual CTAs.
+
 Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). When no named homepage cards exist, the grid falls back to published curriculum programs.
 
 ## Public nav anchors (all themes)

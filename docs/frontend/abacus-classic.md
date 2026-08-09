@@ -234,7 +234,8 @@ Prerequisites: migration `039` applied, seed run, hosts entry for `smart-brain-a
 
 ### Nav and hero
 
-- [ ] Sticky nav shows logo/wordmark, section links, **Book free demo** and **Apply franchise**
+- [ ] Sticky nav shows logo/wordmark, section links, **Book free demo** and **Apply franchise** (brand host only)
+- [ ] Center host sticky nav shows **Book a free trial** (or enroll CTA) and **does not** show **Apply franchise**
 - [ ] Mobile: hamburger opens dropdown with section links; both CTAs remain visible
 - [ ] Hero shows age badge, headline, subtitle, and both CTAs
 

@@ -31,8 +31,9 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
-  const secondaryLabel = config.nav.secondaryCtaLabel ?? "Apply franchise";
-  const secondaryHref = config.nav.secondaryCtaHref ?? "apply";
+  const secondaryLabel = config.nav.secondaryCtaLabel?.trim() || "";
+  const secondaryHref = config.nav.secondaryCtaHref?.trim() || "";
+  const showSecondaryCta = Boolean(secondaryLabel && secondaryHref);
 
   const drawer =
     menuOpen && typeof document !== "undefined"
@@ -115,7 +116,9 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
             </a>
           ) : null}
           <AbacusCtaButton label={config.nav.ctaLabel} href={config.nav.ctaHref} variant="nav-enroll" />
-          <AbacusCtaButton label={secondaryLabel} href={secondaryHref} variant="nav-apply" />
+          {showSecondaryCta ? (
+            <AbacusCtaButton label={secondaryLabel} href={secondaryHref} variant="nav-apply" />
+          ) : null}
         </div>
       </div>
 

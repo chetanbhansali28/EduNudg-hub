@@ -61,6 +61,16 @@ The center public homepage SHALL display profile fields from `get_center_landing
 - **THEN** updated display name, blurb, contact, photo, and social links are visible
 - **AND** the nav shows the brand logo only (no center logo)
 
+### Requirement: No franchise apply on center public landing
+
+Center (franchise) public landing pages SHALL NOT show brand franchise-application CTAs. **Apply franchise** (and `#apply` / `apply` secondary CTAs) are brand-homepage only.
+
+#### Scenario: Center Abacus Classic nav omits Apply franchise
+
+- **WHEN** a visitor opens a center public site on Abacus Classic (or Spark) theme
+- **THEN** the sticky nav and hero MUST NOT show an **Apply franchise** button
+- **AND** `sanitizeCenterPublicNavConfig` strips secondary franchise CTAs and `#apply` nav links before render
+
 #### Scenario: Authorized editors
 
 - **WHEN** a user without center, brand, or platform access attempts to update another center's profile

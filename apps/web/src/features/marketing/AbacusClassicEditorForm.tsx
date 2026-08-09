@@ -175,17 +175,19 @@ export function AbacusClassicEditorForm({
               commit({ ...config, nav: { ...config.nav, ctaLabel: v }, hero: { ...config.hero, ctaLabel: v } })
             }
           />
-          <Input
-            label="Secondary CTA label (franchise)"
-            value={config.nav.secondaryCtaLabel ?? ""}
-            onChange={(v) =>
-              commit({
-                ...config,
-                nav: { ...config.nav, secondaryCtaLabel: v },
-                hero: { ...config.hero, secondaryCtaLabel: v },
-              })
-            }
-          />
+          {portalMode === "brand" ? (
+            <Input
+              label="Secondary CTA label (franchise)"
+              value={config.nav.secondaryCtaLabel ?? ""}
+              onChange={(v) =>
+                commit({
+                  ...config,
+                  nav: { ...config.nav, secondaryCtaLabel: v },
+                  hero: { ...config.hero, secondaryCtaLabel: v },
+                })
+              }
+            />
+          ) : null}
         </EditorFieldsGrid>
       </EditorAccordion>
 

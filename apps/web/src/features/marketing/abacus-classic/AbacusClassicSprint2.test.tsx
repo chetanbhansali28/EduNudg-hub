@@ -74,6 +74,38 @@ describe("Abacus Classic Sprint 2 — nav and hero CTAs", () => {
     expect(screen.getByRole("button", { name: "Book free demo" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Apply franchise" })).toBeDefined();
   });
+
+  it("regression_centerConfigHidesFranchiseApplyCta", () => {
+    const centerConfig = {
+      ...config,
+      nav: {
+        ...config.nav,
+        ctaLabel: "Book a free trial",
+        ctaHref: "#enroll",
+        secondaryCtaLabel: undefined,
+        secondaryCtaHref: undefined,
+      },
+      hero: {
+        ...config.hero,
+        ctaLabel: "Book a free trial",
+        ctaHref: "#enroll",
+        secondaryCtaLabel: undefined,
+        secondaryCtaHref: undefined,
+      },
+    };
+
+    render(
+      wrapWithLeadModal(
+        <MemoryRouter>
+          <AbacusClassicNav config={centerConfig} />
+          <AbacusClassicHero config={centerConfig} />
+        </MemoryRouter>
+      )
+    );
+
+    expect(screen.getAllByRole("button", { name: "Book a free trial" }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: "Apply franchise" })).toBeNull();
+  });
 });
 
 describe("Abacus Classic Sprint 2 — lead modals", () => {

@@ -32,4 +32,28 @@ describe("mergeAbacusClassicCenterLandingConfig", () => {
     expect(config.programsSection?.eyebrow).toBe("WHAT WE TEACH");
     expect(config.trustMedia?.cards).toHaveLength(3);
   });
+
+  it("regression_centerLandingOmitsFranchiseApplyCta", () => {
+    const config = mergeAbacusClassicCenterLandingConfig(
+      "Nilesh Gattani Center",
+      "Smart Brain Abacus",
+      "Pune",
+      {
+        nav: {
+          links: [{ label: "Why us", href: "#features" }],
+          ctaLabel: "Book a free trial",
+          ctaHref: "#enroll",
+          secondaryCtaLabel: "Apply franchise",
+          secondaryCtaHref: "apply",
+          adminHref: "/login",
+        },
+      }
+    );
+
+    expect(config.nav.secondaryCtaLabel).toBeUndefined();
+    expect(config.nav.secondaryCtaHref).toBeUndefined();
+    expect(config.hero.secondaryCtaLabel).toBeUndefined();
+    expect(config.hero.secondaryCtaHref).toBeUndefined();
+    expect(config.nav.ctaLabel).toBe("Book a free trial");
+  });
 });

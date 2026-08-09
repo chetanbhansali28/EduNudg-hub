@@ -169,6 +169,9 @@ export function mergeSparkAcademyCenterLandingConfig(
       links: partial?.nav?.links ?? centerBase.nav.links,
       ctaLabel: partial?.nav?.ctaLabel ?? centerBase.nav.ctaLabel,
       ctaHref: partial?.nav?.ctaHref ?? centerBase.nav.ctaHref,
+      // Franchise apply is brand-only — never inherit Spark secondary / #apply CTAs on centers.
+      secondaryCtaLabel: undefined,
+      secondaryCtaHref: undefined,
     },
     hero: {
       ...sparkBase.hero!,
@@ -180,6 +183,8 @@ export function mergeSparkAcademyCenterLandingConfig(
       subtitle: centerBase.hero.subtitle,
       ctaLabel: centerBase.hero.ctaLabel,
       ctaHref: centerBase.hero.ctaHref,
+      secondaryCtaLabel: undefined,
+      secondaryCtaHref: undefined,
     },
     featureSections: partial?.featureSections ?? centerBase.featureSections,
     featuresShowcase: {
@@ -229,8 +234,9 @@ export function mergeAbacusClassicCenterLandingConfig(
       links: partial?.nav?.links ?? centerBase.nav.links,
       ctaLabel: partial?.nav?.ctaLabel ?? centerBase.nav.ctaLabel,
       ctaHref: partial?.nav?.ctaHref ?? centerBase.nav.ctaHref,
-      secondaryCtaLabel: partial?.nav?.secondaryCtaLabel ?? abacusBase.nav.secondaryCtaLabel,
-      secondaryCtaHref: partial?.nav?.secondaryCtaHref ?? abacusBase.nav.secondaryCtaHref,
+      // Franchise apply is brand-only — never inherit Abacus secondary CTAs on centers.
+      secondaryCtaLabel: undefined,
+      secondaryCtaHref: undefined,
     },
     hero: {
       ...abacusBase.hero,
@@ -242,6 +248,8 @@ export function mergeAbacusClassicCenterLandingConfig(
       ctaLabel: centerBase.hero.ctaLabel,
       ctaHref: centerBase.hero.ctaHref,
       badge: partial?.hero?.badge ?? abacusBase.hero.badge,
+      secondaryCtaLabel: undefined,
+      secondaryCtaHref: undefined,
     },
     featureSections: partial?.featureSections ?? centerBase.featureSections,
     programsSection: {

@@ -71,6 +71,7 @@ description: Add EduNudg features using modular files, service layer, base theme
 - Student/login chrome: never clear `logo_url` / login copy when patching unrelated settings.
 - Helpers: `apps/web/src/lib/marketingMediaGuard.ts`.
 - Social Media Connect: Facebook/Instagram footer icons only — do **not** mount a WhatsApp float on public brand landing.
+- Center public landing: never inherit brand **Apply franchise** / `#apply` secondary CTAs — `sanitizeCenterPublicNavConfig` + center merge omit them.
 
 ## Lead lost (reference)
 

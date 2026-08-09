@@ -8,8 +8,9 @@ type Props = {
 
 export function AbacusClassicHero({ config }: Props) {
   const hero = config.hero;
-  const secondaryLabel = hero.secondaryCtaLabel ?? config.nav.secondaryCtaLabel ?? "Apply franchise";
-  const secondaryHref = hero.secondaryCtaHref ?? config.nav.secondaryCtaHref ?? "apply";
+  const secondaryLabel = (hero.secondaryCtaLabel ?? config.nav.secondaryCtaLabel)?.trim() || "";
+  const secondaryHref = (hero.secondaryCtaHref ?? config.nav.secondaryCtaHref)?.trim() || "";
+  const showSecondaryCta = Boolean(secondaryLabel && secondaryHref);
 
   return (
     <section className="ac-hero" id="hero">
@@ -31,7 +32,9 @@ export function AbacusClassicHero({ config }: Props) {
         <p className="ac-hero__subtitle">{hero.subtitle}</p>
         <div className="ac-hero__actions">
           <AbacusCtaButton label={hero.ctaLabel || config.nav.ctaLabel} href={hero.ctaHref || config.nav.ctaHref} variant="primary" />
-          <AbacusCtaButton label={secondaryLabel} href={secondaryHref} variant="secondary" />
+          {showSecondaryCta ? (
+            <AbacusCtaButton label={secondaryLabel} href={secondaryHref} variant="secondary" />
+          ) : null}
         </div>
       </div>
     </section>
