@@ -17,7 +17,7 @@ Parents enter the pipeline via brand student applications or direct center regis
 
 The brand host SHALL expose a student application with required fields: parent name, WhatsApp, email, child name, child DOB, city, and India 6-digit pincode; school name optional.
 
-On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`), not an inline Novu section. CTA hrefs and URL hashes `#enroll`, `#enroll-student`, and `#register` SHALL map to the enroll modal via `resolveLeadModalKind` / `LeadModalHashOpener`.
+On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`), not an inline Novu section. CTA hrefs and URL hashes `#enroll`, `#enroll-student`, and `#register` SHALL map to the enroll modal via `resolveLeadModalKind` / `LeadModalHashOpener`. The lead modal SHALL fit the device viewport: mobile near full-width single-column fields; desktop a centered card with two-column fields; modal body SHALL scroll within `100dvh` so the submit control is never clipped.
 
 Traceability: FR-B02, FR-B03, FR-B04
 
@@ -26,6 +26,12 @@ Traceability: FR-B02, FR-B03, FR-B04
 - **WHEN** a parent submits the student application on the brand public homepage
 - **THEN** the system creates or merges a lead via `submit_brand_student_application`
 - **AND** sets `lead_source = brand` with `center_id` null
+
+#### Scenario: Lead modal fits viewport on desktop and mobile
+
+- **WHEN** a visitor opens Book free demo / enroll on a short desktop or mobile viewport
+- **THEN** the modal panel is capped to the viewport height
+- **AND** the form body scrolls so the primary submit button remains reachable
 
 #### Scenario: Deep link opens enroll modal (Abacus/Spark)
 

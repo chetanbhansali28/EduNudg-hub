@@ -16,7 +16,7 @@ Prospective franchise owners apply to open a center under a brand via the brand 
 
 The brand host SHALL expose a franchise application (`#apply`) with extended fields: applicant name, email, phone, proposed franchise name, address, city, state, pincode, and experience.
 
-On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`). URL hash `#apply` and CTA href `apply` SHALL open the apply modal via `resolveLeadModalKind` / `LeadModalHashOpener`. Center hosts SHALL NOT expose the franchise apply modal.
+On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`). URL hash `#apply` and CTA href `apply` SHALL open the apply modal via `resolveLeadModalKind` / `LeadModalHashOpener`. Center hosts SHALL NOT expose the franchise apply modal. The apply modal SHALL use the same viewport-capped responsive layout as enroll (mobile full-width; desktop centered two-column fields; scrollable body).
 
 Traceability: FR-B01, FR-B03
 

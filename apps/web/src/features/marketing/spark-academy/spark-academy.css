@@ -1731,4 +1731,5 @@ body.sa-nav-drawer-open {
 
 .marketing-page--spark-academy .ac-modal__panel {
   border-radius: 1rem;
+  /* Height / scroll behavior inherited from .ac-modal__* in marketing.css */
 }

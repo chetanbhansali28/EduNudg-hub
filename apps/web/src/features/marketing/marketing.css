@@ -4139,12 +4139,15 @@ body.ac-nav-drawer-open {
   gap: 1rem;
 }
 
+/* Lead modals: viewport-capped on every device; body scrolls so submit is never clipped. */
 .ac-modal {
   border: none;
   padding: 0;
+  margin: auto;
   background: transparent;
-  max-width: none;
-  max-height: none;
+  width: min(520px, calc(100vw - 1.5rem));
+  max-width: min(520px, calc(100vw - 1.5rem));
+  max-height: calc(100dvh - 1.5rem);
 }
 
 .ac-modal::backdrop {
@@ -4152,7 +4155,10 @@ body.ac-nav-drawer-open {
 }
 
 .ac-modal__panel {
-  width: min(520px, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100dvh - 1.5rem);
   background: #fff;
   border-radius: 1rem;
   overflow: hidden;
@@ -4163,8 +4169,10 @@ body.ac-nav-drawer-open {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.75rem;
   padding: 1rem 1.25rem;
   border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
 }
 
 .ac-modal__header h2 {
@@ -4178,16 +4186,58 @@ body.ac-nav-drawer-open {
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .ac-modal__body {
   padding: 1.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
 }
 
 .ac-modal__grid {
   display: grid;
   gap: 0.75rem;
   margin-bottom: 1rem;
+  grid-template-columns: 1fr;
+}
+
+/* Mobile: near full-width sheet; single-column fields. */
+@media (max-width: 767px) {
+  .ac-modal {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .ac-modal__panel {
+    max-height: calc(100dvh - 1rem);
+    border-radius: 0.75rem;
+  }
+
+  .ac-modal__header,
+  .ac-modal__body {
+    padding: 0.875rem 1rem;
+  }
+}
+
+/* Desktop: centered card; two-column fields so the form fits shorter viewports. */
+@media (min-width: 768px) {
+  .ac-modal {
+    width: min(560px, calc(100vw - 2rem));
+    max-width: min(560px, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+  }
+
+  .ac-modal__panel {
+    max-height: calc(100dvh - 2rem);
+  }
+
+  .ac-modal__grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .ac-modal__success {
