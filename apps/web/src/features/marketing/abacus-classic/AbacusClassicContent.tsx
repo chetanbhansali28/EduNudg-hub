@@ -11,6 +11,8 @@ import { FeatureGridSection } from "./FeatureGridSection";
 import { FoundersSection } from "./FoundersSection";
 import { TrustMediaSection } from "./TrustMediaSection";
 import { GalleryMarqueeSection } from "./GalleryMarqueeSection";
+import { UpcomingEventsSection } from "../UpcomingEventsSection";
+import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
 
 function FaqList({ items }: { items: { question: string; answer: string }[] }) {
   return (
@@ -43,6 +45,9 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
   const showTestimonials = isAbacusSectionEnabled(config, "testimonials");
   const showFaq = isAbacusSectionEnabled(config, "faq") && config.faq.length > 0;
   const showGallery = isAbacusSectionEnabled(config, "gallery") && (config.gallery?.images.length ?? 0) > 0;
+  const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
+  const showUpcomingEvents =
+    isAbacusSectionEnabled(config, "upcomingEvents") && upcomingEvents.length > 0;
 
   return (
     <main className="ac-main">
@@ -54,6 +59,9 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
       {showFeatures ? <FeatureGridSection siteName={config.meta.siteName} sections={config.featureSections} /> : null}
       {showFounders && config.founders ? <FoundersSection founders={config.founders} /> : null}
       {showTrust && config.trustMedia ? <TrustMediaSection trust={config.trustMedia} /> : null}
+      {showUpcomingEvents && config.upcomingEvents ? (
+        <UpcomingEventsSection section={config.upcomingEvents} events={upcomingEvents} useLeadModals />
+      ) : null}
       {showTestimonials ? <TestimonialsCarousel testimonials={config.testimonials} /> : null}
       {showFaq ? (
         <section className="ac-faq" id="faq">

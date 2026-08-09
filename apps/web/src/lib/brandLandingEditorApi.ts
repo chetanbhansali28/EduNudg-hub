@@ -78,6 +78,12 @@ export function landingConfigToPartial(
           })),
         }
       : undefined,
+    upcomingEvents: config.upcomingEvents
+      ? {
+          ...config.upcomingEvents,
+          items: config.upcomingEvents.items.map((item) => ({ ...item })),
+        }
+      : undefined,
   };
 }
 

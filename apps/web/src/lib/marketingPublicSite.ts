@@ -29,6 +29,7 @@ const LEGACY_NAV_HREF_ALIASES: Record<string, string> = {
 const NOVU_SHARED: NavOptionDef[] = [
   { value: "#features", label: "Features (#features)", sectionKey: "featureScroll" },
   { value: CURRICULUM_NAV_HREF, label: "Curriculum (#curriculum)" },
+  { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
   { value: "#testimonials", label: "Testimonials (#testimonials)", sectionKey: "testimonials" },
   { value: "#faq", label: "FAQ (#faq)", sectionKey: "faq" },
 ];
@@ -58,6 +59,7 @@ const ABACUS_CLASSIC_OPTIONS: NavOptionDef[] = [
   { value: "#features", label: "Why us (#features)", sectionKey: "featureGrid" },
   { value: "#founders", label: "Leadership (#founders)", sectionKey: "founders" },
   { value: "#trust", label: "Trust & video (#trust)", sectionKey: "trustMedia" },
+  { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
   { value: "#testimonials", label: "Success stories (#testimonials)", sectionKey: "testimonials" },
   { value: "#faq", label: "FAQ (#faq)", sectionKey: "faq" },
   { value: "#gallery", label: "Gallery (#gallery)", sectionKey: "gallery" },
@@ -70,6 +72,7 @@ const SPARK_ACADEMY_OPTIONS: NavOptionDef[] = [
   { value: CURRICULUM_NAV_HREF, label: "Syllabus (#curriculum)", sectionKey: "curriculumSyllabus" },
   { value: "#features", label: "About us (#features)", sectionKey: "featureGrid" },
   { value: "#founders", label: "Mentors (#founders)", sectionKey: "founders" },
+  { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
   { value: "#journey", label: "Journey stats (#journey)", sectionKey: "trustMedia" },
   { value: "#testimonials", label: "Testimonials (#testimonials)", sectionKey: "testimonials" },
   { value: "#faq", label: "FAQ (#faq)", sectionKey: "faq" },

@@ -12,6 +12,8 @@ import { JourneySection } from "./JourneySection";
 import { MentorsSection } from "./MentorsSection";
 import { TestimonialsSection } from "./TestimonialsSection";
 import { FaqSection } from "./FaqSection";
+import { UpcomingEventsSection } from "../UpcomingEventsSection";
+import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
 
 type Props = {
   config: HomepageConfig;
@@ -38,6 +40,9 @@ export function SparkAcademyContent({
   const showFounders = isSparkSectionEnabled(config, "founders") && (config.founders?.length ?? 0) > 0;
   const showTestimonials = isSparkSectionEnabled(config, "testimonials");
   const showFaq = isSparkSectionEnabled(config, "faq") && config.faq.length > 0;
+  const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
+  const showUpcomingEvents =
+    isSparkSectionEnabled(config, "upcomingEvents") && upcomingEvents.length > 0;
 
   const featureImageFallback =
     config.hero.backgroundImageUrl?.trim() ||
@@ -80,6 +85,10 @@ export function SparkAcademyContent({
       ) : null}
 
       {showFounders && config.founders ? <MentorsSection founders={config.founders} /> : null}
+
+      {showUpcomingEvents && config.upcomingEvents ? (
+        <UpcomingEventsSection section={config.upcomingEvents} events={upcomingEvents} useLeadModals />
+      ) : null}
 
       {showTestimonials ? <TestimonialsSection testimonials={config.testimonials} /> : null}
 

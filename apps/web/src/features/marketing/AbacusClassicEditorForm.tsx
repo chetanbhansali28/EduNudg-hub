@@ -34,6 +34,7 @@ import {
 } from "./HomepageEditorShell";
 import { MarketingMediaField } from "./MarketingMediaField";
 import { MARKETING_THEME_LABELS, type MarketingTheme } from "@/types/homepage";
+import { UpcomingEventsEditorFields } from "./UpcomingEventsEditorFields";
 
 export type AbacusClassicEditorFormProps = {
   config: HomepageConfig;
@@ -480,6 +481,21 @@ export function AbacusClassicEditorForm({
             />
           ))}
         </EditorItemList>
+      </EditorAccordion>
+
+      <EditorAccordion
+        sectionId="upcomingEvents"
+        title="Upcoming events"
+        enabled={isAbacusSectionEnabled(config, "upcomingEvents")}
+        onEnabledChange={(e) => setSection("upcomingEvents", e)}
+      >
+        <UpcomingEventsEditorFields
+          config={config}
+          onChange={onChange}
+          commit={commit}
+          commitMedia={commitMedia}
+          uploadScope={uploadScope}
+        />
       </EditorAccordion>
 
       <EditorAccordion

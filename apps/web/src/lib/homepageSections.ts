@@ -18,7 +18,8 @@ export type HomepageSectionKey =
   | "footerRich"
   | "ecosystemIntro"
   | "connectivityShowcase"
-  | "footerCta";
+  | "footerCta"
+  | "upcomingEvents";
 
 export type HomepageSectionVisibility = Partial<Record<HomepageSectionKey, boolean>>;
 
@@ -40,6 +41,7 @@ export const DEFAULT_HOMEPAGE_SECTION_VISIBILITY: Record<HomepageSectionKey, boo
   ecosystemIntro: true,
   connectivityShowcase: true,
   footerCta: true,
+  upcomingEvents: true,
 };
 
 /** Section defaults for the platform enterprise landing at localhost:9000. */
@@ -61,6 +63,7 @@ export const ENTERPRISE_PLATFORM_SECTION_DEFAULTS: Record<HomepageSectionKey, bo
   ecosystemIntro: true,
   connectivityShowcase: true,
   footerCta: true,
+  upcomingEvents: false,
 };
 
 export const ABACUS_CLASSIC_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean> = {
@@ -81,6 +84,7 @@ export const ABACUS_CLASSIC_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean
   ecosystemIntro: false,
   connectivityShowcase: false,
   footerCta: false,
+  upcomingEvents: true,
 };
 
 export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean> = {
@@ -101,6 +105,7 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   ecosystemIntro: false,
   connectivityShowcase: false,
   footerCta: false,
+  upcomingEvents: true,
 };
 
 /** Section toggles honored when alternate-theme landing JSON was saved from that theme's editor. */
@@ -115,6 +120,7 @@ const ABACUS_CLASSIC_SHARED_SECTION_KEYS: HomepageSectionKey[] = [
   "gallery",
   "curriculumSyllabus",
   "footerRich",
+  "upcomingEvents",
 ];
 
 const SPARK_ACADEMY_SHARED_SECTION_KEYS: HomepageSectionKey[] = [

@@ -4636,3 +4636,178 @@ body.ac-nav-drawer-open {
 .sa-site-footer__legal-link:hover {
   color: rgba(255, 255, 255, 0.75);
 }
+
+/* --- Upcoming events (all marketing themes) --- */
+.mkt-events {
+  padding: 4rem 1.25rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.mkt-events__inner {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.mkt-events__header {
+  max-width: 40rem;
+  margin-bottom: 2rem;
+}
+
+.mkt-events__eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2563eb;
+}
+
+.mkt-events__title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1.2;
+  color: #0f172a;
+  font-family: var(--novu-font-serif, Georgia, serif);
+  font-weight: 400;
+}
+
+.marketing-page--abacus-classic .mkt-events__title,
+.marketing-page--spark-academy .mkt-events__title {
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.mkt-events__subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.mkt-events__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .mkt-events__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mkt-events__card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.mkt-events__media {
+  aspect-ratio: 16 / 9;
+  background: #e2e8f0;
+}
+
+.mkt-events__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mkt-events__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem 1.15rem 1.25rem;
+  flex: 1;
+}
+
+.mkt-events__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mkt-events__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3.25rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.65rem;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.mkt-events__month {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.mkt-events__day {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.mkt-events__type {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.mkt-events__type--workshop {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+.mkt-events__type--demo {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.mkt-events__type--other {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.mkt-events__card-title {
+  margin: 0.25rem 0 0;
+  font-size: 1.1rem;
+  line-height: 1.35;
+  color: #0f172a;
+}
+
+.mkt-events__meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.mkt-events__desc {
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #334155;
+  flex: 1;
+}
+
+.mkt-events__actions {
+  margin-top: 0.75rem;
+}
+
+.mkt-events__cta {
+  display: inline-flex;
+}

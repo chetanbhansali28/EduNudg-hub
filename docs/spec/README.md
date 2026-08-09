@@ -26,6 +26,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [staff-login](../../openspec/specs/staff-login/spec.md) | Platform/brand/center `/login` labels + exact accessible-name testing |
 | [marketing-homepage](../../openspec/specs/marketing-homepage/spec.md) | Platform public bundle vs config-only React Query keys |
 | [marketing-footer](../../openspec/specs/marketing-footer/spec.md) | Public footer columns + legal pages |
+| [brand-upcoming-events](../../openspec/specs/brand-upcoming-events/spec.md) | Homepage upcoming events (competitions/workshops/demos) |
 | [platform-settings](../../openspec/specs/platform-settings/spec.md) | Platform settings / feature flags |
 | [platform-brand-onboarding](../../openspec/specs/platform-brand-onboarding/spec.md) | Brand signup approve + credential-skip on theme save |
 | [student-leads](../../openspec/specs/student-leads/spec.md) | Brand/center student leads + Abacus/Spark modals |

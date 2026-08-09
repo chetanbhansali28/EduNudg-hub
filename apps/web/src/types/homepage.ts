@@ -163,6 +163,39 @@ export interface HomepageProgramsSection {
   cards?: HomepageProgramCard[];
 }
 
+/** Public marketing upcoming event card (competitions, workshops, demos, other). */
+export type HomepageEventType = "competition" | "workshop" | "demo" | "other";
+
+export interface HomepageUpcomingEvent {
+  type: HomepageEventType;
+  title: string;
+  description?: string;
+  /** ISO date YYYY-MM-DD (required for public visibility). */
+  startDate: string;
+  /** Optional end date YYYY-MM-DD for multi-day events. */
+  endDate?: string;
+  /** Start time display, e.g. "10:00 AM". */
+  startTime?: string;
+  /** End time display, e.g. "1:00 PM". */
+  endTime?: string;
+  /** Free-text duration, e.g. "2 hours" or "Full day". */
+  duration?: string;
+  location?: string;
+  /** Optional cover image (brand-assets upload). */
+  imageUrl?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+export interface HomepageUpcomingEventsSection {
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  /** Cap how many upcoming items render (omit or 0 = show all upcoming). */
+  maxItems?: number;
+  items: HomepageUpcomingEvent[];
+}
+
 export interface HomepageFooterStat {
   value: string;
   label: string;
@@ -272,6 +305,8 @@ export interface HomepageConfig {
   trustMedia?: HomepageTrustMedia;
   gallery?: HomepageGallery;
   programsSection?: HomepageProgramsSection;
+  /** Upcoming events (all themes) — competitions, workshops, demos, other. */
+  upcomingEvents?: HomepageUpcomingEventsSection;
   /** Platform enterprise landing: hero stat overlay on side image. */
   heroOverlayCard?: HomepageHeroOverlayCard;
   /** Platform enterprise landing: cream intro band below hero. */

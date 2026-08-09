@@ -18,6 +18,7 @@ export type MarketingConfigPartial = {
   gallery?: { images?: Array<{ url?: string }> };
   programsSection?: { cards?: Array<{ imageUrl?: string }> };
   testimonials?: { items?: Array<{ avatarUrl?: string }> };
+  upcomingEvents?: { items?: Array<{ imageUrl?: string }> };
 };
 
 /** True when a URL points at uploaded `brand-assets` objects (not stock Unsplash). */
@@ -56,6 +57,7 @@ function collectMarketingMediaUrls(
     ...(p.gallery?.images?.map((img) => img.url) ?? []),
     ...(p.programsSection?.cards?.map((c) => c.imageUrl) ?? []),
     ...(p.testimonials?.items?.map((t) => t.avatarUrl) ?? []),
+    ...(p.upcomingEvents?.items?.map((e) => e.imageUrl) ?? []),
   ];
   return urls.filter((u): u is string => typeof u === "string" && u.trim().length > 0);
 }
@@ -186,6 +188,16 @@ export function preserveCustomMarketingMediaUrls<T extends Partial<HomepageConfi
         ...card,
         imageUrl:
           preferCustomUrl(prev.programsSection?.cards?.[i]?.imageUrl, card.imageUrl) ?? card.imageUrl,
+      })),
+    };
+  }
+  if (draft.upcomingEvents?.items) {
+    out.upcomingEvents = {
+      ...draft.upcomingEvents,
+      items: draft.upcomingEvents.items.map((item, i) => ({
+        ...item,
+        imageUrl:
+          preferCustomUrl(prev.upcomingEvents?.items?.[i]?.imageUrl, item.imageUrl) ?? item.imageUrl,
       })),
     };
   }

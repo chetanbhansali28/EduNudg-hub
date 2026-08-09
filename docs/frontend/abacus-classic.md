@@ -55,7 +55,7 @@ Sprint 2 covers the top-of-page conversion flow and curriculum-driven programs s
 
 Section order on the public page (`AbacusClassicContent`):
 
-1. Hero → 2. Programs (`#programs`) → 3. **Curriculum syllabus** (`#curriculum`) → 4. Feature grid → 5. Founders → 6. Trust / video → 7. Testimonials → 8. FAQ → 9. Gallery → 10. Rich footer (in `BrandPublicLayout`)
+1. Hero → 2. Programs (`#programs`) → 3. **Curriculum syllabus** (`#curriculum`) → 4. Feature grid → 5. Founders → 6. Trust / video → 7. **Upcoming events** (`#events`) → 8. Testimonials → 9. FAQ → 10. Gallery → 11. Rich footer (in `BrandPublicLayout`)
 
 Section toggles live in `config.sections` and are edited in `AbacusClassicEditorForm`.
 

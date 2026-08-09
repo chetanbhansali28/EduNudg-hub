@@ -17,6 +17,8 @@ import { MarketingBackgroundMedia } from "./MarketingBackgroundMedia";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { isSectionEnabled } from "@/lib/homepageSections";
 import { useScrollReveal } from "./useScrollReveal";
+import { UpcomingEventsSection } from "./UpcomingEventsSection";
+import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
 
 function FaqList({ items }: { items: { question: string; answer: string }[] }) {
   return (
@@ -66,6 +68,11 @@ function MarketingContentView({
   const showPrivacy = isSectionEnabled(config, "privacy");
   const showTestimonials = isSectionEnabled(config, "testimonials");
   const showFaq = isSectionEnabled(config, "faq") && config.faq.length > 0;
+  const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
+  const showUpcomingEvents =
+    portalMode !== "platform" &&
+    isSectionEnabled(config, "upcomingEvents") &&
+    upcomingEvents.length > 0;
 
   return (
     <div className="novu-hero-wrap">
@@ -119,6 +126,10 @@ function MarketingContentView({
         )}
 
         {showPrivacy ? <PrivacySection privacy={config.privacy} /> : null}
+
+        {showUpcomingEvents && config.upcomingEvents ? (
+          <UpcomingEventsSection section={config.upcomingEvents} events={upcomingEvents} />
+        ) : null}
 
         {showTestimonials ? <TestimonialsCarousel testimonials={config.testimonials} /> : null}
 

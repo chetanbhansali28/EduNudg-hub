@@ -42,6 +42,7 @@ import { FooterLegalPagesEditor } from "./FooterLegalPagesEditor";
 import { SocialMediaConnectEditor } from "./SocialMediaConnectEditor";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
+import { UpcomingEventsEditorFields } from "./UpcomingEventsEditorFields";
 
 export type HomepageEditorFormProps = {
   config: HomepageConfig;
@@ -834,6 +835,23 @@ export function HomepageEditorForm({
         </EditorItemList>
       </EditorAccordion>
       </>
+      ) : null}
+
+      {!isPlatformEditor ? (
+      <EditorAccordion
+        sectionId="upcomingEvents"
+        title="Upcoming events"
+        enabled={sections.upcomingEvents}
+        onEnabledChange={(enabled) => setSection("upcomingEvents", enabled)}
+      >
+        <UpcomingEventsEditorFields
+          config={config}
+          onChange={onChange}
+          commit={commit}
+          commitMedia={commitMedia}
+          uploadScope={uploadScope}
+        />
+      </EditorAccordion>
       ) : null}
 
       {!isPlatformEditor ? (

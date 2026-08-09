@@ -36,6 +36,8 @@ Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_them
 
 **Franchise apply is brand-only:** center public layouts run `sanitizeCenterPublicNavConfig()` so **Apply franchise** / `#apply` secondary CTAs never appear on center hosts (Vercel `?portal=center` or `{center}.{brand}.localhost`). Brand landings keep dual CTAs.
 
+**Upcoming events:** Homepage editor section (like Leadership profiles). Brand adds competitions / workshops / demos with optional image, date, time, duration. Public `#events` shows only upcoming items (capped by `maxItems`). Works on Abacus, Spark, and Novu brand themes.
+
 Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). When no named homepage cards exist, the grid falls back to published curriculum programs.
 
 ## Public nav anchors (all themes)
