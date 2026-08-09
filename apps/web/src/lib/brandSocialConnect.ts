@@ -3,14 +3,17 @@ import type { HomepageConfig } from "@/types/homepage";
 export type BrandSocialConnect = {
   facebookUrl?: string;
   instagramUrl?: string;
+  /** @deprecated Kept for stored settings round-trip; not shown on public landing. */
   whatsappPhoneE164?: string;
+  /** @deprecated Kept for stored settings round-trip; not shown on public landing. */
   whatsappPrefillMessage?: string;
+  /** @deprecated Kept for stored settings round-trip; not shown on public landing. */
   whatsappBubbleTitle?: string;
+  /** @deprecated Kept for stored settings round-trip; not shown on public landing. */
   whatsappBubbleBody?: string;
+  /** @deprecated Kept for stored settings round-trip; not shown on public landing. */
   whatsappEnabled?: boolean;
 };
-
-export const BRAND_SOCIAL_WHATSAPP_MESSAGE_MAX = 1000;
 
 const EMPTY: BrandSocialConnect = {};
 
@@ -51,10 +54,7 @@ export function parseBrandSocialConnectRecord(raw: unknown): BrandSocialConnect 
     facebookUrl: normalizeSocialUrl(trimOptional(row.facebookUrl ?? row.facebook_url)),
     instagramUrl: normalizeSocialUrl(trimOptional(row.instagramUrl ?? row.instagram_url)),
     whatsappPhoneE164,
-    whatsappPrefillMessage: trimOptional(row.whatsappPrefillMessage ?? row.whatsapp_prefill_message)?.slice(
-      0,
-      BRAND_SOCIAL_WHATSAPP_MESSAGE_MAX
-    ),
+    whatsappPrefillMessage: trimOptional(row.whatsappPrefillMessage ?? row.whatsapp_prefill_message),
     whatsappBubbleTitle: trimOptional(row.whatsappBubbleTitle ?? row.whatsapp_bubble_title),
     whatsappBubbleBody: trimOptional(row.whatsappBubbleBody ?? row.whatsapp_bubble_body),
     whatsappEnabled:
@@ -72,24 +72,12 @@ export function parseBrandSocialConnect(
   return migrateSocialConnectFromLanding(fromSettings, landing);
 }
 
-function platformKind(platform: string, url: string): "facebook" | "instagram" | "whatsapp" | null {
+function platformKind(platform: string, url: string): "facebook" | "instagram" | null {
   const p = platform.toLowerCase();
   const u = url.toLowerCase();
   if (p.includes("facebook") || u.includes("facebook.com")) return "facebook";
   if (p.includes("instagram") || u.includes("instagram.com")) return "instagram";
-  if (p.includes("whatsapp") || u.includes("wa.me") || u.includes("whatsapp.com")) return "whatsapp";
   return null;
-}
-
-function phoneFromWhatsAppUrl(url: string): string | undefined {
-  try {
-    const parsed = new URL(url);
-    if (!parsed.hostname.includes("wa.me")) return undefined;
-    const digits = parsed.pathname.replace(/\D/g, "");
-    return digits ? `+${digits}` : undefined;
-  } catch {
-    return undefined;
-  }
 }
 
 /** Copies legacy `landing.footer.rich.socialLinks` when `social_connect` is empty. */
@@ -97,10 +85,7 @@ export function migrateSocialConnectFromLanding(
   socialConnect: BrandSocialConnect,
   landing?: Partial<HomepageConfig>
 ): BrandSocialConnect {
-  const hasConfigured =
-    Boolean(socialConnect.facebookUrl) ||
-    Boolean(socialConnect.instagramUrl) ||
-    Boolean(socialConnect.whatsappPhoneE164);
+  const hasConfigured = Boolean(socialConnect.facebookUrl) || Boolean(socialConnect.instagramUrl);
   if (hasConfigured) return socialConnect;
 
   const links = landing?.footer?.rich?.socialLinks ?? [];
@@ -117,29 +102,10 @@ export function migrateSocialConnectFromLanding(
     if (kind === "instagram" && !migrated.instagramUrl && isHttpsUrl(url)) {
       migrated.instagramUrl = url;
     }
-    if (kind === "whatsapp" && !migrated.whatsappPhoneE164) {
-      migrated.whatsappPhoneE164 = phoneFromWhatsAppUrl(url) ?? normalizeWhatsAppPhone(url);
-      if (migrated.whatsappPhoneE164) migrated.whatsappEnabled = true;
-    }
   }
   return migrated;
 }
 
 export function hasBrandSocialFooterIcons(connect: BrandSocialConnect): boolean {
   return Boolean(connect.facebookUrl || connect.instagramUrl);
-}
-
-export function isBrandWhatsAppFloatVisible(connect: BrandSocialConnect): boolean {
-  return connect.whatsappEnabled !== false && Boolean(normalizeWhatsAppPhone(connect.whatsappPhoneE164));
-}
-
-export function buildBrandWhatsAppHref(connect: BrandSocialConnect): string | null {
-  const phone = normalizeWhatsAppPhone(connect.whatsappPhoneE164);
-  if (!phone) return null;
-  const digits = phone.replace(/\D/g, "");
-  if (!digits) return null;
-  const message = trimOptional(connect.whatsappPrefillMessage);
-  const base = `https://wa.me/${digits}`;
-  if (!message) return base;
-  return `${base}?text=${encodeURIComponent(message)}`;
 }

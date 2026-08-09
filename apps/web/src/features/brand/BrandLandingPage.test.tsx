@@ -95,4 +95,27 @@ describe("BrandLandingPage", () => {
     expect(screen.getByRole("main")).toBeDefined();
     expect(screen.getByText(/Shape your future with/)).toBeDefined();
   });
+
+  it("regression_brandLandingOmitsWhatsAppFloat", () => {
+    const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
+    const { container } = renderWithOutlet({
+      config,
+      brandSlug: "smart-brain-abacus",
+      marketingTheme: "abacus-classic",
+      publicCurriculum: [],
+      publicStats: { centersCount: 12, studentsCount: 5000 },
+      legalPages: {},
+      socialConnect: {
+        whatsappPhoneE164: "+919021924968",
+        whatsappPrefillMessage: "Hi, I am interested in connection with you",
+        whatsappBubbleTitle: "Chetan Bhansali",
+        whatsappBubbleBody: "Hi, I am interested in connection with you",
+        whatsappEnabled: true,
+      },
+    });
+
+    expect(container.querySelector('[data-testid="brand-whatsapp-float"]')).toBeNull();
+    expect(screen.queryByRole("link", { name: "Chat on WhatsApp" })).toBeNull();
+    expect(screen.queryByText("Chetan Bhansali")).toBeNull();
+  });
 });

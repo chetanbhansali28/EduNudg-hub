@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildBrandWhatsAppHref,
   hasBrandSocialFooterIcons,
-  isBrandWhatsAppFloatVisible,
   migrateSocialConnectFromLanding,
   parseBrandSocialConnect,
 } from "./brandSocialConnect";
@@ -20,7 +18,8 @@ describe("brandSocialConnect", () => {
       },
     });
     expect(connect.facebookUrl).toBe("https://facebook.com/brand");
-    expect(connect.whatsappEnabled).toBe(true);
+    expect(connect.instagramUrl).toBe("https://instagram.com/brand");
+    expect(connect.whatsappPhoneE164).toBe("+919021924968");
   });
 
   it("migrateSocialConnectFromLanding copies legacy footer social links", () => {
@@ -32,6 +31,7 @@ describe("brandSocialConnect", () => {
             socialLinks: [
               { platform: "Facebook", url: "https://facebook.com/example" },
               { platform: "Instagram", url: "https://instagram.com/example" },
+              { platform: "WhatsApp", url: "https://wa.me/919876543210" },
             ],
           },
         },
@@ -39,30 +39,14 @@ describe("brandSocialConnect", () => {
     );
     expect(connect.facebookUrl).toBe("https://facebook.com/example");
     expect(connect.instagramUrl).toBe("https://instagram.com/example");
+    expect(connect.whatsappPhoneE164).toBeUndefined();
   });
 
-  it("buildBrandWhatsAppHref includes encoded prefill message", () => {
-    const href = buildBrandWhatsAppHref({
-      whatsappPhoneE164: "+91 90219 24968",
-      whatsappPrefillMessage: "Hello! I visited your website.",
-      whatsappEnabled: true,
-    });
-    expect(href).toBe("https://wa.me/919021924968?text=Hello!%20I%20visited%20your%20website.");
-  });
-
-  it("hasBrandSocialFooterIcons and float visibility respect config", () => {
+  it("hasBrandSocialFooterIcons respects facebook and instagram only", () => {
     expect(hasBrandSocialFooterIcons({ facebookUrl: "https://facebook.com/x" })).toBe(true);
-    expect(
-      isBrandWhatsAppFloatVisible({
-        whatsappPhoneE164: "+919876543210",
-        whatsappEnabled: true,
-      })
-    ).toBe(true);
-    expect(
-      isBrandWhatsAppFloatVisible({
-        whatsappPhoneE164: "+919876543210",
-        whatsappEnabled: false,
-      })
-    ).toBe(false);
+    expect(hasBrandSocialFooterIcons({ instagramUrl: "https://instagram.com/x" })).toBe(true);
+    expect(hasBrandSocialFooterIcons({ whatsappPhoneE164: "+919876543210", whatsappEnabled: true })).toBe(
+      false
+    );
   });
 });

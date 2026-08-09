@@ -70,6 +70,7 @@ description: Add EduNudg features using modular files, service layer, base theme
 - Seed: `ON CONFLICT` must use `EXCLUDED.settings || brand_settings.settings` (existing wins).
 - Student/login chrome: never clear `logo_url` / login copy when patching unrelated settings.
 - Helpers: `apps/web/src/lib/marketingMediaGuard.ts`.
+- Social Media Connect: Facebook/Instagram footer icons only — do **not** mount a WhatsApp float on public brand landing.
 
 ## Lead lost (reference)
 

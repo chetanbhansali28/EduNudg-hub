@@ -27,3 +27,10 @@ THEN the public brand and center footers reflect those links after save
 GIVEN a center public site
 WHEN the brand has legal pages or social connect configured
 THEN the center footer shows the same legal links and social icons as the brand site
+
+### No WhatsApp float on brand landing
+
+GIVEN a brand public landing page (any marketing theme)
+WHEN social_connect includes WhatsApp phone, bubble title/body, or whatsappEnabled
+THEN the page MUST NOT render a floating WhatsApp chat button or chat preview bubble
+AND Social Media Connect in the homepage editor only configures Facebook and Instagram footer icons
