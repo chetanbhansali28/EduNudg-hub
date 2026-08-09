@@ -36,19 +36,19 @@ Brand staff SHALL edit franchise details except slug.
 
 ### Requirement: Center owner login credentials
 
-Brand staff SHALL view and set the franchise center login email and password from Franchise Identity on `/app/centers`. Credentials SHALL provision Supabase Auth and an active `center_owner` membership so the same email/password work on the center host `/login`. Login email SHALL NOT be stored on `franchise_centers`; source of truth is Auth + `profiles` + memberships. Profile-only saves SHALL NOT call `center-owner-credentials`.
+Brand staff SHALL view and set the franchise center login email and password from Franchise Identity on `/app/centers`. Credentials SHALL provision Supabase Auth and an active `center_owner` membership so the same email/password work on the center host `/login`. Login email SHALL NOT be stored on `franchise_centers`; source of truth is Auth + `profiles` + memberships. Profile-only saves SHALL NOT call `center-owner-credentials`. Franchise Identity helper text SHALL show an environment-aware login URL via `portalLoginUrl` (local `{center}.{brand}.localhost:9000/login`; Vercel same-origin `/login?portal=center&brand=…&center=…`) — never a hardcoded localhost host when the brand app is on `*.vercel.app`.
 
 #### Scenario: Show login email from database
 
 - **WHEN** brand staff open a franchise detail panel
 - **THEN** Franchise Identity shows the active `center_owner` login email from `get_center_owner_login`
-- **AND** helper text names the center host login URL
+- **AND** helper text links to the center staff login URL for the current environment
 
 #### Scenario: Create or reset franchise password
 
 - **WHEN** brand staff enter a login email and password (password required when no prior login exists) and save
 - **THEN** the SPA invokes `center-owner-credentials` to create or update the Auth user and sync `center_owner` membership
-- **AND** that email and password can sign in at `{center}.{brand}` `/login`
+- **AND** that email and password can sign in at the center portal login URL (`portalLoginUrl`)
 
 #### Scenario: Profile-only save skips credentials
 

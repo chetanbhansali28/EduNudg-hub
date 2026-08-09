@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@edunudg/ui";
@@ -91,12 +91,27 @@ function renderPanel() {
 }
 
 describe("CenterDetailPanel franchise login credentials", () => {
+  const originalLocation = window.location;
+
   beforeEach(() => {
     updateFranchiseCenter.mockClear();
     fetchCenterOwnerLoginEmail.mockClear();
     upsertCenterOwnerCredentials.mockClear();
     shouldSyncCenterOwnerCredentials.mockReset();
     shouldSyncCenterOwnerCredentials.mockReturnValue(false);
+    Object.defineProperty(window, "location", {
+      value: {
+        protocol: "http:",
+        hostname: "localhost",
+        port: "9000",
+        origin: "http://localhost:9000",
+      },
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, "location", { value: originalLocation, writable: true });
   });
 
   it("regression_franchise_identity_loads_login_email_from_database", async () => {
@@ -106,7 +121,32 @@ describe("CenterDetailPanel franchise login credentials", () => {
       "owner@arti.example.com"
     );
     expect(screen.getByText(/Franchise Identity/i)).toBeDefined();
-    expect(screen.getByText(/arti-drawing\.vihaan-abacas-pune\.localhost:9000\/login/)).toBeDefined();
+    expect(
+      screen.getByRole("link", {
+        name: /arti-drawing\.vihaan-abacas-pune\.localhost:9000\/login/,
+      })
+    ).toHaveProperty("href", "http://arti-drawing.vihaan-abacas-pune.localhost:9000/login");
+  });
+
+  it("regression_franchise_identity_login_hint_uses_vercel_same_origin_url", async () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        protocol: "https:",
+        hostname: "edunudg-hub.vercel.app",
+        port: "",
+        origin: "https://edunudg-hub.vercel.app",
+      },
+      writable: true,
+    });
+    renderPanel();
+    await screen.findByLabelText("Login email");
+    const loginLink = screen.getByRole("link", {
+      name: /edunudg-hub\.vercel\.app\/login\?portal=center&brand=vihaan-abacas-pune&center=arti-drawing/,
+    });
+    expect(loginLink).toHaveProperty(
+      "href",
+      "https://edunudg-hub.vercel.app/login?portal=center&brand=vihaan-abacas-pune&center=arti-drawing"
+    );
   });
 
   it("regression_profile_only_save_does_not_invoke_center_owner_credentials", async () => {

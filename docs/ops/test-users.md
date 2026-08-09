@@ -58,6 +58,10 @@ If center login fails after setting credentials: confirm migration `073_center_o
 
 Seeded demo brand login remains `owner@edunudg.com` / `admin` at http://abacusworld.localhost:9000/login when `test-users.sql` has been applied.
 
+## Demo URL sheet (Vercel)
+
+Bookmark list for **Smart Brain Abacus** client demos: [demo-smart-brain-abacus-urls.md](./demo-smart-brain-abacus-urls.md)
+
 ## Platform admin cross-portal handoff
 
 As `admin@edunudg.com` on http://localhost:9000/admin/brands:
@@ -115,6 +119,7 @@ DELETE FROM auth.users WHERE email LIKE '%@edunudg.com';
 | Login "Invalid credentials" | Re-run `test-users.sql` or reset password in Dashboard; use `admin@edunudg.com` / `admin` |
 | Brand login not working after platform edit | Deploy `brand-owner-credentials` Edge Function; set login email + password on Brands → Edit |
 | Center login not working after brand centers edit | Deploy `center-owner-credentials`; apply migration `073`; set Login email + Password under Franchise Identity |
+| Center login fails / stays on wrong portal on Vercel | Use `/login?portal=center&brand={brand}&center={center}` (not `{center}.{brand}.localhost:9000/login`). See [demo-smart-brain-abacus-urls.md](./demo-smart-brain-abacus-urls.md) |
 | No data after login | Check `memberships.status = 'active'` |
 | Brand/center portal wrong | Use subdomain hosts above; run `test-users.sql` for `domain_mappings` |
 | Brand login access denied (owner) | App resolves brand via slug + `get_portal_branding`; ensure `test-users.sql` brand id matches domain slug |

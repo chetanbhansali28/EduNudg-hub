@@ -73,6 +73,8 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
    - **Real multi-host**: set `VITE_PORTAL_BASE_DOMAIN=yourdomain.com`, add wildcard DNS `*.yourdomain.com` → Vercel, and map hosts in `domain_mappings` (seed rows still use `*.localhost` for local; the SPA rewrites them when the base domain is set).
 4. Supabase Auth → add production Site URL / Redirect URLs for `https://edunudg-hub.vercel.app/**` (and custom domains when used)
 
+**Client demo URLs (Smart Brain Abacus on Vercel):** [demo-smart-brain-abacus-urls.md](./demo-smart-brain-abacus-urls.md)
+
 ### Deploy
 
 **Production on `main` / `master`:** Vercel Git auto-deploy is enabled for those branches only (`apps/web/vercel.json` → `git.deploymentEnabled`). Other branches do not auto-deploy.

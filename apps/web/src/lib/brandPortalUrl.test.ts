@@ -8,6 +8,7 @@ import {
   normalizePortalHostname,
   portalBackendUrl,
   portalHandoffLoginUrl,
+  portalLoginUrl,
   portalTargetFromDomain,
   usesSameOriginPortals,
 } from "./brandPortalUrl";
@@ -70,6 +71,28 @@ describe("brandPortalUrl", () => {
         hostname: "koramangala.abacusworld.localhost",
       })
     ).toBe("http://koramangala.abacusworld.localhost:9000/app");
+  });
+
+  it("regression_portal_login_url_matches_env_for_center", () => {
+    mockLocation("localhost");
+    expect(
+      portalLoginUrl({
+        portalType: "center",
+        brandSlug: "smart-brain-abacus",
+        centerSlug: "center-2",
+      })
+    ).toBe("http://center-2.smart-brain-abacus.localhost:9000/login");
+
+    mockLocation("edunudg-hub.vercel.app", "", "https:");
+    expect(
+      portalLoginUrl({
+        portalType: "center",
+        brandSlug: "smart-brain-abacus",
+        centerSlug: "center-2",
+      })
+    ).toBe(
+      "https://edunudg-hub.vercel.app/login?portal=center&brand=smart-brain-abacus&center=center-2"
+    );
   });
 
   it("regression_portal_handoff_login_url_includes_next_path", () => {

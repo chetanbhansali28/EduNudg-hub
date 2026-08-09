@@ -202,6 +202,15 @@ export function portalBackendUrl(target: PortalTarget): string {
   return `${origin}${path}`;
 }
 
+/** Staff login URL for a portal (brand/center → /login; same-origin adds ?portal=&brand=). */
+export function portalLoginUrl(target: PortalTarget): string {
+  if (usesSameOriginPortals()) {
+    return sameOriginUrl("/login", target);
+  }
+  const origin = portalOriginUrl(target).replace(/\/$/, "");
+  return `${origin}/login`;
+}
+
 /** Callback URL on the target portal host; edge function appends token_hash for verifyOtp handoff. */
 export function portalHandoffLoginUrl(target: PortalTarget): string {
   if (usesSameOriginPortals()) {

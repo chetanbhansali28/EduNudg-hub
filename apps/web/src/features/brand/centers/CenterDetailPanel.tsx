@@ -19,7 +19,7 @@ import {
   Select,
   Textarea,
 } from "@edunudg/ui";
-import { centerPortalUrl, portalBackendUrl } from "@/lib/brandPortalUrl";
+import { centerPortalUrl, portalBackendUrl, portalLoginUrl } from "@/lib/brandPortalUrl";
 import {
   type BrandCenterRow,
   fetchCenterStats,
@@ -172,6 +172,10 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
   const centerBackendUrl =
     center.status === "active"
       ? portalBackendUrl({ portalType: "center", brandSlug, centerSlug: center.slug })
+      : null;
+  const centerLoginUrl =
+    center.status === "active"
+      ? portalLoginUrl({ portalType: "center", brandSlug, centerSlug: center.slug })
       : null;
   const centerFrontendUrl =
     center.status === "active" ? centerPortalUrl(brandSlug, center.slug) : null;
@@ -386,9 +390,15 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
         </FormGrid>
         <p className="ed-text-sm ed-muted">
           Franchise staff sign in with this email and password at{" "}
-          <code>
-            {center.slug}.{brandSlug}.localhost:9000/login
-          </code>
+          {centerLoginUrl ? (
+            <a href={centerLoginUrl} target="_blank" rel="noreferrer">
+              <code>{centerLoginUrl.replace(/^https?:\/\//, "")}</code>
+            </a>
+          ) : (
+            <code>
+              {center.slug}.{brandSlug}.localhost:9000/login
+            </code>
+          )}
           .
         </p>
         <Textarea
