@@ -80,8 +80,7 @@ export function AboutUsEditorFields({
         </EditorFieldSpan>
         <EditorFieldSpan>
           <MarketingMediaField
-            label="About image"
-            description="Optional photo beside the company story"
+            label="About image (optional, beside story)"
             value={section.imageUrl ?? ""}
             onChange={(v) => {
               commitMedia({ ...config, about: { ...section, imageUrl: v } });
@@ -305,8 +304,7 @@ function AboutMemberEditorItem({
         <Input label="Role" value={member.role} onChange={(v) => update({ role: v })} />
         <EditorFieldSpan>
           <MarketingMediaField
-            label="Photo"
-            description="Portrait photo for the team grid"
+            label="Team photo (portrait)"
             value={member.photoUrl}
             onChange={(v) => update({ photoUrl: v }, true)}
             mediaType="image"
