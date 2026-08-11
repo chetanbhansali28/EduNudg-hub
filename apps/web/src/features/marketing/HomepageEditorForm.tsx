@@ -43,6 +43,7 @@ import { SocialMediaConnectEditor } from "./SocialMediaConnectEditor";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 import { UpcomingEventsEditorFields } from "./UpcomingEventsEditorFields";
+import { AboutUsEditorFields } from "./AboutUsEditorFields";
 
 export type HomepageEditorFormProps = {
   config: HomepageConfig;
@@ -845,6 +846,24 @@ export function HomepageEditorForm({
         onEnabledChange={(enabled) => setSection("upcomingEvents", enabled)}
       >
         <UpcomingEventsEditorFields
+          config={config}
+          onChange={onChange}
+          commit={commit}
+          commitMedia={commitMedia}
+          uploadScope={uploadScope}
+        />
+      </EditorAccordion>
+      ) : null}
+
+      {!isPlatformEditor && portalMode === "brand" ? (
+      <EditorAccordion
+        sectionId="about"
+        title="About Us"
+        description="Company story, key features, team photos — full /about page"
+        enabled={sections.about}
+        onEnabledChange={(enabled) => setSection("about", enabled)}
+      >
+        <AboutUsEditorFields
           config={config}
           onChange={onChange}
           commit={commit}

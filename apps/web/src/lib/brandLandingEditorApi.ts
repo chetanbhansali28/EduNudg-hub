@@ -84,6 +84,13 @@ export function landingConfigToPartial(
           items: config.upcomingEvents.items.map((item) => ({ ...item })),
         }
       : undefined,
+    about: config.about
+      ? {
+          ...config.about,
+          features: config.about.features.map((f) => ({ ...f })),
+          members: config.about.members.map((m) => ({ ...m })),
+        }
+      : undefined,
   };
 }
 

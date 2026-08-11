@@ -69,6 +69,25 @@ describe("regression_tenantMarketingContentPreservesBrandAssets", () => {
     expect(preserved.meta?.logoUrl).toContain("brand-assets");
   });
 
+  it("editor save does not replace about team photo brand-assets with unsplash stock", () => {
+    const existing = {
+      about: {
+        imageUrl: asset("brand/marketing/about-story/asset.jpeg"),
+        members: [{ photoUrl: asset("brand/marketing/about-member/asset.jpeg") }],
+      },
+    };
+    const next = {
+      about: {
+        imageUrl: unsplash,
+        members: [{ photoUrl: unsplash }],
+        features: [],
+      },
+    };
+    const preserved = preserveCustomMarketingMediaUrls(existing, next);
+    expect(preserved.about?.imageUrl).toContain("brand-assets");
+    expect(preserved.about?.members?.[0]?.photoUrl).toContain("brand-assets");
+  });
+
   it("brand_settings merge prefers existing landing content", () => {
     const merged = mergeBrandSettingsPreserveContent(
       {

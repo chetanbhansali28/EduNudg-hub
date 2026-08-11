@@ -19,6 +19,10 @@ export type MarketingConfigPartial = {
   programsSection?: { cards?: Array<{ imageUrl?: string }> };
   testimonials?: { items?: Array<{ avatarUrl?: string }> };
   upcomingEvents?: { items?: Array<{ imageUrl?: string }> };
+  about?: {
+    imageUrl?: string;
+    members?: Array<{ photoUrl?: string }>;
+  };
 };
 
 /** True when a URL points at uploaded `brand-assets` objects (not stock Unsplash). */
@@ -58,6 +62,8 @@ function collectMarketingMediaUrls(
     ...(p.programsSection?.cards?.map((c) => c.imageUrl) ?? []),
     ...(p.testimonials?.items?.map((t) => t.avatarUrl) ?? []),
     ...(p.upcomingEvents?.items?.map((e) => e.imageUrl) ?? []),
+    p.about?.imageUrl,
+    ...(p.about?.members?.map((m) => m.photoUrl) ?? []),
   ];
   return urls.filter((u): u is string => typeof u === "string" && u.trim().length > 0);
 }
@@ -198,6 +204,17 @@ export function preserveCustomMarketingMediaUrls<T extends Partial<HomepageConfi
         ...item,
         imageUrl:
           preferCustomUrl(prev.upcomingEvents?.items?.[i]?.imageUrl, item.imageUrl) ?? item.imageUrl,
+      })),
+    };
+  }
+  if (draft.about) {
+    out.about = {
+      ...draft.about,
+      imageUrl: preferCustomUrl(prev.about?.imageUrl, draft.about.imageUrl) ?? draft.about.imageUrl,
+      members: draft.about.members?.map((member, i) => ({
+        ...member,
+        photoUrl:
+          preferCustomUrl(prev.about?.members?.[i]?.photoUrl, member.photoUrl) ?? member.photoUrl,
       })),
     };
   }

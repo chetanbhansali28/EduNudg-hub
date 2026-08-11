@@ -30,7 +30,7 @@ When a brand switches from Novu to Abacus Classic or Spark Academy, stored `land
 
 Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, domains, and franchise centers — not marketing theme.
 
-Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → rich footer (live center/student counts + custom stats).
+Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → **About Us** (`#about`, when enabled) → rich footer (live center/student counts + custom stats).
 
 Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_theme` and show the same programs grid from brand curriculum. Center copy (hero, city) comes from `mergeAbacusClassicCenterLandingConfig()` merged with `brand_settings.center_landing`.
 
@@ -38,11 +38,15 @@ Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_them
 
 **Upcoming events:** Homepage editor section (like Leadership profiles). Brand adds competitions / workshops / demos with optional image, date, time, duration. Public `#events` shows only upcoming items (capped by `maxItems`). Works on Abacus, Spark, and Novu brand themes.
 
+**About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (Mastermind-style company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — on Abacus Classic it renders **after Gallery**. When the homepage About section is enabled, public nav auto-injects **About Us → `#about`** (unless `/about` or `#about` already exists). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`.
+
 Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). When no named homepage cards exist, the grid falls back to published curriculum programs.
 
-## Public nav anchors (all themes)
+**Public nav anchors (all themes)**
 
 Nav links are configured in the homepage editor (`config.nav.links`). Brand owners choose **labels** freely; hrefs must match on-page section IDs.
+
+Hash section links (`#gallery`, `#faq`, …) are resolved with `resolveMarketingSectionHref` via `MarketingSectionNavLink` in Abacus / Spark / Novu navs: on `/` they stay as `#…`; from `/about` (or other routes) they become `/#…` so Gallery and other homepage sections remain reachable.
 
 | Theme | Default programs link | Curriculum / programs target | Full curriculum tree |
 |-------|----------------------|------------------------------|----------------------|

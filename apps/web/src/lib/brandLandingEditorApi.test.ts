@@ -253,3 +253,13 @@ describe("fetchBrandMarketingEditor", () => {
     expect(editor.socialConnect.instagramUrl).toBe("https://instagram.com/legacy");
   });
 });
+
+describe("landingConfigToPartial about", () => {
+  it("regression_brand_landing_partial_includes_about", () => {
+    const config = mergeAbacusClassicLandingConfig("About Brand");
+    const partial = landingConfigToPartial(config, { marketingTheme: "abacus-classic" });
+    expect(partial.about?.title).toContain("ABOUT");
+    expect(partial.about?.features?.length).toBeGreaterThan(0);
+    expect(partial.sections?.about).toBe(false);
+  });
+});

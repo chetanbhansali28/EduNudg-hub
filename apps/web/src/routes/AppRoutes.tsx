@@ -15,6 +15,7 @@ import { RevenuePage } from "@/features/platform/RevenuePage";
 import { AuditLogsPage } from "@/features/platform/AuditLogsPage";
 import { SettingsPage } from "@/features/platform/SettingsPage";
 import { BrandLandingPage } from "@/features/brand/BrandLandingPage";
+import { BrandAboutPage } from "@/features/brand/BrandAboutPage";
 import { BrandLegalPage } from "@/features/brand/BrandLegalPage";
 import { BrandLayout } from "@/features/brand/BrandLayout";
 import { BrandPublicLayout } from "@/features/brand/BrandPublicLayout";
@@ -153,6 +154,7 @@ export function AppRoutes() {
         <>
           <Route element={<BrandPublicLayout />}>
             <Route path="/" element={<BrandLandingPage />} />
+            <Route path="/about" element={<BrandAboutPage />} />
             <Route path="/legal/:kind" element={<BrandLegalPage />} />
           </Route>
           <Route

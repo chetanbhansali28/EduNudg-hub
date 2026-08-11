@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { centerPublicLoginHrefs } from "@/features/marketing/CenterPublicNavLogins";
+import { MarketingSectionNavLink } from "@/features/marketing/MarketingSectionNavLink";
 import { AbacusCtaButton } from "./MarketingLeadModals";
 
 type Props = {
@@ -60,9 +61,12 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
               </div>
               <div className="ac-nav__drawer-links">
                 {config.nav.links.map((link, i) => (
-                  <a key={`${link.label}-${i}`} href={link.href} onClick={closeMenu}>
-                    {link.label}
-                  </a>
+                  <MarketingSectionNavLink
+                    key={`${link.label}-${i}`}
+                    href={link.href}
+                    label={link.label}
+                    onClick={closeMenu}
+                  />
                 ))}
                 {logins ? (
                   <a href={logins.studentLoginHref} onClick={closeMenu}>
@@ -103,9 +107,12 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
 
         <nav className="ac-nav__links" aria-label="Sections">
           {config.nav.links.map((link, i) => (
-            <a key={`${link.label}-${i}`} href={link.href} className="ac-nav__link">
-              {link.label}
-            </a>
+            <MarketingSectionNavLink
+              key={`${link.label}-${i}`}
+              href={link.href}
+              label={link.label}
+              className="ac-nav__link"
+            />
           ))}
         </nav>
 

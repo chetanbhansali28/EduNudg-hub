@@ -196,6 +196,54 @@ export interface HomepageUpcomingEventsSection {
   items: HomepageUpcomingEvent[];
 }
 
+/** Key differentiator on the brand About Us page / homepage teaser. */
+export interface HomepageAboutFeature {
+  id: string;
+  title: string;
+  body: string;
+}
+
+/** Team member on the brand About Us page (Mastermind-style photo grid). */
+export interface HomepageAboutMember {
+  id: string;
+  name: string;
+  role: string;
+  photoUrl: string;
+  /** Optional; not shown on the team grid (full bios stay on Leadership). */
+  bio?: string;
+}
+
+/**
+ * Brand About Us content (Mastermind-style layout).
+ * Stored in `brand_settings.settings.landing.about`. Homepage visibility uses `sections.about`.
+ */
+export interface HomepageAboutSection {
+  heroHeadline?: string;
+  heroSubtitle?: string;
+  title?: string;
+  body?: string;
+  imageUrl?: string;
+  philosophyTitle?: string;
+  philosophyBody?: string;
+  differentTitle?: string;
+  features: HomepageAboutFeature[];
+  whatWeDoTitle?: string;
+  whatWeDoBody?: string;
+  teamTitle?: string;
+  members: HomepageAboutMember[];
+  /** When false, public `/about` redirects home. Default true when omitted. */
+  publishPage?: boolean;
+  ctaEyebrow?: string;
+  onlineCtaTitle?: string;
+  onlineCtaBody?: string;
+  onlineCtaLabel?: string;
+  onlineCtaHref?: string;
+  franchiseCtaTitle?: string;
+  franchiseCtaBody?: string;
+  franchiseCtaLabel?: string;
+  franchiseCtaHref?: string;
+}
+
 export interface HomepageFooterStat {
   value: string;
   label: string;
@@ -307,6 +355,8 @@ export interface HomepageConfig {
   programsSection?: HomepageProgramsSection;
   /** Upcoming events (all themes) — competitions, workshops, demos, other. */
   upcomingEvents?: HomepageUpcomingEventsSection;
+  /** Brand About Us (Mastermind-style) — `/about` + optional homepage `#about`. */
+  about?: HomepageAboutSection;
   /** Platform enterprise landing: hero stat overlay on side image. */
   heroOverlayCard?: HomepageHeroOverlayCard;
   /** Platform enterprise landing: cream intro band below hero. */

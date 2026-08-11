@@ -2,6 +2,7 @@ import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeAbacusClassicSectionVisibility, mergeSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
+import { mergeAboutSection } from "@/lib/aboutUs";
 import type { HomepageConfig } from "@/types/homepage";
 
 const SPARK_FOOTER_PHONE = "(222) 545-4543";
@@ -22,6 +23,7 @@ export function buildBrandLandingConfig(
     nav: {
       links: [
         { label: "Why franchise", href: "#features" },
+        { label: "About", href: "/about" },
         { label: "Success stories", href: "#testimonials" },
         { label: "FAQ", href: "#faq" },
         { label: "Apply", href: "#apply" },
@@ -144,6 +146,7 @@ export function buildBrandLandingConfig(
   return {
     ...merged,
     featureSections: withDefaultFeatureVideos(merged.featureSections),
+    about: mergeAboutSection(brandName, partial?.about ?? merged.about),
   };
 }
 
@@ -168,6 +171,7 @@ export function buildAbacusClassicLandingPartial(brandName: string): Partial<Hom
       links: [
         { label: "Programs", href: "#programs" },
         { label: "Why us", href: "#features" },
+        { label: "About", href: "/about" },
         { label: "Leadership", href: "#founders" },
         { label: "FAQ", href: "#faq" },
       ],
@@ -191,6 +195,7 @@ export function buildAbacusClassicLandingPartial(brandName: string): Partial<Hom
       backgroundImageUrl: "",
       phoneFrameUrl: "",
     },
+    about: mergeAboutSection(brandName),
     featureSections: [
       {
         id: "levels",
@@ -377,6 +382,7 @@ export function mergeAbacusClassicLandingConfig(
       ...partial?.footer,
       rich: { ...base.footer!.rich, ...partial?.footer?.rich },
     },
+    about: mergeAboutSection(brandName, partial?.about ?? base.about),
     sections: mergeAbacusClassicSectionVisibility(partial),
   });
 }
@@ -402,6 +408,7 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
       links: [
         { label: "Programs", href: "#programs" },
         { label: "About us", href: "#features" },
+        { label: "About", href: "/about" },
         { label: "FAQ", href: "#faq" },
         { label: "Contact", href: "#apply" },
       ],
@@ -651,6 +658,7 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
         socialLinks: [],
       },
     },
+    about: mergeAboutSection(brandName),
     sections: mergeSectionVisibility(undefined, SPARK_ACADEMY_SECTION_DEFAULTS),
   };
 }
@@ -691,6 +699,7 @@ export function mergeSparkAcademyLandingConfig(
       ...partial?.footer,
       rich: { ...base.footer!.rich, ...partial?.footer?.rich },
     },
+    about: mergeAboutSection(brandName, partial?.about ?? base.about),
     sections: mergeSparkAcademySectionVisibility(partial),
   });
 }

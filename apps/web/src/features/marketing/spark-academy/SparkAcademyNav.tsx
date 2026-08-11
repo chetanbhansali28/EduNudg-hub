@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { centerPublicLoginHrefs } from "@/features/marketing/CenterPublicNavLogins";
+import { MarketingSectionNavLink } from "@/features/marketing/MarketingSectionNavLink";
 import { SparkAcademyCta } from "./SparkAcademyCta";
 
 type Props = {
@@ -57,9 +58,12 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
               </div>
               <div className="sa-nav__drawer-links">
                 {config.nav.links.map((link, i) => (
-                  <a key={`${link.label}-${i}`} href={link.href} onClick={closeMenu}>
-                    {link.label}
-                  </a>
+                  <MarketingSectionNavLink
+                    key={`${link.label}-${i}`}
+                    href={link.href}
+                    label={link.label}
+                    onClick={closeMenu}
+                  />
                 ))}
                 {logins ? (
                   <a href={logins.studentLoginHref} onClick={closeMenu}>
@@ -100,9 +104,12 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
 
         <nav className="sa-nav__links" aria-label="Sections">
           {config.nav.links.map((link, i) => (
-            <a key={`${link.label}-${i}`} href={link.href} className="sa-nav__link">
-              {link.label}
-            </a>
+            <MarketingSectionNavLink
+              key={`${link.label}-${i}`}
+              href={link.href}
+              label={link.label}
+              className="sa-nav__link"
+            />
           ))}
         </nav>
 

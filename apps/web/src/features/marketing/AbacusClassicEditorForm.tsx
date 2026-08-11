@@ -35,6 +35,7 @@ import {
 import { MarketingMediaField } from "./MarketingMediaField";
 import { MARKETING_THEME_LABELS, type MarketingTheme } from "@/types/homepage";
 import { UpcomingEventsEditorFields } from "./UpcomingEventsEditorFields";
+import { AboutUsEditorFields } from "./AboutUsEditorFields";
 
 export type AbacusClassicEditorFormProps = {
   config: HomepageConfig;
@@ -497,6 +498,24 @@ export function AbacusClassicEditorForm({
           uploadScope={uploadScope}
         />
       </EditorAccordion>
+
+      {portalMode === "brand" ? (
+        <EditorAccordion
+          sectionId="about"
+          title="About Us"
+          description="Company story, key features, team photos — full /about page"
+          enabled={isAbacusSectionEnabled(config, "about")}
+          onEnabledChange={(e) => setSection("about", e)}
+        >
+          <AboutUsEditorFields
+            config={config}
+            onChange={onChange}
+            commit={commit}
+            commitMedia={commitMedia}
+            uploadScope={uploadScope}
+          />
+        </EditorAccordion>
+      ) : null}
 
       <EditorAccordion
         sectionId="trustMedia"

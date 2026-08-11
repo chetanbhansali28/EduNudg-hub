@@ -19,6 +19,8 @@ import { isSectionEnabled } from "@/lib/homepageSections";
 import { useScrollReveal } from "./useScrollReveal";
 import { UpcomingEventsSection } from "./UpcomingEventsSection";
 import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
+import { AboutUsHomepageSection } from "./AboutUsContent";
+import { aboutHasContent, isAboutPagePublished } from "@/lib/aboutUs";
 
 function FaqList({ items }: { items: { question: string; answer: string }[] }) {
   return (
@@ -73,6 +75,10 @@ function MarketingContentView({
     portalMode !== "platform" &&
     isSectionEnabled(config, "upcomingEvents") &&
     upcomingEvents.length > 0;
+  const showAbout =
+    portalMode === "brand" &&
+    isSectionEnabled(config, "about") &&
+    aboutHasContent(config.about);
 
   return (
     <div className="novu-hero-wrap">
@@ -152,6 +158,13 @@ function MarketingContentView({
           <h2 className="novu-reveal">Got questions?</h2>
           <FaqList items={config.faq} />
         </section>
+        ) : null}
+
+        {showAbout ? (
+          <AboutUsHomepageSection
+            config={config}
+            showPageLink={isAboutPagePublished(config.about)}
+          />
         ) : null}
       </main>
     </div>

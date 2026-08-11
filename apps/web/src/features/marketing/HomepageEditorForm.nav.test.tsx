@@ -78,5 +78,30 @@ describe("AbacusClassicEditorForm navigation", () => {
     expect(navPanel).toBeDefined();
     const linkSelect = within(navPanel).getByLabelText("Link") as HTMLSelectElement;
     expect(Array.from(linkSelect.options).some((o) => o.value === "#founders")).toBe(true);
+    expect(Array.from(linkSelect.options).some((o) => o.value === "/about")).toBe(true);
+    // #about appears only when sections.about is enabled (default off)
+    expect(Array.from(linkSelect.options).some((o) => o.value === "#about")).toBe(false);
+  });
+
+  it("regression_nav_link_dropdown_lists_about_section_when_enabled", () => {
+    let config = mergeAbacusClassicLandingConfig("Smart Brain");
+    config = {
+      ...config,
+      sections: { ...config.sections, about: true },
+    };
+    render(
+      <AbacusClassicEditorForm
+        config={config}
+        marketingTheme="abacus-classic"
+        portalMode="brand"
+        onChange={() => undefined}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Navigation & CTAs/i }));
+
+    const navPanel = screen.getByText("Menu item 1").closest(".ed-editor-item-panel") as HTMLElement;
+    const linkSelect = within(navPanel).getByLabelText("Link") as HTMLSelectElement;
+    expect(Array.from(linkSelect.options).some((o) => o.value === "#about")).toBe(true);
   });
 });

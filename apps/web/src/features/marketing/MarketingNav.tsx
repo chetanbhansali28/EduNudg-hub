@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { CenterPublicNavLogins } from "./CenterPublicNavLogins";
 import { MarketingCtaLink } from "./MarketingCtaLink";
+import { MarketingSectionNavLink } from "./MarketingSectionNavLink";
 import { useHeroIntroComplete } from "./useHeroIntroComplete";
 import { useNavTheme } from "./useNavTheme";
 
@@ -78,14 +79,13 @@ export function MarketingNav({ config, brandSlug }: Props) {
               </div>
               <div className="novu-nav-bar__drawer-links">
                 {config.nav.links.map((l, i) => (
-                  <a
+                  <MarketingSectionNavLink
                     key={`${l.label}-${l.href}-${i}`}
                     href={l.href}
+                    label={l.label}
                     className="novu-nav-bar__drawer-link"
                     onClick={closeMenu}
-                  >
-                    {l.label}
-                  </a>
+                  />
                 ))}
                 {brandSlug ? (
                   <CenterPublicNavLogins brandSlug={brandSlug} inDropdown onNavigate={closeMenu} />
@@ -129,9 +129,12 @@ export function MarketingNav({ config, brandSlug }: Props) {
 
         <div className={`novu-nav-bar__pill ${isLightBg ? "novu-nav-bar__pill--on-white" : ""}`}>
           {config.nav.links.map((l, i) => (
-            <a key={`${l.label}-${l.href}-${i}`} href={l.href} className="novu-nav-bar__link">
-              {l.label}
-            </a>
+            <MarketingSectionNavLink
+              key={`${l.label}-${l.href}-${i}`}
+              href={l.href}
+              label={l.label}
+              className="novu-nav-bar__link"
+            />
           ))}
           {brandSlug ? <CenterPublicNavLogins brandSlug={brandSlug} isLightBg={isLightBg} /> : null}
           <MarketingCtaLink

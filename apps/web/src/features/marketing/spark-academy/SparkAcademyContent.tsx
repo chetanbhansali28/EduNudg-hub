@@ -14,6 +14,8 @@ import { TestimonialsSection } from "./TestimonialsSection";
 import { FaqSection } from "./FaqSection";
 import { UpcomingEventsSection } from "../UpcomingEventsSection";
 import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
+import { AboutUsHomepageSection } from "../AboutUsContent";
+import { aboutHasContent, isAboutPagePublished } from "@/lib/aboutUs";
 
 type Props = {
   config: HomepageConfig;
@@ -43,6 +45,8 @@ export function SparkAcademyContent({
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
   const showUpcomingEvents =
     isSparkSectionEnabled(config, "upcomingEvents") && upcomingEvents.length > 0;
+  const showAbout =
+    isSparkSectionEnabled(config, "about") && aboutHasContent(config.about);
 
   const featureImageFallback =
     config.hero.backgroundImageUrl?.trim() ||
@@ -93,6 +97,13 @@ export function SparkAcademyContent({
       {showTestimonials ? <TestimonialsSection testimonials={config.testimonials} /> : null}
 
       {showFaq ? <FaqSection items={config.faq} /> : null}
+
+      {showAbout ? (
+        <AboutUsHomepageSection
+          config={config}
+          showPageLink={isAboutPagePublished(config.about)}
+        />
+      ) : null}
     </main>
   );
 }

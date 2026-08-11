@@ -51,6 +51,25 @@ describe("syncMarketingNavLinks", () => {
 
     expect(next.nav.links.some((l) => l.href === CURRICULUM_NAV_HREF && l.label === "Our courses")).toBe(true);
   });
+
+  it("regression_injects_about_us_nav_when_homepage_about_enabled", () => {
+    const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
+    // Remove any default /about link so injection is observable
+    config.nav.links = config.nav.links.filter((l) => l.href !== "/about" && l.href !== "#about");
+    config.sections = { ...config.sections, about: true };
+    const next = syncMarketingNavLinks(config, { theme: "abacus-classic", publicCurriculum: [] });
+
+    expect(next.nav.links.some((l) => l.href === "#about" && l.label === "About Us")).toBe(true);
+  });
+
+  it("regression_omits_about_us_nav_when_homepage_about_disabled", () => {
+    const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
+    config.nav.links = config.nav.links.filter((l) => l.href !== "/about" && l.href !== "#about");
+    config.sections = { ...config.sections, about: false };
+    const next = syncMarketingNavLinks(config, { theme: "abacus-classic", publicCurriculum: [] });
+
+    expect(next.nav.links.some((l) => l.href === "#about" && l.label === "About Us")).toBe(false);
+  });
 });
 
 describe("marketingNavSectionOptions", () => {

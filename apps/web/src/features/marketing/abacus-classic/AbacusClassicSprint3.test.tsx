@@ -186,11 +186,25 @@ describe("Abacus Classic Sprint 3 — rich footer", () => {
 });
 
 describe("Abacus Classic Sprint 3 — content section order and toggles", () => {
-  it("renders founders, trust, and gallery in document order", () => {
+  it("renders founders, trust, gallery, then about in document order", () => {
+    let config = sprint3Config();
+    config = {
+      ...config,
+      about: {
+        title: "About us",
+        body: "Story",
+        features: [],
+        members: [],
+        publishPage: true,
+      },
+      sections: { ...config.sections, about: true },
+    };
     render(
-      <LeadModalProvider>
-        <AbacusClassicContent config={sprint3Config()} publicCurriculum={[]} />
-      </LeadModalProvider>
+      <MemoryRouter>
+        <LeadModalProvider>
+          <AbacusClassicContent config={config} publicCurriculum={[]} />
+        </LeadModalProvider>
+      </MemoryRouter>
     );
 
     const main = screen.getByRole("main");
@@ -199,6 +213,7 @@ describe("Abacus Classic Sprint 3 — content section order and toggles", () => 
     expect(sectionIds.indexOf("founders")).toBeLessThan(sectionIds.indexOf("trust"));
     expect(sectionIds.indexOf("trust")).toBeLessThan(sectionIds.indexOf("faq"));
     expect(sectionIds.indexOf("faq")).toBeLessThan(sectionIds.indexOf("gallery"));
+    expect(sectionIds.indexOf("gallery")).toBeLessThan(sectionIds.indexOf("about"));
   });
 
   it("hides founders section when disabled in editor toggles", () => {

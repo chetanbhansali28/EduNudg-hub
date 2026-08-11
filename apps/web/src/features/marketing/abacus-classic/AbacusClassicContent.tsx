@@ -13,6 +13,8 @@ import { TrustMediaSection } from "./TrustMediaSection";
 import { GalleryMarqueeSection } from "./GalleryMarqueeSection";
 import { UpcomingEventsSection } from "../UpcomingEventsSection";
 import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
+import { AboutUsHomepageSection } from "../AboutUsContent";
+import { aboutHasContent, isAboutPagePublished } from "@/lib/aboutUs";
 
 function FaqList({ items }: { items: { question: string; answer: string }[] }) {
   return (
@@ -48,6 +50,8 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
   const showUpcomingEvents =
     isAbacusSectionEnabled(config, "upcomingEvents") && upcomingEvents.length > 0;
+  const showAbout =
+    isAbacusSectionEnabled(config, "about") && aboutHasContent(config.about);
 
   return (
     <main className="ac-main">
@@ -70,6 +74,12 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
         </section>
       ) : null}
       {showGallery && config.gallery ? <GalleryMarqueeSection gallery={config.gallery} /> : null}
+      {showAbout ? (
+        <AboutUsHomepageSection
+          config={config}
+          showPageLink={isAboutPagePublished(config.about)}
+        />
+      ) : null}
     </main>
   );
 }

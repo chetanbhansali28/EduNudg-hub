@@ -1,7 +1,11 @@
 import type { HomepageConfig, HomepageLink, MarketingTheme } from "@/types/homepage";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import type { PortalMode } from "@/lib/portalMode";
+import { aboutHasContent } from "@/lib/aboutUs";
 import {
+  ABACUS_CLASSIC_SECTION_DEFAULTS,
+  DEFAULT_HOMEPAGE_SECTION_VISIBILITY,
+  SPARK_ACADEMY_SECTION_DEFAULTS,
   mergeSectionVisibility,
   type HomepageSectionKey,
   type HomepageSectionVisibility,
@@ -9,6 +13,7 @@ import {
 
 export const CURRICULUM_NAV_HREF = "#curriculum";
 export const PROGRAMS_NAV_HREF = "#programs";
+export const ABOUT_NAV_HREF = "#about";
 export const CUSTOM_NAV_HREF_OPTION = "__custom__";
 
 export type MarketingNavSectionOption = { value: string; label: string };
@@ -29,6 +34,8 @@ const LEGACY_NAV_HREF_ALIASES: Record<string, string> = {
 const NOVU_SHARED: NavOptionDef[] = [
   { value: "#features", label: "Features (#features)", sectionKey: "featureScroll" },
   { value: CURRICULUM_NAV_HREF, label: "Curriculum (#curriculum)" },
+  { value: "/about", label: "About page (/about)" },
+  { value: "#about", label: "About section (#about)", sectionKey: "about" },
   { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
   { value: "#testimonials", label: "Testimonials (#testimonials)", sectionKey: "testimonials" },
   { value: "#faq", label: "FAQ (#faq)", sectionKey: "faq" },
@@ -57,6 +64,8 @@ const ABACUS_CLASSIC_OPTIONS: NavOptionDef[] = [
   { value: PROGRAMS_NAV_HREF, label: "Programs (#programs)", sectionKey: "programsGrid" },
   { value: CURRICULUM_NAV_HREF, label: "Syllabus (#curriculum)", sectionKey: "curriculumSyllabus" },
   { value: "#features", label: "Why us (#features)", sectionKey: "featureGrid" },
+  { value: "/about", label: "About page (/about)" },
+  { value: "#about", label: "About section (#about)", sectionKey: "about" },
   { value: "#founders", label: "Leadership (#founders)", sectionKey: "founders" },
   { value: "#trust", label: "Trust & video (#trust)", sectionKey: "trustMedia" },
   { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
@@ -71,6 +80,8 @@ const SPARK_ACADEMY_OPTIONS: NavOptionDef[] = [
   { value: PROGRAMS_NAV_HREF, label: "Programs (#programs)", sectionKey: "programsGrid" },
   { value: CURRICULUM_NAV_HREF, label: "Syllabus (#curriculum)", sectionKey: "curriculumSyllabus" },
   { value: "#features", label: "About us (#features)", sectionKey: "featureGrid" },
+  { value: "/about", label: "About page (/about)" },
+  { value: "#about", label: "About section (#about)", sectionKey: "about" },
   { value: "#founders", label: "Mentors (#founders)", sectionKey: "founders" },
   { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
   { value: "#journey", label: "Journey stats (#journey)", sectionKey: "trustMedia" },
@@ -139,6 +150,7 @@ export function resolveNavHrefSelectValue(
 }
 
 const AUTO_CURRICULUM_LABEL = "Curriculum";
+const AUTO_ABOUT_LABEL = "About Us";
 
 function stripAutoInjectedCurriculumLink(links: HomepageConfig["nav"]["links"]) {
   return links.filter((l) => !(l.href === CURRICULUM_NAV_HREF && l.label === AUTO_CURRICULUM_LABEL));
@@ -157,16 +169,48 @@ function injectNovuCurriculumLink(links: HomepageConfig["nav"]["links"]) {
   ];
 }
 
-/** Theme-aware nav: Novu injects Curriculum when RPC has programs; alternate themes keep brand-chosen labels. */
+function stripAutoInjectedAboutLink(links: HomepageConfig["nav"]["links"]) {
+  return links.filter((l) => !(l.href === ABOUT_NAV_HREF && l.label === AUTO_ABOUT_LABEL));
+}
+
+/** Insert About Us → #about after Gallery/FAQ when the homepage About section is on. */
+function injectAboutNavLink(links: HomepageConfig["nav"]["links"]) {
+  if (links.some((l) => l.href === ABOUT_NAV_HREF || l.href === "/about")) {
+    return links;
+  }
+  const galleryIdx = links.findIndex((l) => l.href === "#gallery");
+  const faqIdx = links.findIndex((l) => l.href === "#faq");
+  const insertAt =
+    galleryIdx >= 0 ? galleryIdx + 1 : faqIdx >= 0 ? faqIdx + 1 : links.length;
+  return [
+    ...links.slice(0, insertAt),
+    { label: AUTO_ABOUT_LABEL, href: ABOUT_NAV_HREF },
+    ...links.slice(insertAt),
+  ];
+}
+
+function sectionDefaultsForTheme(theme: MarketingTheme): Record<HomepageSectionKey, boolean> {
+  if (theme === "abacus-classic") return ABACUS_CLASSIC_SECTION_DEFAULTS;
+  if (theme === "spark-academy") return SPARK_ACADEMY_SECTION_DEFAULTS;
+  return DEFAULT_HOMEPAGE_SECTION_VISIBILITY;
+}
+
+/** Theme-aware nav: Novu injects Curriculum when RPC has programs; About Us when homepage About is on. */
 export function syncMarketingNavLinks(
   config: HomepageConfig,
   options: { theme: MarketingTheme; publicCurriculum: PublicCurriculumProgram[] }
 ): HomepageConfig {
   const { theme, publicCurriculum } = options;
   let links = stripAutoInjectedCurriculumLink(config.nav.links);
+  links = stripAutoInjectedAboutLink(links);
 
   if (theme === "novu" && publicCurriculum.length > 0) {
     links = injectNovuCurriculumLink(links);
+  }
+
+  const sections = mergeSectionVisibility(config.sections, sectionDefaultsForTheme(theme));
+  if (sections.about && aboutHasContent(config.about)) {
+    links = injectAboutNavLink(links);
   }
 
   return { ...config, nav: { ...config.nav, links } };
