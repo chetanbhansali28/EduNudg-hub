@@ -183,7 +183,7 @@ Traceability: FR-X02
 
 ### Requirement: Manual student lead entry
 
-Staff SHALL create leads without public forms via manual entry cards and staff RPCs.
+Staff SHALL create leads without public forms via staff RPCs. Brand **+ New Lead** and center **+ Add Lead** SHALL open a modal (`ManualStudentLeadCard`, same chrome as Add Franchise), not an inline `AddFormSection`. Fields are grouped Parent / Child / Location / Notes.
 
 #### Scenario: Brand manual unassigned lead
 
@@ -194,6 +194,12 @@ Staff SHALL create leads without public forms via manual entry cards and staff R
 
 - **WHEN** center staff create a lead via `create_center_student_lead_staff`
 - **THEN** a lead with `lead_source = center` and `center_id` set appears in center Leads
+
+#### Scenario: Add lead opens modal
+
+- **WHEN** center or brand staff click **+ Add Lead** / **+ New Lead**
+- **THEN** a dialog titled **Add student lead** opens
+- **AND** Cancel or Close dismisses it without creating a lead
 
 #### Scenario: Center CSV import
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -103,7 +103,6 @@ export function CenterLeadsPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [convertAllMode, setConvertAllMode] = useState(false);
   const [bulkConvertMessage, setBulkConvertMessage] = useState<string | null>(null);
-  const addFormRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lostMode, setLostMode] = useState(false);
@@ -225,14 +224,6 @@ export function CenterLeadsPage() {
   }, [allLeads, filter]);
 
   const openAddLead = () => setAddLeadOpen(true);
-
-  useEffect(() => {
-    if (!addLeadOpen || !addFormRef.current) return;
-    const frame = requestAnimationFrame(() => {
-      addFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [addLeadOpen]);
 
   const pageItems = useMemo(() => paginateItems(filtered, page, LEAD_PAGE_SIZE), [filtered, page]);
 
@@ -489,18 +480,13 @@ export function CenterLeadsPage() {
         }
       />
 
-      {addLeadOpen ? (
-        <div ref={addFormRef} id="center-add-student-lead" className="ed-center-leads-page__add-form">
-          <ManualStudentLeadCard
-            scope="center"
-            centerId={centerId}
-            invalidateKey={["center-leads", centerId]}
-            formOpen={addLeadOpen}
-            onFormOpenChange={setAddLeadOpen}
-            hideTrigger
-          />
-        </div>
-      ) : null}
+      <ManualStudentLeadCard
+        scope="center"
+        centerId={centerId}
+        invalidateKey={["center-leads", centerId]}
+        open={addLeadOpen}
+        onClose={() => setAddLeadOpen(false)}
+      />
 
       <CenterStudentLeadImportDialog
         centerId={centerId}
@@ -510,14 +496,11 @@ export function CenterLeadsPage() {
         onImported={invalidate}
       />
 
-      <button
-        type="button"
-        className="ed-pipeline-fab"
-        aria-label="Add lead"
-        onClick={openAddLead}
-      >
-        +
-      </button>
+      {addLeadOpen ? null : (
+        <button type="button" className="ed-pipeline-fab" aria-label="Add lead" onClick={openAddLead}>
+          +
+        </button>
+      )}
     </div>
   );
 }

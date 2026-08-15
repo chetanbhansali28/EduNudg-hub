@@ -49,6 +49,8 @@ Center public footer contact: `regression_center_footer_contact_uses_franchise_p
 
 Center public footer name: `regression_center_footer_replaces_sample_center_placeholder_with_franchise_name` and `regression_center_public_footer_uses_franchise_name_not_sample_center` — never show editor placeholder **Sample Center** on a live center host.
 
+Manual student lead: `regression_manual_brand_student_matches_public_enroll_fields` and `regression_manual_center_student_matches_public_register_fields` — Add Lead is a modal (`ed-import-dialog`), same pattern as Add Franchise.
+
 Coverage target: ≥80% on `packages/*`.
 
 ## Before finish

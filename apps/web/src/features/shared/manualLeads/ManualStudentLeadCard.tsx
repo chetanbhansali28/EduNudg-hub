@@ -1,40 +1,60 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
+import { Button, FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
 import { createBrandStudentLeadStaff, createCenterStudentLeadStaff } from "@/lib/manualLeadsApi";
 import { PHONE_INPUT_PLACEHOLDER } from "@/lib/phoneInput";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { isIndiaPincode } from "@/lib/leadSla";
-import { AddFormSection } from "@/features/shared/AddFormSection";
-import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import "@/features/platform/brandDetailPage.css";
+import "@/features/brand/franchiseApplications/franchiseApplications.css";
 
 type Props =
-  | { scope: "brand"; brandId: string; invalidateKey: unknown[]; formOpen?: boolean; onFormOpenChange?: (open: boolean) => void; hideTrigger?: boolean }
-  | { scope: "center"; centerId: string; invalidateKey: unknown[]; formOpen?: boolean; onFormOpenChange?: (open: boolean) => void; hideTrigger?: boolean };
+  | { scope: "brand"; brandId: string; invalidateKey: unknown[]; open: boolean; onClose: () => void }
+  | { scope: "center"; centerId: string; invalidateKey: unknown[]; open: boolean; onClose: () => void };
+
+const emptyForm = {
+  parentName: "",
+  whatsapp: "",
+  email: "",
+  city: "",
+  pincode: "",
+  childName: "",
+  childDob: "",
+  schoolName: "",
+  notes: "",
+};
 
 export function ManualStudentLeadCard(props: Props) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
-  const { bindClose, closeAddForm } = useAddFormCloser();
-  const [parentName, setParentName] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
-  const [email, setEmail] = useState("");
-  const [city, setCity] = useState("");
-  const [pincode, setPincode] = useState("");
-  const [childName, setChildName] = useState("");
-  const [childDob, setChildDob] = useState("");
-  const [schoolName, setSchoolName] = useState("");
-  const [notes, setNotes] = useState("");
+  const [form, setForm] = useState(emptyForm);
 
   const isBrand = props.scope === "brand";
   const pincodeRequired = isBrand;
-  const pincodeValid = pincodeRequired ? isIndiaPincode(pincode) : !pincode.trim() || isIndiaPincode(pincode);
+  const pincodeValid = pincodeRequired ? isIndiaPincode(form.pincode) : !form.pincode.trim() || isIndiaPincode(form.pincode);
   const pincodeHint =
-    pincode.trim() && !pincodeValid
+    form.pincode.trim() && !pincodeValid
       ? isBrand
         ? "Enter a valid 6-digit India pincode"
         : "Use a 6-digit India pincode or leave blank"
       : undefined;
+
+  const setField = (key: keyof typeof emptyForm) => (value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (props.open && !dialog.open) dialog.showModal();
+    if (!props.open && dialog.open) dialog.close();
+  }, [props.open]);
+
+  useEffect(() => {
+    if (props.open) return;
+    setForm(emptyForm);
+  }, [props.open]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -45,15 +65,15 @@ export function ManualStudentLeadCard(props: Props) {
       }
       clear();
       const payload = {
-        parentName,
-        whatsappE164: whatsapp,
-        email,
-        city,
-        pincode: pincode || undefined,
-        childName,
-        childDob: childDob || undefined,
-        schoolName: schoolName || undefined,
-        notes,
+        parentName: form.parentName,
+        whatsappE164: form.whatsapp,
+        email: form.email,
+        city: form.city,
+        pincode: form.pincode || undefined,
+        childName: form.childName,
+        childDob: form.childDob || undefined,
+        schoolName: form.schoolName || undefined,
+        notes: form.notes,
       };
       if (props.scope === "brand") {
         const { error: err } = await createBrandStudentLeadStaff(props.brandId, payload);
@@ -65,83 +85,113 @@ export function ManualStudentLeadCard(props: Props) {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: props.invalidateKey });
-      setParentName("");
-      setWhatsapp("");
-      setEmail("");
-      setCity("");
-      setPincode("");
-      setChildName("");
-      setChildDob("");
-      setSchoolName("");
-      setNotes("");
-      closeAddForm();
+      props.onClose();
     },
     onError: capture,
   });
 
+  const handleClose = () => {
+    if (save.isPending) return;
+    clear();
+    props.onClose();
+  };
+
   const brandCanSubmit =
-    parentName.trim() &&
-    whatsapp.trim() &&
-    email.trim() &&
-    city.trim() &&
-    pincode.trim() &&
+    form.parentName.trim() &&
+    form.whatsapp.trim() &&
+    form.email.trim() &&
+    form.city.trim() &&
+    form.pincode.trim() &&
     pincodeValid;
 
-  const centerCanSubmit = parentName.trim() && whatsapp.trim() && email.trim() && pincodeValid;
+  const centerCanSubmit = form.parentName.trim() && form.whatsapp.trim() && form.email.trim() && pincodeValid;
+  const canSubmit = isBrand ? brandCanSubmit : centerCanSubmit;
 
   return (
-    <AddFormSection
-      buttonLabel="Add lead"
-      panelTitle="Add student lead manually"
-      open={props.formOpen}
-      onOpenChange={props.onFormOpenChange}
-      hideTrigger={props.hideTrigger}
-      primaryAction={{
-        label: "Create lead",
-        onClick: () => save.mutate(),
-        pending: save.isPending,
-        disabled: !(isBrand ? brandCanSubmit : centerCanSubmit),
-      }}
+    <dialog
+      ref={dialogRef}
+      className="ed-import-dialog ed-franchise-app-manual-dialog"
+      aria-labelledby="manual-student-lead-title"
+      onClose={handleClose}
+      onClick={(event) => event.target === dialogRef.current && handleClose()}
     >
-      {({ close }) => {
-        bindClose(close);
-        return (
-          <>
-            <p className="ed-text-sm ed-muted">
-              Walk-in or phone enquiry — same fields as the public {isBrand ? "student application" : "center registration"}{" "}
-              form. Duplicate WhatsApp merges per brand.
-            </p>
-            <MutationError message={error} />
-            <FormGrid>
-              <Input label="Parent name" value={parentName} onChange={setParentName} />
-              <Input
-                label="WhatsApp number"
-                value={whatsapp}
-                onChange={setWhatsapp}
-                placeholder={PHONE_INPUT_PLACEHOLDER}
-              />
-              <Input label="Email" value={email} onChange={setEmail} type="email" />
-              {isBrand ? (
-                <>
-                  <Input label="City" value={city} onChange={setCity} />
-                  <Input label="Pincode" value={pincode} onChange={setPincode} placeholder="6 digits" />
-                </>
-              ) : (
-                <>
-                  <Input label="Child name" value={childName} onChange={setChildName} />
-                  <Input label="City (optional)" value={city} onChange={setCity} />
-                  <Input label="Pincode (optional)" value={pincode} onChange={setPincode} placeholder="6 digits" />
-                </>
-              )}
-              {isBrand && <Input label="Child name" value={childName} onChange={setChildName} />}
-            </FormGrid>
-            {pincodeHint && <p className="ed-text-sm ed-muted">{pincodeHint}</p>}
-            <Input label="Child date of birth" value={childDob} onChange={setChildDob} type="date" />
-            {isBrand && <Input label="School name (optional)" value={schoolName} onChange={setSchoolName} />}
-            <Textarea label="Notes (optional)" value={notes} onChange={setNotes} rows={2} />
-          </>
-        );
-      }}
-    </AddFormSection>
+      <div className="ed-import-dialog__panel" role="document">
+        <header className="ed-import-dialog__header">
+          <h2 id="manual-student-lead-title">Add student lead</h2>
+          <button type="button" className="ed-import-dialog__close" aria-label="Close" onClick={handleClose}>
+            ×
+          </button>
+        </header>
+
+        <div className="ed-import-dialog__body">
+          <p className="ed-import-dialog__intro">
+            Walk-in or phone enquiry — same fields as the public {isBrand ? "student application" : "center registration"}{" "}
+            form. Duplicate WhatsApp merges per brand.
+          </p>
+          <MutationError message={error} />
+
+          <div className="ed-franchise-app-manual-dialog__sections">
+            <section className="ed-franchise-app-detail__card">
+              <h3 className="ed-franchise-app-detail__card-title">Parent</h3>
+              <FormGrid>
+                <Input label="Parent name" value={form.parentName} onChange={setField("parentName")} autoComplete="name" />
+                <Input
+                  label="WhatsApp number"
+                  value={form.whatsapp}
+                  onChange={setField("whatsapp")}
+                  placeholder={PHONE_INPUT_PLACEHOLDER}
+                  autoComplete="tel"
+                />
+                <Input label="Email" value={form.email} onChange={setField("email")} type="email" autoComplete="email" />
+              </FormGrid>
+            </section>
+
+            <section className="ed-franchise-app-detail__card">
+              <h3 className="ed-franchise-app-detail__card-title">Child</h3>
+              <FormGrid>
+                <Input label="Child name" value={form.childName} onChange={setField("childName")} />
+                <Input label="Child date of birth" value={form.childDob} onChange={setField("childDob")} type="date" />
+                {isBrand ? (
+                  <Input label="School name (optional)" value={form.schoolName} onChange={setField("schoolName")} />
+                ) : null}
+              </FormGrid>
+            </section>
+
+            <section className="ed-franchise-app-detail__card">
+              <h3 className="ed-franchise-app-detail__card-title">Location</h3>
+              <FormGrid>
+                <Input
+                  label={isBrand ? "City" : "City (optional)"}
+                  value={form.city}
+                  onChange={setField("city")}
+                  autoComplete="address-level2"
+                />
+                <Input
+                  label={isBrand ? "Pincode" : "Pincode (optional)"}
+                  value={form.pincode}
+                  onChange={setField("pincode")}
+                  placeholder="6 digits"
+                />
+              </FormGrid>
+              {pincodeHint ? <p className="ed-text-sm ed-muted">{pincodeHint}</p> : null}
+            </section>
+
+            <section className="ed-franchise-app-detail__card ed-franchise-app-detail__card--wide">
+              <h3 className="ed-franchise-app-detail__card-title">Notes</h3>
+              <Textarea label="Notes (optional)" value={form.notes} onChange={setField("notes")} rows={3} />
+            </section>
+          </div>
+        </div>
+
+        <footer className="ed-import-dialog__footer">
+          <Button type="button" variant="ghost" onClick={handleClose} disabled={save.isPending}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={() => save.mutate()} disabled={!canSubmit || save.isPending}>
+            {save.isPending ? "Creating…" : "Create lead"}
+          </Button>
+        </footer>
+      </div>
+    </dialog>
   );
 }

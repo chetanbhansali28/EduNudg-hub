@@ -476,36 +476,13 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
         </div>
       ) : null}
 
-      {addLeadOpen && isMobile ? (
-        <div className="ed-ops-mobile-detail" role="dialog" aria-modal aria-label="Add lead">
-          <div className="ed-ops-mobile-detail__bar">
-            <button type="button" className="ed-ops-mobile-detail__back" onClick={() => setAddLeadOpen(false)}>
-              ← Back
-            </button>
-          </div>
-          <ManualStudentLeadCard
-            scope="brand"
-            brandId={brandId}
-            invalidateKey={["brand-leads", brandId]}
-            formOpen
-            onFormOpenChange={setAddLeadOpen}
-            hideTrigger
-          />
-        </div>
-      ) : null}
-
-      {addLeadOpen && !isMobile ? (
-        <div className="ed-student-leads__add-form">
-          <ManualStudentLeadCard
-            scope="brand"
-            brandId={brandId}
-            invalidateKey={["brand-leads", brandId]}
-            formOpen={addLeadOpen}
-            onFormOpenChange={setAddLeadOpen}
-            hideTrigger
-          />
-        </div>
-      ) : null}
+      <ManualStudentLeadCard
+        scope="brand"
+        brandId={brandId}
+        invalidateKey={["brand-leads", brandId]}
+        open={addLeadOpen}
+        onClose={() => setAddLeadOpen(false)}
+      />
 
       {isMobile && !addLeadOpen ? <LeadFab onClick={() => setAddLeadOpen(true)} /> : null}
     </div>

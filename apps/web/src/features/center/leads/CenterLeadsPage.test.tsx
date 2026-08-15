@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@edunudg/ui";
 import { CenterLeadsPage } from "./CenterLeadsPage";
@@ -15,7 +15,8 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
 }));
 
 vi.mock("@/features/shared/manualLeads/ManualStudentLeadCard", () => ({
-  ManualStudentLeadCard: () => <div>Add student lead manually</div>,
+  ManualStudentLeadCard: ({ open }: { open: boolean }) =>
+    open ? <div>Add student lead manually</div> : null,
 }));
 
 vi.mock("@/features/center/leads/CenterStudentLeadImportDialog", () => ({
@@ -78,10 +79,7 @@ describe("CenterLeadsPage", () => {
     expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
   });
 
-  it("regression_center_leads_add_lead_opens_form_and_scrolls", async () => {
-    const scrollIntoView = vi.fn();
-    Element.prototype.scrollIntoView = scrollIntoView;
-
+  it("regression_center_leads_add_lead_opens_modal", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>
@@ -92,14 +90,9 @@ describe("CenterLeadsPage", () => {
     );
 
     expect(screen.queryByRole("button", { name: /Filter/i })).toBeNull();
+    expect(screen.queryByText("Add student lead manually")).toBeNull();
     fireEvent.click(await screen.findByRole("button", { name: /\+ Add Lead/i }));
-    await waitFor(() => {
-      expect(screen.getByText("Add student lead manually")).toBeDefined();
-      expect(document.getElementById("center-add-student-lead")).toBeTruthy();
-    });
-    await waitFor(() => {
-      expect(scrollIntoView).toHaveBeenCalled();
-    });
+    expect(await screen.findByText("Add student lead manually")).toBeDefined();
   });
 
   it("regression_center_leads_import_csv_opens_dialog", async () => {

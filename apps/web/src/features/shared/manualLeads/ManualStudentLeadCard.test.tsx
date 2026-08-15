@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ManualStudentLeadCard } from "./ManualStudentLeadCard";
@@ -11,24 +11,39 @@ vi.mock("@/lib/manualLeadsApi", () => ({
   createCenterStudentLeadStaff: (...args: unknown[]) => createCenterStudentLeadStaff(...args),
 }));
 
+function polyfillDialog() {
+  HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
+    this.open = true;
+  });
+  HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+    this.open = false;
+  });
+}
+
 describe("ManualStudentLeadCard", () => {
   beforeEach(() => {
+    polyfillDialog();
     createBrandStudentLeadStaff.mockReset();
     createCenterStudentLeadStaff.mockReset();
     createBrandStudentLeadStaff.mockResolvedValue({ id: "l1", error: null });
     createCenterStudentLeadStaff.mockResolvedValue({ id: "l2", error: null });
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("regression_manual_brand_student_matches_public_enroll_fields", async () => {
     const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const onClose = vi.fn();
     render(
       <QueryClientProvider client={qc}>
-        <ManualStudentLeadCard scope="brand" brandId="brand-1" invalidateKey={["leads"]} />
+        <ManualStudentLeadCard scope="brand" brandId="brand-1" invalidateKey={["leads"]} open onClose={onClose} />
       </QueryClientProvider>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Add lead" }));
-
+    expect(screen.getByRole("heading", { name: "Add student lead" })).toBeDefined();
+    expect(document.querySelector(".ed-franchise-app-manual-dialog")).not.toBeNull();
     expect(screen.getByLabelText("School name (optional)")).toBeDefined();
     expect(screen.getByLabelText("Child date of birth")).toBeDefined();
 
@@ -56,17 +71,23 @@ describe("ManualStudentLeadCard", () => {
         notes: "",
       });
     });
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("regression_manual_center_student_matches_public_register_fields", async () => {
     const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const onClose = vi.fn();
     render(
       <QueryClientProvider client={qc}>
-        <ManualStudentLeadCard scope="center" centerId="center-1" invalidateKey={["center-leads"]} />
+        <ManualStudentLeadCard
+          scope="center"
+          centerId="center-1"
+          invalidateKey={["center-leads"]}
+          open
+          onClose={onClose}
+        />
       </QueryClientProvider>
     );
-
-    fireEvent.click(screen.getByRole("button", { name: "Add lead" }));
 
     expect(screen.getByLabelText("City (optional)")).toBeDefined();
     expect(screen.getByLabelText("Pincode (optional)")).toBeDefined();
@@ -93,5 +114,6 @@ describe("ManualStudentLeadCard", () => {
         notes: "",
       });
     });
+    expect(onClose).toHaveBeenCalled();
   });
 });
