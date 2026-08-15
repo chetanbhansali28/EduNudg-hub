@@ -43,7 +43,11 @@ Brand franchise centers: profile/photo saves must not call `center-owner-credent
 
 Franchise CSV import: platform `/admin/brands/:slug` and brand `/app/centers` share `FranchiseCenterImportDialog`; required CSV columns are `name` and `city`; slug is derived from name (`deriveFranchiseCenterSlug` + RPC) then `import_franchise_centers` (`is_platform_admin` or `has_brand_access`) — see `docs/ops/franchise-center-csv-import.md`.
 
-Center public footer social: `regression_center_landing_footer_ignores_brand_social_connect` — icons use franchise `social_links`, not brand `social_connect`.
+Center public footer social: `regression_center_landing_footer_ignores_brand_social_connect` and `regression_center_social_links_map_youtube_and_whatsapp` — icons use franchise `social_links` (including YouTube), not brand `social_connect`.
+
+Center public footer contact: `regression_center_footer_contact_uses_franchise_profile_not_brand_hq`, `regression_center_footer_replaces_brand_head_office_with_franchise_contact`, `regression_center_footer_uses_franchise_phone_not_placeholder`, `regression_novu_center_footer_shows_franchise_contact_not_presence` — Novu / Abacus / Spark overlay Franchise Management address and phone.
+
+Center public footer name: `regression_center_footer_replaces_sample_center_placeholder_with_franchise_name` and `regression_center_public_footer_uses_franchise_name_not_sample_center` — never show editor placeholder **Sample Center** on a live center host.
 
 Coverage target: ≥80% on `packages/*`.
 

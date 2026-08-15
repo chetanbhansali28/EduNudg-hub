@@ -1,21 +1,32 @@
 import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
+import type { CenterFooterContact } from "@/lib/centerFooterContact";
 import { buildBrandFooterStats } from "@/lib/marketingFooterHelpers";
 import { FooterPresenceBlock } from "@/features/marketing/FooterPresenceBlock";
 import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIcons";
 import { FooterLinkColumn } from "@/features/marketing/footer/FooterLinkColumn";
 import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
+import { CenterFooterContactBlock } from "@/features/marketing/footer/CenterFooterContactBlock";
 
 type Props = {
   config: HomepageConfig;
   legalPages?: BrandLegalPages;
   socialConnect?: BrandSocialConnect;
+  /** Center host only — `null` hides brand Head office. */
+  centerContact?: CenterFooterContact | null;
 };
 
-export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {} }: Props) {
+export function AbacusClassicFooter({
+  config,
+  legalPages = {},
+  socialConnect = {},
+  centerContact,
+}: Props) {
   const rich = config.footer.rich;
   const stats = buildBrandFooterStats(rich);
+  const onCenterHost = centerContact !== undefined;
+  const presence = onCenterHost ? [] : (rich?.presence ?? []);
 
   return (
     <footer className="ac-footer mkt-footer-shell">
@@ -55,11 +66,15 @@ export function AbacusClassicFooter({ config, legalPages = {}, socialConnect = {
           <FooterLinkColumn title="Quick links" links={config.footer.productLinks} />
 
           <FooterPresenceBlock
-            presence={rich?.presence ?? []}
+            presence={presence}
             regionClassName="ac-footer__presence"
           />
 
-          {rich?.headOffice ? (
+          {onCenterHost ? (
+            centerContact ? (
+              <CenterFooterContactBlock contact={centerContact} addressClassName="ac-footer__office" />
+            ) : null
+          ) : rich?.headOffice ? (
             <div>
               <h3 className="mkt-footer-shell__heading">Head office</h3>
               <address className="ac-footer__office">

@@ -55,7 +55,17 @@ The system SHALL accept `social_links` as a JSON array of `{platform, url}` with
 
 The center public homepage SHALL display profile fields from `get_center_landing_public` including display name, description, address, contact phone, photo, and social links.
 
-Footer Facebook and Instagram icons on the **center** host SHALL use `franchise_centers.social_links`, not brand `social_connect`.
+Footer social icons on the **center** host SHALL use `franchise_centers.social_links` (Facebook, Instagram, YouTube, WhatsApp, LinkedIn, X when a valid `https` URL is saved), not brand `social_connect`. Brand landing Social Media Connect remains Facebook/Instagram only and SHALL NOT show a WhatsApp float.
+
+On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show the same franchise Location & Contact overlay (`centerFooterContactFromProfile`) — street, city · region · pincode, and phone — and SHALL NOT show brand `headOffice`, brand “Our presence”, or Spark’s placeholder phone. Brand hosts keep Head office / presence unchanged.
+
+#### Scenario: Footer social uses franchise URLs
+
+- **GIVEN** the brand Social Media Connect points at the brand owner's Facebook/Instagram
+- **AND** the franchise saved its own social URLs in Franchise Management / center Settings
+- **WHEN** a visitor opens the center public site (View Frontend)
+- **THEN** the footer shows icons for each saved https link (including YouTube)
+- **AND** does not open the brand owner's social pages
 
 #### Scenario: Public page after settings save
 
@@ -63,13 +73,22 @@ Footer Facebook and Instagram icons on the **center** host SHALL use `franchise_
 - **THEN** updated display name, blurb, contact, photo, and social links are visible
 - **AND** the nav shows the brand logo only (no center logo)
 
-#### Scenario: Footer social uses franchise URLs
+#### Scenario: Footer contact uses franchise address on every theme
 
-- **GIVEN** the brand Social Media Connect points at the brand owner's Facebook/Instagram
-- **AND** the franchise saved its own Facebook/Instagram URLs in center Settings
-- **WHEN** a visitor clicks footer Facebook or Instagram on the center public site
-- **THEN** the browser opens the franchise URLs
-- **AND** does not open the brand owner's social pages
+- **GIVEN** Franchise Management saved this center’s address and phone
+- **AND** the brand homepage Head office still lists the brand owner HQ
+- **WHEN** a visitor opens View Frontend (Novu, Abacus Classic, or Spark Academy)
+- **THEN** the footer shows **This center** / **Contact Us** with the franchise address and phone
+- **AND** does not show brand Head office, brand presence cities, or a placeholder phone
+
+#### Scenario: Footer blurb uses franchise name not Sample Center
+
+- **GIVEN** the brand center-landing template still contains the editor placeholder **Sample Center**
+- **AND** Franchise Identity name / display name is saved (e.g. Smart Brain Abacus)
+- **WHEN** a visitor opens that center’s public site
+- **THEN** the footer description and site name use the franchise display name
+- **AND** do not show **Sample Center**
+- **AND** copyright omits “Part of {brand}” when the franchise name matches the brand name
 
 ### Requirement: No franchise apply on center public landing
 

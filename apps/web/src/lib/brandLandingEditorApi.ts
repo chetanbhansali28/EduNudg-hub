@@ -1,6 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
 import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
-import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "@/lib/centerLandingDefaults";
+import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig, CENTER_LANDING_EDITOR_PLACEHOLDER_NAME } from "@/lib/centerLandingDefaults";
 import { mergeSectionVisibility, ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, DEFAULT_HOMEPAGE_SECTION_VISIBILITY } from "@/lib/homepageSections";
 import { preserveCustomMarketingMediaUrls } from "@/lib/marketingMediaGuard";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
@@ -127,7 +127,7 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
     centerLandingConfig:
       marketingTheme === "abacus-classic"
         ? mergeAbacusClassicCenterLandingConfig(
-            "Sample Center",
+            CENTER_LANDING_EDITOR_PLACEHOLDER_NAME,
             brand.name,
             "your city",
             centerLandingPartial,
@@ -135,14 +135,14 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
           )
         : marketingTheme === "spark-academy"
           ? mergeSparkAcademyCenterLandingConfig(
-              "Sample Center",
+              CENTER_LANDING_EDITOR_PLACEHOLDER_NAME,
               brand.name,
               "your city",
               centerLandingPartial,
               brand.logo_url
             )
           : buildCenterLandingConfig(
-              "Sample Center",
+              CENTER_LANDING_EDITOR_PLACEHOLDER_NAME,
               brand.name,
               "your city",
               centerLandingPartial,

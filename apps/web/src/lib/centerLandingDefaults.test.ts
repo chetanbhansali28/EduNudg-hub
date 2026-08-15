@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "./centerLandingDefaults";
+import {
+  buildCenterLandingConfig,
+  mergeAbacusClassicCenterLandingConfig,
+  overlayCenterLandingIdentity,
+  publicCenterDisplayName,
+  centerPublicCopyright,
+} from "./centerLandingDefaults";
 
 describe("buildCenterLandingConfig", () => {
   it("regression_parent_focused_enrollment_cta", () => {
@@ -55,5 +61,42 @@ describe("mergeAbacusClassicCenterLandingConfig", () => {
     expect(config.hero.secondaryCtaLabel).toBeUndefined();
     expect(config.hero.secondaryCtaHref).toBeUndefined();
     expect(config.nav.ctaLabel).toBe("Book a free trial");
+  });
+});
+
+describe("overlayCenterLandingIdentity", () => {
+  it("regression_center_footer_replaces_sample_center_placeholder_with_franchise_name", () => {
+    const config = mergeAbacusClassicCenterLandingConfig(
+      "Sample Center",
+      "Smart Brain Abacus",
+      "your city",
+      {
+        footer: {
+          productLinks: [],
+          companyLinks: [],
+          connectLinks: [],
+          copyright: "© 2026 Sample Center. Part of Smart Brain Abacus.",
+          privacyHref: "",
+          termsHref: "",
+          refundHref: "",
+          rich: {
+            description:
+              "Sample Center is a premier education institute delivering abacus, Vedic maths, and handwriting programs.",
+          },
+        },
+      }
+    );
+
+    const overlaid = overlayCenterLandingIdentity(config, "Smart Brain Abacus", "Smart Brain Abacus");
+    expect(overlaid.footer.rich?.description).toBe(
+      "Smart Brain Abacus is a premier education institute delivering abacus, Vedic maths, and handwriting programs."
+    );
+    expect(overlaid.footer.rich?.description).not.toContain("Sample Center");
+    expect(overlaid.footer.copyright).toBe(centerPublicCopyright("Smart Brain Abacus", "Smart Brain Abacus"));
+    expect(overlaid.footer.copyright).not.toMatch(/Part of/);
+  });
+
+  it("prefers display name over legal franchise name", () => {
+    expect(publicCenterDisplayName("Legal LLC", "Smart Brain Abacus")).toBe("Smart Brain Abacus");
   });
 });

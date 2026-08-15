@@ -1,4 +1,5 @@
 import type { CenterPublicProfile } from "@/lib/centerLandingApi";
+import { formatCenterLocationLine } from "@/lib/centerFooterContact";
 
 type Props = {
   profile: CenterPublicProfile;
@@ -7,7 +8,7 @@ type Props = {
 /** FR-C03 — center facts above registration form on center public host. */
 export function CenterBlurbSection({ profile }: Props) {
   const title = profile.displayName ?? profile.centerName;
-  const location = [profile.city, profile.region, profile.pincode].filter(Boolean).join(" · ");
+  const location = formatCenterLocationLine(profile);
 
   return (
     <section id="about-center" data-nav-theme="light" className="novu-center-blurb">

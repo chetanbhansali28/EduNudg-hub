@@ -43,9 +43,10 @@ describe("brandSocialConnect", () => {
     expect(connect.whatsappPhoneE164).toBeUndefined();
   });
 
-  it("hasBrandSocialFooterIcons respects facebook and instagram only", () => {
+  it("hasBrandSocialFooterIcons includes youtube and ignores whatsapp phone-only", () => {
     expect(hasBrandSocialFooterIcons({ facebookUrl: "https://facebook.com/x" })).toBe(true);
     expect(hasBrandSocialFooterIcons({ instagramUrl: "https://instagram.com/x" })).toBe(true);
+    expect(hasBrandSocialFooterIcons({ youtubeUrl: "https://youtube.com/@x" })).toBe(true);
     expect(hasBrandSocialFooterIcons({ whatsappPhoneE164: "+919876543210", whatsappEnabled: true })).toBe(
       false
     );
@@ -58,5 +59,17 @@ describe("brandSocialConnect", () => {
     ]);
     expect(connect.facebookUrl).toBe("https://facebook.com/koramangala-center");
     expect(connect.instagramUrl).toBe("https://instagram.com/koramangala-center");
+  });
+
+  it("regression_center_social_links_map_youtube_and_whatsapp", () => {
+    const connect = socialConnectFromCenterLinks([
+      { platform: "YouTube", url: "https://youtube.com/@smart_brain_abacus2019?si=abc" },
+      {
+        platform: "WhatsApp",
+        url: "Message us on WhatsApp. https://wa.me/919876543210",
+      },
+    ]);
+    expect(connect.youtubeUrl).toContain("youtube.com/@smart_brain_abacus2019");
+    expect(connect.whatsappUrl).toBe("https://wa.me/919876543210");
   });
 });

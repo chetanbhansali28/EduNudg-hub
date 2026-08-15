@@ -5,6 +5,56 @@ import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig } from "@/types/homepage";
 import { buildSparkAcademyLandingPartial, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
 
+/** Brand editor preview name for `center_landing` — never show this on a live center host. */
+export const CENTER_LANDING_EDITOR_PLACEHOLDER_NAME = "Sample Center";
+
+export function publicCenterDisplayName(centerName: string, displayName?: string | null): string {
+  const display = displayName?.trim();
+  return display || centerName;
+}
+
+export function replaceCenterLandingPlaceholder(text: string | undefined, centerName: string): string | undefined {
+  if (!text) return text;
+  if (!text.includes(CENTER_LANDING_EDITOR_PLACEHOLDER_NAME)) return text;
+  return text.split(CENTER_LANDING_EDITOR_PLACEHOLDER_NAME).join(centerName);
+}
+
+export function centerPublicCopyright(centerName: string, brandName: string, year = new Date().getFullYear()): string {
+  if (centerName.trim().toLowerCase() === brandName.trim().toLowerCase()) {
+    return `© ${year} ${centerName}.`;
+  }
+  return `© ${year} ${centerName}. Part of ${brandName}.`;
+}
+
+/** Swap editor placeholders for this franchise’s name on View Frontend. */
+export function overlayCenterLandingIdentity(
+  config: HomepageConfig,
+  centerName: string,
+  brandName: string
+): HomepageConfig {
+  const description = replaceCenterLandingPlaceholder(config.footer.rich?.description, centerName);
+  const heroSubtitle = replaceCenterLandingPlaceholder(config.hero.subtitle, centerName);
+  const privacyBody = replaceCenterLandingPlaceholder(config.privacy?.body, centerName);
+
+  return {
+    ...config,
+    hero: {
+      ...config.hero,
+      subtitle: heroSubtitle ?? config.hero.subtitle,
+    },
+    privacy: config.privacy
+      ? { ...config.privacy, body: privacyBody ?? config.privacy.body }
+      : config.privacy,
+    footer: {
+      ...config.footer,
+      copyright: centerPublicCopyright(centerName, brandName),
+      rich: config.footer.rich
+        ? { ...config.footer.rich, description: description ?? config.footer.rich.description }
+        : config.footer.rich,
+    },
+  };
+}
+
 /** Parent-facing enrollment landing for a center hostname (e.g. koramangala.abacusworld.localhost). */
 export function buildCenterLandingConfig(
   centerName: string,

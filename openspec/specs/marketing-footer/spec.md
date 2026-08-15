@@ -25,8 +25,11 @@ THEN the public brand and center footers reflect those links after save
 ### Center inheritance
 
 GIVEN a center public site
-WHEN the brand has legal pages or social connect configured
-THEN the center footer shows the same legal links and social icons as the brand site
+WHEN the footer renders
+THEN legal links may still follow brand uploads
+AND social icons use that franchise’s `social_links` (not brand `social_connect`)
+AND address/phone use Franchise Management Location & Contact via `centerFooterContactFromProfile` on Novu, Abacus Classic, and Spark Academy
+AND brand Head office / Our presence / Spark placeholder phone MUST NOT appear
 
 ### No WhatsApp float on brand landing
 

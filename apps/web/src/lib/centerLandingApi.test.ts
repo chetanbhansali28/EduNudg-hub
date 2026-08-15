@@ -35,6 +35,35 @@ describe("fetchCenterLandingBundle", () => {
     expect(bundle?.config.nav.links.some((l) => l.href === "#curriculum")).toBe(true);
   });
 
+  it("regression_center_public_footer_uses_franchise_name_not_sample_center", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Smart Brain Abacus",
+        brand_slug: "smart-brain-abacus",
+        marketing_theme: "abacus-classic",
+        center_name: "Smart Brain Abacus",
+        center_display_name: "Smart Brain Abacus",
+        center_slug: "smart-brain-abacus",
+        landing: {
+          footer: {
+            rich: {
+              description:
+                "Sample Center is a premier education institute delivering abacus, Vedic maths, and handwriting programs.",
+            },
+          },
+        },
+        success_stories: [],
+        curriculum: [],
+      },
+      error: null,
+    });
+
+    const bundle = await fetchCenterLandingBundle("smart-brain-abacus", "smart-brain-abacus");
+    expect(bundle?.config.footer.rich?.description).toContain("Smart Brain Abacus");
+    expect(bundle?.config.footer.rich?.description).not.toContain("Sample Center");
+    expect(bundle?.config.meta.siteName).toBe("Smart Brain Abacus");
+  });
+
   it("regression_center_landing_footer_ignores_brand_social_connect", async () => {
     rpc.mockResolvedValue({
       data: {
@@ -50,6 +79,7 @@ describe("fetchCenterLandingBundle", () => {
         center_social_links: [
           { platform: "Facebook", url: "https://facebook.com/koramangala-center" },
           { platform: "Instagram", url: "https://instagram.com/koramangala-center" },
+          { platform: "YouTube", url: "https://youtube.com/@koramangala" },
         ],
         landing: {},
         success_stories: [],
@@ -62,5 +92,6 @@ describe("fetchCenterLandingBundle", () => {
     expect(bundle?.socialConnect.facebookUrl).toBe("https://facebook.com/koramangala-center");
     expect(bundle?.socialConnect.instagramUrl).toBe("https://instagram.com/koramangala-center");
     expect(bundle?.socialConnect.facebookUrl).not.toContain("chetan-bhansali");
+    expect(bundle?.socialConnect.youtubeUrl).toBe("https://youtube.com/@koramangala");
   });
 });

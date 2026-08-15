@@ -152,6 +152,27 @@ describe("Abacus Classic Sprint 3 — rich footer", () => {
     expect(screen.getByRole("link", { name: "Facebook" })).toBeDefined();
   });
 
+  it("regression_center_footer_replaces_brand_head_office_with_franchise_contact", () => {
+    render(
+      <MemoryRouter>
+        <AbacusClassicFooter
+          config={sprint3Config()}
+          centerContact={{
+            addressLines: ["Flat no 1 Shanti pushp app", "Chh.Sambhaji nagar · Maharastra · 431001"],
+            phone: "+918806232153",
+          }}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("heading", { name: "This center" })).toBeDefined();
+    expect(screen.getByText("Flat no 1 Shanti pushp app")).toBeDefined();
+    expect(screen.getByText("+918806232153")).toBeDefined();
+    expect(screen.queryByText("Head office")).toBeNull();
+    expect(screen.queryByText("123 Main Road, Pune")).toBeNull();
+    expect(screen.queryByText("Our presence")).toBeNull();
+  });
+
   it("regression_footer_stats_row_separate_from_brand_column", () => {
     const { container } = render(
       <MemoryRouter>

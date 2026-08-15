@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { fetchCenterLandingBundle } from "@/lib/centerLandingApi";
+import { centerFooterContactFromProfile } from "@/lib/centerFooterContact";
 import { sanitizeCenterPublicNavConfig } from "@/lib/centerPublicNav";
 import { applyMarketingThemeVariables } from "@/lib/applyMarketingFonts";
 import { scrollToMarketingHash } from "@/lib/marketingPublicSite";
@@ -74,6 +75,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
   }
 
   const publicConfig = sanitizeCenterPublicNavConfig(bundle.config);
+  const centerContact = centerFooterContactFromProfile(bundle.profile);
 
   const layoutInner = (
     <div className={marketingPageClassName(theme)}>
@@ -102,6 +104,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           config={publicConfig}
           legalPages={bundle.legalPages}
           socialConnect={bundle.socialConnect}
+          centerContact={centerContact}
         />
       ) : null}
       {showFooter && isAbacusClassic ? (
@@ -109,6 +112,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           config={publicConfig}
           legalPages={bundle.legalPages}
           socialConnect={bundle.socialConnect}
+          centerContact={centerContact}
         />
       ) : null}
       {showFooter && isSparkAcademy ? (
@@ -116,6 +120,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           config={publicConfig}
           legalPages={bundle.legalPages}
           socialConnect={bundle.socialConnect}
+          centerContact={centerContact}
         />
       ) : null}
       {themeUsesLeadModals(theme) ? (

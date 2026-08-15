@@ -20,6 +20,8 @@ Local seeded demo often uses Spark for AbacusWorld — see [Operations runbook](
 | Footer + CTA | `SparkAcademyFooter`, `SparkAcademyCta` |
 | Page shell | `SparkAcademyContent` |
 
+On a **center** host, `SparkAcademyFooter` receives `centerContact` and shows Franchise Management phone/address under Contact Us (never the brand placeholder `(222) 545-4543`). Brand hosts keep `headOffice` phone or the placeholder.
+
 Section order and toggles follow Spark defaults in `brandLandingDefaults` / homepage section keys. Center hosts inherit the brand theme via `mergeSparkAcademyCenterLandingConfig()`.
 
 ## Lead modals (shared with Abacus Classic)

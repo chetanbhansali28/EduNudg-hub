@@ -39,4 +39,25 @@ describe("SparkAcademyFooter", () => {
     expect(screen.queryByText("Visa")).toBeNull();
     expect(screen.queryByText("Mastercard")).toBeNull();
   });
+
+  it("regression_center_footer_uses_franchise_phone_not_placeholder", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    render(
+      <MemoryRouter>
+        <LeadModalProvider>
+          <SparkAcademyFooter
+            config={config}
+            centerContact={{
+              addressLines: ["12 Main Road"],
+              phone: "+918806232153",
+            }}
+          />
+        </LeadModalProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("+918806232153")).toBeDefined();
+    expect(screen.getByText("12 Main Road")).toBeDefined();
+    expect(screen.queryByText("(222) 545-4543")).toBeNull();
+  });
 });

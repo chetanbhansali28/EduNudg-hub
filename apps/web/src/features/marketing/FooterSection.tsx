@@ -1,6 +1,7 @@
 import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
+import type { CenterFooterContact } from "@/lib/centerFooterContact";
 import { buildBrandFooterStats } from "@/lib/marketingFooterHelpers";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { MarketingBackgroundMedia } from "./MarketingBackgroundMedia";
@@ -8,15 +9,23 @@ import { FooterPresenceBlock } from "./FooterPresenceBlock";
 import { BrandSocialFooterIcons } from "./BrandSocialFooterIcons";
 import { FooterLinkColumn } from "@/features/marketing/footer/FooterLinkColumn";
 import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
+import { CenterFooterContactBlock } from "@/features/marketing/footer/CenterFooterContactBlock";
 import { isSectionEnabled } from "@/lib/homepageSections";
 
 type Props = {
   config: HomepageConfig;
   legalPages?: BrandLegalPages;
   socialConnect?: BrandSocialConnect;
+  /** Center host only — `null` hides brand presence. */
+  centerContact?: CenterFooterContact | null;
 };
 
-export function FooterSection({ config, legalPages = {}, socialConnect = {} }: Props) {
+export function FooterSection({
+  config,
+  legalPages = {},
+  socialConnect = {},
+  centerContact,
+}: Props) {
   if (!isSectionEnabled(config, "footer")) {
     return null;
   }
@@ -52,7 +61,11 @@ export function FooterSection({ config, legalPages = {}, socialConnect = {} }: P
           <FooterLinkColumn title="Product" links={config.footer.productLinks} />
           <FooterLinkColumn title="Company" links={config.footer.companyLinks} />
           <FooterLinkColumn title="Connect" links={config.footer.connectLinks} />
-          <FooterPresenceBlock presence={config.footer.rich?.presence ?? []} />
+          {centerContact !== undefined ? (
+            centerContact ? <CenterFooterContactBlock contact={centerContact} /> : null
+          ) : (
+            <FooterPresenceBlock presence={config.footer.rich?.presence ?? []} />
+          )}
         </div>
         {footerStats.length > 0 ? (
           <div className="novu-site-footer__stats mkt-footer-shell__stats">

@@ -26,7 +26,9 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme se
 
 **Social Media Connect** configures Facebook and Instagram footer icons only. Brand public landing does **not** show a floating WhatsApp chat button or message bubble (legacy `social_connect` WhatsApp fields are ignored on render).
 
-**Center public footer:** Facebook/Instagram icons use that franchise’s `franchise_centers.social_links` (center Settings). They must **not** inherit brand `social_connect` (the brand owner’s pages). If the center has not saved Facebook/Instagram URLs, those footer icons are omitted.
+**Center public footer:** icons use that franchise’s `franchise_centers.social_links` (Franchise Management / center Settings) — Facebook, Instagram, YouTube, WhatsApp, LinkedIn, and X when the URL is `https`. They must **not** inherit brand `social_connect`. Incomplete WhatsApp text without a full `https://` URL is omitted. Brand landing stays Facebook/Instagram only (no WhatsApp float).
+
+**Center public contact:** all three themes overlay Franchise Management Location & Contact in the footer (`centerFooterContactFromProfile` → `centerContact` on `CenterPublicLayout`). Novu adds a **This center** column (and still shows the about-center blurb). Abacus replaces **Head office** with **This center**. Spark **Contact Us** uses the franchise phone and address (no `(222)` placeholder). Brand HQ / “Our presence” stay on the **brand** site only.
 
 When a brand switches from Novu to Abacus Classic or Spark Academy, stored `landing` JSON is merged with the new theme defaults. **Novu-era section toggles do not disable Abacus/Spark sections** until the brand owner saves from the alternate-theme editor (detected via Abacus/Spark-specific fields in JSON). Shared copy (hero, FAQ, testimonials, features) is preserved. See `mergeAbacusClassicSectionVisibility()` in `homepageSections.ts`.
 
@@ -35,6 +37,8 @@ Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, do
 Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → **About Us** (`#about`, when enabled) → rich footer (live center/student counts + custom stats).
 
 Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_theme` and show the same programs grid from brand curriculum. Center copy (hero, city) comes from `mergeAbacusClassicCenterLandingConfig()` merged with `brand_settings.center_landing`.
+
+The brand homepage editor previews center landing with placeholder **Sample Center**. On View Frontend, `overlayCenterLandingIdentity` replaces that placeholder with Franchise Identity **Display name** (else franchise name). Copyright drops the redundant “Part of {brand}” when those names match.
 
 **Franchise apply is brand-only:** center public layouts run `sanitizeCenterPublicNavConfig()` so **Apply franchise** / `#apply` secondary CTAs never appear on center hosts (Vercel `?portal=center` or `{center}.{brand}.localhost`). Brand landings keep dual CTAs.
 

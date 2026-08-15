@@ -1,5 +1,11 @@
 import { getSupabase } from "@/lib/supabase";
-import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig } from "@/lib/centerLandingDefaults";
+import {
+  buildCenterLandingConfig,
+  mergeSparkAcademyCenterLandingConfig,
+  mergeAbacusClassicCenterLandingConfig,
+  overlayCenterLandingIdentity,
+  publicCenterDisplayName,
+} from "@/lib/centerLandingDefaults";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
@@ -156,17 +162,7 @@ function applyCanonicalCenterName(
   centerName: string,
   brandName: string
 ): HomepageConfig {
-  const year = new Date().getFullYear();
-  return applyCanonicalSiteName(
-    {
-      ...config,
-      footer: {
-        ...config.footer,
-        copyright: `© ${year} ${centerName}. Part of ${brandName}.`,
-      },
-    },
-    centerName
-  );
+  return applyCanonicalSiteName(overlayCenterLandingIdentity(config, centerName, brandName), centerName);
 }
 
 function buildConfigWithStories(
@@ -230,9 +226,10 @@ export async function fetchCenterLandingBundle(
     const { legalPages, socialConnect } = parseCenterBrandMarketingExtras(row, socialLinks);
 
     if (!row.center_name || !row.brand_name) {
+      const publicName = publicCenterDisplayName(row.center_name ?? fallbackCenter, row.center_display_name);
       return {
         config: buildConfigWithStories(
-          row.center_name ?? fallbackCenter,
+          publicName,
           row.brand_name ?? fallbackBrand,
           row.center_city ?? null,
           row.landing ?? undefined,
@@ -259,7 +256,7 @@ export async function fetchCenterLandingBundle(
 
     return {
       config: buildConfigWithStories(
-        row.center_name,
+        publicCenterDisplayName(row.center_name, row.center_display_name),
         row.brand_name,
         row.center_city ?? null,
         row.landing ?? undefined,

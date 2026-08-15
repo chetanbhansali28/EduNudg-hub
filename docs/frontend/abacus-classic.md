@@ -297,7 +297,8 @@ Prerequisites: migration `039` applied, Abacus Classic theme assigned, seed or e
 - [ ] **Custom stats** from editor appear alongside or instead of live stats
 - [ ] Turning off **Show live stats** hides DB counts but keeps custom stats
 - [ ] **Our presence** regions and cities render when configured
-- [ ] **Head office** address, phone, and website display correctly
+- [ ] **Head office** address, phone, and website display correctly on the **brand** site
+- [ ] Center View Frontend footer shows **This center** (franchise address/phone), not brand Head office
 - [ ] Social links open in a new tab
 - [ ] Copyright and legal links appear in the footer bottom bar
 

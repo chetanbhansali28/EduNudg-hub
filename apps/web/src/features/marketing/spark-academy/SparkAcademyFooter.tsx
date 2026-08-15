@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
+import type { CenterFooterContact } from "@/lib/centerFooterContact";
+import { centerPhoneHref } from "@/lib/centerFooterContact";
 import { hasBrandSocialFooterIcons } from "@/lib/brandSocialConnect";
 import { FooterPresenceBlock } from "@/features/marketing/FooterPresenceBlock";
 import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIcons";
@@ -15,18 +17,30 @@ type Props = {
   config: HomepageConfig;
   legalPages?: BrandLegalPages;
   socialConnect?: BrandSocialConnect;
+  /** Center host only — `null` hides brand placeholder phone. */
+  centerContact?: CenterFooterContact | null;
 };
 
 const DEFAULT_PHONE = "(222) 545-4543";
 
-export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {} }: Props) {
+export function SparkAcademyFooter({
+  config,
+  legalPages = {},
+  socialConnect = {},
+  centerContact,
+}: Props) {
   const modal = useLeadModalOptional();
   const [email, setEmail] = useState("");
 
   const rich = config.footer.rich;
-  const phone = rich?.headOffice?.phone?.trim() || DEFAULT_PHONE;
-  const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
+  const onCenterHost = centerContact !== undefined;
+  const phone = onCenterHost
+    ? (centerContact?.phone ?? "")
+    : rich?.headOffice?.phone?.trim() || DEFAULT_PHONE;
+  const phoneHref = phone ? centerPhoneHref(phone) : "";
   const showSocial = hasBrandSocialFooterIcons(socialConnect);
+  const showCenterContact = onCenterHost && Boolean(centerContact);
+  const showBrandContact = !onCenterHost;
 
   const cta = config.footerCta;
   const ctaTitle = cta.title?.trim() || "Start Your Learning Journey Today!";
@@ -63,12 +77,25 @@ export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {}
       <div className="sa-site-footer__cta-band">
         <div className="sa-site-footer__inner">
           <div className="sa-site-footer__cta-grid">
+            {showBrandContact || showCenterContact ? (
             <div className="sa-site-footer__contact">
               <span className="sa-site-footer__label">Contact Us</span>
-              <a href={phoneHref} className="sa-site-footer__phone">
-                {phone}
-              </a>
+              {phone ? (
+                <a href={phoneHref} className="sa-site-footer__phone">
+                  {phone}
+                </a>
+              ) : null}
+              {showCenterContact
+                ? centerContact?.addressLines.map((line) => (
+                    <p key={line} className="sa-site-footer__address">
+                      {line}
+                    </p>
+                  ))
+                : null}
             </div>
+            ) : (
+              <div className="sa-site-footer__contact" />
+            )}
 
             <div className="sa-site-footer__cta-center">
               <h2>{ctaTitle}</h2>
@@ -134,7 +161,7 @@ export function SparkAcademyFooter({ config, legalPages = {}, socialConnect = {}
           </nav>
 
           <FooterPresenceBlock
-            presence={rich?.presence ?? []}
+            presence={onCenterHost ? [] : (rich?.presence ?? [])}
             className="sa-site-footer__presence"
             regionClassName="sa-site-footer__presence-region"
           />

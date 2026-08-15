@@ -1343,6 +1343,13 @@ body.sa-nav-drawer-open {
   color: rgba(255, 255, 255, 0.85);
 }
 
+.sa-site-footer__address {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.78);
+}
+
 .sa-site-footer__cta-center h2 {
   margin: 0 0 0.75rem;
   font-size: clamp(1.5rem, 3vw, 2rem);
