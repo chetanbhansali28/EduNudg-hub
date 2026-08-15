@@ -37,7 +37,7 @@ Add to hosts file:
 
 Assign theme: **Platform admin** → **Brands** → **Edit** → **Brand settings** → **Website theme** → choose *Abacus Classic* → **Save changes**.
 
-Brand owners cannot change the theme; they only edit content at `{brand}.localhost:9000/app/homepage`.
+Brand owners cannot change the theme; they only edit content at `{brand}.localhost:9000/app/homepage` and `{brand}.localhost:9000/app/center-site`.
 
 ## Sprint 2 (delivered)
 
@@ -91,7 +91,7 @@ Card-based programs section (replacing the auto-scroll marquee) with curriculum-
 | 5 | Curriculum marketing fields (fallback) | `/app/curriculum` → `CurriculumWorkspace` | Used when no named homepage cards are configured. Create **and** the existing-course editor both include benefits, why parents choose this, skills & outcomes, and scholarship; **Save** updates the saved course. |
 | 6 | Public curriculum JSON | `brand_public_curriculum_json()` | Migration `042_program_marketing_fields.sql` |
 | 7 | Center sites inherit Abacus theme | `mergeAbacusClassicCenterLandingConfig()` | Brand + center `{center}.{brand}` use Abacus layout, sections, and programs grid |
-| 8 | Center template editor | `BrandMarketingEditorPage` panel 2 | `AbacusClassicEditorForm` when `marketing_theme = abacus-classic` |
+| 8 | Center template editor | `BrandCenterSiteEditorPage` at `/app/center-site` | `AbacusClassicEditorForm` when `marketing_theme = abacus-classic` |
 
 **Card source priority:** If `programsSection.cards` contains at least one card with a name, those cards render on the public site. Otherwise the grid falls back to published **Curriculum** programs.
 
@@ -224,6 +224,7 @@ Prerequisites: migration `039` applied, dev server on port 9000.
 ### Brand editor
 
 - [ ] `/app/homepage` on an Abacus-themed brand shows `AbacusClassicEditorForm`
+- [ ] `/app/center-site` shows the parent enrollment template editor (not nested on Homepage)
 - [ ] Theme label shows “managed by EduNudg platform admin”
 - [ ] All accordion sections use two-column field grids and card-style add/remove buttons (same as platform `/admin/homepage`)
 - [ ] Novu-themed brands still show `HomepageEditorForm`

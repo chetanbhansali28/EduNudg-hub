@@ -159,7 +159,8 @@ export interface HomepageProgramsSection {
   eyebrow?: string;
   title?: string;
   defaultScholarshipHighlight?: string;
-  /** When set, these cards render instead of brand curriculum programs. */
+  /** When set, these cards render instead of brand curriculum programs on Abacus Classic.
+   *  Spark Academy prefers published curriculum; cards are fallback only. */
   cards?: HomepageProgramCard[];
 }
 

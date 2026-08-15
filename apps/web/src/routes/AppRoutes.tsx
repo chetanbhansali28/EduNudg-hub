@@ -32,7 +32,7 @@ import { BrandCampaignsPage } from "@/features/brand/campaigns/BrandCampaignsPag
 import { BrandSuccessStoriesPage } from "@/features/brand/successStories/BrandSuccessStoriesPage";
 import { BrandMerchandisePage } from "@/features/brand/merchandise/BrandMerchandisePage";
 import { BrandCompetitionsPage } from "@/features/brand/competitions/BrandCompetitionsPage";
-import { BrandMarketingEditorPage } from "@/features/brand/marketing/BrandMarketingEditorPage";
+import { BrandCenterSiteEditorPage, BrandMarketingEditorPage } from "@/features/brand/marketing/BrandMarketingEditorPage";
 import { CenterLandingPage } from "@/features/center/CenterLandingPage";
 import { CenterPublicLayout } from "@/features/center/CenterPublicLayout";
 import { CenterLayout } from "@/features/center/CenterLayout";
@@ -232,6 +232,7 @@ export function AppRoutes() {
               }
             />
             <Route path="homepage" element={<BrandMarketingEditorPage />} />
+            <Route path="center-site" element={<BrandCenterSiteEditorPage />} />
             <Route path="settings" element={<BrandSettingsPage />} />
           </Route>
         </>

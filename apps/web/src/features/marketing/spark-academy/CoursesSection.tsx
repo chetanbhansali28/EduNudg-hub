@@ -1,4 +1,3 @@
-import { useMemo, useState } from "react";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { programCardPalette } from "@/lib/marketingFeatureSections";
 import { programLessonLabel } from "./curriculumHelpers";
@@ -7,7 +6,6 @@ import { SparkAcademyCta } from "./SparkAcademyCta";
 type Props = {
   programs: PublicCurriculumProgram[];
   ctaHref: string;
-  ctaLabel: string;
   title?: string;
   subtitle?: string;
 };
@@ -27,6 +25,8 @@ export function CourseCard({
   const lessonLabel = programLessonLabel(program);
   const isBestSeller = index === 0;
   const imageUrl = program.marketingImageUrl?.trim() || null;
+  const category = program.ageLabel?.trim() || program.name.split(" ")[0] || "Program";
+  const blurb = program.description?.trim() || program.whyTake?.trim() || "";
 
   return (
     <article className="sa-course-card">
@@ -47,18 +47,17 @@ export function CourseCard({
       </div>
       <div className="sa-course-card__body">
         <div className="sa-course-card__meta">
-          <span>{program.name.split(" ")[0] ?? "Program"}</span>
+          <span>{category}</span>
           <span className="sa-course-card__lessons">⏱ {lessonLabel}</span>
         </div>
         <h3 className="sa-course-card__title">{program.name}</h3>
-        {program.description ? <p className="sa-course-card__desc">{program.description}</p> : null}
-        <div className="sa-course-card__footer">
-          <span className="sa-course-card__price">Enroll</span>
+        {blurb ? <p className="sa-course-card__desc">{blurb}</p> : null}
+        <div className="sa-course-card__actions">
+          <SparkAcademyCta label={enrollLabel} href={enrollHref} variant="outline" className="sa-course-card__btn" />
           <span className="sa-course-card__rating" aria-label="Rated 5 out of 5">
             ★★★★★ <small>({program.levels.length || 1}+)</small>
           </span>
         </div>
-        <SparkAcademyCta label={enrollLabel} href={enrollHref} variant="outline" className="sa-course-card__btn" />
       </div>
     </article>
   );
@@ -67,22 +66,9 @@ export function CourseCard({
 export function CoursesSection({
   programs,
   ctaHref,
-  ctaLabel,
   title = "Courses designed for success",
   subtitle = "Explore programs built for real outcomes.",
 }: Props) {
-  const [activeTab, setActiveTab] = useState<string>("all");
-
-  const tabs = useMemo(() => {
-    const names = programs.map((p) => p.name);
-    return ["All courses", ...names];
-  }, [programs]);
-
-  const filtered = useMemo(() => {
-    if (activeTab === "all") return programs;
-    return programs.filter((p) => p.name === activeTab);
-  }, [activeTab, programs]);
-
   if (programs.length === 0) return null;
 
   return (
@@ -93,31 +79,12 @@ export function CoursesSection({
         {subtitle ? <p className="sa-section-subtitle">{subtitle}</p> : null}
       </div>
 
-      <div className="sa-courses__tabs" role="tablist" aria-label="Course categories">
-        {tabs.map((tab) => {
-          const value = tab === "All courses" ? "all" : tab;
-          const selected = activeTab === value;
-          return (
-            <button
-              key={tab}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              className={`sa-courses__tab${selected ? " sa-courses__tab--active" : ""}`}
-              onClick={() => setActiveTab(value)}
-            >
-              {tab}
-            </button>
-          );
-        })}
-      </div>
-
       <div className="sa-courses__grid">
-        {filtered.map((program) => (
+        {programs.map((program, index) => (
           <CourseCard
             key={program.name}
             program={program}
-            index={programs.indexOf(program)}
+            index={index}
             enrollHref={ctaHref}
             enrollLabel="Enroll now"
           />

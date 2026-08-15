@@ -4,6 +4,7 @@ import {
   resolveProgramsGridItems,
   programsGridHasContent,
   restrictProgramsSectionToEnabledCurriculum,
+  resolveSparkCoursePrograms,
 } from "./programsGridItems";
 import type { PublicCurriculumProgram } from "./brandCurriculumPublic";
 
@@ -118,5 +119,63 @@ describe("programsGridHasContent", () => {
     const config = mergeAbacusClassicLandingConfig("Smart Brain Abacus");
     expect(programsGridHasContent(config.programsSection, [])).toBe(true);
     expect(config.programsSection?.cards).toHaveLength(3);
+  });
+});
+
+describe("resolveSparkCoursePrograms", () => {
+  it("regression_spark_courses_prefer_published_curriculum_over_homepage_cards", () => {
+    const section = mergeAbacusClassicLandingConfig("Smart Brain Abacus").programsSection;
+    const courses = resolveSparkCoursePrograms(section, [
+      {
+        ...sampleCurriculum("Junior Abacus Path"),
+        description: "From published syllabus",
+        levels: [
+          {
+            name: "Level 1",
+            levelCode: "L1",
+            topicsCovered: ["Addition"],
+            whyTake: null,
+            whatYouLearn: null,
+            marketingVideoUrl: null,
+            modules: [],
+          },
+        ],
+      },
+    ]);
+
+    expect(courses).toHaveLength(1);
+    expect(courses[0]?.name).toBe("Junior Abacus Path");
+    expect(courses[0]?.description).toBe("From published syllabus");
+    expect(courses[0]?.levels).toHaveLength(1);
+    expect(courses.map((course) => course.name)).not.toContain("Abacus (Mental Math)");
+  });
+
+  it("regression_spark_courses_fill_missing_banner_from_matching_homepage_card", () => {
+    const courses = resolveSparkCoursePrograms(
+      {
+        cards: [
+          {
+            id: "a",
+            name: "Junior Abacus Path",
+            description: "Homepage blurb",
+            imageUrl: "https://cdn.example/card.jpg",
+          },
+        ],
+      },
+      [sampleCurriculum("Junior Abacus Path")]
+    );
+
+    expect(courses[0]?.marketingImageUrl).toBe("https://cdn.example/card.jpg");
+    expect(courses[0]?.description).toBe("From curriculum");
+  });
+
+  it("falls back to homepage cards when no published curriculum exists", () => {
+    const section = mergeAbacusClassicLandingConfig("Smart Brain Abacus").programsSection;
+    const courses = resolveSparkCoursePrograms(section, []);
+    expect(courses.map((course) => course.name)).toEqual([
+      "Abacus (Mental Math)",
+      "Vedic Mathematics",
+      "Handwriting",
+    ]);
   });
 });

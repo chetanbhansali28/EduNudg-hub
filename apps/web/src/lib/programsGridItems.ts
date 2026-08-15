@@ -123,3 +123,26 @@ export function programsGridToPublicPrograms(
     levels: [],
   }));
 }
+
+/** Spark “Courses designed for success” prefers published Curriculum syllabus.
+ *  Homepage program cards are a fallback when no published courses exist.
+ *  Matching card images fill in only when a syllabus course has no banner.
+ */
+export function resolveSparkCoursePrograms(
+  programsSection: HomepageProgramsSection | undefined,
+  curriculum: PublicCurriculumProgram[]
+): PublicCurriculumProgram[] {
+  if (curriculum.length === 0) {
+    return programsGridToPublicPrograms(programsSection, curriculum);
+  }
+
+  const cards = programsSection?.cards ?? [];
+  return curriculum.map((program) => {
+    if (program.marketingImageUrl?.trim()) return program;
+    const match = cards.find(
+      (card) => card.name.trim().toLowerCase() === program.name.trim().toLowerCase()
+    );
+    const cardImage = match?.imageUrl?.trim();
+    return cardImage ? { ...program, marketingImageUrl: cardImage } : program;
+  });
+}

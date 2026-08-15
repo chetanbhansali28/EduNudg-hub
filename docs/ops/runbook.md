@@ -174,7 +174,8 @@ pnpm test:rls
 - Brand **Franchise Centers** → Franchise Identity: set center **Login email** / **Password** the same way (`center-owner-credentials`); profile-only saves do not call the edge function; passwords must be at least 6 characters (`admin` is too short)
 - React Query: keep `MARKETING_HOMEPAGE_CONFIG_QUERY_KEY` vs `MARKETING_PUBLIC_BUNDLE_QUERY_KEY` separate ([marketing-homepage OpenSpec](../../openspec/specs/marketing-homepage/spec.md))
 - Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
-- Brand owners edit page **content** at `{brand}.localhost:9000/app/homepage`
+- Brand owners edit brand page **content** at `{brand}.localhost:9000/app/homepage`
+- Brand owners edit the center enrollment template at `{brand}.localhost:9000/app/center-site`
 
 ## Franchise center CSV import
 

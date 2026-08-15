@@ -31,6 +31,20 @@ AND social icons use that franchise’s `social_links` (not brand `social_connec
 AND address/phone use Franchise Management Location & Contact via `centerFooterContactFromProfile` on Novu, Abacus Classic, and Spark Academy
 AND brand Head office / Our presence / Spark placeholder phone MUST NOT appear
 
+### Spark Academy has no newsletter CTA
+
+GIVEN a Spark Academy public brand or center site
+WHEN the site footer renders
+THEN it uses a column grid (brand, Explore, Contact, presence on brand hosts)
+AND it MUST NOT render `footerCta` copy, an email/newsletter form, or a Login/arrow CTA — including leftover Novu “Start your network differently.” text in stored landing JSON
+
+#### Scenario: Spark footer ignores leftover Novu CTA
+
+- **GIVEN** Spark Academy landing JSON still has `footerCta.title` “Start your network differently.”
+- **WHEN** the public Spark footer renders
+- **THEN** that heading and any email/newsletter controls are absent
+- **AND** Explore / Contact columns remain
+
 ### No WhatsApp float on brand landing
 
 GIVEN a brand public landing page (any marketing theme)

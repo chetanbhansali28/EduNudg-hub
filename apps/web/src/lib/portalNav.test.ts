@@ -95,6 +95,16 @@ describe("portalNav", () => {
     expect(marketing?.active).toBe(true);
   });
 
+  it("regression_brand_nav_includes_center_site_configuration", () => {
+    const sections = brandNavSections("/app/center-site");
+    const general = sections.find((s) => s.title === "General");
+    const centerSite = general?.items.find((i) => i.label === "Center Site Configuration");
+    const homepage = general?.items.find((i) => i.label === "Homepage");
+    expect(centerSite?.href).toBe("/app/center-site");
+    expect(centerSite?.active).toBe(true);
+    expect(homepage?.active).toBe(false);
+  });
+
   it("center nav includes merchandise orders", () => {
     const sections = centerNavSections("/app/merchandise");
     const merchandise = sections[1]?.items.find((i) => i.label === "Merchandise");

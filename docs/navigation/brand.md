@@ -19,6 +19,7 @@ See [Navigation spec](../spec/navigation-spec.md).
 - Analytics
 - **Campaigns** (`/app/campaigns`) — CRUD
 - **Success stories** (`/app/success-stories`) — CRUD
-- **Marketing pages** (`/app/homepage`) — brand franchise site + center enrollment template (hero, FAQ, footer; success stories feed brand testimonials)
+- **Marketing pages** (`/app/homepage`) — brand franchise recruitment site (hero, FAQ, footer; success stories feed brand testimonials)
+- **Center Site Configuration** (`/app/center-site`) — parent enrollment template for every franchise hostname
 - **Billing** (`/app/billing`)
 - Settings (logo, theme, `lead_stale_days`, timezone default IST)

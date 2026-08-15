@@ -77,8 +77,8 @@ export function AbacusClassicEditorForm({
     onChange(next);
   };
 
-  const sectionDefaults =
-    marketingTheme === "spark-academy" ? SPARK_ACADEMY_SECTION_DEFAULTS : ABACUS_CLASSIC_SECTION_DEFAULTS;
+  const isSpark = marketingTheme === "spark-academy";
+  const sectionDefaults = isSpark ? SPARK_ACADEMY_SECTION_DEFAULTS : ABACUS_CLASSIC_SECTION_DEFAULTS;
 
   const setSection = (key: HomepageSectionKey, enabled: boolean) => {
     commit(setSectionEnabled(config, key, enabled, sectionDefaults));
@@ -220,8 +220,12 @@ export function AbacusClassicEditorForm({
 
       <EditorAccordion
         sectionId="programsGrid"
-        title="Programs grid"
-        description="Program cards shown in the World-Class Brain Development section"
+        title={isSpark ? "Courses designed for success" : "Programs grid"}
+        description={
+          isSpark
+            ? "Shows or hides the public courses grid. Published Curriculum fills the cards."
+            : "Program cards shown in the World-Class Brain Development section"
+        }
         enabled={isAbacusSectionEnabled(config, "programsGrid")}
         onEnabledChange={(e) => setSection("programsGrid", e)}
       >
@@ -246,9 +250,20 @@ export function AbacusClassicEditorForm({
           </EditorFieldSpan>
         </EditorFieldsGrid>
         <EditorSectionNote>
-          Add program cards below. When at least one card has a name, those cards are shown on the public site.
-          If no cards are configured, programs fall back to your{" "}
-          <Link to="/app/curriculum">Curriculum</Link> catalog.
+          {isSpark ? (
+            <>
+              Spark Academy’s <strong>Courses designed for success</strong> uses published{" "}
+              <Link to="/app/curriculum">Curriculum</Link> courses (the same catalog as Curriculum syllabus).
+              Homepage program cards below are used only when no published courses exist. Matching card images
+              fill in when a course has no banner.
+            </>
+          ) : (
+            <>
+              Add program cards below. When at least one card has a name, those cards are shown on the public site.
+              If no cards are configured, programs fall back to your{" "}
+              <Link to="/app/curriculum">Curriculum</Link> catalog.
+            </>
+          )}
         </EditorSectionNote>
         <EditorItemList
           onAdd={() =>
@@ -291,14 +306,28 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="curriculumSyllabus"
         title="Curriculum syllabus"
-        description="Full published syllabus at #curriculum on your public site"
+        description={
+          isSpark
+            ? "Published Curriculum catalog for Courses designed for success (#programs / #curriculum)"
+            : "Full published syllabus at #curriculum on your public site"
+        }
         enabled={isAbacusSectionEnabled(config, "curriculumSyllabus")}
         onEnabledChange={(e) => setSection("curriculumSyllabus", e)}
       >
         <EditorSectionNote>
-          Manage courses, programs, and chapters at <Link to="/app/curriculum">Curriculum</Link>. When visible, parents
-          see the full tree at <code>#curriculum</code> — separate from the marketing programs grid at{" "}
-          <code>#programs</code>.
+          {isSpark ? (
+            <>
+              Manage courses, programs, and chapters at <Link to="/app/curriculum">Curriculum</Link>. Spark Academy
+              shows those published courses in <strong>Courses designed for success</strong> — not leftover marketing
+              program cards from another theme.
+            </>
+          ) : (
+            <>
+              Manage courses, programs, and chapters at <Link to="/app/curriculum">Curriculum</Link>. When visible,
+              parents see the full tree at <code>#curriculum</code> — separate from the marketing programs grid at{" "}
+              <code>#programs</code>.
+            </>
+          )}
         </EditorSectionNote>
       </EditorAccordion>
 

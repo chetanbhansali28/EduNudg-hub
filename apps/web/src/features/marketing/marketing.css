@@ -4397,15 +4397,14 @@ body.ac-nav-drawer-open {
   background: #fff;
 }
 
-.sa-site-footer__presence {
-  min-width: 160px;
-}
-
 .sa-site-footer__presence h3 {
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin: 0 0 0.5rem;
+  font-family: var(--mkt-footer-heading-font);
+  font-size: var(--mkt-footer-heading-size);
+  font-weight: var(--mkt-footer-heading-weight);
+  text-transform: var(--mkt-footer-heading-transform);
+  letter-spacing: var(--mkt-footer-heading-letter-spacing);
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .sa-site-footer__presence-region strong {
@@ -4515,10 +4514,16 @@ body.ac-nav-drawer-open {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.brand-social-footer-icons--spark {
+  margin-top: 0.15rem;
+}
+
 .brand-social-footer-icons--spark a {
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
   color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .novu-site-footer__bottom-start {
@@ -4560,10 +4565,22 @@ body.ac-nav-drawer-open {
 .marketing-page--spark-academy .mkt-footer-shell {
   --mkt-footer-heading-font: var(--novu-font-sans, Inter, system-ui, sans-serif);
   --mkt-footer-heading-size: 0.75rem;
-  --mkt-footer-heading-weight: 600;
+  --mkt-footer-heading-weight: 700;
   --mkt-footer-heading-transform: uppercase;
-  --mkt-footer-heading-letter-spacing: 0.08em;
+  --mkt-footer-heading-letter-spacing: 0.1em;
   --mkt-footer-link-size: 0.9375rem;
+}
+
+.marketing-page--spark-academy .mkt-footer-shell .mkt-footer-shell__heading {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.marketing-page--spark-academy .mkt-footer-shell .mkt-footer-shell__link {
+  color: #fff;
+}
+
+.marketing-page--spark-academy .mkt-footer-shell .mkt-footer-shell__link:hover {
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .mkt-footer-shell__heading {

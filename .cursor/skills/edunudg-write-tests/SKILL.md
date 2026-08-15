@@ -57,6 +57,12 @@ Curriculum parent marketing: `regression_created_course_shows_parent_marketing_f
 
 Curriculum live toggle: `regression_curriculum_course_live_toggle_is_visible` and `regression_curriculum_course_live_toggle_turns_course_off` — brand `/app/curriculum` course **detail** (column 2) has an on/off switch next to the Active badge and **Save** (`programs.is_active`), right-aligned in the header (`regression_curriculum_detail_save_group_aligns_right`); the Courses list has no toggle. Off courses stay in the list and drop from public programs / batch pickers. Course title uses 50% of the header and wraps to a second line (`regression_curriculum_detail_title_uses_half_width`). Desktop add is **+ Add Curriculum** in the page header only — the Courses list has no **+** (`regression_courses_list_has_no_add_plus_button`).
 
+Spark Academy public courses: `regression_spark_courses_use_published_curriculum_over_homepage_cards` — **Courses designed for success** lists published `/app/curriculum` programs even when leftover `programsSection` cards exist. Course cards keep **Enroll now** only (no **Enroll** price/link) and center the rating below the button (`regression_spark_course_card_keeps_enroll_now_and_centers_rating_below`). The section has no **All courses** / course-name tabs (`regression_spark_courses_section_has_no_curriculum_tabs`).
+
+Spark Academy public footer: `regression_spark_footer_is_column_layout_without_newsletter` — column grid (brand, Explore, Contact, presence); no email/newsletter form. Leftover Novu `footerCta` “Start your network differently.” is not rendered (`regression_spark_footer_hides_novu_newsletter_cta`).
+
+Brand center enrollment template: `regression_center_site_config_is_its_own_page` — **Center Site Configuration** is `/app/center-site`, not a panel on `/app/homepage`.
+
 Franchise public programs: `regression_center_public_programs_filter_to_enabled_curriculum` — center WHAT WE TEACH / courses show only `center_program_enablement` programs, not the full Center sites template.
 
 Manual student lead: `regression_manual_brand_student_matches_public_enroll_fields` and `regression_manual_center_student_matches_public_register_fields` — Add Lead is a modal (`ed-import-dialog`), same pattern as Add Franchise.

@@ -4,7 +4,7 @@ import type { CenterPublicProfile } from "@/lib/centerLandingApi";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { isSparkSectionEnabled } from "@/lib/homepageSections";
-import { programsGridHasContent, programsGridToPublicPrograms } from "@/lib/programsGridItems";
+import { resolveSparkCoursePrograms } from "@/lib/programsGridItems";
 import { SparkAcademyHero } from "./SparkAcademyHero";
 import { CoursesSection } from "./CoursesSection";
 import { FeaturesSection } from "./FeaturesSection";
@@ -33,10 +33,8 @@ export function SparkAcademyContent({
   publicStats = { centersCount: 0, studentsCount: 0 },
 }: Props) {
   const showHero = isSparkSectionEnabled(config, "hero");
-  const programItems = programsGridToPublicPrograms(config.programsSection, publicCurriculum);
-  const showPrograms =
-    isSparkSectionEnabled(config, "programsGrid") &&
-    programsGridHasContent(config.programsSection, publicCurriculum);
+  const programItems = resolveSparkCoursePrograms(config.programsSection, publicCurriculum);
+  const showPrograms = isSparkSectionEnabled(config, "programsGrid") && programItems.length > 0;
   const showFeatures = isSparkSectionEnabled(config, "featureGrid") && config.featureSections.length > 0;
   const showJourney = isSparkSectionEnabled(config, "trustMedia") && config.trustMedia;
   const showFounders = isSparkSectionEnabled(config, "founders") && (config.founders?.length ?? 0) > 0;
@@ -68,7 +66,6 @@ export function SparkAcademyContent({
         <CoursesSection
           programs={programItems}
           ctaHref={config.nav.ctaHref}
-          ctaLabel={config.nav.ctaLabel}
         />
       ) : null}
 

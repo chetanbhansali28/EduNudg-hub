@@ -44,7 +44,9 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | | Campaigns | `/app/campaigns` | Exists — CRUD |
 | | **Success stories** | `/app/success-stories` | Exists — CRUD |
 | | Merchandise | `/app/merchandise` | Exists — catalog (photos), promos, orders |
-| General | Settings | `/app/settings` | Exists |
+| General | **Homepage** | `/app/homepage` | Exists — brand public site editor |
+| | **Center Site Configuration** | `/app/center-site` | Exists — parent enrollment template (`center_landing`) |
+| | Settings | `/app/settings` | Exists |
 | | **Billing** | `/app/billing` | Exists — subscription checkout stub |
 | Footer | Log out | — | Exists |
 

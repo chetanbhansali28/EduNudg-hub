@@ -32,7 +32,9 @@ function socialConnectEqual(a: BrandSocialConnect, b: BrandSocialConnect): boole
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-export function BrandMarketingEditorPage() {
+type MarketingEditorVariant = "brand" | "center";
+
+function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVariant }) {
   const { brandId, missingBrand } = useBrandScope();
   const qc = useQueryClient();
   const [brandConfig, setBrandConfig] = useState<HomepageConfig | null>(null);
@@ -160,17 +162,19 @@ export function BrandMarketingEditorPage() {
   });
 
   const lastSavedLabel = useMemo(() => {
-    const stamps = [brandUpdatedAt, centerUpdatedAt].filter(Boolean) as string[];
-    if (stamps.length === 0) return null;
-    const latest = stamps.sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
-    return formatLastSavedLabel(latest);
-  }, [brandUpdatedAt, centerUpdatedAt]);
+    const stamp = variant === "center" ? centerUpdatedAt : brandUpdatedAt;
+    return stamp ? formatLastSavedLabel(stamp) : null;
+  }, [variant, brandUpdatedAt, centerUpdatedAt]);
 
   if (missingBrand) {
     return <p className="ed-empty">Brand context not found.</p>;
   }
 
-  if (editor.isLoading || !brandConfig || !centerConfig || !brandBaseline || !centerBaseline) {
+  const brandReady = Boolean(brandConfig && brandBaseline);
+  const centerReady = Boolean(centerConfig && centerBaseline);
+  const ready = variant === "center" ? centerReady : brandReady;
+
+  if (editor.isLoading || !ready) {
     return <p className="ed-empty">Loading marketing pages…</p>;
   }
 
@@ -182,10 +186,65 @@ export function BrandMarketingEditorPage() {
     brandId,
   };
 
+  if (variant === "center" && centerConfig && centerBaseline) {
+    return (
+      <HomepageEditorShell
+        title="Center Site Configuration"
+        subtitle="Template for every center hostname. Center name and city are filled in per location."
+        lastSavedLabel={lastSavedLabel}
+      >
+        <HomepageEditorPanels defaultOpenId="center">
+          <HomepageEditorPanel
+            panelId="center"
+            title="Center sites (parent enrollment template)"
+            icon="apartment"
+            iconTone="secondary"
+            onSave={() => saveCenter.mutate(centerConfig)}
+            onDiscard={() => setCenterConfig(centerBaseline)}
+            isDirty={!!centerDirty}
+            savePending={saveCenter.isPending}
+            saved={centerSaved}
+            description="Public enrollment pages on each franchise hostname inherit this template."
+          >
+            {marketingTheme === "abacus-classic" || marketingTheme === "spark-academy" ? (
+              <AbacusClassicEditorForm
+                config={centerConfig}
+                marketingTheme={marketingTheme}
+                portalMode="center"
+                onChange={setCenterConfig}
+                uploadScope={{ kind: "brand", brandId: brandId! }}
+                onPersist={(next) => {
+                  setCenterConfig(next);
+                  saveCenter.mutate(next);
+                }}
+              />
+            ) : (
+              <HomepageEditorForm
+                config={centerConfig}
+                marketingTheme={marketingTheme}
+                portalMode="center"
+                onChange={setCenterConfig}
+                uploadScope={{ kind: "brand", brandId: brandId! }}
+                onPersist={(next) => {
+                  setCenterConfig(next);
+                  saveCenter.mutate(next);
+                }}
+              />
+            )}
+          </HomepageEditorPanel>
+        </HomepageEditorPanels>
+      </HomepageEditorShell>
+    );
+  }
+
+  if (!brandConfig || !brandBaseline) {
+    return <p className="ed-empty">Loading marketing pages…</p>;
+  }
+
   return (
     <HomepageEditorShell
       title="Homepage Configuration"
-      subtitle="Manage your public brand recruitment site and center enrollment templates."
+      subtitle="Manage your public brand recruitment site."
       lastSavedLabel={lastSavedLabel}
     >
       <HomepageEditorPanels defaultOpenId="brand">
@@ -249,46 +308,15 @@ export function BrandMarketingEditorPage() {
             />
           )}
         </HomepageEditorPanel>
-
-        <HomepageEditorPanel
-          panelId="center"
-          title="Center sites (parent enrollment template)"
-          icon="apartment"
-          iconTone="secondary"
-          onSave={() => saveCenter.mutate(centerConfig)}
-          onDiscard={() => setCenterConfig(centerBaseline)}
-          isDirty={!!centerDirty}
-          savePending={saveCenter.isPending}
-          saved={centerSaved}
-          description="Template for every center hostname. Center name and city are filled in per location."
-        >
-          {marketingTheme === "abacus-classic" || marketingTheme === "spark-academy" ? (
-            <AbacusClassicEditorForm
-              config={centerConfig}
-              marketingTheme={marketingTheme}
-              portalMode="center"
-              onChange={setCenterConfig}
-              uploadScope={{ kind: "brand", brandId: brandId! }}
-              onPersist={(next) => {
-                setCenterConfig(next);
-                saveCenter.mutate(next);
-              }}
-            />
-          ) : (
-            <HomepageEditorForm
-              config={centerConfig}
-              marketingTheme={marketingTheme}
-              portalMode="center"
-              onChange={setCenterConfig}
-              uploadScope={{ kind: "brand", brandId: brandId! }}
-              onPersist={(next) => {
-                setCenterConfig(next);
-                saveCenter.mutate(next);
-              }}
-            />
-          )}
-        </HomepageEditorPanel>
       </HomepageEditorPanels>
     </HomepageEditorShell>
   );
+}
+
+export function BrandMarketingEditorPage() {
+  return <BrandMarketingLandingEditor variant="brand" />;
+}
+
+export function BrandCenterSiteEditorPage() {
+  return <BrandMarketingLandingEditor variant="center" />;
 }

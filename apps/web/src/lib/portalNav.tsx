@@ -125,6 +125,7 @@ export function brandNavSections(pathname: string): ShellNavSection[] {
       "General",
       [
         { path: "/app/homepage", label: "Homepage", icon: <IconBook /> },
+        { path: "/app/center-site", label: "Center Site Configuration", icon: <IconBuilding /> },
         { path: "/app/billing", label: "Billing", icon: <IconWallet /> },
         { path: "/app/settings", label: "Settings", icon: <IconSettings /> },
       ],

@@ -18,11 +18,11 @@ Platform admins assign a theme per brand at **Platform → Brands → Edit** (`/
 
 | Theme | Layout | Editor (brand owners) |
 |-------|--------|------------------------|
-| `novu` (default) | Phone-scroll features, Novu nav | `HomepageEditorForm` at `/app/homepage` |
-| `abacus-classic` | Success Abacus-style sections, dual CTAs, modals | `AbacusClassicEditorForm` at `/app/homepage` |
-| `spark-academy` | Educat-style courses grid, mentors, journey stats | `AbacusClassicEditorForm` at `/app/homepage` |
+| `novu` (default) | Phone-scroll features, Novu nav | `HomepageEditorForm` at `/app/homepage` and `/app/center-site` |
+| `abacus-classic` | Success Abacus-style sections, dual CTAs, modals | `AbacusClassicEditorForm` at `/app/homepage` and `/app/center-site` |
+| `spark-academy` | Educat-style courses grid, mentors, journey stats | `AbacusClassicEditorForm` at `/app/homepage` and `/app/center-site` |
 
-Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme selection is platform-only (brand detail **Brand settings**, not the brands list).
+Brand owners edit **content** at `{brand}.localhost:9000/app/homepage` (brand site) and `{brand}.localhost:9000/app/center-site` (center enrollment template). Theme selection is platform-only (brand detail **Brand settings**, not the brands list).
 
 **Social Media Connect** configures Facebook and Instagram footer icons only. Brand public landing does **not** show a floating WhatsApp chat button or message bubble (legacy `social_connect` WhatsApp fields are ignored on render).
 
@@ -48,7 +48,7 @@ The brand homepage editor previews center landing with placeholder **Sample Cent
 
 **About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (Mastermind-style company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — on Abacus Classic it renders **after Gallery**. When the homepage About section is enabled, public nav auto-injects **About Us → `#about`** (unless `/about` or `#about` already exists). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`.
 
-Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). On the **brand** site, named cards win; otherwise the grid falls back to all published curriculum programs. On a **franchise (center)** site, `get_center_landing_public` returns only programs in `center_program_enablement`, and Center sites cards are restricted to those names (`restrictProgramsSectionToEnabledCurriculum`).
+Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). On the **brand** site for **Abacus Classic**, named cards win; otherwise the grid falls back to all published curriculum programs. On **Spark Academy**, **Courses designed for success** prefers published `/app/curriculum` (`publicCurriculum`); leftover homepage cards are used only when no published courses exist (`resolveSparkCoursePrograms`). On a **franchise (center)** site, `get_center_landing_public` returns only programs in `center_program_enablement`, and Center sites cards are restricted to those names (`restrictProgramsSectionToEnabledCurriculum`).
 
 **Public nav anchors (all themes)**
 
@@ -60,7 +60,7 @@ Hash section links (`#gallery`, `#faq`, …) are resolved with `resolveMarketing
 |-------|----------------------|------------------------------|----------------------|
 | `novu` | — (auto **Curriculum** when published programs exist) | `#curriculum` → `CurriculumPublicSection` | Yes |
 | `abacus-classic` | **Programs** → `#programs` | **`#curriculum`** → syllabus section (`AbacusCurriculumSection`) | No (marketing grid + syllabus tree) |
-| `spark-academy` | **Programs** → `#programs` | `#curriculum` alias scrolls to courses grid | No |
+| `spark-academy` | **Programs** → `#programs` | `#curriculum` alias scrolls to **Courses designed for success** (published syllabus cards) | No |
 
 `syncMarketingNavLinks()` in `marketingPublicSite.ts` auto-adds **Curriculum → `#curriculum`** on Novu only when RPC returns published programs. Alternate themes keep default **Programs** links; custom `#curriculum` hrefs still work via an in-section anchor alias.
 
@@ -71,6 +71,8 @@ Direct URLs such as `/#curriculum` scroll after the landing bundle loads (`scrol
 In **Navigation & CTAs** (Abacus/Spark) or **Navigation Management** (Novu), each menu item **Link** field is a theme-aware dropdown plus optional **Custom link** text input. Presets match on-page section IDs above; Novu brand vs center templates differ (`#apply` vs `#register`). Helpers live in `marketingNavSectionOptions()` / `NavLinkHrefField` (`HomepageEditorShell.tsx`). Legacy mistyped anchors such as `#FoundersSection` normalize to `#founders` when saved.
 
 **Abacus Classic syllabus:** Toggle **Curriculum syllabus** in the homepage editor (visible by default). Content comes from published `/app/curriculum` data; no separate copy fields in v1.
+
+**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`).
 
 See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
 

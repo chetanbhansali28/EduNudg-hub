@@ -120,6 +120,33 @@ Brand staff SHALL turn a course on or off from the course detail header (next to
 - **THEN** `programs.is_active` becomes true
 - **AND** it appears again on public programs and franchise batches
 
+### Requirement: Spark Academy courses use published syllabus
+
+On Spark Academy public sites, **Courses designed for success** SHALL show that brand’s published `/app/curriculum` catalog (the same `publicCurriculum` RPC payload as Curriculum syllabus). Homepage `programsSection` cards SHALL NOT hide published courses. Cards are a fallback only when no published courses exist.
+
+#### Scenario: Published curriculum wins over leftover program cards
+
+- **GIVEN** a Spark Academy brand landing whose stored `programsSection` still has named marketing cards
+- **AND** `get_brand_landing_public` returns published curriculum programs
+- **WHEN** a visitor opens the public homepage
+- **THEN** **Courses designed for success** lists the published course names, descriptions, age labels, and lesson counts
+- **AND** it does not list leftover homepage card names such as Abacus (Mental Math) unless those names are the published courses
+
+#### Scenario: Course card keeps Enroll now and centers rating below
+
+- **GIVEN** a Spark Academy public homepage with at least one published course
+- **WHEN** a visitor views **Courses designed for success**
+- **THEN** each course card has an **Enroll now** control
+- **AND** it does not show a separate **Enroll** price/link
+- **AND** the star rating appears below **Enroll now**, centered like the button
+
+#### Scenario: Courses section has no curriculum filter tabs
+
+- **GIVEN** a Spark Academy public homepage with published curriculum courses
+- **WHEN** a visitor views **Courses designed for success**
+- **THEN** all published course cards are visible in one grid
+- **AND** there are no **All courses** / course-name filter tabs
+
 ### Requirement: Delete guards
 
 The system SHALL block level deletes that would break student progress or active batch ranges.

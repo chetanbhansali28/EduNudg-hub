@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
@@ -9,9 +7,8 @@ import { hasBrandSocialFooterIcons } from "@/lib/brandSocialConnect";
 import { FooterPresenceBlock } from "@/features/marketing/FooterPresenceBlock";
 import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIcons";
 import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
-import { MarketingFooterLink } from "@/features/marketing/footer/FooterLinkColumn";
-import { useLeadModalOptional } from "@/features/marketing/abacus-classic/LeadModalContext";
-import { resolveLeadModalKind } from "@/features/marketing/abacus-classic/MarketingLeadModals";
+import { FooterLinkColumn } from "@/features/marketing/footer/FooterLinkColumn";
+import { CenterFooterContactBlock } from "@/features/marketing/footer/CenterFooterContactBlock";
 
 type Props = {
   config: HomepageConfig;
@@ -23,15 +20,18 @@ type Props = {
 
 const DEFAULT_PHONE = "(222) 545-4543";
 
+const FALLBACK_NAV_LINKS = [
+  { label: "Courses", href: "#programs" },
+  { label: "Shop", href: "#programs" },
+  { label: "Contact Us", href: "#apply" },
+];
+
 export function SparkAcademyFooter({
   config,
   legalPages = {},
   socialConnect = {},
   centerContact,
 }: Props) {
-  const modal = useLeadModalOptional();
-  const [email, setEmail] = useState("");
-
   const rich = config.footer.rich;
   const onCenterHost = centerContact !== undefined;
   const phone = onCenterHost
@@ -39,145 +39,92 @@ export function SparkAcademyFooter({
     : rich?.headOffice?.phone?.trim() || DEFAULT_PHONE;
   const phoneHref = phone ? centerPhoneHref(phone) : "";
   const showSocial = hasBrandSocialFooterIcons(socialConnect);
-  const showCenterContact = onCenterHost && Boolean(centerContact);
-  const showBrandContact = !onCenterHost;
+  const presence = onCenterHost ? [] : (rich?.presence ?? []);
+  const brandAddress = !onCenterHost ? rich?.headOffice?.address?.trim() : "";
+  const brandWebsite = !onCenterHost ? rich?.headOffice?.website?.trim() : "";
 
-  const cta = config.footerCta;
-  const ctaTitle = cta.title?.trim() || "Start Your Learning Journey Today!";
-  const ctaSubtitle =
-    cta.subtitle?.trim() || "Browse courses and unlock new skills to reach your goals.";
-  const loginLabel = cta.ctaLabel?.trim() || "Login";
+  const navLinks = config.footer.productLinks.length > 0 ? config.footer.productLinks : FALLBACK_NAV_LINKS;
 
-  const navLinks =
-    config.footer.productLinks.length > 0
-      ? config.footer.productLinks.slice(0, 3)
-      : [
-          { label: "Courses", href: "#programs" },
-          { label: "Shop", href: "#programs" },
-          { label: "Contact Us", href: "#apply" },
-        ];
-
-  const handleEmailSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    const modalKind = resolveLeadModalKind(cta.ctaHref);
-    if (modalKind && modal) {
-      modal.openModal(modalKind);
-      return;
-    }
-    window.location.href = config.nav.adminHref;
-  };
-
-  const arrowCtaKind = resolveLeadModalKind(cta.ctaHref);
   const copyrightText = config.footer.copyright.startsWith("Copyright")
     ? config.footer.copyright
     : config.footer.copyright.replace(/^©\s*/, "Copyright © ");
 
   return (
     <footer className="sa-site-footer mkt-footer-shell">
-      <div className="sa-site-footer__cta-band">
-        <div className="sa-site-footer__inner">
-          <div className="sa-site-footer__cta-grid">
-            {showBrandContact || showCenterContact ? (
-            <div className="sa-site-footer__contact">
-              <span className="sa-site-footer__label">Contact Us</span>
-              {phone ? (
-                <a href={phoneHref} className="sa-site-footer__phone">
-                  {phone}
-                </a>
-              ) : null}
-              {showCenterContact
-                ? centerContact?.addressLines.map((line) => (
-                    <p key={line} className="sa-site-footer__address">
-                      {line}
-                    </p>
-                  ))
-                : null}
+      <div className="sa-site-footer__inner">
+        <div className="sa-site-footer__grid">
+          <div className="sa-site-footer__brand">
+            <div className="sa-site-footer__brand-mark">
+              {config.meta.logoUrl ? (
+                <img src={config.meta.logoUrl} alt="" className="sa-site-footer__logo" width={44} height={44} />
+              ) : (
+                <span className="sa-site-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
+              )}
+              <strong>{config.meta.siteName}</strong>
             </div>
-            ) : (
-              <div className="sa-site-footer__contact" />
-            )}
+            {rich?.description ? <p className="sa-site-footer__blurb">{rich.description}</p> : null}
+          </div>
 
-            <div className="sa-site-footer__cta-center">
-              <h2>{ctaTitle}</h2>
-              <p>{ctaSubtitle}</p>
-              <form className="sa-site-footer__email-form" onSubmit={handleEmailSubmit}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="Email Address"
-                  aria-label="Email address"
+          <FooterLinkColumn
+            title="Explore"
+            links={navLinks}
+            headingClassName="mkt-footer-shell__heading"
+            linkClassName="sa-site-footer__nav-link"
+          />
+
+          {onCenterHost ? (
+            centerContact ? (
+              <div className="sa-site-footer__contact">
+                <CenterFooterContactBlock
+                  contact={centerContact}
+                  heading="Contact"
+                  addressClassName="sa-site-footer__office"
                 />
-                <Link to={config.nav.adminHref} className="sa-site-footer__login-btn">
-                  {loginLabel}
-                </Link>
-                {arrowCtaKind && modal ? (
-                  <button
-                    type="button"
-                    className="sa-site-footer__arrow-btn"
-                    aria-label={cta.ctaLabel || "Get started"}
-                    onClick={() => modal.openModal(arrowCtaKind)}
-                  >
-                    <span aria-hidden>↗</span>
-                  </button>
-                ) : (
-                  <a href={cta.ctaHref} className="sa-site-footer__arrow-btn" aria-label={cta.ctaLabel || "Get started"}>
-                    <span aria-hidden>↗</span>
-                  </a>
-                )}
-              </form>
-            </div>
-
-            {showSocial ? (
-              <div className="sa-site-footer__social">
-                <span className="sa-site-footer__label">Social Media</span>
+                {showSocial ? (
+                  <BrandSocialFooterIcons socialConnect={socialConnect} variant="spark-academy" />
+                ) : null}
+              </div>
+            ) : showSocial ? (
+              <div className="sa-site-footer__contact">
+                <h3 className="mkt-footer-shell__heading">Follow us</h3>
                 <BrandSocialFooterIcons socialConnect={socialConnect} variant="spark-academy" />
               </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
-      <div className="sa-site-footer__nav-band">
-        <div className="sa-site-footer__inner sa-site-footer__nav-row">
-          <div className="sa-site-footer__brand">
-            {config.meta.logoUrl ? (
-              <img src={config.meta.logoUrl} alt="" className="sa-site-footer__logo" width={40} height={40} />
-            ) : (
-              <span className="sa-site-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
-            )}
-            <strong>{config.meta.siteName}</strong>
-          </div>
-
-          <nav className="sa-site-footer__nav" aria-label="Footer">
-            {navLinks.map((link) => (
-              <MarketingFooterLink
-                key={`${link.label}-${link.href}`}
-                href={link.href}
-                label={link.label}
-                className="sa-site-footer__nav-link"
-              />
-            ))}
-          </nav>
+            ) : null
+          ) : (
+            <div className="sa-site-footer__contact">
+              <h3 className="mkt-footer-shell__heading">Contact</h3>
+              <address className="sa-site-footer__office">
+                {phone ? (
+                  <p>
+                    <a href={phoneHref} className="sa-site-footer__phone">
+                      {phone}
+                    </a>
+                  </p>
+                ) : null}
+                {brandAddress ? <p>{brandAddress}</p> : null}
+                {brandWebsite ? <p>{brandWebsite}</p> : null}
+              </address>
+              {showSocial ? (
+                <BrandSocialFooterIcons socialConnect={socialConnect} variant="spark-academy" />
+              ) : null}
+            </div>
+          )}
 
           <FooterPresenceBlock
-            presence={onCenterHost ? [] : (rich?.presence ?? [])}
+            presence={presence}
             className="sa-site-footer__presence"
             regionClassName="sa-site-footer__presence-region"
           />
+        </div>
 
+        <div className="sa-site-footer__bottom">
+          <p>{copyrightText}</p>
           <FooterLegalLinks
             config={config}
             legalPages={legalPages}
             className="sa-site-footer__legal"
             linkClassName="sa-site-footer__legal-link"
           />
-        </div>
-      </div>
-
-      <div className="sa-site-footer__bottom-band">
-        <div className="sa-site-footer__inner sa-site-footer__bottom-row">
-          <p>{copyrightText}</p>
         </div>
       </div>
     </footer>

@@ -11,7 +11,7 @@ Copy and media URLs live in JSON settings — Storage files only render when tho
 |---------|-----------------|
 | Platform `/` + `/admin/homepage` | `platform_settings.marketing_homepage` |
 | Brand public + `/app/homepage` | `brand_settings.settings.landing` |
-| Franchise/center public | `brand_settings.settings.center_landing` (fallback brand `landing`) |
+| Franchise/center public + `/app/center-site` | `brand_settings.settings.center_landing` (fallback brand `landing`) |
 | Login / student portal chrome | `brands.logo_url`, portal branding RPC, `login_headline` / `login_subtext` |
 
 Bucket: `brand-assets` (`platform/marketing/…`, `{brandId}/marketing/…`, logos, center/student photos).

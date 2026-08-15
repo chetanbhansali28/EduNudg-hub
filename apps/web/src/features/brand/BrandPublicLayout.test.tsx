@@ -124,6 +124,8 @@ describe("BrandPublicLayout", () => {
     expect(await screen.findByText("Page body")).toBeDefined();
     expect(document.querySelector(".marketing-page--spark-academy")).toBeDefined();
     expect(screen.getByRole("banner")).toBeDefined();
-    expect(screen.getByText(/Start Your Learning Journey Today!/i)).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Explore" })).toBeDefined();
+    expect(screen.queryByText(/Start Your Learning Journey Today!/i)).toBeNull();
+    expect(screen.queryByText(/Start your network differently/i)).toBeNull();
   });
 });

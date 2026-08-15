@@ -24,8 +24,8 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [functional-requirements.md](./functional-requirements.md) | FR ID index → links to `openspec/specs/` |
 | OpenSpec behavioral specs | [`openspec/specs/`](../../openspec/specs/) | GIVEN/WHEN/THEN requirements; supersedes FR tables over time |
 | [staff-login](../../openspec/specs/staff-login/spec.md) | Platform/brand/center `/login` labels + exact accessible-name testing |
-| [marketing-homepage](../../openspec/specs/marketing-homepage/spec.md) | Platform public bundle vs config-only React Query keys |
-| [marketing-footer](../../openspec/specs/marketing-footer/spec.md) | Public footer columns + legal pages |
+| [marketing-homepage](../../openspec/specs/marketing-homepage/spec.md) | Platform public bundle vs config-only React Query keys; brand Homepage vs Center Site Configuration |
+| [marketing-footer](../../openspec/specs/marketing-footer/spec.md) | Public footer columns + legal pages; Spark has no newsletter CTA |
 | [brand-upcoming-events](../../openspec/specs/brand-upcoming-events/spec.md) | Homepage upcoming events (competitions/workshops/demos) |
 | [platform-settings](../../openspec/specs/platform-settings/spec.md) | Platform settings / feature flags |
 | [platform-brand-onboarding](../../openspec/specs/platform-brand-onboarding/spec.md) | Brand signup approve + credential-skip on theme save |
@@ -33,7 +33,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [franchise-applications](../../openspec/specs/franchise-applications/spec.md) | Franchise apply + approve provision |
 | [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace |
 | [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform and brand CSV bulk center import |
-| [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` courses/levels/units; on/off toggle; parent marketing stays editable after create |
+| [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` courses/levels/units; on/off toggle; parent marketing stays editable after create; Spark public courses use published syllabus |
 | [brand-batches-feature-flag](../../openspec/specs/brand-batches-feature-flag/spec.md) | Per-brand Batches module gate |
 | [brand-competitions-module](../../openspec/specs/brand-competitions-module/spec.md) | Competitions nav, flag, question bank, student quiz |
 | [student-learn-portal](../../openspec/specs/student-learn-portal/spec.md) | Learn host enrollment-gated portal |

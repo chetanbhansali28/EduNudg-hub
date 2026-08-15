@@ -9,7 +9,7 @@ Admin portals (platform, brand, center) share the **Vivid Logic** design system 
 | Platform | `/admin/homepage` | `HomepageEditorPage`, `HomepageEditorForm` |
 | Platform | `/admin/brands/:slug` | `BrandDetailPage`, `BrandEditForm` (**Website theme** in Brand settings) |
 | Brand | `/app/homepage` | `BrandMarketingEditorPage`, `HomepageEditorForm` or theme-specific editor |
-| Center template | `/app/homepage` (panel 2) | Same `HomepageEditorForm` as brand template |
+| Center template | `/app/center-site` | `BrandCenterSiteEditorPage` — same forms as brand template (`center_landing`) |
 | Center detail | `/app/centers/:slug` | `BrandCenterDetailPage` (read-only KPIs; styling only) |
 
 Theme-specific editors (`AbacusClassicEditorForm`, future themes) reuse `HomepageEditorShell`, `HomepageEditorSections`, and `EditorAccordion`.
@@ -37,7 +37,7 @@ Users choose light or dark in the **AppShell header** (`ThemeToggle`). Preferenc
 
 - Gradient promo card with page title, subtitle, and full-width **Save changes** button (Material `save` icon)
 - Sticky bottom save bar on **mobile only** (hidden on desktop ≥1024px)
-- `HomepageEditorPanel` uses the same hero pattern for brand + center template panels
+- `HomepageEditorPanel` uses the same hero pattern on **Homepage** (`/app/homepage`) and **Center Site Configuration** (`/app/center-site`)
 
 ### Accordions (`EditorAccordion` + `HomepageEditorSections`)
 

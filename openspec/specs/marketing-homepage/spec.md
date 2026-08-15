@@ -77,3 +77,20 @@ Brand and center public/editor loads SHALL merge stored `landing` / `center_land
 - **AND** the editor draft contains an Unsplash default for that field
 - **WHEN** `saveBrandMarketingLanding` runs
 - **THEN** the stored `brand-assets` URL is kept
+
+### Requirement: Center enrollment template has its own brand nav page
+
+Brand staff SHALL edit the parent enrollment template (`center_landing`) at `/app/center-site` (**Center Site Configuration**). The brand Homepage editor at `/app/homepage` SHALL NOT include that Center sites panel.
+
+#### Scenario: Homepage editor is brand site only
+
+- **GIVEN** a brand user on `/app/homepage`
+- **THEN** they see **Homepage Configuration** for the brand recruitment site
+- **AND** they do not see **Center sites (parent enrollment template)** on that page
+
+#### Scenario: Center Site Configuration is a left-nav item
+
+- **GIVEN** a brand user in the `/app` shell
+- **WHEN** they open **Center Site Configuration**
+- **THEN** they land on `/app/center-site`
+- **AND** they can edit the parent enrollment template

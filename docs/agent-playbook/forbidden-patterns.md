@@ -17,7 +17,7 @@
 13. Ask the user for permission to update specs/docs/tests/skills — sync automatically (`artifact-sync`)
 14. Invent `SKIP_CI_LOCAL=1` without explicit user emergency approval
 15. Discard platform/brand/center marketing config or `brand-assets` URLs because of Novu markers, theme defaults, seed overwrite, or editor save of stock Unsplash (`marketing-homepage-media`)
-16. Save `/admin/homepage` or brand `/app/homepage` while the UI shows substituted Unsplash defaults over a customized DB row
+16. Save `/admin/homepage`, brand `/app/homepage`, or `/app/center-site` while the UI shows substituted Unsplash defaults over a customized DB row
 17. `brand_settings` seed/upsert that full-replaces `settings` (`settings = EXCLUDED.settings`) — existing content must win
 
 ## Avoid
