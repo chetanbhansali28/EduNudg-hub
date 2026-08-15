@@ -29,8 +29,12 @@ export async function loginOnPage(
   await page.getByRole("button", { name: "Log in", exact: true }).click();
 }
 
-/** Unique 10-digit Indian mobile suffix for WhatsApp merge isolation. */
+let whatsAppSeq = 0;
+
+/** Unique 10-digit Indian mobile for WhatsApp merge isolation across parallel workers. */
 export function uniqueWhatsApp(): string {
-  const n = Date.now() % 10_000_000_000;
-  return `9${String(n).padStart(9, "0").slice(-9)}`;
+  whatsAppSeq += 1;
+  const worker = Number(process.env.TEST_WORKER_INDEX ?? 0);
+  const n = Date.now() * 100 + worker * 10 + (whatsAppSeq % 10);
+  return `9${String(n).slice(-9)}`;
 }

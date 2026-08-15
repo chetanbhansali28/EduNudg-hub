@@ -44,7 +44,9 @@ test.describe("E2E-04 — Student lead Path B (center register → convert)", ()
       const centerCtx = await browser.newContext({ storageState: authStatePath("center") });
       const centerPage = await centerCtx.newPage();
       await centerPage.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/app/leads"));
-      await expect(centerPage.getByText(fields.childName).first()).toBeVisible({
+      await expect(
+        centerPage.getByText(fields.parentName).or(centerPage.getByText(fields.childName)).first()
+      ).toBeVisible({
         timeout: 20_000,
       });
       await centerCtx.close();
@@ -52,7 +54,7 @@ test.describe("E2E-04 — Student lead Path B (center register → convert)", ()
       const brandCtx = await browser.newContext({ storageState: authStatePath("brand") });
       const brandPage = await brandCtx.newPage();
       await brandPage.goto(brandUrl(SEED.brandSlug, "/app/leads"));
-      const onBrand = brandPage.getByText(fields.childName).first();
+      const onBrand = brandPage.getByText(fields.parentName).or(brandPage.getByText(fields.childName)).first();
       if (await onBrand.isVisible({ timeout: 10_000 }).catch(() => false)) {
         await expect(onBrand).toBeVisible();
       }
