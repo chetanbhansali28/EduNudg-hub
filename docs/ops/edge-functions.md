@@ -12,7 +12,7 @@ EduNudg functions live in [`supabase/functions/`](../../supabase/functions/):
 
 **SPA rule:** `BrandEditForm` calls `brand-owner-credentials` only when login email or password fields change (`credentialsChanged`). Saving website theme, name, or status alone must not invoke credentials — otherwise edge 400s block unrelated brand edits.
 
-**SPA rule:** `CenterDetailPanel` (Franchise Identity) calls `center-owner-credentials` only when login email or password fields were intentionally edited (`loginFieldsTouched` + `shouldSyncCenterOwnerCredentials`). Profile-only saves must not invoke credentials.
+**SPA rule:** `CenterDetailPanel` (Franchise Identity) calls `center-owner-credentials` only when login email or password fields were intentionally edited (`loginFieldsTouched` + `shouldSyncCenterOwnerCredentials`). Profile-only saves must not invoke credentials. Passwords must be at least 6 characters (`admin` is too short).
 
 No Docker required. Deploy with the **Supabase CLI** against your linked cloud project.
 

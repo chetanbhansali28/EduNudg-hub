@@ -51,6 +51,16 @@ describe("brandOwnerCredentialsApi", () => {
     });
   });
 
+  it("regression_short_admin_password_is_rejected_before_edge_function", async () => {
+    const result = await upsertBrandOwnerCredentials({
+      brandId: "brand-1",
+      email: "owner@brand.com",
+      password: "admin",
+    });
+    expect(result.error).toMatch(/at least 6 characters/i);
+    expect(invokeMock).not.toHaveBeenCalled();
+  });
+
   it("regression_upsert_brand_owner_credentials_surfaces_function_error", async () => {
     invokeMock.mockResolvedValue({ data: { error: "Password required for a new brand login" }, error: null });
     const result = await upsertBrandOwnerCredentials({

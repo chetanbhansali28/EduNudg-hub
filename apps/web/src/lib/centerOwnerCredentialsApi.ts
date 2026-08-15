@@ -1,4 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
+import { parseFunctionsInvokeError } from "@/lib/parseFunctionsInvokeError";
+import { staffAuthPasswordError } from "@/lib/staffAuthPassword";
 
 export async function fetchCenterOwnerLoginEmail(centerId: string): Promise<string | null> {
   const { data, error } = await getSupabase().rpc("get_center_owner_login", {
@@ -41,6 +43,9 @@ export async function upsertCenterOwnerCredentials(
     return { error: "Login email is required" };
   }
 
+  const passwordError = staffAuthPasswordError(input.password);
+  if (passwordError) return { error: passwordError };
+
   const { data, error } = await getSupabase().functions.invoke("center-owner-credentials", {
     body: {
       centerId: input.centerId,
@@ -51,7 +56,7 @@ export async function upsertCenterOwnerCredentials(
     },
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: await parseFunctionsInvokeError(error) };
 
   const payload = data as { error?: string; ok?: boolean } | null;
   if (payload?.error) return { error: payload.error };

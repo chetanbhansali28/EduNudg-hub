@@ -53,6 +53,36 @@ describe("centerOwnerCredentialsApi", () => {
     });
   });
 
+  it("regression_short_admin_password_is_rejected_before_edge_function", async () => {
+    const result = await upsertCenterOwnerCredentials({
+      centerId: "center-1",
+      brandId: "brand-1",
+      email: "owner@center.com",
+      password: "admin",
+    });
+    expect(result.error).toMatch(/at least 6 characters/i);
+    expect(invokeMock).not.toHaveBeenCalled();
+  });
+
+  it("regression_upsert_center_owner_credentials_parses_edge_400_body", async () => {
+    invokeMock.mockResolvedValue({
+      data: null,
+      error: {
+        message: "Edge Function returned a non-2xx status code",
+        context: new Response(JSON.stringify({ error: "Password must be at least 6 characters." }), {
+          status: 400,
+        }),
+      },
+    });
+    const result = await upsertCenterOwnerCredentials({
+      centerId: "center-1",
+      brandId: "brand-1",
+      email: "owner@center.com",
+      password: "secret1",
+    });
+    expect(result.error).toBe("Password must be at least 6 characters.");
+  });
+
   it("regression_upsert_center_owner_credentials_surfaces_function_error", async () => {
     invokeMock.mockResolvedValue({
       data: { error: "Password required for a new franchise login" },

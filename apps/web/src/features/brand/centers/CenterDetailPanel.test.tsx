@@ -126,6 +126,7 @@ describe("CenterDetailPanel franchise login credentials", () => {
       "owner@arti.example.com"
     );
     expect(screen.getByText(/Franchise Identity/i)).toBeDefined();
+    expect(screen.getByText(/at least 6 characters/i)).toBeDefined();
     expect(
       screen.getByRole("link", {
         name: /arti-drawing\.vihaan-abacas-pune\.localhost:9000\/login/,
@@ -189,6 +190,28 @@ describe("CenterDetailPanel franchise login credentials", () => {
       password: "new-secret",
       fullName: "Arti Drawing",
     });
+  });
+
+  it("regression_short_password_save_scrolls_error_into_view", async () => {
+    shouldSyncCenterOwnerCredentials.mockReturnValue(true);
+    const scrollIntoView = vi.fn();
+    const originalScroll = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scrollIntoView;
+
+    try {
+      renderPanel();
+      await screen.findByLabelText("Login email");
+
+      fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
+      fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+
+      expect(await screen.findByRole("alert")).toBeDefined();
+      await waitFor(() => expect(scrollIntoView).toHaveBeenCalled());
+      expect(updateFranchiseCenter).not.toHaveBeenCalled();
+      expect(upsertCenterOwnerCredentials).not.toHaveBeenCalled();
+    } finally {
+      Element.prototype.scrollIntoView = originalScroll;
+    }
   });
 
   it("regression_brand_centers_view_frontend_and_backend_links", async () => {

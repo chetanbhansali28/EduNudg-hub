@@ -1,4 +1,6 @@
 import { getSupabase } from "@/lib/supabase";
+import { parseFunctionsInvokeError } from "@/lib/parseFunctionsInvokeError";
+import { staffAuthPasswordError } from "@/lib/staffAuthPassword";
 
 export async function fetchBrandOwnerLoginEmail(brandId: string): Promise<string | null> {
   const { data, error } = await getSupabase().rpc("get_brand_owner_login", {
@@ -40,6 +42,9 @@ export async function upsertBrandOwnerCredentials(
     return { error: "Login email is required" };
   }
 
+  const passwordError = staffAuthPasswordError(input.password);
+  if (passwordError) return { error: passwordError };
+
   const { data, error } = await getSupabase().functions.invoke("brand-owner-credentials", {
     body: {
       brandId: input.brandId,
@@ -49,7 +54,7 @@ export async function upsertBrandOwnerCredentials(
     },
   });
 
-  if (error) return { error: error.message };
+  if (error) return { error: await parseFunctionsInvokeError(error) };
 
   const payload = data as { error?: string; ok?: boolean } | null;
   if (payload?.error) return { error: payload.error };

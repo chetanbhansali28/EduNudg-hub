@@ -50,6 +50,8 @@ Brand staff SHALL view and set the franchise center login email and password fro
 - **WHEN** brand staff enter a login email and password (password required when no prior login exists) and save
 - **THEN** the SPA invokes `center-owner-credentials` to create or update the Auth user and sync `center_owner` membership
 - **AND** that email and password can sign in at the center portal login URL (`portalLoginUrl`)
+- **AND** passwords shorter than 6 characters (including `admin`) are rejected with a clear message — Auth does not allow them
+- **AND** that error scrolls into view so staff do not have to hunt for it above Save Changes
 
 #### Scenario: Profile-only save skips credentials
 

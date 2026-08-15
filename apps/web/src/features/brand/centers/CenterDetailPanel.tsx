@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -33,6 +33,7 @@ import {
   shouldSyncCenterOwnerCredentials,
   upsertCenterOwnerCredentials,
 } from "@/lib/centerOwnerCredentialsApi";
+import { staffAuthPasswordError } from "@/lib/staffAuthPassword";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import {
@@ -106,6 +107,7 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
   const [originalLoginEmail, setOriginalLoginEmail] = useState<string | null>(null);
   const [credentialsLoaded, setCredentialsLoaded] = useState(false);
   const [loginFieldsTouched, setLoginFieldsTouched] = useState(false);
+  const errorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const next = centerToForm(center);
@@ -142,6 +144,14 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
       cancelled = true;
     };
   }, [center.id]);
+
+  useEffect(() => {
+    if (!error) return;
+    const frame = requestAnimationFrame(() => {
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [error]);
 
   const stats = useQuery({
     queryKey: ["brand-center-stats", center.id],
@@ -185,8 +195,6 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
   const saveProfile = useMutation({
     mutationFn: async () => {
       clear();
-      await updateFranchiseCenter(center.id, form);
-
       const shouldSyncCredentials = shouldSyncCenterOwnerCredentials({
         loginEmail,
         password,
@@ -195,11 +203,18 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
         loginFieldsTouched,
       });
 
-      // Profile-only saves must not invoke center-owner-credentials (edge 400s block unrelated edits).
       if (shouldSyncCredentials) {
         if (!originalLoginEmail && !password.trim()) {
           throw new Error("Password required for a new franchise login");
         }
+        const passwordError = staffAuthPasswordError(password);
+        if (passwordError) throw new Error(passwordError);
+      }
+
+      await updateFranchiseCenter(center.id, form);
+
+      // Profile-only saves must not invoke center-owner-credentials (edge 400s block unrelated edits).
+      if (shouldSyncCredentials) {
         const { error: credErr } = await upsertCenterOwnerCredentials({
           centerId: center.id,
           brandId,
@@ -348,7 +363,9 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
         <CenterDetailStatsRow items={centerStatsItems(stats.data, centerBackendUrl)} />
       ) : null}
 
-      <MutationError message={error} />
+      <div ref={errorRef}>
+        <MutationError message={error} />
+      </div>
 
       {!isMobile ? null : (
         <div className="ed-brand-centers__mobile-photo">
@@ -405,6 +422,10 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
             disabled={!credentialsLoaded}
           />
         </FormGrid>
+        <p className="ed-text-sm ed-muted">
+          New or changed passwords must be at least 6 characters. The word <code>admin</code> is only 5 and
+          Auth will reject it — use something like <code>admin1</code>.
+        </p>
         <p className="ed-text-sm ed-muted">
           Franchise staff sign in with this email and password at{" "}
           {centerLoginUrl ? (

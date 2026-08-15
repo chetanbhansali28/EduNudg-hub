@@ -77,6 +77,12 @@ Deno.serve(async (req) => {
   if (!centerId || !brandId || !email) {
     return jsonResponse({ error: "centerId, brandId, and email are required" }, 400);
   }
+  if (password && password.length < 6) {
+    return jsonResponse(
+      { error: "Password must be at least 6 characters. “admin” is only 5 and cannot be saved." },
+      400,
+    );
+  }
 
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },

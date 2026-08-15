@@ -45,7 +45,7 @@ pnpm dlx supabase@2.104.0 functions deploy brand-owner-credentials
 
 ## Franchise (center) login credentials (brand staff)
 
-On **Brand → Franchise Centers** (`/app/centers`), open a center and use **Franchise Identity** → **Login email** / **Password**. Password is required only when creating a new login; leave blank to keep the existing password.
+On **Brand → Franchise Centers** (`/app/centers`), open a center and use **Franchise Identity** → **Login email** / **Password**. Password is required only when creating a new login; leave blank to keep the existing password. **New passwords must be at least 6 characters** — `admin` (5 characters) is rejected by Supabase Auth (HTTP 400). Use `admin1` or longer.
 
 The franchise signs in at `{center}.{brand}.localhost:9000/login` (dev) using that email and password. This provisions Auth + `center_owner` membership via `center-owner-credentials`:
 

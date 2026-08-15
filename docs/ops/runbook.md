@@ -171,7 +171,7 @@ pnpm test:rls
 - Edit platform homepage at **Platform → Homepage** (`/admin/homepage`) after signing in as `admin@edunudg.com`
 - **Brand marketing themes** (Novu / Abacus Classic / Spark Academy) are assigned on **Platform → Brands → Edit** → **Brand settings** → **Website theme**
 - Saving theme/name/status alone does **not** call `brand-owner-credentials` — only when login email/password fields change (see [edge-functions](./edge-functions.md))
-- Brand **Franchise Centers** → Franchise Identity: set center **Login email** / **Password** the same way (`center-owner-credentials`); profile-only saves do not call the edge function
+- Brand **Franchise Centers** → Franchise Identity: set center **Login email** / **Password** the same way (`center-owner-credentials`); profile-only saves do not call the edge function; passwords must be at least 6 characters (`admin` is too short)
 - React Query: keep `MARKETING_HOMEPAGE_CONFIG_QUERY_KEY` vs `MARKETING_PUBLIC_BUNDLE_QUERY_KEY` separate ([marketing-homepage OpenSpec](../../openspec/specs/marketing-homepage/spec.md))
 - Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
 - Brand owners edit page **content** at `{brand}.localhost:9000/app/homepage`
