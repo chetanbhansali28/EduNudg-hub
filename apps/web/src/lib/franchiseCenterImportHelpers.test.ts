@@ -12,9 +12,9 @@ import {
 
 describe("franchiseCenterImportHelpers", () => {
   it("parses quoted CSV cells", () => {
-    expect(parseCsvText('center_slug,name,city\n"west-1","Mumbai, West","Mumbai"')).toEqual([
-      ["center_slug", "name", "city"],
-      ["west-1", "Mumbai, West", "Mumbai"],
+    expect(parseCsvText('name,city\n"Mumbai, West","Mumbai"')).toEqual([
+      ["name", "city"],
+      ["Mumbai, West", "Mumbai"],
     ]);
   });
 
@@ -25,7 +25,6 @@ describe("franchiseCenterImportHelpers", () => {
 
   it("regression_sql_injection_in_name_is_plain_text_not_sql", () => {
     const row = buildImportRow({
-      center_slug: "test-center",
       name: "'; DROP TABLE franchise_centers;--",
       city: "Mumbai",
     });
@@ -36,7 +35,6 @@ describe("franchiseCenterImportHelpers", () => {
 
   it("regression_script_tag_in_description_is_stored_as_text", () => {
     const row = buildImportRow({
-      center_slug: "safe-center",
       name: "Safe Center",
       city: "Mumbai",
       short_description: "<script>alert(1)</script>",
@@ -45,19 +43,29 @@ describe("franchiseCenterImportHelpers", () => {
     expect(validateImportRow(row, new Set())).toEqual([]);
   });
 
-  it("rejects duplicate slugs within the same file", () => {
+  it("derives slug from name and ignores center_slug column", () => {
     const csv = `center_slug,name,city
-dup-center,One,Mumbai
-dup-center,Two,Pune`;
+ignored-slug,Andheri West,Mumbai`;
 
     const preview = parseFranchiseCenterImportCsv(csv);
-    expect(preview.validRows).toHaveLength(1);
-    expect(preview.rows[1]?.errors[0]).toMatch(/Duplicate center_slug/);
+    expect(preview.fileError).toBeNull();
+    expect(preview.validRows[0]?.center_slug).toBe("andheri-west");
+  });
+
+  it("uniques duplicate names in the same file", () => {
+    const csv = `name,city
+Koramangala,Bengaluru
+Koramangala,Bengaluru`;
+
+    const preview = parseFranchiseCenterImportCsv(csv);
+    expect(preview.validRows).toHaveLength(2);
+    expect(preview.validRows[0]?.center_slug).toBe("koramangala");
+    expect(preview.validRows[1]?.center_slug).toBe("koramangala-2");
   });
 
   it("rejects files over row limit", () => {
-    const header = "center_slug,name,city\n";
-    const rows = Array.from({ length: 501 }, (_, i) => `c-${i},Name ${i},City`).join("\n");
+    const header = "name,city\n";
+    const rows = Array.from({ length: 501 }, (_, i) => `Name ${i},City`).join("\n");
     const preview = parseFranchiseCenterImportCsv(header + rows);
     expect(preview.fileError).toMatch(/Too many rows/);
   });
@@ -71,13 +79,14 @@ dup-center,Two,Pune`;
     expect(slugifyImportSlug("Mumbai Andheri")).toBe("mumbai-andheri");
   });
 
-  it("parseFranchiseCenterImportCsv accepts export-style headers", () => {
-    const csv = `Center Slug,Name,City,Owner Email
-andheri-west,Andheri West,Mumbai,owner@example.com`;
+  it("parseFranchiseCenterImportCsv accepts export-style headers without slug", () => {
+    const csv = `Name,City,Owner Email
+Andheri West,Mumbai,owner@example.com`;
 
     const preview = parseFranchiseCenterImportCsv(csv);
     expect(preview.fileError).toBeNull();
     expect(preview.validRows).toHaveLength(1);
+    expect(preview.validRows[0]?.center_slug).toBe("andheri-west");
     expect(preview.validRows[0]?.owner_email).toBe("owner@example.com");
   });
 });
@@ -99,7 +108,9 @@ describe("downloadFranchiseCenterImportTemplate", () => {
 
     try {
       downloadFranchiseCenterImportTemplate("abacusworld");
-      expect(franchiseCenterImportTemplateCsv()).toContain("center_slug,name,city");
+      expect(franchiseCenterImportTemplateCsv()).toContain("name,city");
+      expect(franchiseCenterImportTemplateCsv()).not.toMatch(/^center_slug/m);
+      expect(franchiseCenterImportTemplateCsv()).not.toContain("center_slug,");
       expect(createElement).toHaveBeenCalledWith("a");
       expect(createObjectURL).toHaveBeenCalled();
       expect(anchor.download).toBe("franchise-centers-import-abacusworld.csv");

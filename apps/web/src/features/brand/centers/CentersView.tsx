@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Button,
   CentersDirectoryItem,
   CentersDirectoryPanel,
   CentersKpiCard,
@@ -12,6 +13,7 @@ import {
 } from "@edunudg/ui";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { CenterDetailPanel } from "@/features/brand/centers/CenterDetailPanel";
+import { FranchiseCenterImportDialog } from "@/features/platform/FranchiseCenterImportDialog";
 import {
   centerAvatarTone,
   centerCounts,
@@ -24,7 +26,6 @@ import {
 } from "@/features/brand/centers/brandCentersHelpers";
 import { centerMatchesSearch, fetchBrandCenters } from "@/lib/centerCentersApi";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
-import "./brandCenters.css";
 import "./brandCenters.css";
 
 const KPI_ICONS = {
@@ -55,6 +56,7 @@ export function CentersView() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   const centers = useQuery({
     queryKey: ["centers", brandId],
@@ -155,6 +157,11 @@ export function CentersView() {
       <CentersPageHeader
         title="Franchise Management"
         subtitle="Manage franchise profile, curriculum, and lifecycle from one workspace."
+        actions={
+          <Button type="button" variant="secondary" onClick={() => setImportOpen(true)}>
+            Import Franchise
+          </Button>
+        }
       />
 
       {isMobile ? (
@@ -219,6 +226,14 @@ export function CentersView() {
           {detailPanel}
         </div>
       ) : null}
+
+      <FranchiseCenterImportDialog
+        brandId={brandId}
+        brandSlug={brandSlug}
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={refreshCenters}
+      />
     </div>
   );
 }

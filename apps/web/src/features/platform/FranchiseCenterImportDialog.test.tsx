@@ -63,8 +63,8 @@ describe("FranchiseCenterImportDialog", () => {
       />
     );
 
-    const csv = `center_slug,name,city
-andheri-west,Andheri West,Mumbai`;
+    const csv = `name,city
+Andheri West,Mumbai`;
 
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File([csv], "centers.csv", { type: "text/csv" });

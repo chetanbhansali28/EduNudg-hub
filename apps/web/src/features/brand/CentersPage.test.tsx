@@ -97,6 +97,15 @@ vi.mock("@/features/center/settings/CenterPhotoUpload", () => ({
   CenterPhotoUpload: () => <div>Photo upload</div>,
 }));
 
+function polyfillDialog() {
+  HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
+    this.open = true;
+  });
+  HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+    this.open = false;
+  });
+}
+
 function renderPage(initialEntries = ["/app/centers"]) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
@@ -111,6 +120,7 @@ function renderPage(initialEntries = ["/app/centers"]) {
 describe("CentersPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    polyfillDialog();
   });
 
   it("regression_centers_management_layout", async () => {
@@ -119,6 +129,14 @@ describe("CentersPage", () => {
     expect(screen.getByText("Total Centers")).toBeDefined();
     expect(screen.getByText("Directory")).toBeDefined();
     expect(screen.getByRole("link", { name: "Add New" })).toBeDefined();
+  });
+
+  it("regression_brand_centers_shows_franchise_csv_import", async () => {
+    renderPage();
+    const importButton = await screen.findByRole("button", { name: "Import Franchise" });
+    expect(importButton).toBeDefined();
+    fireEvent.click(importButton);
+    expect(screen.getByRole("heading", { name: "Import franchise centers" })).toBeDefined();
   });
 
   it("regression_centers_no_delete", async () => {

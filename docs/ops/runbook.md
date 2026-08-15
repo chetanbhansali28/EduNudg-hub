@@ -178,7 +178,7 @@ pnpm test:rls
 
 ## Franchise center CSV import
 
-Bulk-onboard centers from brand detail — see [franchise-center-csv-import](./franchise-center-csv-import.md).
+Bulk-onboard centers from platform brand detail or brand Franchise Management — see [franchise-center-csv-import](./franchise-center-csv-import.md).
 
 ## Merchandise product photos
 

@@ -22,7 +22,7 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 |-------|-------|-------------|
 | `profiles` | user | Extended auth user profile |
 | `brands` | platform | Franchise brand tenant |
-| `franchise_centers` | brand | Physical center / franchise; public profile fields below |
+| `franchise_centers` | brand | Physical center / franchise; public profile fields below. CSV import sets `slug` from **name** (unique `-2` suffix if needed). |
 | `memberships` | auth | User role per scope |
 | `domain_mappings` | routing | Hostname → portal |
 | `platform_brand_signups` | platform | Self-serve EduNudg brand signup queue |

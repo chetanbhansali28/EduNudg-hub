@@ -34,7 +34,7 @@ Requires **Node.js ≥ 20.19**. Opt out of telemetry: `OPENSPEC_TELEMETRY=0` or 
 - `student-leads` — brand/center lead pipeline, SLA, convert; modal deep links
 - `center-public-profile` — franchise public profile settings and landing
 - `franchise-center-management` — brand `/app/centers` lifecycle + curriculum enablement
-- `franchise-center-csv-import` — platform CSV bulk center import
+- `franchise-center-csv-import` — platform and brand CSV bulk center import
 - `brand-curriculum-workspace` — `/app/curriculum` draft/publish safety
 - `brand-batches-feature-flag` — per-brand Batches module gate
 - `student-learn-portal` — learn host enrollment-gated portal

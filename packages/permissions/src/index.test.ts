@@ -9,4 +9,13 @@ describe("can", () => {
   it("denies center admissions brand suspend", () => {
     expect(can("center_admissions", "brands", "suspend")).toBe(false);
   });
+
+  it("allows brand owner and brand admin to create centers", () => {
+    expect(can("brand_owner", "centers", "create")).toBe(true);
+    expect(can("brand_admin", "centers", "create")).toBe(true);
+  });
+
+  it("denies center staff franchise center create", () => {
+    expect(can("center_owner", "centers", "create")).toBe(false);
+  });
 });

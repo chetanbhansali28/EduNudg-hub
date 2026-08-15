@@ -24,6 +24,20 @@ const MATRIX: Record<string, Record<string, string[]>> = {
     update: ["platform_super_admin", "platform_ops", "brand_owner", "brand_admin"],
     suspend: ["platform_super_admin", "platform_ops", "brand_owner"],
   },
+  centers: {
+    create: ["platform_super_admin", "platform_ops", "brand_owner", "brand_admin"],
+    read: [
+      "platform_super_admin",
+      "platform_ops",
+      "brand_owner",
+      "brand_admin",
+      "center_owner",
+      "center_manager",
+      "center_admissions",
+      "center_finance",
+    ],
+    update: ["platform_super_admin", "platform_ops", "brand_owner", "brand_admin", "center_owner", "center_manager"],
+  },
   leads: {
     create: ["center_owner", "center_manager", "center_admissions"],
     read: ["platform_super_admin", "brand_owner", "center_owner", "center_admissions"],

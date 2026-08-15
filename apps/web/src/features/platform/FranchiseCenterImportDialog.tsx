@@ -53,7 +53,7 @@ function ImportPreviewTable({ preview }: { preview: FranchiseCenterImportPreview
         <thead>
           <tr>
             <th scope="col">#</th>
-            <th scope="col">Slug</th>
+            <th scope="col">URL</th>
             <th scope="col">Name</th>
             <th scope="col">City</th>
             <th scope="col">Status</th>
@@ -215,7 +215,7 @@ export function FranchiseCenterImportDialog({ brandId, brandSlug, open, onClose,
                 <ImportStep
                   step={2}
                   title="Add your data"
-                  hint="Required: center_slug, name, city. Optional: display_name, region, country, address, pincode, contact_phone, short_description, owner_email."
+                  hint="Required: name, city. URL is created from the name. Optional: display_name, region, country, address, pincode, contact_phone, short_description, owner_email."
                 />
 
                 <ImportStep step={3} title="Upload franchise data" hint={uploadedFileName ? `Selected: ${uploadedFileName}` : "Save as .csv, then upload."}>

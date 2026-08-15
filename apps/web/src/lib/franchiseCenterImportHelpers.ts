@@ -45,7 +45,6 @@ export type FranchiseCenterImportRpcRow = {
 };
 
 const TEMPLATE_HEADERS: FranchiseCenterImportField[] = [
-  "center_slug",
   "name",
   "city",
   "display_name",
@@ -81,7 +80,7 @@ const HEADER_ALIASES: Record<string, FranchiseCenterImportField> = {
 };
 
 const SAMPLE_ROW: FranchiseCenterImportRow = {
-  center_slug: "mumbai-andheri",
+  center_slug: "",
   name: "Mumbai Andheri Center",
   city: "Mumbai",
   display_name: "Abacus World Andheri",
@@ -120,6 +119,23 @@ export function slugifyImportSlug(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+/** Build a URL slug from franchise name (city fallback), uniqued against reserved values. */
+export function deriveFranchiseCenterSlug(name: string, city: string, reserved: Set<string> = new Set()): string {
+  const base = slugifyImportSlug(name) || slugifyImportSlug(city);
+  if (!base || !SLUG_PATTERN.test(base)) return "";
+
+  if (!reserved.has(base)) return base;
+
+  for (let n = 2; n <= 999; n += 1) {
+    const suffix = `-${n}`;
+    const trimmed = base.slice(0, Math.max(1, 48 - suffix.length)).replace(/-+$/g, "");
+    const candidate = `${trimmed}${suffix}`;
+    if (SLUG_PATTERN.test(candidate) && !reserved.has(candidate)) return candidate;
+  }
+
+  return "";
 }
 
 function parseCsvLine(line: string): string[] {
@@ -228,20 +244,18 @@ export function validateImportRow(
   seenSlugs: Set<string>
 ): string[] {
   const errors: string[] = [];
-  const slug = slugifyImportSlug(values.center_slug ?? "");
   const name = sanitizeImportCell(values.name ?? "", 200);
   const city = sanitizeImportCell(values.city ?? "", 100);
+  const slug = values.center_slug || deriveFranchiseCenterSlug(name, city, seenSlugs);
   const ownerEmail = sanitizeImportCell(values.owner_email ?? "", 320).toLowerCase();
   const pincode = sanitizeImportCell(values.pincode ?? "", 12);
 
-  if (!slug || !SLUG_PATTERN.test(slug)) {
-    errors.push("center_slug is required and must be lowercase letters, numbers, and hyphens.");
-  } else if (seenSlugs.has(slug)) {
-    errors.push("Duplicate center_slug in this file.");
-  }
-
   if (!name) errors.push("name is required.");
   if (!city) errors.push("city is required.");
+
+  if (name && city && (!slug || !SLUG_PATTERN.test(slug))) {
+    errors.push("Could not create a URL from the franchise name. Use letters or numbers in the name.");
+  }
 
   if (ownerEmail && !EMAIL_PATTERN.test(ownerEmail)) {
     errors.push("owner_email is not a valid email address.");
@@ -254,12 +268,16 @@ export function validateImportRow(
   return errors;
 }
 
-export function buildImportRow(values: Partial<FranchiseCenterImportRow>): FranchiseCenterImportRow {
-  const slug = slugifyImportSlug(values.center_slug ?? "");
+export function buildImportRow(
+  values: Partial<FranchiseCenterImportRow>,
+  reservedSlugs: Set<string> = new Set()
+): FranchiseCenterImportRow {
+  const name = sanitizeImportCell(values.name ?? "", 200);
+  const city = sanitizeImportCell(values.city ?? "", 100);
   return {
-    center_slug: slug,
-    name: sanitizeImportCell(values.name ?? "", 200),
-    city: sanitizeImportCell(values.city ?? "", 100),
+    center_slug: deriveFranchiseCenterSlug(name, city, reservedSlugs),
+    name,
+    city,
     display_name: sanitizeImportCell(values.display_name ?? "", 200),
     region: sanitizeImportCell(values.region ?? "", 100),
     country: sanitizeImportCell(values.country ?? "", 2) || "IN",
@@ -311,11 +329,11 @@ export function parseFranchiseCenterImportCsv(text: string): FranchiseCenterImpo
     };
   }
 
-  if (!mappedFields.includes("center_slug") || !mappedFields.includes("name") || !mappedFields.includes("city")) {
+  if (!mappedFields.includes("name") || !mappedFields.includes("city")) {
     return {
       rows: [],
       validRows: [],
-      fileError: "CSV must include center_slug, name, and city columns.",
+      fileError: "CSV must include name and city columns.",
     };
   }
 
@@ -339,7 +357,7 @@ export function parseFranchiseCenterImportCsv(text: string): FranchiseCenterImpo
       values[field] = sanitizeImportCell(cells[colIndex] ?? "", 500);
     });
 
-    const built = buildImportRow(values);
+    const built = buildImportRow(values, seenSlugs);
     const errors = validateImportRow(built, seenSlugs);
     if (errors.length === 0) {
       seenSlugs.add(built.center_slug);

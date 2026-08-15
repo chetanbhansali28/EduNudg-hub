@@ -41,7 +41,7 @@ Platform brand settings: theme/name/status saves must not call `brand-owner-cred
 
 Brand franchise centers: profile/photo saves must not call `center-owner-credentials` unless Franchise Identity login email/password were intentionally edited (`CenterDetailPanel` `loginFieldsTouched` + `shouldSyncCenterOwnerCredentials`).
 
-Franchise CSV import: validate client-side then `import_franchise_centers` RPC — see `docs/ops/franchise-center-csv-import.md`.
+Franchise CSV import: platform `/admin/brands/:slug` and brand `/app/centers` share `FranchiseCenterImportDialog`; required CSV columns are `name` and `city`; slug is derived from name (`deriveFranchiseCenterSlug` + RPC) then `import_franchise_centers` (`is_platform_admin` or `has_brand_access`) — see `docs/ops/franchise-center-csv-import.md`.
 
 Coverage target: ≥80% on `packages/*`.
 

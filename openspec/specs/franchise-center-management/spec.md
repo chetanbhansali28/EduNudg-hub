@@ -5,6 +5,7 @@ Brand staff SHALL manage all franchise centers from a master-detail workspace at
 ## Related
 
 - Journey: [`docs/journeys/brand-operator.md`](../../../docs/journeys/brand-operator.md)
+- CSV bulk import: [`openspec/specs/franchise-center-csv-import/spec.md`](../franchise-center-csv-import/spec.md)
 - Change source: `openspec/changes/franchise-center-management/` (shipped; mainline copy)
 
 ## Requirements
@@ -54,6 +55,19 @@ Brand staff SHALL view and set the franchise center login email and password fro
 
 - **WHEN** brand staff save name, photo, or description without intentionally editing login fields
 - **THEN** the SPA does not invoke `upsertCenterOwnerCredentials` / `center-owner-credentials`
+
+### Requirement: Bulk CSV import
+
+Brand staff with `centers.create` SHALL bulk-onboard franchise centers from CSV on `/app/centers`, using the same flow as platform admins (`import_franchise_centers`).
+
+#### Scenario: Import Franchise on franchise management
+
+- **GIVEN** brand owner or brand admin is on `/app/centers`
+- **WHEN** they click **Import Franchise**
+- **THEN** the franchise center CSV import dialog opens
+- **AND** created centers appear in the directory after a successful import
+
+See [`openspec/specs/franchise-center-csv-import/spec.md`](../franchise-center-csv-import/spec.md).
 
 ### Requirement: No franchise delete
 

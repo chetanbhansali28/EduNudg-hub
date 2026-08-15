@@ -2,11 +2,12 @@
 
 ## Purpose
 
-Platform admins bulk-onboard franchise centers for a brand from a CSV template on `/admin/brands/:slug`, provisioning center records and center portal hostnames safely.
+Platform admins and brand staff (owner/admin) bulk-onboard franchise centers for a brand from a CSV template, provisioning center records and center portal hostnames safely. Platform UI is `/admin/brands/:slug`; brand UI is `/app/centers`.
 
 ## Related
 
 - Platform brand onboarding: `openspec/specs/platform-brand-onboarding/spec.md`
+- Franchise center management: `openspec/specs/franchise-center-management/spec.md`
 - Franchise inquiry approval (single-center path): `approve_franchise_inquiry` RPC
 - Platform data export center columns: `apps/web/src/lib/platformDataExportHelpers.ts`
 
@@ -14,13 +15,37 @@ Platform admins bulk-onboard franchise centers for a brand from a CSV template o
 
 ### Requirement: CSV template download
 
-Platform admins SHALL download a franchise center import template from the brand detail Franchise centers card.
+Platform admins and brand staff SHALL download a franchise center import template from the import dialog.
 
 #### Scenario: Download template
 
-- **GIVEN** platform admin is on `/admin/brands/:slug`
-- **WHEN** they open **Import CSV** and click **Download template**
-- **THEN** the browser downloads a CSV with headers `center_slug`, `name`, `city`, and optional profile columns plus one sample row
+- **GIVEN** platform admin is on `/admin/brands/:slug` or brand staff is on `/app/centers`
+- **WHEN** they open **Import Franchise** and click **Download template**
+- **THEN** the browser downloads a CSV with headers `name`, `city`, and optional profile columns plus one sample row
+- **AND** the template SHALL NOT include `center_slug`
+
+### Requirement: Auto-generated center URL
+
+The system SHALL create `franchise_centers.slug` from the franchise **name** (slugified). Callers SHALL NOT be required to supply `center_slug`.
+
+#### Scenario: Slug from name
+
+- **GIVEN** a CSV row with name `Andheri West` and city `Mumbai`
+- **WHEN** the row is imported
+- **THEN** the stored slug is `andheri-west`
+- **AND** the center hostname is `{slug}.{brand_slug}.localhost`
+
+#### Scenario: Unique suffix on collision
+
+- **WHEN** the derived slug already exists for the brand or earlier in the same file
+- **THEN** the system stores `andheri-west-2` (then `-3`, …)
+- **AND** does not ask the user to type a slug
+
+#### Scenario: Legacy CSV with center_slug column
+
+- **WHEN** an older file still includes a `center_slug` column
+- **THEN** that column is ignored
+- **AND** the slug is still derived from `name`
 
 ### Requirement: Client-side CSV validation
 
@@ -51,12 +76,12 @@ The SPA SHALL parse CSV files locally, enforce limits, and preview rows before i
 
 The system SHALL create franchise centers via `import_franchise_centers(p_brand_id, p_rows)` using parameterized JSON rows only.
 
-#### Scenario: Authorized platform admin import
+#### Scenario: Authorized import
 
-- **GIVEN** caller is platform admin or has brand access for `p_brand_id`
+- **GIVEN** caller is platform admin or has brand access for `p_brand_id` (`brand_owner` / `brand_admin`)
 - **WHEN** valid rows are submitted
-- **THEN** each row inserts an `active` `franchise_centers` record
-- **AND** inserts a primary `domain_mappings` row with hostname `{center_slug}.{brand_slug}.localhost` and `portal_type = center`
+- **THEN** each row inserts an `active` `franchise_centers` record with slug derived from name
+- **AND** inserts a primary `domain_mappings` row with hostname `{derived_slug}.{brand_slug}.localhost` and `portal_type = center`
 - **AND** optionally inserts a `center_owner` membership invite when `owner_email` matches an auth user
 
 #### Scenario: Reject unauthorized caller
@@ -92,10 +117,26 @@ Platform admins SHALL import centers from the Franchise centers card on `/admin/
 
 #### Scenario: Open import dialog
 
-- **WHEN** platform admin clicks **Import CSV** on the Franchise centers card
+- **WHEN** platform admin clicks **Import Franchise** on the Franchise centers card
 - **THEN** a modal opens with template download, file picker, preview, and import action
 
 #### Scenario: Refresh list after import
 
 - **WHEN** import creates one or more centers
 - **THEN** the Franchise centers list and domain mappings refresh without a full page reload
+
+### Requirement: Import UI on brand franchise management
+
+Brand staff with `centers.create` (`brand_owner`, `brand_admin`) SHALL import centers from Franchise Management at `/app/centers` using the same CSV dialog and `import_franchise_centers` RPC as platform admins.
+
+#### Scenario: Open import dialog from brand portal
+
+- **GIVEN** brand owner or brand admin is on `/app/centers`
+- **WHEN** they click **Import Franchise**
+- **THEN** a modal opens with template download, file picker, preview, and import action
+- **AND** confirmed rows call `import_franchise_centers` for the current brand only
+
+#### Scenario: Refresh brand directory after import
+
+- **WHEN** import creates one or more centers
+- **THEN** the Franchise Management directory refreshes without a full page reload

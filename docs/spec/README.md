@@ -32,7 +32,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [student-leads](../../openspec/specs/student-leads/spec.md) | Brand/center student leads + Abacus/Spark modals |
 | [franchise-applications](../../openspec/specs/franchise-applications/spec.md) | Franchise apply + approve provision |
 | [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace |
-| [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform CSV bulk center import |
+| [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform and brand CSV bulk center import |
 | [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` draft/publish |
 | [brand-batches-feature-flag](../../openspec/specs/brand-batches-feature-flag/spec.md) | Per-brand Batches module gate |
 | [student-learn-portal](../../openspec/specs/student-learn-portal/spec.md) | Learn host enrollment-gated portal |

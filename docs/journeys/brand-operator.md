@@ -9,7 +9,7 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 | Home | Compact KPI grid: unassigned leads, stale leads, new franchise applications |
 | **Student Leads** | Assign, reallocate, view lost with reasons |
 | **Franchise Applications** | Approve/reject; provisions center + domain |
-| Franchise Centers | Master-detail `/app/centers` — profile, suspend/re-enable, curriculum enablement |
+| Franchise Centers | Master-detail `/app/centers` — profile, suspend/re-enable, curriculum enablement, **Import Franchise** CSV |
 | Curriculum | Master-detail `/app/curriculum` — courses/levels/units with draft publish safety |
 | Royalties | Brand ↔ franchise money (not EduNudg subscription) |
 | Analytics | Cross-center metrics |
@@ -26,6 +26,7 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 ## Franchise operations
 
 - Approve inquiry → center host live + operator invite (same transaction).
+- **Import Franchise** CSV on `/app/centers` — same template and `import_franchise_centers` RPC as platform admins ([ops](../ops/franchise-center-csv-import.md)).
 - Read-only visibility into any student/center under brand for growth planning (Phase B/C pages).
 
 ## Billing
