@@ -7,6 +7,8 @@ brands,suspend,y,y,y,n,n,n,n,n
 centers,create,y,y,y,y,n,n,n,n
 centers,read,y,y,y,y,y,y,y,y
 centers,update,y,y,y,y,y,y,n,n
+centers,delete,y,y,y,y,n,n,n,n
+centers,suspend,y,y,y,y,n,n,n,n
 programs,create,n,n,y,y,n,n,n,n
 programs,read,y,y,y,y,y,y,y,y
 curriculum,create,n,n,y,y,n,n,n,n

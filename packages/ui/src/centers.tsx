@@ -375,16 +375,21 @@ export function CenterCurriculumToggleCard({
 
 export function CenterDetailFooter({
   suspendAction,
+  deleteAction,
   resetAction,
   saveAction,
 }: {
   suspendAction?: ReactNode;
+  deleteAction?: ReactNode;
   resetAction?: ReactNode;
   saveAction?: ReactNode;
 }) {
   return (
     <footer className="ed-center-detail-footer">
-      <div className="ed-center-detail-footer__left">{suspendAction}</div>
+      <div className="ed-center-detail-footer__left">
+        {suspendAction}
+        {deleteAction}
+      </div>
       <div className="ed-center-detail-footer__right">
         {resetAction}
         {saveAction}

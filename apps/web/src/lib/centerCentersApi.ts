@@ -111,6 +111,14 @@ export async function setFranchiseCenterStatus(
   if (error) throw error;
 }
 
+export async function softDeleteFranchiseCenter(centerId: string, reason?: string): Promise<void> {
+  const { error } = await getSupabase().rpc("soft_delete_franchise_center", {
+    p_center_id: centerId,
+    p_reason: reason?.trim() || null,
+  });
+  if (error) throw error;
+}
+
 export type CenterStats = {
   openLeads: number;
   staleLeads: number;

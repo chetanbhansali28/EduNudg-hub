@@ -6,6 +6,8 @@ import { CenterDetailPanel } from "./CenterDetailPanel";
 import type { BrandCenterRow } from "@/lib/centerCentersApi";
 
 const updateFranchiseCenter = vi.fn().mockResolvedValue(undefined);
+const setFranchiseCenterStatus = vi.fn().mockResolvedValue(undefined);
+const softDeleteFranchiseCenter = vi.fn().mockResolvedValue(undefined);
 const fetchCenterOwnerLoginEmail = vi.fn().mockResolvedValue("owner@arti.example.com");
 const upsertCenterOwnerCredentials = vi.fn().mockResolvedValue({ error: null });
 const shouldSyncCenterOwnerCredentials = vi.fn();
@@ -23,7 +25,8 @@ vi.mock("@/lib/centerCentersApi", async () => {
       revenueMtd: 0,
     }),
     updateFranchiseCenter: (...args: unknown[]) => updateFranchiseCenter(...args),
-    setFranchiseCenterStatus: vi.fn(),
+    setFranchiseCenterStatus: (...args: unknown[]) => setFranchiseCenterStatus(...args),
+    softDeleteFranchiseCenter: (...args: unknown[]) => softDeleteFranchiseCenter(...args),
   };
 });
 
@@ -95,6 +98,8 @@ describe("CenterDetailPanel franchise login credentials", () => {
 
   beforeEach(() => {
     updateFranchiseCenter.mockClear();
+    setFranchiseCenterStatus.mockClear();
+    softDeleteFranchiseCenter.mockClear();
     fetchCenterOwnerLoginEmail.mockClear();
     upsertCenterOwnerCredentials.mockClear();
     shouldSyncCenterOwnerCredentials.mockReset();
@@ -184,5 +189,42 @@ describe("CenterDetailPanel franchise login credentials", () => {
       password: "new-secret",
       fullName: "Arti Drawing",
     });
+  });
+
+  it("regression_brand_centers_view_frontend_and_backend_links", async () => {
+    renderPanel();
+    expect(await screen.findByRole("link", { name: "View Frontend ↗" })).toHaveProperty(
+      "href",
+      "http://arti-drawing.vihaan-abacas-pune.localhost:9000/"
+    );
+    expect(screen.getByRole("link", { name: "View Backend ↗" })).toHaveProperty(
+      "href",
+      "http://arti-drawing.vihaan-abacas-pune.localhost:9000/app"
+    );
+  });
+
+  it("regression_brand_centers_confirm_delete_calls_soft_delete_rpc", async () => {
+    const onDeleted = vi.fn();
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <CenterDetailPanel
+            center={center}
+            brandId="brand-vihaan"
+            brandSlug="vihaan-abacas-pune"
+            isMobile={false}
+            onStatusChanged={() => undefined}
+            onDeleted={onDeleted}
+          />
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Delete franchise" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete" }));
+    await waitFor(() =>
+      expect(softDeleteFranchiseCenter).toHaveBeenCalledWith("center-arti", "")
+    );
+    expect(onDeleted).toHaveBeenCalled();
   });
 });

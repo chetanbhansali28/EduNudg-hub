@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { setFranchiseCenterStatus } from "./centerCentersApi";
+import { setFranchiseCenterStatus, softDeleteFranchiseCenter } from "./centerCentersApi";
 
 const rpc = vi.fn();
 const fromUpdate = vi.fn();
@@ -28,6 +28,15 @@ describe("centerCentersApi RPC", () => {
       p_center_id: "center-1",
       p_status: "suspended",
       p_reason: "Policy violation",
+    });
+  });
+
+  it("softDeleteFranchiseCenter calls soft-delete RPC", async () => {
+    rpc.mockResolvedValue({ data: null, error: null });
+    await softDeleteFranchiseCenter("center-1", "Closed location");
+    expect(rpc).toHaveBeenCalledWith("soft_delete_franchise_center", {
+      p_center_id: "center-1",
+      p_reason: "Closed location",
     });
   });
 });

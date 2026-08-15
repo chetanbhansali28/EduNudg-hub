@@ -69,31 +69,43 @@ Brand staff with `centers.create` SHALL bulk-onboard franchise centers from CSV 
 
 See [`openspec/specs/franchise-center-csv-import/spec.md`](../franchise-center-csv-import/spec.md).
 
-### Requirement: No franchise delete
+### Requirement: View franchise frontend and backend
 
-Brand staff SHALL NOT delete franchise centers from the UI.
+Brand staff SHALL open the selected franchise public site and staff app from `/app/centers`.
 
-#### Scenario: Delete action absent
+#### Scenario: View frontend and backend
 
-- **WHEN** brand staff view franchise management
-- **THEN** no delete or soft-delete control is shown
+- **GIVEN** brand staff have a franchise selected
+- **WHEN** they click **View Frontend** or **View Backend**
+- **THEN** the browser opens the center marketing URL or center `/app` in a new tab
 
-### Requirement: Suspend and re-enable franchise
+### Requirement: Disable and enable franchise
 
-Brand staff SHALL suspend and re-enable franchises reversibly.
+Brand staff SHALL disable and enable franchises reversibly (`set_franchise_center_status` `suspended` ↔ `active`).
 
-#### Scenario: Suspend blocks center staff
+#### Scenario: Disable blocks center staff
 
-- **WHEN** brand staff suspend a franchise
+- **WHEN** brand staff disable a franchise
 - **THEN** `franchise_centers.status` becomes `suspended`
 - **AND** center staff cannot access center `/app` or run center mutation RPCs
 - **AND** brand staff may still manage the franchise from the brand portal
 
-#### Scenario: Re-enable restores access
+#### Scenario: Enable restores access
 
-- **WHEN** brand staff re-enable a suspended franchise
+- **WHEN** brand staff enable a disabled franchise
 - **THEN** `franchise_centers.status` becomes `active`
 - **AND** center staff access is restored
+
+### Requirement: Soft-delete franchise
+
+Brand staff with `centers.delete` SHALL remove a franchise from Brand Backend via `soft_delete_franchise_center`.
+
+#### Scenario: Confirm delete
+
+- **WHEN** brand staff confirm **Delete franchise**
+- **THEN** `franchise_centers.deleted_at` is set and status becomes `closed`
+- **AND** the center disappears from `/app/centers` and public landing
+- **AND** student and lead rows are not hard-deleted
 
 ### Requirement: Version-level curriculum assignment
 

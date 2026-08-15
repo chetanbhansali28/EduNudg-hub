@@ -2613,6 +2613,12 @@
   gap: 0.5rem;
 }
 
+.ed-center-detail-hero__portal-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .ed-center-detail-hero__frontend-link {
   display: inline-flex;
   align-items: center;
@@ -2899,10 +2905,15 @@
   border-top: 1px solid var(--ed-border);
 }
 
+.ed-center-detail-footer__left,
 .ed-center-detail-footer__right {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
+}
+
+.ed-center-detail-footer__right {
   margin-left: auto;
 }
 

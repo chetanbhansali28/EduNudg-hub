@@ -103,6 +103,11 @@ export function CentersView() {
     void qc.invalidateQueries({ queryKey: ["centers", brandId] });
   };
 
+  const handleDeleted = () => {
+    closeDetail();
+    refreshCenters();
+  };
+
   if (missingBrand || !brandId || !brandSlug) {
     return <p className="ed-empty">Brand context not found. Check domain mapping for this hostname.</p>;
   }
@@ -143,6 +148,7 @@ export function CentersView() {
       brandSlug={brandSlug}
       isMobile={isMobile}
       onStatusChanged={refreshCenters}
+      onDeleted={handleDeleted}
     />
   ) : (
     <div className="ed-brand-centers__placeholder">

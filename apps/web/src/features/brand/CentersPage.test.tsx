@@ -67,6 +67,7 @@ vi.mock("@/lib/centerCentersApi", async (importOriginal) => {
     }),
     updateFranchiseCenter: vi.fn().mockResolvedValue(undefined),
     setFranchiseCenterStatus: vi.fn().mockResolvedValue(undefined),
+    softDeleteFranchiseCenter: vi.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -139,12 +140,16 @@ describe("CentersPage", () => {
     expect(screen.getByRole("heading", { name: "Import franchise centers" })).toBeDefined();
   });
 
-  it("regression_centers_no_delete", async () => {
-    renderPage();
-    await waitFor(() => {
-      expect(screen.getByText("Abacus Koramangala")).toBeDefined();
-    });
-    expect(screen.queryByRole("button", { name: /delete/i })).toBeNull();
+  it("regression_brand_centers_view_frontend_and_backend", async () => {
+    renderPage(["/app/centers?center=koramangala"]);
+    expect(await screen.findByRole("link", { name: "View Frontend ↗" })).toBeDefined();
+    expect(screen.getByRole("link", { name: "View Backend ↗" })).toBeDefined();
+  });
+
+  it("regression_brand_centers_can_soft_delete_franchise", async () => {
+    renderPage(["/app/centers?center=koramangala"]);
+    expect(await screen.findByRole("button", { name: "Delete franchise" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Disable franchise" })).toBeDefined();
   });
 
   it("regression_master_detail_selects_center", async () => {

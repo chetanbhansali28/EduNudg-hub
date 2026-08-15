@@ -37,6 +37,8 @@ const MATRIX: Record<string, Record<string, string[]>> = {
       "center_finance",
     ],
     update: ["platform_super_admin", "platform_ops", "brand_owner", "brand_admin", "center_owner", "center_manager"],
+    delete: ["platform_super_admin", "platform_ops", "brand_owner", "brand_admin"],
+    suspend: ["platform_super_admin", "platform_ops", "brand_owner", "brand_admin"],
   },
   leads: {
     create: ["center_owner", "center_manager", "center_admissions"],

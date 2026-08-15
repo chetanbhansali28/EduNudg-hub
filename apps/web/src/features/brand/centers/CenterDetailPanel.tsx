@@ -25,6 +25,7 @@ import {
   fetchCenterStats,
   setFranchiseCenterStatus,
   updateFranchiseCenter,
+  softDeleteFranchiseCenter,
 } from "@/lib/centerCentersApi";
 import type { CenterPublicProfileInput } from "@/lib/centerProfileFields";
 import {
@@ -86,9 +87,10 @@ type Props = {
   brandSlug: string;
   isMobile: boolean;
   onStatusChanged: () => void;
+  onDeleted?: () => void;
 };
 
-export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStatusChanged }: Props) {
+export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStatusChanged, onDeleted }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const profileSaved = useSavedFlash();
@@ -96,6 +98,8 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
   const [savedForm, setSavedForm] = useState(() => centerToForm(center));
   const [suspendMode, setSuspendMode] = useState(false);
   const [suspendReason, setSuspendReason] = useState("");
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
   const [pendingProgramId, setPendingProgramId] = useState<string | null>(null);
   const [loginEmail, setLoginEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -109,6 +113,8 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
     setSavedForm(next);
     setSuspendMode(false);
     setSuspendReason("");
+    setDeleteMode(false);
+    setDeleteReason("");
   }, [center]);
 
   useEffect(() => {
@@ -169,16 +175,9 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
   const authorizedSet = new Set(authorizedProgramIds.data ?? []);
   const title = centerListTitle(center);
   const initials = centerInitials(center);
-  const centerBackendUrl =
-    center.status === "active"
-      ? portalBackendUrl({ portalType: "center", brandSlug, centerSlug: center.slug })
-      : null;
-  const centerLoginUrl =
-    center.status === "active"
-      ? portalLoginUrl({ portalType: "center", brandSlug, centerSlug: center.slug })
-      : null;
-  const centerFrontendUrl =
-    center.status === "active" ? centerPortalUrl(brandSlug, center.slug) : null;
+  const centerBackendUrl = portalBackendUrl({ portalType: "center", brandSlug, centerSlug: center.slug });
+  const centerLoginUrl = portalLoginUrl({ portalType: "center", brandSlug, centerSlug: center.slug });
+  const centerFrontendUrl = centerPortalUrl(brandSlug, center.slug);
   const credentialsDirty =
     loginEmail.trim() !== (originalLoginEmail ?? "") || Boolean(password.trim());
   const isDirty = JSON.stringify(form) !== JSON.stringify(savedForm) || credentialsDirty;
@@ -243,6 +242,18 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
     onError: capture,
   });
 
+  const removeFranchise = useMutation({
+    mutationFn: async () => {
+      clear();
+      await softDeleteFranchiseCenter(center.id, deleteReason);
+    },
+    onSuccess: () => {
+      setDeleteMode(false);
+      onDeleted?.();
+    },
+    onError: capture,
+  });
+
   const toggleProgram = useMutation({
     mutationFn: async ({ programId, enabled }: { programId: string; enabled: boolean }) => {
       clear();
@@ -291,19 +302,25 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
     setLoginFieldsTouched(false);
   };
 
-  const frontendLink = centerFrontendUrl ? (
-    <a
-      className="ed-center-detail-hero__frontend-link"
-      href={centerFrontendUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      View Frontend ↗
-    </a>
-  ) : (
-    <span className="ed-center-detail-hero__frontend-link" aria-disabled="true">
-      View Frontend
-    </span>
+  const portalLinks = (
+    <div className="ed-center-detail-hero__portal-links">
+      <a
+        className="ed-center-detail-hero__frontend-link"
+        href={centerFrontendUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View Frontend ↗
+      </a>
+      <a
+        className="ed-center-detail-hero__frontend-link"
+        href={centerBackendUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View Backend ↗
+      </a>
+    </div>
   );
 
   return (
@@ -314,7 +331,7 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
           imageUrl={form.photoUrl}
           title={title}
           slug={center.slug}
-          titleAction={frontendLink}
+          titleAction={portalLinks}
         />
       ) : (
         <CenterDetailHero
@@ -323,7 +340,7 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
           title={title}
           franchiseId={centerFranchiseId(center)}
           status={<CenterStatusBadge status={centerStatusTone(center.status)} />}
-          titleAction={frontendLink}
+          titleAction={portalLinks}
         />
       )}
 
@@ -481,16 +498,34 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
       </CentersSectionCard>
 
       {suspendMode ? (
-        <CentersSectionCard title="Suspend franchise">
+        <CentersSectionCard title="Disable franchise">
           <p className="ed-text-sm ed-muted">
-            Suspending blocks center staff from /app and hides public registration. You can re-enable later.
+            Disabling blocks center staff from /app and hides public registration. You can enable it again later.
           </p>
           <Input label="Reason (optional)" value={suspendReason} onChange={setSuspendReason} editable />
           <div className="ed-brand-centers__inline-actions">
             <Button onClick={() => suspend.mutate()} disabled={suspend.isPending}>
-              {suspend.isPending ? "Suspending…" : "Confirm suspend"}
+              {suspend.isPending ? "Disabling…" : "Confirm disable"}
             </Button>
             <Button variant="ghost" onClick={() => setSuspendMode(false)}>
+              Cancel
+            </Button>
+          </div>
+        </CentersSectionCard>
+      ) : null}
+
+      {deleteMode ? (
+        <CentersSectionCard title="Delete franchise">
+          <p className="ed-text-sm ed-muted">
+            This removes the franchise from Brand Backend and the public center site. Student and lead records are
+            kept. This cannot be undone from this screen.
+          </p>
+          <Input label="Reason (optional)" value={deleteReason} onChange={setDeleteReason} editable />
+          <div className="ed-brand-centers__inline-actions">
+            <Button variant="danger" onClick={() => removeFranchise.mutate()} disabled={removeFranchise.isPending}>
+              {removeFranchise.isPending ? "Deleting…" : "Confirm delete"}
+            </Button>
+            <Button variant="ghost" onClick={() => setDeleteMode(false)}>
               Cancel
             </Button>
           </div>
@@ -509,26 +544,34 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
           />
           {center.status === "active" ? (
             <Button variant="danger" block onClick={() => setSuspendMode(true)}>
-              Suspend franchise
+              Disable franchise
             </Button>
           ) : (
             <Button block onClick={() => reEnable.mutate()} disabled={reEnable.isPending}>
-              {reEnable.isPending ? "Re-enabling…" : "Re-enable franchise"}
+              {reEnable.isPending ? "Enabling…" : "Enable franchise"}
             </Button>
           )}
+          <Button variant="secondary" block onClick={() => setDeleteMode(true)}>
+            Delete franchise
+          </Button>
         </div>
       ) : (
         <CenterDetailFooter
           suspendAction={
             center.status === "active" ? (
               <Button variant="danger" onClick={() => setSuspendMode(true)}>
-                Suspend Franchise
+                Disable franchise
               </Button>
             ) : (
               <Button onClick={() => reEnable.mutate()} disabled={reEnable.isPending}>
-                {reEnable.isPending ? "Re-enabling…" : "Re-enable franchise"}
+                {reEnable.isPending ? "Enabling…" : "Enable franchise"}
               </Button>
             )
+          }
+          deleteAction={
+            <Button variant="secondary" onClick={() => setDeleteMode(true)}>
+              Delete franchise
+            </Button>
           }
           resetAction={
             <Button variant="ghost" onClick={resetForm} disabled={!isDirty}>

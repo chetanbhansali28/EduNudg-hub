@@ -24,6 +24,10 @@ BEGIN
     RAISE EXCEPTION 'Missing set_franchise_center_status';
   END IF;
 
+  IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'soft_delete_franchise_center') THEN
+    RAISE EXCEPTION 'Missing soft_delete_franchise_center';
+  END IF;
+
   IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'sync_center_curriculum_enablement') THEN
     RAISE EXCEPTION 'Missing sync_center_curriculum_enablement';
   END IF;

@@ -46,7 +46,7 @@ Center staff update via RPC `update_center_public_profile_rpc` (requires `has_ce
 | `center_status_events` | brand | Append-only audit when brand suspends/re-enables a franchise |
 | `center_curriculum_enablement` | brand | Published `curriculum_version_id` pins per center; sync via `sync_center_curriculum_enablement` |
 
-RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended`. Center staff access gated via `user_center_ids()` (operational centers only).
+RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended` (Disable/Enable in Brand Backend). RPC `soft_delete_franchise_center` — brand/platform sets `deleted_at` and `closed`. Center staff access gated via `user_center_ids()` (operational centers only).
 
 ## Leads & recruitment
 

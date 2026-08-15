@@ -18,4 +18,10 @@ describe("can", () => {
   it("denies center staff franchise center create", () => {
     expect(can("center_owner", "centers", "create")).toBe(false);
   });
+
+  it("allows brand owner to delete and suspend centers", () => {
+    expect(can("brand_owner", "centers", "delete")).toBe(true);
+    expect(can("brand_admin", "centers", "suspend")).toBe(true);
+    expect(can("center_owner", "centers", "delete")).toBe(false);
+  });
 });
