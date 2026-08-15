@@ -115,6 +115,18 @@ describe("CurriculumPage", () => {
     expect(screen.getByText(/Marketing copy and structure for the core Abacus course/i)).toBeDefined();
   });
 
+  it("regression_curriculum_banner_shows_upload_size_hint", async () => {
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Course Banner (Thumbnail)").length).toBeGreaterThan(0);
+    });
+    expect(screen.getByText(/Maximum 5 MB/i)).toBeDefined();
+    expect(screen.getByText(/1280×720/)).toBeDefined();
+    expect(screen.getByText(/PNG, JPEG, WebP, or GIF/i)).toBeDefined();
+  });
+
   it("regression_desktop_add_course_opens_create_form", async () => {
     mockCurriculumTables();
     renderPage();

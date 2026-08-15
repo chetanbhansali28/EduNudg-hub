@@ -66,4 +66,22 @@ describe("MarketingNav", () => {
 
     vi.unstubAllGlobals();
   });
+
+  it("regression_franchise_frontend_nav_highlights_logo_and_name", () => {
+    const config = sanitizeCenterPublicNavConfig(
+      buildCenterLandingConfig("Nilesh Gattani Center", "Abacus World", "Pune")
+    );
+    config.meta.logoUrl = "https://cdn.example/logo.png";
+
+    const { container } = render(
+      <MemoryRouter>
+        <MarketingNav config={config} brandSlug="abacusworld" />
+      </MemoryRouter>
+    );
+
+    expect(container.querySelector(".novu-nav-bar--franchise")).not.toBeNull();
+    const logo = container.querySelector(".novu-nav-bar__logo-img") as HTMLImageElement;
+    expect(logo?.getAttribute("width")).toBe("64");
+    expect(screen.getByText("Nilesh Gattani Center")).toBeDefined();
+  });
 });

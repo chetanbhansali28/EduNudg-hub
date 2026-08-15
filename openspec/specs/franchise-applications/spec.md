@@ -60,6 +60,8 @@ Traceability: FR-B20
 - **WHEN** brand staff delete a franchise from Franchise Management (`soft_delete_franchise_center`)
 - **THEN** the matching approved inquiry is **not** removed
 - **AND** the inquiry leaves the **Decided** tab and appears under **Deleted** with a DELETED badge
+- **AND** the **Deleted** filter tab is last (after **All applications**)
+- **AND** on **All applications**, deleted inquiries sort after live pending/decided rows (newest-first within each group)
 - **AND** the detail view explains the franchise was deleted from Franchise Management and is kept for history
 
 ### Requirement: Approve franchise inquiry

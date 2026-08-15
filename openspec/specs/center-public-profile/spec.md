@@ -73,6 +73,12 @@ On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show
 - **THEN** updated display name, blurb, contact, photo, and social links are visible
 - **AND** the nav shows the brand logo only (no center logo)
 
+#### Scenario: Franchise frontend nav highlights logo and name
+
+- **WHEN** a visitor opens a center (franchise) public site
+- **THEN** the sticky nav uses a franchise lockup (`ac-nav--franchise` / `sa-nav--franchise` / `novu-nav-bar--franchise`)
+- **AND** the brand logo and site name are larger and bolder than on the brand homepage nav
+
 #### Scenario: Footer contact uses franchise address on every theme
 
 - **GIVEN** Franchise Management saved this center’s address and phone

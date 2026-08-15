@@ -84,6 +84,8 @@ describe("FranchiseApplicationsPage", () => {
     expect(screen.getByRole("tablist", { name: "Application filter" })).toBeDefined();
     expect(await screen.findByRole("tab", { name: /Pending review \(1\)/ })).toBeDefined();
     expect(screen.getByRole("tab", { name: /Deleted \(0\)/ })).toBeDefined();
+    const tabs = screen.getAllByRole("tab").map((tab) => tab.textContent);
+    expect(tabs[tabs.length - 1]).toMatch(/Deleted/);
     expect(screen.getByPlaceholderText("Search applications...")).toBeDefined();
   });
 
@@ -213,5 +215,36 @@ describe("FranchiseApplicationsPage", () => {
 
     fireEvent.click(deletedRow);
     expect(screen.getByText(/deleted from Franchise Management/i)).toBeDefined();
+  });
+
+  it("regression_deleted_franchise_appears_last_on_all_applications", async () => {
+    mockInquiries.splice(
+      0,
+      mockInquiries.length,
+      {
+        ...sampleInquiry,
+        id: "inq-deleted",
+        status: "converted",
+        converted_center_id: "center-gone",
+        proposed_franchise_name: "Closed Pune West",
+        created_at: "2026-08-15T12:00:00Z",
+      },
+      sampleInquiry,
+    );
+    mockDeletedCenters.splice(0, mockDeletedCenters.length, {
+      id: "center-gone",
+      deleted_at: "2026-08-15T12:05:00Z",
+    });
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <FranchiseApplicationsPage />
+      </QueryClientProvider>
+    );
+
+    fireEvent.click(await screen.findByRole("tab", { name: /All applications \(2\)/ }));
+    const rows = await screen.findAllByRole("button", { name: /Pune West/i });
+    expect(rows.map((row) => row.textContent?.includes("Closed Pune West"))).toEqual([false, true]);
   });
 });

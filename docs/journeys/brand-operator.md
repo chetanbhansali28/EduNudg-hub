@@ -28,7 +28,7 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 - Approve inquiry → center host live + operator invite (same transaction).
 - **Import Franchise** CSV on `/app/centers` — same template and `import_franchise_centers` RPC as platform admins ([ops](../ops/franchise-center-csv-import.md)).
 - Open that franchise’s **Frontend** (public site) and **Backend** (`/app`) from the franchise detail panel (**View Frontend** / **View Backend**).
-- **Disable / Enable** franchise (`suspended` ↔ `active`). **Delete** is a soft-delete (`deleted_at`). Approved Franchise Applications stay as history under the **Deleted** tab (not live **Decided**).
+- **Disable / Enable** franchise (`suspended` ↔ `active`). **Delete** is a soft-delete (`deleted_at`). Approved Franchise Applications stay as history under the last **Deleted** tab (not live **Decided**); on **All applications** they sort after live rows.
 - Read-only visibility into any student/center under brand for growth planning (Phase B/C pages).
 
 ## Billing

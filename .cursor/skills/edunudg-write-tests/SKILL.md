@@ -39,7 +39,7 @@ Spark Academy / Abacus Classic public lead forms live in modals — Playwright h
 
 Platform brand settings: theme/name/status saves must not call `brand-owner-credentials` unless login fields were intentionally edited (`BrandEditForm` `loginFieldsTouched` + `shouldSyncBrandOwnerCredentials`).
 
-Brand franchise centers: profile/photo saves must not call `center-owner-credentials` unless Franchise Identity login email/password were intentionally edited (`CenterDetailPanel` `loginFieldsTouched` + `shouldSyncCenterOwnerCredentials`). Brand `/app/centers` launches View Frontend/View Backend; disable/enable uses `set_franchise_center_status`; delete uses `soft_delete_franchise_center`. Soft-deleted centers remain on Franchise Applications under the **Deleted** tab (`regression_deleted_converted_inquiry_uses_deleted_tab`, `regression_deleted_franchise_tab_separates_soft_deleted_centers`) — do not drop inquiry history.
+Brand franchise centers: profile/photo saves must not call `center-owner-credentials` unless Franchise Identity login email/password were intentionally edited (`CenterDetailPanel` `loginFieldsTouched` + `shouldSyncCenterOwnerCredentials`). Brand `/app/centers` launches View Frontend/View Backend; disable/enable uses `set_franchise_center_status`; delete uses `soft_delete_franchise_center`. Soft-deleted centers remain on Franchise Applications under the **Deleted** tab (`regression_deleted_converted_inquiry_uses_deleted_tab`, `regression_deleted_franchise_tab_separates_soft_deleted_centers`) — do not drop inquiry history. **Deleted** is the last filter tab; **All applications** lists deleted inquiries after live rows (`regression_deleted_franchise_inquiries_sort_to_bottom_of_all`, `regression_deleted_franchise_appears_last_on_all_applications`).
 
 Franchise CSV import: platform `/admin/brands/:slug` and brand `/app/centers` share `FranchiseCenterImportDialog`; required CSV columns are `name` and `city`; slug is derived from name (`deriveFranchiseCenterSlug` + RPC) then `import_franchise_centers` (`is_platform_admin` or `has_brand_access`) — see `docs/ops/franchise-center-csv-import.md`.
 
@@ -48,6 +48,10 @@ Center public footer social: `regression_center_landing_footer_ignores_brand_soc
 Center public footer contact: `regression_center_footer_contact_uses_franchise_profile_not_brand_hq`, `regression_center_footer_replaces_brand_head_office_with_franchise_contact`, `regression_center_footer_uses_franchise_phone_not_placeholder`, `regression_novu_center_footer_shows_franchise_contact_not_presence` — Novu / Abacus / Spark overlay Franchise Management address and phone.
 
 Center public footer name: `regression_center_footer_replaces_sample_center_placeholder_with_franchise_name` and `regression_center_public_footer_uses_franchise_name_not_sample_center` — never show editor placeholder **Sample Center** on a live center host.
+
+Center public nav lockup: `regression_franchise_frontend_nav_highlights_logo_and_name` — franchise frontend enlarges brand logo and site name (`--franchise` nav modifier).
+
+Curriculum course banner: `regression_curriculum_banner_shows_upload_size_hint` and `regression_curriculum_banner_rejects_images_over_5mb` — dropzone shows formats, 5 MB max, 1280×720; oversized images rejected.
 
 Manual student lead: `regression_manual_brand_student_matches_public_enroll_fields` and `regression_manual_center_student_matches_public_register_fields` — Add Lead is a modal (`ed-import-dialog`), same pattern as Add Franchise.
 

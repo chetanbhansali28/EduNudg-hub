@@ -35,9 +35,9 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 |---------|------|-------|--------|
 | Main menu | Home | `/app` | Exists — stale/unassigned lead KPIs |
 | Features | **Student Leads** | `/app/leads` | Exists — manual add, assign, stale, lost |
-| | **Franchise Applications** | `/app/franchise-applications` | Exists — approve/reject; Add Franchise modal; Deleted tab for soft-deleted centers |
+| | **Franchise Applications** | `/app/franchise-applications` | Exists — approve/reject; Add Franchise modal; Deleted tab last; deleted rows last on All |
 | | Franchise Centers | `/app/centers` | Exists — import CSV, view frontend/backend, disable/enable, soft-delete |
-| | Curriculum | `/app/curriculum` | Exists — 2-column master-detail: courses, levels, units, publish |
+| | Curriculum | `/app/curriculum` | Exists — 2-column master-detail: courses, levels, units, publish; banner upload shows max size |
 | | Royalties | `/app/royalties` | Exists |
 | | Analytics | `/app/analytics` | Exists |
 | | Campaigns | `/app/campaigns` | Exists — CRUD |

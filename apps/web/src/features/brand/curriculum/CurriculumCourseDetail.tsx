@@ -15,6 +15,7 @@ import {
 } from "@edunudg/ui";
 import type { CurriculumProgram, ProgramMarketingInput } from "@/lib/curriculumApi";
 import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
+import { curriculumBannerUploadHint } from "@/lib/marketingMediaStorage";
 import { CurriculumLevelPanel } from "@/features/brand/curriculum/CurriculumLevelPanel";
 import type { LevelForm } from "@/features/brand/curriculum/curriculumForms";
 import type { CurriculumLevel, CourseImpactStats } from "@/lib/curriculumApi";
@@ -199,6 +200,7 @@ export function CurriculumCourseDetail({
             <p className="ed-field__label">Course Banner (Thumbnail)</p>
             <CurriculumBannerDropzone
               imageUrl={editCourse.marketingImageUrl}
+              hint={curriculumBannerUploadHint()}
               onUploadClick={() => {
                 const input = bannerInputRef.current?.querySelector<HTMLInputElement>('input[type="file"]');
                 input?.click();

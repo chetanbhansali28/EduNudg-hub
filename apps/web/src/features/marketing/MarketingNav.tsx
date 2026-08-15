@@ -99,7 +99,7 @@ export function MarketingNav({ config, brandSlug }: Props) {
 
   return (
     <nav
-      className={`novu-nav-bar novu-nav-bar--${theme} ${heroIntroComplete ? "novu-nav-bar--visible" : ""} ${menuOpen ? "novu-nav-bar--menu-open" : ""}`}
+      className={`novu-nav-bar novu-nav-bar--${theme} ${heroIntroComplete ? "novu-nav-bar--visible" : ""} ${menuOpen ? "novu-nav-bar--menu-open" : ""}${brandSlug ? " novu-nav-bar--franchise" : ""}`}
       aria-label="Site"
     >
       <div className="novu-nav-bar__inner">
@@ -117,7 +117,13 @@ export function MarketingNav({ config, brandSlug }: Props) {
 
           <Link to="/" className="novu-nav-bar__logo" aria-label={`${config.meta.siteName} home`}>
             {logoUrl ? (
-              <img src={logoUrl} alt="" className="novu-nav-bar__logo-img" width={40} height={40} />
+              <img
+                src={logoUrl}
+                alt=""
+                className="novu-nav-bar__logo-img"
+                width={brandSlug ? 64 : 40}
+                height={brandSlug ? 64 : 40}
+              />
             ) : (
               <span className="novu-nav-bar__logo-mark" aria-hidden>
                 {config.meta.siteName.charAt(0)}

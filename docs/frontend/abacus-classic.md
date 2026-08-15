@@ -299,6 +299,7 @@ Prerequisites: migration `039` applied, Abacus Classic theme assigned, seed or e
 - [ ] **Our presence** regions and cities render when configured
 - [ ] **Head office** address, phone, and website display correctly on the **brand** site
 - [ ] Center View Frontend footer shows **This center** (franchise address/phone), not brand Head office
+- [ ] Center View Frontend nav shows a larger, highlighted brand logo and franchise name
 - [ ] Social links open in a new tab
 - [ ] Copyright and legal links appear in the footer bottom bar
 

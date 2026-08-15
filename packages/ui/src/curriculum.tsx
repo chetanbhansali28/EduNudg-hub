@@ -486,30 +486,36 @@ export function CurriculumBannerDropzone({
   imageUrl,
   onUploadClick,
   uploading,
+  hint,
 }: {
   imageUrl?: string | null;
   onUploadClick: () => void;
   uploading?: boolean;
+  hint?: string;
 }) {
   return (
-    <button type="button" className="ed-curriculum-banner-dropzone" onClick={onUploadClick} disabled={uploading}>
-      {imageUrl ? (
-        <img src={imageUrl} alt="" className="ed-curriculum-banner-dropzone__image" />
-      ) : (
-        <>
-          <span className="ed-curriculum-banner-dropzone__icon" aria-hidden>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <path d="M17 8l-5-5-5 5" />
-              <path d="M12 3v12" />
-            </svg>
-          </span>
-          <span className="ed-curriculum-banner-dropzone__label">
-            {uploading ? "Uploading…" : "Drop image here or click to upload"}
-          </span>
-        </>
-      )}
-    </button>
+    <div className="ed-curriculum-banner">
+      <button type="button" className="ed-curriculum-banner-dropzone" onClick={onUploadClick} disabled={uploading}>
+        {imageUrl ? (
+          <img src={imageUrl} alt="" className="ed-curriculum-banner-dropzone__image" />
+        ) : (
+          <>
+            <span className="ed-curriculum-banner-dropzone__icon" aria-hidden>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <path d="M17 8l-5-5-5 5" />
+                <path d="M12 3v12" />
+              </svg>
+            </span>
+            <span className="ed-curriculum-banner-dropzone__label">
+              {uploading ? "Uploading…" : "Drop image here or click to upload"}
+            </span>
+            {hint ? <span className="ed-curriculum-banner-dropzone__hint">{hint}</span> : null}
+          </>
+        )}
+      </button>
+      {imageUrl && hint ? <p className="ed-curriculum-banner-dropzone__hint">{hint}</p> : null}
+    </div>
   );
 }
 

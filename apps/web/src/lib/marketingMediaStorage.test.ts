@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { marketingMediaFolder, marketingMediaObjectPath } from "./marketingMediaStorage";
+import {
+  marketingMediaFolder,
+  marketingMediaObjectPath,
+  MARKETING_IMAGE_MAX_BYTES,
+  assertMarketingImageUploadSize,
+} from "./marketingMediaStorage";
 
 describe("marketingMediaObjectPath", () => {
   it("regression_platform_scope_uses_stable_slot_path", () => {
@@ -35,5 +40,16 @@ describe("marketingMediaFolder", () => {
     expect(
       marketingMediaFolder({ kind: "brand", brandId: "b1" }, "hero-background")
     ).toBe("b1/marketing/hero-background");
+  });
+});
+
+describe("assertMarketingImageUploadSize", () => {
+  it("regression_curriculum_banner_rejects_images_over_5mb", () => {
+    const oversized = new File([new Uint8Array(MARKETING_IMAGE_MAX_BYTES + 1)], "banner.png", {
+      type: "image/png",
+    });
+    expect(() => assertMarketingImageUploadSize(oversized)).toThrow(/5 MB or smaller/);
+    const ok = new File(["x"], "banner.png", { type: "image/png" });
+    expect(() => assertMarketingImageUploadSize(ok)).not.toThrow();
   });
 });

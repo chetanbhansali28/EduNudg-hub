@@ -106,6 +106,34 @@ describe("Abacus Classic Sprint 2 — nav and hero CTAs", () => {
     expect(screen.getAllByRole("button", { name: "Book a free trial" }).length).toBeGreaterThan(0);
     expect(screen.queryByRole("button", { name: "Apply franchise" })).toBeNull();
   });
+
+  it("regression_franchise_frontend_nav_highlights_logo_and_name", () => {
+    const centerConfig = {
+      ...config,
+      meta: { ...config.meta, siteName: "Nilesh Gattani Center", logoUrl: "https://cdn.example/logo.png" },
+      nav: {
+        ...config.nav,
+        ctaLabel: "Book a free trial",
+        ctaHref: "#enroll",
+        secondaryCtaLabel: undefined,
+        secondaryCtaHref: undefined,
+      },
+    };
+
+    const { container } = render(
+      wrapWithLeadModal(
+        <MemoryRouter>
+          <AbacusClassicNav config={centerConfig} brandSlug="smart-brain-abacus" />
+        </MemoryRouter>
+      )
+    );
+
+    expect(container.querySelector(".ac-nav--franchise")).not.toBeNull();
+    const logo = container.querySelector(".ac-nav__logo-img") as HTMLImageElement;
+    expect(logo?.getAttribute("width")).toBe("64");
+    expect(logo?.getAttribute("height")).toBe("64");
+    expect(screen.getByText("Nilesh Gattani Center")).toBeDefined();
+  });
 });
 
 describe("Abacus Classic Sprint 2 — lead modals", () => {

@@ -2295,6 +2295,7 @@
   background: var(--ed-surface-container-low);
   display: grid;
   place-items: center;
+  justify-items: center;
   gap: 0.5rem;
   padding: 1rem;
   cursor: pointer;
@@ -2316,6 +2317,20 @@
 .ed-curriculum-banner-dropzone__label {
   font-size: 0.8125rem;
   text-align: center;
+}
+
+.ed-curriculum-banner-dropzone__hint {
+  margin: 0.5rem 0 0;
+  max-width: 18rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ed-muted);
+  text-align: center;
+}
+
+.ed-curriculum-banner > .ed-curriculum-banner-dropzone__hint {
+  max-width: none;
+  text-align: left;
 }
 
 /* ─── Franchise centers primitives ─── */

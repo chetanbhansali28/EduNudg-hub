@@ -7,8 +7,8 @@ const EMPTY_DELETED_CENTER_IDS: ReadonlySet<string> = new Set();
 export const INQUIRY_FILTER_OPTIONS: { value: InquiryFilter; label: string; mobileLabel: string }[] = [
   { value: "pending", label: "Pending review", mobileLabel: "Pending" },
   { value: "decided", label: "Decided", mobileLabel: "Decided" },
-  { value: "deleted", label: "Deleted", mobileLabel: "Deleted" },
   { value: "all", label: "All applications", mobileLabel: "All" },
+  { value: "deleted", label: "Deleted", mobileLabel: "Deleted" },
 ];
 
 export function isPendingInquiry(row: FranchiseInquiry) {
@@ -118,6 +118,19 @@ export function inquiryMatchesSearch(row: FranchiseInquiry, search: string) {
   return haystack.includes(query);
 }
 
+export function sortDeletedInquiriesLast(
+  rows: FranchiseInquiry[],
+  deletedCenterIds: ReadonlySet<string> = EMPTY_DELETED_CENTER_IDS,
+) {
+  const live: FranchiseInquiry[] = [];
+  const deleted: FranchiseInquiry[] = [];
+  for (const row of rows) {
+    if (isDeletedConvertedInquiry(row, deletedCenterIds)) deleted.push(row);
+    else live.push(row);
+  }
+  return [...live, ...deleted];
+}
+
 export function filterInquiries(
   rows: FranchiseInquiry[],
   filter: InquiryFilter,
@@ -125,7 +138,7 @@ export function filterInquiries(
   deletedCenterIds: ReadonlySet<string> = EMPTY_DELETED_CENTER_IDS,
 ) {
   const query = search.trim();
-  return rows.filter((row) => {
+  const filtered = rows.filter((row) => {
     if (query) return inquiryMatchesSearch(row, query);
 
     const deleted = isDeletedConvertedInquiry(row, deletedCenterIds);
@@ -134,6 +147,9 @@ export function filterInquiries(
     if (filter === "deleted" && !deleted) return false;
     return true;
   });
+
+  if (filter === "deleted") return filtered;
+  return sortDeletedInquiriesLast(filtered, deletedCenterIds);
 }
 
 export function inquiryCounts(

@@ -159,6 +159,31 @@
   font-weight: 700;
 }
 
+.sa-nav--franchise .sa-nav__inner {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.sa-nav--franchise .sa-nav__logo-link {
+  gap: 0.85rem;
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+}
+
+.sa-nav--franchise .sa-nav__logo-img,
+.sa-nav--franchise .sa-nav__logo-fallback {
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 0.85rem;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--sa-blue);
+}
+
+.sa-nav--franchise .sa-nav__wordmark {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  max-width: min(52vw, 18rem);
+}
+
 .sa-nav__links {
   display: flex;
   justify-content: center;

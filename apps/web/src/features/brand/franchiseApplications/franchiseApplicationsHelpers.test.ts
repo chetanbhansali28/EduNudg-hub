@@ -102,6 +102,34 @@ describe("franchiseApplicationsHelpers", () => {
     expect(inquiryCounts(rows, deletedIds)).toEqual({ pending: 1, decided: 1, deleted: 1, all: 3 });
   });
 
+  it("regression_deleted_franchise_inquiries_sort_to_bottom_of_all", () => {
+    const pending: FranchiseInquiry = { ...base, id: "inq-pending" };
+    const approvedDeleted: FranchiseInquiry = {
+      ...base,
+      id: "inq-gone",
+      status: "converted",
+      converted_center_id: "center-gone",
+      proposed_franchise_name: "Deleted Branch",
+      created_at: "2026-08-15T12:00:00Z",
+    };
+    const approvedLive: FranchiseInquiry = {
+      ...base,
+      id: "inq-live",
+      status: "converted",
+      converted_center_id: "center-live",
+      proposed_franchise_name: "Live Branch",
+    };
+    const deletedIds = new Set(["center-gone"]);
+    const newestFirst = [approvedDeleted, pending, approvedLive];
+
+    expect(filterInquiries(newestFirst, "all", "", deletedIds).map((row) => row.id)).toEqual([
+      "inq-pending",
+      "inq-live",
+      "inq-gone",
+    ]);
+    expect(filterInquiries(newestFirst, "deleted", "", deletedIds).map((row) => row.id)).toEqual(["inq-gone"]);
+  });
+
   it("maps inquiry status presentation", () => {
     expect(inquiryStatusPresentation(base)).toEqual({ label: "NEW", tone: "new" });
     expect(inquiryStatusPresentation({ ...base, status: "contacted" }).tone).toBe("pending");

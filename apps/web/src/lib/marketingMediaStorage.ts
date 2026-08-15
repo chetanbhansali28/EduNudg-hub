@@ -7,6 +7,22 @@ export type MarketingUploadScope =
   | { kind: "platform-logo" }
   | { kind: "brand"; brandId: string };
 
+/** Client-side cap for marketing images (curriculum banner, homepage slots). */
+export const MARKETING_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const MARKETING_IMAGE_MAX_MB = MARKETING_IMAGE_MAX_BYTES / (1024 * 1024);
+export const CURRICULUM_BANNER_RECOMMENDED_SIZE = "1280×720 (16:9)";
+
+export function curriculumBannerUploadHint(): string {
+  return `PNG, JPEG, WebP, or GIF. Maximum ${MARKETING_IMAGE_MAX_MB} MB. Recommended ${CURRICULUM_BANNER_RECOMMENDED_SIZE} for program cards.`;
+}
+
+export function assertMarketingImageUploadSize(file: File): void {
+  if (!file.type.startsWith("image/")) return;
+  if (file.size > MARKETING_IMAGE_MAX_BYTES) {
+    throw new Error(`Image must be ${MARKETING_IMAGE_MAX_MB} MB or smaller.`);
+  }
+}
+
 const PLATFORM_LOGO_PREFIX = "platform-logo.";
 const STABLE_BASENAME = "asset";
 
@@ -99,6 +115,7 @@ export async function uploadMarketingMedia(
   subdir: string,
   file: File
 ): Promise<string> {
+  assertMarketingImageUploadSize(file);
   await removeExistingMarketingMediaInSlot(scope, subdir);
 
   const path = marketingMediaObjectPath(scope, subdir, file);

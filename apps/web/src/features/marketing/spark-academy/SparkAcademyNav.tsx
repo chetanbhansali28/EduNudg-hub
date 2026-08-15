@@ -78,7 +78,7 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
       : null;
 
   return (
-    <header className={`sa-nav${menuOpen ? " sa-nav--menu-open" : ""}`}>
+    <header className={`sa-nav${menuOpen ? " sa-nav--menu-open" : ""}${logins ? " sa-nav--franchise" : ""}`}>
       <div className="sa-nav__inner">
         <div className="sa-nav__brand">
           <button
@@ -94,7 +94,7 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
 
           <Link to="/" className="sa-nav__logo-link">
             {logoUrl ? (
-              <img src={logoUrl} alt="" className="sa-nav__logo-img" width={40} height={40} />
+              <img src={logoUrl} alt="" className="sa-nav__logo-img" width={logins ? 64 : 40} height={logins ? 64 : 40} />
             ) : (
               <span className="sa-nav__logo-fallback">{config.meta.siteName.charAt(0)}</span>
             )}

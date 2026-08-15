@@ -54,6 +54,16 @@ Brand staff SHALL add, edit, reorder, or delete units under a level's default Un
 - **WHEN** the brand user adds, edits, reorders, or deletes units
 - **THEN** changes persist under the level's default Units module
 
+### Requirement: Course banner upload guidance
+
+Brand staff SHALL see allowed formats, maximum file size, and recommended dimensions when setting a course thumbnail (`marketing_image_url`).
+
+#### Scenario: Thumbnail dropzone shows size limits
+
+- **WHEN** brand staff open a course on `/app/curriculum`
+- **THEN** Course Banner (Thumbnail) shows PNG/JPEG/WebP/GIF, maximum 5 MB, and recommended 1280×720 (16:9)
+- **AND** uploads larger than 5 MB are rejected before storage
+
 ### Requirement: Delete guards
 
 The system SHALL block level deletes that would break student progress or active batch ranges.
