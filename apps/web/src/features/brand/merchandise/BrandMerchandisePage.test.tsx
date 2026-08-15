@@ -23,10 +23,6 @@ vi.mock("./BrandMerchandisePaymentSettings", () => ({
   BrandMerchandisePaymentSettings: () => null,
 }));
 
-vi.mock("@/features/brand/kits/BrandCompetitionsSection", () => ({
-  BrandCompetitionsSection: () => null,
-}));
-
 describe("BrandMerchandisePage", () => {
   it("regression_renders_merchandise_catalog_header_and_tabs", () => {
     render(
@@ -42,5 +38,14 @@ describe("BrandMerchandisePage", () => {
     expect(screen.getByRole("button", { name: "+ Add Merchandise" })).toBeDefined();
     expect(screen.getByRole("tab", { name: "Promo Codes" })).toBeDefined();
     expect(screen.getByTestId("catalog-section")).toBeDefined();
+  });
+
+  it("regression_merchandisePageOmitsCompetitionsTab", () => {
+    render(
+      <MemoryRouter>
+        <BrandMerchandisePage />
+      </MemoryRouter>
+    );
+    expect(screen.queryByRole("tab", { name: "Competitions" })).toBeNull();
   });
 });

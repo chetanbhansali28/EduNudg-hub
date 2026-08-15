@@ -1,0 +1,45 @@
+.ed-comp-questions {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ed-comp-questions__attached,
+.ed-comp-questions__bank,
+.ed-comp-options__preview {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ed-comp-questions__attached li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.ed-comp-questions__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.ed-comp-options {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ed-comp-options__row {
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .ed-comp-options__row {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+  }
+}

@@ -22,4 +22,10 @@ describe("resolveFeatureFlags (FF-01..03)", () => {
     expect(resolveFeatureFlags(undefined, "batches")).toBe(false);
     expect(resolveFeatureFlags({ batches: true }, "batches")).toBe(true);
   });
+
+  it("regression_competitions_defaults_off_until_enabled", () => {
+    expect(resolveFeatureFlags({}, "competitions")).toBe(false);
+    expect(resolveFeatureFlags(undefined, "competitions")).toBe(false);
+    expect(resolveFeatureFlags({ competitions: true }, "competitions")).toBe(true);
+  });
 });

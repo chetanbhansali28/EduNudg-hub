@@ -13,6 +13,11 @@ export type RegisteredCompetition = {
   status: string;
   fee_type: string;
   fee_amount: number | null;
+  question_count?: number;
+  quiz_status?: string;
+  can_take?: boolean;
+  score?: number | null;
+  max_score?: number | null;
 };
 
 export type PastCompetitionResult = {

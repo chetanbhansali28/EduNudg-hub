@@ -2451,6 +2451,30 @@
   transform: scale(0.97);
 }
 
+.ed-sp-quiz {
+  display: grid;
+  gap: 1rem;
+}
+
+.ed-sp-quiz__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.ed-sp-quiz__q ul {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ed-sp-quiz__score {
+  font-weight: 600;
+}
+
 @media (min-width: 1024px) {
   .ed-sp-bottom-nav,
   .ed-sp-fab {

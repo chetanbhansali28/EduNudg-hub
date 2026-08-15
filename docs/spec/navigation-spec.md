@@ -37,7 +37,8 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | Features | **Student Leads** | `/app/leads` | Exists — manual add, assign, stale, lost |
 | | **Franchise Applications** | `/app/franchise-applications` | Exists — approve/reject; Add Franchise modal; Deleted tab last; deleted rows last on All |
 | | Franchise Centers | `/app/centers` | Exists — import CSV, view frontend/backend, disable/enable, soft-delete |
-| | Curriculum | `/app/curriculum` | Exists — 2-column master-detail: courses, levels, units, publish; banner upload shows max size |
+| | Curriculum | `/app/curriculum` | Exists — 2-column master-detail: courses, levels, units; add via **+ Add Curriculum** in the page header (no **+** on Courses); on/off toggle and Save right-aligned in course detail next to Active (`programs.is_active`); title uses 50% width and wraps; existing courses keep benefits / why parents choose this / skills & outcomes editable; banner upload shows max size |
+| | **Competitions** | `/app/competitions` | Exists — Events + question bank; gated by `competitions` (default off) |
 | | Royalties | `/app/royalties` | Exists |
 | | Analytics | `/app/analytics` | Exists |
 | | Campaigns | `/app/campaigns` | Exists — CRUD |
@@ -78,7 +79,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 |---------|------|-------|--------|
 | Main | Dashboard | `/` | Exists |
 | Main | Progress | `/progress` | Exists |
-| Main | Competitions | `/competitions` | Exists |
+| Main | Competitions | `/competitions` | Exists — labeled Events; gated by brand `competitions` flag |
 | Main | Activity | `/activity` | Exists |
 | General | Profile | `/profile` | Exists |
 | — | Kits / merchandise | — | **Not in nav** (FR-S03) |

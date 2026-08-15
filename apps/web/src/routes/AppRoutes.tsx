@@ -31,6 +31,7 @@ import { BrandBillingPage } from "@/features/brand/billing/BrandBillingPage";
 import { BrandCampaignsPage } from "@/features/brand/campaigns/BrandCampaignsPage";
 import { BrandSuccessStoriesPage } from "@/features/brand/successStories/BrandSuccessStoriesPage";
 import { BrandMerchandisePage } from "@/features/brand/merchandise/BrandMerchandisePage";
+import { BrandCompetitionsPage } from "@/features/brand/competitions/BrandCompetitionsPage";
 import { BrandMarketingEditorPage } from "@/features/brand/marketing/BrandMarketingEditorPage";
 import { CenterLandingPage } from "@/features/center/CenterLandingPage";
 import { CenterPublicLayout } from "@/features/center/CenterPublicLayout";
@@ -93,7 +94,14 @@ export function AppRoutes() {
         >
           <Route index element={<StudentHomePage />} />
           <Route path="progress" element={<StudentProgressPage />} />
-          <Route path="competitions" element={<StudentCompetitionsPage />} />
+          <Route
+            path="competitions"
+            element={
+              <FeatureFlagRoute flag="competitions" fallback="/">
+                <StudentCompetitionsPage />
+              </FeatureFlagRoute>
+            }
+          />
           <Route path="activity" element={<StudentActivityPage />} />
           <Route path="profile" element={<StudentProfilePage />} />
         </Route>
@@ -215,6 +223,14 @@ export function AppRoutes() {
               }
             />
             <Route path="kits" element={<Navigate to="/app/merchandise" replace />} />
+            <Route
+              path="competitions"
+              element={
+                <FeatureFlagRoute flag="competitions">
+                  <BrandCompetitionsPage />
+                </FeatureFlagRoute>
+              }
+            />
             <Route path="homepage" element={<BrandMarketingEditorPage />} />
             <Route path="settings" element={<BrandSettingsPage />} />
           </Route>

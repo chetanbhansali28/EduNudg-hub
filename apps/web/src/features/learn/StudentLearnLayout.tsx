@@ -7,6 +7,7 @@ import { StudentMobileChrome } from "@/features/learn/components/StudentMobileCh
 import { useStudentBreakpoint } from "@/features/learn/hooks/useStudentBreakpoint";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { studentNavSections, signOutNavItem } from "@/lib/portalNav";
+import { useBrandFeatureFlags } from "@/hooks/useFeatureFlag";
 import { resolveShellProductName } from "@/lib/portalBranding";
 import { displayUserFromAuth } from "@/lib/portalUser";
 import { fetchStudentLearnHome, StudentLearnRpcError } from "@/lib/studentLearnApi";
@@ -17,6 +18,7 @@ export function StudentLearnLayout() {
   const { signOut, user } = useAuth();
   const tenant = useTenant();
   const { isMobile } = useStudentBreakpoint();
+  const featureFlags = useBrandFeatureFlags();
   const { data: branding } = usePortalBranding();
   const shell = resolveShellProductName(
     tenant.portalType,
@@ -60,7 +62,7 @@ export function StudentLearnLayout() {
         subtitle: studentCode ? `Student ID: #${studentCode.replace(/^#/, "")}` : authProfile.email,
         avatarUrl,
       }}
-      navSections={studentNavSections(pathname)}
+      navSections={studentNavSections(pathname, featureFlags)}
       footerItems={[signOutNavItem(() => void signOut())]}
       showUpgradeCard={false}
       showWelcome={false}

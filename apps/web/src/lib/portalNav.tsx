@@ -21,6 +21,11 @@ export const BRAND_FEATURE_FLAGS: Record<string, string> = {
   "/app/campaigns": "campaigns",
   "/app/merchandise": "merchandise",
   "/app/kits": "merchandise",
+  "/app/competitions": "competitions",
+};
+
+export const STUDENT_FEATURE_FLAGS: Record<string, string> = {
+  "/competitions": "competitions",
 };
 
 export const CENTER_FEATURE_FLAGS: Record<string, string> = {
@@ -107,6 +112,7 @@ export function brandNavSections(pathname: string): ShellNavSection[] {
       "Features",
       [
         { path: "/app/curriculum", label: "Curriculum", icon: <IconBook /> },
+        { path: "/app/competitions", label: "Competitions", icon: <IconGraduation /> },
         { path: "/app/centers", label: "Franchise Management", icon: <IconBuilding /> },
         { path: "/app/analytics", label: "Analytics", icon: <IconChart /> },
         { path: "/app/campaigns", label: "Campaigns", icon: <IconChart /> },
@@ -192,11 +198,18 @@ export function staffBottomNavFromSections(sections: ShellNavSection[]): ShellNa
   return sections.flatMap((section) => section.items.filter((item) => item.href !== "#"));
 }
 
-export function studentNavSections(pathname: string): ShellNavSection[] {
-  return [
-    section("Main menu", STUDENT_MAIN_NAV, pathname),
-    section("General", [STUDENT_PROFILE_NAV], pathname),
-  ];
+export function studentNavSections(
+  pathname: string,
+  flags?: Record<string, boolean>
+): ShellNavSection[] {
+  const main = flags
+    ? STUDENT_MAIN_NAV.filter((item) => {
+        const flag = STUDENT_FEATURE_FLAGS[item.path];
+        if (!flag) return true;
+        return Boolean(flags[flag]);
+      })
+    : STUDENT_MAIN_NAV;
+  return [section("Main menu", main, pathname), section("General", [STUDENT_PROFILE_NAV], pathname)];
 }
 
 export function supportNavItem(): ShellNavItem {

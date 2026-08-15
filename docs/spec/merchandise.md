@@ -1,6 +1,6 @@
 # Merchandise ordering
 
-Brand-managed catalog; franchise centers place orders from an ecommerce-style shop. Gated by the `merchandise` feature flag.
+Brand-managed catalog; franchise centers place orders from an ecommerce-style shop. Gated by the `merchandise` feature flag. Competitions are a separate module (`/app/competitions`, flag `competitions`).
 
 ## Portals & routes
 

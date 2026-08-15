@@ -11,8 +11,10 @@ centers,delete,y,y,y,y,n,n,n,n
 centers,suspend,y,y,y,y,n,n,n,n
 programs,create,n,n,y,y,n,n,n,n
 programs,read,y,y,y,y,y,y,y,y
+programs,update,n,n,y,y,n,n,n,n
 curriculum,create,n,n,y,y,n,n,n,n
 curriculum,approve,n,n,y,y,n,n,n,n
+curriculum,update,n,n,y,y,n,n,n,n
 leads,create,n,n,n,n,y,y,y,n
 leads,read,y,y,y,y,y,y,y,y
 enrollments,create,n,n,n,n,y,y,y,n
@@ -27,3 +29,7 @@ royalties,approve,n,n,y,y,n,n,n,n
 analytics,read,y,y,y,y,y,y,y,y
 audit_logs,read,y,y,n,n,n,n,n,n
 domain_mappings,update,y,y,y,n,n,n,n,n
+competitions,create,y,y,y,y,n,n,n,n
+competitions,read,y,y,y,y,y,y,y,n
+competitions,update,y,y,y,y,n,n,n,n
+competitions,delete,y,y,y,y,n,n,n,n

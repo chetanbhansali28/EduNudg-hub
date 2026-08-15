@@ -103,6 +103,9 @@ export type StudentCompetitionCard = {
   my_registration_status: string;
   can_enroll: boolean;
   enroll_blocked_reason: string | null;
+  question_count?: number;
+  quiz_status?: string;
+  can_take?: boolean;
 };
 
 export type StudentProfilePayload = {

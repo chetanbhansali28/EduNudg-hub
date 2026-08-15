@@ -62,7 +62,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-B20 | B | **Franchise Applications** nav `/app/franchise-applications` | Moved out of Settings |
 | FR-B21 | B | Approve creates center + domain + operator invite | Same transaction: `franchise_centers`, `{center}.{brand}` mapping |
 | FR-B22 | B | 360° read-only student/center views | All centers under brand (Phase B/C) |
-| FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Master-detail: courses → levels → units; draft/publish; clone live to draft before structural edits |
+| FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Master-detail: courses → levels → units; on/off toggle per course (`programs.is_active`); parent marketing (benefits, why parents choose this, skills & outcomes) stays editable after create via Save |
 
 ---
 
@@ -141,12 +141,13 @@ UI: Convert dialog shows read-only prefill; staff may add `student_code`, batch,
 | FR-S11 | S | Enrollment-scoped academic records | progress, assessments, competitions |
 | FR-S12 | S | Student portal auth | `students.user_id` + invite flow |
 | FR-S13 | S | Comprehensive dashboard | `get_student_learn_home` single RPC |
-| FR-S14 | S | Nav: Dashboard, Progress, Competitions, Activity, Profile | learn.* routes |
+| FR-S14 | S | Nav: Dashboard, Progress, Events (if `competitions` on), Activity, Profile | learn.* routes |
 | FR-S15 | S | Curriculum progress ladder | Pinned `curriculum_version_id` |
 | FR-S16 | S | Exam visibility | `student_assessments.visible_to_student` |
 | FR-S17 | S | Free competition self-enroll | `register_student_for_competition` |
 | FR-S18 | S | Paid competition deferred | Coming soon UI; RPC rejects |
 | FR-S19 | S | Competition results on portal | `student_competition_entries` |
+| FR-S22 | S | Competition quiz | Question bank + one-attempt scored quiz when `competitions` is on |
 | FR-S20 | S | Activity timeline | Derived feed on dashboard + `/activity` |
 | FR-S21 | S | Profile + center transparency | Enrollment and center card |
 

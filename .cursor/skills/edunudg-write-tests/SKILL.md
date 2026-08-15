@@ -53,6 +53,10 @@ Center public nav lockup: `regression_franchise_frontend_nav_highlights_logo_and
 
 Curriculum course banner: `regression_curriculum_banner_shows_upload_size_hint` and `regression_curriculum_banner_rejects_images_over_5mb` — dropzone shows formats, 5 MB max, 1280×720; oversized images rejected.
 
+Curriculum parent marketing: `regression_created_course_shows_parent_marketing_fields` and `regression_created_course_parent_marketing_is_editable` — after create, `/app/curriculum` course detail still shows Add benefit, Why parents choose this, Skills and outcomes, and **Save**.
+
+Curriculum live toggle: `regression_curriculum_course_live_toggle_is_visible` and `regression_curriculum_course_live_toggle_turns_course_off` — brand `/app/curriculum` course **detail** (column 2) has an on/off switch next to the Active badge and **Save** (`programs.is_active`), right-aligned in the header (`regression_curriculum_detail_save_group_aligns_right`); the Courses list has no toggle. Off courses stay in the list and drop from public programs / batch pickers. Course title uses 50% of the header and wraps to a second line (`regression_curriculum_detail_title_uses_half_width`). Desktop add is **+ Add Curriculum** in the page header only — the Courses list has no **+** (`regression_courses_list_has_no_add_plus_button`).
+
 Franchise public programs: `regression_center_public_programs_filter_to_enabled_curriculum` — center WHAT WE TEACH / courses show only `center_program_enablement` programs, not the full Center sites template.
 
 Manual student lead: `regression_manual_brand_student_matches_public_enroll_fields` and `regression_manual_center_student_matches_public_register_fields` — Add Lead is a modal (`ed-import-dialog`), same pattern as Add Franchise.

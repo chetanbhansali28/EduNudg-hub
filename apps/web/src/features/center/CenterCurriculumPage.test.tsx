@@ -42,7 +42,7 @@ describe("CenterCurriculumPage", () => {
       </QueryClientProvider>
     );
     expect(screen.getByText("Curriculum Builder")).toBeDefined();
-    expect(screen.getByRole("heading", { name: /Active Courses/i })).toBeDefined();
+    expect(screen.getByRole("heading", { name: /Courses/i })).toBeDefined();
     expect(document.querySelector(".ed-curriculum-brand__layout")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Add course" })).toBeNull();
   });

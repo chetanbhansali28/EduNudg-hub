@@ -2225,19 +2225,49 @@
   display: flex;
   gap: 0.875rem;
   min-width: 0;
+  flex: 1;
+}
+
+.ed-curriculum-editor-hero__copy {
+  min-width: 0;
+  flex: 1;
 }
 
 .ed-curriculum-editor-hero__title-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .ed-curriculum-editor-hero__title {
+  flex: 0 1 50%;
+  max-width: 50%;
+  min-width: 0;
   margin: 0;
   font-size: 1.125rem;
   font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.ed-curriculum-editor-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 0.75rem;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.ed-curriculum-editor-hero__meta .ed-toggle,
+.ed-curriculum-editor-hero__meta .ed-btn {
+  flex-shrink: 0;
 }
 
 .ed-curriculum-editor-hero__description {

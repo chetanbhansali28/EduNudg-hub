@@ -8,6 +8,7 @@ import {
   studentNavSections,
   BRAND_FEATURE_FLAGS,
   CENTER_FEATURE_FLAGS,
+  STUDENT_FEATURE_FLAGS,
   staffBottomNavFromSections,
 } from "./portalNav";
 import { FEATURE_FLAG_DEFAULTS } from "@/hooks/useFeatureFlag";
@@ -169,6 +170,33 @@ describe("portalNav", () => {
     expect(features?.items.some((i) => i.href === "/app/batches")).toBe(true);
   });
 
+  it("includes brand competitions nav item", () => {
+    const sections = brandNavSections("/app/competitions");
+    const item = sections.find((s) => s.title === "Features")?.items.find((i) => i.label === "Competitions");
+    expect(item?.href).toBe("/app/competitions");
+    expect(item?.active).toBe(true);
+  });
+
+  it("regression_filterNav_hides_competitions_when_flag_off", () => {
+    const sections = filterNavByFeatureFlags(
+      brandNavSections("/app"),
+      { ...FEATURE_FLAG_DEFAULTS, competitions: false },
+      BRAND_FEATURE_FLAGS
+    );
+    const features = sections.find((s) => s.title === "Features");
+    expect(features?.items.some((i) => i.href === "/app/competitions")).toBe(false);
+  });
+
+  it("regression_filterNav_shows_competitions_when_flag_on", () => {
+    const sections = filterNavByFeatureFlags(
+      brandNavSections("/app"),
+      { ...FEATURE_FLAG_DEFAULTS, competitions: true },
+      BRAND_FEATURE_FLAGS
+    );
+    const features = sections.find((s) => s.title === "Features");
+    expect(features?.items.some((i) => i.href === "/app/competitions")).toBe(true);
+  });
+
   it("S-02 / E2E-09 student learn nav has dashboard, progress, competitions, activity, and profile", () => {
     const sections = studentNavSections("/progress");
     const main = sections[0]?.items ?? [];
@@ -190,6 +218,16 @@ describe("portalNav", () => {
     expect(bottomItems.map((i) => i.label)).toEqual(sidebarLabels);
     expect(bottomItems.map((i) => i.href)).toEqual(["/", "/progress", "/competitions", "/activity", "/profile"]);
     expect(bottomItems.find((i) => i.id === "profile")?.active).toBe(true);
+  });
+
+  it("regression_competitionsFlagHidesStudentEvents", () => {
+    const sections = studentNavSections("/competitions", {
+      ...FEATURE_FLAG_DEFAULTS,
+      competitions: false,
+    });
+    const main = sections[0]?.items ?? [];
+    expect(main.some((i) => i.href === "/competitions")).toBe(false);
+    expect(STUDENT_FEATURE_FLAGS["/competitions"]).toBe("competitions");
   });
 
   it("center bottom nav mirrors sidebar sections", () => {

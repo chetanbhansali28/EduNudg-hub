@@ -14,6 +14,7 @@ import {
   fetchLevelUnitCounts,
   fetchPrograms,
   reorderLevels,
+  setProgramActive,
   updateLevel,
   updateProgram,
   type CurriculumLevel,
@@ -102,7 +103,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
   });
 
   const filteredCourses = useMemo(() => {
-    const tabbed = isMobile ? filterCoursesByTab(allCourses, mobileTab) : allCourses.filter((course) => course.is_active);
+    const tabbed = isMobile ? filterCoursesByTab(allCourses, mobileTab) : allCourses;
     return tabbed.filter((course) => {
       const levelNames = (levelsByProgram.data?.[course.id] ?? []).map((level) => level.name);
       return matchesCurriculumSearch(course, levelNames, search);
@@ -180,6 +181,15 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       invalidateAll();
       setSelectedCourseId("");
       setMobileDetailOpen(false);
+    },
+    onError: capture,
+  });
+
+  const toggleCourseActive = useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => setProgramActive(id, isActive),
+    onSuccess: () => {
+      clear();
+      invalidateAll();
     },
     onError: capture,
   });
@@ -283,6 +293,8 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       saveCoursePending={saveCourse.isPending}
       saveCourseSaved={courseSaved.saved}
       onArchiveCourse={() => archiveCourse.mutate()}
+      onToggleActive={(isActive) => toggleCourseActive.mutate({ id: selectedCourse.id, isActive })}
+      toggleActivePending={toggleCourseActive.isPending && toggleCourseActive.variables?.id === selectedCourse.id}
       selectedLevelId={selectedLevelId}
       onSelectLevel={setSelectedLevelId}
       addLevel={addLevel}
@@ -326,7 +338,6 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
         openMobileCourse(courseId);
         setRequestAddProgram(true);
       }}
-      onOpenAddCourse={openAddCourse}
       readOnly={readOnly}
       isMobile={isMobile}
     />

@@ -45,18 +45,6 @@
   font-weight: 700;
 }
 
-.ed-curriculum-brand__add-btn {
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid var(--ed-border);
-  border-radius: var(--ed-radius);
-  background: var(--ed-card);
-  color: var(--ed-primary);
-  font-size: 1.25rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
 .ed-curriculum-brand__detail {
   min-width: 0;
   animation: ed-curriculum-fade-up 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;

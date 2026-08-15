@@ -80,6 +80,11 @@ RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended` (Disab
 | `brand_competitions` | brand | Competition calendar; `fee_type`, registration window |
 | `student_competition_registrations` | center | Student self-enroll (free); paid Coming soon |
 | `student_competition_entries` | center | Post-event results |
+| `competition_question_bank` | brand | MCQ bank tagged to course + level |
+| `competition_question_options` | brand | Options for a bank question (`is_correct`) |
+| `brand_competition_questions` | brand | Snapshotted questions attached to an event |
+| `student_competition_attempts` | center | One quiz attempt per student per competition |
+| `student_competition_attempt_answers` | center | Selected options + correctness after submit |
 
 ### `merchandise_catalog` columns (notable)
 
@@ -102,6 +107,7 @@ Centers with `merchandise` enabled can **SELECT** active rows for their brand (p
 | Column | Table | Purpose |
 |--------|-------|---------|
 | `why_take`, `what_you_learn`, `marketing_video_url` | `programs`, `levels` | Abacus marketing copy |
+| `is_active` | `programs` | Course on/off; false hides from public curriculum and batch pickers, not from `/app/curriculum` |
 | `abacus_level_code`, `topics_covered` | `levels` | Level label + topic list (jsonb array) |
 
 ## Settings JSON keys (`brand_settings.settings`)

@@ -10,7 +10,7 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 | **Student Leads** | Assign, reallocate, view lost with reasons |
 | **Franchise Applications** | Approve/reject; Add Franchise modal; provisions center + domain |
 | Franchise Centers | Master-detail `/app/centers` — profile, open frontend/backend, disable/enable, delete, curriculum, **Import Franchise** CSV |
-| Curriculum | Master-detail `/app/curriculum` — courses/levels/units with draft publish safety |
+| Curriculum | Master-detail `/app/curriculum` — courses/levels/units; on/off toggle in course detail header; parent marketing stays editable after create |
 | Royalties | Brand ↔ franchise money (not EduNudg subscription) |
 | Analytics | Cross-center metrics |
 | Settings | Logo, theme, **`lead_stale_days`**, **timezone**, feature/integration toggles |

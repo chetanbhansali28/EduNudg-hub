@@ -14,7 +14,7 @@ See [Navigation spec](../spec/navigation-spec.md).
 - **Student Leads** (`/app/leads`) — assign, stale queue, manual add
 - **Franchise Applications** (`/app/franchise-applications`) — approve/reject; **Add Franchise** modal; **Deleted** tab last for applications whose center was later soft-deleted (those rows also sort last on **All applications**)
 - Franchise Centers (`/app/centers`) — edit existing (including Franchise Identity login email/password); **View Frontend** / **View Backend**; disable/enable; soft-delete; new centers via franchise application approval or **Import Franchise** CSV
-- Curriculum (`/app/curriculum`) — courses, levels, units, publish; course banner upload shows formats, 5 MB max, and 1280×720 recommendation
+- Curriculum (`/app/curriculum`) — courses, levels, units; add via **+ Add Curriculum** in the page header (no **+** on the Courses list); on/off toggle and **Save** right-aligned in course detail next to Active (`programs.is_active`); course title uses 50% of the header and wraps; existing courses keep **Add benefit**, **Why parents choose this**, and **Skills and outcomes** editable; course banner upload shows formats, 5 MB max, and 1280×720 recommendation
 - Royalties & Finance
 - Analytics
 - **Campaigns** (`/app/campaigns`) — CRUD

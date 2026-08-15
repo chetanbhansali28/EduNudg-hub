@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { can } from "./index";
+import { can, canAny } from "./index";
 
 describe("can", () => {
   it("allows platform admin brand create", () => {
@@ -23,5 +23,26 @@ describe("can", () => {
     expect(can("brand_owner", "centers", "delete")).toBe(true);
     expect(can("brand_admin", "centers", "suspend")).toBe(true);
     expect(can("center_owner", "centers", "delete")).toBe(false);
+  });
+
+  it("allows brand owner and admin to manage competitions", () => {
+    expect(can("brand_owner", "competitions", "create")).toBe(true);
+    expect(can("brand_admin", "competitions", "update")).toBe(true);
+    expect(can("center_owner", "competitions", "read")).toBe(true);
+    expect(can("center_owner", "competitions", "create")).toBe(false);
+  });
+
+  it("regression_platformAdminCanCreateCompetitions", () => {
+    expect(can("platform_super_admin", "competitions", "create")).toBe(true);
+    expect(can("platform_ops", "competitions", "update")).toBe(true);
+    expect(can("platform_super_admin", "competitions", "delete")).toBe(true);
+    expect(canAny(["platform_super_admin"], "competitions", "create")).toBe(true);
+    expect(canAny(["center_owner"], "competitions", "create")).toBe(false);
+  });
+
+  it("allows brand owner and admin to update programs", () => {
+    expect(can("brand_owner", "programs", "update")).toBe(true);
+    expect(can("brand_admin", "programs", "update")).toBe(true);
+    expect(can("center_owner", "programs", "update")).toBe(false);
   });
 });

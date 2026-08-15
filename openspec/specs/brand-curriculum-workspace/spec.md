@@ -22,6 +22,12 @@ Brand staff SHALL manage courses in a two-column layout at `/app/curriculum`.
 - **WHEN** the page loads
 - **THEN** column 1 lists courses and column 2 shows the selected course detail
 
+#### Scenario: Add course uses page header only
+
+- **GIVEN** a brand user on `/app/curriculum` on desktop
+- **THEN** **+ Add Curriculum** appears in the page header
+- **AND** the Courses list has no **+** add button
+
 ### Requirement: Publish workflow
 
 Brand staff SHALL publish draft course versions so they appear on the public website and center batch picker.
@@ -63,6 +69,56 @@ Brand staff SHALL see allowed formats, maximum file size, and recommended dimens
 - **WHEN** brand staff open a course on `/app/curriculum`
 - **THEN** Course Banner (Thumbnail) shows PNG/JPEG/WebP/GIF, maximum 5 MB, and recommended 1280×720 (16:9)
 - **AND** uploads larger than 5 MB are rejected before storage
+
+### Requirement: Parent marketing fields persist on existing courses
+
+Brand staff SHALL edit the same parent-facing marketing fields after a course is created as they see while adding it. Those fields SHALL persist on `programs` and remain available via **Save**.
+
+#### Scenario: Created course shows benefits, why parents choose this, and skills
+
+- **GIVEN** a brand user on `/app/curriculum` with an existing course
+- **WHEN** they select that course
+- **THEN** the course editor shows **Add benefit**, **Why parents choose this**, **Skills and outcomes**, and scholarship highlight
+- **AND** saved values from create (or later edits) populate those fields
+- **AND** **Save** remains available so the course can be edited after it exists on the backend
+
+#### Scenario: Add-course form includes the same parent marketing fields
+
+- **GIVEN** a brand user opens **Add course**
+- **WHEN** they fill benefits, why parents choose this, and skills and outcomes
+- **THEN** create persists those values on `programs`
+- **AND** selecting the new course shows the same fields for further edits
+
+### Requirement: Course live toggle
+
+Brand staff SHALL turn a course on or off from the course detail header (next to the Active badge and **Save**), without deleting it. The course list SHALL NOT include a live toggle. Off courses remain in `/app/curriculum` so they can be turned back on, and SHALL NOT appear on public programs or franchise batch pickers.
+
+#### Scenario: Toggle lives in course detail, not the list
+
+- **GIVEN** a brand user on `/app/curriculum` with an existing course selected
+- **THEN** column 1 (Courses) has no on/off switch
+- **AND** column 2 shows the live toggle next to the Active badge, with **Save** beside it, grouped at the right of the header
+
+#### Scenario: Course title uses half the header and wraps
+
+- **GIVEN** a brand user viewing a course in column 2
+- **THEN** the course title occupies at most 50% of the header row
+- **AND** a long title wraps onto a second line instead of stretching the full row
+
+#### Scenario: Toggle off hides a course from public surfaces
+
+- **GIVEN** a brand user on `/app/curriculum` with an existing course
+- **WHEN** they turn the course off
+- **THEN** `programs.is_active` becomes false
+- **AND** the course stays listed in the curriculum workspace
+- **AND** public curriculum JSON and center batch pickers omit it
+
+#### Scenario: Toggle on restores a course
+
+- **GIVEN** an inactive (off) course that is not deleted
+- **WHEN** the brand user turns the course on
+- **THEN** `programs.is_active` becomes true
+- **AND** it appears again on public programs and franchise batches
 
 ### Requirement: Delete guards
 

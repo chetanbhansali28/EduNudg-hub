@@ -33,8 +33,9 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [franchise-applications](../../openspec/specs/franchise-applications/spec.md) | Franchise apply + approve provision |
 | [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace |
 | [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform and brand CSV bulk center import |
-| [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` draft/publish |
+| [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` courses/levels/units; on/off toggle; parent marketing stays editable after create |
 | [brand-batches-feature-flag](../../openspec/specs/brand-batches-feature-flag/spec.md) | Per-brand Batches module gate |
+| [brand-competitions-module](../../openspec/specs/brand-competitions-module/spec.md) | Competitions nav, flag, question bank, student quiz |
 | [student-learn-portal](../../openspec/specs/student-learn-portal/spec.md) | Learn host enrollment-gated portal |
 | [agent-artifact-sync](../../openspec/specs/agent-artifact-sync/spec.md) | Mandatory sync of specs/docs/tests/skills/agents; agent boundaries |
 | [rpc-catalog.md](./rpc-catalog.md) | Supabase RPC signatures |
@@ -46,6 +47,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [services-layer.md](./services-layer.md) | Auth, DB, payments, integrations as services |
 | [feature-flags.md](./feature-flags.md) | Module/integration ON/OFF |
 | [merchandise.md](./merchandise.md) | Catalog, photos, center shop, orders, payments |
+| [competitions.md](./competitions.md) | Brand events, question bank, student quiz |
 | [manual-leads.md](./manual-leads.md) | Staff manual lead / signup entry by portal |
 
 ## Journeys

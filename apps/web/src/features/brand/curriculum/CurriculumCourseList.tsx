@@ -34,7 +34,6 @@ type Props = {
   onOpenCourse: (id: string) => void;
   onEditProgram: (courseId: string, programId: string) => void;
   onAddProgram: (courseId: string) => void;
-  onOpenAddCourse?: () => void;
   readOnly?: boolean;
   isMobile: boolean;
 };
@@ -54,7 +53,6 @@ export function CurriculumCourseList({
   onOpenCourse,
   onEditProgram,
   onAddProgram,
-  onOpenAddCourse,
   readOnly = false,
   isMobile,
 }: Props) {
@@ -113,28 +111,14 @@ export function CurriculumCourseList({
     );
   }
 
-  const activeCourses = allCourses.filter((course) => course.is_active && courses.some((item) => item.id === course.id));
+  const listedCourses = courses;
 
   return (
-    <CurriculumSidebarCard
-      title={`Active Courses (${activeCourses.length})`}
-      actions={
-        !readOnly ? (
-          <button
-            type="button"
-            className="ed-curriculum-brand__add-btn"
-            onClick={() => onOpenAddCourse?.()}
-            aria-label="Add course"
-          >
-            +
-          </button>
-        ) : null
-      }
-    >
-      {activeCourses.length === 0 ? (
-        <p className="ed-text-sm ed-muted">No active courses yet — create your first course.</p>
+    <CurriculumSidebarCard title={`Courses (${listedCourses.length})`}>
+      {listedCourses.length === 0 ? (
+        <p className="ed-text-sm ed-muted">No courses yet — create your first course.</p>
       ) : (
-        activeCourses.map((course, index) => (
+        listedCourses.map((course, index) => (
           <CourseListItem
             key={course.id}
             initials={courseInitials(course.name)}

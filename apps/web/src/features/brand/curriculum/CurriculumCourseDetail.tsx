@@ -12,12 +12,13 @@ import {
   Input,
   SaveButton,
   Textarea,
+  Toggle,
 } from "@edunudg/ui";
 import type { CurriculumProgram, ProgramMarketingInput } from "@/lib/curriculumApi";
 import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
 import { curriculumBannerUploadHint } from "@/lib/marketingMediaStorage";
 import { CurriculumLevelPanel } from "@/features/brand/curriculum/CurriculumLevelPanel";
-import type { LevelForm } from "@/features/brand/curriculum/curriculumForms";
+import { CourseParentMarketingFields, type LevelForm } from "@/features/brand/curriculum/curriculumForms";
 import type { CurriculumLevel, CourseImpactStats } from "@/lib/curriculumApi";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import {
@@ -42,6 +43,8 @@ type Props = {
   saveCoursePending: boolean;
   saveCourseSaved?: boolean;
   onArchiveCourse: () => void;
+  onToggleActive?: (isActive: boolean) => void;
+  toggleActivePending?: boolean;
   selectedLevelId: string | null;
   onSelectLevel: (id: string | null) => void;
   addLevel: LevelForm;
@@ -76,6 +79,8 @@ export function CurriculumCourseDetail({
   onSaveCourse,
   saveCoursePending,
   saveCourseSaved = false,
+  onToggleActive,
+  toggleActivePending = false,
   selectedLevelId,
   onSelectLevel,
   addLevel,
@@ -114,6 +119,16 @@ export function CurriculumCourseDetail({
       status={status}
       description={editorCourseDescription(course.name)}
       embedded
+      liveToggle={
+        !readOnly && onToggleActive ? (
+          <Toggle
+            checked={course.is_active}
+            disabled={toggleActivePending}
+            aria-label={course.is_active ? `Turn ${course.name} off` : `Turn ${course.name} on`}
+            onChange={onToggleActive}
+          />
+        ) : null
+      }
       saveAction={
         !readOnly ? (
           <SaveButton
@@ -121,7 +136,7 @@ export function CurriculumCourseDetail({
             pending={saveCoursePending}
             saved={saveCourseSaved}
             disabled={!editCourse.name.trim()}
-            label="Save Changes"
+            label="Save"
           />
         ) : null
       }
@@ -218,6 +233,21 @@ export function CurriculumCourseDetail({
               />
             </div>
           </div>
+        </div>
+      </CurriculumSectionCard>
+
+      <CurriculumSectionCard
+        icon={
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <path d="M12 3 4 7v10l8 4 8-4V7l-8-4z" />
+            <path d="M12 7v14" />
+            <path d="m8 9 8 4" />
+          </svg>
+        }
+        title="Benefits & outcomes"
+      >
+        <div className="ed-editable-form">
+          <CourseParentMarketingFields value={editCourse} onChange={onEditCourseChange} readOnly={readOnly} />
         </div>
       </CurriculumSectionCard>
 

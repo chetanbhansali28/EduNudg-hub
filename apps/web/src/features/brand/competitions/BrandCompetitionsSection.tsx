@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
+  Button,
   FormGrid,
   Input,
   MutationError,
   Select,
   ToggleField,
 } from "@edunudg/ui";
+import { BrandCompetitionQuestionsPanel } from "@/features/brand/competitions/BrandCompetitionQuestionsPanel";
 import { CrudRowActions } from "@/features/platform/components/CrudRowActions";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { AddFormSection } from "@/features/shared/AddFormSection";
@@ -20,7 +22,7 @@ import {
 } from "@/lib/brandCompetitionsApi";
 import "@/features/brand/merchandise/brandMerchandiseCatalog.css";
 
-type Props = { brandId: string };
+type Props = { brandId: string; canEdit: boolean };
 
 type CompetitionForm = {
   name: string;
@@ -59,12 +61,13 @@ function rowToForm(row: BrandCompetition): CompetitionForm {
   };
 }
 
-export function BrandCompetitionsSection({ brandId }: Props) {
+export function BrandCompetitionsSection({ brandId, canEdit }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const [questionsFor, setQuestionsFor] = useState<string | null>(null);
   const { bindClose, closeAddForm } = useAddFormCloser();
 
   const competitions = useQuery({
@@ -173,31 +176,33 @@ export function BrandCompetitionsSection({ brandId }: Props) {
       <section className="ed-brand-merch-section__panel">
         <header className="ed-brand-merch-section__head">
           <div>
-            <h2 className="ed-brand-merch-section__title">Competitions</h2>
+            <h2 className="ed-brand-merch-section__title">Events</h2>
             <p className="ed-brand-merch-section__subtitle">
               Competitions appear on the student learn portal. Free events allow self-enrollment; paid events
-              show Coming soon.
+              show Coming soon. Attach quiz questions after you create an event.
             </p>
           </div>
         </header>
 
         <div className="ed-brand-merch-section__body">
-          <AddFormSection
-            buttonLabel="Add competition"
-            panelTitle="Add competition"
-            actionsPlacement="footer"
-            primaryAction={{
-              label: "Add competition",
-              onClick: () => create.mutate(),
-              pending: create.isPending,
-              disabled: !form.name.trim(),
-            }}
-          >
-            {({ close }) => {
-              bindClose(close);
-              return renderFields(form, setForm);
-            }}
-          </AddFormSection>
+          {canEdit ? (
+            <AddFormSection
+              buttonLabel="Add competition"
+              panelTitle="Add competition"
+              actionsPlacement="footer"
+              primaryAction={{
+                label: "Add competition",
+                onClick: () => create.mutate(),
+                pending: create.isPending,
+                disabled: !form.name.trim(),
+              }}
+            >
+              {({ close }) => {
+                bindClose(close);
+                return renderFields(form, setForm);
+              }}
+            </AddFormSection>
+          ) : null}
 
           {rows.length === 0 ? (
             <p className="ed-brand-merch-catalog__empty">No competitions scheduled.</p>
@@ -217,19 +222,21 @@ export function BrandCompetitionsSection({ brandId }: Props) {
                           </p>
                         </div>
                         <div className="ed-brand-merch-item__actions">
-                          <CrudRowActions
-                            editing={editing}
-                            onEdit={() => {
-                              setEditingId(c.id);
-                              setEditForm(rowToForm(c));
-                            }}
-                            onSave={() => update.mutate(c.id)}
-                            onCancel={() => setEditingId(null)}
-                            onDelete={() => remove.mutate(c.id)}
-                            deleteTitle="Delete competition"
-                            deleteDescription="This removes the competition from the learn portal. Existing registrations are also removed."
-                            saveDisabled={!editForm.name.trim() || update.isPending}
-                          />
+                          {canEdit ? (
+                            <CrudRowActions
+                              editing={editing}
+                              onEdit={() => {
+                                setEditingId(c.id);
+                                setEditForm(rowToForm(c));
+                              }}
+                              onSave={() => update.mutate(c.id)}
+                              onCancel={() => setEditingId(null)}
+                              onDelete={() => remove.mutate(c.id)}
+                              deleteTitle="Delete competition"
+                              deleteDescription="This removes the competition from the learn portal. Existing registrations are also removed."
+                              saveDisabled={!editForm.name.trim() || update.isPending}
+                            />
+                          ) : null}
                         </div>
                       </div>
 
@@ -258,6 +265,20 @@ export function BrandCompetitionsSection({ brandId }: Props) {
                               <span>{c.registration_mode}</span>
                             </div>
                           </div>
+
+                          <Button
+                            variant="secondary"
+                            onClick={() => setQuestionsFor((id) => (id === c.id ? null : c.id))}
+                          >
+                            {questionsFor === c.id ? "Hide questions" : "Questions"}
+                          </Button>
+                          {questionsFor === c.id ? (
+                            <BrandCompetitionQuestionsPanel
+                              brandId={brandId}
+                              competitionId={c.id}
+                              canEdit={canEdit}
+                            />
+                          ) : null}
                         </>
                       )}
                     </div>

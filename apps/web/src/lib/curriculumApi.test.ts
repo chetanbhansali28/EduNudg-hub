@@ -5,6 +5,7 @@ import {
   purgeProgram,
   reorderLevels,
   reorderUnits,
+  setProgramActive,
 } from "./curriculumApi";
 
 const rpc = vi.fn();
@@ -66,6 +67,15 @@ describe("curriculumApi", () => {
     expect(update).toHaveBeenCalledTimes(2);
     expect(update).toHaveBeenNthCalledWith(1, { sort_order: 1 });
     expect(update).toHaveBeenNthCalledWith(2, { sort_order: 2 });
+  });
+
+  it("setProgramActive updates is_active without deleting the course", async () => {
+    const eq = vi.fn(() => chain(null));
+    const update = vi.fn(() => ({ eq }));
+    fromMock.mockReturnValue({ update });
+    await setProgramActive("p1", false);
+    expect(update).toHaveBeenCalledWith({ is_active: false });
+    expect(eq).toHaveBeenCalledWith("id", "p1");
   });
 
   it("fetchCourseImpactStats returns center and batch counts", async () => {

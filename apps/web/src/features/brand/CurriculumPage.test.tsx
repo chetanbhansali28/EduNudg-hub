@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CurriculumPage } from "./CurriculumPage";
+import { exactAccessibleName } from "@/test/exactAccessibleName";
 
 vi.mock("./hooks/useBrandScope", () => ({
   useBrandScope: () => ({ brandId: "brand-1", brandSlug: "abacus", missingBrand: false }),
@@ -42,13 +43,13 @@ const sampleProgram = {
   id: "p1",
   name: "Abacus",
   description: "Desc",
-  why_take: "Why",
-  what_you_learn: "What",
+  why_take: "Parents want faster mental math",
+  what_you_learn: "Anzan, visualization, and confidence",
   marketing_video_url: null,
   marketing_image_url: null,
   age_label: "Level 1 to 8",
-  marketing_benefits: [],
-  scholarship_highlight: null,
+  marketing_benefits: ["Faster mental math"],
+  scholarship_highlight: "1 Lakh Success Scholarship!",
   is_active: true,
 };
 
@@ -95,7 +96,7 @@ describe("CurriculumPage", () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText(/No active courses yet/i)).toBeDefined();
+      expect(screen.getByText(/No courses yet/i)).toBeDefined();
     });
     expect(screen.getByText(/Select a course to manage programs/i)).toBeDefined();
   });
@@ -108,11 +109,40 @@ describe("CurriculumPage", () => {
       expect(screen.getByText("Abacus")).toBeDefined();
     });
 
-    expect(screen.getByText(/Active Courses \(1\)/)).toBeDefined();
+    expect(screen.getByText(/Courses \(1\)/)).toBeDefined();
     expect(screen.getByText("Programs Structure")).toBeDefined();
     expect(screen.getByLabelText("Course Name")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeDefined();
+    expect(screen.getByRole("button", { name: exactAccessibleName("Save") })).toBeDefined();
     expect(screen.getByText(/Marketing copy and structure for the core Abacus course/i)).toBeDefined();
+    const detailTitle = document.querySelector(".ed-curriculum-editor-hero__title") as HTMLElement | null;
+    expect(detailTitle).toBeTruthy();
+    expect(detailTitle?.textContent).toContain("Abacus");
+  });
+
+  it("regression_curriculum_detail_title_uses_half_width", async () => {
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(document.querySelector(".ed-curriculum-editor-hero__title")).toBeTruthy();
+    });
+
+    const title = document.querySelector(".ed-curriculum-editor-hero__title") as HTMLElement;
+    expect(title.className).toContain("ed-curriculum-editor-hero__title");
+    expect(title.parentElement?.className).toContain("ed-curriculum-editor-hero__title-row");
+  });
+
+  it("regression_curriculum_detail_save_group_aligns_right", async () => {
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(document.querySelector(".ed-curriculum-editor-hero__meta")).toBeTruthy();
+    });
+
+    const meta = document.querySelector(".ed-curriculum-editor-hero__meta") as HTMLElement;
+    expect(meta.contains(screen.getByRole("switch", { name: "Turn Abacus off" }))).toBe(true);
+    expect(meta.contains(screen.getByRole("button", { name: exactAccessibleName("Save") }))).toBe(true);
   });
 
   it("regression_curriculum_banner_shows_upload_size_hint", async () => {
@@ -141,7 +171,58 @@ describe("CurriculumPage", () => {
       expect(screen.getByRole("heading", { name: "Add course" })).toBeDefined();
       expect(screen.getByLabelText("Course name")).toBeDefined();
       expect(screen.getByRole("button", { name: "Create course" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "Add benefit" })).toBeDefined();
+      expect(screen.getByLabelText("Why parents choose this")).toBeDefined();
+      expect(screen.getByLabelText("Skills and outcomes")).toBeDefined();
     });
+  });
+
+  it("regression_courses_list_has_no_add_plus_button", async () => {
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "+ Add Curriculum" })).toBeDefined();
+    });
+
+    expect(screen.queryByRole("button", { name: "Add course" })).toBeNull();
+    expect(document.querySelector(".ed-curriculum-brand__add-btn")).toBeNull();
+  });
+
+  it("regression_created_course_shows_parent_marketing_fields", async () => {
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Benefits & outcomes" })).toBeDefined();
+    });
+
+    expect(screen.getByLabelText("Why parents choose this")).toBeDefined();
+    expect(screen.getByLabelText("Skills and outcomes")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Add benefit" })).toBeDefined();
+    expect(screen.getByDisplayValue("Parents want faster mental math")).toBeDefined();
+    expect(screen.getByDisplayValue("Anzan, visualization, and confidence")).toBeDefined();
+    expect(screen.getByDisplayValue("Faster mental math")).toBeDefined();
+    expect(screen.getByDisplayValue("1 Lakh Success Scholarship!")).toBeDefined();
+    expect(screen.getByRole("button", { name: exactAccessibleName("Save") })).toBeDefined();
+  });
+
+  it("regression_created_course_parent_marketing_is_editable", async () => {
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Why parents choose this")).toBeDefined();
+    });
+
+    fireEvent.change(screen.getByLabelText("Why parents choose this"), {
+      target: { value: "Updated parent reason" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add benefit" }));
+
+    expect(screen.getByDisplayValue("Updated parent reason")).toBeDefined();
+    expect(screen.getByLabelText("Benefit 2")).toBeDefined();
+    expect((screen.getByRole("button", { name: exactAccessibleName("Save") }) as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("shows chapters panel when program accordion expanded", async () => {
@@ -157,6 +238,43 @@ describe("CurriculumPage", () => {
       expect(screen.getByText("Chapters")).toBeDefined();
       expect(screen.getByRole("button", { name: "Add chapter" })).toBeDefined();
       expect(screen.getByRole("button", { name: "Save program" })).toBeDefined();
+    });
+  });
+
+  it("regression_curriculum_course_live_toggle_is_visible", async () => {
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("switch", { name: "Turn Abacus off" })).toBeDefined();
+    });
+
+    const editorToggle = screen.getByRole("switch", { name: "Turn Abacus off" });
+    expect(editorToggle.getAttribute("aria-checked")).toBe("true");
+    expect(screen.getByRole("button", { name: exactAccessibleName("Save") })).toBeDefined();
+    expect(screen.getAllByRole("switch")).toHaveLength(1);
+  });
+
+  it("regression_curriculum_course_live_toggle_turns_course_off", async () => {
+    const programsApi = chain([sampleProgram]);
+    fromMock.mockImplementation((table: string) => {
+      if (table === "programs") return programsApi;
+      if (table === "levels") return chain([sampleLevel]);
+      if (table === "center_program_enablement") return chain(null, { count: 0 });
+      if (table === "batches") return chain(null, { count: 0 });
+      if (table === "modules") return chain([]);
+      if (table === "lessons") return chain([]);
+      return chain([]);
+    });
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("switch", { name: "Turn Abacus off" })).toBeDefined();
+    });
+
+    fireEvent.click(screen.getByRole("switch", { name: "Turn Abacus off" }));
+    await waitFor(() => {
+      expect(programsApi.update).toHaveBeenCalledWith({ is_active: false });
     });
   });
 });

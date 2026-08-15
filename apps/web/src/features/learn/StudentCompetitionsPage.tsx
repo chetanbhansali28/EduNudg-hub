@@ -9,6 +9,7 @@ import {
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { CompetitionCard } from "@/features/learn/components/CompetitionCard";
+import { StudentCompetitionQuizPanel } from "@/features/learn/components/StudentCompetitionQuizPanel";
 import { SectionCard, StudentEmptyState, StudentPageHeading, StudentPortalLoading } from "@/features/learn/components/StudentPortalShell";
 import { StudentTabBar } from "@/features/learn/components/StudentTabBar";
 import { StudentEnrollmentBlockedPage } from "@/features/learn/StudentEnrollmentBlockedPage";
@@ -31,11 +32,19 @@ const TAB_LABELS: Record<Tab, string> = {
   past: "Past results",
 };
 
+function quizLabel(status?: string, canTake?: boolean): string | undefined {
+  if (status === "submitted") return "View score";
+  if (status === "in_progress") return "Resume quiz";
+  if (canTake) return "Take quiz";
+  return undefined;
+}
+
 export function StudentCompetitionsPage() {
   const tenant = useTenant();
   const brandId = tenant.brandId!;
   const [tab, setTab] = useState<Tab>("upcoming");
   const [selectedPastId, setSelectedPastId] = useState<string | null>(null);
+  const [quizCompetitionId, setQuizCompetitionId] = useState<string | null>(null);
   const qc = useQueryClient();
 
   const list = useQuery({
@@ -73,7 +82,11 @@ export function StudentCompetitionsPage() {
 
   return (
     <div className="ed-sp-stack">
-      <StudentPageHeading title="Competitions" subtitle="Register for events and view your results." />
+      <StudentPageHeading title="Competitions" subtitle="Register for events, take quizzes, and view your results." />
+
+      {quizCompetitionId ? (
+        <StudentCompetitionQuizPanel competitionId={quizCompetitionId} onClose={() => setQuizCompetitionId(null)} />
+      ) : null}
 
       <StudentTabBar tabs={["upcoming", "registered", "past"] as const} value={tab} onChange={setTab} labels={TAB_LABELS} />
 
@@ -95,6 +108,12 @@ export function StudentCompetitionsPage() {
               enrollBlockedReason={heroCompetition.enroll_blocked_reason}
               onEnroll={() => enroll.mutate(heroCompetition.id)}
               enrollPending={enroll.isPending}
+              quizActionLabel={quizLabel(heroCompetition.quiz_status, heroCompetition.can_take)}
+              onQuizAction={
+                quizLabel(heroCompetition.quiz_status, heroCompetition.can_take)
+                  ? () => setQuizCompetitionId(heroCompetition.id)
+                  : undefined
+              }
             />
           </div>
         )}
@@ -175,6 +194,10 @@ export function StudentCompetitionsPage() {
                     enrollBlockedReason={c.enroll_blocked_reason}
                     onEnroll={() => enroll.mutate(c.id)}
                     enrollPending={enroll.isPending}
+                    quizActionLabel={quizLabel(c.quiz_status, c.can_take)}
+                    onQuizAction={
+                      quizLabel(c.quiz_status, c.can_take) ? () => setQuizCompetitionId(c.id) : undefined
+                    }
                   />
                 ))}
               </div>
@@ -190,6 +213,12 @@ export function StudentCompetitionsPage() {
                     location={r.location}
                     feeType={r.fee_type}
                     statusTag={r.status}
+                    quizActionLabel={quizLabel(r.quiz_status, r.can_take) ?? (r.quiz_status === "submitted" ? "View score" : undefined)}
+                    onQuizAction={
+                      r.can_take || r.quiz_status === "submitted"
+                        ? () => setQuizCompetitionId(r.competition_id)
+                        : undefined
+                    }
                     secondaryAction={
                       r.fee_type === "free" && r.status === "registered" ? (
                         <Button variant="ghost" onClick={() => withdraw.mutate(r.registration_id)} disabled={withdraw.isPending}>

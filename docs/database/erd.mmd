@@ -26,3 +26,8 @@ erDiagram
   brands ||--o{ merchandise_catalog : defines
   franchise_centers ||--o{ merchandise_orders : places
   brands ||--o{ brand_campaigns : runs
+  brands ||--o{ brand_competitions : hosts
+  brand_competitions ||--o{ brand_competition_questions : snapshots
+  programs ||--o{ competition_question_bank : banks
+  levels ||--o{ competition_question_bank : tags
+  students ||--o{ student_competition_attempts : takes

@@ -418,6 +418,7 @@ export function CurriculumCourseEditorHero({
   title,
   status,
   description,
+  liveToggle,
   saveAction,
   embedded = false,
 }: {
@@ -426,6 +427,7 @@ export function CurriculumCourseEditorHero({
   title: string;
   status: CurriculumCourseStatus;
   description?: string;
+  liveToggle?: ReactNode;
   saveAction?: ReactNode;
   embedded?: boolean;
 }) {
@@ -433,15 +435,18 @@ export function CurriculumCourseEditorHero({
     <div className={`ed-curriculum-editor-hero${embedded ? " ed-curriculum-editor-hero--embedded" : ""}`}>
       <div className="ed-curriculum-editor-hero__main">
         <CourseAvatar initials={initials} tone={tone} />
-        <div>
+        <div className="ed-curriculum-editor-hero__copy">
           <div className="ed-curriculum-editor-hero__title-row">
             <h2 className="ed-curriculum-editor-hero__title">{title}</h2>
-            <CurriculumStatusBadge status={status} />
+            <div className="ed-curriculum-editor-hero__meta">
+              <CurriculumStatusBadge status={status} />
+              {liveToggle}
+              {saveAction}
+            </div>
           </div>
           {description ? <p className="ed-curriculum-editor-hero__description">{description}</p> : null}
         </div>
       </div>
-      {saveAction ? <div className="ed-curriculum-editor-hero__actions">{saveAction}</div> : null}
     </div>
   );
 }

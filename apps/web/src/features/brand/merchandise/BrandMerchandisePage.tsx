@@ -6,8 +6,6 @@ import {
   FilterTabs,
 } from "@edunudg/ui";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
-import { BrandCompetitionsSection } from "@/features/brand/kits/BrandCompetitionsSection";
-import { useBrandMerchMobile } from "./hooks/useBrandMerchBreakpoint";
 import { BrandMerchandiseCatalogSection } from "./BrandMerchandiseCatalogSection";
 import { BrandMerchandiseOrdersSection } from "./BrandMerchandiseOrdersSection";
 import { BrandMerchandisePromoSection } from "./BrandMerchandisePromoSection";
@@ -19,7 +17,6 @@ const TABS = [
   { id: "promo", label: "Promo Codes", mobileLabel: "Promo Codes" },
   { id: "orders", label: "Orders", mobileLabel: "Orders" },
   { id: "payment", label: "Payment settings", mobileLabel: "Payment" },
-  { id: "competitions", label: "Competitions", mobileLabel: "Competitions" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -29,16 +26,13 @@ export function BrandMerchandisePage() {
   const [activeTab, setActiveTab] = useState<TabId>("catalog");
   const [catalogAddOpen, setCatalogAddOpen] = useState(false);
 
-  const isMobile = useBrandMerchMobile();
-
   if (missingBrand || !brandId) {
     return <p className="ed-empty">Brand context not found.</p>;
   }
 
-  const visibleTabs = isMobile ? TABS.filter((tab) => tab.id !== "competitions") : TABS;
-  const tabOptions = visibleTabs.map((tab) => ({
+  const tabOptions = TABS.map((tab) => ({
     value: tab.id,
-    label: isMobile ? tab.mobileLabel : tab.label,
+    label: tab.label,
   }));
 
   return (
@@ -100,7 +94,6 @@ export function BrandMerchandisePage() {
       {activeTab === "promo" ? <BrandMerchandisePromoSection brandId={brandId} /> : null}
       {activeTab === "orders" ? <BrandMerchandiseOrdersSection brandId={brandId} /> : null}
       {activeTab === "payment" ? <BrandMerchandisePaymentSettings brandId={brandId} /> : null}
-      {activeTab === "competitions" ? <BrandCompetitionsSection brandId={brandId} /> : null}
     </div>
   );
 }

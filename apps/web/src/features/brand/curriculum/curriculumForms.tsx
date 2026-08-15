@@ -44,16 +44,16 @@ export function courseToForm(program: CurriculumProgram): ProgramMarketingInput 
   };
 }
 
-export function CourseFields({
-  brandId,
+export function CourseParentMarketingFields({
   value,
   onChange,
+  readOnly = false,
 }: {
-  brandId: string;
   value: ProgramMarketingInput;
   onChange: (v: ProgramMarketingInput) => void;
+  readOnly?: boolean;
 }) {
-  const uploadScope = { kind: "brand" as const, brandId };
+  const canEdit = !readOnly;
 
   const updateBenefit = (index: number, text: string) => {
     const benefits = [...value.benefits];
@@ -62,20 +62,93 @@ export function CourseFields({
   };
 
   return (
+    <>
+      <p className="ed-text-sm ed-muted">Benefits appear as bullet points in the public Know More popup.</p>
+      {value.benefits.map((benefit, index) => (
+        <div key={`benefit-${index}`} className="ed-form-section">
+          <Input
+            label={`Benefit ${index + 1}`}
+            value={benefit}
+            onChange={(v) => updateBenefit(index, v)}
+            editable={canEdit}
+            disabled={readOnly}
+          />
+          {canEdit ? (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                onChange({ ...value, benefits: value.benefits.filter((_, idx) => idx !== index) })
+              }
+            >
+              Remove benefit
+            </Button>
+          ) : null}
+        </div>
+      ))}
+      {canEdit ? (
+        <Button variant="ghost" onClick={() => onChange({ ...value, benefits: [...value.benefits, ""] })}>
+          Add benefit
+        </Button>
+      ) : value.benefits.length === 0 ? (
+        <p className="ed-text-sm ed-muted">No benefits yet.</p>
+      ) : null}
+      <Input
+        label="Scholarship highlight (optional)"
+        value={value.scholarshipHighlight}
+        onChange={(scholarshipHighlight) => onChange({ ...value, scholarshipHighlight })}
+        placeholder="1 Lakh Success Scholarship!"
+        editable={canEdit}
+        disabled={readOnly}
+      />
+      <Textarea
+        label="Why parents choose this"
+        value={value.whyTake}
+        onChange={(whyTake) => onChange({ ...value, whyTake })}
+        rows={3}
+        editable={canEdit}
+      />
+      <Textarea
+        label="Skills and outcomes"
+        value={value.whatYouLearn}
+        onChange={(whatYouLearn) => onChange({ ...value, whatYouLearn })}
+        rows={3}
+        editable={canEdit}
+      />
+    </>
+  );
+}
+
+export function CourseFields({
+  brandId,
+  value,
+  onChange,
+  readOnly = false,
+}: {
+  brandId: string;
+  value: ProgramMarketingInput;
+  onChange: (v: ProgramMarketingInput) => void;
+  readOnly?: boolean;
+}) {
+  const uploadScope = { kind: "brand" as const, brandId };
+  const canEdit = !readOnly;
+
+  return (
     <div className="ed-editable-form">
       <FormGrid columns={2}>
         <Input
           label="Course name"
           value={value.name}
           onChange={(name) => onChange({ ...value, name })}
-          editable
+          editable={canEdit}
+          disabled={readOnly}
         />
         <Input
           label="Age / grade badge"
           value={value.ageLabel}
           onChange={(ageLabel) => onChange({ ...value, ageLabel })}
           placeholder="Age 6–14"
-          editable
+          editable={canEdit}
+          disabled={readOnly}
         />
       </FormGrid>
       <MarketingMediaField
@@ -85,65 +158,23 @@ export function CourseFields({
         mediaType="image"
         uploadSubdir="program-marketing"
         uploadScope={uploadScope}
+        disabled={readOnly}
       />
       <Textarea
         label="Short description (card blurb)"
         value={value.description}
         onChange={(description) => onChange({ ...value, description })}
         rows={3}
-        editable
+        editable={canEdit}
       />
-      <p className="ed-text-sm ed-muted">Benefits appear as bullet points in the public Know More popup.</p>
-      {value.benefits.map((benefit, index) => (
-        <div key={`benefit-${index}`} className="ed-form-section">
-          <Input
-            label={`Benefit ${index + 1}`}
-            value={benefit}
-            onChange={(v) => updateBenefit(index, v)}
-            editable
-          />
-          <Button
-            variant="ghost"
-            onClick={() =>
-              onChange({ ...value, benefits: value.benefits.filter((_, idx) => idx !== index) })
-            }
-          >
-            Remove benefit
-          </Button>
-        </div>
-      ))}
-      <Button variant="ghost" onClick={() => onChange({ ...value, benefits: [...value.benefits, ""] })}>
-        Add benefit
-      </Button>
+      <CourseParentMarketingFields value={value} onChange={onChange} readOnly={readOnly} />
       <Input
-        label="Scholarship highlight (optional)"
-        value={value.scholarshipHighlight}
-        onChange={(scholarshipHighlight) => onChange({ ...value, scholarshipHighlight })}
-        placeholder="1 Lakh Success Scholarship!"
-        editable
-      />
-      <FormGrid columns={2}>
-        <Input
-          label="Overview video"
-          value={value.videoUrl}
-          onChange={(videoUrl) => onChange({ ...value, videoUrl })}
-          placeholder="https://…"
-          editable
-        />
-        <Textarea
-          label="Why parents choose this"
-          value={value.whyTake}
-          onChange={(whyTake) => onChange({ ...value, whyTake })}
-          rows={3}
-          editable
-        />
-      </FormGrid>
-      <Textarea
-        label="Skills and outcomes"
-        value={value.whatYouLearn}
-        onChange={(whatYouLearn) => onChange({ ...value, whatYouLearn })}
-        rows={3}
-        editable
+        label="Overview video"
+        value={value.videoUrl}
+        onChange={(videoUrl) => onChange({ ...value, videoUrl })}
+        placeholder="https://…"
+        editable={canEdit}
+        disabled={readOnly}
       />
     </div>
   );

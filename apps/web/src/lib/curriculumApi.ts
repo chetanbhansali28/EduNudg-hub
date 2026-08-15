@@ -187,6 +187,11 @@ export async function updateProgram(id: string, input: ProgramMarketingInput): P
   if (error) throw error;
 }
 
+export async function setProgramActive(id: string, isActive: boolean): Promise<void> {
+  const { error } = await client().from("programs").update({ is_active: isActive }).eq("id", id);
+  if (error) throw error;
+}
+
 export async function archiveProgram(id: string): Promise<void> {
   const { error } = await client()
     .from("programs")

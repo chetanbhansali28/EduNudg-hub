@@ -46,6 +46,12 @@ vi.mock("@/features/learn/hooks/useStudentBreakpoint", () => ({
   useStudentBreakpoint: () => ({ isMobile: false }),
 }));
 
+vi.mock("@/hooks/useFeatureFlag", () => ({
+  useBrandFeatureFlags: () => ({ competitions: true }),
+  useBrandFeatureFlagsReady: () => true,
+  useFeatureFlag: () => true,
+}));
+
 vi.mock("@/lib/studentLearnApi", () => ({
   StudentLearnRpcError: class StudentLearnRpcError extends Error {},
   fetchStudentLearnHome: vi.fn().mockResolvedValue({
