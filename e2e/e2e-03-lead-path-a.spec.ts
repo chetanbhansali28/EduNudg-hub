@@ -20,6 +20,7 @@ test.describe("E2E-03 — Student lead Path A (brand → assign → convert)", (
   });
 
   test("parent applies on brand → brand sees unassigned → center convert path", async ({ browser }) => {
+    test.setTimeout(90_000);
     const fields = makeE2ELeadFields({ tag: `path-a-${Date.now().toString(36)}` });
 
     try {
@@ -46,46 +47,31 @@ test.describe("E2E-03 — Student lead Path A (brand → assign → convert)", (
       const brandCtx = await browser.newContext({ storageState: authStatePath("brand") });
       const brandPage = await brandCtx.newPage();
       await brandPage.goto(brandUrl(SEED.brandSlug, "/app/leads"));
-      await expect(
-        brandPage.getByText(fields.childName).or(brandPage.getByText(fields.parentName)).first()
-      ).toBeVisible({ timeout: 20_000 });
 
-      const unassigned = brandPage.getByRole("button", { name: /unassigned/i }).or(
-        brandPage.getByRole("tab", { name: /unassigned/i })
-      );
-      if (await unassigned.first().isVisible().catch(() => false)) {
-        await unassigned.first().click();
-      }
+      const leadRow = brandPage.getByRole("button", { name: new RegExp(fields.parentName, "i") });
+      await expect(leadRow).toBeVisible({ timeout: 20_000 });
+      await leadRow.click();
 
-      await brandPage
+      const centerSelect = brandPage.getByLabel("Center");
+      await expect(centerSelect).toBeVisible({ timeout: 15_000 });
+      const koramangalaValue = await centerSelect.locator("option").filter({ hasText: /koramangala/i }).getAttribute("value");
+      expect(koramangalaValue).toBeTruthy();
+      await centerSelect.selectOption(koramangalaValue!);
+
+      const confirmAssign = brandPage.getByRole("button", { name: "Confirm & Assign Lead", exact: true });
+      await expect(confirmAssign).toBeEnabled({ timeout: 10_000 });
+      await confirmAssign.click();
+
+      const centerCtx = await browser.newContext({ storageState: authStatePath("center") });
+      const centerPage = await centerCtx.newPage();
+      await centerPage.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/app/leads"));
+      await centerPage
         .getByText(fields.childName)
-        .or(brandPage.getByText(fields.parentName))
+        .or(centerPage.getByText(fields.parentName))
         .first()
-        .click();
-      const assignBtn = brandPage.getByRole("button", { name: /assign/i }).first();
-      if (await assignBtn.isVisible().catch(() => false)) {
-        await assignBtn.click();
-        const centerOption = brandPage.getByRole("option", { name: /koramangala/i }).or(
-          brandPage.getByText(/koramangala/i)
-        );
-        if (await centerOption.first().isVisible().catch(() => false)) {
-          await centerOption.first().click();
-        }
-        const confirm = brandPage.getByRole("button", { name: /confirm|assign|save/i }).last();
-        if (await confirm.isVisible().catch(() => false)) {
-          await confirm.click();
-        }
-
-        const centerCtx = await browser.newContext({ storageState: authStatePath("center") });
-        const centerPage = await centerCtx.newPage();
-        await centerPage.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/app/leads"));
-        await centerPage
-          .getByText(fields.childName)
-          .first()
-          .isVisible({ timeout: 10_000 })
-          .catch(() => false);
-        await centerCtx.close();
-      }
+        .isVisible({ timeout: 10_000 })
+        .catch(() => false);
+      await centerCtx.close();
       await brandCtx.close();
     } finally {
       await cleanupEphemeralE2ELead({ brandId: SEED.brandId, whatsapp: fields.whatsapp });

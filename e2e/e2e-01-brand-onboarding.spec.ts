@@ -20,28 +20,31 @@ test.describe("E2E-01 — New brand onboarding", () => {
     }
   });
 
-  test("visitor signup → admin pending → approve → brand host", async ({ page }) => {
+  test("visitor signup → admin pending → approve → brand host", async ({ browser, page }) => {
     const suffix = Date.now().toString(36);
     const orgName = `E2E Brand ${suffix}`;
     const email = `e2e-brand-${suffix}@example.com`;
 
     try {
-      await page.goto(platformUrl("/"));
-      await page.goto(platformUrl("/#brand-signup"));
-      await expect(page.getByLabel("Organization name")).toBeVisible({ timeout: 15_000 });
-      await page.getByLabel("Organization name").fill(orgName);
-      await page.getByLabel("Admin name").fill("E2E Admin");
-      await page.getByLabel("Work email").fill(email);
-      await page.getByLabel("Phone").fill("9890111222");
-      await page.getByLabel("City").fill("Bengaluru");
-      await page.getByRole("button", { name: /submit|request|launch/i }).first().click();
-      await expect(page.getByRole("status").filter({ hasText: /received|thank/i })).toBeVisible({
+      const publicCtx = await browser.newContext();
+      const publicPage = await publicCtx.newPage();
+      await publicPage.goto(platformUrl("/"));
+      await publicPage.goto(platformUrl("/#brand-signup"));
+      await expect(publicPage.getByLabel("Organization name")).toBeVisible({ timeout: 15_000 });
+      await publicPage.getByLabel("Organization name").fill(orgName);
+      await publicPage.getByLabel("Admin name").fill("E2E Admin");
+      await publicPage.getByLabel("Work email").fill(email);
+      await publicPage.getByLabel("Phone").fill("9890111222");
+      await publicPage.getByLabel("City").fill("Bengaluru");
+      await publicPage.getByRole("button", { name: /submit|request|launch/i }).first().click();
+      await expect(publicPage.getByRole("status").filter({ hasText: /received|thank/i })).toBeVisible({
         timeout: 20_000,
       });
+      await publicCtx.close();
 
       await page.goto(platformUrl("/admin/brands"));
-      const pending = page.locator(".ed-brands-signup-review").getByText(orgName);
-      await expect(pending).toBeVisible({ timeout: 20_000 });
+      const pending = page.locator(".ed-brands-signup-review").getByText(orgName, { exact: true });
+      await expect(pending).toBeVisible({ timeout: 30_000 });
       await pending.click();
 
       const approve = page.getByRole("button", { name: /approve/i }).first();
