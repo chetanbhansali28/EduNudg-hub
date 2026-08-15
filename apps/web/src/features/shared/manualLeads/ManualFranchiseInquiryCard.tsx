@@ -1,111 +1,151 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
+import { Button, FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
 import { createFranchiseInquiryStaff } from "@/lib/manualLeadsApi";
 import { PHONE_INPUT_PLACEHOLDER } from "@/lib/phoneInput";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
-import { AddFormSection } from "@/features/shared/AddFormSection";
-import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
+import "@/features/platform/brandDetailPage.css";
+import "@/features/brand/franchiseApplications/franchiseApplications.css";
 
 type Props = {
   brandId: string;
-  formOpen?: boolean;
-  onFormOpenChange?: (open: boolean) => void;
-  hideTrigger?: boolean;
+  open: boolean;
+  onClose: () => void;
 };
 
-export function ManualFranchiseInquiryCard({ brandId, formOpen, onFormOpenChange, hideTrigger }: Props) {
+const emptyForm = {
+  fullName: "",
+  email: "",
+  phone: "",
+  city: "",
+  proposedName: "",
+  pincode: "",
+  state: "",
+  addressLine: "",
+  priorExperience: "",
+  message: "",
+};
+
+export function ManualFranchiseInquiryCard({ brandId, open, onClose }: Props) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
-  const { bindClose, closeAddForm } = useAddFormCloser();
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [city, setCity] = useState("");
-  const [proposedName, setProposedName] = useState("");
-  const [pincode, setPincode] = useState("");
-  const [state, setState] = useState("");
-  const [addressLine, setAddressLine] = useState("");
-  const [priorExperience, setPriorExperience] = useState("");
-  const [message, setMessage] = useState("");
+  const [form, setForm] = useState(emptyForm);
+
+  const setField = (key: keyof typeof emptyForm) => (value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+
+  useEffect(() => {
+    if (open) return;
+    setForm(emptyForm);
+  }, [open]);
 
   const save = useMutation({
     mutationFn: async () => {
       clear();
       const { error: err } = await createFranchiseInquiryStaff(brandId, {
-        fullName,
-        email,
-        phoneE164: phone,
-        city,
-        proposedFranchiseName: proposedName,
-        pincode,
-        state,
-        addressLine,
-        priorExperience,
-        message,
+        fullName: form.fullName,
+        email: form.email,
+        phoneE164: form.phone,
+        city: form.city,
+        proposedFranchiseName: form.proposedName,
+        pincode: form.pincode,
+        state: form.state,
+        addressLine: form.addressLine,
+        priorExperience: form.priorExperience,
+        message: form.message,
       });
       if (err) throw new Error(err);
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
-      setFullName("");
-      setEmail("");
-      setPhone("");
-      setCity("");
-      setProposedName("");
-      setPincode("");
-      setState("");
-      setAddressLine("");
-      setPriorExperience("");
-      setMessage("");
-      closeAddForm();
+      onClose();
     },
     onError: capture,
   });
 
-  const canSubmit = fullName.trim() && email.trim();
+  const handleClose = () => {
+    if (save.isPending) return;
+    clear();
+    onClose();
+  };
+
+  const canSubmit = form.fullName.trim() && form.email.trim();
 
   return (
-    <AddFormSection
-      buttonLabel="Add franchise application"
-      panelTitle="Add franchise application manually"
-      open={formOpen}
-      onOpenChange={onFormOpenChange}
-      hideTrigger={hideTrigger}
-      primaryAction={{
-        label: "Create application",
-        onClick: () => save.mutate(),
-        pending: save.isPending,
-        disabled: !canSubmit,
-      }}
+    <dialog
+      ref={dialogRef}
+      className="ed-import-dialog ed-franchise-app-manual-dialog"
+      aria-labelledby="manual-franchise-title"
+      onClose={handleClose}
+      onClick={(event) => event.target === dialogRef.current && handleClose()}
     >
-      {({ close }) => {
-        bindClose(close);
-        return (
-          <>
-            <p className="ed-text-sm ed-muted">Same fields as the public franchise application form on your brand site.</p>
-            <MutationError message={error} />
-            <FormGrid>
-              <Input label="Full name" value={fullName} onChange={setFullName} autoComplete="name" />
-              <Input label="Email" value={email} onChange={setEmail} type="email" autoComplete="email" />
-              <Input
-                label="Phone"
-                value={phone}
-                onChange={setPhone}
-                placeholder={PHONE_INPUT_PLACEHOLDER}
-                autoComplete="tel"
-              />
-              <Input label="Preferred city" value={city} onChange={setCity} autoComplete="address-level2" />
-              <Input label="Proposed franchise name" value={proposedName} onChange={setProposedName} />
-              <Input label="Pincode" value={pincode} onChange={setPincode} />
-              <Input label="State" value={state} onChange={setState} />
-            </FormGrid>
-            <Input label="Address" value={addressLine} onChange={setAddressLine} />
-            <Textarea label="Prior experience" value={priorExperience} onChange={setPriorExperience} rows={3} />
-            <Textarea label="Message (optional)" value={message} onChange={setMessage} rows={4} />
-          </>
-        );
-      }}
-    </AddFormSection>
+      <div className="ed-import-dialog__panel" role="document">
+        <header className="ed-import-dialog__header">
+          <h2 id="manual-franchise-title">Add franchise application</h2>
+          <button type="button" className="ed-import-dialog__close" aria-label="Close" onClick={handleClose}>
+            ×
+          </button>
+        </header>
+
+        <div className="ed-import-dialog__body">
+          <p className="ed-import-dialog__intro">
+            Record a walk-in or phone enquiry. Same fields as the public apply form on your brand site.
+          </p>
+          <MutationError message={error} />
+
+          <div className="ed-franchise-app-manual-dialog__sections">
+            <section className="ed-franchise-app-detail__card">
+              <h3 className="ed-franchise-app-detail__card-title">Applicant</h3>
+              <FormGrid>
+                <Input label="Full name" value={form.fullName} onChange={setField("fullName")} autoComplete="name" />
+                <Input label="Email" value={form.email} onChange={setField("email")} type="email" autoComplete="email" />
+                <Input
+                  label="Phone"
+                  value={form.phone}
+                  onChange={setField("phone")}
+                  placeholder={PHONE_INPUT_PLACEHOLDER}
+                  autoComplete="tel"
+                />
+                <Input label="Proposed franchise name" value={form.proposedName} onChange={setField("proposedName")} />
+              </FormGrid>
+            </section>
+
+            <section className="ed-franchise-app-detail__card">
+              <h3 className="ed-franchise-app-detail__card-title">Proposed location</h3>
+              <FormGrid>
+                <Input label="Preferred city" value={form.city} onChange={setField("city")} autoComplete="address-level2" />
+                <Input label="State" value={form.state} onChange={setField("state")} />
+                <Input label="Pincode" value={form.pincode} onChange={setField("pincode")} />
+                <Input label="Address" value={form.addressLine} onChange={setField("addressLine")} />
+              </FormGrid>
+            </section>
+
+            <section className="ed-franchise-app-detail__card ed-franchise-app-detail__card--wide">
+              <h3 className="ed-franchise-app-detail__card-title">Background</h3>
+              <Textarea label="Prior experience" value={form.priorExperience} onChange={setField("priorExperience")} rows={3} />
+              <Textarea label="Message (optional)" value={form.message} onChange={setField("message")} rows={3} />
+            </section>
+          </div>
+        </div>
+
+        <footer className="ed-import-dialog__footer">
+          <Button type="button" variant="ghost" onClick={handleClose} disabled={save.isPending}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={() => save.mutate()} disabled={!canSubmit || save.isPending}>
+            {save.isPending ? "Creating…" : "Create application"}
+          </Button>
+        </footer>
+      </div>
+    </dialog>
   );
 }

@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FranchiseApplicationsPage } from "./FranchiseApplicationsPage";
+import { exactAccessibleName } from "@/test/exactAccessibleName";
 
 const sampleInquiry = {
   id: "inq-1",
@@ -22,28 +23,47 @@ const sampleInquiry = {
   updated_at: "2026-06-01T10:00:00Z",
 };
 
+const { mockInquiries, mockDeletedCenters } = vi.hoisted(() => ({
+  mockInquiries: [] as Record<string, unknown>[],
+  mockDeletedCenters: [] as { id: string; deleted_at: string | null }[],
+}));
+
 vi.mock("@/features/brand/hooks/useBrandScope", () => ({
   useBrandScope: () => ({ brandId: "brand-1", brandSlug: "abacus", isLoading: false, missingBrand: false }),
 }));
 
 vi.mock("@/features/shared/manualLeads/ManualFranchiseInquiryCard", () => ({
-  ManualFranchiseInquiryCard: () => <div>Manual franchise card</div>,
+  ManualFranchiseInquiryCard: ({ open }: { open: boolean }) =>
+    open ? <div>Manual franchise card</div> : null,
 }));
 
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          order: () => Promise.resolve({ data: [sampleInquiry], error: null }),
+    from: (table: string) => {
+      if (table === "franchise_centers") {
+        return {
+          select: () => ({
+            eq: () => ({
+              not: () => Promise.resolve({ data: mockDeletedCenters, error: null }),
+            }),
+          }),
+        };
+      }
+      return {
+        select: () => ({
+          eq: () => ({
+            order: () => Promise.resolve({ data: mockInquiries, error: null }),
+          }),
         }),
-      }),
-    }),
+      };
+    },
   }),
 }));
 
 describe("FranchiseApplicationsPage", () => {
   beforeEach(() => {
+    mockInquiries.splice(0, mockInquiries.length, sampleInquiry);
+    mockDeletedCenters.splice(0, mockDeletedCenters.length);
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
       matches: query.includes("1024"),
       media: query,
@@ -63,6 +83,7 @@ describe("FranchiseApplicationsPage", () => {
     expect(screen.getByText("Review and manage incoming center requests.")).toBeDefined();
     expect(screen.getByRole("tablist", { name: "Application filter" })).toBeDefined();
     expect(await screen.findByRole("tab", { name: /Pending review \(1\)/ })).toBeDefined();
+    expect(screen.getByRole("tab", { name: /Deleted \(0\)/ })).toBeDefined();
     expect(screen.getByPlaceholderText("Search applications...")).toBeDefined();
   });
 
@@ -83,5 +104,114 @@ describe("FranchiseApplicationsPage", () => {
     expect(screen.getByText("Looking to open in Q3.")).toBeDefined();
     expect(screen.getByRole("button", { name: "Approve & create center" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Reject" })).toBeDefined();
+  });
+
+  it("regression_add_franchise_opens_modal_instead_of_below_fold_form", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <FranchiseApplicationsPage />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText("Franchise Applications")).toBeDefined();
+    expect(screen.queryByText("Manual franchise card")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "+ Add Franchise" }));
+    expect(screen.getByText("Manual franchise card")).toBeDefined();
+  });
+
+  it("regression_search_shows_matches_without_switching_tabs_first", async () => {
+    mockInquiries.splice(0, mockInquiries.length, sampleInquiry, {
+      ...sampleInquiry,
+      id: "inq-decided",
+      status: "lost",
+      proposed_franchise_name: "EduQuest Academy",
+      full_name: "Ravi Kumar",
+    });
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <FranchiseApplicationsPage />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByRole("tab", { name: /Pending review \(1\)/ })).toBeDefined();
+    expect(screen.queryByText("EduQuest Academy")).toBeNull();
+
+    fireEvent.change(screen.getByPlaceholderText("Search applications..."), {
+      target: { value: "EduQuest" },
+    });
+
+    expect(await screen.findByRole("button", { name: /EduQuest Academy/i })).toBeDefined();
+    expect(screen.getByRole("tab", { name: /All applications \(2\)/ }).getAttribute("aria-selected")).toBe(
+      "true",
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("Search applications..."), {
+      target: { value: "" },
+    });
+
+    expect(screen.queryByText("EduQuest Academy")).toBeNull();
+    expect(screen.getByRole("tab", { name: /Pending review \(1\)/ }).getAttribute("aria-selected")).toBe(
+      "true",
+    );
+  });
+
+  it("regression_franchise_apps_mobile_short_tabs_and_fab", async () => {
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <FranchiseApplicationsPage />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByRole("tab", { name: /Pending \(1\)/ })).toBeDefined();
+    expect(screen.queryByRole("tab", { name: /Pending review/ })).toBeNull();
+    expect(screen.getByRole("button", { name: exactAccessibleName("Add Franchise") })).toBeDefined();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Abacus Pune West/i }));
+    expect(screen.queryByRole("button", { name: exactAccessibleName("Add Franchise") })).toBeNull();
+    expect(screen.getByRole("button", { name: "Approve & create center" })).toBeDefined();
+  });
+
+  it("regression_deleted_franchise_tab_separates_soft_deleted_centers", async () => {
+    mockInquiries.splice(0, mockInquiries.length, {
+      ...sampleInquiry,
+      id: "inq-deleted",
+      status: "converted",
+      converted_center_id: "center-gone",
+      proposed_franchise_name: "Closed Pune West",
+    });
+    mockDeletedCenters.splice(0, mockDeletedCenters.length, {
+      id: "center-gone",
+      deleted_at: "2026-08-01T10:00:00Z",
+    });
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <FranchiseApplicationsPage />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByRole("tab", { name: /Deleted \(1\)/ })).toBeDefined();
+    expect(screen.getByRole("tab", { name: /Decided \(0\)/ })).toBeDefined();
+    expect(screen.queryByText("Closed Pune West")).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: /Deleted \(1\)/ }));
+    const deletedRow = await screen.findByRole("button", { name: /Closed Pune West/i });
+    expect(screen.getByText("DELETED")).toBeDefined();
+
+    fireEvent.click(deletedRow);
+    expect(screen.getByText(/deleted from Franchise Management/i)).toBeDefined();
   });
 });

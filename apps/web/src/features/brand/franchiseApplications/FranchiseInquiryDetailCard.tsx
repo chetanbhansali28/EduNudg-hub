@@ -24,6 +24,7 @@ export interface FranchiseInquiry {
 type Props = {
   inquiry: FranchiseInquiry;
   pending: boolean;
+  convertedCenterDeleted?: boolean;
   onBack?: () => void;
   onApprove: () => void;
   onReject: () => void;
@@ -123,6 +124,7 @@ function ActionButtons({
 export function FranchiseInquiryDetailCard({
   inquiry,
   pending,
+  convertedCenterDeleted = false,
   onBack,
   onApprove,
   onReject,
@@ -217,7 +219,11 @@ export function FranchiseInquiryDetailCard({
             </section>
           ) : null}
 
-          {inquiry.converted_center_id ? (
+          {inquiry.converted_center_id && convertedCenterDeleted ? (
+            <p className="ed-franchise-app-detail__meta">
+              This franchise was deleted from Franchise Management. The application is kept for history.
+            </p>
+          ) : inquiry.converted_center_id ? (
             <p className="ed-franchise-app-detail__meta">
               Center provisioned (ID {inquiry.converted_center_id.slice(0, 8)}…)
             </p>

@@ -2,6 +2,9 @@
 
 .ed-franchise-apps-page {
   --ed-franchise-apps-radius: calc(var(--ed-radius-lg) + 4px);
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .ed-franchise-apps-page .ed-pipeline-workspace {
@@ -19,6 +22,8 @@
   flex-direction: column;
   gap: 0.875rem;
   margin-bottom: 1rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .ed-franchise-apps-page__toolbar .ed-filter-tabs {
@@ -26,17 +31,31 @@
 }
 
 @media (max-width: 1023px) {
+  .ed-franchise-apps-page {
+    padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ed-franchise-apps-page--detail-open {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
   .ed-franchise-apps-page__toolbar .ed-filter-tabs {
-    display: inline-flex;
+    display: flex;
     flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
     gap: 0.25rem;
     padding: 0.25rem;
     border-radius: 999px;
     background: var(--ed-surface-container-low);
     overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
 
   .ed-franchise-apps-page__toolbar .ed-filter-tabs__btn {
+    flex: 0 0 auto;
     border: none;
     background: transparent;
     color: var(--ed-muted);
@@ -55,12 +74,24 @@
 }
 
 @media (min-width: 1024px) {
+  .ed-franchise-apps-page__toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
   .ed-franchise-apps-page__search {
-    display: none;
+    display: flex;
+    flex: 1 1 16rem;
+    max-width: 24rem;
+    min-width: 0;
   }
 
   .ed-franchise-apps-page__toolbar .ed-filter-tabs {
     gap: 0.625rem;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .ed-franchise-apps-page__toolbar .ed-filter-tabs__btn {
@@ -178,6 +209,7 @@
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
 }
 
 .ed-franchise-app-list-item__location {
@@ -187,6 +219,7 @@
   margin: 0;
   font-size: 0.8125rem;
   color: var(--ed-muted);
+  overflow-wrap: anywhere;
 }
 
 .ed-franchise-app-status-badge {
@@ -219,6 +252,11 @@
   color: #b91c1c;
 }
 
+.ed-franchise-app-status-badge--deleted {
+  background: color-mix(in srgb, #64748b 16%, var(--ed-card));
+  color: #475569;
+}
+
 .ed-franchise-app-status-badge--neutral {
   background: var(--ed-surface-container-low);
   color: var(--ed-muted);
@@ -238,7 +276,7 @@
 
 .ed-franchise-app-mobile-card__head {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.75rem;
   align-items: start;
 }
@@ -285,12 +323,14 @@
   margin: 0;
   font-size: 0.9375rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .ed-franchise-app-mobile-card__date {
   font-size: 0.75rem;
   color: var(--ed-muted);
   white-space: nowrap;
+  text-align: right;
 }
 
 .ed-franchise-app-mobile-card__location {
@@ -300,6 +340,7 @@
   margin: 0.35rem 0 0;
   font-size: 0.8125rem;
   color: var(--ed-muted);
+  overflow-wrap: anywhere;
 }
 
 .ed-franchise-app-mobile-card__footer {
@@ -361,8 +402,64 @@
   padding: 2rem;
 }
 
-.ed-franchise-apps-page__add-form {
-  margin-top: 1rem;
+.ed-franchise-app-manual-dialog {
+  box-sizing: border-box;
+  width: calc(100vw - 1rem);
+  max-width: min(52rem, calc(100vw - 1rem));
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 0.75rem);
+  margin: max(0.375rem, env(safe-area-inset-top, 0px)) auto max(0.375rem, env(safe-area-inset-bottom, 0px));
+}
+
+.ed-franchise-app-manual-dialog .ed-import-dialog__panel {
+  min-height: 0;
+  max-height: inherit;
+}
+
+.ed-franchise-app-manual-dialog .ed-import-dialog__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ed-franchise-app-manual-dialog .ed-import-dialog__header h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding-right: 0.5rem;
+}
+
+.ed-franchise-app-manual-dialog .ed-import-dialog__footer {
+  padding-bottom: calc(0.625rem + env(safe-area-inset-bottom, 0px));
+}
+
+.ed-franchise-app-manual-dialog__sections {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ed-franchise-app-manual-dialog__sections .ed-franchise-app-detail__card {
+  margin: 0;
+}
+
+.ed-franchise-app-manual-dialog__sections .ed-textarea,
+.ed-franchise-app-manual-dialog__sections .ed-field {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .ed-franchise-app-manual-dialog {
+    width: calc(100vw - 0.5rem);
+    max-width: none;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  }
+
+  .ed-franchise-app-manual-dialog .ed-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ed-franchise-app-manual-dialog .ed-franchise-app-detail__card {
+    padding: 0.875rem 1rem;
+  }
 }
 
 /* Detail panel */
@@ -399,7 +496,7 @@
 
 .ed-franchise-app-detail__hero-copy {
   flex: 1;
-  min-width: 12rem;
+  min-width: 0;
 }
 
 .ed-franchise-app-detail__hero-title {
@@ -407,6 +504,7 @@
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .ed-franchise-app-detail__hero-subtitle {
@@ -519,8 +617,10 @@
 
 .ed-franchise-app-detail__field-value--contact {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
+  max-width: 100%;
 }
 
 .ed-franchise-app-detail__field-value--italic {
@@ -543,6 +643,7 @@
 .ed-franchise-app-detail__map-frame {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: 12rem;
   border: 0;
   background: var(--ed-surface-container-low);
@@ -561,6 +662,8 @@
   text-decoration: none;
   border-top: 1px solid var(--ed-border);
   background: var(--ed-card);
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .ed-franchise-app-detail__map-label:hover {
@@ -602,7 +705,7 @@
 
 .ed-franchise-apps-page__fab {
   position: fixed;
-  right: 1.25rem;
+  right: max(1rem, env(safe-area-inset-right, 0px));
   bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   width: 3.5rem;
   height: 3.5rem;

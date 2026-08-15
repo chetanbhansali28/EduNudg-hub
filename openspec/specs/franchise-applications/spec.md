@@ -48,6 +48,20 @@ Traceability: FR-B20
 - **WHEN** brand staff open Franchise Applications
 - **THEN** pending inquiries from public and manual entry are listed for review
 
+#### Scenario: Search finds applications from any tab
+
+- **WHEN** brand staff type in Search applications while Pending, Decided, or Deleted is selected
+- **THEN** matching inquiries are shown immediately (name, applicant, city, email, phone)
+- **AND** the view switches to **All applications** so results are not hidden by the previous tab
+- **AND** clearing the search restores the previous tab so unmatched applications are hidden again
+
+#### Scenario: Soft-deleted franchise stays in applications history
+
+- **WHEN** brand staff delete a franchise from Franchise Management (`soft_delete_franchise_center`)
+- **THEN** the matching approved inquiry is **not** removed
+- **AND** the inquiry leaves the **Decided** tab and appears under **Deleted** with a DELETED badge
+- **AND** the detail view explains the franchise was deleted from Franchise Management and is kept for history
+
 ### Requirement: Approve franchise inquiry
 
 Brand staff SHALL approve inquiries to provision a franchise center, domain, and operator invite atomically.
@@ -74,5 +88,12 @@ Brand staff SHALL create franchise inquiries manually from `/app/franchise-appli
 
 #### Scenario: Staff manual franchise inquiry
 
-- **WHEN** brand staff create an inquiry via `create_franchise_inquiry_staff`
-- **THEN** the inquiry appears in the franchise applications list for review and approval
+- **WHEN** brand staff choose **Add Franchise**
+- **THEN** a modal dialog opens with the same fields as the public apply form
+- **AND** submitting via `create_franchise_inquiry_staff` adds the inquiry to the franchise applications list for review and approval
+
+#### Scenario: Franchise applications stay usable on small screens
+
+- **WHEN** brand staff use Franchise Applications on a phone or tablet
+- **THEN** filter tabs, application names, the add-franchise dialog, and approve/reject actions remain fully visible without clipping
+- **AND** the add-franchise dialog scrolls inside the modal so header and footer stay on screen

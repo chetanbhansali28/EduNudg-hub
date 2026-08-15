@@ -59,11 +59,11 @@ export function FranchiseApplicationsPage() {
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<InquiryFilter>("pending");
   const [search, setSearch] = useState("");
+  const filterBeforeSearchRef = useRef<InquiryFilter>("pending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rejectMode, setRejectMode] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [addFormOpen, setAddFormOpen] = useState(false);
-  const addFormRef = useRef<HTMLDivElement>(null);
   const { isDesktop, isMobile } = useOpsBreakpoint();
 
   const inquiries = useQuery({
@@ -79,9 +79,29 @@ export function FranchiseApplicationsPage() {
     },
   });
 
+  const deletedCenters = useQuery({
+    queryKey: ["franchise-centers-deleted", brandId],
+    enabled: !!brandId,
+    queryFn: async () => {
+      const { data, error: qErr } = await getSupabase()
+        .from("franchise_centers")
+        .select("id, deleted_at")
+        .eq("brand_id", brandId!)
+        .not("deleted_at", "is", null);
+      return supabaseList(data, qErr) as { id: string; deleted_at: string | null }[];
+    },
+  });
+
   const all = inquiries.data ?? [];
-  const counts = useMemo(() => inquiryCounts(all), [all]);
-  const filtered = useMemo(() => filterInquiries(all, filter, search), [all, filter, search]);
+  const deletedCenterIds = useMemo(
+    () => new Set((deletedCenters.data ?? []).map((row) => row.id)),
+    [deletedCenters.data],
+  );
+  const counts = useMemo(() => inquiryCounts(all, deletedCenterIds), [all, deletedCenterIds]);
+  const filtered = useMemo(
+    () => filterInquiries(all, filter, search, deletedCenterIds),
+    [all, filter, search, deletedCenterIds],
+  );
   const selected = all.find((row) => row.id === selectedId) ?? null;
   const now = Date.now();
 
@@ -112,14 +132,6 @@ export function FranchiseApplicationsPage() {
     setSelectedId(filtered[0]!.id);
   }, [filtered, selectedId, isDesktop]);
 
-  useEffect(() => {
-    if (!addFormOpen || !addFormRef.current) return;
-    const frame = requestAnimationFrame(() => {
-      addFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [addFormOpen]);
-
   const approve = useMutation({
     mutationFn: async () => {
       if (!selectedId) return;
@@ -129,6 +141,7 @@ export function FranchiseApplicationsPage() {
     },
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
+      void qc.invalidateQueries({ queryKey: ["franchise-centers-deleted", brandId] });
       void qc.invalidateQueries({ queryKey: ["centers", brandId] });
       void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
       closeDetail();
@@ -155,7 +168,7 @@ export function FranchiseApplicationsPage() {
 
   const desktopFilterTabs = INQUIRY_FILTER_OPTIONS.map((option) => ({
     value: option.value,
-    label: option.label,
+    label: isMobile ? option.mobileLabel : option.label,
     count: counts[option.value],
   }));
 
@@ -171,14 +184,14 @@ export function FranchiseApplicationsPage() {
   );
 
   const renderDesktopList = () => {
-    if (inquiries.isLoading) return <p className="ed-text-sm ed-muted">Loading applications…</p>;
+    if (inquiries.isLoading || deletedCenters.isLoading) return <p className="ed-text-sm ed-muted">Loading applications…</p>;
     if (filtered.length === 0) return listEmpty;
 
     return (
       <div className="ed-franchise-apps-page__desktop-list">
         {filtered.map((row) => {
           const title = inquiryListTitle(row);
-          const status = inquiryStatusPresentation(row);
+          const status = inquiryStatusPresentation(row, deletedCenterIds);
           const location = inquiryLocationLine(row);
 
           return (
@@ -207,14 +220,14 @@ export function FranchiseApplicationsPage() {
   };
 
   const renderMobileList = () => {
-    if (inquiries.isLoading) return <p className="ed-text-sm ed-muted">Loading applications…</p>;
+    if (inquiries.isLoading || deletedCenters.isLoading) return <p className="ed-text-sm ed-muted">Loading applications…</p>;
     if (filtered.length === 0) return listEmpty;
 
     return (
       <div className="ed-franchise-apps-page__mobile-list">
         {filtered.map((row) => {
           const title = inquiryListTitle(row);
-          const status = inquiryStatusPresentation(row);
+          const status = inquiryStatusPresentation(row, deletedCenterIds);
           const location = inquiryMobileLocation(row);
           const avatarTone = inquiryAvatarTone(title);
 
@@ -232,7 +245,7 @@ export function FranchiseApplicationsPage() {
                 <div>
                   <div className="ed-franchise-app-mobile-card__title-row">
                     <h3 className="ed-franchise-app-mobile-card__title">{title}</h3>
-                    {status.tone === "new" ? <StatusBadge {...status} /> : null}
+                    {status.tone === "new" || status.tone === "deleted" ? <StatusBadge {...status} /> : null}
                   </div>
                   {location ? (
                     <p className="ed-franchise-app-mobile-card__location">
@@ -254,7 +267,7 @@ export function FranchiseApplicationsPage() {
   };
 
   return (
-    <div className="ed-franchise-apps-page">
+    <div className={`ed-franchise-apps-page${selected ? " ed-franchise-apps-page--detail-open" : ""}`}>
       <PipelinePageHeader
         title="Franchise Applications"
         subtitle="Review and manage incoming center requests."
@@ -268,7 +281,19 @@ export function FranchiseApplicationsPage() {
           <input
             type="search"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              const hadQuery = search.trim().length > 0;
+              const hasQuery = value.trim().length > 0;
+              setSearch(value);
+              if (hasQuery && !hadQuery) {
+                filterBeforeSearchRef.current = filter === "all" ? filterBeforeSearchRef.current : filter;
+                setFilter("all");
+              }
+              if (!hasQuery && hadQuery) {
+                setFilter(filterBeforeSearchRef.current);
+              }
+            }}
             placeholder="Search applications..."
             aria-label="Search applications"
           />
@@ -302,6 +327,7 @@ export function FranchiseApplicationsPage() {
             <FranchiseInquiryDetailCard
               inquiry={selected}
               pending={isPendingInquiry(selected)}
+              convertedCenterDeleted={deletedCenterIds.has(selected.converted_center_id ?? "")}
               onBack={closeDetail}
               onApprove={() => approve.mutate()}
               onReject={() => {
@@ -326,25 +352,24 @@ export function FranchiseApplicationsPage() {
         }
       />
 
-      {addFormOpen && brandId ? (
-        <div ref={addFormRef} className="ed-franchise-apps-page__add-form">
-          <ManualFranchiseInquiryCard
-            brandId={brandId}
-            formOpen={addFormOpen}
-            onFormOpenChange={setAddFormOpen}
-            hideTrigger
-          />
-        </div>
+      {brandId ? (
+        <ManualFranchiseInquiryCard
+          brandId={brandId}
+          open={addFormOpen}
+          onClose={() => setAddFormOpen(false)}
+        />
       ) : null}
 
-      <button
-        type="button"
-        className="ed-franchise-apps-page__fab"
-        aria-label="Add Franchise"
-        onClick={() => setAddFormOpen(true)}
-      >
-        +
-      </button>
+      {isMobile && !selected && !addFormOpen ? (
+        <button
+          type="button"
+          className="ed-franchise-apps-page__fab"
+          aria-label="Add Franchise"
+          onClick={() => setAddFormOpen(true)}
+        >
+          +
+        </button>
+      ) : null}
     </div>
   );
 }

@@ -1,10 +1,13 @@
 import type { FranchiseInquiry } from "./FranchiseInquiryDetailCard";
 
-export type InquiryFilter = "all" | "pending" | "decided";
+export type InquiryFilter = "all" | "pending" | "decided" | "deleted";
+
+const EMPTY_DELETED_CENTER_IDS: ReadonlySet<string> = new Set();
 
 export const INQUIRY_FILTER_OPTIONS: { value: InquiryFilter; label: string; mobileLabel: string }[] = [
   { value: "pending", label: "Pending review", mobileLabel: "Pending" },
   { value: "decided", label: "Decided", mobileLabel: "Decided" },
+  { value: "deleted", label: "Deleted", mobileLabel: "Deleted" },
   { value: "all", label: "All applications", mobileLabel: "All" },
 ];
 
@@ -57,10 +60,24 @@ export function formatInquiryRelativeWhen(iso: string, nowMs: number = Date.now(
 
 export type InquiryStatusPresentation = {
   label: string;
-  tone: "new" | "pending" | "approved" | "rejected" | "neutral";
+  tone: "new" | "pending" | "approved" | "rejected" | "deleted" | "neutral";
 };
 
-export function inquiryStatusPresentation(row: FranchiseInquiry): InquiryStatusPresentation {
+/** Approved applications whose franchise was later soft-deleted in Franchise Management. */
+export function isDeletedConvertedInquiry(
+  row: FranchiseInquiry,
+  deletedCenterIds: ReadonlySet<string> = EMPTY_DELETED_CENTER_IDS,
+) {
+  return Boolean(row.converted_center_id && deletedCenterIds.has(row.converted_center_id));
+}
+
+export function inquiryStatusPresentation(
+  row: FranchiseInquiry,
+  deletedCenterIds: ReadonlySet<string> = EMPTY_DELETED_CENTER_IDS,
+): InquiryStatusPresentation {
+  if (isDeletedConvertedInquiry(row, deletedCenterIds)) {
+    return { label: "DELETED", tone: "deleted" };
+  }
   if (row.status === "new") return { label: "NEW", tone: "new" };
   if (isPendingInquiry(row)) return { label: "PENDING", tone: "pending" };
   if (row.converted_center_id) return { label: "APPROVED", tone: "approved" };
@@ -80,34 +97,55 @@ export function inquiryAvatarTone(seed: string): AvatarTone {
   return AVATAR_TONES[hash % AVATAR_TONES.length] ?? "blue";
 }
 
-export function filterInquiries(rows: FranchiseInquiry[], filter: InquiryFilter, search: string) {
+export function inquiryMatchesSearch(row: FranchiseInquiry, search: string) {
   const query = search.trim().toLowerCase();
+  if (!query) return true;
+
+  const haystack = [
+    inquiryListTitle(row),
+    row.full_name,
+    row.email,
+    row.city,
+    row.state,
+    row.pincode,
+    row.phone_e164,
+    row.address_line,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query);
+}
+
+export function filterInquiries(
+  rows: FranchiseInquiry[],
+  filter: InquiryFilter,
+  search: string,
+  deletedCenterIds: ReadonlySet<string> = EMPTY_DELETED_CENTER_IDS,
+) {
+  const query = search.trim();
   return rows.filter((row) => {
+    if (query) return inquiryMatchesSearch(row, query);
+
+    const deleted = isDeletedConvertedInquiry(row, deletedCenterIds);
     if (filter === "pending" && !isPendingInquiry(row)) return false;
-    if (filter === "decided" && isPendingInquiry(row)) return false;
-    if (!query) return true;
-
-    const haystack = [
-      inquiryListTitle(row),
-      row.full_name,
-      row.email,
-      row.city,
-      row.state,
-      row.pincode,
-      row.phone_e164,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return haystack.includes(query);
+    if (filter === "decided" && (isPendingInquiry(row) || deleted)) return false;
+    if (filter === "deleted" && !deleted) return false;
+    return true;
   });
 }
 
-export function inquiryCounts(rows: FranchiseInquiry[]) {
+export function inquiryCounts(
+  rows: FranchiseInquiry[],
+  deletedCenterIds: ReadonlySet<string> = EMPTY_DELETED_CENTER_IDS,
+) {
+  const deleted = rows.filter((row) => isDeletedConvertedInquiry(row, deletedCenterIds)).length;
   return {
     pending: rows.filter(isPendingInquiry).length,
-    decided: rows.filter((row) => !isPendingInquiry(row)).length,
+    decided: rows.filter((row) => !isPendingInquiry(row) && !isDeletedConvertedInquiry(row, deletedCenterIds))
+      .length,
+    deleted,
     all: rows.length,
   };
 }

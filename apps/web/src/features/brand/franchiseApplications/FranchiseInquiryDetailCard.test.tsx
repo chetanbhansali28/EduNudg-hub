@@ -53,4 +53,30 @@ describe("FranchiseInquiryDetailCard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Approve & create center" }));
     expect(onApprove).toHaveBeenCalled();
   });
+
+  it("regression_deleted_converted_center_explains_history_keep", () => {
+    render(
+      <FranchiseInquiryDetailCard
+        inquiry={{
+          ...inquiry,
+          status: "converted",
+          converted_center_id: "center-gone",
+        }}
+        pending={false}
+        convertedCenterDeleted
+        onApprove={vi.fn()}
+        onReject={vi.fn()}
+        rejectMode={false}
+        rejectReason=""
+        onRejectReasonChange={vi.fn()}
+        onConfirmReject={vi.fn()}
+        onCancelAction={vi.fn()}
+        approvePending={false}
+        rejectPending={false}
+      />
+    );
+
+    expect(screen.getByText(/deleted from Franchise Management/i)).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Approve & create center" })).toBeNull();
+  });
 });

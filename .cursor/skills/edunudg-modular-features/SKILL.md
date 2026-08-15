@@ -85,6 +85,7 @@ description: Add EduNudg features using modular files, service layer, base theme
 ## Manual leads (staff)
 
 - Platform / brand / center manual entry — [`docs/spec/manual-leads.md`](../../docs/spec/manual-leads.md), `manualLeadsApi.ts`, RPCs in migration `019_*`.
+- Brand Franchise Applications: **Add Franchise** uses a modal dialog, not an below-the-fold `AddFormSection`.
 - App pages use `PageGrid` / `FormGrid` from `@edunudg/ui` — see [`ui-shell-standards.md`](../../docs/spec/ui-shell-standards.md).
 
 ## Before finish

@@ -6,6 +6,7 @@ import {
   inquiryListTitle,
   inquiryLocationLine,
   inquiryStatusPresentation,
+  isDeletedConvertedInquiry,
   isPendingInquiry,
   mapsEmbedUrl,
   mapsSearchUrl,
@@ -55,7 +56,50 @@ describe("franchiseApplicationsHelpers", () => {
     expect(filterInquiries(rows, "pending", "")).toHaveLength(1);
     expect(filterInquiries(rows, "decided", "")).toHaveLength(1);
     expect(filterInquiries(rows, "all", "eduquest")).toHaveLength(1);
-    expect(inquiryCounts(rows)).toEqual({ pending: 1, decided: 1, all: 2 });
+    expect(filterInquiries(rows, "pending", "eduquest")).toHaveLength(1);
+    expect(inquiryCounts(rows)).toEqual({ pending: 1, decided: 1, deleted: 0, all: 2 });
+  });
+
+  it("regression_search_finds_application_from_any_tab", () => {
+    const decided: FranchiseInquiry = {
+      ...base,
+      id: "inq-2",
+      status: "lost",
+      full_name: "Ravi Kumar",
+      email: "ravi@example.com",
+      proposed_franchise_name: "EduQuest Academy",
+    };
+    expect(filterInquiries([base, decided], "pending", "EduQuest").map((row) => row.id)).toEqual(["inq-2"]);
+    expect(filterInquiries([base, decided], "deleted", "arti").map((row) => row.id)).toEqual(["inq-1"]);
+  });
+
+  it("regression_deleted_converted_inquiry_uses_deleted_tab", () => {
+    const approvedLive: FranchiseInquiry = {
+      ...base,
+      id: "inq-live",
+      status: "converted",
+      converted_center_id: "center-live",
+      proposed_franchise_name: "Live Branch",
+    };
+    const approvedDeleted: FranchiseInquiry = {
+      ...base,
+      id: "inq-gone",
+      status: "converted",
+      converted_center_id: "center-gone",
+      proposed_franchise_name: "Deleted Branch",
+    };
+    const rows = [base, approvedLive, approvedDeleted];
+    const deletedIds = new Set(["center-gone"]);
+
+    expect(isDeletedConvertedInquiry(approvedDeleted, deletedIds)).toBe(true);
+    expect(inquiryStatusPresentation(approvedDeleted, deletedIds)).toEqual({
+      label: "DELETED",
+      tone: "deleted",
+    });
+    expect(inquiryStatusPresentation(approvedLive, deletedIds).tone).toBe("approved");
+    expect(filterInquiries(rows, "decided", "", deletedIds).map((row) => row.id)).toEqual(["inq-live"]);
+    expect(filterInquiries(rows, "deleted", "", deletedIds).map((row) => row.id)).toEqual(["inq-gone"]);
+    expect(inquiryCounts(rows, deletedIds)).toEqual({ pending: 1, decided: 1, deleted: 1, all: 3 });
   });
 
   it("maps inquiry status presentation", () => {

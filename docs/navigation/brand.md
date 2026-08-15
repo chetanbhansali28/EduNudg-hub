@@ -12,7 +12,7 @@ See [Navigation spec](../spec/navigation-spec.md).
 
 - Home (dashboard — unassigned / stale lead KPIs)
 - **Student Leads** (`/app/leads`) — assign, stale queue, manual add
-- **Franchise Applications** (`/app/franchise-applications`) — approve/reject, manual add
+- **Franchise Applications** (`/app/franchise-applications`) — approve/reject; **Add Franchise** modal; **Deleted** tab for applications whose center was later soft-deleted
 - Franchise Centers (`/app/centers`) — edit existing (including Franchise Identity login email/password); **View Frontend** / **View Backend**; disable/enable; soft-delete; new centers via franchise application approval or **Import Franchise** CSV
 - Curriculum (abacus level metadata, topics, marketing video)
 - Royalties & Finance

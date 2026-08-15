@@ -39,7 +39,7 @@ Spark Academy / Abacus Classic public lead forms live in modals — Playwright h
 
 Platform brand settings: theme/name/status saves must not call `brand-owner-credentials` unless login fields were intentionally edited (`BrandEditForm` `loginFieldsTouched` + `shouldSyncBrandOwnerCredentials`).
 
-Brand franchise centers: profile/photo saves must not call `center-owner-credentials` unless Franchise Identity login email/password were intentionally edited (`CenterDetailPanel` `loginFieldsTouched` + `shouldSyncCenterOwnerCredentials`). Brand `/app/centers` launches View Frontend/View Backend; disable/enable uses `set_franchise_center_status`; delete uses `soft_delete_franchise_center`.
+Brand franchise centers: profile/photo saves must not call `center-owner-credentials` unless Franchise Identity login email/password were intentionally edited (`CenterDetailPanel` `loginFieldsTouched` + `shouldSyncCenterOwnerCredentials`). Brand `/app/centers` launches View Frontend/View Backend; disable/enable uses `set_franchise_center_status`; delete uses `soft_delete_franchise_center`. Soft-deleted centers remain on Franchise Applications under the **Deleted** tab (`regression_deleted_converted_inquiry_uses_deleted_tab`, `regression_deleted_franchise_tab_separates_soft_deleted_centers`) — do not drop inquiry history.
 
 Franchise CSV import: platform `/admin/brands/:slug` and brand `/app/centers` share `FranchiseCenterImportDialog`; required CSV columns are `name` and `city`; slug is derived from name (`deriveFranchiseCenterSlug` + RPC) then `import_franchise_centers` (`is_platform_admin` or `has_brand_access`) — see `docs/ops/franchise-center-csv-import.md`.
 

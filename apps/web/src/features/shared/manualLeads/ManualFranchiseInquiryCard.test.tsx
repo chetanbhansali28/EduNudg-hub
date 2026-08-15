@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ManualFranchiseInquiryCard } from "./ManualFranchiseInquiryCard";
@@ -9,22 +9,37 @@ vi.mock("@/lib/manualLeadsApi", () => ({
   createFranchiseInquiryStaff: (...args: unknown[]) => createFranchiseInquiryStaff(...args),
 }));
 
+function polyfillDialog() {
+  HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
+    this.open = true;
+  });
+  HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+    this.open = false;
+  });
+}
+
 describe("ManualFranchiseInquiryCard", () => {
   beforeEach(() => {
+    polyfillDialog();
     createFranchiseInquiryStaff.mockReset();
     createFranchiseInquiryStaff.mockResolvedValue({ id: "inq-1", error: null });
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("regression_manual_franchise_matches_public_apply_fields", async () => {
     const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    const onClose = vi.fn();
     render(
       <QueryClientProvider client={qc}>
-        <ManualFranchiseInquiryCard brandId="brand-1" />
+        <ManualFranchiseInquiryCard brandId="brand-1" open onClose={onClose} />
       </QueryClientProvider>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Add franchise application" }));
-
+    expect(screen.getByRole("heading", { name: "Add franchise application" })).toBeDefined();
+    expect(document.querySelector(".ed-franchise-app-manual-dialog")).not.toBeNull();
     expect(screen.getByLabelText("Full name")).toBeDefined();
     expect(screen.getByLabelText("Preferred city")).toBeDefined();
     expect(screen.getByLabelText("Pincode")).toBeDefined();
@@ -59,5 +74,6 @@ describe("ManualFranchiseInquiryCard", () => {
         message: "",
       });
     });
+    expect(onClose).toHaveBeenCalled();
   });
 });
