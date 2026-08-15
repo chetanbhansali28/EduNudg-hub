@@ -43,6 +43,8 @@ Brand franchise centers: profile/photo saves must not call `center-owner-credent
 
 Franchise CSV import: platform `/admin/brands/:slug` and brand `/app/centers` share `FranchiseCenterImportDialog`; required CSV columns are `name` and `city`; slug is derived from name (`deriveFranchiseCenterSlug` + RPC) then `import_franchise_centers` (`is_platform_admin` or `has_brand_access`) — see `docs/ops/franchise-center-csv-import.md`.
 
+Center public footer social: `regression_center_landing_footer_ignores_brand_social_connect` — icons use franchise `social_links`, not brand `social_connect`.
+
 Coverage target: ≥80% on `packages/*`.
 
 ## Before finish

@@ -196,6 +196,7 @@ See [merchandise spec](../spec/merchandise.md).
 - Franchise staff: **Center portal → Settings** (`/app/settings`) — update photo, address, phone, and social links. Sign-in email comes from Google/social auth; public site URL is the center marketing host (no separate website field).
 - Center photo storage: `{brand_id}/centers/{center_id}/photo.{ext}` in **`brand-assets`** bucket.
 - Changes appear on the center public site (`{center}.{brand}.localhost:9000`) via `get_center_landing_public`.
+- Footer Facebook/Instagram on the **center** site use those franchise social links — not brand Homepage → Social Media Connect.
 
 ```bash
 supabase db push   # applies 009 if not yet applied

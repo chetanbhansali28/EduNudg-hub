@@ -26,6 +26,8 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage`. Theme se
 
 **Social Media Connect** configures Facebook and Instagram footer icons only. Brand public landing does **not** show a floating WhatsApp chat button or message bubble (legacy `social_connect` WhatsApp fields are ignored on render).
 
+**Center public footer:** Facebook/Instagram icons use that franchise’s `franchise_centers.social_links` (center Settings). They must **not** inherit brand `social_connect` (the brand owner’s pages). If the center has not saved Facebook/Instagram URLs, those footer icons are omitted.
+
 When a brand switches from Novu to Abacus Classic or Spark Academy, stored `landing` JSON is merged with the new theme defaults. **Novu-era section toggles do not disable Abacus/Spark sections** until the brand owner saves from the alternate-theme editor (detected via Abacus/Spark-specific fields in JSON). Shared copy (hero, FAQ, testimonials, features) is preserved. See `mergeAbacusClassicSectionVisibility()` in `homepageSections.ts`.
 
 Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, domains, and franchise centers — not marketing theme.

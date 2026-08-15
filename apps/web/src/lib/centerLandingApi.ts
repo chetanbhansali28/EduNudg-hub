@@ -6,7 +6,7 @@ import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
 import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPublicSite";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { parseBrandLegalPagesRecord, type BrandLegalPages } from "@/lib/brandLegalPages";
-import { parseBrandSocialConnect, type BrandSocialConnect } from "@/lib/brandSocialConnect";
+import { socialConnectFromCenterLinks, type BrandSocialConnect } from "@/lib/brandSocialConnect";
 import type { HomepageConfig, MarketingTheme } from "@/types/homepage";
 import { parseMarketingTheme } from "@/types/homepage";
 
@@ -106,22 +106,19 @@ function parseCenterSocialLinks(raw: unknown): CenterSocialLink[] {
     .filter((x): x is CenterSocialLink => x !== null);
 }
 
-function parseCenterBrandMarketingExtras(row: CenterLandingRow | undefined): {
+function parseCenterBrandMarketingExtras(
+  row: CenterLandingRow | undefined,
+  socialLinks: CenterSocialLink[]
+): {
   legalPages: BrandLegalPages;
   socialConnect: BrandSocialConnect;
 } {
-  if (!row) return { legalPages: {}, socialConnect: {} };
+  if (!row) return { legalPages: {}, socialConnect: socialConnectFromCenterLinks(socialLinks) };
   const legalPages =
     row.legal_pages && typeof row.legal_pages === "object"
       ? parseBrandLegalPagesRecord(row.legal_pages as Record<string, unknown>)
       : {};
-  const socialConnect = parseBrandSocialConnect(
-    row.social_connect && typeof row.social_connect === "object"
-      ? { social_connect: row.social_connect }
-      : undefined,
-    row.landing
-  );
-  return { legalPages, socialConnect };
+  return { legalPages, socialConnect: socialConnectFromCenterLinks(socialLinks) };
 }
 
 const EMPTY_CENTER_MARKETING = { legalPages: {} as BrandLegalPages, socialConnect: {} as BrandSocialConnect };
@@ -229,7 +226,8 @@ export async function fetchCenterLandingBundle(
     const row = data as CenterLandingRow;
     const theme = parseMarketingTheme(row.marketing_theme);
     const publicStats = parsePublicStats(row.public_stats);
-    const { legalPages, socialConnect } = parseCenterBrandMarketingExtras(row);
+    const socialLinks = parseCenterSocialLinks(row.center_social_links);
+    const { legalPages, socialConnect } = parseCenterBrandMarketingExtras(row, socialLinks);
 
     if (!row.center_name || !row.brand_name) {
       return {
@@ -249,6 +247,7 @@ export async function fetchCenterLandingBundle(
           brandName: row.brand_name ?? fallbackBrand,
           city: row.center_city ?? null,
           photoUrl: row.center_photo_url ?? null,
+          socialLinks,
         },
         publicCurriculum: curriculum,
         marketingTheme: theme,
@@ -281,7 +280,7 @@ export async function fetchCenterLandingBundle(
         contactPhone: row.center_contact_phone ?? null,
         photoUrl: row.center_photo_url ?? null,
         shortDescription: row.center_short_description ?? null,
-        socialLinks: parseCenterSocialLinks(row.center_social_links),
+        socialLinks,
         brandName: row.brand_name,
         brandSlug: row.brand_slug ?? brandSlug,
       },

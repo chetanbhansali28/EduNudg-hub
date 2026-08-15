@@ -109,3 +109,18 @@ export function migrateSocialConnectFromLanding(
 export function hasBrandSocialFooterIcons(connect: BrandSocialConnect): boolean {
   return Boolean(connect.facebookUrl || connect.instagramUrl);
 }
+
+/** Footer Facebook/Instagram for a center host — from franchise `social_links`, not brand `social_connect`. */
+export function socialConnectFromCenterLinks(
+  links: Array<{ platform: string; url: string }>
+): BrandSocialConnect {
+  const migrated: BrandSocialConnect = {};
+  for (const link of links) {
+    const url = normalizeSocialUrl(trimOptional(link.url));
+    if (!url) continue;
+    const kind = platformKind(link.platform, url);
+    if (kind === "facebook" && !migrated.facebookUrl) migrated.facebookUrl = url;
+    if (kind === "instagram" && !migrated.instagramUrl) migrated.instagramUrl = url;
+  }
+  return migrated;
+}

@@ -32,6 +32,7 @@ Bucket: `brand-assets` (`platform/marketing/…`, `{brandId}/marketing/…`, log
 - `ON CONFLICT … DO UPDATE SET settings = EXCLUDED.settings` for `brand_settings`.
 - Save an editor while the UI is showing stock defaults over customized DB content.
 - Delete Storage objects to “fix” missing images — fix JSON URLs.
+- Inherit brand `social_connect` Facebook/Instagram onto center public footers (use `franchise_centers.social_links`).
 
 ## Code / specs
 

@@ -55,11 +55,21 @@ The system SHALL accept `social_links` as a JSON array of `{platform, url}` with
 
 The center public homepage SHALL display profile fields from `get_center_landing_public` including display name, description, address, contact phone, photo, and social links.
 
+Footer Facebook and Instagram icons on the **center** host SHALL use `franchise_centers.social_links`, not brand `social_connect`.
+
 #### Scenario: Public page after settings save
 
 - **WHEN** a visitor opens the center public homepage after staff save profile changes
 - **THEN** updated display name, blurb, contact, photo, and social links are visible
 - **AND** the nav shows the brand logo only (no center logo)
+
+#### Scenario: Footer social uses franchise URLs
+
+- **GIVEN** the brand Social Media Connect points at the brand owner's Facebook/Instagram
+- **AND** the franchise saved its own Facebook/Instagram URLs in center Settings
+- **WHEN** a visitor clicks footer Facebook or Instagram on the center public site
+- **THEN** the browser opens the franchise URLs
+- **AND** does not open the brand owner's social pages
 
 ### Requirement: No franchise apply on center public landing
 

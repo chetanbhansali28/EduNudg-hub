@@ -3,6 +3,7 @@ import {
   hasBrandSocialFooterIcons,
   migrateSocialConnectFromLanding,
   parseBrandSocialConnect,
+  socialConnectFromCenterLinks,
 } from "./brandSocialConnect";
 
 describe("brandSocialConnect", () => {
@@ -48,5 +49,14 @@ describe("brandSocialConnect", () => {
     expect(hasBrandSocialFooterIcons({ whatsappPhoneE164: "+919876543210", whatsappEnabled: true })).toBe(
       false
     );
+  });
+
+  it("regression_center_footer_uses_franchise_social_not_brand", () => {
+    const connect = socialConnectFromCenterLinks([
+      { platform: "Facebook", url: "https://facebook.com/koramangala-center" },
+      { platform: "Instagram", url: "https://instagram.com/koramangala-center" },
+    ]);
+    expect(connect.facebookUrl).toBe("https://facebook.com/koramangala-center");
+    expect(connect.instagramUrl).toBe("https://instagram.com/koramangala-center");
   });
 });
