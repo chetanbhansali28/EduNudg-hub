@@ -3,9 +3,24 @@ import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandMerchandiseCatalogSection } from "./BrandMerchandiseCatalogSection";
 
+vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
+  useOpsBreakpoint: () => ({ isDesktop: true, isMobile: false }),
+}));
+
 vi.mock("@/lib/merchandiseOrdersApi", () => ({
   upsertMerchandiseCatalogItem: vi.fn().mockResolvedValue("new-item-id"),
   deleteMerchandiseCatalogItem: vi.fn(),
+  listMerchandiseCatalog: vi.fn().mockResolvedValue([
+    {
+      id: "item-1",
+      sku: "KIT001",
+      name: "Level 1 Kit",
+      price_cents: 105000,
+      currency: "INR",
+      is_active: true,
+      photo_urls: ["https://cdn.example/photo-1.jpg"],
+    },
+  ]),
 }));
 
 vi.mock("@/lib/supabase", () => ({
@@ -52,14 +67,15 @@ describe("BrandMerchandiseCatalogSection", () => {
     );
 
     expect(await screen.findByText("Level 1 Kit")).toBeDefined();
-    expect(screen.getByText("Active")).toBeDefined();
+    expect(screen.getAllByText("Active").length).toBeGreaterThan(0);
     expect(screen.getByText("Edit Details")).toBeDefined();
     expect(screen.getByText("Product Assets (1/5 uploaded)")).toBeDefined();
     expect(screen.getByRole("button", { name: "Manage Gallery" })).toBeDefined();
     expect(screen.getByTestId("product-photos")).toBeDefined();
+    expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
   });
 
-  it("regression_add_catalog_panel_shows_below_tabs_when_open", async () => {
+  it("regression_add_catalog_panel_shows_in_detail_when_open", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={qc}>

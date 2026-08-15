@@ -62,7 +62,7 @@ export function JourneySection({
     <section className="sa-journey" id="journey">
       <div className="sa-journey__header">
         <span className="sa-journey__badge">{badge}</span>
-        <h2 className="sa-journey__title">{heading || "Our Journey to Excellence"}</h2>
+        <h2 className="sa-section-title sa-journey__title">{heading || "Our Journey to Excellence"}</h2>
         {trust.intro ? <p className="sa-journey__intro">{trust.intro}</p> : null}
       </div>
 
@@ -75,7 +75,7 @@ export function JourneySection({
             >
               <JourneyRowIcon />
               <div>
-                <h3>{card.title}</h3>
+                <h3 className="sa-item-title">{card.title}</h3>
                 <p>{card.subtitle}</p>
               </div>
             </div>

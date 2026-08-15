@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import { mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { AbacusClassicEditorForm } from "./AbacusClassicEditorForm";
 import { HomepageEditorForm } from "./HomepageEditorForm";
@@ -103,5 +103,35 @@ describe("AbacusClassicEditorForm navigation", () => {
     const navPanel = screen.getByText("Menu item 1").closest(".ed-editor-item-panel") as HTMLElement;
     const linkSelect = within(navPanel).getByLabelText("Link") as HTMLSelectElement;
     expect(Array.from(linkSelect.options).some((o) => o.value === "#about")).toBe(true);
+  });
+
+  it("regression_spark_nav_dropdown_omits_duplicate_programs_and_about_us", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain");
+    render(
+      <AbacusClassicEditorForm
+        config={config}
+        marketingTheme="spark-academy"
+        portalMode="brand"
+        onChange={() => undefined}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Navigation & CTAs/i }));
+
+    const navPanel = screen.getByText("Menu item 1").closest(".ed-editor-item-panel") as HTMLElement;
+    const linkSelect = within(navPanel).getByLabelText("Link") as HTMLSelectElement;
+    const labels = Array.from(linkSelect.options).map((o) => o.textContent);
+    const values = Array.from(linkSelect.options).map((o) => o.value);
+
+    expect(labels).not.toContain("Programs (#programs)");
+    expect(labels).not.toContain("About us (#features)");
+    expect(values).not.toContain("#curriculum");
+    expect(values).toContain("#programs");
+    expect(values).toContain("#features");
+    expect(values).toContain("/about");
+    expect(values).toContain("#gallery");
+    expect(labels).toContain("Courses (#programs)");
+    expect(labels).toContain("Features (#features)");
+    expect(labels).toContain("Photo gallery (#gallery)");
   });
 });

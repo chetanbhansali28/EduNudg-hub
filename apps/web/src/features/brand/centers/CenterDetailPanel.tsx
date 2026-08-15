@@ -1,22 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  CenterAddSocialButton,
   CenterCurriculumToggleCard,
   CenterDetailFooter,
   CenterDetailHero,
   CenterDetailStatsRow,
   CenterMobileHeroBanner,
   CentersSectionCard,
-  CenterSocialLinkRow,
   CenterStatusBadge,
   FormGrid,
   Input,
   MutationError,
   PasswordInput,
   SaveButton,
-  Select,
   Textarea,
 } from "@edunudg/ui";
 import { centerPortalUrl, portalBackendUrl, portalLoginUrl } from "@/lib/brandPortalUrl";
@@ -52,18 +49,7 @@ import {
   programCurriculumSubtitle,
 } from "@/features/brand/centers/brandCentersHelpers";
 
-const SOCIAL_PLATFORMS = [
-  "Facebook",
-  "Instagram",
-  "WhatsApp",
-  "YouTube",
-  "LinkedIn",
-  "X (Twitter)",
-];
-
-const MAX_SOCIAL_LINKS = 6;
-
-type FormState = CenterPublicProfileInput & { name: string };
+type FormState = Omit<CenterPublicProfileInput, "socialLinks"> & { name: string };
 
 function centerToForm(center: BrandCenterRow): FormState {
   return {
@@ -77,8 +63,6 @@ function centerToForm(center: BrandCenterRow): FormState {
     country: center.country ?? "IN",
     contactPhone: center.contact_phone ?? "",
     photoUrl: center.photo_url ?? "",
-    socialLinks:
-      center.social_links.length > 0 ? center.social_links : [{ platform: "Facebook", url: "" }],
   };
 }
 
@@ -211,7 +195,10 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
         if (passwordError) throw new Error(passwordError);
       }
 
-      await updateFranchiseCenter(center.id, form);
+      await updateFranchiseCenter(center.id, {
+        ...form,
+        socialLinks: center.social_links,
+      });
 
       // Profile-only saves must not invoke center-owner-credentials (edge 400s block unrelated edits).
       if (shouldSyncCredentials) {
@@ -286,28 +273,6 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const updateSocial = (index: number, patch: Partial<{ platform: string; url: string }>) => {
-    setForm((prev) => ({
-      ...prev,
-      socialLinks: prev.socialLinks.map((link, i) => (i === index ? { ...link, ...patch } : link)),
-    }));
-  };
-
-  const addSocial = () => {
-    if (form.socialLinks.length >= MAX_SOCIAL_LINKS) return;
-    setForm((prev) => ({
-      ...prev,
-      socialLinks: [...prev.socialLinks, { platform: "Instagram", url: "" }],
-    }));
-  };
-
-  const removeSocial = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      socialLinks: prev.socialLinks.filter((_, i) => i !== index),
-    }));
   };
 
   const resetForm = () => {
@@ -464,33 +429,6 @@ export function CenterDetailPanel({ center, brandId, brandSlug, isMobile, onStat
         {!isMobile ? (
           <Input label="Address" value={form.addressLine1} onChange={(v) => setField("addressLine1", v)} editable />
         ) : null}
-      </CentersSectionCard>
-
-      <CentersSectionCard
-        title="Social Media"
-        action={
-          <button type="button" className="ed-centers-section__link" onClick={addSocial} disabled={form.socialLinks.length >= MAX_SOCIAL_LINKS}>
-            + Add Link
-          </button>
-        }
-      >
-        {form.socialLinks.map((link, index) => (
-          <div key={`social-${index}`} className="ed-brand-centers__social-block">
-            <Select
-              label="Platform"
-              value={link.platform}
-              onChange={(platform) => updateSocial(index, { platform })}
-              options={SOCIAL_PLATFORMS.map((p) => ({ value: p, label: p }))}
-              editable
-            />
-            <CenterSocialLinkRow
-              value={link.url}
-              onChange={(url) => updateSocial(index, { url })}
-              onRemove={form.socialLinks.length > 1 ? () => removeSocial(index) : undefined}
-            />
-          </div>
-        ))}
-        {isMobile ? <CenterAddSocialButton onClick={addSocial} /> : null}
       </CentersSectionCard>
 
       <CentersSectionCard title="Curriculum Assignment">

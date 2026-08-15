@@ -24,6 +24,7 @@ export type StoryRow = {
   image_url: string | null;
   sort_order: number;
   is_published: boolean;
+  created_at?: string | null;
 };
 
 const TRASH_ICON = (

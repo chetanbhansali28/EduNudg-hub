@@ -22,7 +22,7 @@ export function MentorCard({ founder }: { founder: HomepageFounderProfile }) {
           </span>
         )}
       </div>
-      <h3 className="sa-mentor-card__name">{founder.name}</h3>
+      <h3 className="sa-item-title sa-mentor-card__name">{founder.name}</h3>
       <p className="sa-mentor-card__role">{founder.title || founder.roleBadge}</p>
     </article>
   );
@@ -40,11 +40,11 @@ export function MentorsSection({
     <section className="sa-mentors" id="founders">
       <div className="sa-mentors__header">
         <span className="sa-mentors__badge">{eyebrow}</span>
-        <h2 className="sa-mentors__title">{title}</h2>
+        <h2 className="sa-section-title sa-mentors__title">{title}</h2>
         {subtitle ? <p className="sa-mentors__subtitle">{subtitle}</p> : null}
       </div>
       <div className="sa-mentors__track-wrap">
-        <div className="sa-mentors__track">
+        <div className="sa-mentors__track sa-mentors__track--center">
           {founders.map((founder) => (
             <MentorCard key={founder.name} founder={founder} />
           ))}

@@ -50,7 +50,7 @@ export function CourseCard({
           <span>{category}</span>
           <span className="sa-course-card__lessons">⏱ {lessonLabel}</span>
         </div>
-        <h3 className="sa-course-card__title">{program.name}</h3>
+        <h3 className="sa-item-title sa-course-card__title">{program.name}</h3>
         {blurb ? <p className="sa-course-card__desc">{blurb}</p> : null}
         <div className="sa-course-card__actions">
           <SparkAcademyCta label={enrollLabel} href={enrollHref} variant="outline" className="sa-course-card__btn" />

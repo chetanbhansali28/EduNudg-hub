@@ -10,5 +10,6 @@ export { JourneySection } from "./JourneySection";
 export { MentorCard, MentorsSection } from "./MentorsSection";
 export { TestimonialsSection } from "./TestimonialsSection";
 export { FaqSection } from "./FaqSection";
+export { GallerySection } from "./GallerySection";
 
 import "./spark-academy.css";

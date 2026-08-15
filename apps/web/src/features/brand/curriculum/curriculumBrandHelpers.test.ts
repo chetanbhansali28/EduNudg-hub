@@ -4,6 +4,7 @@ import {
   courseMetaLine,
   courseStatus,
   curriculumTabCounts,
+  curriculumPageCounts,
   editorCourseDescription,
   editorCourseTitle,
   filterCoursesByTab,
@@ -39,7 +40,19 @@ describe("curriculumBrandHelpers", () => {
     const courses = [sample, { ...sample, id: "p2", is_active: false }];
     expect(filterCoursesByTab(courses, "active")).toHaveLength(1);
     expect(filterCoursesByTab(courses, "drafts")).toHaveLength(1);
-    expect(curriculumTabCounts(courses)).toEqual({ active: 1, drafts: 1, archived: 0 });
+    expect(filterCoursesByTab(courses, "all")).toHaveLength(2);
+    expect(curriculumTabCounts(courses)).toEqual({ all: 2, active: 1, drafts: 1 });
+  });
+
+  it("regression_curriculum_page_counts_include_programs", () => {
+    const courses = [sample, { ...sample, id: "p2", is_active: false }];
+    expect(curriculumPageCounts(courses, { p1: 3, p2: 1 })).toEqual({
+      all: 2,
+      active: 1,
+      drafts: 1,
+      total: 2,
+      programs: 4,
+    });
   });
 
   it("matches search across course and program names", () => {

@@ -3,14 +3,11 @@ import type { LeadRow } from "@/lib/leadsApi";
 import { isLeadStale, leadAgeDays } from "@/lib/leadSla";
 import { initialsFromName } from "@/lib/welcomeMessage";
 
-export type LeadFilter = "unassigned" | "stale" | "lost" | "converted" | "all";
+export type LeadFilter = "pending" | "decided";
 
 export const LEAD_FILTER_OPTIONS: { value: LeadFilter; label: string; mobileLabel: string }[] = [
-  { value: "unassigned", label: "Unassigned", mobileLabel: "Unassigned" },
-  { value: "stale", label: "Needs attention", mobileLabel: "Needs attention" },
-  { value: "lost", label: "Lost", mobileLabel: "Lost" },
-  { value: "converted", label: "Converted", mobileLabel: "Converted" },
-  { value: "all", label: "All", mobileLabel: "All leads" },
+  { value: "pending", label: "Pending review", mobileLabel: "Pending" },
+  { value: "decided", label: "Decided", mobileLabel: "Decided" },
 ];
 
 export type LeadSort = "newest" | "oldest";
@@ -19,12 +16,18 @@ export function isUnassignedLead(lead: LeadRow): boolean {
   return !lead.center_id && lead.status !== "lost" && lead.status !== "converted";
 }
 
+export function isPendingLead(lead: LeadRow): boolean {
+  return lead.status !== "lost" && lead.status !== "converted";
+}
+
 export function isConvertedLead(lead: LeadRow): boolean {
   return lead.status === "converted";
 }
 
 export function leadCounts(leads: LeadRow[], nowMs = Date.now()) {
   return {
+    pending: leads.filter(isPendingLead).length,
+    decided: leads.filter((lead) => !isPendingLead(lead)).length,
     unassigned: leads.filter(isUnassignedLead).length,
     stale: leads.filter((lead) => isLeadStale(lead, nowMs)).length,
     lost: leads.filter((lead) => lead.status === "lost").length,
@@ -33,12 +36,40 @@ export function leadCounts(leads: LeadRow[], nowMs = Date.now()) {
   };
 }
 
-export function filterLeads(leads: LeadRow[], filter: LeadFilter, nowMs = Date.now()): LeadRow[] {
-  if (filter === "unassigned") return leads.filter(isUnassignedLead);
-  if (filter === "stale") return leads.filter((lead) => isLeadStale(lead, nowMs));
-  if (filter === "lost") return leads.filter((lead) => lead.status === "lost");
-  if (filter === "converted") return leads.filter(isConvertedLead);
-  return leads;
+export function leadMatchesSearch(lead: LeadRow, search: string): boolean {
+  const query = search.trim().toLowerCase();
+  if (!query) return true;
+
+  const haystack = [
+    leadListTitle(lead),
+    lead.full_name,
+    lead.parent_name,
+    lead.email,
+    lead.whatsapp_e164,
+    lead.child_name,
+    lead.city,
+    lead.pincode,
+    lead.school_name,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query);
+}
+
+export function filterLeads(
+  leads: LeadRow[],
+  filter: LeadFilter,
+  _nowMs = Date.now(),
+  search = "",
+): LeadRow[] {
+  const query = search.trim();
+  return leads.filter((lead) => {
+    if (query) return leadMatchesSearch(lead, query);
+    if (filter === "pending") return isPendingLead(lead);
+    return !isPendingLead(lead);
+  });
 }
 
 export function sortLeads(leads: LeadRow[], sort: LeadSort): LeadRow[] {
@@ -58,6 +89,26 @@ export function leadListTitle(lead: LeadRow): string {
 export function leadListLocation(lead: LeadRow): string | null {
   const location = [lead.city, lead.pincode].filter(Boolean).join(" ");
   return location || null;
+}
+
+export function leadMobileLocation(lead: LeadRow): string | null {
+  return lead.city?.trim() || lead.pincode?.trim() || null;
+}
+
+export type LeadInboxBadgeTone = "new" | "pending" | "approved" | "rejected" | "neutral";
+
+export function leadInboxStatusPresentation(
+  lead: LeadRow,
+  nowMs = Date.now(),
+): { label: string; tone: LeadInboxBadgeTone } {
+  if (lead.status === "converted") return { label: "CONVERTED", tone: "approved" };
+  if (lead.status === "lost") return { label: "LOST", tone: "rejected" };
+  if (isLeadStale(lead, nowMs)) return { label: "NEEDS ATTENTION", tone: "pending" };
+  if (lead.status === "new") return { label: "NEW", tone: "new" };
+  if (lead.status === "contacted" || lead.status === "qualified") {
+    return { label: lead.status.toUpperCase(), tone: "pending" };
+  }
+  return { label: "OPEN", tone: "pending" };
 }
 
 export function leadListMeta(lead: LeadRow): string {
@@ -93,12 +144,38 @@ export function leadSourcePresentation(source: string | null): { label: string; 
   return { label: "BRAND", tone: "brand" };
 }
 
+export function formatLeadListDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString(undefined, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+export function formatLeadRelativeWhen(iso: string, nowMs: number = Date.now()): string {
+  const diffMs = nowMs - new Date(iso).getTime();
+  if (diffMs < 0) return "Just now";
+
+  const minutes = Math.floor(diffMs / (60 * 1000));
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+
+  return formatLeadListDate(iso);
+}
+
 export function formatLeadListWhen(iso: string, nowMs = Date.now()): string {
   const days = leadAgeDays(iso, nowMs);
   if (days < 7) return `${days}d ago`;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "numeric" });
+  return formatLeadListDate(iso);
 }
 
 export function formatLeadSubmittedWhen(iso: string): string {
@@ -221,9 +298,4 @@ export function filterTabOptions(counts: ReturnType<typeof leadCounts>) {
     label: option.label,
     count: counts[option.value],
   }));
-}
-
-export function mobileKpiFilter(filter: LeadFilter): LeadFilter {
-  if (filter === "converted") return "all";
-  return filter;
 }

@@ -204,7 +204,7 @@ export interface HomepageAboutFeature {
   body: string;
 }
 
-/** Team member on the brand About Us page (Mastermind-style photo grid). */
+/** Team member on the brand About Us page (photo grid). */
 export interface HomepageAboutMember {
   id: string;
   name: string;
@@ -215,7 +215,7 @@ export interface HomepageAboutMember {
 }
 
 /**
- * Brand About Us content (Mastermind-style layout).
+ * Brand About Us content (theme-aware layout: Novu, Abacus Classic, Spark Academy).
  * Stored in `brand_settings.settings.landing.about`. Homepage visibility uses `sections.about`.
  */
 export interface HomepageAboutSection {
@@ -356,7 +356,7 @@ export interface HomepageConfig {
   programsSection?: HomepageProgramsSection;
   /** Upcoming events (all themes) — competitions, workshops, demos, other. */
   upcomingEvents?: HomepageUpcomingEventsSection;
-  /** Brand About Us (Mastermind-style) — `/about` + optional homepage `#about`. */
+  /** Brand About Us — `/about` + optional homepage `#about` (theme chrome on the public page). */
   about?: HomepageAboutSection;
   /** Platform enterprise landing: hero stat overlay on side image. */
   heroOverlayCard?: HomepageHeroOverlayCard;

@@ -546,7 +546,7 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
       },
     ],
     gallery: {
-      title: "Our partners",
+      title: "Photo gallery",
       images: [],
     },
     testimonials: {

@@ -127,11 +127,18 @@ describe("CenterDetailPanel franchise login credentials", () => {
     );
     expect(screen.getByText(/Franchise Identity/i)).toBeDefined();
     expect(screen.getByText(/at least 6 characters/i)).toBeDefined();
-    expect(
-      screen.getByRole("link", {
+    expect(screen.getByRole("link", {
         name: /arti-drawing\.vihaan-abacas-pune\.localhost:9000\/login/,
       })
     ).toHaveProperty("href", "http://arti-drawing.vihaan-abacas-pune.localhost:9000/login");
+  });
+
+  it("regression_brand_centers_detail_omits_social_media_section", async () => {
+    renderPanel();
+    await screen.findByLabelText("Login email");
+    expect(screen.queryByText("Social Media")).toBeNull();
+    expect(screen.queryByRole("button", { name: /\+ Add Link/i })).toBeNull();
+    expect(screen.queryByLabelText("Platform")).toBeNull();
   });
 
   it("regression_franchise_identity_login_hint_uses_vercel_same_origin_url", async () => {
@@ -157,7 +164,24 @@ describe("CenterDetailPanel franchise login credentials", () => {
 
   it("regression_profile_only_save_does_not_invoke_center_owner_credentials", async () => {
     shouldSyncCenterOwnerCredentials.mockReturnValue(false);
-    renderPanel();
+    const withSocial: BrandCenterRow = {
+      ...center,
+      social_links: [{ platform: "Instagram", url: "https://instagram.com/center" }],
+    };
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <CenterDetailPanel
+            center={withSocial}
+            brandId="brand-vihaan"
+            brandSlug="vihaan-abacas-pune"
+            isMobile={false}
+            onStatusChanged={() => undefined}
+          />
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
     await screen.findByLabelText("Login email");
 
     fireEvent.change(screen.getByLabelText("Franchise Name"), {
@@ -167,6 +191,13 @@ describe("CenterDetailPanel franchise login credentials", () => {
 
     await waitFor(() => expect(updateFranchiseCenter).toHaveBeenCalled());
     expect(upsertCenterOwnerCredentials).not.toHaveBeenCalled();
+    expect(updateFranchiseCenter).toHaveBeenCalledWith(
+      "center-arti",
+      expect.objectContaining({
+        name: "Arti Drawing Updated",
+        socialLinks: [{ platform: "Instagram", url: "https://instagram.com/center" }],
+      })
+    );
   });
 
   it("regression_credential_save_invokes_center_owner_credentials", async () => {

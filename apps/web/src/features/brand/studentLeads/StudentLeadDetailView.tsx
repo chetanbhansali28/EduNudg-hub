@@ -232,23 +232,21 @@ export function StudentLeadDetailView({
         ) : null}
       </div>
       <div className="ed-student-leads__detail-grid">
-        <div>
-          <LeadDetailHeader
-            title={title}
-            status={<LeadStatusBadge tone={status.tone}>{status.label} LEAD</LeadStatusBadge>}
-            submittedAt={formatLeadSubmittedWhen(lead.created_at)}
-          />
-          {applicantCard}
-          <section className="ed-lead-activity-card">
-            <h3 className="ed-lead-activity-card__title">Recent Activity</h3>
-            <ul className="ed-lead-activity-card__list">
-              <li>Lead created via {lead.lead_source ?? "brand"} channel</li>
-              {lead.assigned_at ? <li>Assigned to center</li> : null}
-              {stale ? <li>SLA follow-up required</li> : null}
-            </ul>
-          </section>
-        </div>
-        <div>{assignmentPanel}</div>
+        <LeadDetailHeader
+          title={title}
+          status={<LeadStatusBadge tone={status.tone}>{status.label} LEAD</LeadStatusBadge>}
+          submittedAt={formatLeadSubmittedWhen(lead.created_at)}
+        />
+        {applicantCard}
+        {assignmentPanel}
+        <section className="ed-lead-activity-card">
+          <h3 className="ed-lead-activity-card__title">Recent Activity</h3>
+          <ul className="ed-lead-activity-card__list">
+            <li>Lead created via {lead.lead_source ?? "brand"} channel</li>
+            {lead.assigned_at ? <li>Assigned to center</li> : null}
+            {stale ? <li>SLA follow-up required</li> : null}
+          </ul>
+        </section>
       </div>
     </div>
   );

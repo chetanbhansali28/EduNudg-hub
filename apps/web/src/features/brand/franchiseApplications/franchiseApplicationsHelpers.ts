@@ -1,14 +1,12 @@
 import type { FranchiseInquiry } from "./FranchiseInquiryDetailCard";
 
-export type InquiryFilter = "all" | "pending" | "decided" | "deleted";
+export type InquiryFilter = "pending" | "decided";
 
 const EMPTY_DELETED_CENTER_IDS: ReadonlySet<string> = new Set();
 
 export const INQUIRY_FILTER_OPTIONS: { value: InquiryFilter; label: string; mobileLabel: string }[] = [
   { value: "pending", label: "Pending review", mobileLabel: "Pending" },
   { value: "decided", label: "Decided", mobileLabel: "Decided" },
-  { value: "all", label: "All applications", mobileLabel: "All" },
-  { value: "deleted", label: "Deleted", mobileLabel: "Deleted" },
 ];
 
 export function isPendingInquiry(row: FranchiseInquiry) {
@@ -141,27 +139,29 @@ export function filterInquiries(
   const filtered = rows.filter((row) => {
     if (query) return inquiryMatchesSearch(row, query);
 
-    const deleted = isDeletedConvertedInquiry(row, deletedCenterIds);
     if (filter === "pending" && !isPendingInquiry(row)) return false;
-    if (filter === "decided" && (isPendingInquiry(row) || deleted)) return false;
-    if (filter === "deleted" && !deleted) return false;
+    if (filter === "decided" && isPendingInquiry(row)) return false;
     return true;
   });
 
-  if (filter === "deleted") return filtered;
+  if (filter === "pending") return filtered;
   return sortDeletedInquiriesLast(filtered, deletedCenterIds);
 }
 
-export function inquiryCounts(
-  rows: FranchiseInquiry[],
-  deletedCenterIds: ReadonlySet<string> = EMPTY_DELETED_CENTER_IDS,
-) {
-  const deleted = rows.filter((row) => isDeletedConvertedInquiry(row, deletedCenterIds)).length;
+export function isRejectedInquiry(row: FranchiseInquiry) {
+  return row.status === "lost";
+}
+
+export function isApprovedInquiry(row: FranchiseInquiry) {
+  return !isPendingInquiry(row) && !isRejectedInquiry(row);
+}
+
+export function inquiryCounts(rows: FranchiseInquiry[]) {
   return {
     pending: rows.filter(isPendingInquiry).length,
-    decided: rows.filter((row) => !isPendingInquiry(row) && !isDeletedConvertedInquiry(row, deletedCenterIds))
-      .length,
-    deleted,
+    decided: rows.filter((row) => !isPendingInquiry(row)).length,
+    approved: rows.filter(isApprovedInquiry).length,
+    rejected: rows.filter(isRejectedInquiry).length,
     all: rows.length,
   };
 }

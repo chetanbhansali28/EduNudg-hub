@@ -1,11 +1,21 @@
 .ed-brand-merch-page {
   width: 100%;
-  max-width: 76rem;
+  max-width: 100%;
   --ed-brand-merch-purple: #6366f1;
   --ed-brand-merch-purple-hover: #5558e3;
   --ed-brand-merch-price-bg: color-mix(in srgb, var(--ed-primary) 12%, var(--ed-card));
   --ed-brand-merch-mobile-edit-bg: color-mix(in srgb, var(--ed-primary) 12%, var(--ed-card));
   --ed-brand-merch-mobile-delete-bg: color-mix(in srgb, #ef4444 12%, var(--ed-card));
+}
+
+.ed-brand-merch-page .ed-pipeline-workspace {
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .ed-brand-merch-page .ed-pipeline-workspace {
+    grid-template-columns: minmax(16rem, 0.95fr) minmax(0, 2.05fr);
+  }
 }
 
 .ed-brand-merch-add-panel {

@@ -86,7 +86,7 @@ export function FeaturesSection({ sections, showcase, imageUrlFallback }: Props)
 
           <div className="sa-features__content">
             <p className="sa-features__eyebrow">{resolved.eyebrow}</p>
-            <h2 className="sa-features__title">{resolved.title}</h2>
+            <h2 className="sa-section-title sa-features__title">{resolved.title}</h2>
             <p className="sa-features__subtitle">{resolved.subtitle}</p>
             <ul className="sa-features__list">
               {sections.map((section, index) => (
@@ -106,7 +106,7 @@ export function FeaturesSection({ sections, showcase, imageUrlFallback }: Props)
                     </svg>
                   </span>
                   <div>
-                    <h3>{featureHeading(section)}</h3>
+                    <h3 className="sa-item-title">{featureHeading(section)}</h3>
                     <p>{section.body}</p>
                   </div>
                 </li>

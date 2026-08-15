@@ -171,4 +171,69 @@ describe("SparkAcademyContent", () => {
     expect(screen.queryByRole("tab", { name: exactAccessibleName("All courses") })).toBeNull();
     expect(screen.queryByRole("tab", { name: exactAccessibleName("Abacus") })).toBeNull();
   });
+
+  it("regression_spark_photo_gallery_renders_homepage_images", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus", {
+      gallery: {
+        title: "Campus moments",
+        images: [
+          { url: "https://cdn.example.com/gallery-a.jpg", alt: "Annual day" },
+          { url: "https://cdn.example.com/gallery-b.jpg", alt: "Classroom" },
+        ],
+      },
+    });
+    config.sections = { ...config.sections, gallery: false };
+    const { container } = render(
+      <LeadModalProvider>
+        <SparkAcademyContent config={config} portalMode="brand" brandSlug="smart-brain-abacus" />
+      </LeadModalProvider>
+    );
+
+    expect(container.querySelector("#gallery")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Campus moments" })).toBeDefined();
+    expect(screen.getByAltText("Annual day")).toBeDefined();
+    expect(screen.getByAltText("Classroom")).toBeDefined();
+    const sectionIds = [...container.querySelectorAll("section[id]")].map((el) => el.id);
+    expect(sectionIds.indexOf("faq")).toBeLessThan(sectionIds.indexOf("gallery"));
+  });
+
+  it("regression_spark_section_headings_use_shared_title_class", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus", {
+      gallery: {
+        title: "Campus moments",
+        images: [{ url: "https://cdn.example.com/gallery-a.jpg", alt: "Annual day" }],
+      },
+    });
+    const { container } = render(
+      <LeadModalProvider>
+        <SparkAcademyContent
+          config={config}
+          portalMode="brand"
+          brandSlug="smart-brain-abacus"
+          publicCurriculum={[
+            createPublicCurriculumProgram({
+              name: "Junior Abacus Path",
+              description: "From published syllabus",
+            }),
+          ]}
+        />
+      </LeadModalProvider>
+    );
+
+    const sectionH2s = container.querySelectorAll(
+      ".sa-courses h2, .sa-features h2, .sa-journey h2, .sa-mentors h2, .sa-testimonials h2, .sa-faq h2, .sa-gallery h2"
+    );
+    expect(sectionH2s.length).toBeGreaterThanOrEqual(6);
+    sectionH2s.forEach((heading) => {
+      expect(heading.classList.contains("sa-section-title")).toBe(true);
+    });
+
+    const itemH3s = container.querySelectorAll(
+      ".sa-course-card h3, .sa-features__item h3, .sa-journey__row h3, .sa-mentor-card h3"
+    );
+    expect(itemH3s.length).toBeGreaterThan(0);
+    itemH3s.forEach((heading) => {
+      expect(heading.classList.contains("sa-item-title")).toBe(true);
+    });
+  });
 });

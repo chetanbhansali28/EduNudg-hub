@@ -66,7 +66,7 @@ Styles live in `packages/ui/src/styles.css` under **Backend commerce workspace**
 
 ## Backend pipeline workspace
 
-Staff lead and application pipelines use reusable primitives from `@edunudg/ui`:
+Staff lead, application, **and curriculum** workspaces use reusable primitives from `@edunudg/ui`:
 
 | Primitive | Use |
 |-----------|-----|
@@ -109,22 +109,23 @@ Pass `welcomeHeading` and `welcomeSubtitle` into `AppShell`; the legacy `Welcome
 
 ## Lead / application pipelines
 
-Franchise applications, student leads (brand + center), and platform brand signups share the **pipeline** pattern from `@edunudg/ui`:
+Franchise applications, brand student leads, center leads, platform brand signups, brand/center curriculum, brand success stories, and brand merchandise share the **pipeline** pattern from `@edunudg/ui`. Brand Student Leads (`/app/leads`), Curriculum (`/app/curriculum`), Success Stories (`/app/success-stories`), and Merchandise (`/app/merchandise`) use the same workspace chrome as Franchise Applications: `PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`, and `PipelineWorkspace` with the list staying visible beside detail on desktop. On Student Leads, assignment management stacks below applicant details in that detail column (do not add a third page column).
 
 | Primitive | Use |
 |-----------|-----|
 | `PipelineMasterDetail` | List column + sticky detail column from 1024px |
-| `FilterTabs` | Pill filters with optional counts (replaces lone `Select`) |
+| `PipelineWorkspace` | Persistent list + detail chrome used by Franchise Applications, brand Student Leads, Curriculum, Success Stories, and Merchandise |
+| `FilterTabs` | Pill filters with optional counts (replaces lone `Select`). Brand Franchise Applications and Student Leads use **Pending review** / **Decided** only. |
 | `PipelineListItem` | Avatar, title, meta, badges, relative time |
-| `KpiCard` + `onClick` | KPI strip doubles as filter shortcuts |
+| `KpiCard` / `LeadKpiGrid` + `onClick` | KPI strip doubles as filter shortcuts. Franchise Applications: Pending review, Approved, Rejected, Total. Brand Student Leads: Pending review, Converted, Lost, Total. Curriculum: Active, Drafts, Programs (informational), Total. Merchandise: Active, Draft, Orders, Total. |
 | `PipelineEmptyState` | Compact empty message + optional CTA |
 | `PipelineDetailPlaceholder` | Desktop hint when no row is selected |
 
 Styles use admin theme tokens (`--ed-primary-soft`, `--ed-card`, etc.) for light and dark mode.
 
-Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `BrandsSignupReviewSection` (on `/admin/brands`; detail via `PlatformSignupDetailCard`).
+Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `CurriculumWorkspace` (`/app/curriculum` and center curriculum), `BrandMerchandisePage`, `BrandsSignupReviewSection` (on `/admin/brands`; detail via `PlatformSignupDetailCard`).
 
-Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `BrandsSignupReviewSection.test.tsx`, `PlatformSignupDetailCard.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`.
+Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `CurriculumPage.test.tsx`, `CenterCurriculumPage.test.tsx`, `BrandMerchandisePage.test.tsx`, `BrandsSignupReviewSection.test.tsx`, `PlatformSignupDetailCard.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`.
 
 ## Backend catalog workspace
 

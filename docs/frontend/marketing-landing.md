@@ -26,7 +26,7 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage` (brand si
 
 **Social Media Connect** configures Facebook and Instagram footer icons only. Brand public landing does **not** show a floating WhatsApp chat button or message bubble (legacy `social_connect` WhatsApp fields are ignored on render).
 
-**Center public footer:** icons use that franchise’s `franchise_centers.social_links` (Franchise Management / center Settings) — Facebook, Instagram, YouTube, WhatsApp, LinkedIn, and X when the URL is `https`. They must **not** inherit brand `social_connect`. Incomplete WhatsApp text without a full `https://` URL is omitted. Brand landing stays Facebook/Instagram only (no WhatsApp float).
+**Center public footer:** icons use that franchise’s `franchise_centers.social_links` (edited in **center Settings**, not brand `/app/centers`) — Facebook, Instagram, YouTube, WhatsApp, LinkedIn, and X when the URL is `https`. They must **not** inherit brand `social_connect`. Incomplete WhatsApp text without a full `https://` URL is omitted. Brand landing stays Facebook/Instagram only (no WhatsApp float). Franchise Management (`/app/centers`) has no Social Media section; profile save does not edit `social_links` (`regression_brand_centers_detail_omits_social_media_section`).
 
 **Center public contact:** all three themes overlay Franchise Management Location & Contact in the footer (`centerFooterContactFromProfile` → `centerContact` on `CenterPublicLayout`). Novu adds a **This center** column (and still shows the about-center blurb). Abacus replaces **Head office** with **This center**. Spark **Contact Us** uses the franchise phone and address (no `(222)` placeholder). Brand HQ / “Our presence” stay on the **brand** site only.
 
@@ -36,7 +36,7 @@ When a brand switches from Novu to Abacus Classic or Spark Academy, stored `land
 
 Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, domains, and franchise centers — not marketing theme.
 
-Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → **About Us** (`#about`, when enabled) → rich footer (live center/student counts + custom stats).
+Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → **About Us** (`#about`, when enabled) → rich footer (live center/student counts + custom stats). Brand staff manage carousel quotes at `/app/success-stories` (pipeline chrome + Published/Draft/With photo/Total KPIs).
 
 Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_theme`. Program cards on the franchise public site are **that center’s enabled programs** (`center_program_enablement`), not the full brand catalog. Center sites accordion copy/images still apply when a card name matches an enabled course. Center copy (hero, city) comes from `mergeAbacusClassicCenterLandingConfig()` merged with `brand_settings.center_landing`.
 
@@ -46,7 +46,7 @@ The brand homepage editor previews center landing with placeholder **Sample Cent
 
 **Upcoming events:** Homepage editor section (like Leadership profiles). Brand adds competitions / workshops / demos with optional image, date, time, duration. Public `#events` shows only upcoming items (capped by `maxItems`). Works on Abacus, Spark, and Novu brand themes.
 
-**About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (Mastermind-style company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — on Abacus Classic it renders **after Gallery**. When the homepage About section is enabled, public nav auto-injects **About Us → `#about`** (unless `/about` or `#about` already exists). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`.
+**About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. The page chrome matches the brand **Website theme**: Novu keeps the Mastermind navy look; Spark Academy uses `.about-us--spark-academy` (light hero, Spark type scale, `SparkAcademyCta`); Abacus Classic uses `.about-us--abacus-classic`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — on Abacus Classic and Spark it renders **after Gallery**. When the homepage About section is enabled, public nav auto-injects **About Us → `#about`** (unless `/about` or `#about` already exists). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`. Regression: `regression_spark_about_page_uses_spark_theme_classes`.
 
 Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). On the **brand** site for **Abacus Classic**, named cards win; otherwise the grid falls back to all published curriculum programs. On **Spark Academy**, **Courses designed for success** prefers published `/app/curriculum` (`publicCurriculum`); leftover homepage cards are used only when no published courses exist (`resolveSparkCoursePrograms`). On a **franchise (center)** site, `get_center_landing_public` returns only programs in `center_program_enablement`, and Center sites cards are restricted to those names (`restrictProgramsSectionToEnabledCurriculum`).
 
@@ -69,6 +69,12 @@ Direct URLs such as `/#curriculum` scroll after the landing bundle loads (`scrol
 ### Homepage editor nav Link dropdown
 
 In **Navigation & CTAs** (Abacus/Spark) or **Navigation Management** (Novu), each menu item **Link** field is a theme-aware dropdown plus optional **Custom link** text input. Presets match on-page section IDs above; Novu brand vs center templates differ (`#apply` vs `#register`). Helpers live in `marketingNavSectionOptions()` / `NavLinkHrefField` (`HomepageEditorShell.tsx`). Legacy mistyped anchors such as `#FoundersSection` normalize to `#founders` when saved.
+
+**Spark Academy Link dropdown:** do not list `Programs (#programs)` or `About us (#features)` — those duplicated Abacus-style labels. Use `Courses (#programs)` for the courses block (`#curriculum` is an in-section alias, not a second option) and `Features (#features)` for the features block. Include `Photo gallery (#gallery)`. `About page (/about)` and `About section (#about)` stay. Regression: `regression_spark_nav_dropdown_omits_duplicate_programs_and_about_us`.
+
+**Spark Academy photo gallery:** public `#gallery` reads `config.gallery` from **Photo gallery** in `/app/homepage` / `/app/center-site`. Empty galleries stay hidden. Regression: `regression_spark_photo_gallery_renders_homepage_images`.
+
+**Spark Academy headings:** section `h2`s share `--sa-h2-*` (Inter, `clamp(1.75rem, 4vw, 2.25rem)`, weight 800). Card/list `h3`s share `--sa-h3-*`. Hero stays `--sa-h1-size`. About teaser and upcoming events titles inherit the same Spark tokens. Regression: `regression_spark_section_headings_share_type_scale`.
 
 **Abacus Classic syllabus:** Toggle **Curriculum syllabus** in the homepage editor (visible by default). Content comes from published `/app/curriculum` data; no separate copy fields in v1.
 

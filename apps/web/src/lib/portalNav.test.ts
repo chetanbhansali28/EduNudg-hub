@@ -29,10 +29,11 @@ describe("portalNav", () => {
     expect(brands?.active).toBe(true);
   });
 
-  it("marks brand analytics inactive on dashboard", () => {
+  it("regression_brand_analytics_follows_merchandise_in_features", () => {
     const sections = brandNavSections("/app");
-    const analytics = sections.find((s) => s.title === "Features")?.items.find((i) => i.label === "Analytics");
-    expect(analytics?.active).toBe(false);
+    const labels = sections.find((s) => s.title === "Features")?.items.map((i) => i.label) ?? [];
+    expect(labels.indexOf("Merchandise")).toBeGreaterThan(-1);
+    expect(labels.indexOf("Analytics")).toBe(labels.indexOf("Merchandise") + 1);
   });
 
   it("regression_brand_home_active_on_app_root", () => {

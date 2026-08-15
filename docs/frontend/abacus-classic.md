@@ -39,6 +39,8 @@ Assign theme: **Platform admin** → **Brands** → **Edit** → **Brand setting
 
 Brand owners cannot change the theme; they only edit content at `{brand}.localhost:9000/app/homepage` and `{brand}.localhost:9000/app/center-site`.
 
+Public **`/about`** uses `.about-us--abacus-classic` (navy/blue Abacus tokens + `AbacusCtaButton` when lead modals are on). Spark Academy brands use `.about-us--spark-academy` instead — see [Spark Academy](./spark-academy.md).
+
 ## Sprint 2 (delivered)
 
 Sprint 2 covers the top-of-page conversion flow and curriculum-driven programs strip.

@@ -1,16 +1,21 @@
 import { Link } from "react-router-dom";
-import type { HomepageAboutSection, HomepageConfig } from "@/types/homepage";
-import { MarketingCtaLink } from "./MarketingCtaLink";
+import type { HomepageAboutSection, HomepageConfig, MarketingTheme } from "@/types/homepage";
+import { aboutUsThemeClass } from "@/lib/marketingThemeLayout";
 import { aboutHasContent, mergeAboutSection } from "@/lib/aboutUs";
+import { MarketingCtaLink } from "./MarketingCtaLink";
+import { AbacusCtaButton } from "./abacus-classic/MarketingLeadModals";
+import { SparkAcademyCta } from "./spark-academy/SparkAcademyCta";
 
 type FullProps = {
   config: HomepageConfig;
+  marketingTheme?: MarketingTheme;
   /** When true, CTAs use enroll/apply modal hashes (Abacus/Spark). */
   useLeadModals?: boolean;
 };
 
 type TeaserProps = {
   config: HomepageConfig;
+  marketingTheme?: MarketingTheme;
   /** Show link to full /about when published. */
   showPageLink?: boolean;
 };
@@ -71,7 +76,43 @@ function FeaturesBlock({ section }: { section: HomepageAboutSection }) {
   );
 }
 
-function CtaBand({ section, useLeadModals }: { section: HomepageAboutSection; useLeadModals?: boolean }) {
+function AboutThemeCta({
+  href,
+  label,
+  marketingTheme,
+  useLeadModals,
+  sparkVariant = "primary",
+}: {
+  href: string;
+  label: string;
+  marketingTheme?: MarketingTheme;
+  useLeadModals?: boolean;
+  sparkVariant?: "primary" | "dark" | "outline";
+}) {
+  if (marketingTheme === "spark-academy") {
+    return <SparkAcademyCta href={href} label={label} variant={sparkVariant} />;
+  }
+  if (marketingTheme === "abacus-classic" && useLeadModals) {
+    return (
+      <AbacusCtaButton
+        href={href}
+        label={label}
+        variant={sparkVariant === "dark" ? "secondary" : "primary"}
+      />
+    );
+  }
+  return <MarketingCtaLink href={href} label={label} variant="on-light" />;
+}
+
+function CtaBand({
+  section,
+  marketingTheme,
+  useLeadModals,
+}: {
+  section: HomepageAboutSection;
+  marketingTheme?: MarketingTheme;
+  useLeadModals?: boolean;
+}) {
   const onlineLabel = section.onlineCtaLabel?.trim();
   const franchiseLabel = section.franchiseCtaLabel?.trim();
   if (!onlineLabel && !franchiseLabel) return null;
@@ -87,14 +128,26 @@ function CtaBand({ section, useLeadModals }: { section: HomepageAboutSection; us
           <article className="about-us__cta-card">
             {section.onlineCtaTitle?.trim() ? <h3>{section.onlineCtaTitle}</h3> : null}
             {section.onlineCtaBody?.trim() ? <p>{section.onlineCtaBody}</p> : null}
-            <MarketingCtaLink href={onlineHref} label={onlineLabel} variant="on-light" />
+            <AboutThemeCta
+              href={onlineHref}
+              label={onlineLabel}
+              marketingTheme={marketingTheme}
+              useLeadModals={useLeadModals}
+              sparkVariant="primary"
+            />
           </article>
         ) : null}
         {franchiseLabel ? (
           <article className="about-us__cta-card">
             {section.franchiseCtaTitle?.trim() ? <h3>{section.franchiseCtaTitle}</h3> : null}
             {section.franchiseCtaBody?.trim() ? <p>{section.franchiseCtaBody}</p> : null}
-            <MarketingCtaLink href={franchiseHref} label={franchiseLabel} variant="on-light" />
+            <AboutThemeCta
+              href={franchiseHref}
+              label={franchiseLabel}
+              marketingTheme={marketingTheme}
+              useLeadModals={useLeadModals}
+              sparkVariant="dark"
+            />
           </article>
         ) : null}
       </div>
@@ -102,15 +155,18 @@ function CtaBand({ section, useLeadModals }: { section: HomepageAboutSection; us
   );
 }
 
-/** Full Mastermind-style About Us page content. */
-export function AboutUsPageContent({ config, useLeadModals = false }: FullProps) {
+/** Full About Us page — Novu (Mastermind), Abacus Classic, or Spark Academy chrome. */
+export function AboutUsPageContent({ config, marketingTheme, useLeadModals = false }: FullProps) {
   if (!aboutHasContent(config.about)) return null;
   const section = resolveAbout(config);
 
   return (
-    <div className="about-us about-us--page">
+    <div className={`about-us about-us--page ${aboutUsThemeClass(marketingTheme)}`}>
       <header className="about-us__hero">
         <div className="about-us__hero-inner">
+          {marketingTheme === "spark-academy" ? (
+            <span className="about-us__hero-badge">About us</span>
+          ) : null}
           {section.heroHeadline?.trim() ? <h1>{section.heroHeadline}</h1> : null}
           {section.heroSubtitle?.trim() ? <p className="about-us__hero-sub">{section.heroSubtitle}</p> : null}
           {config.meta.logoUrl ? (
@@ -159,20 +215,24 @@ export function AboutUsPageContent({ config, useLeadModals = false }: FullProps)
         )}
 
         <TeamGrid section={section} />
-        <CtaBand section={section} useLeadModals={useLeadModals} />
+        <CtaBand section={section} marketingTheme={marketingTheme} useLeadModals={useLeadModals} />
       </div>
     </div>
   );
 }
 
 /** Homepage `#about` teaser — condensed story + features + team preview. */
-export function AboutUsHomepageSection({ config, showPageLink = true }: TeaserProps) {
+export function AboutUsHomepageSection({
+  config,
+  marketingTheme,
+  showPageLink = true,
+}: TeaserProps) {
   if (!aboutHasContent(config.about)) return null;
   const section = resolveAbout(config);
   const previewMembers = (section.members ?? []).slice(0, 4);
 
   return (
-    <section className="about-us about-us--teaser" id="about">
+    <section className={`about-us about-us--teaser ${aboutUsThemeClass(marketingTheme)}`} id="about">
       <div className="about-us__teaser-inner">
         <h2 className="about-us__section-title">{section.title?.trim() || `About ${config.meta.siteName}`}</h2>
         {section.body?.trim() ? <p className="about-us__teaser-copy">{section.body}</p> : null}

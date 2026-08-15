@@ -78,6 +78,27 @@ Brand and center public/editor loads SHALL merge stored `landing` / `center_land
 - **WHEN** `saveBrandMarketingLanding` runs
 - **THEN** the stored `brand-assets` URL is kept
 
+### Requirement: Spark Academy public headings share one type scale
+
+Spark Academy public landings SHALL use shared `--sa-h2-*` tokens for section titles and `--sa-h3-*` for card/list headings. Features, journey, mentors, and testimonials SHALL NOT use a different clamp size than courses/FAQ/gallery. About teaser and upcoming events titles SHALL inherit the same Spark tokens. The hero MAY stay larger (`--sa-h1-size`). Footer column labels SHALL remain small uppercase chrome.
+
+#### Scenario: Section titles share sa-section-title
+
+- **GIVEN** a Spark Academy public homepage
+- **WHEN** courses, features, journey, mentors, testimonials, FAQ, and gallery titles render
+- **THEN** each section `h2` includes `sa-section-title`
+- **AND** CSS uses `--sa-h2-size` `clamp(1.75rem, 4vw, 2.25rem)` at weight 800
+
+### Requirement: Spark Academy success stories cards are centered
+
+Spark Academy **Success stories** (`#testimonials`) SHALL center story cards in the row when there are fewer than a full grid of cards (`sa-testimonials__grid--center`).
+
+#### Scenario: Partial testimonial row is centered
+
+- **WHEN** a Spark Academy public homepage shows Success stories
+- **THEN** the testimonials grid uses `sa-testimonials__grid--center`
+- **AND** leftover cards sit in the center of the row, not the left edge
+
 ### Requirement: Center enrollment template has its own brand nav page
 
 Brand staff SHALL edit the parent enrollment template (`center_landing`) at `/app/center-site` (**Center Site Configuration**). The brand Homepage editor at `/app/homepage` SHALL NOT include that Center sites panel.

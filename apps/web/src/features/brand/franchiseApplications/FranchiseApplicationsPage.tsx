@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   FilterTabs,
+  LeadKpiCard,
+  LeadKpiGrid,
   MutationError,
   PipelinePageHeader,
   PipelineWorkspace,
@@ -59,7 +61,6 @@ export function FranchiseApplicationsPage() {
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<InquiryFilter>("pending");
   const [search, setSearch] = useState("");
-  const filterBeforeSearchRef = useRef<InquiryFilter>("pending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rejectMode, setRejectMode] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -97,7 +98,7 @@ export function FranchiseApplicationsPage() {
     () => new Set((deletedCenters.data ?? []).map((row) => row.id)),
     [deletedCenters.data],
   );
-  const counts = useMemo(() => inquiryCounts(all, deletedCenterIds), [all, deletedCenterIds]);
+  const counts = useMemo(() => inquiryCounts(all), [all]);
   const filtered = useMemo(
     () => filterInquiries(all, filter, search, deletedCenterIds),
     [all, filter, search, deletedCenterIds],
@@ -275,25 +276,43 @@ export function FranchiseApplicationsPage() {
       />
       <MutationError message={error} />
 
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="Pending review"
+          value={counts.pending}
+          hint={counts.pending > 0 ? "In queue" : undefined}
+          active={filter === "pending"}
+          onClick={() => setFilter("pending")}
+        />
+        <LeadKpiCard
+          label="Approved"
+          value={counts.approved}
+          hint="Created centers"
+          onClick={() => setFilter("decided")}
+        />
+        <LeadKpiCard
+          label="Rejected"
+          value={counts.rejected}
+          tone="lost"
+          active={filter === "decided"}
+          onClick={() => setFilter("decided")}
+        />
+        <LeadKpiCard
+          label={isMobile ? "All apps" : "Total"}
+          value={counts.all}
+          hint="All applications"
+          tone="total"
+          onClick={() => setFilter("pending")}
+        />
+      </LeadKpiGrid>
+
       <div className="ed-franchise-apps-page__toolbar">
         <label className="ed-franchise-apps-page__search">
           <span className="ed-franchise-apps-page__search-icon">{ICON_SEARCH}</span>
           <input
             type="search"
             value={search}
-            onChange={(event) => {
-              const value = event.target.value;
-              const hadQuery = search.trim().length > 0;
-              const hasQuery = value.trim().length > 0;
-              setSearch(value);
-              if (hasQuery && !hadQuery) {
-                filterBeforeSearchRef.current = filter === "all" ? filterBeforeSearchRef.current : filter;
-                setFilter("all");
-              }
-              if (!hasQuery && hadQuery) {
-                setFilter(filterBeforeSearchRef.current);
-              }
-            }}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Search applications..."
             aria-label="Search applications"
           />

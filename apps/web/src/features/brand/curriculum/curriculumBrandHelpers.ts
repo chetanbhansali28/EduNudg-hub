@@ -2,7 +2,7 @@ import type { CurriculumProgram } from "@/lib/curriculumApi";
 import type { CurriculumCourseStatus } from "@edunudg/ui";
 import { initialsFromName } from "@/lib/welcomeMessage";
 
-export type CurriculumTabFilter = "active" | "drafts" | "archived";
+export type CurriculumTabFilter = "all" | "active" | "drafts";
 
 const AVATAR_TONES = ["blue", "purple", "teal", "pink"] as const;
 
@@ -43,13 +43,22 @@ export function filterCoursesByTab(
 ): CurriculumProgram[] {
   if (tab === "active") return courses.filter((course) => course.is_active);
   if (tab === "drafts") return courses.filter((course) => !course.is_active);
-  return [];
+  return courses;
 }
 
 export function curriculumTabCounts(courses: CurriculumProgram[]) {
   const active = courses.filter((course) => course.is_active).length;
   const drafts = courses.filter((course) => !course.is_active).length;
-  return { active, drafts, archived: 0 };
+  return { all: courses.length, active, drafts };
+}
+
+export function curriculumPageCounts(
+  courses: CurriculumProgram[],
+  levelCounts: Record<string, number> = {},
+) {
+  const tabs = curriculumTabCounts(courses);
+  const programs = Object.values(levelCounts).reduce((sum, count) => sum + count, 0);
+  return { ...tabs, total: tabs.all, programs };
 }
 
 export function impactStatChips(input: {

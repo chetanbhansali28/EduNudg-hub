@@ -1,6 +1,5 @@
 import {
   CourseListItem,
-  CurriculumBuilderHeader,
   CurriculumFilterTabs,
   CurriculumMobileCourseCard,
   CurriculumSearchField,
@@ -58,9 +57,9 @@ export function CurriculumCourseList({
 }: Props) {
   const counts = curriculumTabCounts(allCourses);
   const tabOptions = [
+    { value: "all" as const, label: "All", count: counts.all },
     { value: "active" as const, label: "Active", count: counts.active },
     { value: "drafts" as const, label: "Drafts", count: counts.drafts },
-    { value: "archived" as const, label: "Archived", count: counts.archived },
   ];
 
   if (isMobile) {
@@ -68,11 +67,6 @@ export function CurriculumCourseList({
 
     return (
       <div className="ed-curriculum-brand__mobile-list">
-        <CurriculumBuilderHeader
-          eyebrow="Build & Manage"
-          title="Your Curriculum"
-          subtitle="Structure courses, programs, and chapters for your franchise network."
-        />
         <CurriculumSearchField value={search} onChange={onSearchChange} />
         <CurriculumFilterTabs options={tabOptions} value={mobileTab} onChange={onMobileTabChange} />
 

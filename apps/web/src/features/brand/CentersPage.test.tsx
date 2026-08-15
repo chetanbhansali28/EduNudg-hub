@@ -136,6 +136,8 @@ describe("CentersPage", () => {
     renderPage();
     const importButton = await screen.findByRole("button", { name: "Import Franchise" });
     expect(importButton).toBeDefined();
+    expect(importButton.className).toContain("ed-btn--primary");
+    expect(importButton.className).not.toContain("ed-btn--secondary");
     fireEvent.click(importButton);
     expect(screen.getByRole("heading", { name: "Import franchise centers" })).toBeDefined();
   });

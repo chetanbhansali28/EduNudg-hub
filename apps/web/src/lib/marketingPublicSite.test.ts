@@ -4,6 +4,7 @@ import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import {
   CURRICULUM_NAV_HREF,
   CUSTOM_NAV_HREF_OPTION,
+  PROGRAMS_NAV_HREF,
   isKnownMarketingNavHref,
   marketingNavSectionOptions,
   normalizeMarketingNavHref,
@@ -95,6 +96,22 @@ describe("marketingNavSectionOptions", () => {
     const options = marketingNavSectionOptions({ theme: "spark-academy", portalMode: "brand" });
     expect(options.some((o) => o.value === "#journey")).toBe(true);
   });
+
+  it("regression_spark_nav_dropdown_omits_duplicate_programs_and_about_us", () => {
+    const options = marketingNavSectionOptions({ theme: "spark-academy", portalMode: "brand" });
+    const values = options.map((o) => o.value);
+    const labels = options.map((o) => o.label);
+
+    expect(labels).not.toContain("Programs (#programs)");
+    expect(labels).not.toContain("About us (#features)");
+    expect(values).not.toContain(CURRICULUM_NAV_HREF);
+    expect(values).toContain(PROGRAMS_NAV_HREF);
+    expect(values).toContain("#features");
+    expect(values).toContain("/about");
+    expect(values).toContain("#gallery");
+    expect(options.find((o) => o.value === PROGRAMS_NAV_HREF)?.label).toBe("Courses (#programs)");
+    expect(options.find((o) => o.value === "#features")?.label).toBe("Features (#features)");
+  });
 });
 
 describe("normalizeMarketingNavHref", () => {
@@ -113,6 +130,14 @@ describe("resolveNavHrefSelectValue", () => {
   it("regression_legacy_alias_resolves_to_preset_option", () => {
     const options = marketingNavSectionOptions({ theme: "abacus-classic", portalMode: "brand" });
     expect(resolveNavHrefSelectValue("#FoundersSection", options)).toBe("#founders");
+  });
+
+  it("regression_spark_curriculum_alias_maps_to_courses_option", () => {
+    const options = marketingNavSectionOptions({ theme: "spark-academy", portalMode: "brand" });
+    expect(resolveNavHrefSelectValue("#curriculum", options)).toBe("#programs");
+    expect(
+      isKnownMarketingNavHref("#curriculum", { theme: "spark-academy", portalMode: "brand" })
+    ).toBe(true);
   });
 });
 

@@ -39,19 +39,6 @@
   text-decoration: underline;
 }
 
-.ed-centers-section__link {
-  border: none;
-  background: transparent;
-  color: var(--ed-primary);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.ed-brand-centers__social-block {
-  margin-bottom: 0.75rem;
-}
-
 .ed-brand-centers__inline-actions {
   display: flex;
   flex-wrap: wrap;

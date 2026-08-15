@@ -3,6 +3,7 @@ import type { LeadRow } from "@/lib/leadsApi";
 import {
   filterLeads,
   filterTabOptions,
+  leadInboxStatusPresentation,
   leadCounts,
   leadGridFields,
   leadListLines,
@@ -66,6 +67,8 @@ describe("studentLeadsHelpers", () => {
       lead({ id: "4", status: "converted", center_id: "c2" }),
     ];
     expect(leadCounts(leads, NOW)).toEqual({
+      pending: 2,
+      decided: 2,
       unassigned: 1,
       stale: 1,
       lost: 1,
@@ -79,8 +82,30 @@ describe("studentLeadsHelpers", () => {
       lead({ id: "old", created_at: "2026-06-01T00:00:00Z" }),
       lead({ id: "new", created_at: "2026-06-20T00:00:00Z", status: "lost" }),
     ];
-    expect(filterLeads(leads, "lost", NOW).map((row) => row.id)).toEqual(["new"]);
+    expect(filterLeads(leads, "decided", NOW).map((row) => row.id)).toEqual(["new"]);
+    expect(filterLeads(leads, "pending", NOW).map((row) => row.id)).toEqual(["old"]);
     expect(sortLeads(leads, "newest").map((row) => row.id)).toEqual(["new", "old"]);
+  });
+
+  it("filterLeads searches across tabs", () => {
+    const leads = [
+      lead({ id: "pending", parent_name: "Arti Rathi" }),
+      lead({ id: "lost", parent_name: "Priya Sharma", status: "lost", city: "Mumbai", pincode: "400001" }),
+    ];
+    expect(filterLeads(leads, "pending", NOW, "Priya").map((row) => row.id)).toEqual(["lost"]);
+    expect(filterLeads(leads, "decided", NOW, "411018").map((row) => row.id)).toEqual(["pending"]);
+  });
+
+  it("leadInboxStatusPresentation maps pipeline badges", () => {
+    expect(leadInboxStatusPresentation(lead())).toEqual({ label: "NEW", tone: "new" });
+    expect(leadInboxStatusPresentation(lead({ status: "converted" }))).toEqual({
+      label: "CONVERTED",
+      tone: "approved",
+    });
+    expect(leadInboxStatusPresentation(lead({ status: "lost" }))).toEqual({
+      label: "LOST",
+      tone: "rejected",
+    });
   });
 
   it("presentation helpers map status and source badges", () => {
@@ -96,10 +121,11 @@ describe("studentLeadsHelpers", () => {
     expect(insight?.body).toContain("24 hours");
   });
 
-  it("filterTabOptions includes counts for tabs", () => {
+  it("filterTabOptions includes pending and decided counts", () => {
     const options = filterTabOptions(leadCounts([lead()], NOW));
-    expect(options.find((opt) => opt.value === "unassigned")?.count).toBe(1);
-    expect(options.find((opt) => opt.value === "all")?.count).toBe(1);
+    expect(options.map((opt) => opt.value)).toEqual(["pending", "decided"]);
+    expect(options.find((opt) => opt.value === "pending")?.count).toBe(1);
+    expect(options.find((opt) => opt.value === "decided")?.count).toBe(0);
   });
 
   it("leadsExportCsv emits header and escaped parent name", () => {

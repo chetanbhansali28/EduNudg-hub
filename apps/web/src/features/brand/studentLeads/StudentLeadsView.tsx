@@ -1,24 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
-  LeadFab,
-  LeadFilterPills,
-  LeadGridCard,
-  LeadInsightBanner,
-  LeadInsightsCard,
+  FilterTabs,
   LeadKpiCard,
   LeadKpiGrid,
-  LeadListCard,
-  LeadPageHeader,
-  LeadStatusBadge,
-  LeadTasksCard,
-  LeadToolbarRow,
   MutationError,
-  Select,
+  PipelinePageHeader,
+  PipelineWorkspace,
 } from "@edunudg/ui";
 import { ManualStudentLeadCard } from "@/features/shared/manualLeads/ManualStudentLeadCard";
-import { PhoneLink, telHref } from "@edunudg/ui";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { isLeadStale } from "@/lib/leadSla";
@@ -33,41 +24,53 @@ import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { StudentLeadDetailView } from "@/features/brand/studentLeads/StudentLeadDetailView";
 import {
-  averageResponseHours,
-  buildLeadTasks,
   downloadLeadsCsv,
   filterLeads,
-  filterTabOptions,
-  formatLeadListWhen,
-  formatLeadSubmittedRelative,
+  formatLeadListDate,
+  formatLeadRelativeWhen,
+  LEAD_FILTER_OPTIONS,
   leadAvatarTone,
   leadCounts,
-  leadGridFields,
+  leadInboxStatusPresentation,
   leadInitials,
-  leadListLines,
   leadListLocation,
   leadListTitle,
-  leadSourcePresentation,
-  leadStatusPresentation,
+  leadMobileLocation,
   sortLeads,
-  staleLeadInsight,
   type LeadFilter,
-  type LeadSort,
 } from "@/features/brand/studentLeads/studentLeadsHelpers";
+import "../franchiseApplications/franchiseApplications.css";
 import "./studentLeads.css";
+
+const ICON_SEARCH = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
+
+const ICON_PIN = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z" />
+    <circle cx="12" cy="10" r="2.5" />
+  </svg>
+);
+
+function StatusBadge({ label, tone }: ReturnType<typeof leadInboxStatusPresentation>) {
+  return <span className={`ed-franchise-app-status-badge ed-franchise-app-status-badge--${tone}`}>{label}</span>;
+}
 
 export function StudentLeadsView({ brandId }: { brandId: string }) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
-  const { isMobile } = useOpsBreakpoint();
-  const [filter, setFilter] = useState<LeadFilter>("unassigned");
-  const [sort, setSort] = useState<LeadSort>("newest");
+  const { isDesktop, isMobile } = useOpsBreakpoint();
+  const [filter, setFilter] = useState<LeadFilter>("pending");
+  const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [assignMode, setAssignMode] = useState(false);
   const [isReallocate, setIsReallocate] = useState(false);
   const [assignCenterId, setAssignCenterId] = useState("");
   const [addLeadOpen, setAddLeadOpen] = useState(false);
-  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
   const leads = useQuery({
     queryKey: ["brand-leads", brandId],
@@ -104,7 +107,14 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
     },
   });
 
-  const selected = (leads.data ?? []).find((row) => row.id === selectedId) ?? null;
+  const allLeads = leads.data ?? [];
+  const now = Date.now();
+  const counts = useMemo(() => leadCounts(allLeads, now), [allLeads, now]);
+  const filtered = useMemo(
+    () => sortLeads(filterLeads(allLeads, filter, now, search), "newest"),
+    [allLeads, filter, search, now],
+  );
+  const selected = allLeads.find((row) => row.id === selectedId) ?? null;
 
   const suggestions = useQuery({
     queryKey: ["lead-suggestions", selectedId],
@@ -120,38 +130,38 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
     return map;
   }, [centers.data]);
 
-  const now = Date.now();
-  const allLeads = leads.data ?? [];
-  const counts = useMemo(() => leadCounts(allLeads, now), [allLeads, now]);
-  const filtered = useMemo(
-    () => sortLeads(filterLeads(allLeads, filter, now), sort),
-    [allLeads, filter, sort, now]
-  );
-  const tabOptions = filterTabOptions(counts);
-  const insight = staleLeadInsight(allLeads, now);
-  const tasks = buildLeadTasks(allLeads, now);
-
-  const closeDetail = () => {
-    setSelectedId(null);
+  const resetAssignState = () => {
     setAssignMode(false);
     setIsReallocate(false);
     setAssignCenterId("");
-    setMobileDetailOpen(false);
+  };
+
+  const closeDetail = () => {
+    setSelectedId(null);
+    resetAssignState();
   };
 
   const selectLead = (id: string) => {
     setSelectedId(id);
-    setAssignMode(false);
-    setIsReallocate(false);
-    setAssignCenterId("");
-    if (isMobile) setMobileDetailOpen(true);
+    resetAssignState();
   };
+
+  useEffect(() => {
+    if (selectedId && !filtered.some((row) => row.id === selectedId)) {
+      setSelectedId(null);
+      resetAssignState();
+    }
+  }, [filtered, selectedId]);
+
+  useEffect(() => {
+    if (selectedId || filtered.length === 0 || !isDesktop) return;
+    setSelectedId(filtered[0]!.id);
+  }, [filtered, selectedId, isDesktop]);
 
   const assign = useMutation({
     mutationFn: async () => {
       if (!selectedId || !assignCenterId) return;
       clear();
-      // Reassign when the lead already has a center (reallocate or reassign).
       if (selected?.center_id) await reassignLead(selectedId, assignCenterId);
       else await assignLeadToCenter(selectedId, assignCenterId);
     },
@@ -182,299 +192,218 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
   const selectedUnassigned =
     selected && !selected.center_id && selected.status !== "lost" && selected.status !== "converted";
 
-  const detailView =
-    selected ? (
-      <StudentLeadDetailView
-        lead={selected}
-        isMobile={isMobile}
-        assignedCenterName={selected.center_id ? centerNameById.get(selected.center_id) : undefined}
-        stale={selectedStale}
-        unassigned={!!selectedUnassigned}
-        assignMode={assignMode}
-        isReallocate={isReallocate}
-        assignCenterId={assignCenterId}
-        onAssignCenterIdChange={setAssignCenterId}
-        exactSuggestions={suggestions.data?.exact ?? []}
-        nearSuggestions={suggestions.data?.near ?? []}
-        centers={centers.data ?? []}
-        assignPending={assign.isPending}
-        reopenPending={reopen.isPending}
-        onBack={
-          isMobile
-            ? () => setMobileDetailOpen(false)
-            : () => closeDetail()
-        }
-        onStartAssign={(reallocate) => {
-          setAssignMode(true);
-          setIsReallocate(reallocate);
-          // Preserve a center the user already picked in the panel; only
-          // prefill the current assignment when nothing is selected yet.
-          setAssignCenterId((prev) => prev || selected.center_id || "");
-        }}
-        onCancelAssign={() => {
-          setAssignMode(false);
-          setIsReallocate(false);
-          setAssignCenterId("");
-        }}
-        onConfirmAssign={() => assign.mutate()}
-        onReopen={() => reopen.mutate(selected.id)}
-      />
-    ) : null;
+  const filterTabs = LEAD_FILTER_OPTIONS.map((option) => ({
+    value: option.value,
+    label: isMobile ? option.mobileLabel : option.label,
+    count: counts[option.value],
+  }));
 
-  const kpiGrid = (
-    <LeadKpiGrid>
-      <LeadKpiCard
-        label="Unassigned"
-        value={counts.unassigned}
-        hint={counts.unassigned > 0 ? `+${Math.min(counts.unassigned, 12)}%` : undefined}
-        active={filter === "unassigned"}
-        onClick={() => setFilter("unassigned")}
-      />
-      <LeadKpiCard
-        label="Needs Attention"
-        value={counts.stale}
-        hint={counts.stale > 0 ? "Urgent" : undefined}
-        tone="urgent"
-        active={filter === "stale"}
-        onClick={() => setFilter("stale")}
-      />
-      <LeadKpiCard
-        label="Lost"
-        value={counts.lost}
-        hint="30 days"
-        tone="lost"
-        active={filter === "lost"}
-        onClick={() => setFilter("lost")}
-      />
-      <LeadKpiCard
-        label={isMobile ? "All leads" : "Active Total"}
-        value={counts.all}
-        hint="All Leads"
-        tone="total"
-        active={filter === "all"}
-        onClick={() => setFilter("all")}
-      />
-    </LeadKpiGrid>
-  );
-
-  const leadCardsMobile = (
-    <>
-      {filtered.length === 0 ? (
-        <p className="ed-text-sm ed-muted">No student leads in this view.</p>
-      ) : (
-        filtered.map((lead) => {
-          const status = leadStatusPresentation(lead);
-          const source = leadSourcePresentation(lead.lead_source);
-          const centerName = lead.center_id ? centerNameById.get(lead.center_id) : undefined;
-          const location = leadListLocation(lead);
-          return (
-            <LeadListCard
-              key={lead.id}
-              initials={leadInitials(lead)}
-              avatarTone={leadAvatarTone(lead.id)}
-              title={leadListTitle(lead)}
-              meta={
-                <>
-                  <PhoneLink
-                    phone={lead.whatsapp_e164}
-                    onClick={(event) => event.stopPropagation()}
-                  />
-                  {location ? ` • ${location}` : null}
-                </>
-              }
-              lines={leadListLines(lead, centerName)}
-              when={formatLeadListWhen(lead.created_at, now)}
-              selected={lead.id === selectedId}
-              badges={
-                <>
-                  <LeadStatusBadge tone={status.tone}>{status.label}</LeadStatusBadge>
-                  <LeadStatusBadge tone={source.tone}>{source.label}</LeadStatusBadge>
-                </>
-              }
-              onSelect={() => selectLead(lead.id)}
-            />
-          );
-        })
-      )}
-      {insight ? (
-        <LeadInsightBanner
-          title="Need better conversions?"
-          body={insight.body}
-          actionLabel="Review Follow-up SLA"
-          onAction={() => setFilter("stale")}
-        />
+  const listEmpty = (
+    <div className="ed-franchise-apps-page__empty">
+      <p>No student leads in this view.</p>
+      {filter !== "pending" ? (
+        <Button variant="ghost" onClick={() => setFilter("pending")}>
+          Show pending review
+        </Button>
       ) : null}
-    </>
-  );
-
-  const leadCardsDesktop = (
-    <div className="ed-student-leads__grid">
-      {filtered.length === 0 ? (
-        <p className="ed-text-sm ed-muted">No student leads in this view.</p>
-      ) : (
-        filtered.map((lead) => {
-          const status = leadStatusPresentation(lead);
-          const source = leadSourcePresentation(lead.lead_source);
-          const centerName = lead.center_id ? centerNameById.get(lead.center_id) : undefined;
-          const unassigned = !lead.center_id && lead.status !== "lost" && lead.status !== "converted";
-          const stale = isLeadStale(lead, now);
-          return (
-            <LeadGridCard
-              key={lead.id}
-              initials={leadInitials(lead)}
-              avatarTone={leadAvatarTone(lead.id)}
-              title={leadListTitle(lead)}
-              when={formatLeadSubmittedRelative(lead.created_at, now)}
-              statusBadge={<LeadStatusBadge tone={status.tone}>{status.label}</LeadStatusBadge>}
-              sourceBadge={<LeadStatusBadge tone={source.tone}>{source.label}</LeadStatusBadge>}
-              fields={leadGridFields(lead, centerName).map((field) =>
-                field.label === "Contact"
-                  ? {
-                      ...field,
-                      value: (
-                        <PhoneLink
-                          phone={lead.whatsapp_e164}
-                          onClick={(event) => event.stopPropagation()}
-                        />
-                      ),
-                    }
-                  : field
-              )}
-              footer={
-                lead.status === "converted" ? (
-                  <Button variant="secondary" block onClick={() => selectLead(lead.id)}>
-                    View Enrollment
-                  </Button>
-                ) : stale ? (
-                  <Button block onClick={() => selectLead(lead.id)}>
-                    Assign Center
-                  </Button>
-                ) : unassigned ? (
-                  <>
-                    <Button
-                      variant="secondary"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        const href = telHref(lead.whatsapp_e164);
-                        if (href) window.location.href = href;
-                      }}
-                    >
-                      Call
-                    </Button>
-                    <Button variant="ghost" onClick={() => selectLead(lead.id)}>
-                      Details
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button variant="secondary" onClick={() => selectLead(lead.id)}>
-                      WhatsApp
-                    </Button>
-                    <Button variant="ghost" onClick={() => selectLead(lead.id)}>
-                      Convert
-                    </Button>
-                  </>
-                )
-              }
-              onSelect={() => selectLead(lead.id)}
-            />
-          );
-        })
-      )}
     </div>
   );
 
-  const sidebar = !isMobile ? (
-    <aside className="ed-student-leads__aside">
-      <LeadInsightsCard
-        body="You are responding to leads based on your current open pipeline age."
-        metricLabel="Current Response Time"
-        metricValue={`${averageResponseHours(allLeads, now)} hrs`}
-        benchmark="Brand SLA Benchmark: 24h — faster follow-up improves conversion rates."
-        action={
-          <Button variant="secondary" block onClick={() => setFilter("stale")}>
-            View SLA Report
-          </Button>
-        }
-      />
-      <LeadTasksCard
-        total={tasks.length}
-        items={tasks}
-        action={
-          <Button variant="ghost" block onClick={() => setFilter("stale")}>
-            All Tasks
-          </Button>
-        }
-      />
-    </aside>
+  const renderDesktopList = () => {
+    if (leads.isLoading) return <p className="ed-text-sm ed-muted">Loading leads…</p>;
+    if (filtered.length === 0) return listEmpty;
+
+    return (
+      <div className="ed-franchise-apps-page__desktop-list">
+        {filtered.map((lead) => {
+          const title = leadListTitle(lead);
+          const status = leadInboxStatusPresentation(lead, now);
+          const location = leadListLocation(lead);
+
+          return (
+            <button
+              key={lead.id}
+              type="button"
+              className={`ed-franchise-app-list-item${lead.id === selectedId ? " ed-franchise-app-list-item--selected" : ""}`}
+              onClick={() => selectLead(lead.id)}
+            >
+              <div className="ed-franchise-app-list-item__head">
+                <StatusBadge {...status} />
+                <span className="ed-franchise-app-list-item__when">{formatLeadRelativeWhen(lead.created_at, now)}</span>
+              </div>
+              <p className="ed-franchise-app-list-item__title">{title}</p>
+              {location ? (
+                <p className="ed-franchise-app-list-item__location">
+                  {ICON_PIN}
+                  {location}
+                </p>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderMobileList = () => {
+    if (leads.isLoading) return <p className="ed-text-sm ed-muted">Loading leads…</p>;
+    if (filtered.length === 0) return listEmpty;
+
+    return (
+      <div className="ed-franchise-apps-page__mobile-list">
+        {filtered.map((lead) => {
+          const title = leadListTitle(lead);
+          const status = leadInboxStatusPresentation(lead, now);
+          const location = leadMobileLocation(lead);
+          const avatarTone = leadAvatarTone(lead.id);
+
+          return (
+            <button
+              key={lead.id}
+              type="button"
+              className="ed-franchise-app-mobile-card"
+              onClick={() => selectLead(lead.id)}
+            >
+              <div className="ed-franchise-app-mobile-card__head">
+                <span className={`ed-franchise-app-mobile-card__avatar ed-franchise-app-mobile-card__avatar--${avatarTone}`}>
+                  {leadInitials(lead)}
+                </span>
+                <div>
+                  <div className="ed-franchise-app-mobile-card__title-row">
+                    <h3 className="ed-franchise-app-mobile-card__title">{title}</h3>
+                    {status.tone === "new" ? <StatusBadge {...status} /> : null}
+                  </div>
+                  {location ? (
+                    <p className="ed-franchise-app-mobile-card__location">
+                      {ICON_PIN}
+                      {location}
+                    </p>
+                  ) : null}
+                </div>
+                <span className="ed-franchise-app-mobile-card__date">{formatLeadListDate(lead.created_at)}</span>
+              </div>
+              <div className="ed-franchise-app-mobile-card__footer">
+                <span className="ed-franchise-app-mobile-card__cta">View Details &gt;</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const detailView = selected ? (
+    <StudentLeadDetailView
+      lead={selected}
+      isMobile={isMobile}
+      assignedCenterName={selected.center_id ? centerNameById.get(selected.center_id) : undefined}
+      stale={selectedStale}
+      unassigned={!!selectedUnassigned}
+      assignMode={assignMode}
+      isReallocate={isReallocate}
+      assignCenterId={assignCenterId}
+      onAssignCenterIdChange={setAssignCenterId}
+      exactSuggestions={suggestions.data?.exact ?? []}
+      nearSuggestions={suggestions.data?.near ?? []}
+      centers={centers.data ?? []}
+      assignPending={assign.isPending}
+      reopenPending={reopen.isPending}
+      onBack={closeDetail}
+      onStartAssign={(reallocate) => {
+        setAssignMode(true);
+        setIsReallocate(reallocate);
+        setAssignCenterId((prev) => prev || selected.center_id || "");
+      }}
+      onCancelAssign={resetAssignState}
+      onConfirmAssign={() => assign.mutate()}
+      onReopen={() => reopen.mutate(selected.id)}
+    />
   ) : null;
 
   return (
-    <div className={`ed-student-leads${isMobile ? " ed-student-leads--mobile" : ""}`}>
-      <LeadPageHeader
+    <div className={`ed-franchise-apps-page ed-student-leads${selected ? " ed-franchise-apps-page--detail-open" : ""}`}>
+      <PipelinePageHeader
         title="Student Leads"
-        subtitle={
-          isMobile
-            ? "Assign parent inquiries to centers and track progress."
-            : "Manage parent inquiries and track conversion pipeline."
-        }
+        subtitle="Manage parent inquiries and track conversion pipeline."
         actions={
           <>
-            {!isMobile ? (
-              <Button variant="secondary" onClick={() => downloadLeadsCsv(allLeads)}>
-                Export List
-              </Button>
-            ) : null}
+            <Button variant="secondary" onClick={() => downloadLeadsCsv(allLeads)}>
+              Export List
+            </Button>
             <Button onClick={() => setAddLeadOpen(true)}>+ New Lead</Button>
           </>
         }
       />
       <MutationError message={error} />
 
-      {kpiGrid}
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="Pending review"
+          value={counts.pending}
+          hint={counts.pending > 0 ? "In queue" : undefined}
+          active={filter === "pending"}
+          onClick={() => setFilter("pending")}
+        />
+        <LeadKpiCard
+          label="Converted"
+          value={counts.converted}
+          hint="Enrolled"
+          onClick={() => setFilter("decided")}
+        />
+        <LeadKpiCard
+          label="Lost"
+          value={counts.lost}
+          tone="lost"
+          active={filter === "decided"}
+          onClick={() => setFilter("decided")}
+        />
+        <LeadKpiCard
+          label={isMobile ? "All leads" : "Total"}
+          value={counts.all}
+          hint="All leads"
+          tone="total"
+          onClick={() => setFilter("pending")}
+        />
+      </LeadKpiGrid>
 
-      {isMobile ? (
-        <>
-          <LeadFilterPills options={tabOptions} value={filter} onChange={setFilter} />
-          {leadCardsMobile}
-        </>
-      ) : (
-        <div className="ed-student-leads__layout">
-          <div className="ed-student-leads__main">
-            {selected ? (
-              detailView
-            ) : (
-              <>
-                <LeadToolbarRow
-                  tabs={<LeadFilterPills options={tabOptions} value={filter} onChange={setFilter} />}
-                  sort={
-                    <Select
-                      label="Sorted by"
-                      value={sort}
-                      onChange={(value) => setSort(value as LeadSort)}
-                      options={[
-                        { value: "newest", label: "Newest first" },
-                        { value: "oldest", label: "Oldest first" },
-                      ]}
-                    />
-                  }
-                />
-                {leadCardsDesktop}
-                <p className="ed-text-sm ed-muted ed-student-leads__placeholder">
-                  Select a parent lead to review details and assign to a center.
-                </p>
-              </>
-            )}
-          </div>
-          {sidebar}
-        </div>
-      )}
+      <div className="ed-franchise-apps-page__toolbar">
+        <label className="ed-franchise-apps-page__search">
+          <span className="ed-franchise-apps-page__search-icon">{ICON_SEARCH}</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search leads..."
+            aria-label="Search leads"
+          />
+        </label>
+        <FilterTabs
+          options={filterTabs}
+          value={filter}
+          onChange={setFilter}
+          aria-label="Lead filter"
+        />
+      </div>
 
-      {isMobile && mobileDetailOpen && detailView ? (
-        <div className="ed-ops-mobile-detail" role="dialog" aria-modal aria-label="Lead details">
-          {detailView}
-        </div>
-      ) : null}
+      <PipelineWorkspace
+        detailOpen={!!selected}
+        list={
+          <>
+            {isDesktop ? renderDesktopList() : null}
+            {isMobile ? renderMobileList() : null}
+          </>
+        }
+        detail={
+          detailView ??
+          (isDesktop ? (
+            <div className="ed-franchise-apps-page__placeholder">
+              <p className="ed-text-sm ed-muted">
+                Select a parent lead to review details and assign to a center.
+              </p>
+            </div>
+          ) : null)
+        }
+      />
 
       <ManualStudentLeadCard
         scope="brand"
@@ -484,7 +413,16 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
         onClose={() => setAddLeadOpen(false)}
       />
 
-      {isMobile && !addLeadOpen ? <LeadFab onClick={() => setAddLeadOpen(true)} /> : null}
+      {isMobile && !selected && !addLeadOpen ? (
+        <button
+          type="button"
+          className="ed-franchise-apps-page__fab"
+          aria-label="New Lead"
+          onClick={() => setAddLeadOpen(true)}
+        >
+          +
+        </button>
+      ) : null}
     </div>
   );
 }

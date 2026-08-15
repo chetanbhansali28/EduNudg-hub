@@ -77,6 +77,7 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
       {showAbout ? (
         <AboutUsHomepageSection
           config={config}
+          marketingTheme="abacus-classic"
           showPageLink={isAboutPagePublished(config.about)}
         />
       ) : null}

@@ -11,6 +11,109 @@
 
 .ed-curriculum-brand {
   --curriculum-accent: color-mix(in srgb, var(--ed-primary-soft) 75%, var(--ed-card));
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.ed-curriculum-brand .ed-pipeline-workspace {
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .ed-curriculum-brand .ed-pipeline-workspace {
+    grid-template-columns: minmax(16rem, 0.95fr) minmax(0, 2.05fr);
+  }
+}
+
+.ed-curriculum-brand__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ed-curriculum-brand__toolbar .ed-filter-tabs {
+  margin-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  .ed-curriculum-brand__toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .ed-curriculum-brand__search {
+    display: flex;
+    flex: 1 1 16rem;
+    max-width: 24rem;
+    min-width: 0;
+  }
+
+  .ed-curriculum-brand__toolbar .ed-filter-tabs {
+    gap: 0.625rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ed-curriculum-brand__toolbar .ed-filter-tabs__btn {
+    border: none;
+    background: transparent;
+    color: var(--ed-muted);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+  }
+
+  .ed-curriculum-brand__toolbar .ed-filter-tabs__btn.is-active {
+    background: color-mix(in srgb, var(--ed-primary) 12%, var(--ed-card));
+    color: var(--ed-primary);
+    border: none;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ed-primary) 22%, transparent);
+  }
+}
+
+.ed-curriculum-brand__search {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--ed-border);
+  border-radius: 999px;
+  background: var(--ed-card);
+}
+
+.ed-curriculum-brand__search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+.ed-curriculum-brand__search input::placeholder {
+  color: var(--ed-muted);
+}
+
+.ed-curriculum-brand__search-icon {
+  color: var(--ed-muted);
+  display: grid;
+  place-items: center;
+}
+
+@media (max-width: 1023px) {
+  .ed-curriculum-brand {
+    padding-bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ed-curriculum-brand .ed-pipeline-page-header__actions .ed-btn {
+    display: none;
+  }
 }
 
 .ed-curriculum-brand__layout {

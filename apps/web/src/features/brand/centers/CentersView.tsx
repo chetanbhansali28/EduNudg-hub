@@ -164,7 +164,7 @@ export function CentersView() {
         title="Franchise Management"
         subtitle="Manage franchise profile, curriculum, and lifecycle from one workspace."
         actions={
-          <Button type="button" variant="secondary" onClick={() => setImportOpen(true)}>
+          <Button type="button" variant="primary" onClick={() => setImportOpen(true)}>
             Import Franchise
           </Button>
         }

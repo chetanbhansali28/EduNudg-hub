@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Button,
-  CatalogPageHeader,
-  CatalogToolbar,
   FilterTabs,
+  LeadKpiCard,
+  LeadKpiGrid,
+  PipelinePageHeader,
 } from "@edunudg/ui";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
+import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
+import { listBrandMerchandiseOrders, listMerchandiseCatalog } from "@/lib/merchandiseOrdersApi";
 import { BrandMerchandiseCatalogSection } from "./BrandMerchandiseCatalogSection";
 import { BrandMerchandiseOrdersSection } from "./BrandMerchandiseOrdersSection";
 import { BrandMerchandisePromoSection } from "./BrandMerchandisePromoSection";
 import { BrandMerchandisePaymentSettings } from "./BrandMerchandisePaymentSettings";
+import {
+  merchandisePageCounts,
+  type CatalogTabFilter,
+} from "./merchandisePageHelpers";
+import "@/features/brand/franchiseApplications/franchiseApplications.css";
 import "./brandMerchandiseCatalog.css";
 
 const TABS = [
@@ -21,79 +30,148 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+const ICON_SEARCH = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
+
 export function BrandMerchandisePage() {
   const { brandId, missingBrand } = useBrandScope();
+  const { isMobile } = useOpsBreakpoint();
   const [activeTab, setActiveTab] = useState<TabId>("catalog");
   const [catalogAddOpen, setCatalogAddOpen] = useState(false);
+  const [listFilter, setListFilter] = useState<CatalogTabFilter>("all");
+  const [search, setSearch] = useState("");
+
+  const catalog = useQuery({
+    queryKey: ["merchandise-catalog", brandId],
+    enabled: !!brandId,
+    queryFn: () => listMerchandiseCatalog(brandId!),
+  });
+
+  const orders = useQuery({
+    queryKey: ["brand-merchandise-orders", brandId],
+    enabled: !!brandId,
+    queryFn: () => listBrandMerchandiseOrders(brandId!),
+  });
+
+  const pageCounts = useMemo(
+    () => merchandisePageCounts(catalog.data ?? [], orders.data?.length ?? 0),
+    [catalog.data, orders.data],
+  );
 
   if (missingBrand || !brandId) {
     return <p className="ed-empty">Brand context not found.</p>;
   }
 
+  const openCatalogTab = (filter: CatalogTabFilter) => {
+    setActiveTab("catalog");
+    setListFilter(filter);
+    setCatalogAddOpen(false);
+  };
+
   const tabOptions = TABS.map((tab) => ({
     value: tab.id,
-    label: tab.label,
+    label: isMobile && tab.mobileLabel ? tab.mobileLabel : tab.label,
   }));
 
   return (
-    <div className="ed-brand-merch-page">
-      <header className="ed-brand-merch-page__mobile-head">
-        <p className="ed-brand-merch-page__eyebrow">Management</p>
-        <div className="ed-brand-merch-page__mobile-title-row">
-          <h1 className="ed-brand-merch-page__mobile-title">
-            {activeTab === "catalog"
-              ? "Catalog"
-              : (TABS.find((tab) => tab.id === activeTab)?.label ?? "Store")}
-          </h1>
-          {activeTab === "catalog" ? (
-            <button
-              type="button"
-              className="ed-brand-merch-page__fab"
-              aria-label="Add Merchandise"
-              onClick={() => setCatalogAddOpen(true)}
-            >
-              +
-            </button>
-          ) : null}
-        </div>
-      </header>
-
-      <div className="ed-brand-merch-page__desktop-head">
-        <CatalogPageHeader
-          title="Merchandise Catalog"
-          actions={
-            activeTab === "catalog" ? (
-              <Button onClick={() => setCatalogAddOpen(true)}>+ Add Merchandise</Button>
-            ) : null
-          }
-        />
-      </div>
-
-      <CatalogToolbar
-        tabs={
-          <FilterTabs
-            options={tabOptions}
-            value={activeTab}
-            onChange={(value) => {
-              if (value !== "catalog") setCatalogAddOpen(false);
-              setActiveTab(value as TabId);
-            }}
-            variant="segmented"
-            aria-label="Merchandise sections"
-          />
+    <div className="ed-franchise-apps-page ed-brand-merch-page">
+      <PipelinePageHeader
+        title="Merchandise"
+        subtitle="Manage catalog SKUs, promo codes, and franchise center orders."
+        actions={
+          activeTab === "catalog" ? (
+            <Button onClick={() => setCatalogAddOpen(true)}>+ Add Merchandise</Button>
+          ) : null
         }
       />
+
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="Active"
+          value={pageCounts.active}
+          hint={pageCounts.active > 0 ? "Live SKUs" : undefined}
+          active={activeTab === "catalog" && listFilter === "active"}
+          onClick={() => openCatalogTab("active")}
+        />
+        <LeadKpiCard
+          label="Draft"
+          value={pageCounts.draft}
+          hint="Not live"
+          active={activeTab === "catalog" && listFilter === "draft"}
+          onClick={() => openCatalogTab("draft")}
+        />
+        <LeadKpiCard
+          label="Orders"
+          value={pageCounts.orders}
+          hint="Franchise orders"
+          active={activeTab === "orders"}
+          onClick={() => {
+            setActiveTab("orders");
+            setCatalogAddOpen(false);
+          }}
+        />
+        <LeadKpiCard
+          label={isMobile ? "All items" : "Total"}
+          value={pageCounts.total}
+          hint="All SKUs"
+          tone="total"
+          active={activeTab === "catalog" && listFilter === "all"}
+          onClick={() => openCatalogTab("all")}
+        />
+      </LeadKpiGrid>
+
+      <div className="ed-franchise-apps-page__toolbar">
+        <label className="ed-franchise-apps-page__search">
+          <span className="ed-franchise-apps-page__search-icon">{ICON_SEARCH}</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setActiveTab("catalog");
+            }}
+            placeholder="Search catalog..."
+            aria-label="Search catalog"
+          />
+        </label>
+        <FilterTabs
+          options={tabOptions}
+          value={activeTab}
+          onChange={(value) => {
+            if (value !== "catalog") setCatalogAddOpen(false);
+            setActiveTab(value as TabId);
+          }}
+          aria-label="Merchandise sections"
+        />
+      </div>
 
       {activeTab === "catalog" ? (
         <BrandMerchandiseCatalogSection
           brandId={brandId}
           formOpen={catalogAddOpen}
           onFormOpenChange={setCatalogAddOpen}
+          listFilter={listFilter}
+          search={search}
         />
       ) : null}
       {activeTab === "promo" ? <BrandMerchandisePromoSection brandId={brandId} /> : null}
       {activeTab === "orders" ? <BrandMerchandiseOrdersSection brandId={brandId} /> : null}
       {activeTab === "payment" ? <BrandMerchandisePaymentSettings brandId={brandId} /> : null}
+
+      {isMobile && activeTab === "catalog" && !catalogAddOpen ? (
+        <button
+          type="button"
+          className="ed-franchise-apps-page__fab"
+          aria-label="Add Merchandise"
+          onClick={() => setCatalogAddOpen(true)}
+        >
+          +
+        </button>
+      ) : null}
     </div>
   );
 }

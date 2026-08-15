@@ -104,7 +104,7 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   featureGrid: true,
   founders: true,
   trustMedia: true,
-  gallery: false,
+  gallery: true,
   footerRich: true,
   ecosystemIntro: false,
   connectivityShowcase: false,

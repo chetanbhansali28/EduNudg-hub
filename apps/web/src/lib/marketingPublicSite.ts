@@ -77,9 +77,8 @@ const ABACUS_CLASSIC_OPTIONS: NavOptionDef[] = [
 ];
 
 const SPARK_ACADEMY_OPTIONS: NavOptionDef[] = [
-  { value: PROGRAMS_NAV_HREF, label: "Programs (#programs)", sectionKey: "programsGrid" },
-  { value: CURRICULUM_NAV_HREF, label: "Syllabus (#curriculum)", sectionKey: "curriculumSyllabus" },
-  { value: "#features", label: "About us (#features)", sectionKey: "featureGrid" },
+  { value: PROGRAMS_NAV_HREF, label: "Courses (#programs)", sectionKey: "programsGrid" },
+  { value: "#features", label: "Features (#features)", sectionKey: "featureGrid" },
   { value: "/about", label: "About page (/about)" },
   { value: "#about", label: "About section (#about)", sectionKey: "about" },
   { value: "#founders", label: "Mentors (#founders)", sectionKey: "founders" },
@@ -87,6 +86,7 @@ const SPARK_ACADEMY_OPTIONS: NavOptionDef[] = [
   { value: "#journey", label: "Journey stats (#journey)", sectionKey: "trustMedia" },
   { value: "#testimonials", label: "Testimonials (#testimonials)", sectionKey: "testimonials" },
   { value: "#faq", label: "FAQ (#faq)", sectionKey: "faq" },
+  { value: "#gallery", label: "Photo gallery (#gallery)", sectionKey: "gallery" },
   { value: "enroll", label: "Open enroll modal (enroll)" },
   { value: "apply", label: "Open franchise modal (apply)" },
 ];
@@ -128,14 +128,32 @@ export function normalizeMarketingNavHref(href: string): string {
   return alias ?? trimmed;
 }
 
+function isPresetNavOption(option: MarketingNavSectionOption, href: string): boolean {
+  return option.value !== CUSTOM_NAV_HREF_OPTION && option.value === href;
+}
+
+/**
+ * Spark public courses live at `#programs` with a `#curriculum` alias in the same section.
+ * If Syllabus is not listed as its own dropdown option, treat the alias as Courses.
+ */
+function sparkCoursesAliasHref(
+  href: string,
+  options: MarketingNavSectionOption[]
+): string | null {
+  if (href !== CURRICULUM_NAV_HREF) return null;
+  if (options.some((option) => isPresetNavOption(option, CURRICULUM_NAV_HREF))) return null;
+  if (options.some((option) => isPresetNavOption(option, PROGRAMS_NAV_HREF))) return PROGRAMS_NAV_HREF;
+  return null;
+}
+
 export function isKnownMarketingNavHref(
   href: string,
   options: { theme: MarketingTheme; portalMode: PortalMode; sections?: HomepageSectionVisibility }
 ): boolean {
   const normalized = normalizeMarketingNavHref(href);
-  return marketingNavSectionOptions(options).some(
-    (option) => option.value !== CUSTOM_NAV_HREF_OPTION && option.value === normalized
-  );
+  const presets = marketingNavSectionOptions(options);
+  if (presets.some((option) => isPresetNavOption(option, normalized))) return true;
+  return sparkCoursesAliasHref(normalized, presets) !== null;
 }
 
 export function resolveNavHrefSelectValue(
@@ -143,10 +161,10 @@ export function resolveNavHrefSelectValue(
   options: MarketingNavSectionOption[]
 ): string {
   const normalized = normalizeMarketingNavHref(href);
-  if (options.some((option) => option.value === normalized && option.value !== CUSTOM_NAV_HREF_OPTION)) {
+  if (options.some((option) => isPresetNavOption(option, normalized))) {
     return normalized;
   }
-  return CUSTOM_NAV_HREF_OPTION;
+  return sparkCoursesAliasHref(normalized, options) ?? CUSTOM_NAV_HREF_OPTION;
 }
 
 const AUTO_CURRICULUM_LABEL = "Curriculum";

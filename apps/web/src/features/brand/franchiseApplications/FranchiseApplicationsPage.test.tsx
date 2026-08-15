@@ -83,10 +83,43 @@ describe("FranchiseApplicationsPage", () => {
     expect(screen.getByText("Review and manage incoming center requests.")).toBeDefined();
     expect(screen.getByRole("tablist", { name: "Application filter" })).toBeDefined();
     expect(await screen.findByRole("tab", { name: /Pending review \(1\)/ })).toBeDefined();
-    expect(screen.getByRole("tab", { name: /Deleted \(0\)/ })).toBeDefined();
+    expect(screen.getByRole("tab", { name: /Decided \(0\)/ })).toBeDefined();
+    expect(screen.queryByRole("tab", { name: /All applications/ })).toBeNull();
+    expect(screen.queryByRole("tab", { name: /Deleted/ })).toBeNull();
     const tabs = screen.getAllByRole("tab").map((tab) => tab.textContent);
-    expect(tabs[tabs.length - 1]).toMatch(/Deleted/);
+    expect(tabs).toEqual(["Pending review (1)", "Decided (0)"]);
     expect(screen.getByPlaceholderText("Search applications...")).toBeDefined();
+  });
+
+  it("regression_franchise_apps_kpi_cards_match_lead_stats", async () => {
+    mockInquiries.splice(0, mockInquiries.length, sampleInquiry, {
+      ...sampleInquiry,
+      id: "inq-approved",
+      status: "converted",
+      converted_center_id: "center-live",
+      proposed_franchise_name: "Live Pune West",
+    }, {
+      ...sampleInquiry,
+      id: "inq-rejected",
+      status: "lost",
+      proposed_franchise_name: "EduQuest Academy",
+    });
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <FranchiseApplicationsPage />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByRole("tab", { name: /Pending review \(1\)/ })).toBeDefined();
+    const kpiLabels = [...container.querySelectorAll(".ed-lead-kpi__label")].map((el) => el.textContent);
+    expect(kpiLabels).toEqual(["Pending review", "Approved", "Rejected", "Total"]);
+    const kpiValues = [...container.querySelectorAll(".ed-lead-kpi__value")].map((el) => el.textContent);
+    expect(kpiValues).toEqual(["1", "1", "1", "3"]);
+
+    fireEvent.click(container.querySelectorAll(".ed-lead-kpi")[1]!);
+    expect(screen.getByRole("tab", { name: /Decided \(2\)/ }).getAttribute("aria-selected")).toBe("true");
   });
 
   it("regression_franchise_name_opens_full_application_detail", async () => {
@@ -147,9 +180,10 @@ describe("FranchiseApplicationsPage", () => {
     });
 
     expect(await screen.findByRole("button", { name: /EduQuest Academy/i })).toBeDefined();
-    expect(screen.getByRole("tab", { name: /All applications \(2\)/ }).getAttribute("aria-selected")).toBe(
+    expect(screen.getByRole("tab", { name: /Pending review \(1\)/ }).getAttribute("aria-selected")).toBe(
       "true",
     );
+    expect(screen.queryByRole("tab", { name: /All applications/ })).toBeNull();
 
     fireEvent.change(screen.getByPlaceholderText("Search applications..."), {
       target: { value: "" },
@@ -185,7 +219,7 @@ describe("FranchiseApplicationsPage", () => {
     expect(screen.getByRole("button", { name: "Approve & create center" })).toBeDefined();
   });
 
-  it("regression_deleted_franchise_tab_separates_soft_deleted_centers", async () => {
+  it("regression_deleted_converted_inquiry_appears_on_decided_tab", async () => {
     mockInquiries.splice(0, mockInquiries.length, {
       ...sampleInquiry,
       id: "inq-deleted",
@@ -205,11 +239,11 @@ describe("FranchiseApplicationsPage", () => {
       </QueryClientProvider>
     );
 
-    expect(await screen.findByRole("tab", { name: /Deleted \(1\)/ })).toBeDefined();
-    expect(screen.getByRole("tab", { name: /Decided \(0\)/ })).toBeDefined();
+    expect(await screen.findByRole("tab", { name: /Decided \(1\)/ })).toBeDefined();
+    expect(screen.queryByRole("tab", { name: /Deleted/ })).toBeNull();
     expect(screen.queryByText("Closed Pune West")).toBeNull();
 
-    fireEvent.click(screen.getByRole("tab", { name: /Deleted \(1\)/ }));
+    fireEvent.click(screen.getByRole("tab", { name: /Decided \(1\)/ }));
     const deletedRow = await screen.findByRole("button", { name: /Closed Pune West/i });
     expect(screen.getByText("DELETED")).toBeDefined();
 
@@ -217,7 +251,7 @@ describe("FranchiseApplicationsPage", () => {
     expect(screen.getByText(/deleted from Franchise Management/i)).toBeDefined();
   });
 
-  it("regression_deleted_franchise_appears_last_on_all_applications", async () => {
+  it("regression_deleted_franchise_appears_last_on_decided", async () => {
     mockInquiries.splice(
       0,
       mockInquiries.length,
@@ -228,6 +262,14 @@ describe("FranchiseApplicationsPage", () => {
         converted_center_id: "center-gone",
         proposed_franchise_name: "Closed Pune West",
         created_at: "2026-08-15T12:00:00Z",
+      },
+      {
+        ...sampleInquiry,
+        id: "inq-live",
+        status: "converted",
+        converted_center_id: "center-live",
+        proposed_franchise_name: "Live Pune West",
+        created_at: "2026-06-01T09:00:00Z",
       },
       sampleInquiry,
     );
@@ -243,7 +285,7 @@ describe("FranchiseApplicationsPage", () => {
       </QueryClientProvider>
     );
 
-    fireEvent.click(await screen.findByRole("tab", { name: /All applications \(2\)/ }));
+    fireEvent.click(await screen.findByRole("tab", { name: /Decided \(2\)/ }));
     const rows = await screen.findAllByRole("button", { name: /Pune West/i });
     expect(rows.map((row) => row.textContent?.includes("Closed Pune West"))).toEqual([false, true]);
   });

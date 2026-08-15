@@ -56,14 +56,24 @@ Traceability: FR-C01, FR-C02, FR-C03, FR-C04
 
 ### Requirement: Brand student leads pipeline
 
-Brand staff SHALL manage student leads at `/app/leads` with filters for unassigned, assigned, stale (needs attention), and lost leads.
+Brand staff SHALL manage student leads at `/app/leads` with **Pending review** (open pipeline: unassigned, assigned, and stale) and **Decided** (lost and converted) tabs. The page SHALL use the same pipeline chrome as Franchise Applications: stats strip, search, filter tabs, and a persistent list with detail beside it on desktop.
 
 Traceability: FR-B10
 
 #### Scenario: Unassigned brand lead visible
 
-- **WHEN** brand staff open Student Leads with filter Unassigned
+- **WHEN** brand staff open Student Leads on **Pending review**
 - **THEN** brand-application leads without `center_id` appear in the list
+- **AND** lost and converted leads are listed on **Decided** instead
+
+#### Scenario: Pipeline chrome matches franchise applications
+
+- **WHEN** brand staff open Student Leads
+- **THEN** the page shows a pipeline header, KPI cards (Pending review, Converted, Lost, Total), search, and **Pending review** / **Decided** tabs
+- **AND** the lead list remains visible while a lead is selected on desktop
+- **AND** search finds matching leads from any status without switching tabs
+- **AND** assignment management stacks below applicant details (two-column page: list + stacked detail)
+- **AND** **Recent Activity** is the last section in the detail column
 
 ### Requirement: Pincode-based center suggestions
 
@@ -91,7 +101,7 @@ Traceability: FR-B13, FR-B16, FR-B17
 #### Scenario: Stale lead after inactivity
 
 - **WHEN** a lead is assigned to a center and no qualifying status change occurs within `lead_stale_days`
-- **THEN** the lead appears in brand Stale / Needs attention filter
+- **THEN** the lead appears on brand **Pending review** with a NEEDS ATTENTION badge
 
 #### Scenario: Brand reassigns stale lead
 
@@ -108,7 +118,7 @@ Traceability: FR-B14, FR-B15, FR-C11b
 
 - **WHEN** center staff call `mark_lead_lost` with a reason
 - **THEN** the lead status becomes `lost` with `lost_reason` stored
-- **AND** brand staff see the lead in Lost filter with the reason
+- **AND** brand staff see the lead on **Decided** with the reason
 - **AND** brand staff cannot call `mark_lead_lost`
 
 #### Scenario: Brand reopens lost lead

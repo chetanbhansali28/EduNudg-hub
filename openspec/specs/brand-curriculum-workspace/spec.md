@@ -22,6 +22,13 @@ Brand staff SHALL manage courses in a two-column layout at `/app/curriculum`.
 - **WHEN** the page loads
 - **THEN** column 1 lists courses and column 2 shows the selected course detail
 
+#### Scenario: Page chrome matches franchise applications
+
+- **GIVEN** a brand user on `/app/curriculum`
+- **THEN** the page uses `PipelinePageHeader` + `LeadKpiGrid` like Franchise Applications
+- **AND** stats cards show Active, Drafts, Programs, and Total
+- **AND** **+ Add Curriculum** remains in the page header only
+
 #### Scenario: Add course uses page header only
 
 - **GIVEN** a brand user on `/app/curriculum` on desktop

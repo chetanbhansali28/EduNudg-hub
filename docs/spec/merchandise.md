@@ -6,7 +6,7 @@ Brand-managed catalog; franchise centers place orders from an ecommerce-style sh
 
 | Portal | Route | Purpose |
 |--------|-------|---------|
-| Brand | `/app/merchandise` | Catalog CRUD, promos, payment settings, order fulfillment |
+| Brand | `/app/merchandise` | Catalog CRUD, promos, payment settings, order fulfillment — pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs) |
 | Center | `/app/merchandise` | Shop (product grid + checkout), order history |
 | Platform | `/admin/brands/:slug` | Enable `merchandise` feature toggle |
 
@@ -35,6 +35,7 @@ Brand-configurable: Razorpay checkout, invoice/bank transfer, or both (`brand_se
 
 ## Related
 
+- Canonical behavior: [`openspec/specs/brand-merchandise/spec.md`](../../openspec/specs/brand-merchandise/spec.md)
 - [feature-flags.md](./feature-flags.md) — `merchandise` key
 - [navigation-spec.md](./navigation-spec.md) — sidebar entries
 - [table-dictionary.md](../database/table-dictionary.md) — schema

@@ -40,7 +40,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
-| FR-B10 | B | **Student Leads** nav item `/app/leads` | Lists: unassigned, assigned, stale, **lost** |
+| FR-B10 | B | **Student Leads** nav item `/app/leads` | Lists: **Pending review** (unassigned, assigned, stale) and **Decided** (lost, converted); same pipeline chrome as Franchise Applications (KPI strip, search, persistent list + detail) |
 | FR-B11 | B | Pincode suggestions | Exact → same city + 3-digit prefix → rank by last-3 distance; **manual assign only** |
 | FR-B12 | B | Assign to any center in brand | Override dropdown beyond suggestions |
 | FR-B13 | B | Reallocate stale leads | After configurable SLA days without center status change |
@@ -62,7 +62,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-B20 | B | **Franchise Applications** nav `/app/franchise-applications` | Moved out of Settings |
 | FR-B21 | B | Approve creates center + domain + operator invite | Same transaction: `franchise_centers`, `{center}.{brand}` mapping |
 | FR-B22 | B | 360° read-only student/center views | All centers under brand (Phase B/C) |
-| FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Master-detail: courses → levels → units; on/off toggle per course (`programs.is_active`); parent marketing (benefits, why parents choose this, skills & outcomes) stays editable after create via Save |
+| FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Drafts/Programs/Total KPIs); master-detail: courses → levels → units; on/off toggle per course (`programs.is_active`); parent marketing stays editable after create via Save |
+| FR-B24 | B | **Merchandise** workspace `/app/merchandise` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings; desktop catalog list + detail |
 
 ---
 

@@ -19,3 +19,10 @@ export function themeUsesLeadModals(theme: MarketingTheme): boolean {
 export function isAlternateMarketingTheme(theme: MarketingTheme): boolean {
   return theme !== "novu";
 }
+
+/** Modifier on `.about-us` so `/about` and `#about` inherit the brand marketing theme. */
+export function aboutUsThemeClass(theme: MarketingTheme | undefined): string {
+  if (theme === "spark-academy") return "about-us--spark-academy";
+  if (theme === "abacus-classic") return "about-us--abacus-classic";
+  return "about-us--novu";
+}

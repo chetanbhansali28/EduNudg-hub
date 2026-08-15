@@ -41,9 +41,11 @@ describe("CenterCurriculumPage", () => {
         <CenterCurriculumPage />
       </QueryClientProvider>
     );
-    expect(screen.getByText("Curriculum Builder")).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Curriculum" })).toBeDefined();
     expect(screen.getByRole("heading", { name: /Courses/i })).toBeDefined();
-    expect(document.querySelector(".ed-curriculum-brand__layout")).toBeTruthy();
+    expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
+    expect(document.querySelector(".ed-lead-kpi-grid")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Add course" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "+ Add Curriculum" })).toBeNull();
   });
 });

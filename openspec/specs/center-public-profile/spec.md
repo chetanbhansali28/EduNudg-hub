@@ -55,14 +55,14 @@ The system SHALL accept `social_links` as a JSON array of `{platform, url}` with
 
 The center public homepage SHALL display profile fields from `get_center_landing_public` including display name, description, address, contact phone, photo, and social links.
 
-Footer social icons on the **center** host SHALL use `franchise_centers.social_links` (Facebook, Instagram, YouTube, WhatsApp, LinkedIn, X when a valid `https` URL is saved), not brand `social_connect`. Brand landing Social Media Connect remains Facebook/Instagram only and SHALL NOT show a WhatsApp float.
+Footer social icons on the **center** host SHALL use `franchise_centers.social_links` (Facebook, Instagram, YouTube, WhatsApp, LinkedIn, X when a valid `https` URL is saved in **center Settings**), not brand `social_connect`. Brand **Franchise Management** (`/app/centers`) SHALL NOT show or edit those links. Brand landing Social Media Connect remains Facebook/Instagram only and SHALL NOT show a WhatsApp float.
 
 On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show the same franchise Location & Contact overlay (`centerFooterContactFromProfile`) — street, city · region · pincode, and phone — and SHALL NOT show brand `headOffice`, brand “Our presence”, or Spark’s placeholder phone. Brand hosts keep Head office / presence unchanged.
 
 #### Scenario: Footer social uses franchise URLs
 
 - **GIVEN** the brand Social Media Connect points at the brand owner's Facebook/Instagram
-- **AND** the franchise saved its own social URLs in Franchise Management / center Settings
+- **AND** the franchise saved its own social URLs in center Settings
 - **WHEN** a visitor opens the center public site (View Frontend)
 - **THEN** the footer shows icons for each saved https link (including YouTube)
 - **AND** does not open the brand owner's social pages

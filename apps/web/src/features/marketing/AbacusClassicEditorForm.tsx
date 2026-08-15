@@ -13,7 +13,7 @@ import type {
 } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import type { PortalMode } from "@/lib/portalMode";
-import { isAbacusSectionEnabled, setSectionEnabled, ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, type HomepageSectionKey } from "@/lib/homepageSections";
+import { isAbacusSectionEnabled, isSparkSectionEnabled, setSectionEnabled, ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, type HomepageSectionKey } from "@/lib/homepageSections";
 import { emptyHomepageProgramCard } from "@/lib/programsGridItems";
 import { FooterRichEditorFields } from "@/features/marketing/FooterRichEditorFields";
 import { FooterLegalPagesEditor } from "@/features/marketing/FooterLegalPagesEditor";
@@ -79,6 +79,8 @@ export function AbacusClassicEditorForm({
 
   const isSpark = marketingTheme === "spark-academy";
   const sectionDefaults = isSpark ? SPARK_ACADEMY_SECTION_DEFAULTS : ABACUS_CLASSIC_SECTION_DEFAULTS;
+  const isThemeSectionEnabled = (key: HomepageSectionKey) =>
+    isSpark ? isSparkSectionEnabled(config, key) : isAbacusSectionEnabled(config, key);
 
   const setSection = (key: HomepageSectionKey, enabled: boolean) => {
     commit(setSectionEnabled(config, key, enabled, sectionDefaults));
@@ -196,7 +198,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="hero"
         title="Hero"
-        enabled={isAbacusSectionEnabled(config, "hero")}
+        enabled={isThemeSectionEnabled("hero")}
         onEnabledChange={(e) => setSection("hero", e)}
       >
         <EditorFieldsGrid>
@@ -226,7 +228,7 @@ export function AbacusClassicEditorForm({
             ? "Shows or hides the public courses grid. Published Curriculum fills the cards."
             : "Program cards shown in the World-Class Brain Development section"
         }
-        enabled={isAbacusSectionEnabled(config, "programsGrid")}
+        enabled={isThemeSectionEnabled("programsGrid")}
         onEnabledChange={(e) => setSection("programsGrid", e)}
       >
         <EditorFieldsGrid>
@@ -311,7 +313,7 @@ export function AbacusClassicEditorForm({
             ? "Published Curriculum catalog for Courses designed for success (#programs / #curriculum)"
             : "Full published syllabus at #curriculum on your public site"
         }
-        enabled={isAbacusSectionEnabled(config, "curriculumSyllabus")}
+        enabled={isThemeSectionEnabled("curriculumSyllabus")}
         onEnabledChange={(e) => setSection("curriculumSyllabus", e)}
       >
         <EditorSectionNote>
@@ -334,7 +336,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="featureGrid"
         title="Why us (feature blocks)"
-        enabled={isAbacusSectionEnabled(config, "featureGrid")}
+        enabled={isThemeSectionEnabled("featureGrid")}
         onEnabledChange={(e) => setSection("featureGrid", e)}
       >
         {marketingTheme === "spark-academy" ? (
@@ -489,7 +491,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="founders"
         title="Leadership profiles"
-        enabled={isAbacusSectionEnabled(config, "founders")}
+        enabled={isThemeSectionEnabled("founders")}
         onEnabledChange={(e) => setSection("founders", e)}
       >
         <EditorItemList
@@ -516,7 +518,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="upcomingEvents"
         title="Upcoming events"
-        enabled={isAbacusSectionEnabled(config, "upcomingEvents")}
+        enabled={isThemeSectionEnabled("upcomingEvents")}
         onEnabledChange={(e) => setSection("upcomingEvents", e)}
       >
         <UpcomingEventsEditorFields
@@ -533,7 +535,7 @@ export function AbacusClassicEditorForm({
           sectionId="about"
           title="About Us"
           description="Company story, key features, team photos — full /about page"
-          enabled={isAbacusSectionEnabled(config, "about")}
+          enabled={isThemeSectionEnabled("about")}
           onEnabledChange={(e) => setSection("about", e)}
         >
           <AboutUsEditorFields
@@ -549,7 +551,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="trustMedia"
         title="Trust & video"
-        enabled={isAbacusSectionEnabled(config, "trustMedia")}
+        enabled={isThemeSectionEnabled("trustMedia")}
         onEnabledChange={(e) => setSection("trustMedia", e)}
       >
         <EditorFieldsGrid>
@@ -673,7 +675,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="testimonials"
         title="Success stories section"
-        enabled={isAbacusSectionEnabled(config, "testimonials")}
+        enabled={isThemeSectionEnabled("testimonials")}
         onEnabledChange={(e) => setSection("testimonials", e)}
       >
         <EditorFieldsGrid>
@@ -694,7 +696,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="faq"
         title="FAQ"
-        enabled={isAbacusSectionEnabled(config, "faq")}
+        enabled={isThemeSectionEnabled("faq")}
         onEnabledChange={(e) => setSection("faq", e)}
       >
         <EditorItemList
@@ -738,7 +740,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="gallery"
         title="Photo gallery"
-        enabled={isAbacusSectionEnabled(config, "gallery")}
+        enabled={isThemeSectionEnabled("gallery")}
         onEnabledChange={(e) => setSection("gallery", e)}
       >
         <EditorFieldsGrid>
@@ -812,7 +814,7 @@ export function AbacusClassicEditorForm({
       <EditorAccordion
         sectionId="footerRich"
         title="Footer"
-        enabled={isAbacusSectionEnabled(config, "footerRich")}
+        enabled={isThemeSectionEnabled("footerRich")}
         onEnabledChange={(e) => setSection("footerRich", e)}
       >
         <EditorFieldsGrid>

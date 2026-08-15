@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button, CurriculumBuilderHeader, CurriculumFab, MutationError } from "@edunudg/ui";
+import { Button, CurriculumFab, FilterTabs, LeadKpiCard, LeadKpiGrid, MutationError, PipelinePageHeader, PipelineWorkspace } from "@edunudg/ui";
 import { CurriculumAddCoursePanel } from "@/features/brand/curriculum/CurriculumAddCoursePanel";
 import {
   archiveProgram,
@@ -35,11 +35,19 @@ import {
   EMPTY_LEVEL_FORM,
 } from "@/features/brand/curriculum/curriculumForms";
 import {
+  curriculumPageCounts,
   filterCoursesByTab,
   matchesCurriculumSearch,
   type CurriculumTabFilter,
 } from "@/features/brand/curriculum/curriculumBrandHelpers";
 import "@/features/brand/curriculum/curriculumBrand.css";
+
+const ICON_SEARCH = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
 
 interface CurriculumWorkspaceProps {
   brandId: string;
@@ -57,7 +65,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
 
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
-  const [mobileTab, setMobileTab] = useState<CurriculumTabFilter>("active");
+  const [listFilter, setListFilter] = useState<CurriculumTabFilter>("all");
   const [search, setSearch] = useState("");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [addCourseOpen, setAddCourseOpen] = useState(false);
@@ -103,12 +111,17 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
   });
 
   const filteredCourses = useMemo(() => {
-    const tabbed = isMobile ? filterCoursesByTab(allCourses, mobileTab) : allCourses;
+    const tabbed = filterCoursesByTab(allCourses, listFilter);
     return tabbed.filter((course) => {
       const levelNames = (levelsByProgram.data?.[course.id] ?? []).map((level) => level.name);
       return matchesCurriculumSearch(course, levelNames, search);
     });
-  }, [allCourses, isMobile, mobileTab, search, levelsByProgram.data]);
+  }, [allCourses, listFilter, search, levelsByProgram.data]);
+
+  const pageCounts = useMemo(
+    () => curriculumPageCounts(allCourses, levelCountsByProgram.data ?? {}),
+    [allCourses, levelCountsByProgram.data],
+  );
 
   useEffect(() => {
     if (activeCourseId || filteredCourses.length === 0) return;
@@ -327,8 +340,8 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       levelsByProgram={levelsByProgram.data ?? {}}
       levelCounts={levelCountsByProgram.data ?? {}}
       selectedId={activeCourseId || null}
-      mobileTab={mobileTab}
-      onMobileTabChange={setMobileTab}
+      mobileTab={listFilter}
+      onMobileTabChange={setListFilter}
       search={search}
       onSearchChange={setSearch}
       onSelect={selectCourse}
@@ -357,30 +370,85 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
 
   const mainDetailPanel = addCourseOpen && addCoursePanel ? addCoursePanel : detailPanel;
 
+  const filterTabs = [
+    { value: "all" as const, label: isMobile ? "All" : "All courses", count: pageCounts.total },
+    { value: "active" as const, label: "Active", count: pageCounts.active },
+    { value: "drafts" as const, label: "Drafts", count: pageCounts.drafts },
+  ];
+
   return (
     <div className={`ed-curriculum-brand${isMobile ? " ed-curriculum-brand--mobile" : ""}`}>
-      {!isMobile ? (
-        <CurriculumBuilderHeader
-          variant="page"
-          title="Curriculum Builder"
-          subtitle="Design and manage your franchise's educational blueprint. Changes here update across all authorized centers and student portals."
-          actions={
-            !readOnly ? (
-              <Button onClick={openAddCourse}>+ Add Curriculum</Button>
-            ) : null
-          }
+      <PipelinePageHeader
+        title="Curriculum"
+        subtitle="Design and manage your franchise's educational blueprint. Changes here update across all authorized centers and student portals."
+        actions={
+          !readOnly ? (
+            <Button onClick={openAddCourse}>+ Add Curriculum</Button>
+          ) : null
+        }
+      />
+
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="Active"
+          value={pageCounts.active}
+          hint={pageCounts.active > 0 ? "Live" : undefined}
+          active={listFilter === "active"}
+          onClick={() => setListFilter("active")}
         />
-      ) : null}
+        <LeadKpiCard
+          label="Drafts"
+          value={pageCounts.drafts}
+          hint="Not live"
+          active={listFilter === "drafts"}
+          onClick={() => setListFilter("drafts")}
+        />
+        <LeadKpiCard
+          label="Programs"
+          value={pageCounts.programs}
+          hint="Syllabus levels"
+        />
+        <LeadKpiCard
+          label="Total"
+          value={pageCounts.total}
+          hint="All courses"
+          tone="total"
+          active={listFilter === "all"}
+          onClick={() => setListFilter("all")}
+        />
+      </LeadKpiGrid>
 
       <MutationError message={error} />
+
+      {!isMobile ? (
+        <div className="ed-curriculum-brand__toolbar">
+          <label className="ed-curriculum-brand__search">
+            <span className="ed-curriculum-brand__search-icon">{ICON_SEARCH}</span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search courses..."
+              aria-label="Search courses"
+            />
+          </label>
+          <FilterTabs
+            options={filterTabs}
+            value={listFilter}
+            onChange={setListFilter}
+            aria-label="Course filter"
+          />
+        </div>
+      ) : null}
 
       {isMobile ? (
         listPanel
       ) : (
-        <div className="ed-curriculum-brand__layout">
-          {listPanel}
-          <div className="ed-curriculum-brand__detail">{mainDetailPanel}</div>
-        </div>
+        <PipelineWorkspace
+          detailOpen={!!selectedCourse || addCourseOpen}
+          list={listPanel}
+          detail={<div className="ed-curriculum-brand__detail">{mainDetailPanel}</div>}
+        />
       )}
 
       {isMobile && mobileDetailOpen && selectedCourse && !addCourseOpen ? (

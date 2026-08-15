@@ -1,0 +1,51 @@
+# brand-merchandise Specification
+
+## Purpose
+
+Brand staff manage the merchandise catalog, promo codes, payment settings, and franchise orders at `/app/merchandise`, gated by the `merchandise` feature flag.
+
+## Related
+
+- Product: [`docs/spec/merchandise.md`](../../../docs/spec/merchandise.md)
+- Journey: [`docs/journeys/brand-operator.md`](../../../docs/journeys/brand-operator.md)
+- Navigation: [`docs/spec/navigation-spec.md`](../../../docs/spec/navigation-spec.md)
+- Competitions stay off this page: [`brand-competitions-module`](../brand-competitions-module/spec.md)
+
+## Requirements
+
+### Requirement: Pipeline chrome on Merchandise
+
+Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipeline chrome as Franchise Applications: page header, KPI stats strip, search, section tabs, and a catalog list with detail beside it on desktop.
+
+#### Scenario: Page chrome matches franchise applications
+
+- **GIVEN** a brand user on `/app/merchandise`
+- **THEN** the page uses `PipelinePageHeader` + `LeadKpiGrid` like Franchise Applications
+- **AND** stats cards show Active, Draft, Orders, and Total
+- **AND** **+ Add Merchandise** remains in the page header on the Catalog section
+- **AND** section tabs remain Catalog, Promo Codes, Orders, and Payment settings
+
+#### Scenario: KPI cards filter catalog or open orders
+
+- **GIVEN** a brand user on `/app/merchandise`
+- **WHEN** they click Active, Draft, or Total
+- **THEN** the Catalog section is shown with that catalog filter
+- **WHEN** they click Orders
+- **THEN** the Orders section is shown
+
+#### Scenario: Desktop catalog is list plus detail
+
+- **GIVEN** a brand user on `/app/merchandise` Catalog on desktop with at least one SKU
+- **THEN** the page uses `PipelineWorkspace`
+- **AND** column 1 lists SKUs and column 2 shows the selected catalog card
+
+### Requirement: Competitions is not a Merchandise tab
+
+The Merchandise page SHALL NOT include a Competitions tab.
+
+#### Scenario: Merchandise catalog has no Competitions tab
+
+- **GIVEN** brand staff is on `/app/merchandise`
+- **WHEN** the page renders
+- **THEN** section tabs are Catalog, Promo Codes, Orders, and Payment settings
+- **AND** no Competitions tab is present

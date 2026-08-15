@@ -181,6 +181,25 @@ export async function deleteMerchandiseCatalogItem(brandId: string, itemId: stri
   if (error) throw error;
 }
 
+export type MerchandiseCatalogListItem = {
+  id: string;
+  sku: string;
+  name: string;
+  price_cents: number;
+  currency: string;
+  is_active: boolean;
+  photo_urls: string[] | null;
+};
+
+export async function listMerchandiseCatalog(brandId: string): Promise<MerchandiseCatalogListItem[]> {
+  const { data, error } = await getSupabase()
+    .from("merchandise_catalog")
+    .select("id, sku, name, price_cents, currency, is_active, photo_urls")
+    .eq("brand_id", brandId)
+    .order("name");
+  return supabaseList(data, error) as MerchandiseCatalogListItem[];
+}
+
 export async function listActiveMerchandiseCatalog(brandId: string) {
   const { data, error } = await getSupabase()
     .from("merchandise_catalog")

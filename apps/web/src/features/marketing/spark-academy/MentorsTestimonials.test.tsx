@@ -16,7 +16,16 @@ describe("MentorsSection", () => {
     expect(screen.getByText("Sarah Johnson")).toBeDefined();
     expect(screen.getByText("AI Expert & Data Scientist")).toBeDefined();
     expect(document.querySelector(".sa-mentors__track")).toBeDefined();
+    expect(document.querySelector(".sa-mentors__track--center")).toBeDefined();
     expect(document.querySelector(".sa-mentors")).toBeDefined();
+  });
+
+  it("regression_spark_mentors_center_in_track", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    render(<MentorsSection founders={[config.founders![0]]} />);
+
+    expect(document.querySelector(".sa-mentors__track--center")).toBeDefined();
+    expect(screen.getByText("Sarah Johnson")).toBeDefined();
   });
 });
 
@@ -31,6 +40,24 @@ describe("TestimonialsSection", () => {
     expect(screen.getByText("John Matthews")).toBeDefined();
     expect(screen.getByText("Product Designer")).toBeDefined();
     expect(document.querySelectorAll(".sa-testimonial-card")).toHaveLength(6);
+    expect(document.querySelector(".sa-testimonials__grid--center")).toBeDefined();
+  });
+
+  it("regression_spark_testimonials_center_in_grid", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    render(
+      <TestimonialsSection
+        testimonials={{
+          ...config.testimonials,
+          title: "Success stories",
+          items: config.testimonials.items.slice(0, 1),
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Success stories" })).toBeDefined();
+    expect(document.querySelector(".sa-testimonials__grid--center")).toBeDefined();
+    expect(document.querySelectorAll(".sa-testimonial-card")).toHaveLength(1);
   });
 });
 

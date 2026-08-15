@@ -55,9 +55,8 @@ describe("franchiseApplicationsHelpers", () => {
 
     expect(filterInquiries(rows, "pending", "")).toHaveLength(1);
     expect(filterInquiries(rows, "decided", "")).toHaveLength(1);
-    expect(filterInquiries(rows, "all", "eduquest")).toHaveLength(1);
     expect(filterInquiries(rows, "pending", "eduquest")).toHaveLength(1);
-    expect(inquiryCounts(rows)).toEqual({ pending: 1, decided: 1, deleted: 0, all: 2 });
+    expect(inquiryCounts(rows)).toEqual({ pending: 1, decided: 1, approved: 0, rejected: 1, all: 2 });
   });
 
   it("regression_search_finds_application_from_any_tab", () => {
@@ -70,10 +69,10 @@ describe("franchiseApplicationsHelpers", () => {
       proposed_franchise_name: "EduQuest Academy",
     };
     expect(filterInquiries([base, decided], "pending", "EduQuest").map((row) => row.id)).toEqual(["inq-2"]);
-    expect(filterInquiries([base, decided], "deleted", "arti").map((row) => row.id)).toEqual(["inq-1"]);
+    expect(filterInquiries([base, decided], "decided", "arti").map((row) => row.id)).toEqual(["inq-1"]);
   });
 
-  it("regression_deleted_converted_inquiry_uses_deleted_tab", () => {
+  it("regression_deleted_converted_inquiry_uses_decided_tab", () => {
     const approvedLive: FranchiseInquiry = {
       ...base,
       id: "inq-live",
@@ -97,12 +96,14 @@ describe("franchiseApplicationsHelpers", () => {
       tone: "deleted",
     });
     expect(inquiryStatusPresentation(approvedLive, deletedIds).tone).toBe("approved");
-    expect(filterInquiries(rows, "decided", "", deletedIds).map((row) => row.id)).toEqual(["inq-live"]);
-    expect(filterInquiries(rows, "deleted", "", deletedIds).map((row) => row.id)).toEqual(["inq-gone"]);
-    expect(inquiryCounts(rows, deletedIds)).toEqual({ pending: 1, decided: 1, deleted: 1, all: 3 });
+    expect(filterInquiries(rows, "decided", "", deletedIds).map((row) => row.id)).toEqual([
+      "inq-live",
+      "inq-gone",
+    ]);
+    expect(inquiryCounts(rows)).toEqual({ pending: 1, decided: 2, approved: 2, rejected: 0, all: 3 });
   });
 
-  it("regression_deleted_franchise_inquiries_sort_to_bottom_of_all", () => {
+  it("regression_deleted_franchise_inquiries_sort_to_bottom_of_decided", () => {
     const pending: FranchiseInquiry = { ...base, id: "inq-pending" };
     const approvedDeleted: FranchiseInquiry = {
       ...base,
@@ -122,12 +123,11 @@ describe("franchiseApplicationsHelpers", () => {
     const deletedIds = new Set(["center-gone"]);
     const newestFirst = [approvedDeleted, pending, approvedLive];
 
-    expect(filterInquiries(newestFirst, "all", "", deletedIds).map((row) => row.id)).toEqual([
-      "inq-pending",
+    expect(filterInquiries(newestFirst, "decided", "", deletedIds).map((row) => row.id)).toEqual([
       "inq-live",
       "inq-gone",
     ]);
-    expect(filterInquiries(newestFirst, "deleted", "", deletedIds).map((row) => row.id)).toEqual(["inq-gone"]);
+    expect(filterInquiries(newestFirst, "pending", "", deletedIds).map((row) => row.id)).toEqual(["inq-pending"]);
   });
 
   it("maps inquiry status presentation", () => {

@@ -9,9 +9,18 @@
   --sa-yellow: #facc15;
   --sa-radius: 1rem;
   --sa-max: 1200px;
+  --sa-heading-font: Inter, system-ui, -apple-system, sans-serif;
+  --sa-h1-size: clamp(2rem, 5vw, 3.25rem);
+  --sa-h2-size: clamp(1.75rem, 4vw, 2.25rem);
+  --sa-h2-weight: 800;
+  --sa-h2-line: 1.2;
+  --sa-h2-tracking: -0.02em;
+  --sa-h3-size: 1.0625rem;
+  --sa-h3-weight: 700;
+  --sa-h3-line: 1.35;
   background: #fff;
   color: var(--sa-navy);
-  font-family: Inter, system-ui, sans-serif;
+  font-family: var(--sa-heading-font);
 }
 
 /* Buttons */
@@ -71,12 +80,31 @@
   text-align: center;
 }
 
-.sa-section-title {
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
-  font-weight: 800;
-  line-height: 1.2;
+.sa-section-title,
+.sa-features__title,
+.sa-journey__title,
+.sa-mentors__title,
+.sa-testimonials__title {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h2-size);
+  font-weight: var(--sa-h2-weight);
+  line-height: var(--sa-h2-line);
+  letter-spacing: var(--sa-h2-tracking);
+  color: var(--sa-navy);
   margin: 0 0 0.5rem;
-  letter-spacing: -0.02em;
+}
+
+.sa-item-title,
+.sa-course-card__title,
+.sa-features__item h3,
+.sa-journey__row h3,
+.sa-mentor-card__name {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h3-size);
+  font-weight: var(--sa-h3-weight);
+  line-height: var(--sa-h3-line);
+  letter-spacing: normal;
+  color: var(--sa-navy);
 }
 
 .sa-section-subtitle {
@@ -341,11 +369,13 @@ body.sa-nav-drawer-open {
 }
 
 .sa-hero__title {
-  font-size: clamp(2rem, 5vw, 3.25rem);
-  font-weight: 800;
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h1-size);
+  font-weight: var(--sa-h2-weight);
   line-height: 1.1;
   margin: 0 0 1rem;
   letter-spacing: -0.03em;
+  color: var(--sa-navy);
 }
 
 .sa-hero__highlight {
@@ -564,9 +594,6 @@ body.sa-nav-drawer-open {
 
 .sa-course-card__title {
   margin: 0;
-  font-size: 1.0625rem;
-  font-weight: 700;
-  line-height: 1.35;
 }
 
 .sa-course-card__desc {
@@ -790,11 +817,6 @@ body.sa-nav-drawer-open {
 
 .sa-features__title {
   margin: 0 0 0.75rem;
-  font-size: clamp(1.75rem, 3vw, 2.35rem);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--sa-navy);
 }
 
 .sa-features__subtitle {
@@ -832,11 +854,9 @@ body.sa-nav-drawer-open {
   place-items: center;
 }
 
-.sa-features__item h3 {
+.sa-features__item h3,
+.sa-features__item .sa-item-title {
   margin: 0 0 0.35rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--sa-navy);
 }
 
 .sa-features__item p {
@@ -871,11 +891,6 @@ body.sa-nav-drawer-open {
 
 .sa-journey__title {
   margin: 0 0 0.75rem;
-  font-size: clamp(1.85rem, 3.5vw, 2.5rem);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--sa-navy);
 }
 
 .sa-journey__intro {
@@ -928,11 +943,9 @@ body.sa-nav-drawer-open {
   place-items: center;
 }
 
-.sa-journey__row h3 {
+.sa-journey__row h3,
+.sa-journey__row .sa-item-title {
   margin: 0 0 0.35rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--sa-navy);
 }
 
 .sa-journey__row p {
@@ -1029,11 +1042,6 @@ body.sa-nav-drawer-open {
 
 .sa-mentors__title {
   margin: 0 0 0.75rem;
-  font-size: clamp(1.85rem, 3.5vw, 2.5rem);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: var(--sa-navy);
 }
 
 .sa-mentors__subtitle {
@@ -1044,28 +1052,34 @@ body.sa-nav-drawer-open {
 }
 
 .sa-mentors__track-wrap {
-  overflow: hidden;
+  overflow-x: auto;
   width: 100%;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sa-mentors__track-wrap::-webkit-scrollbar {
+  display: none;
 }
 
 .sa-mentors__track {
   display: flex;
   gap: 1.25rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
   padding: 0 clamp(1rem, 6vw, 4rem) 0.5rem;
 }
 
-.sa-mentors__track::-webkit-scrollbar {
-  display: none;
+.sa-mentors__track--center {
+  justify-content: center;
 }
 
 .sa-mentor-card {
   flex: 0 0 clamp(200px, 22vw, 240px);
-  scroll-snap-align: start;
-  text-align: left;
+  scroll-snap-align: center;
+  text-align: center;
 }
 
 .sa-mentor-card__photo {
@@ -1096,9 +1110,6 @@ body.sa-nav-drawer-open {
 
 .sa-mentor-card__name {
   margin: 0 0 0.35rem;
-  font-size: 1.0625rem;
-  font-weight: 700;
-  color: #111827;
 }
 
 .sa-mentor-card__role {
@@ -1133,11 +1144,6 @@ body.sa-nav-drawer-open {
 
 .sa-testimonials__title {
   margin: 0 0 0.75rem;
-  font-size: clamp(1.85rem, 3.5vw, 2.5rem);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  color: #111827;
 }
 
 .sa-testimonials__subtitle {
@@ -1151,12 +1157,19 @@ body.sa-nav-drawer-open {
   max-width: var(--sa-max);
   margin: 0 auto;
   padding: 0 1.25rem;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1.25rem;
 }
 
+.sa-testimonials__grid--center {
+  justify-content: center;
+}
+
 .sa-testimonial-card {
+  flex: 0 1 22rem;
+  width: min(100%, 22rem);
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 1.25rem;
@@ -1164,7 +1177,6 @@ body.sa-nav-drawer-open {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  min-height: 100%;
 }
 
 .sa-testimonial-card__stars {
@@ -1282,6 +1294,57 @@ body.sa-nav-drawer-open {
   color: var(--sa-muted);
   line-height: 1.6;
   font-size: 0.9375rem;
+}
+
+/* Photo gallery */
+.sa-gallery {
+  padding: 3.5rem 0 4rem;
+  background: #f8fafc;
+}
+
+.sa-gallery .sa-section-head {
+  margin-bottom: 2rem;
+}
+
+.sa-gallery__grid {
+  max-width: var(--sa-max);
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.sa-gallery__item {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 1.15rem;
+  background: #e2e8f0;
+  aspect-ratio: 4 / 3;
+}
+
+.sa-gallery__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.sa-gallery__item:hover img {
+  transform: scale(1.04);
+}
+
+@media (min-width: 640px) {
+  .sa-gallery__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .sa-gallery__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* Site footer */
@@ -1530,14 +1593,8 @@ body.sa-nav-drawer-open {
 
   .sa-mentors__track {
     gap: 1rem;
-    /* Left gutter only; ::after provides matching trailing scroll space. */
-    padding: 0 0 0.75rem 1.25rem;
+    padding: 0 1.25rem 0.75rem;
     scroll-padding-inline: 1.25rem;
-  }
-
-  .sa-mentors__track::after {
-    content: "";
-    flex: 0 0 1.25rem;
   }
 
   .sa-mentor-card {
@@ -1546,10 +1603,6 @@ body.sa-nav-drawer-open {
 
   .sa-courses__grid {
     grid-template-columns: 1fr;
-  }
-
-  .sa-testimonials__grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 
 }
@@ -1579,12 +1632,8 @@ body.sa-nav-drawer-open {
   }
 
   .sa-mentors__track {
-    padding: 0 0 0.75rem 1.25rem;
+    padding: 0 1.25rem 0.75rem;
     scroll-padding-inline: 1.25rem;
-  }
-
-  .sa-mentors__track::after {
-    flex-basis: 1.25rem;
   }
 
   .sa-site-footer__bottom {
@@ -1597,9 +1646,46 @@ body.sa-nav-drawer-open {
     justify-content: flex-start;
   }
 
-  .sa-testimonials__grid {
-    grid-template-columns: 1fr;
+  .sa-testimonial-card {
+    flex: 1 1 100%;
+    width: 100%;
   }
+}
+
+/* Shared About / events headings match Spark section titles */
+.marketing-page--spark-academy .about-us__section-title,
+.marketing-page--spark-academy .about-us__philosophy h2,
+.marketing-page--spark-academy .mkt-events__title {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h2-size);
+  font-weight: var(--sa-h2-weight);
+  line-height: var(--sa-h2-line);
+  letter-spacing: var(--sa-h2-tracking);
+  color: var(--sa-navy);
+}
+
+.marketing-page--spark-academy .about-us__hero h1 {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h1-size);
+  font-weight: var(--sa-h2-weight);
+  letter-spacing: var(--sa-h2-tracking);
+  line-height: 1.1;
+}
+
+.marketing-page--spark-academy .about-us__feature h3,
+.marketing-page--spark-academy .about-us__cta-card h3,
+.marketing-page--spark-academy .mkt-events__card-title,
+.marketing-page--spark-academy .about-us__member-name {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h3-size);
+  font-weight: var(--sa-h3-weight);
+  line-height: var(--sa-h3-line);
+  letter-spacing: normal;
+  color: var(--sa-navy);
+}
+
+.marketing-page--spark-academy .about-us__member-name {
+  text-transform: none;
 }
 
 /* Enrollment / franchise forms inside spark layout */
@@ -1624,4 +1710,191 @@ body.sa-nav-drawer-open {
 .marketing-page--spark-academy .ac-modal__panel {
   border-radius: 1rem;
   /* Height / scroll behavior inherited from .ac-modal__* in marketing.css */
+}
+
+/* About Us (`/about` + `#about`) — Spark Academy */
+.about-us--spark-academy {
+  --sa-blue: #3b82f6;
+  --sa-blue-dark: #1d4ed8;
+  --sa-navy: #0f172a;
+  --sa-muted: #64748b;
+  --sa-border: #e2e8f0;
+  --sa-yellow: #facc15;
+  --sa-radius: 1rem;
+  --sa-heading-font: Inter, system-ui, -apple-system, sans-serif;
+  --sa-h1-size: clamp(2rem, 5vw, 3.25rem);
+  --sa-h2-size: clamp(1.75rem, 4vw, 2.25rem);
+  --sa-h2-weight: 800;
+  --sa-h2-line: 1.2;
+  --sa-h2-tracking: -0.02em;
+  --sa-h3-size: 1.0625rem;
+  --sa-h3-weight: 700;
+  --sa-h3-line: 1.35;
+  font-family: var(--sa-heading-font);
+  color: var(--sa-navy);
+}
+
+.about-us--spark-academy.about-us--page {
+  background: #fff;
+}
+
+.about-us--spark-academy .about-us__hero {
+  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+  color: var(--sa-navy);
+  padding: 3.5rem 1.25rem 2.75rem;
+}
+
+.about-us--spark-academy .about-us__hero-badge {
+  display: inline-block;
+  background: #eff6ff;
+  color: var(--sa-blue);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.375rem 0.75rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+
+.about-us--spark-academy .about-us__hero h1 {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h1-size);
+  font-weight: var(--sa-h2-weight);
+  letter-spacing: var(--sa-h2-tracking);
+  line-height: 1.1;
+}
+
+.about-us--spark-academy .about-us__hero-sub {
+  color: var(--sa-muted);
+  opacity: 1;
+  max-width: 38rem;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+.about-us--spark-academy .about-us__hero-brand {
+  letter-spacing: -0.02em;
+  text-transform: none;
+  font-weight: 800;
+  color: var(--sa-navy);
+}
+
+.about-us--spark-academy .about-us__hero-logo {
+  max-height: 72px;
+  filter: none;
+}
+
+.about-us--spark-academy .about-us__section-title {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h2-size);
+  font-weight: var(--sa-h2-weight);
+  line-height: var(--sa-h2-line);
+  letter-spacing: var(--sa-h2-tracking);
+}
+
+.about-us--spark-academy .about-us__story-copy,
+.about-us--spark-academy .about-us__what-copy p,
+.about-us--spark-academy .about-us__teaser-copy {
+  color: var(--sa-muted);
+}
+
+.about-us--spark-academy .about-us__story-image {
+  border-radius: var(--sa-radius);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+.about-us--spark-academy .about-us__philosophy {
+  background: #eff6ff;
+  border: 1px solid var(--sa-border);
+  border-radius: 1.25rem;
+}
+
+.about-us--spark-academy .about-us__philosophy h2 {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h2-size);
+  font-weight: var(--sa-h2-weight);
+  letter-spacing: var(--sa-h2-tracking);
+}
+
+.about-us--spark-academy .about-us__philosophy p {
+  color: var(--sa-muted);
+}
+
+.about-us--spark-academy .about-us__feature {
+  background: #fff;
+  border: 1px solid var(--sa-border);
+  border-radius: var(--sa-radius);
+  padding: 1.15rem 1.25rem;
+}
+
+.about-us--spark-academy .about-us__feature-index {
+  color: var(--sa-blue);
+}
+
+.about-us--spark-academy .about-us__feature h3 {
+  color: var(--sa-navy);
+}
+
+.about-us--spark-academy .about-us__feature p {
+  color: var(--sa-muted);
+}
+
+.about-us--spark-academy .about-us__member-photo {
+  aspect-ratio: 4 / 5;
+  border-radius: 1.75rem;
+  max-width: 240px;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+}
+
+.about-us--spark-academy .about-us__member-name {
+  text-transform: none;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-size: 1.0625rem;
+  color: #111827;
+}
+
+.about-us--spark-academy .about-us__member-role {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.about-us--spark-academy .about-us__cta-band {
+  background: #0f172a;
+  color: #fff;
+  border-radius: 1.25rem;
+  padding: 2.25rem 1.5rem;
+}
+
+.about-us--spark-academy .about-us__cta-eyebrow {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sa-yellow);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.about-us--spark-academy .about-us__cta-card h3 {
+  letter-spacing: -0.02em;
+}
+
+.about-us--spark-academy .about-us__cta-card p {
+  color: #cbd5e1;
+}
+
+.about-us--spark-academy.about-us--teaser {
+  background: #fafafa;
+}
+
+.about-us--spark-academy .about-us__teaser-link a {
+  color: var(--sa-blue);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.about-us--spark-academy .about-us__teaser-link a:hover {
+  color: var(--sa-blue-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

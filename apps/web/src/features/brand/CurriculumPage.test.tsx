@@ -99,6 +99,7 @@ describe("CurriculumPage", () => {
       expect(screen.getByText(/No courses yet/i)).toBeDefined();
     });
     expect(screen.getByText(/Select a course to manage programs/i)).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Curriculum" })).toBeDefined();
   });
 
   it("shows curriculum builder layout for active course", async () => {
@@ -276,5 +277,32 @@ describe("CurriculumPage", () => {
     await waitFor(() => {
       expect(programsApi.update).toHaveBeenCalledWith({ is_active: false });
     });
+  });
+
+  it("regression_curriculum_page_matches_franchise_apps_stats_chrome", async () => {
+    mockCurriculumTables();
+    const { container } = renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Curriculum" })).toBeDefined();
+      expect(screen.getByText("Abacus")).toBeDefined();
+    });
+
+    await waitFor(() => {
+      const kpiValues = [...container.querySelectorAll(".ed-lead-kpi__value")].map((el) => el.textContent);
+      expect(kpiValues).toEqual(["1", "0", "1", "1"]);
+    });
+
+    expect(screen.getByText(/educational blueprint/i)).toBeDefined();
+    expect(screen.getByRole("button", { name: "+ Add Curriculum" })).toBeDefined();
+    expect(screen.getByPlaceholderText("Search courses...")).toBeDefined();
+    expect(screen.getByRole("tablist", { name: "Course filter" })).toBeDefined();
+    const kpiLabels = [...container.querySelectorAll(".ed-lead-kpi__label")].map((el) => el.textContent);
+    expect(kpiLabels).toEqual(["Active", "Drafts", "Programs", "Total"]);
+    expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
+    expect(document.querySelector(".ed-pipeline-page-header")).toBeTruthy();
+
+    fireEvent.click(container.querySelectorAll(".ed-lead-kpi")[1]!);
+    expect(screen.getByRole("tab", { name: /Drafts \(0\)/ }).getAttribute("aria-selected")).toBe("true");
   });
 });

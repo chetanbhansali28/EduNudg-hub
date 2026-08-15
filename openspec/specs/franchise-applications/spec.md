@@ -46,22 +46,23 @@ Traceability: FR-B20
 #### Scenario: Brand reviews pending application
 
 - **WHEN** brand staff open Franchise Applications
-- **THEN** pending inquiries from public and manual entry are listed for review
+- **THEN** filter tabs are **Pending review** and **Decided** only
+- **AND** a stats strip shows Pending review, Approved, Rejected, and Total (same `LeadKpiGrid` chrome as Student Leads)
+- **AND** pending inquiries from public and manual entry are listed under **Pending review**
 
 #### Scenario: Search finds applications from any tab
 
-- **WHEN** brand staff type in Search applications while Pending, Decided, or Deleted is selected
+- **WHEN** brand staff type in Search applications while Pending review or Decided is selected
 - **THEN** matching inquiries are shown immediately (name, applicant, city, email, phone)
-- **AND** the view switches to **All applications** so results are not hidden by the previous tab
-- **AND** clearing the search restores the previous tab so unmatched applications are hidden again
+- **AND** the current tab stays selected (there is no **All applications** tab)
+- **AND** clearing the search restores the tab’s unfiltered list
 
 #### Scenario: Soft-deleted franchise stays in applications history
 
 - **WHEN** brand staff delete a franchise from Franchise Management (`soft_delete_franchise_center`)
 - **THEN** the matching approved inquiry is **not** removed
-- **AND** the inquiry leaves the **Decided** tab and appears under **Deleted** with a DELETED badge
-- **AND** the **Deleted** filter tab is last (after **All applications**)
-- **AND** on **All applications**, deleted inquiries sort after live pending/decided rows (newest-first within each group)
+- **AND** the inquiry stays on **Decided** with a DELETED badge (there is no separate **Deleted** tab)
+- **AND** on **Decided**, deleted inquiries sort after live approved/rejected rows
 - **AND** the detail view explains the franchise was deleted from Franchise Management and is kept for history
 
 ### Requirement: Approve franchise inquiry

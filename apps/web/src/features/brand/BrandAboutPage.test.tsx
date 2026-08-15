@@ -2,18 +2,24 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
 import { BrandAboutPage } from "./BrandAboutPage";
-import { mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModalContext";
+import {
+  mergeAbacusClassicLandingConfig,
+  mergeSparkAcademyLandingConfig,
+} from "@/lib/brandLandingDefaults";
 import type { BrandLandingOutletContext } from "./BrandPublicLayout";
 
 function AboutRoute({ ctx }: { ctx: BrandLandingOutletContext }) {
   return (
     <MemoryRouter initialEntries={["/about"]}>
-      <Routes>
-        <Route path="/" element={<div>Home page</div>} />
-        <Route element={<Outlet context={ctx} />}>
-          <Route path="/about" element={<BrandAboutPage />} />
-        </Route>
-      </Routes>
+      <LeadModalProvider>
+        <Routes>
+          <Route path="/" element={<div>Home page</div>} />
+          <Route element={<Outlet context={ctx} />}>
+            <Route path="/about" element={<BrandAboutPage />} />
+          </Route>
+        </Routes>
+      </LeadModalProvider>
     </MemoryRouter>
   );
 }
@@ -45,5 +51,32 @@ describe("BrandAboutPage", () => {
     config.about = { ...config.about!, publishPage: false };
     render(<AboutRoute ctx={baseCtx({ config })} />);
     expect(screen.getByText("Home page")).toBeDefined();
+  });
+
+  it("regression_spark_about_page_uses_spark_theme_classes", () => {
+    render(
+      <AboutRoute
+        ctx={baseCtx({
+          marketingTheme: "spark-academy",
+          config: mergeSparkAcademyLandingConfig("Spark Brand"),
+        })}
+      />
+    );
+    const root = document.querySelector(".about-us--page");
+    expect(root?.classList.contains("about-us--spark-academy")).toBe(true);
+    expect(screen.getByText("About us")).toBeTruthy();
+    expect(document.querySelector(".sa-btn")).toBeTruthy();
+  });
+
+  it("regression_abacus_about_page_uses_abacus_theme_classes", () => {
+    render(<AboutRoute ctx={baseCtx()} />);
+    const root = document.querySelector(".about-us--page");
+    expect(root?.classList.contains("about-us--abacus-classic")).toBe(true);
+  });
+
+  it("regression_abacus_about_page_uses_abacus_theme_classes", () => {
+    render(<AboutRoute ctx={baseCtx()} />);
+    const root = document.querySelector(".about-us--page");
+    expect(root?.classList.contains("about-us--abacus-classic")).toBe(true);
   });
 });

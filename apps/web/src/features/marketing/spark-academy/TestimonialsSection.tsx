@@ -55,10 +55,10 @@ export function TestimonialsSection({
     <section className="sa-testimonials" id="testimonials">
       <div className="sa-testimonials__header">
         <span className="sa-testimonials__badge">{eyebrow}</span>
-        <h2 className="sa-testimonials__title">{title}</h2>
+        <h2 className="sa-section-title sa-testimonials__title">{title}</h2>
         <p className="sa-testimonials__subtitle">{subtitle}</p>
       </div>
-      <div className="sa-testimonials__grid">
+      <div className="sa-testimonials__grid sa-testimonials__grid--center">
         {items.map((item, i) => (
           <TestimonialCard key={`${item.author}-${i}`} item={item} />
         ))}

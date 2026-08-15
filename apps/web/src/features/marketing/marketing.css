@@ -4741,7 +4741,7 @@ body.ac-nav-drawer-open {
 .marketing-page--abacus-classic .mkt-events__title,
 .marketing-page--spark-academy .mkt-events__title {
   font-family: inherit;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .mkt-events__subtitle {
@@ -5178,4 +5178,57 @@ body.ac-nav-drawer-open {
   color: #0369a1;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* About Us (`/about` + `#about`) — Abacus Classic */
+.about-us--abacus-classic {
+  --ac-navy: #0f172a;
+  --ac-blue: #2563eb;
+  --ac-yellow: #facc15;
+  --ac-muted: #64748b;
+  --ac-radius: 1rem;
+  font-family: Inter, system-ui, sans-serif;
+  color: var(--ac-navy);
+}
+
+.about-us--abacus-classic .about-us__hero {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #1d4ed8 100%);
+  color: #fff;
+}
+
+.about-us--abacus-classic .about-us__hero h1 {
+  letter-spacing: -0.02em;
+}
+
+.about-us--abacus-classic .about-us__section-title {
+  letter-spacing: -0.02em;
+}
+
+.about-us--abacus-classic .about-us__philosophy {
+  background: #eff6ff;
+  border-left: 4px solid var(--ac-blue);
+}
+
+.about-us--abacus-classic .about-us__feature-index {
+  color: var(--ac-blue);
+}
+
+.about-us--abacus-classic .about-us__member-name {
+  letter-spacing: -0.01em;
+}
+
+.about-us--abacus-classic .about-us__cta-band {
+  background: var(--ac-navy);
+}
+
+.about-us--abacus-classic .about-us__cta-eyebrow {
+  color: var(--ac-yellow);
+}
+
+.about-us--abacus-classic .about-us__teaser-link a {
+  color: var(--ac-blue);
+}
+
+.about-us--abacus-classic.about-us--teaser {
+  background: #f8fafc;
 }

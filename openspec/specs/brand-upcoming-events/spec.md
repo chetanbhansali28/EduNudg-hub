@@ -33,6 +33,10 @@ GIVEN Abacus Classic, Spark Academy, or Novu brand themes
 WHEN upcoming events are configured
 THEN each theme layout includes the shared `UpcomingEventsSection`
 
+GIVEN a Spark Academy public homepage
+WHEN `#events` renders
+THEN the section title uses the Spark `--sa-h2-*` heading tokens (same as other Spark section titles)
+
 ### Optional media
 
 GIVEN an event with an uploaded cover image in `brand-assets`

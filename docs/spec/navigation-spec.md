@@ -34,16 +34,15 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
 | Main menu | Home | `/app` | Exists — stale/unassigned lead KPIs |
-| Features | **Student Leads** | `/app/leads` | Exists — manual add, assign, stale, lost |
-| | **Franchise Applications** | `/app/franchise-applications` | Exists — approve/reject; Add Franchise modal; Deleted tab last; deleted rows last on All |
-| | Franchise Centers | `/app/centers` | Exists — import CSV, view frontend/backend, disable/enable, soft-delete |
-| | Curriculum | `/app/curriculum` | Exists — 2-column master-detail: courses, levels, units; add via **+ Add Curriculum** in the page header (no **+** on Courses); on/off toggle and Save right-aligned in course detail next to Active (`programs.is_active`); title uses 50% width and wraps; existing courses keep benefits / why parents choose this / skills & outcomes editable; banner upload shows max size |
+| Features | **Student Leads** | `/app/leads` | Exists — same pipeline chrome as Franchise Applications; Pending review / Decided; KPI stats; search; list + stacked detail (assignment below applicant); manual add, assign |
+| | **Franchise Applications** | `/app/franchise-applications` | Exists — Pending review / Decided; KPI stats; Add Franchise modal; deleted centers stay on Decided |
+| | Franchise Centers | `/app/centers` | Exists — import CSV, view frontend/backend, disable/enable, soft-delete; no Social Media editor |
+| | Curriculum | `/app/curriculum` | Exists — pipeline header + Active/Drafts/Programs/Total KPIs; 2-column master-detail; add via **+ Add Curriculum** in the page header (no **+** on Courses); on/off toggle and Save right-aligned in course detail |
 | | **Competitions** | `/app/competitions` | Exists — Events + question bank; gated by `competitions` (default off) |
-| | Royalties | `/app/royalties` | Exists |
-| | Analytics | `/app/analytics` | Exists |
 | | Campaigns | `/app/campaigns` | Exists — CRUD |
-| | **Success stories** | `/app/success-stories` | Exists — CRUD |
-| | Merchandise | `/app/merchandise` | Exists — catalog (photos), promos, orders |
+| | **Success stories** | `/app/success-stories` | Exists — pipeline chrome like Franchise Applications; KPI stats (Published, Draft, With photo, Total); Published / Draft tabs; Add Story modal; list + detail |
+| | Merchandise | `/app/merchandise` | Exists — pipeline header + Active/Draft/Orders/Total KPIs; catalog (photos), promos, orders, payment settings |
+| | Analytics | `/app/analytics` | Exists |
 | General | **Homepage** | `/app/homepage` | Exists — brand public site editor |
 | | **Center Site Configuration** | `/app/center-site` | Exists — parent enrollment template (`center_landing`) |
 | | Settings | `/app/settings` | Exists |

@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { render, screen } from "@testing-library/react";
 import { AboutUsHomepageSection, AboutUsPageContent } from "./AboutUsContent";
-import { mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import {
+  mergeAbacusClassicLandingConfig,
+  mergeSparkAcademyLandingConfig,
+} from "@/lib/brandLandingDefaults";
 import { setSectionEnabled, ABACUS_CLASSIC_SECTION_DEFAULTS } from "@/lib/homepageSections";
 
 describe("AboutUsContent", () => {
@@ -62,5 +65,18 @@ describe("AboutUsContent", () => {
     expect(config.sections?.about).toBe(false);
     const enabled = setSectionEnabled(config, "about", true, ABACUS_CLASSIC_SECTION_DEFAULTS);
     expect(enabled.sections?.about).toBe(true);
+  });
+
+  it("regression_spark_about_page_uses_spark_theme_modifier", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Demo");
+    const { container } = render(
+      <MemoryRouter>
+        <AboutUsPageContent config={config} marketingTheme="spark-academy" useLeadModals />
+      </MemoryRouter>
+    );
+    expect(container.querySelector(".about-us--spark-academy.about-us--page")).toBeTruthy();
+    expect(container.querySelector(".about-us__hero-badge")?.textContent).toBe("About us");
+    expect(container.querySelector(".sa-btn--primary")).toBeTruthy();
+    expect(container.querySelector(".sa-btn--dark")).toBeTruthy();
   });
 });
