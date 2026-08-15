@@ -7,6 +7,7 @@ import {
   publicCenterDisplayName,
 } from "@/lib/centerLandingDefaults";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
+import { restrictProgramsSectionToEnabledCurriculum } from "@/lib/programsGridItems";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
 import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
 import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPublicSite";
@@ -184,7 +185,11 @@ function buildConfigWithStories(
     centerName,
     brandName
   );
-  return syncMarketingNavLinks(merged, { theme, publicCurriculum: curriculum });
+  const withEnabledPrograms = {
+    ...merged,
+    programsSection: restrictProgramsSectionToEnabledCurriculum(merged.programsSection, curriculum),
+  };
+  return syncMarketingNavLinks(withEnabledPrograms, { theme, publicCurriculum: curriculum });
 }
 
 export async function fetchCenterLandingBundle(

@@ -53,6 +53,8 @@ Center public nav lockup: `regression_franchise_frontend_nav_highlights_logo_and
 
 Curriculum course banner: `regression_curriculum_banner_shows_upload_size_hint` and `regression_curriculum_banner_rejects_images_over_5mb` — dropzone shows formats, 5 MB max, 1280×720; oversized images rejected.
 
+Franchise public programs: `regression_center_public_programs_filter_to_enabled_curriculum` — center WHAT WE TEACH / courses show only `center_program_enablement` programs, not the full Center sites template.
+
 Manual student lead: `regression_manual_brand_student_matches_public_enroll_fields` and `regression_manual_center_student_matches_public_register_fields` — Add Lead is a modal (`ed-import-dialog`), same pattern as Add Franchise.
 
 Coverage target: ≥80% on `packages/*`.

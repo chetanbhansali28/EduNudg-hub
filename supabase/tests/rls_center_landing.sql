@@ -17,6 +17,16 @@ END;
 $$;
 
 DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_proc WHERE proname = 'center_public_curriculum_json'
+  ) THEN
+    RAISE EXCEPTION 'Missing center_public_curriculum_json';
+  END IF;
+END;
+$$;
+
+DO $$
 DECLARE
   payload jsonb;
 BEGIN

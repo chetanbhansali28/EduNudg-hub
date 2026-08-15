@@ -38,7 +38,7 @@ Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, do
 
 Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → **About Us** (`#about`, when enabled) → rich footer (live center/student counts + custom stats).
 
-Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_theme` and show the same programs grid from brand curriculum. Center copy (hero, city) comes from `mergeAbacusClassicCenterLandingConfig()` merged with `brand_settings.center_landing`.
+Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_theme`. Program cards on the franchise public site are **that center’s enabled programs** (`center_program_enablement`), not the full brand catalog. Center sites accordion copy/images still apply when a card name matches an enabled course. Center copy (hero, city) comes from `mergeAbacusClassicCenterLandingConfig()` merged with `brand_settings.center_landing`.
 
 The brand homepage editor previews center landing with placeholder **Sample Center**. On View Frontend, `overlayCenterLandingIdentity` replaces that placeholder with Franchise Identity **Display name** (else franchise name). Copyright drops the redundant “Part of {brand}” when those names match.
 
@@ -48,7 +48,7 @@ The brand homepage editor previews center landing with placeholder **Sample Cent
 
 **About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (Mastermind-style company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — on Abacus Classic it renders **after Gallery**. When the homepage About section is enabled, public nav auto-injects **About Us → `#about`** (unless `/about` or `#about` already exists). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`.
 
-Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). When no named homepage cards exist, the grid falls back to published curriculum programs.
+Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). On the **brand** site, named cards win; otherwise the grid falls back to all published curriculum programs. On a **franchise (center)** site, `get_center_landing_public` returns only programs in `center_program_enablement`, and Center sites cards are restricted to those names (`restrictProgramsSectionToEnabledCurriculum`).
 
 **Public nav anchors (all themes)**
 

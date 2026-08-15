@@ -3,6 +3,7 @@ import { mergeAbacusClassicLandingConfig } from "./brandLandingDefaults";
 import {
   resolveProgramsGridItems,
   programsGridHasContent,
+  restrictProgramsSectionToEnabledCurriculum,
 } from "./programsGridItems";
 import type { PublicCurriculumProgram } from "./brandCurriculumPublic";
 
@@ -90,6 +91,25 @@ describe("resolveProgramsGridItems", () => {
     );
     expect(items).toHaveLength(1);
     expect(items[0]?.name).toBe("Junior Abacus");
+  });
+});
+
+describe("restrictProgramsSectionToEnabledCurriculum", () => {
+  it("regression_center_public_programs_keep_only_enabled_named_cards", () => {
+    const section = mergeAbacusClassicLandingConfig("Smart Brain Abacus").programsSection;
+    const restricted = restrictProgramsSectionToEnabledCurriculum(section, [
+      sampleCurriculum("Abacus (Mental Math)"),
+    ]);
+    expect(restricted?.cards?.map((card) => card.name)).toEqual(["Abacus (Mental Math)"]);
+    expect(resolveProgramsGridItems(restricted, [sampleCurriculum("Abacus (Mental Math)")])).toHaveLength(1);
+  });
+
+  it("regression_center_public_programs_fall_back_to_enabled_curriculum_when_names_differ", () => {
+    const section = mergeAbacusClassicLandingConfig("Smart Brain Abacus").programsSection;
+    const enabled = [sampleCurriculum("Junior Abacus")];
+    const restricted = restrictProgramsSectionToEnabledCurriculum(section, enabled);
+    expect(restricted?.cards).toEqual([]);
+    expect(resolveProgramsGridItems(restricted, enabled).map((item) => item.name)).toEqual(["Junior Abacus"]);
   });
 });
 

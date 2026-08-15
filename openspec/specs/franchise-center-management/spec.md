@@ -124,6 +124,12 @@ Brand staff SHALL assign and unassign published curriculum versions per franchis
 - **WHEN** brand staff remove a version that has active batches at the center
 - **THEN** the sync is rejected with `CURRICULUM_VERSION_IN_USE`
 
+#### Scenario: Franchise public site lists assigned programs only
+
+- **WHEN** a visitor opens that franchise’s public marketing site
+- **THEN** program cards come from `center_program_enablement` for that center
+- **AND** Center sites accordion cards for unassigned courses are not shown
+
 ### Requirement: Student impact deferred
 
 Student learn portal behavior when a franchise is suspended is out of scope for this change.

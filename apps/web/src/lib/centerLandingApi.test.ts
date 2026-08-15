@@ -94,4 +94,24 @@ describe("fetchCenterLandingBundle", () => {
     expect(bundle?.socialConnect.facebookUrl).not.toContain("chetan-bhansali");
     expect(bundle?.socialConnect.youtubeUrl).toBe("https://youtube.com/@koramangala");
   });
+
+  it("regression_center_public_programs_filter_to_enabled_curriculum", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Smart Brain Abacus",
+        brand_slug: "smart-brain-abacus",
+        marketing_theme: "abacus-classic",
+        center_name: "Nilesh Gattani Center",
+        center_slug: "nilesh-gattani-center",
+        landing: {},
+        success_stories: [],
+        curriculum: [{ name: "Abacus (Mental Math)", version_number: 1, levels: [] }],
+      },
+      error: null,
+    });
+
+    const bundle = await fetchCenterLandingBundle("smart-brain-abacus", "nilesh-gattani-center");
+    expect(bundle?.publicCurriculum.map((row) => row.name)).toEqual(["Abacus (Mental Math)"]);
+    expect(bundle?.config.programsSection?.cards?.map((card) => card.name)).toEqual(["Abacus (Mental Math)"]);
+  });
 });

@@ -72,6 +72,7 @@ description: Add EduNudg features using modular files, service layer, base theme
 - Helpers: `apps/web/src/lib/marketingMediaGuard.ts`.
 - Social Media Connect: Facebook/Instagram footer icons only — do **not** mount a WhatsApp float on public brand landing.
 - Center public landing: never inherit brand **Apply franchise** / `#apply` secondary CTAs — `sanitizeCenterPublicNavConfig` + center merge omit them.
+- Center public programs: `get_center_landing_public` curriculum is `center_public_curriculum_json` (enabled programs only); `restrictProgramsSectionToEnabledCurriculum` drops Center sites cards that are not assigned (`regression_center_public_programs_filter_to_enabled_curriculum`).
 - Center public footer: use `franchise_centers.social_links` via `socialConnectFromCenterLinks` — Facebook, Instagram, YouTube, WhatsApp, LinkedIn, X as footer icons; never brand `social_connect`; do **not** mount a WhatsApp float.
 - Center public contact: pass `centerContact={centerFooterContactFromProfile(profile)}` into Novu / Abacus / Spark footers so Location & Contact is the same overlay; never print brand `headOffice` or Spark placeholder phone on a center host.
 - Center public name: `overlayCenterLandingIdentity` replaces editor placeholder `Sample Center` with Franchise Identity display/name; do not show Sample Center on View Frontend.

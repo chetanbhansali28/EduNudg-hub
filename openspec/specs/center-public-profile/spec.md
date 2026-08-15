@@ -96,6 +96,18 @@ On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show
 - **AND** do not show **Sample Center**
 - **AND** copyright omits “Part of {brand}” when the franchise name matches the brand name
 
+### Requirement: Franchise public programs match center enablement
+
+The center public homepage SHALL list only programs assigned to that franchise in `center_program_enablement` (via `center_public_curriculum_json`). Center sites marketing cards SHALL be restricted to matching enabled program names.
+
+#### Scenario: WHAT WE TEACH shows only subscribed courses
+
+- **GIVEN** the brand Center sites template lists Abacus, Vedic Mathematics, and Handwriting
+- **AND** Franchise Management enabled only Abacus for this center
+- **WHEN** a visitor opens that franchise public site
+- **THEN** WHAT WE TEACH / courses / syllabus show Abacus only
+- **AND** Vedic Mathematics and Handwriting cards are omitted
+
 ### Requirement: No franchise apply on center public landing
 
 Center (franchise) public landing pages SHALL NOT show brand franchise-application CTAs. **Apply franchise** (and `#apply` / `apply` secondary CTAs) are brand-homepage only.

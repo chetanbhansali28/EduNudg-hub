@@ -42,7 +42,23 @@ function curriculumToDisplay(program: PublicCurriculumProgram, index: number): P
   };
 }
 
-/** Homepage cards take precedence; otherwise fall back to published brand curriculum.
+/** Keep Center sites program cards that match enabled curriculum names (case-insensitive).
+ *  Empty kept-cards falls through to `resolveProgramsGridItems` curriculum list.
+ */
+export function restrictProgramsSectionToEnabledCurriculum(
+  section: HomepageProgramsSection | undefined,
+  curriculum: PublicCurriculumProgram[]
+): HomepageProgramsSection | undefined {
+  if (!section) return section;
+  const enabledNames = new Set(
+    curriculum.map((program) => program.name.trim().toLowerCase()).filter(Boolean)
+  );
+  const namedCards = (section.cards ?? []).filter((card) => card.name.trim().length > 0);
+  const kept = namedCards.filter((card) => enabledNames.has(card.name.trim().toLowerCase()));
+  return { ...section, cards: kept };
+}
+
+/** Homepage cards take precedence; otherwise fall back to published curriculum.
  *  When a homepage card has no image, fill from a curriculum program with the same name.
  */
 export function resolveProgramsGridItems(
