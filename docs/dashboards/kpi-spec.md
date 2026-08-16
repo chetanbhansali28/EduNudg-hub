@@ -12,6 +12,8 @@ MRR, active/suspended brands, total centers, total students, churn-risk brands, 
 
 Home (`/app`), Analytics (`/app/analytics`): active centers, net enrollments (30d), revenue, royalty due, curriculum drafts pending, center rankings, unassigned/stale leads.
 
+Analytics **Performance Breakdown** is a scannable pulse (headline + enrollments / royalty collected vs still due / peak day / live days). 14D/30D presets remain; optional From/To calendar filters the same window immediately and Export CSV downloads that window.
+
 Platform brand detail: 30d royalty, enrollments, centers active/total, leads, unpaid invoices, subscription plan (no duplicate “centers listed” / hostname KPIs — see Domains section).
 
 ## Center

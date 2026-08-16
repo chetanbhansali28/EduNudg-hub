@@ -1,10 +1,43 @@
-import type { BrandAnalyticsStats, BrandDailyTrendRow } from "@/lib/brandAnalyticsStats";
+import { addCalendarDays, type BrandAnalyticsStats, type BrandDailyTrendRow } from "@/lib/brandAnalyticsStats";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { formatCompactRelative, percentChange } from "@/lib/brandDashboardHelpers";
 
 export type AnalyticsChartPeriod = 14 | 30;
 
-export type PerformanceRowStatus = "processed" | "pending";
+export type AnalyticsDateRange = { from: string; to: string };
+
+export function normalizeDateRange(from: string, to: string): AnalyticsDateRange | null {
+  if (!from || !to) return null;
+  return from <= to ? { from, to } : { from: to, to: from };
+}
+
+export function clampDateRange(
+  range: AnalyticsDateRange,
+  bounds: { min: string; max: string }
+): AnalyticsDateRange {
+  const from = range.from < bounds.min ? bounds.min : range.from > bounds.max ? bounds.max : range.from;
+  const to = range.to > bounds.max ? bounds.max : range.to < bounds.min ? bounds.min : range.to;
+  return normalizeDateRange(from, to) ?? { from: bounds.min, to: bounds.max };
+}
+
+export function availableTrendBounds(rows: BrandDailyTrendRow[]): { min: string; max: string } | null {
+  if (rows.length === 0) return null;
+  const dates = rows.map((row) => row.metric_date).sort();
+  return { min: dates[0]!, max: dates.at(-1)! };
+}
+
+export function inclusiveDayCount(range: AnalyticsDateRange): number {
+  const from = Date.parse(`${range.from}T00:00:00Z`);
+  const to = Date.parse(`${range.to}T00:00:00Z`);
+  if (Number.isNaN(from) || Number.isNaN(to)) return 0;
+  return Math.max(1, Math.round((to - from) / 86_400_000) + 1);
+}
+
+export function windowDayCount(days: AnalyticsChartPeriod, range?: AnalyticsDateRange | null): number {
+  return range ? inclusiveDayCount(range) : days;
+}
+
+export type PerformanceRowStatus = "peak" | "enrolling" | "royalty" | "quiet";
 
 export type AnalyticsActivityItem = {
   id: string;
@@ -92,8 +125,31 @@ export function sliceTrendRows(rows: BrandDailyTrendRow[], days: AnalyticsChartP
   return rows.slice(0, days);
 }
 
-export function buildEnrollmentChartBars(rows: BrandDailyTrendRow[], days: AnalyticsChartPeriod) {
-  const chronological = [...sliceTrendRows(rows, days)].reverse();
+export function sliceTrendWindow(
+  rows: BrandDailyTrendRow[],
+  days: AnalyticsChartPeriod,
+  range?: AnalyticsDateRange | null
+): BrandDailyTrendRow[] {
+  if (!range) return sliceTrendRows(rows, days);
+  return rows.filter((row) => row.metric_date >= range.from && row.metric_date <= range.to);
+}
+
+export function presetWindowRange(
+  rows: BrandDailyTrendRow[],
+  days: AnalyticsChartPeriod
+): AnalyticsDateRange | null {
+  const windowRows = sliceTrendRows(rows, days);
+  if (windowRows.length === 0) return null;
+  const dates = windowRows.map((row) => row.metric_date).sort();
+  return { from: dates[0]!, to: dates.at(-1)! };
+}
+
+export function buildEnrollmentChartBars(
+  rows: BrandDailyTrendRow[],
+  days: AnalyticsChartPeriod,
+  range?: AnalyticsDateRange | null
+) {
+  const chronological = [...sliceTrendWindow(rows, days, range)].reverse();
   const max = Math.max(...chronological.map((row) => row.enrollments_count), 1);
   return chronological.map((row, index) => ({
     key: row.metric_date,
@@ -103,8 +159,12 @@ export function buildEnrollmentChartBars(rows: BrandDailyTrendRow[], days: Analy
   }));
 }
 
-export function buildChartAxisLabels(rows: BrandDailyTrendRow[], days: AnalyticsChartPeriod) {
-  const chronological = [...sliceTrendRows(rows, days)].reverse();
+export function buildChartAxisLabels(
+  rows: BrandDailyTrendRow[],
+  days: AnalyticsChartPeriod,
+  range?: AnalyticsDateRange | null
+) {
+  const chronological = [...sliceTrendWindow(rows, days, range)].reverse();
   if (chronological.length === 0) {
     return { start: "", middle: "", end: "" };
   }
@@ -115,16 +175,13 @@ export function buildChartAxisLabels(rows: BrandDailyTrendRow[], days: Analytics
   };
 
   const middle = chronological[Math.floor(chronological.length / 2)]!;
+  const last = chronological.at(-1)!.metric_date;
+  const bounds = availableTrendBounds(rows);
   return {
     start: format(chronological[0]!.metric_date),
     middle: format(middle.metric_date),
-    end: "Today",
+    end: !range && bounds?.max === last ? "Today" : format(last),
   };
-}
-
-export function performanceRowStatus(row: BrandDailyTrendRow): PerformanceRowStatus {
-  if (row.enrollments_count > 0 && row.revenue_cents <= 0) return "pending";
-  return "processed";
 }
 
 export function formatPerformanceDate(iso: string): string {
@@ -132,36 +189,171 @@ export function formatPerformanceDate(iso: string): string {
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-export function buildPerformanceTableRows(rows: BrandDailyTrendRow[], days: AnalyticsChartPeriod) {
-  return [...sliceTrendRows(rows, days)].reverse().map((row) => ({
-    key: row.metric_date,
-    date: formatPerformanceDate(row.metric_date),
-    enrollments: row.enrollments_count,
-    royalty: formatInrFromPaise(row.revenue_cents),
-    activeCenters: row.active_centers,
-    status: performanceRowStatus(row),
-  }));
+export function performanceRowHasActivity(row: BrandDailyTrendRow): boolean {
+  return row.enrollments_count > 0 || row.revenue_cents > 0;
 }
 
-export function performanceTableCsv(rows: BrandDailyTrendRow[], days: AnalyticsChartPeriod): string {
-  const header = "Date,New Enrollments,Royalty (Paid),Active Centers,Status";
-  const body = buildPerformanceTableRows(rows, days)
+export function peakEnrollmentCount(rows: BrandDailyTrendRow[]): number {
+  return Math.max(0, ...rows.map((row) => row.enrollments_count));
+}
+
+export function performanceRowStatus(row: BrandDailyTrendRow, peakCount = 0): PerformanceRowStatus {
+  if (row.enrollments_count > 0 && peakCount > 0 && row.enrollments_count === peakCount) return "peak";
+  if (row.enrollments_count > 0) return "enrolling";
+  if (row.revenue_cents > 0) return "royalty";
+  return "quiet";
+}
+
+export function performanceStatusLabel(status: PerformanceRowStatus): string {
+  if (status === "peak") return "Peak day";
+  if (status === "enrolling") return "Enrolling";
+  if (status === "royalty") return "Royalty in";
+  return "Quiet";
+}
+
+export type PerformanceTableRow = {
+  key: string;
+  date: string;
+  enrollments: number;
+  royalty: string;
+  royaltyCents: number;
+  activeCenters: number;
+  status: PerformanceRowStatus;
+  highlight: boolean;
+};
+
+export function buildPerformanceTableRows(
+  rows: BrandDailyTrendRow[],
+  days: AnalyticsChartPeriod,
+  options: { activityOnly?: boolean; range?: AnalyticsDateRange | null } = {}
+): PerformanceTableRow[] {
+  const windowRows = [...sliceTrendWindow(rows, days, options.range)].reverse();
+  const peak = peakEnrollmentCount(windowRows);
+  const mapped = windowRows.map((row) => {
+    const status = performanceRowStatus(row, peak);
+    return {
+      key: row.metric_date,
+      date: formatPerformanceDate(row.metric_date),
+      enrollments: row.enrollments_count,
+      royalty: formatInrFromPaise(row.revenue_cents),
+      royaltyCents: row.revenue_cents,
+      activeCenters: row.active_centers,
+      status,
+      highlight: status === "peak",
+    };
+  });
+  if (options.activityOnly === false) return mapped;
+  return mapped.filter((row) => row.enrollments > 0 || row.royaltyCents > 0);
+}
+
+export type PerformanceSnapshot = {
+  enrollments: number;
+  enrollmentTrendPercent: number | null;
+  royaltyCollectedCents: number;
+  royaltyPendingCents: number;
+  peakDate: string | null;
+  peakEnrollments: number;
+  centersEnrolling: number;
+  activityDays: number;
+  headline: string;
+  windowDays: number;
+};
+
+export function buildPerformanceSnapshot(
+  stats: BrandAnalyticsStats,
+  days: AnalyticsChartPeriod,
+  range?: AnalyticsDateRange | null
+): PerformanceSnapshot {
+  const windowRows = sliceTrendWindow(stats.recentDaily, days, range);
+  const span = windowDayCount(days, range);
+  const priorRows = range
+    ? stats.recentDaily.filter((row) => {
+        const priorEnd = addCalendarDays(range.from, -1);
+        const priorStart = addCalendarDays(range.from, -span);
+        return row.metric_date >= priorStart && row.metric_date <= priorEnd;
+      })
+    : stats.recentDaily.slice(days, days * 2);
+  const enrollments = windowRows.reduce((sum, row) => sum + row.enrollments_count, 0);
+  const priorEnrollments = priorRows.reduce((sum, row) => sum + row.enrollments_count, 0);
+  const royaltyCollectedCents = windowRows.reduce((sum, row) => sum + row.revenue_cents, 0);
+  const peak = windowRows.reduce<BrandDailyTrendRow | null>((best, row) => {
+    if (row.enrollments_count <= 0) return best;
+    if (!best || row.enrollments_count > best.enrollments_count) return row;
+    return best;
+  }, null);
+  const activityDays = windowRows.filter(performanceRowHasActivity).length;
+  const peakLabel = peak ? formatPerformanceDate(peak.metric_date) : null;
+  const topName = stats.topCenters[0]?.name;
+  const headlineParts = [
+    `${enrollments.toLocaleString("en-IN")} new enrollment${enrollments === 1 ? "" : "s"}`,
+    `${formatInrFromPaise(royaltyCollectedCents)} collected`,
+  ];
+  if (topName && enrollments > 0) headlineParts.push(`${topName} leading`);
+  else if (stats.royaltyPendingCents > 0) headlineParts.push("settlements still due");
+  const headline =
+    enrollments === 0 && royaltyCollectedCents === 0
+      ? "Quiet period — convert leads to see daily movement across your network."
+      : headlineParts.join(" · ");
+
+  return {
+    enrollments,
+    enrollmentTrendPercent: percentChange(enrollments, priorEnrollments),
+    royaltyCollectedCents,
+    royaltyPendingCents: stats.royaltyPendingCents,
+    peakDate: peakLabel,
+    peakEnrollments: peak?.enrollments_count ?? 0,
+    centersEnrolling: peak?.active_centers ?? 0,
+    activityDays,
+    headline,
+    windowDays: span,
+  };
+}
+
+export function performanceCsvFilename(days: AnalyticsChartPeriod, range?: AnalyticsDateRange | null): string {
+  if (range) return `performance-breakdown-${range.from}-to-${range.to}.csv`;
+  return `performance-breakdown-${days}d.csv`;
+}
+
+export function performanceTableCsv(
+  rows: BrandDailyTrendRow[],
+  days: AnalyticsChartPeriod,
+  range?: AnalyticsDateRange | null
+): string {
+  const header = "Date,New Enrollments,Centers Enrolling,Royalty Collected,Pulse";
+  const tableRows = buildPerformanceTableRows(rows, days, { range });
+  const snapshotEnrollments = tableRows.reduce((sum, row) => sum + row.enrollments, 0);
+  const snapshotRoyalty = tableRows.reduce((sum, row) => sum + row.royaltyCents, 0);
+  const body = tableRows
     .map((row) =>
-      [row.date, row.enrollments, `"${row.royalty}"`, row.activeCenters, row.status].join(",")
+      [row.date, row.enrollments, row.activeCenters, `"${row.royalty}"`, performanceStatusLabel(row.status)].join(",")
     )
     .join("\n");
-  return `${header}\n${body}`;
+  const totals = [
+    "Period total",
+    snapshotEnrollments,
+    "",
+    `"${formatInrFromPaise(snapshotRoyalty)}"`,
+    "",
+  ].join(",");
+  return `${header}\n${body}${body ? "\n" : ""}${totals}`;
 }
 
-export function downloadPerformanceCsv(rows: BrandDailyTrendRow[], days: AnalyticsChartPeriod) {
-  const csv = performanceTableCsv(rows, days);
+export function downloadPerformanceCsv(
+  rows: BrandDailyTrendRow[],
+  days: AnalyticsChartPeriod,
+  range?: AnalyticsDateRange | null
+) {
+  const csv = `\uFEFF${performanceTableCsv(rows, days, range)}`;
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `performance-breakdown-${days}d.csv`;
+  anchor.download = performanceCsvFilename(days, range);
+  anchor.rel = "noopener";
+  document.body.appendChild(anchor);
   anchor.click();
-  URL.revokeObjectURL(url);
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export function centerInitials(name: string): string {

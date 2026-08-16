@@ -18,7 +18,7 @@ See [Navigation spec](../spec/navigation-spec.md). On mobile the top bar shows t
 - **Campaigns** (`/app/campaigns`) — CRUD
 - **Success stories** (`/app/success-stories`) — franchise-applications pipeline chrome: KPI stats (Published, Draft, With photo, Total), search, **Published** / **Draft** tabs, persistent list + detail; **Add Story** modal
 - **Merchandise** (`/app/merchandise`) — franchise-applications chrome: `PipelinePageHeader`, KPI stats (Active, Draft, Orders, Total), search + Catalog / Promo Codes / Orders / Payment settings tabs; each tab is list + detail on desktop
-- Analytics (`/app/analytics`)
+- Analytics (`/app/analytics`) — live KPIs plus Performance Breakdown (headline snapshot, activity-only daily pulse, shared 14D/30D)
 - **Marketing pages** (`/app/homepage`) — brand franchise recruitment site (hero copy + independent Hero CTA, FAQ, footer; success stories feed brand testimonials)
 - **Center Site Configuration** (`/app/center-site`) — parent enrollment template for every franchise hostname
 - **Billing** (`/app/billing`)

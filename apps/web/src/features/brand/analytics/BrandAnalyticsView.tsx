@@ -2,12 +2,10 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AnalyticsActivityList,
-  AnalyticsDataTable,
   AnalyticsKpiCard,
   AnalyticsKpiGrid,
   AnalyticsPanel,
   PeriodToggle,
-  StatusPill,
   TopCenterRankList,
   TopCenterScrollCards,
   TrendBarChart,
@@ -19,12 +17,10 @@ import {
   buildAnalyticsActivityFeed,
   buildChartAxisLabels,
   buildEnrollmentChartBars,
-  buildPerformanceTableRows,
   centerInitials,
   centersTrendLabel,
   computeEnrollmentTrendPercent,
   computeRoyaltyTrendPercent,
-  downloadPerformanceCsv,
   enrollmentTrendLabel,
   formatActivityTime,
   formatCenterSlug,
@@ -35,7 +31,9 @@ import {
   formatStudentsKpiHint,
   royaltyTrendLabel,
   type AnalyticsChartPeriod,
+  type AnalyticsDateRange,
 } from "@/lib/brandAnalyticsHelpers";
+import { PerformanceBreakdown } from "./PerformanceBreakdown";
 import "./brandAnalytics.css";
 
 function IconEnrollments() {
@@ -213,19 +211,20 @@ export function BrandAnalyticsView({
   nowMs?: number;
 }) {
   const [chartDays, setChartDays] = useState<AnalyticsChartPeriod>(14);
-  const [tableDays] = useState<AnalyticsChartPeriod>(14);
+  const [dateRange, setDateRange] = useState<AnalyticsDateRange | null>(null);
+
+  function handleDaysChange(days: AnalyticsChartPeriod) {
+    setChartDays(days);
+    setDateRange(null);
+  }
 
   const chartBars = useMemo(
-    () => buildEnrollmentChartBars(stats.recentDaily, chartDays),
-    [stats.recentDaily, chartDays]
+    () => buildEnrollmentChartBars(stats.recentDaily, chartDays, dateRange),
+    [stats.recentDaily, chartDays, dateRange]
   );
   const axisLabels = useMemo(
-    () => buildChartAxisLabels(stats.recentDaily, chartDays),
-    [stats.recentDaily, chartDays]
-  );
-  const performanceRows = useMemo(
-    () => buildPerformanceTableRows(stats.recentDaily, tableDays),
-    [stats.recentDaily, tableDays]
+    () => buildChartAxisLabels(stats.recentDaily, chartDays, dateRange),
+    [stats.recentDaily, chartDays, dateRange]
   );
   const activities = useMemo(() => buildAnalyticsActivityFeed(stats, nowMs), [stats, nowMs]);
 
@@ -260,10 +259,13 @@ export function BrandAnalyticsView({
         <AnalyticsPanel
           title="Daily Enrollment Trend"
           className="ed-brand-analytics__chart-panel"
-          badge={isMobile ? "Last 14 days" : undefined}
+          badge={dateRange ? `${dateRange.from} → ${dateRange.to}` : isMobile ? `Last ${chartDays} days` : undefined}
           actions={
             !isMobile ? (
-              <PeriodToggle value={chartDays} onChange={(days) => setChartDays(days as AnalyticsChartPeriod)} />
+              <PeriodToggle
+                value={dateRange ? 0 : chartDays}
+                onChange={(days) => handleDaysChange(days as AnalyticsChartPeriod)}
+              />
             ) : null
           }
         >
@@ -314,46 +316,23 @@ export function BrandAnalyticsView({
             <h2 className="ed-brand-analytics__section-title">Top Centers (30d)</h2>
             <TopCenterScrollCards centers={topCentersMobile} />
           </section>
+
+          <PerformanceBreakdown
+            stats={stats}
+            days={chartDays}
+            onDaysChange={handleDaysChange}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
         </>
       ) : (
-        <AnalyticsPanel
-          title="Performance Breakdown"
-          actions={
-            <button
-              type="button"
-              className="ed-brand-analytics__export-btn"
-              onClick={() => downloadPerformanceCsv(stats.recentDaily, tableDays)}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <path d="M7 10l5 5 5-5" />
-                <path d="M12 15V3" />
-              </svg>
-              Export CSV
-            </button>
-          }
-        >
-          <AnalyticsDataTable
-            columns={[
-              { key: "date", label: "Date" },
-              { key: "enrollments", label: "New Enrollments" },
-              { key: "royalty", label: "Royalty (Paid)", align: "right" },
-              { key: "activeCenters", label: "Active Centers", align: "right" },
-              { key: "status", label: "Status" },
-            ]}
-            rows={performanceRows.map((row) => ({
-              key: row.key,
-              cells: {
-                date: row.date,
-                enrollments: <span className="ed-analytics-table__enrollments">{row.enrollments}</span>,
-                royalty: row.royalty,
-                activeCenters: row.activeCenters,
-                status: <StatusPill status={row.status} />,
-              },
-            }))}
-            emptyMessage="Daily performance appears once enrollments or royalties are recorded."
-          />
-        </AnalyticsPanel>
+        <PerformanceBreakdown
+          stats={stats}
+          days={chartDays}
+          onDaysChange={handleDaysChange}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+        />
       )}
     </div>
   );

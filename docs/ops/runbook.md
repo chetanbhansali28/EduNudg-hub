@@ -34,7 +34,7 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | http://smart-brain-abacus.localhost:9000/ | Smart Brain Abacus (Abacus Classic theme) |
 | http://abacusworld.localhost:9000/login | Brand staff login |
 | http://abacusworld.localhost:9000/app | Brand operator backend (compact KPI dashboard) |
-| http://abacusworld.localhost:9000/app/analytics | Brand analytics KPIs |
+| http://abacusworld.localhost:9000/app/analytics | Brand analytics KPIs + Performance Breakdown pulse |
 | http://{brand}.localhost:9000/auth/handoff | Platform-admin cross-portal sign-in (token in query) |
 | http://koramangala.abacusworld.localhost:9000/ | Center parent enrollment landing (public) |
 | http://koramangala.abacusworld.localhost:9000/login | Center staff login |
