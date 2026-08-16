@@ -7,7 +7,7 @@ Brand-managed catalog; franchise centers place orders from an ecommerce-style sh
 | Portal | Route | Purpose |
 |--------|-------|---------|
 | Brand | `/app/merchandise` | Catalog CRUD, promos, payment settings, order fulfillment — pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
-| Center | `/app/merchandise` | Shop (product grid + checkout), order history |
+| Center | `/app/merchandise` | Shop + checkout and order history — pipeline chrome like Curriculum (`PipelinePageHeader` + Catalog/Unpaid/Orders/Total KPIs); Shop / My Orders tabs |
 | Platform | `/admin/brands/:slug` | Enable `merchandise` feature toggle |
 
 Legacy `/app/kits` redirects to `/app/merchandise`.
@@ -26,8 +26,8 @@ Allowed MIME types match the `brand-assets` bucket: PNG, JPEG, WebP, GIF (5 MB p
 
 ## Center shop UX
 
-1. **Shop** tab — product grid with +/- quantity, optional per-line student assignment, sticky checkout (shipping, promo, payment).
-2. **My orders** tab — order history, allocations, student shipping addresses.
+1. **Shop** tab — product catalog with +/- quantity, optional per-line student assignment, checkout in the detail column on desktop (shipping, promo, payment). Page chrome matches Curriculum (`PipelinePageHeader`, `LeadKpiGrid`, search, `FilterTabs`, `PipelineWorkspace`).
+2. **My orders** tab — order history in the list column; allocations and student shipping addresses in detail.
 
 ## Payments
 

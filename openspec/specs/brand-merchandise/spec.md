@@ -59,3 +59,16 @@ The Merchandise page SHALL NOT include a Competitions tab.
 - **WHEN** the page renders
 - **THEN** section tabs are Catalog, Promo Codes, Orders, and Payment settings
 - **AND** no Competitions tab is present
+
+### Requirement: Pipeline chrome on center Merchandise
+
+Center staff SHALL shop and track kit orders at `/app/merchandise` with the same pipeline chrome as Curriculum: page header, KPI stats strip, search, section tabs, and list + detail on desktop.
+
+#### Scenario: Center shop chrome matches curriculum
+
+- **GIVEN** a center user on `/app/merchandise`
+- **THEN** the page uses `PipelinePageHeader` + `LeadKpiGrid` like Curriculum
+- **AND** stats cards show Catalog, Unpaid, Orders, and Total
+- **AND** section tabs remain Shop and My Orders
+- **AND** desktop Shop keeps the catalog beside checkout in `PipelineWorkspace`
+- **AND** desktop My Orders keeps order history beside allocations and shipping directory

@@ -82,7 +82,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 
 ## Center app
 
-> Canonical specs: [`student-leads`](../../openspec/specs/student-leads/spec.md), [`center-students-workspace`](../../openspec/specs/center-students-workspace/spec.md), [`center-fees-workspace`](../../openspec/specs/center-fees-workspace/spec.md)
+> Canonical specs: [`student-leads`](../../openspec/specs/student-leads/spec.md), [`center-students-workspace`](../../openspec/specs/center-students-workspace/spec.md), [`center-fees-workspace`](../../openspec/specs/center-fees-workspace/spec.md), [`center-inventory-workspace`](../../openspec/specs/center-inventory-workspace/spec.md), [`brand-merchandise`](../../openspec/specs/brand-merchandise/spec.md)
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
@@ -94,6 +94,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-C14 | C | Cannot convert unassigned brand leads | `center_id` must match self |
 | FR-C15 | C | **Students** `/app/students` | Same pipeline chrome as Curriculum (Linked / Unassigned / Programs / Total); list + detail |
 | FR-C16 | C | **Fees** `/app/fees` | Same pipeline chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs |
+| FR-C17 | C | **Inventory** `/app/inventory` | Same pipeline chrome as Curriculum (In stock / Low stock / Incoming / Total); list + item detail |
+| FR-C18 | C | **Merchandise** `/app/merchandise` | Same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs |
 
 ---
 

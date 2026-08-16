@@ -371,3 +371,52 @@ export async function fetchCatalogItemIncomingLines(
 export function countLowStockItems(rows: InventorySummaryRow[], threshold: number): number {
   return rows.filter((row) => row.available <= threshold).length;
 }
+
+export type InventoryTabFilter = "all" | "in_stock" | "low";
+
+export type InventoryPageCounts = {
+  inStock: number;
+  lowStock: number;
+  incoming: number;
+  total: number;
+};
+
+export function inventoryStockBadge(
+  item: InventorySummaryRow,
+  threshold: number
+): { label: string; tone: "success" | "warning" } {
+  if (item.available <= threshold) return { label: "LOW STOCK", tone: "warning" };
+  return { label: "IN STOCK", tone: "success" };
+}
+
+export function inventoryPageCounts(rows: InventorySummaryRow[], threshold: number): InventoryPageCounts {
+  return {
+    inStock: rows.filter((row) => row.available > threshold).length,
+    lowStock: rows.filter((row) => row.available <= threshold).length,
+    incoming: rows.filter((row) => row.incoming > 0).length,
+    total: rows.length,
+  };
+}
+
+export function matchesInventorySearch(item: InventorySummaryRow, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return [item.name, item.sku].some((value) => value.toLowerCase().includes(q));
+}
+
+export function filterCenterInventory(
+  rows: InventorySummaryRow[],
+  filter: InventoryTabFilter,
+  search: string,
+  threshold: number
+): InventorySummaryRow[] {
+  return rows.filter((row) => {
+    const matchesFilter =
+      filter === "in_stock"
+        ? row.available > threshold
+        : filter === "low"
+          ? row.available <= threshold
+          : true;
+    return matchesFilter && matchesInventorySearch(row, search);
+  });
+}

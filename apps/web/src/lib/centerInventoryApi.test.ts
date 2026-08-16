@@ -6,9 +6,13 @@ import {
   computeInventoryValueCents,
   computeInventoryValueTrendPercent,
   countLowStockItems,
+  filterCenterInventory,
+  inventoryPageCounts,
+  inventoryStockBadge,
   inventorySummaryToCsv,
   orderHistorySinceMonths,
   type InventoryCatalogItem,
+  type InventorySummaryRow,
 } from "@/lib/centerInventoryApi";
 import type { MerchandiseOrderRow } from "@/lib/merchandiseOrdersApi";
 
@@ -322,5 +326,37 @@ describe("centerInventoryApi", () => {
     const since = orderHistorySinceMonths(6, new Date("2026-06-15T12:00:00Z"));
     expect(since.getFullYear()).toBe(2025);
     expect(since.getMonth()).toBe(11);
+  });
+
+  it("inventoryPageCounts splits in-stock, low, incoming, and total", () => {
+    const rows: InventorySummaryRow[] = [
+      {
+        catalogItemId: "item-a",
+        sku: "BOOK-1",
+        name: "Level 1 Book",
+        priceCents: 50000,
+        photoUrl: null,
+        onHand: 10,
+        incoming: 0,
+        allocated: 2,
+        available: 8,
+      },
+      {
+        catalogItemId: "item-b",
+        sku: "KIT-1",
+        name: "Starter Kit",
+        priceCents: 120000,
+        photoUrl: null,
+        onHand: 2,
+        incoming: 4,
+        allocated: 0,
+        available: 2,
+      },
+    ];
+    expect(inventoryPageCounts(rows, 5)).toEqual({ inStock: 1, lowStock: 1, incoming: 1, total: 2 });
+    expect(filterCenterInventory(rows, "in_stock", "", 5).map((row) => row.catalogItemId)).toEqual(["item-a"]);
+    expect(filterCenterInventory(rows, "low", "starter", 5)).toHaveLength(1);
+    expect(inventoryStockBadge(rows[0]!, 5).label).toBe("IN STOCK");
+    expect(inventoryStockBadge(rows[1]!, 5).label).toBe("LOW STOCK");
   });
 });

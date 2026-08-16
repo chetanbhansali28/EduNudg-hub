@@ -76,7 +76,7 @@ Brand portal `/app/billing` → payment gateway service → Edge webhook → RPC
 |-------|--------|
 | A | Migration 016, RPCs, platform signup approve, timezone/SLA settings |
 | B | Brand public dual forms, `/app/leads`, `/app/franchise-applications` |
-| C | Center public registration, `/app/leads` / `/app/students` / `/app/fees` Curriculum pipeline chrome, convert, membership gate |
+| C | Center public registration, `/app/leads` / `/app/students` / `/app/fees` / `/app/inventory` / `/app/merchandise` Curriculum pipeline chrome, convert, membership gate |
 | D | Student learn minimal nav; kits; fees matrix |
 | E | Campaigns; RPC-only hardening |
 

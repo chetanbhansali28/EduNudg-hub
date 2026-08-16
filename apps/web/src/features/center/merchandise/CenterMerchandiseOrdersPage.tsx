@@ -4,23 +4,23 @@ import { useSearchParams } from "react-router-dom";
 import {
   Button,
   CommerceAlertBanner,
-  CommercePageHeader,
-  CommerceStatTiles,
-  CommerceWorkspace,
   FilterTabs,
   FormGrid,
   Input,
+  LeadKpiCard,
+  LeadKpiGrid,
   MobileCartBar,
   MutationError,
+  PipelinePageHeader,
+  PipelineWorkspace,
   Select,
   ShippingAddressPreview,
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
-import { fetchCenterInventorySummary } from "@/lib/centerInventoryApi";
 import {
-  computeMerchandiseAvgDeliveryDays,
-  computeMerchandiseStockKits,
+  centerMerchandisePageCounts,
+  filterMerchandiseShopCatalog,
 } from "@/lib/merchandiseOrdersHelpers";
 import {
   createCenterMerchandiseOrder,
@@ -53,6 +53,7 @@ import { CenterStudentProfileAddressCard } from "./CenterStudentProfileAddressCa
 import { MerchandiseCheckoutPanel } from "./MerchandiseCheckoutPanel";
 import { MerchandiseProductGrid } from "./MerchandiseProductGrid";
 import { useCommerceBreakpoint } from "./hooks/useCommerceBreakpoint";
+import "@/features/brand/franchiseApplications/franchiseApplications.css";
 import {
   cartSubtotalCents,
   cartTotalQuantity,
@@ -71,6 +72,13 @@ const emptyCustomAddress = {
   state: "",
   pincode: "",
 };
+
+const ICON_SEARCH = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
 
 const PLACE_ORDER_ICON = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -105,7 +113,7 @@ export function CenterMerchandiseOrdersPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isMobile } = useCommerceBreakpoint();
+  const { isDesktop, isMobile } = useCommerceBreakpoint();
 
   const tab = tabFromSearchParams(searchParams);
   const setTab = (next: MerchTab) => {
@@ -129,6 +137,7 @@ export function CenterMerchandiseOrdersPage() {
   const [promoMessage, setPromoMessage] = useState<string | null>(null);
   const [promoValid, setPromoValid] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<MerchandisePaymentMethod>("invoice");
+  const [search, setSearch] = useState("");
 
   const catalog = useQuery({
     queryKey: ["merchandise-catalog-active", brandId],
@@ -142,15 +151,9 @@ export function CenterMerchandiseOrdersPage() {
     queryFn: () => fetchMerchandiseBrandSettings(brandId!),
   });
 
-  const inventorySummary = useQuery({
-    queryKey: ["center-inventory-summary", brandId, centerId],
-    enabled: !!brandId && !!centerId,
-    queryFn: () => fetchCenterInventorySummary(brandId!, centerId!),
-  });
-
   const merchandiseOrders = useQuery({
     queryKey: ["center-merchandise-orders", centerId],
-    enabled: !!centerId && tab !== "shop",
+    enabled: !!centerId,
     queryFn: () => listCenterMerchandiseOrders(centerId!),
   });
 
@@ -368,16 +371,8 @@ export function CenterMerchandiseOrdersPage() {
   const studentOptions = students.data ?? [];
   const needsShippingStudentPick = shippingMode === "student" && cartStudentIds.length !== 1;
 
-  const stockKits = computeMerchandiseStockKits(inventorySummary.data ?? []);
-  const avgDelivery = computeMerchandiseAvgDeliveryDays(merchandiseOrders.data ?? []);
-  const statTiles = [
-    { label: "Stock Level", value: `${stockKits} kits`, tone: "blue" as const },
-    {
-      label: "Avg. Delivery",
-      value: avgDelivery != null ? `${avgDelivery} days` : "—",
-      tone: "purple" as const,
-    },
-  ];
+  const visibleCatalog = filterMerchandiseShopCatalog(catalogItems, search);
+  const pageCounts = centerMerchandisePageCounts(catalogItems.length, merchandiseOrders.data ?? []);
 
   const customAddressFields = (
     <FormGrid>
@@ -460,19 +455,48 @@ export function CenterMerchandiseOrdersPage() {
   };
 
   const ordersSidebar = (
-    <>
+    <div className="ed-center-merch-aside">
       <CenterMerchandiseAllocationsCard brandId={brandId} centerId={centerId} layout="widget" />
       <CenterStudentProfileAddressCard brandId={brandId} centerId={centerId} layout="widget" />
-      <CommerceStatTiles items={statTiles} />
-    </>
+    </div>
+  );
+
+  const shopList = (
+    <div className="ed-pipeline-list-panel">
+      <section aria-label="Product catalog">
+        <MerchandiseProductGrid
+          catalog={visibleCatalog}
+          cart={cart}
+          students={studentOptions}
+          onUpdateLine={updateCartLine}
+        />
+      </section>
+    </div>
+  );
+
+  const shopDetail = (
+    <div className="ed-merch-checkout">
+      <MerchandiseCheckoutPanel {...checkoutPanelProps} />
+    </div>
+  );
+
+  const ordersList = (
+    <div className="ed-pipeline-list-panel">
+      <CenterMerchandiseOrderHistory
+        centerId={centerId}
+        brandId={brandId}
+        brandSlug={tenant.brandSlug}
+        search={search}
+      />
+    </div>
   );
 
   return (
-    <div className="ed-merch-page">
-      <CommercePageHeader
-        title="Merchandise Orders"
+    <div className="ed-franchise-apps-page ed-center-merch-page">
+      <PipelinePageHeader
+        title="Merchandise"
         subtitle="Track and manage kit orders for your center."
-        action={
+        actions={
           <Button onClick={() => setTab("shop")}>
             {PLACE_ORDER_ICON}
             Place New Order
@@ -480,6 +504,39 @@ export function CenterMerchandiseOrdersPage() {
         }
       />
       <MutationError message={error} />
+
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="Catalog"
+          value={pageCounts.catalog}
+          hint="Live SKUs"
+          active={tab === "shop"}
+          onClick={() => setTab("shop")}
+        />
+        <LeadKpiCard
+          label="Unpaid"
+          value={pageCounts.unpaid}
+          hint="Needs payment"
+          tone="lost"
+          active={tab === "orders"}
+          onClick={() => setTab("orders")}
+        />
+        <LeadKpiCard
+          label="Orders"
+          value={pageCounts.orders}
+          hint="Center orders"
+          active={tab === "orders"}
+          onClick={() => setTab("orders")}
+        />
+        <LeadKpiCard
+          label={isMobile ? "All items" : "Total"}
+          value={pageCounts.total}
+          hint="Catalog SKUs"
+          tone="total"
+          active={tab === "shop"}
+          onClick={() => setTab("shop")}
+        />
+      </LeadKpiGrid>
 
       {alerts && alerts.unpaid_count > 0 ? (
         <CommerceAlertBanner
@@ -497,45 +554,42 @@ export function CenterMerchandiseOrdersPage() {
         />
       ) : null}
 
-      <FilterTabs
-        variant="segmented"
-        aria-label="Merchandise sections"
-        value={tab}
-        onChange={setTab}
-        options={[
-          { value: "shop", label: "Shop" },
-          { value: "orders", label: "My Orders" },
-        ]}
-      />
+      <div className="ed-franchise-apps-page__toolbar">
+        <label className="ed-franchise-apps-page__search">
+          <span className="ed-franchise-apps-page__search-icon">{ICON_SEARCH}</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder={tab === "orders" ? "Search orders..." : "Search catalog..."}
+            aria-label={tab === "orders" ? "Search orders" : "Search catalog"}
+          />
+        </label>
+        <FilterTabs
+          options={[
+            { value: "shop", label: "Shop", count: pageCounts.catalog },
+            { value: "orders", label: "My Orders", count: pageCounts.orders },
+          ]}
+          value={tab}
+          onChange={setTab}
+          aria-label="Merchandise sections"
+        />
+      </div>
 
       {tab === "shop" ? (
-        <div className="ed-merch-shop">
-          <section aria-label="Product catalog">
-            <MerchandiseProductGrid
-              catalog={catalogItems}
-              cart={cart}
-              students={studentOptions}
-              onUpdateLine={updateCartLine}
-            />
-          </section>
-          <div className={`ed-merch-checkout${isMobile ? " ed-merch-checkout--mobile-hidden" : ""}`}>
-            <MerchandiseCheckoutPanel {...checkoutPanelProps} />
-          </div>
-        </div>
-      ) : null}
-
-      {tab === "orders" ? (
-        <CommerceWorkspace
-          main={
-            <CenterMerchandiseOrderHistory
-              centerId={centerId}
-              brandId={brandId}
-              brandSlug={tenant.brandSlug}
-            />
-          }
-          aside={ordersSidebar}
-        />
-      ) : null}
+        isDesktop ? (
+          <PipelineWorkspace detailOpen list={shopList} detail={shopDetail} />
+        ) : (
+          <div className="ed-merch-shop">{shopList}</div>
+        )
+      ) : isDesktop ? (
+        <PipelineWorkspace detailOpen list={ordersList} detail={ordersSidebar} />
+      ) : (
+        <>
+          {ordersList}
+          {ordersSidebar}
+        </>
+      )}
 
       {isMobile && tab === "shop" && cartQty > 0 ? (
         <MobileCartBar

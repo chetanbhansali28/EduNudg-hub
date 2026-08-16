@@ -15,6 +15,7 @@ import { openRazorpayCheckout } from "@/services/payments/razorpayGateway";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { fetchMerchandiseBrandSettings } from "@/lib/merchandiseSettingsApi";
 import {
+  filterCenterMerchandiseOrders,
   filterMerchandiseOrdersSince,
   formatMerchandiseOrderLabel,
   hasOlderMerchandiseOrders,
@@ -25,6 +26,7 @@ type Props = {
   centerId: string;
   brandId: string;
   brandSlug?: string | null;
+  search?: string;
 };
 
 function orderInvoice(order: MerchandiseOrderRow) {
@@ -58,7 +60,7 @@ function StatusBadge({ label, tone }: { label: string; tone: string }) {
   return <span className={`ed-commerce-status-badge ed-commerce-status-badge--${tone}`}>{label}</span>;
 }
 
-export function CenterMerchandiseOrderHistory({ centerId, brandId, brandSlug }: Props) {
+export function CenterMerchandiseOrderHistory({ centerId, brandId, brandSlug, search = "" }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
@@ -116,7 +118,7 @@ export function CenterMerchandiseOrderHistory({ centerId, brandId, brandSlug }: 
   });
 
   const allOrders = orders.data ?? [];
-  const recentOrders = filterMerchandiseOrdersSince(allOrders, 1);
+  const recentOrders = filterCenterMerchandiseOrders(filterMerchandiseOrdersSince(allOrders, 1), search);
   const showArchive = hasOlderMerchandiseOrders(allOrders, 1);
 
   return (

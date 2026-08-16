@@ -125,7 +125,7 @@ vi.mock("./CenterMerchandiseMobileChrome", () => ({
 describe("CenterMerchandiseOrdersPage", () => {
   it("regression_center_merchandise_shop_tab_shows_product_grid", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
+    const { container } = render(
       <QueryClientProvider client={qc}>
         <ThemeProvider>
           <MemoryRouter initialEntries={["/app/merchandise"]}>
@@ -135,11 +135,36 @@ describe("CenterMerchandiseOrdersPage", () => {
       </QueryClientProvider>
     );
 
-    expect(screen.getByText("Merchandise Orders")).toBeDefined();
+    expect(screen.getByText("Merchandise")).toBeDefined();
     expect(screen.getByText(/Track and manage kit orders for your center/i)).toBeDefined();
-    expect(screen.getByRole("tab", { name: "Shop" })).toBeDefined();
+    expect(container.querySelector(".ed-lead-kpi-grid")).toBeTruthy();
+    const kpiLabels = [...container.querySelectorAll(".ed-lead-kpi__label")].map((el) => el.textContent);
+    expect(kpiLabels).toEqual(["Catalog", "Unpaid", "Orders", "Total"]);
+    expect(screen.getByRole("tablist", { name: "Merchandise sections" })).toBeDefined();
+    expect(screen.getByRole("tab", { name: /Shop/ })).toBeDefined();
+    expect(screen.getByLabelText("Search catalog")).toBeDefined();
     expect(await screen.findByText("Abacus kit")).toBeDefined();
     expect(screen.getByText("Your Order")).toBeDefined();
+    expect(container.querySelector(".ed-pipeline-workspace")).toBeTruthy();
+  });
+
+  it("regression_center_merchandise_page_matches_curriculum_stats_chrome", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <MemoryRouter initialEntries={["/app/merchandise"]}>
+            <CenterMerchandiseOrdersPage />
+          </MemoryRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+
+    expect(screen.getByRole("heading", { name: "Merchandise" })).toBeDefined();
+    const kpiLabels = [...container.querySelectorAll(".ed-lead-kpi__label")].map((el) => el.textContent);
+    expect(kpiLabels).toEqual(["Catalog", "Unpaid", "Orders", "Total"]);
+    expect(container.querySelector(".ed-pipeline-page-header")).toBeTruthy();
+    expect(container.querySelector(".ed-pipeline-workspace")).toBeTruthy();
   });
 
   it("regression_center_merchandise_orders_tab_matches_commerce_theme", async () => {
@@ -160,8 +185,7 @@ describe("CenterMerchandiseOrdersPage", () => {
     expect(screen.getByText("MER-2026-00001")).toBeDefined();
     expect(screen.getByText("Allocate Stock")).toBeDefined();
     expect(screen.getByText("Shipping Directory")).toBeDefined();
-    expect(await screen.findByText("24 kits")).toBeDefined();
     expect(await screen.findByText("Pay Now")).toBeDefined();
-    expect(document.querySelector(".ed-commerce-workspace")).toBeTruthy();
+    expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
   });
 });

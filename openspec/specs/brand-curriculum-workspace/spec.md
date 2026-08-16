@@ -9,7 +9,7 @@ Brand staff manage curriculum (courses, levels, units) in a master-detail worksp
 - Journey: [`docs/journeys/brand-operator.md`](../../../docs/journeys/brand-operator.md)
 - Navigation: [`docs/spec/navigation-spec.md`](../../../docs/spec/navigation-spec.md)
 - Change archive source: `openspec/changes/brand-curriculum-workspace/`
-- Center ops reusing this chrome: [`center-students-workspace`](../center-students-workspace/spec.md), [`center-fees-workspace`](../center-fees-workspace/spec.md), [`student-leads`](../student-leads/spec.md)
+- Center ops reusing this chrome: [`center-students-workspace`](../center-students-workspace/spec.md), [`center-fees-workspace`](../center-fees-workspace/spec.md), [`center-inventory-workspace`](../center-inventory-workspace/spec.md), [`brand-merchandise`](../brand-merchandise/spec.md), [`student-leads`](../student-leads/spec.md)
 
 ## Requirements
 

@@ -15,6 +15,7 @@ See [Navigation spec](../spec/navigation-spec.md).
 - **Students** (`/app/students`) — same chrome (Linked / Unassigned / Programs / Total)
 - **Batches & Schedule** (`/app/batches`) — only when brand feature flag `batches` is ON (default off)
 - **Fees & Payments** (`/app/fees`) — same chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs
-- **Merchandise** (`/app/merchandise`) — when brand enables `merchandise` (legacy `/app/kits` redirects)
+- **Inventory** (`/app/inventory`) — same chrome (In stock / Low stock / Incoming / Total)
+- **Merchandise** (`/app/merchandise`) — same chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; gated by brand `merchandise` (legacy `/app/kits` redirects)
 - **Settings** (`/app/settings`) — edit public center profile (photo, address, phone); login email from auth; public footer social uses brand Social Media Connect
 - Assessments / Reports — Phase D

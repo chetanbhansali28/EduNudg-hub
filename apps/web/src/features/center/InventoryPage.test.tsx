@@ -71,8 +71,8 @@ function renderPage() {
 }
 
 describe("InventoryPage", () => {
-  it("renders mock-style inventory layout and item detail", async () => {
-    renderPage();
+  it("regression_center_inventory_page_matches_curriculum_stats_chrome", async () => {
+    const { container } = renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Inventory")).toBeDefined();
@@ -80,13 +80,17 @@ describe("InventoryPage", () => {
       expect(screen.getByText("Level 1 Book")).toBeDefined();
     });
     expect(screen.queryByText(/Center \//)).toBeNull();
-    expect(screen.getByText("Stock by item")).toBeDefined();
-    expect(screen.getByText(/1 ITEMS SHOWN/)).toBeDefined();
+    expect(container.querySelector(".ed-lead-kpi-grid")).toBeTruthy();
+    const kpiLabels = [...container.querySelectorAll(".ed-lead-kpi__label")].map((el) => el.textContent);
+    expect(kpiLabels).toEqual(["In stock", "Low stock", "Incoming", "Total"]);
+    expect(screen.getByRole("tablist", { name: "Inventory filter" })).toBeDefined();
+    expect(screen.getByLabelText("Search inventory")).toBeDefined();
+    expect(container.querySelector(".ed-pipeline-workspace")).toBeTruthy();
     expect(screen.getByText("IN STOCK")).toBeDefined();
 
     await waitFor(() => {
       expect(screen.getByText("Orders (last 6 months)")).toBeDefined();
-      expect(screen.getByText("On the way")).toBeDefined();
+      expect(screen.getByRole("heading", { name: /On the way/ })).toBeDefined();
       expect(screen.getByText("Inventory Value")).toBeDefined();
     });
   });

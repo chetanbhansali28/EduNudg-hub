@@ -70,3 +70,57 @@ export function merchandiseOrderStatusBadge(status: string): {
   if (normalized === "shipped") return { label: "SHIPPED", tone: "shipped" };
   return { label: normalized.replace(/_/g, " ").toUpperCase(), tone: "placed" };
 }
+
+export type CenterMerchandisePageCounts = {
+  catalog: number;
+  unpaid: number;
+  orders: number;
+  total: number;
+};
+
+export function isUnpaidMerchandiseOrder(order: Pick<MerchandiseOrderRow, "payment_status" | "status">): boolean {
+  return (
+    order.payment_status === "unpaid" ||
+    order.payment_status === "pending" ||
+    order.status === "awaiting_payment"
+  );
+}
+
+export function centerMerchandisePageCounts(
+  catalogCount: number,
+  orders: Array<Pick<MerchandiseOrderRow, "payment_status" | "status">>
+): CenterMerchandisePageCounts {
+  return {
+    catalog: catalogCount,
+    unpaid: orders.filter(isUnpaidMerchandiseOrder).length,
+    orders: orders.length,
+    total: catalogCount,
+  };
+}
+
+export function filterMerchandiseShopCatalog<T extends { name: string; sku: string }>(
+  items: T[],
+  search: string
+): T[] {
+  const q = search.trim().toLowerCase();
+  if (!q) return items;
+  return items.filter((item) => item.name.toLowerCase().includes(q) || item.sku.toLowerCase().includes(q));
+}
+
+function orderInvoiceNumber(order: MerchandiseOrderRow): string | null {
+  const invoice = order.merchandise_invoices;
+  if (!invoice) return null;
+  const row = Array.isArray(invoice) ? invoice[0] : invoice;
+  return row?.invoice_number ?? null;
+}
+
+export function filterCenterMerchandiseOrders(orders: MerchandiseOrderRow[], search: string): MerchandiseOrderRow[] {
+  const q = search.trim().toLowerCase();
+  if (!q) return orders;
+  return orders.filter((order) => {
+    const invoiceNumber = orderInvoiceNumber(order);
+    return [order.id, order.status, order.payment_status, invoiceNumber]
+      .filter(Boolean)
+      .some((value) => value!.toLowerCase().includes(q));
+  });
+}

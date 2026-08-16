@@ -32,13 +32,14 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [student-leads](../../openspec/specs/student-leads/spec.md) | Brand/center student leads + Abacus/Spark modals; center `/app/leads` Curriculum chrome |
 | [center-students-workspace](../../openspec/specs/center-students-workspace/spec.md) | Center `/app/students` pipeline chrome (Linked / Unassigned / Programs / Total) |
 | [center-fees-workspace](../../openspec/specs/center-fees-workspace/spec.md) | Center `/app/fees` pipeline chrome (Outstanding / Paid / Overdue / Total) |
+| [center-inventory-workspace](../../openspec/specs/center-inventory-workspace/spec.md) | Center `/app/inventory` pipeline chrome (In stock / Low stock / Incoming / Total) |
 | [franchise-applications](../../openspec/specs/franchise-applications/spec.md) | Franchise apply + approve provision |
 | [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace |
 | [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform and brand CSV bulk center import |
 | [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` courses/levels/units; on/off toggle; mobile **Edit course** overlay matches desktop controls; parent marketing stays editable after create; Spark public courses use published syllabus |
 | [brand-batches-feature-flag](../../openspec/specs/brand-batches-feature-flag/spec.md) | Per-brand Batches module gate |
 | [brand-success-stories](../../openspec/specs/brand-success-stories/spec.md) | Brand `/app/success-stories` pipeline CRUD for testimonials |
-| [brand-merchandise](../../openspec/specs/brand-merchandise/spec.md) | Brand `/app/merchandise` pipeline chrome; catalog, promos, orders, payment settings |
+| [brand-merchandise](../../openspec/specs/brand-merchandise/spec.md) | Brand `/app/merchandise` pipeline chrome; catalog, promos, orders, payment settings; center shop Catalog/Unpaid/Orders/Total |
 | [student-learn-portal](../../openspec/specs/student-learn-portal/spec.md) | Learn host enrollment-gated portal |
 | [agent-artifact-sync](../../openspec/specs/agent-artifact-sync/spec.md) | Mandatory sync of specs/docs/tests/skills/agents; agent boundaries |
 | [rpc-catalog.md](./rpc-catalog.md) | Supabase RPC signatures |

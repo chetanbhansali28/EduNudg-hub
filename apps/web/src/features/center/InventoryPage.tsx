@@ -1,31 +1,54 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Button, CatalogPageHeader } from "@edunudg/ui";
+import {
+  Badge,
+  Button,
+  DataList,
+  FilterTabs,
+  LeadKpiCard,
+  LeadKpiGrid,
+  PipelineDetailPlaceholder,
+  PipelineEmptyState,
+  PipelineListItem,
+  PipelinePageHeader,
+  PipelineWorkspace,
+} from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { InventoryItemDetailPanel, InventoryValueCard } from "@/features/center/inventory/InventoryItemDetailPanel";
-import { IconDownload, IconSearch } from "@/features/center/inventory/InventoryIcons";
-import { InventoryStockCard } from "@/features/center/inventory/InventoryStockCard";
+import { IconDownload } from "@/features/center/inventory/InventoryIcons";
+import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import {
   downloadInventoryCsv,
   fetchCenterInventorySummary,
   fetchInventoryValueStats,
-  type InventorySummaryRow,
+  filterCenterInventory,
+  inventoryPageCounts,
+  inventoryStockBadge,
+  type InventoryTabFilter,
 } from "@/lib/centerInventoryApi";
+import { LOW_STOCK_THRESHOLD } from "@/lib/centerDashboardStats";
+import { initialsFromName } from "@/lib/welcomeMessage";
+import "@/features/brand/franchiseApplications/franchiseApplications.css";
+import "@/features/center/centerOps.css";
 import "@/features/center/inventory/inventory.css";
 
-function matchesSearch(item: InventorySummaryRow, query: string): boolean {
-  const q = query.trim().toLowerCase();
-  if (!q) return true;
-  return [item.name, item.sku].some((value) => value.toLowerCase().includes(q));
-}
+const ICON_SEARCH = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
 
 export function InventoryPage() {
   const tenant = useTenant();
   const brandId = tenant.brandId;
   const centerId = tenant.centerId;
+  const { isDesktop, isMobile } = useOpsBreakpoint();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [listFilter, setListFilter] = useState<InventoryTabFilter>("all");
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
 
   const inventory = useQuery({
     queryKey: ["center-inventory-summary", brandId, centerId],
@@ -39,9 +62,11 @@ export function InventoryPage() {
     queryFn: () => fetchInventoryValueStats(brandId!, centerId!),
   });
 
+  const allItems = inventory.data ?? [];
+  const pageCounts = useMemo(() => inventoryPageCounts(allItems, LOW_STOCK_THRESHOLD), [allItems]);
   const filtered = useMemo(
-    () => (inventory.data ?? []).filter((item) => matchesSearch(item, search)),
-    [inventory.data, search]
+    () => filterCenterInventory(allItems, listFilter, search, LOW_STOCK_THRESHOLD),
+    [allItems, listFilter, search]
   );
 
   useEffect(() => {
@@ -51,21 +76,91 @@ export function InventoryPage() {
 
   const selected =
     filtered.find((item) => item.catalogItemId === selectedId) ??
-    (inventory.data ?? []).find((item) => item.catalogItemId === selectedId) ??
+    allItems.find((item) => item.catalogItemId === selectedId) ??
     null;
+
+  const selectItem = (id: string) => {
+    setSelectedId(id);
+    if (isMobile) setMobileDetailOpen(true);
+  };
 
   if (!centerId || !brandId) return <p className="ed-empty">Center context not found.</p>;
 
+  const filterTabs = [
+    { value: "all" as const, label: isMobile ? "All" : "All items", count: pageCounts.total },
+    { value: "in_stock" as const, label: "In stock", count: pageCounts.inStock },
+    { value: "low" as const, label: "Low stock", count: pageCounts.lowStock },
+  ];
+
+  const listPanel = (
+    <div className="ed-pipeline-list-panel">
+      {inventory.isLoading ? <p className="ed-text-sm ed-muted">Loading inventory…</p> : null}
+      <DataList
+        variant="pipeline"
+        items={filtered.map((item) => ({ ...item, id: item.catalogItemId }))}
+        empty={
+          <PipelineEmptyState
+            message={
+              search.trim()
+                ? "No items match your search."
+                : "No merchandise inventory yet. Place an order from the shop to start tracking stock."
+            }
+            actionLabel={search.trim() ? undefined : "Browse merchandise"}
+            onAction={
+              search.trim()
+                ? undefined
+                : () => {
+                    window.location.href = "/app/merchandise";
+                  }
+            }
+          />
+        }
+        render={(item) => {
+          const badge = inventoryStockBadge(item, LOW_STOCK_THRESHOLD);
+          return (
+            <PipelineListItem
+              title={item.name}
+              meta={`SKU ${item.sku}`}
+              lines={[
+                `Available ${item.available} · On hand ${item.onHand}`,
+                item.incoming > 0 ? `${item.incoming} incoming` : "No incoming units",
+              ]}
+              initials={initialsFromName(item.name)}
+              badges={<Badge tone={badge.tone}>{badge.label}</Badge>}
+              selected={item.catalogItemId === selectedId}
+              onSelect={() => selectItem(item.catalogItemId)}
+            />
+          );
+        }}
+      />
+    </div>
+  );
+
+  const detailPanel = selected ? (
+    <div className="ed-center-inventory-detail">
+      <InventoryItemDetailPanel centerId={centerId} item={selected} />
+      <InventoryValueCard
+        totalCents={valueStats.data?.totalCents ?? 0}
+        trendPercent={valueStats.data?.trendPercent ?? null}
+        loading={valueStats.isLoading}
+      />
+    </div>
+  ) : (
+    <div className="ed-pipeline-list-panel">
+      <PipelineDetailPlaceholder message="Select an item to view order history and incoming shipments." />
+    </div>
+  );
+
   return (
-    <div className="ed-inv-page">
-      <CatalogPageHeader
+    <div className={`ed-franchise-apps-page ed-center-inventory-page${isMobile ? " ed-franchise-apps-page--detail-open" : ""}`}>
+      <PipelinePageHeader
         title="Inventory"
         subtitle="Manage on-hand stock and track incoming merchandise."
         actions={
           <Button
             variant="secondary"
-            disabled={!inventory.data?.length}
-            onClick={() => downloadInventoryCsv(inventory.data ?? [])}
+            disabled={!allItems.length}
+            onClick={() => downloadInventoryCsv(allItems)}
           >
             <IconDownload />
             Export CSV
@@ -73,69 +168,75 @@ export function InventoryPage() {
         }
       />
 
-      <div className="ed-inv-page__search-wrap">
-        <IconSearch className="ed-inv-page__search-icon" />
-        <input
-          type="search"
-          className="ed-inv-page__search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name or SKU (e.g., KIT001)"
-          aria-label="Search inventory"
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="In stock"
+          value={pageCounts.inStock}
+          hint="Healthy levels"
+          active={listFilter === "in_stock"}
+          onClick={() => setListFilter("in_stock")}
+        />
+        <LeadKpiCard
+          label="Low stock"
+          value={pageCounts.lowStock}
+          hint={`≤ ${LOW_STOCK_THRESHOLD} available`}
+          tone="lost"
+          active={listFilter === "low"}
+          onClick={() => setListFilter("low")}
+        />
+        <LeadKpiCard
+          label="Incoming"
+          value={pageCounts.incoming}
+          hint="Inbound SKUs"
+        />
+        <LeadKpiCard
+          label={isMobile ? "All items" : "Total"}
+          value={pageCounts.total}
+          hint="Tracked SKUs"
+          tone="total"
+          active={listFilter === "all"}
+          onClick={() => setListFilter("all")}
+        />
+      </LeadKpiGrid>
+
+      <div className="ed-franchise-apps-page__toolbar">
+        <label className="ed-franchise-apps-page__search">
+          <span className="ed-franchise-apps-page__search-icon">{ICON_SEARCH}</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by name or SKU…"
+            aria-label="Search inventory"
+          />
+        </label>
+        <FilterTabs
+          options={filterTabs}
+          value={listFilter}
+          onChange={setListFilter}
+          aria-label="Inventory filter"
         />
       </div>
 
-      <div className="ed-inv-page__body">
-        <section className="ed-inv-page__main" aria-label="Stock by item">
-          <div className="ed-inv-page__list-header">
-            <h2 className="ed-inv-page__list-title">Stock by item</h2>
-            <span className="ed-inv-page__list-badge">{filtered.length} ITEMS SHOWN</span>
-          </div>
+      {isMobile ? listPanel : <PipelineWorkspace detailOpen={!!selected} list={listPanel} detail={detailPanel} />}
 
-          {inventory.isLoading ? (
-            <p className="ed-text-sm ed-muted">Loading inventory…</p>
-          ) : filtered.length === 0 ? (
-            <div className="ed-inv-page__empty">
-              <p>
-                {search.trim()
-                  ? "No items match your search."
-                  : "No merchandise inventory yet. Place an order from the shop to start tracking stock."}
-              </p>
-              {!search.trim() ? (
-                <Link to="/app/merchandise" className="ed-inv-page__empty-link">
-                  Browse merchandise
-                </Link>
-              ) : null}
+      {isMobile ? (
+        <>
+          <Link to="/app/merchandise" className="ed-franchise-apps-page__fab" aria-label="Place new order">
+            +
+          </Link>
+          {mobileDetailOpen && selected ? (
+            <div className="ed-ops-mobile-detail" role="dialog" aria-modal aria-label="Inventory item">
+              <div className="ed-ops-mobile-detail__bar">
+                <button type="button" className="ed-ops-mobile-detail__back" onClick={() => setMobileDetailOpen(false)}>
+                  ← Back
+                </button>
+              </div>
+              {detailPanel}
             </div>
-          ) : (
-            <div className="ed-inv-page__cards">
-              {filtered.map((item) => (
-                <InventoryStockCard
-                  key={item.catalogItemId}
-                  item={item}
-                  selected={selectedId === item.catalogItemId}
-                  onSelect={() => setSelectedId(item.catalogItemId)}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <aside className="ed-inv-page__aside">
-          {selected ? (
-            <InventoryItemDetailPanel centerId={centerId} item={selected} />
-          ) : (
-            <div className="ed-inv-detail__placeholder">
-              Select an item to view order history and incoming shipments.
-            </div>
-          )}
-          <InventoryValueCard
-            totalCents={valueStats.data?.totalCents ?? 0}
-            trendPercent={valueStats.data?.trendPercent ?? null}
-            loading={valueStats.isLoading}
-          />
-        </aside>
-      </div>
+          ) : null}
+        </>
+      ) : null}
     </div>
   );
 }
