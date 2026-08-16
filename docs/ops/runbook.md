@@ -197,6 +197,7 @@ See [merchandise spec](../spec/merchandise.md).
 - Franchise staff: **Center portal → Settings** (`/app/settings`) — update photo, address, and phone. Sign-in email comes from Google/social auth; public site URL is the center marketing host (no separate website field). Staff cannot add franchise social links here.
 - Center photo storage: `{brand_id}/centers/{center_id}/photo.{ext}` in **`brand-assets`** bucket.
 - Changes appear on the center public site (`{center}.{brand}.localhost:9000`) via `get_center_landing_public`.
+- Mentors: franchiser (Franchise Identity name + master photo) first when present; brand homepage founder always remains (`brand_founders` from migration `083`).
 - Footer social icons on the **center** site use brand Homepage → Social Media Connect, not `franchise_centers.social_links`.
 - Footer address/phone on the **center** site (Novu, Abacus, Spark) use Franchise Management Location & Contact — not brand Head office.
 

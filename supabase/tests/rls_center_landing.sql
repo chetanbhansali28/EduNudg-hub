@@ -10,6 +10,9 @@ BEGIN
   IF payload ? 'success_stories' IS NOT TRUE OR payload ? 'curriculum' IS NOT TRUE THEN
     RAISE EXCEPTION 'get_center_landing_public missing success_stories or curriculum keys';
   END IF;
+  IF payload <> '{}'::jsonb AND payload ? 'brand_founders' IS NOT TRUE THEN
+    RAISE EXCEPTION 'get_center_landing_public missing brand_founders key';
+  END IF;
 EXCEPTION
   WHEN OTHERS THEN
     RAISE EXCEPTION 'get_center_landing_public failed: %', SQLERRM;

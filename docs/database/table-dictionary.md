@@ -128,7 +128,7 @@ Centers with `merchandise` enabled can **SELECT** active rows for their brand (p
 | `get_brand_landing_public` | Brand marketing |
 | `submit_franchise_inquiry_v2` | Franchise application |
 | `submit_brand_student_application` | Student application (`lead_source=brand`) |
-| `get_center_landing_public` | Center marketing (brand logo only; curriculum = enabled programs) |
+| `get_center_landing_public` | Center marketing (brand logo only; curriculum = enabled programs; `brand_founders` from brand `landing.founders`) |
 | `center_public_curriculum_json` | Published programs assigned to that franchise (`center_program_enablement`) |
 | `submit_center_student_registration` | Center registration (`lead_source=center`) |
 | `submit_platform_brand_signup` | Platform B2B signup |

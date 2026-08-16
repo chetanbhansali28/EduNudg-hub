@@ -2,8 +2,13 @@ import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeAbacusClassicSectionVisibility, mergeSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
-import type { HomepageConfig } from "@/types/homepage";
-import { buildSparkAcademyLandingPartial, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import type { HomepageConfig, HomepageFounderProfile, MarketingTheme } from "@/types/homepage";
+import {
+  buildBrandLandingConfig,
+  buildSparkAcademyLandingPartial,
+  mergeAbacusClassicLandingConfig,
+  mergeSparkAcademyLandingConfig,
+} from "@/lib/brandLandingDefaults";
 
 /** Brand editor preview name for `center_landing` — never show this on a live center host. */
 export const CENTER_LANDING_EDITOR_PLACEHOLDER_NAME = "Sample Center";
@@ -53,6 +58,160 @@ export function overlayCenterLandingIdentity(
         : config.footer.rich,
     },
   };
+}
+
+const SPARK_STOCK_FOUNDER_NAMES = new Set([
+  "sarah johnson",
+  "michael brown",
+  "rachel adams",
+  "maria lopez",
+  "david chen",
+]);
+
+export type CenterFounderIdentity = {
+  /** Franchise Identity name (`franchise_centers.name`) — center owner. */
+  ownerName: string;
+  photoUrl: string | null;
+  displayName: string | null;
+  brandName: string;
+  brandFounders?: HomepageFounderProfile[];
+};
+
+export function parseHomepageFounders(raw: unknown): HomepageFounderProfile[] {
+  if (!Array.isArray(raw)) return [];
+  const founders: HomepageFounderProfile[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object") continue;
+    const row = entry as Record<string, unknown>;
+    const name = String(row.name ?? "").trim();
+    if (!name) continue;
+    const founder: HomepageFounderProfile = {
+      roleBadge: String(row.roleBadge ?? "").trim(),
+      name,
+      title: String(row.title ?? "").trim(),
+      bio: String(row.bio ?? ""),
+      photoUrl: String(row.photoUrl ?? "").trim(),
+    };
+    const stat =
+      row.statBadge && typeof row.statBadge === "object"
+        ? (row.statBadge as { value?: unknown; label?: unknown })
+        : null;
+    const statValue = String(stat?.value ?? "").trim();
+    const statLabel = String(stat?.label ?? "").trim();
+    if (statValue && statLabel) {
+      founder.statBadge = { value: statValue, label: statLabel };
+    }
+    founders.push(founder);
+  }
+  return founders;
+}
+
+export function isThemeDefaultFounder(founder: HomepageFounderProfile): boolean {
+  const name = founder.name.trim().toLowerCase();
+  const title = founder.title ?? "";
+  if (!name || name === "founder name" || name === "name") return true;
+  if (name === CENTER_LANDING_EDITOR_PLACEHOLDER_NAME.toLowerCase()) return true;
+  if (title.includes(CENTER_LANDING_EDITOR_PLACEHOLDER_NAME)) return true;
+  if (SPARK_STOCK_FOUNDER_NAMES.has(name) && founder.photoUrl.includes("unsplash.com")) return true;
+  return false;
+}
+
+export function visiblePublicFounders(founders?: HomepageFounderProfile[]): HomepageFounderProfile[] {
+  return (founders ?? []).filter((row) => !isThemeDefaultFounder(row));
+}
+
+function aboutMembersAsFounders(
+  members: { name?: string; role?: string; photoUrl?: string }[] | undefined
+): HomepageFounderProfile[] {
+  if (!members?.length) return [];
+  const founders: HomepageFounderProfile[] = [];
+  for (const member of members) {
+    const name = member.name?.trim() ?? "";
+    if (!name) continue;
+    founders.push({
+      roleBadge: member.role?.trim() || "FOUNDER",
+      name,
+      title: member.role?.trim() || "",
+      bio: "",
+      photoUrl: member.photoUrl?.trim() || "",
+    });
+  }
+  return founders;
+}
+
+/** Same mentor list the brand public homepage uses, minus Center sites placeholders. */
+export function brandPublicFoundersFromLanding(
+  theme: MarketingTheme,
+  brandName: string,
+  landing?: Partial<HomepageConfig>,
+  logoUrl?: string | null
+): HomepageFounderProfile[] {
+  const config =
+    theme === "spark-academy"
+      ? mergeSparkAcademyLandingConfig(brandName, landing, logoUrl)
+      : theme === "abacus-classic"
+        ? mergeAbacusClassicLandingConfig(brandName, landing, logoUrl)
+        : buildBrandLandingConfig(brandName, landing, logoUrl);
+  const saved = parseHomepageFounders(landing?.founders).filter((row) => !isThemeDefaultFounder(row));
+  if (saved.length > 0) return saved;
+  const merged = (config.founders ?? []).filter((row) => !isThemeDefaultFounder(row));
+  if (merged.length > 0) return merged;
+  const fromAbout = aboutMembersAsFounders(config.about?.members).filter((row) => !isThemeDefaultFounder(row));
+  if (fromAbout.length > 0) return fromAbout;
+  return [];
+}
+
+function founderCardTitle(ownerName: string, displayName: string | null, brandName: string): string {
+  const siteName = publicCenterDisplayName(ownerName, displayName).trim();
+  if (siteName && siteName.toLowerCase() !== ownerName.trim().toLowerCase()) return siteName;
+  if (brandName.trim() && brandName.trim().toLowerCase() !== ownerName.trim().toLowerCase()) return brandName.trim();
+  return "Franchise owner";
+}
+
+export function hasCenterFranchiserIdentity(identity: CenterFounderIdentity): boolean {
+  const ownerName = identity.ownerName.trim();
+  const photoUrl = identity.photoUrl?.trim() || "";
+  if (photoUrl) return true;
+  if (!ownerName) return false;
+  const siteName = publicCenterDisplayName(ownerName, identity.displayName).trim().toLowerCase();
+  const brandName = identity.brandName.trim().toLowerCase();
+  const owner = ownerName.toLowerCase();
+  if (owner === CENTER_LANDING_EDITOR_PLACEHOLDER_NAME.toLowerCase()) return false;
+  if (owner === "founder name" || owner === "name") return false;
+  return owner !== siteName && owner !== brandName;
+}
+
+function sameFounderName(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+/** Center public mentors: franchiser first when present; brand homepage founders always follow (first is brand owner if no franchiser). */
+export function overlayCenterFoundersFromIdentity(
+  config: HomepageConfig,
+  identity: CenterFounderIdentity
+): HomepageConfig {
+  const ownerName = identity.ownerName.trim();
+  const photoUrl = identity.photoUrl?.trim() || "";
+  const brandFounders = (identity.brandFounders ?? []).filter((row) => !isThemeDefaultFounder(row));
+
+  if (!hasCenterFranchiserIdentity(identity)) {
+    return { ...config, founders: brandFounders };
+  }
+
+  const name =
+    ownerName ||
+    brandFounders[0]?.name ||
+    publicCenterDisplayName(ownerName, identity.displayName) ||
+    identity.brandName;
+  const franchiser: HomepageFounderProfile = {
+    roleBadge: "FRANCHISE OWNER",
+    name,
+    title: founderCardTitle(name, identity.displayName, identity.brandName),
+    bio: "",
+    photoUrl,
+  };
+  const rest = brandFounders.filter((row) => !sameFounderName(row.name, name));
+  return { ...config, founders: [franchiser, ...rest] };
 }
 
 /** Parent-facing enrollment landing for a center hostname (e.g. koramangala.abacusworld.localhost). */

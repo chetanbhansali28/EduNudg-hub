@@ -26,7 +26,7 @@ Local seeded demo often uses Spark for AbacusWorld — see [Operations runbook](
 
 On a **center** host, `SparkAcademyFooter` receives `centerContact` and shows Franchise Management phone/address under Contact (never the brand placeholder `(222) 545-4543`, brand Head office, or Our presence). Brand hosts keep `headOffice` phone/address or the placeholder.
 
-Section order and toggles follow Spark defaults in `brandLandingDefaults` / homepage section keys. Center hosts inherit the brand theme via `mergeSparkAcademyCenterLandingConfig()`.
+Section order and toggles follow Spark defaults in `brandLandingDefaults` / homepage section keys. Center hosts inherit the brand theme via `mergeSparkAcademyCenterLandingConfig()`. **Meet Our Expert Mentors** is edited at brand `/app/homepage` under **Mentors / Leadership** (`landing.founders`). Template **Founder name** is not shown live. On a franchise host the Franchise Identity owner/photo is prepended when present (`overlayCenterFoundersFromIdentity`).
 
 **Courses designed for success** uses that brand’s published Curriculum catalog (the same data as the homepage and Center Site **Curriculum syllabus** section). The section title is center-aligned (`sa-section-head--center`). Course cards sit in a centered wrapping row (`sa-courses__grid--center`) when there are fewer than a full row. Leftover Abacus Classic program cards in `landing.programsSection` must not hide those courses. Matching card images still fill in when a published course has no banner. Published courses still render when leftover `programsGrid` is off (`regression_spark_courses_show_published_syllabus_even_if_programs_grid_off`).
 

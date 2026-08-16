@@ -51,6 +51,8 @@ Center public footer contact: `regression_center_footer_contact_uses_franchise_p
 
 Center public footer name: `regression_center_footer_replaces_sample_center_placeholder_with_franchise_name` and `regression_center_public_footer_uses_franchise_name_not_sample_center` — never show editor placeholder **Sample Center** on a live center host.
 
+Center public mentors: `regression_center_mentors_show_franchiser_first_then_brand_founder` and `regression_center_mentors_brand_owner_first_when_franchiser_missing` — franchiser card first when Franchise Identity has an owner/photo; brand founder always remains; brand owner is first when the franchiser is missing (`regression_center_public_mentors_use_franchiser_then_brand_founder`).
+
 Center public nav lockup: `regression_franchise_frontend_nav_highlights_logo_and_name` — franchise frontend enlarges brand logo and site name (`--franchise` nav modifier).
 
 Curriculum course banner: `regression_curriculum_banner_shows_upload_size_hint` and `regression_curriculum_banner_rejects_images_over_5mb` — dropzone shows formats, 5 MB max, 1280×720; oversized images rejected.

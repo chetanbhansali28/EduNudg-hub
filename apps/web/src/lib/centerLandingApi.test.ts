@@ -114,4 +114,116 @@ describe("fetchCenterLandingBundle", () => {
     expect(bundle?.publicCurriculum.map((row) => row.name)).toEqual(["Abacus (Mental Math)"]);
     expect(bundle?.config.programsSection?.cards?.map((card) => card.name)).toEqual(["Abacus (Mental Math)"]);
   });
+
+  it("regression_center_public_mentors_use_franchiser_then_brand_founder", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Shree Samarth Smart Brain Abacus",
+        brand_slug: "shree-samarth",
+        marketing_theme: "spark-academy",
+        center_name: "Bhavana Soni",
+        center_display_name: "Shree Samarth Smart Brain Abacus",
+        center_slug: "en-sma-253",
+        center_photo_url: "https://cdn.example/bhavana.jpg",
+        landing: {
+          founders: [{ name: "Founder name", title: "Sample Center Education Pvt. Ltd.", photoUrl: "", roleBadge: "FOUNDER", bio: "" }],
+        },
+        brand_founders: [
+          {
+            name: "Chetan Bhansali",
+            title: "Brand owner",
+            photoUrl: "https://cdn.example/brand-founder.jpg",
+            roleBadge: "FOUNDER & CEO",
+            bio: "",
+          },
+        ],
+        success_stories: [],
+        curriculum: [],
+      },
+      error: null,
+    });
+
+    const bundle = await fetchCenterLandingBundle("shree-samarth", "en-sma-253");
+    expect(bundle?.config.founders?.map((row) => row.name)).toEqual(["Bhavana Soni", "Chetan Bhansali"]);
+    expect(bundle?.config.founders?.[0]?.photoUrl).toBe("https://cdn.example/bhavana.jpg");
+    expect(bundle?.config.founders?.some((row) => row.name === "Founder name")).toBe(false);
+  });
+
+  it("regression_center_public_mentors_brand_owner_first_without_franchiser", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Shree Samarth Smart Brain Abacus",
+        brand_slug: "shree-samarth",
+        marketing_theme: "spark-academy",
+        center_name: "Shree Samarth Smart Brain Abacus",
+        center_display_name: "Shree Samarth Smart Brain Abacus",
+        center_slug: "en-sma-253",
+        center_photo_url: null,
+        landing: {},
+        brand_founders: [
+          {
+            name: "Chetan Bhansali",
+            title: "Brand owner",
+            photoUrl: "https://cdn.example/brand-founder.jpg",
+            roleBadge: "FOUNDER & CEO",
+            bio: "",
+          },
+        ],
+        success_stories: [],
+        curriculum: [],
+      },
+      error: null,
+    });
+
+    const bundle = await fetchCenterLandingBundle("shree-samarth", "en-sma-253");
+    expect(bundle?.config.founders?.map((row) => row.name)).toEqual(["Chetan Bhansali"]);
+  });
+
+  it("regression_center_public_mentors_load_brand_owner_from_brand_homepage_rpc", async () => {
+    rpc.mockImplementation((fn: string) => {
+      if (fn === "get_brand_landing_public") {
+        return Promise.resolve({
+          data: {
+            brand_name: "Shree Samarth Smart Brain Abacus",
+            marketing_theme: "spark-academy",
+            landing: {
+              founders: [
+                {
+                  name: "Chetan Bhansali",
+                  title: "Brand owner",
+                  photoUrl: "https://cdn.example/brand-founder.jpg",
+                  roleBadge: "FOUNDER & CEO",
+                  bio: "",
+                },
+              ],
+            },
+          },
+          error: null,
+        });
+      }
+      return Promise.resolve({
+        data: {
+          brand_name: "Shree Samarth Smart Brain Abacus",
+          brand_slug: "shree-samarth",
+          marketing_theme: "spark-academy",
+          center_name: "Bhavana Soni",
+          center_display_name: "Shree Samarth Smart Brain Abacus",
+          center_slug: "en-sma-253",
+          center_photo_url: "https://cdn.example/bhavana.jpg",
+          landing: {
+            founders: [
+              { name: "Founder name", title: "Sample Center Education Pvt. Ltd.", photoUrl: "", roleBadge: "FOUNDER", bio: "" },
+            ],
+          },
+          success_stories: [],
+          curriculum: [],
+        },
+        error: null,
+      });
+    });
+
+    const bundle = await fetchCenterLandingBundle("shree-samarth", "en-sma-253");
+    expect(rpc).toHaveBeenCalledWith("get_brand_landing_public", { p_brand_slug: "shree-samarth" });
+    expect(bundle?.config.founders?.map((row) => row.name)).toEqual(["Bhavana Soni", "Chetan Bhansali"]);
+  });
 });

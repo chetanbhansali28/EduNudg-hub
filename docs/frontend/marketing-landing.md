@@ -42,6 +42,10 @@ Center enrollment sites (`{center}.{brand}`) inherit the brand's `marketing_them
 
 The brand homepage editor previews center landing with placeholder **Sample Center**. On View Frontend, `overlayCenterLandingIdentity` replaces that placeholder with Franchise Identity **Display name** (else franchise name). Copyright drops the redundant “Part of {brand}” when those names match.
 
+Brand **Mentors / Leadership** (homepage accordion; Spark public label is Meet Our Expert Mentors) stores people in `landing.founders`. Template names **Founder name** / **Name** are never shown on the live brand or franchise site (`visiblePublicFounders`). Set the real person’s name in that accordion.
+
+Center/franchise **Mentors** (`#founders`) always keep the brand homepage founder(s) from `landing.founders`. When Franchise Identity has a distinct owner name (not the display/brand name) or a center master photo, that franchiser card is **first**, then the brand owner. If the franchiser is missing, the brand owner stays in first place. Theme placeholders (`Founder name`, Sample Center, Spark Unsplash stock mentors) are omitted. RPC `get_center_landing_public` returns `brand_founders` for this overlay (`overlayCenterFoundersFromIdentity`).
+
 **Franchise apply is brand-only:** center public layouts run `sanitizeCenterPublicNavConfig()` so **Apply franchise** / `#apply` secondary CTAs never appear on center hosts (Vercel `?portal=center` or `{center}.{brand}.localhost`). Brand landings keep dual CTAs.
 
 **Upcoming events:** Homepage editor section (like Leadership profiles). Brand adds competitions / workshops / demos with optional image, date, time, duration. Public `#events` shows only upcoming items (capped by `maxItems`). Works on Abacus, Spark, and Novu brand themes.
