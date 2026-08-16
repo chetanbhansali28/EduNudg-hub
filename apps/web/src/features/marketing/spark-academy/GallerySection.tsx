@@ -1,4 +1,7 @@
+import { useRef } from "react";
 import type { HomepageGallery } from "@/types/homepage";
+import { galleryColumnCount } from "./galleryHelpers";
+import { useSparkGalleryCarousel } from "./useSparkGalleryCarousel";
 
 type Props = {
   gallery: HomepageGallery;
@@ -13,13 +16,21 @@ export function GallerySection({ gallery }: Props) {
   if (photos.length === 0) return null;
 
   const title = gallery.title?.trim() || "Photo gallery";
+  const trackRef = useRef<HTMLDivElement>(null);
+  useSparkGalleryCarousel(trackRef, galleryColumnCount(photos.length));
 
   return (
     <section className="sa-gallery" id="gallery">
       <div className="sa-section-head sa-section-head--center">
         <h2 className="sa-section-title">{title}</h2>
       </div>
-      <div className="sa-gallery__grid">
+      <div
+        ref={trackRef}
+        className="sa-gallery__track sa-gallery__carousel"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={title}
+      >
         {photos.map((image, index) => (
           <figure key={`${image.url}-${index}`} className="sa-gallery__item">
             <img src={image.url} alt={image.alt ?? ""} loading="lazy" />

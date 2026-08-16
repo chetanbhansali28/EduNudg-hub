@@ -28,6 +28,7 @@ export function PlatformLayout() {
       mobileNavMode="bottom"
       showWelcome={pathname !== "/admin" && pathname !== "/admin/"}
       mobileChrome={<StaffMobileChrome sections={navSections} ariaLabel="Platform navigation" />}
+      resetScrollKey={pathname}
     >
       <Outlet />
     </AppShell>

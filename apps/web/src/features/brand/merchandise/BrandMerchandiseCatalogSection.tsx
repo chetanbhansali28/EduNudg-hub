@@ -23,6 +23,7 @@ import {
   type CatalogItemForm,
   type CatalogItemRow,
 } from "./BrandMerchandiseCatalogCard";
+import { MerchandisePipelineListItem } from "./MerchandisePipelineListItem";
 import "./brandMerchandiseCatalog.css";
 
 const emptyForm: CatalogItemForm = { sku: "", name: "", priceRupees: "", currency: "INR", isActive: true };
@@ -219,25 +220,20 @@ export function BrandMerchandiseCatalogSection({
       {filteredItems.map((item) => {
         const status = catalogStatusBadge(item.is_active);
         return (
-          <button
+          <MerchandisePipelineListItem
             key={item.id}
-            type="button"
-            className={`ed-franchise-app-list-item${item.id === selectedId ? " ed-franchise-app-list-item--selected" : ""}`}
+            selected={item.id === selectedId}
+            badge={status.label}
+            badgeTone={item.is_active ? "approved" : "pending"}
+            when={formatCatalogPrice(item.price_cents, item.currency, item.is_active)}
+            title={item.name}
+            location={formatCatalogSku(item.sku)}
             onClick={() => {
               setSelectedId(item.id);
               onFormOpenChange(false);
               setEditingId(null);
             }}
-          >
-            <div className="ed-franchise-app-list-item__head">
-              <span className={`ed-franchise-app-status-badge ed-franchise-app-status-badge--${item.is_active ? "approved" : "pending"}`}>
-                {status.label}
-              </span>
-              <span className="ed-franchise-app-list-item__when">{formatCatalogPrice(item.price_cents, item.currency, item.is_active)}</span>
-            </div>
-            <p className="ed-franchise-app-list-item__title">{item.name}</p>
-            <p className="ed-franchise-app-list-item__location">{formatCatalogSku(item.sku)}</p>
-          </button>
+          />
         );
       })}
     </div>

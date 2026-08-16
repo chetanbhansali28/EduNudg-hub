@@ -33,7 +33,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [franchise-applications](../../openspec/specs/franchise-applications/spec.md) | Franchise apply + approve provision |
 | [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace |
 | [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform and brand CSV bulk center import |
-| [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` courses/levels/units; on/off toggle; parent marketing stays editable after create; Spark public courses use published syllabus |
+| [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` courses/levels/units; on/off toggle; mobile **Edit course** overlay matches desktop controls; parent marketing stays editable after create; Spark public courses use published syllabus |
 | [brand-batches-feature-flag](../../openspec/specs/brand-batches-feature-flag/spec.md) | Per-brand Batches module gate |
 | [brand-success-stories](../../openspec/specs/brand-success-stories/spec.md) | Brand `/app/success-stories` pipeline CRUD for testimonials |
 | [brand-merchandise](../../openspec/specs/brand-merchandise/spec.md) | Brand `/app/merchandise` pipeline chrome; catalog, promos, orders, payment settings |

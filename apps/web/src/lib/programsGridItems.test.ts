@@ -5,6 +5,7 @@ import {
   programsGridHasContent,
   restrictProgramsSectionToEnabledCurriculum,
   resolveSparkCoursePrograms,
+  sparkShouldShowCoursesSection,
 } from "./programsGridItems";
 import type { PublicCurriculumProgram } from "./brandCurriculumPublic";
 
@@ -177,5 +178,15 @@ describe("resolveSparkCoursePrograms", () => {
       "Vedic Mathematics",
       "Handwriting",
     ]);
+  });
+});
+
+describe("sparkShouldShowCoursesSection", () => {
+  it("regression_spark_courses_show_published_syllabus_even_if_programs_grid_off", () => {
+    expect(sparkShouldShowCoursesSection(false, false, 3, 3)).toBe(true);
+    expect(sparkShouldShowCoursesSection(false, true, 0, 2)).toBe(true);
+    expect(sparkShouldShowCoursesSection(true, false, 0, 2)).toBe(true);
+    expect(sparkShouldShowCoursesSection(false, false, 0, 2)).toBe(false);
+    expect(sparkShouldShowCoursesSection(true, true, 0, 0)).toBe(false);
   });
 });

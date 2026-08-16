@@ -106,6 +106,14 @@ Brand staff SHALL turn a course on or off from the course detail header (next to
 - **THEN** column 1 (Courses) has no on/off switch
 - **AND** column 2 shows the live toggle next to the Active badge, with **Save** beside it, grouped at the right of the header
 
+#### Scenario: Mobile course editor includes the same controls as desktop
+
+- **GIVEN** a brand user on `/app/curriculum` on a phone
+- **WHEN** they open an active course with **Edit course**
+- **THEN** the course overlay includes the live on/off toggle, **Save**, and the same editable course fields as desktop
+- **AND** those controls are not clipped off-screen
+- **AND** draft courses still use **Continue Setup** to open that overlay
+
 #### Scenario: Course title uses half the header and wraps
 
 - **GIVEN** a brand user viewing a course in column 2
@@ -129,7 +137,7 @@ Brand staff SHALL turn a course on or off from the course detail header (next to
 
 ### Requirement: Spark Academy courses use published syllabus
 
-On Spark Academy public sites, **Courses designed for success** SHALL show that brand’s published `/app/curriculum` catalog (the same `publicCurriculum` RPC payload as Curriculum syllabus). Homepage `programsSection` cards SHALL NOT hide published courses. Cards are a fallback only when no published courses exist.
+On Spark Academy public sites, **Courses designed for success** SHALL show that brand’s published `/app/curriculum` catalog (the same `publicCurriculum` RPC payload as Curriculum syllabus). Homepage `programsSection` cards SHALL NOT hide published courses. Cards are a fallback only when no published courses exist. Published syllabus courses SHALL remain visible even when leftover `sections.programsGrid` is off (Novu-era or Courses-grid toggle), so Curriculum syllabus on `/app/homepage` or `/app/center-site` still drives the public catalog.
 
 #### Scenario: Published curriculum wins over leftover program cards
 
@@ -137,7 +145,16 @@ On Spark Academy public sites, **Courses designed for success** SHALL show that 
 - **AND** `get_brand_landing_public` returns published curriculum programs
 - **WHEN** a visitor opens the public homepage
 - **THEN** **Courses designed for success** lists the published course names, descriptions, age labels, and lesson counts
+- **AND** the section title is center-aligned
+- **AND** course cards are centered in the row (`sa-courses__grid--center`)
 - **AND** it does not list leftover homepage card names such as Abacus (Mental Math) unless those names are the published courses
+
+#### Scenario: Published syllabus still shows when programs grid is off
+
+- **GIVEN** a Spark Academy public homepage with published curriculum programs
+- **AND** `sections.programsGrid` is false
+- **WHEN** a visitor opens the public homepage
+- **THEN** **Courses designed for success** still lists the published courses
 
 #### Scenario: Course card keeps Enroll now and centers rating below
 

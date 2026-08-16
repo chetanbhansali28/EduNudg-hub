@@ -15,7 +15,7 @@ Brand staff manage the merchandise catalog, promo codes, payment settings, and f
 
 ### Requirement: Pipeline chrome on Merchandise
 
-Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipeline chrome as Franchise Applications: page header, KPI stats strip, search, section tabs, and a catalog list with detail beside it on desktop.
+Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipeline chrome as Franchise Applications: page header, KPI stats strip, search, section tabs, and a list with detail beside it on desktop for Catalog, Promo Codes, Orders, and Payment settings.
 
 #### Scenario: Page chrome matches franchise applications
 
@@ -23,6 +23,7 @@ Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipelin
 - **THEN** the page uses `PipelinePageHeader` + `LeadKpiGrid` like Franchise Applications
 - **AND** stats cards show Active, Draft, Orders, and Total
 - **AND** **+ Add Merchandise** remains in the page header on the Catalog section
+- **AND** **+ Add Promo Code** appears in the page header on the Promo Codes section
 - **AND** section tabs remain Catalog, Promo Codes, Orders, and Payment settings
 
 #### Scenario: KPI cards filter catalog or open orders
@@ -38,6 +39,15 @@ Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipelin
 - **GIVEN** a brand user on `/app/merchandise` Catalog on desktop with at least one SKU
 - **THEN** the page uses `PipelineWorkspace`
 - **AND** column 1 lists SKUs and column 2 shows the selected catalog card
+
+#### Scenario: Desktop promo, orders, and payment tabs match catalog
+
+- **GIVEN** a brand user on `/app/merchandise` on desktop
+- **WHEN** they open Promo Codes, Orders, or Payment settings
+- **THEN** each tab uses `PipelineWorkspace` with a list in column 1 and the selected item in column 2
+- **AND** typing in search filters the current tab and does not switch to Catalog
+- **AND** Promo Codes can add from the page header into the detail column
+- **AND** Payment settings lists Payment mode, Razorpay, Invoice details, and Reminders
 
 ### Requirement: Competitions is not a Merchandise tab
 

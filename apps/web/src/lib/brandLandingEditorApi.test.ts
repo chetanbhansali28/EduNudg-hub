@@ -1,6 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "./brandLandingDefaults";
-import { fetchBrandMarketingEditor, landingConfigToPartial } from "./brandLandingEditorApi";
+import {
+  fetchBrandMarketingEditor,
+  landingConfigToPartial,
+  saveBrandMarketingLanding,
+  siteLogoUrlFromConfig,
+} from "./brandLandingEditorApi";
 
 const fromMock = vi.fn();
 
@@ -261,5 +266,66 @@ describe("landingConfigToPartial about", () => {
     expect(partial.about?.title).toContain("ABOUT");
     expect(partial.about?.features?.length).toBeGreaterThan(0);
     expect(partial.sections?.about).toBe(false);
+  });
+});
+
+describe("site logo sync", () => {
+  it("siteLogoUrlFromConfig reads homepage Site logo", () => {
+    expect(siteLogoUrlFromConfig({ meta: { logoUrl: "  https://cdn.example/site-logo.png  " } } as never)).toBe(
+      "https://cdn.example/site-logo.png",
+    );
+    expect(siteLogoUrlFromConfig({ meta: { logoUrl: "" } } as never)).toBeNull();
+  });
+
+  it("regression_save_brand_landing_syncs_site_logo_to_brands_logo_url", async () => {
+    const brandUpdate = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    }));
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brand_settings") {
+        return {
+          update: vi.fn(() => ({
+            eq: vi.fn(() => Promise.resolve({ error: null })),
+          })),
+        };
+      }
+      if (table === "brands") {
+        return { update: brandUpdate };
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const config = buildBrandLandingConfig("Abacus World");
+    config.meta.logoUrl = "https://cdn.example/site-logo.png";
+
+    await saveBrandMarketingLanding("brand-1", "settings-1", {}, "landing", config);
+
+    expect(brandUpdate).toHaveBeenCalledWith({ logo_url: "https://cdn.example/site-logo.png" });
+  });
+
+  it("regression_save_center_landing_does_not_overwrite_brand_logo", async () => {
+    const brandUpdate = vi.fn(() => Promise.resolve({ error: null }));
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brand_settings") {
+        return {
+          update: vi.fn(() => ({
+            eq: vi.fn(() => Promise.resolve({ error: null })),
+          })),
+        };
+      }
+      if (table === "brands") {
+        return {
+          update: vi.fn(() => ({
+            eq: brandUpdate,
+          })),
+        };
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const config = buildBrandLandingConfig("Abacus World");
+    config.meta.logoUrl = "https://cdn.example/center-logo.png";
+    await saveBrandMarketingLanding("brand-1", "settings-1", {}, "center_landing", config);
+    expect(brandUpdate).not.toHaveBeenCalled();
   });
 });

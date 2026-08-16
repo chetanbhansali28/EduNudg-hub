@@ -1,5 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
-import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  buildBrandLandingConfig,
+  mergeAbacusClassicLandingConfig,
+  mergeSparkAcademyLandingConfig,
+} from "@/lib/brandLandingDefaults";
 import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import {
   CURRICULUM_NAV_HREF,
@@ -9,6 +13,7 @@ import {
   marketingNavSectionOptions,
   normalizeMarketingNavHref,
   resolveNavHrefSelectValue,
+  scrollPublicPageToTop,
   scrollToMarketingHash,
   sanitizePublicFooter,
   sanitizePublicFooterLinks,
@@ -71,6 +76,36 @@ describe("syncMarketingNavLinks", () => {
 
     expect(next.nav.links.some((l) => l.href === "#about" && l.label === "About Us")).toBe(false);
   });
+
+  it("regression_spark_does_not_inject_about_nav", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
+    config.nav.links = config.nav.links.filter((l) => l.href !== "/about" && l.href !== "#about");
+    config.sections = { ...config.sections, about: true };
+    const next = syncMarketingNavLinks(config, { theme: "spark-academy", publicCurriculum: [] });
+
+    expect(next.nav.links.some((l) => l.href === "#about")).toBe(false);
+    expect(next.nav.links.some((l) => l.href === "/about")).toBe(false);
+  });
+
+  it("regression_spark_keeps_editor_about_nav_link", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
+    config.nav.links = [
+      { label: "About Us", href: "/about" },
+      ...config.nav.links.filter((l) => l.href !== "/about" && l.href !== "#about"),
+    ];
+    const next = syncMarketingNavLinks(config, { theme: "spark-academy", publicCurriculum: [] });
+
+    expect(next.nav.links.some((l) => l.href === "/about" && l.label === "About Us")).toBe(true);
+  });
+
+  it("regression_spark_rewrites_about_hash_nav_to_about_page", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
+    config.nav.links = [{ label: "Our story", href: "#about" }, ...config.nav.links];
+    const next = syncMarketingNavLinks(config, { theme: "spark-academy", publicCurriculum: [] });
+
+    expect(next.nav.links.some((l) => l.href === "#about")).toBe(false);
+    expect(next.nav.links.some((l) => l.href === "/about" && l.label === "Our story")).toBe(true);
+  });
 });
 
 describe("marketingNavSectionOptions", () => {
@@ -108,9 +143,12 @@ describe("marketingNavSectionOptions", () => {
     expect(values).toContain(PROGRAMS_NAV_HREF);
     expect(values).toContain("#features");
     expect(values).toContain("/about");
+    expect(values).not.toContain("#about");
     expect(values).toContain("#gallery");
+    expect(values).toContain("/login");
     expect(options.find((o) => o.value === PROGRAMS_NAV_HREF)?.label).toBe("Courses (#programs)");
     expect(options.find((o) => o.value === "#features")?.label).toBe("Features (#features)");
+    expect(options.find((o) => o.value === "/login")?.label).toBe("Login (/login)");
   });
 });
 
@@ -139,6 +177,12 @@ describe("resolveNavHrefSelectValue", () => {
       isKnownMarketingNavHref("#curriculum", { theme: "spark-academy", portalMode: "brand" })
     ).toBe(true);
   });
+
+  it("regression_spark_login_is_nav_preset", () => {
+    const options = marketingNavSectionOptions({ theme: "spark-academy", portalMode: "brand" });
+    expect(resolveNavHrefSelectValue("/login", options)).toBe("/login");
+    expect(isKnownMarketingNavHref("/login", { theme: "spark-academy", portalMode: "brand" })).toBe(true);
+  });
 });
 
 describe("isKnownMarketingNavHref", () => {
@@ -147,6 +191,47 @@ describe("isKnownMarketingNavHref", () => {
       isKnownMarketingNavHref("#FoundersSection", { theme: "abacus-classic", portalMode: "brand" })
     ).toBe(true);
     expect(isKnownMarketingNavHref("/login", { theme: "abacus-classic", portalMode: "brand" })).toBe(false);
+  });
+});
+
+describe("scrollPublicPageToTop", () => {
+  const originalScrollTo = window.scrollTo;
+
+  afterEach(() => {
+    window.scrollTo = originalScrollTo;
+    vi.unstubAllGlobals();
+  });
+
+  it("regression_about_page_scrolls_to_top_on_load", async () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo as typeof window.scrollTo;
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockImplementation(() => ({
+        matches: false,
+        media: "",
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }))
+    );
+
+    scrollPublicPageToTop();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "smooth" });
+  });
+
+  it("regression_about_page_skips_scroll_to_top_when_hash_present", async () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo as typeof window.scrollTo;
+
+    scrollPublicPageToTop("#team");
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 });
 

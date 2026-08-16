@@ -80,7 +80,6 @@ const SPARK_ACADEMY_OPTIONS: NavOptionDef[] = [
   { value: PROGRAMS_NAV_HREF, label: "Courses (#programs)", sectionKey: "programsGrid" },
   { value: "#features", label: "Features (#features)", sectionKey: "featureGrid" },
   { value: "/about", label: "About page (/about)" },
-  { value: "#about", label: "About section (#about)", sectionKey: "about" },
   { value: "#founders", label: "Mentors (#founders)", sectionKey: "founders" },
   { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
   { value: "#journey", label: "Journey stats (#journey)", sectionKey: "trustMedia" },
@@ -89,6 +88,7 @@ const SPARK_ACADEMY_OPTIONS: NavOptionDef[] = [
   { value: "#gallery", label: "Photo gallery (#gallery)", sectionKey: "gallery" },
   { value: "enroll", label: "Open enroll modal (enroll)" },
   { value: "apply", label: "Open franchise modal (apply)" },
+  { value: "/login", label: "Login (/login)" },
 ];
 
 function baseNavOptionDefs(theme: MarketingTheme, portalMode: PortalMode): NavOptionDef[] {
@@ -188,11 +188,18 @@ function injectNovuCurriculumLink(links: HomepageConfig["nav"]["links"]) {
 }
 
 function stripAutoInjectedAboutLink(links: HomepageConfig["nav"]["links"]) {
-  return links.filter((l) => !(l.href === ABOUT_NAV_HREF && l.label === AUTO_ABOUT_LABEL));
+  return links.filter(
+    (l) =>
+      !((l.href === ABOUT_NAV_HREF || l.href === "/about") && l.label === AUTO_ABOUT_LABEL)
+  );
 }
 
-/** Insert About Us → #about after Gallery/FAQ when the homepage About section is on. */
-function injectAboutNavLink(links: HomepageConfig["nav"]["links"]) {
+function rewriteSparkAboutHashLinks(links: HomepageConfig["nav"]["links"]) {
+  return links.map((l) => (l.href === ABOUT_NAV_HREF ? { ...l, href: "/about" } : l));
+}
+
+/** Insert About Us after Gallery/FAQ when About should appear in public nav. */
+function injectAboutNavLink(links: HomepageConfig["nav"]["links"], href: string) {
   if (links.some((l) => l.href === ABOUT_NAV_HREF || l.href === "/about")) {
     return links;
   }
@@ -202,7 +209,7 @@ function injectAboutNavLink(links: HomepageConfig["nav"]["links"]) {
     galleryIdx >= 0 ? galleryIdx + 1 : faqIdx >= 0 ? faqIdx + 1 : links.length;
   return [
     ...links.slice(0, insertAt),
-    { label: AUTO_ABOUT_LABEL, href: ABOUT_NAV_HREF },
+    { label: AUTO_ABOUT_LABEL, href },
     ...links.slice(insertAt),
   ];
 }
@@ -213,22 +220,27 @@ function sectionDefaultsForTheme(theme: MarketingTheme): Record<HomepageSectionK
   return DEFAULT_HOMEPAGE_SECTION_VISIBILITY;
 }
 
-/** Theme-aware nav: Novu injects Curriculum when RPC has programs; About Us when homepage About is on. */
+/** Theme-aware nav: Novu injects Curriculum when RPC has programs; Abacus/Novu inject About Us when homepage About is on. Spark menu items come only from Navigation & CTAs. */
 export function syncMarketingNavLinks(
   config: HomepageConfig,
   options: { theme: MarketingTheme; publicCurriculum: PublicCurriculumProgram[] }
 ): HomepageConfig {
   const { theme, publicCurriculum } = options;
   let links = stripAutoInjectedCurriculumLink(config.nav.links);
-  links = stripAutoInjectedAboutLink(links);
+
+  if (theme !== "spark-academy") {
+    links = stripAutoInjectedAboutLink(links);
+  }
 
   if (theme === "novu" && publicCurriculum.length > 0) {
     links = injectNovuCurriculumLink(links);
   }
 
   const sections = mergeSectionVisibility(config.sections, sectionDefaultsForTheme(theme));
-  if (sections.about && aboutHasContent(config.about)) {
-    links = injectAboutNavLink(links);
+  if (theme === "spark-academy") {
+    links = rewriteSparkAboutHashLinks(links);
+  } else if (sections.about && aboutHasContent(config.about)) {
+    links = injectAboutNavLink(links, ABOUT_NAV_HREF);
   }
 
   return { ...config, nav: { ...config.nav, links } };
@@ -261,6 +273,18 @@ export function scrollToMarketingHash(hash: string | undefined): void {
   if (!id) return;
   requestAnimationFrame(() => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+/** Public `/about` (and similar routes) start at the top; skip when a hash target exists. */
+export function scrollPublicPageToTop(hash?: string): void {
+  if (hash && hash !== "#") return;
+  const reduce =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const behavior: ScrollBehavior = reduce ? "auto" : "smooth";
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, left: 0, behavior });
   });
 }
 

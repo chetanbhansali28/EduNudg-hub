@@ -13,7 +13,10 @@ import {
   fetchBrandMarketingEditor,
   landingConfigToPartial,
   saveBrandMarketingLanding,
+  siteLogoUrlFromConfig,
+  syncBrandLogoFromSiteLogo,
 } from "@/lib/brandLandingEditorApi";
+import { invalidateBrandLogoCaches } from "@/lib/brandLogoCache";
 import { getSupabase } from "@/lib/supabase";
 import { formatLastSavedLabel } from "@/lib/formatRelativeTime";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
@@ -109,6 +112,7 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
           .insert({ brand_id: brandId, settings: merged });
         if (error) throw new Error(error.message);
       }
+      await syncBrandLogoFromSiteLogo(brandId, siteLogoUrlFromConfig(payload));
     },
     onSuccess: (_data, override) => {
       const payload = override ?? brandConfig;
@@ -126,6 +130,7 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
       setBrandUpdatedAt(new Date().toISOString());
       void qc.invalidateQueries({ queryKey: ["brand-marketing-editor", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
+      invalidateBrandLogoCaches(qc, brandId);
       setBrandSaved(true);
       setTimeout(() => setBrandSaved(false), 3000);
     },

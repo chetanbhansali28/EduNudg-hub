@@ -19,6 +19,7 @@ export {
   readAdminTheme,
   writeAdminTheme,
   AppShell,
+  scrollStaffAppToTop,
   LoginLayout,
   ComingSoonPage,
   SidebarNavLink,
@@ -1033,7 +1034,7 @@ export function EditorSaveBar({
             pending={savePending}
             saved={saved}
             label={saveLabel}
-            disabled={!isDirty && !savePending && !saved}
+            disabled={savePending}
           />
         </div>
       </div>

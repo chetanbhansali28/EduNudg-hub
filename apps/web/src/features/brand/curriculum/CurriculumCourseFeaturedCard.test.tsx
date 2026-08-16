@@ -32,10 +32,12 @@ describe("Curriculum mobile course card", () => {
         ]}
         onEditProgram={() => undefined}
         onAddProgram={() => undefined}
+        onContinueSetup={() => undefined}
       />
     );
     expect(screen.getByText("Abacus Core")).toBeDefined();
     expect(screen.getByText(/Level 1/)).toBeDefined();
+    expect(screen.getByRole("button", { name: "Edit course" })).toBeDefined();
     expect(screen.getAllByRole("button", { name: "Edit" }).length).toBeGreaterThan(0);
   });
 });

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   IconBolt,
@@ -235,6 +235,15 @@ function SidebarPanel({
   );
 }
 
+export function scrollStaffAppToTop() {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  document.querySelectorAll<HTMLElement>(".ed-content, .ed-main").forEach((el) => {
+    el.scrollTop = 0;
+  });
+}
+
 export function AppShell({
   productName = "EduNudg",
   logoUrl,
@@ -255,6 +264,7 @@ export function AppShell({
   mobileNavMode = "drawer",
   mobileChrome,
   shellClassName,
+  resetScrollKey,
   children,
 }: {
   productName?: string;
@@ -287,6 +297,8 @@ export function AppShell({
   mobileChrome?: ReactNode;
   /** Extra class on the shell root (e.g. ed-shell--commerce). */
   shellClassName?: string;
+  /** When this value changes (typically the current pathname), the page scroll resets to the top. */
+  resetScrollKey?: string;
   children: ReactNode;
 }) {
   const [navOpen, setNavOpen] = useState(false);
@@ -323,6 +335,11 @@ export function AppShell({
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, [closeNav]);
+
+  useLayoutEffect(() => {
+    if (resetScrollKey == null) return;
+    scrollStaffAppToTop();
+  }, [resetScrollKey]);
 
   const displayName = welcomeName ?? user?.name ?? "there";
   const heading = welcomeHeading ?? `Welcome back, ${displayName} 👋`;
@@ -390,7 +407,10 @@ export function AppShell({
               <span className="ed-sr-only">{navOpen ? "Close menu" : "Open menu"}</span>
             </button>
           ) : null}
-          <span className="ed-mobile-bar__title">{mobileTitle}</span>
+          <div className="ed-mobile-bar__brand">
+            {logoUrl ? <img src={logoUrl} alt="" className="ed-mobile-bar__logo" /> : null}
+            <span className="ed-mobile-bar__title">{mobileTitle}</span>
+          </div>
           {!titleOnlyMobileBar && mobileBarEnd ? (
             <div className="ed-mobile-bar__end">{mobileBarEnd}</div>
           ) : !titleOnlyMobileBar && shellVariant === "student" && user ? (

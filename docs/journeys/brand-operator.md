@@ -10,10 +10,10 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 | **Student Leads** | Assign, reallocate, view lost with reasons |
 | **Franchise Applications** | Approve/reject; Add Franchise modal; provisions center + domain |
 | Franchise Centers | Master-detail `/app/centers` — profile (no Social Media), open frontend/backend, disable/enable, delete, curriculum, **Import Franchise** CSV |
-| Curriculum | Master-detail `/app/curriculum` — pipeline header + Active/Drafts/Programs/Total KPIs; courses/levels/units; on/off toggle in course detail header; parent marketing stays editable after create |
-| Merchandise | Catalog, promos, and franchise orders — pipeline header + Active/Draft/Orders/Total KPIs |
+| Curriculum | Master-detail `/app/curriculum` — pipeline header + Active/Drafts/Programs/Total KPIs; courses/levels/units; on/off toggle in course detail header (mobile **Edit course** overlay includes the same controls); parent marketing stays editable after create |
+| Merchandise | Catalog, promos, payment settings, and franchise orders — pipeline header + Active/Draft/Orders/Total KPIs; each tab is list + detail |
 | Analytics | Cross-center metrics |
-| Settings | Logo, theme, **`lead_stale_days`**, **timezone**, feature/integration toggles |
+| Settings | White-label login copy, **`lead_stale_days`**, **timezone**. Logo is Homepage **Site logo**. |
 | **Billing** | Pay EduNudg platform subscription (payment gateway) |
 
 ## Student lead operations

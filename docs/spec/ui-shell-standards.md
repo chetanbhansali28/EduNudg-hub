@@ -19,7 +19,7 @@ Tests: `apps/web/src/features/shared/backendKpiTheme.test.tsx`.
 ## Sidebar
 
 - **Desktop:** collapsible left panel ([`packages/ui/src/shell.tsx`](../../packages/ui/src/shell.tsx)); state in `localStorage`
-- **Tablet / mobile:** hidden by default; **hamburger** opens drawer overlay
+- **Tablet / mobile:** hidden by default; staff portals use a **bottom nav** plus a top bar. The mobile bar shows the tenant **logo** (`logoUrl`, typically the Site logo) beside the product name (`regression_staff_mobile_bar_shows_brand_logo`). Hamburger drawer is for portals that still use `mobileNavMode="drawer"`.
 - Nav definitions: [`portalNav.tsx`](../../apps/web/src/lib/portalNav.tsx) — must match [navigation-spec.md](./navigation-spec.md)
 
 ## Content grid
@@ -107,9 +107,11 @@ Brand, center, platform, and learn layouts use `useStaffShellWelcome()`:
 
 Pass `welcomeHeading` and `welcomeSubtitle` into `AppShell`; the legacy `Welcome back, {name}` string remains the fallback when those props are omitted.
 
+Staff `AppShell` layouts (brand `/app`, center `/app`, platform `/admin`) pass `resetScrollKey={pathname}` so switching sidebar or bottom-nav tabs scrolls the page back to the top (window plus `.ed-content` / `.ed-main`). Test: `regression_staff_app_scrolls_to_top_on_tab_change`.
+
 ## Lead / application pipelines
 
-Franchise applications, brand student leads, center leads, platform brand signups, brand/center curriculum, brand success stories, and brand merchandise share the **pipeline** pattern from `@edunudg/ui`. Brand Student Leads (`/app/leads`), Curriculum (`/app/curriculum`), Success Stories (`/app/success-stories`), and Merchandise (`/app/merchandise`) use the same workspace chrome as Franchise Applications: `PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`, and `PipelineWorkspace` with the list staying visible beside detail on desktop. On Student Leads, assignment management stacks below applicant details in that detail column (do not add a third page column).
+Franchise applications, brand student leads, center leads, platform brand signups, brand/center curriculum, brand success stories, and brand merchandise share the **pipeline** pattern from `@edunudg/ui`. Brand Student Leads (`/app/leads`), Curriculum (`/app/curriculum`), Success Stories (`/app/success-stories`), and Merchandise (`/app/merchandise`) use the same workspace chrome as Franchise Applications: `PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`, and `PipelineWorkspace` with the list staying visible beside detail on desktop. Merchandise Catalog, Promo Codes, Orders, and Payment settings all use that list + detail workspace. On Student Leads, assignment management stacks below applicant details in that detail column (do not add a third page column).
 
 | Primitive | Use |
 |-----------|-----|
@@ -125,7 +127,7 @@ Styles use admin theme tokens (`--ed-primary-soft`, `--ed-card`, etc.) for light
 
 Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `CurriculumWorkspace` (`/app/curriculum` and center curriculum), `BrandMerchandisePage`, `BrandsSignupReviewSection` (on `/admin/brands`; detail via `PlatformSignupDetailCard`).
 
-Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `CurriculumPage.test.tsx`, `CenterCurriculumPage.test.tsx`, `BrandMerchandisePage.test.tsx`, `BrandsSignupReviewSection.test.tsx`, `PlatformSignupDetailCard.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`.
+Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `CurriculumPage.test.tsx`, `CenterCurriculumPage.test.tsx`, `BrandMerchandisePage.test.tsx`, `BrandMerchandisePromoSection.test.tsx`, `BrandMerchandiseOrdersSection.test.tsx`, `BrandMerchandisePaymentSettings.test.tsx`, `BrandsSignupReviewSection.test.tsx`, `PlatformSignupDetailCard.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`, `AppShell.responsive.test.tsx`.
 
 ## Backend catalog workspace
 

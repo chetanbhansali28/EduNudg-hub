@@ -73,8 +73,24 @@ describe("BrandSettingsPage", () => {
     expect(await screen.findByText("Brand Configuration")).toBeDefined();
     expect(await screen.findByText(/Active Entity:/)).toBeDefined();
     expect(screen.getByText("White-label & Login Copy")).toBeDefined();
+    expect(screen.queryByText("Brand Identity")).toBeNull();
+    expect(screen.queryByText("Logo upload")).toBeNull();
     expect(screen.queryByText("Merchandise catalog & orders")).toBeNull();
     expect(screen.queryByRole("heading", { name: "Features" })).toBeNull();
     expect(screen.queryByText("Theme")).toBeNull();
+  });
+
+  it("regression_brand_settings_omits_brand_identity_card", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter>
+          <BrandSettingsPage />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+    expect(await screen.findByText("White-label & Login Copy")).toBeDefined();
+    expect(screen.queryByRole("heading", { name: "Brand Identity" })).toBeNull();
+    expect(screen.queryByText("Update your public facing logo and franchise identity.")).toBeNull();
   });
 });

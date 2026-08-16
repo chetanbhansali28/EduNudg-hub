@@ -49,6 +49,7 @@ export function BrandLayout() {
       mobileNavMode="bottom"
       showWelcome={pathname === "/app"}
       mobileChrome={<StaffMobileChrome sections={navSections} ariaLabel="Brand navigation" />}
+      resetScrollKey={pathname}
     >
       <Outlet />
     </AppShell>

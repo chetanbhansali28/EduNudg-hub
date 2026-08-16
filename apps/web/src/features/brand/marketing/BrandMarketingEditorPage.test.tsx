@@ -16,6 +16,8 @@ vi.mock("@/lib/brandLandingEditorApi", () => ({
   fetchBrandMarketingEditor: (...args: unknown[]) => fetchBrandMarketingEditor(...args),
   saveBrandMarketingLanding: vi.fn(),
   landingConfigToPartial: vi.fn(),
+  siteLogoUrlFromConfig: vi.fn(),
+  syncBrandLogoFromSiteLogo: vi.fn(),
 }));
 
 vi.mock("@/features/marketing/HomepageEditorForm", () => ({
@@ -52,6 +54,7 @@ describe("BrandMarketingEditorPage", () => {
     expect(screen.queryByRole("button", { name: /Center sites \(parent enrollment template\)/i })).toBeNull();
     expect(screen.queryByText("Center Site Configuration")).toBeNull();
     expect(screen.getAllByRole("button", { name: "Save changes" })).toHaveLength(1);
+    expect((screen.getByRole("button", { name: "Save changes" }) as HTMLButtonElement).disabled).toBe(false);
     expect(screen.getByText("Novu editor form")).toBeDefined();
     expect(screen.queryByRole("link", { name: /preview/i })).toBeNull();
     expect(screen.queryByRole("tab")).toBeNull();

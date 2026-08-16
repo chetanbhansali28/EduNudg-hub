@@ -52,6 +52,7 @@ export function CenterLayout() {
       mobileNavMode="bottom"
       shellClassName={shellClassName}
       mobileChrome={<StaffMobileChrome sections={navSections} ariaLabel="Center navigation" />}
+      resetScrollKey={pathname}
     >
       <Outlet />
     </AppShell>

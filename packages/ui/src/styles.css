@@ -402,6 +402,22 @@
   letter-spacing: -0.02em;
 }
 
+.ed-mobile-bar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.ed-mobile-bar__logo {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+}
+
 .ed-shell__backdrop {
   display: none;
   position: fixed;
@@ -2139,9 +2155,28 @@
 
 .ed-curriculum-mobile-card__head {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.75rem;
   align-items: start;
+}
+
+.ed-curriculum-mobile-card__open {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ed-curriculum-mobile-card__open:disabled {
+  cursor: default;
 }
 
 .ed-curriculum-mobile-card__title {
@@ -2275,6 +2310,29 @@
   font-size: 0.8125rem;
   color: var(--ed-muted);
   line-height: 1.45;
+}
+
+@media (max-width: 1023px) {
+  .ed-curriculum-editor-hero__title-row {
+    flex-wrap: wrap;
+    row-gap: 0.65rem;
+    align-items: flex-start;
+  }
+
+  .ed-curriculum-editor-hero__title {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .ed-curriculum-editor-hero__meta {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+
+  .ed-curriculum-general-info {
+    overflow: visible;
+  }
 }
 
 .ed-curriculum-video-preview {
@@ -8311,7 +8369,7 @@ body.ed-nav-open {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 0;
+    gap: 0.5rem;
     flex-shrink: 0;
     min-height: var(--ed-mobile-bar-height);
     height: var(--ed-mobile-bar-height);
@@ -8322,6 +8380,13 @@ body.ed-nav-open {
     position: sticky;
     top: 0;
     z-index: 30;
+  }
+
+  .ed-shell--bottom-nav .ed-mobile-bar__brand,
+  .ed-shell--commerce .ed-mobile-bar__brand,
+  .ed-shell--mobile-chrome .ed-mobile-bar__brand {
+    flex: 1;
+    min-width: 0;
   }
 
   .ed-shell--bottom-nav .ed-mobile-bar__title,

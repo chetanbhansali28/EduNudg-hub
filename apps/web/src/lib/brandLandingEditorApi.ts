@@ -195,9 +195,25 @@ export async function saveBrandMarketingLanding(
   if (settingsId) {
     const { error } = await getSupabase().from("brand_settings").update({ settings: merged }).eq("id", settingsId);
     if (error) throw new Error(error.message);
-    return;
+  } else {
+    const { error } = await getSupabase().from("brand_settings").insert({ brand_id: brandId, settings: merged });
+    if (error) throw new Error(error.message);
   }
 
-  const { error } = await getSupabase().from("brand_settings").insert({ brand_id: brandId, settings: merged });
+  if (key === "landing") {
+    await syncBrandLogoFromSiteLogo(brandId, siteLogoUrlFromConfig(nextPartial));
+  }
+}
+
+/** Homepage Site accordion logo (`landing.meta.logoUrl`). Empty does not clear `brands.logo_url`. */
+export function siteLogoUrlFromConfig(config: HomepageConfig | Partial<HomepageConfig>): string | null {
+  const url = config.meta?.logoUrl?.trim();
+  return url || null;
+}
+
+/** Copies homepage Site logo onto `brands.logo_url` for login / student / app chrome. */
+export async function syncBrandLogoFromSiteLogo(brandId: string, logoUrl: string | null): Promise<void> {
+  if (!logoUrl) return;
+  const { error } = await getSupabase().from("brands").update({ logo_url: logoUrl }).eq("id", brandId);
   if (error) throw new Error(error.message);
 }

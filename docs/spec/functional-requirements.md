@@ -62,8 +62,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-B20 | B | **Franchise Applications** nav `/app/franchise-applications` | Moved out of Settings |
 | FR-B21 | B | Approve creates center + domain + operator invite | Same transaction: `franchise_centers`, `{center}.{brand}` mapping |
 | FR-B22 | B | 360° read-only student/center views | All centers under brand (Phase B/C) |
-| FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Drafts/Programs/Total KPIs); master-detail: courses → levels → units; on/off toggle per course (`programs.is_active`); parent marketing stays editable after create via Save |
-| FR-B24 | B | **Merchandise** workspace `/app/merchandise` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings; desktop catalog list + detail |
+| FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Drafts/Programs/Total KPIs); master-detail: courses → levels → units; on/off toggle per course (`programs.is_active`); mobile overlay includes the same editable controls; parent marketing stays editable after create via Save |
+| FR-B24 | B | **Merchandise** workspace `/app/merchandise` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
 
 ---
 

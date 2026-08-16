@@ -56,13 +56,15 @@ export function FeaturesSection({ sections, showcase, imageUrlFallback }: Props)
             <div className="sa-features__scribble sa-features__scribble--zigzag" aria-hidden />
             <div className="sa-features__dots" aria-hidden />
 
-            {resolved.imageUrl ? (
-              <div className="sa-features__photo">
-                <MarketingBackgroundMedia src={resolved.imageUrl} />
-              </div>
-            ) : (
-              <div className="sa-features__photo sa-features__photo--placeholder" aria-hidden />
-            )}
+            <div className="sa-features__photo-stage">
+              {resolved.imageUrl ? (
+                <div className="sa-features__photo">
+                  <MarketingBackgroundMedia src={resolved.imageUrl} />
+                </div>
+              ) : (
+                <div className="sa-features__photo sa-features__photo--placeholder" aria-hidden />
+              )}
+            </div>
 
             <div className="sa-features__float sa-features__float--stats">
               <span className="sa-features__float-label">{resolved.floatStatsLabel}</span>

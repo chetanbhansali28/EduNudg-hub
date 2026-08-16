@@ -67,6 +67,7 @@ export function AbacusClassicEditorForm({
   socialConnect = {},
   onSocialConnectChange,
 }: AbacusClassicEditorFormProps) {
+  /** Structural edits that persist immediately (section visibility). Text fields must use `onChange` only. */
   const commit = (next: HomepageConfig) => {
     onChange(next);
     void onPersist?.(next);
@@ -133,7 +134,7 @@ export function AbacusClassicEditorForm({
 
       <EditorAccordion sectionId="navigation" title="Navigation & CTAs" description="Menus, dual CTAs and modal links">
         <EditorSectionNote>
-          Primary and secondary buttons open enrollment and franchise modals on the public site.
+          Header primary and secondary buttons. The hero banner button is edited in the Hero section.
         </EditorSectionNote>
         <EditorItemList
           onAdd={() => updateNavLinks([...config.nav.links, { label: "New", href: "#" }])}
@@ -175,19 +176,16 @@ export function AbacusClassicEditorForm({
           <Input
             label="Primary CTA label (demo)"
             value={config.nav.ctaLabel}
-            onChange={(v) =>
-              commit({ ...config, nav: { ...config.nav, ctaLabel: v }, hero: { ...config.hero, ctaLabel: v } })
-            }
+            onChange={(v) => onChange({ ...config, nav: { ...config.nav, ctaLabel: v } })}
           />
           {portalMode === "brand" ? (
             <Input
               label="Secondary CTA label (franchise)"
               value={config.nav.secondaryCtaLabel ?? ""}
               onChange={(v) =>
-                commit({
+                onChange({
                   ...config,
                   nav: { ...config.nav, secondaryCtaLabel: v },
-                  hero: { ...config.hero, secondaryCtaLabel: v },
                 })
               }
             />
@@ -201,11 +199,27 @@ export function AbacusClassicEditorForm({
         enabled={isThemeSectionEnabled("hero")}
         onEnabledChange={(e) => setSection("hero", e)}
       >
+        <EditorSectionNote>
+          Independent of Navigation & CTAs. Empty label or link falls back to the header Primary CTA.
+        </EditorSectionNote>
         <EditorFieldsGrid>
           <Input label="Badge" value={config.hero.badge ?? ""} onChange={(v) => onChange({ ...config, hero: { ...config.hero, badge: v } })} />
           <Input label="Headline line 1" value={config.hero.line1} onChange={(v) => onChange({ ...config, hero: { ...config.hero, line1: v } })} />
           <Input label="Headline serif part" value={config.hero.line1Serif} onChange={(v) => onChange({ ...config, hero: { ...config.hero, line1Serif: v } })} />
           <Input label="Subtitle" value={config.hero.subtitle} onChange={(v) => onChange({ ...config, hero: { ...config.hero, subtitle: v } })} />
+          <Input
+            label="Hero CTA label"
+            value={config.hero.ctaLabel}
+            onChange={(v) => onChange({ ...config, hero: { ...config.hero, ctaLabel: v } })}
+          />
+          <NavLinkHrefField
+            label="Hero CTA link"
+            value={config.hero.ctaHref}
+            marketingTheme={marketingTheme}
+            portalMode={portalMode}
+            sections={config.sections}
+            onChange={(v) => onChange({ ...config, hero: { ...config.hero, ctaHref: v } })}
+          />
           <EditorFieldSpan>
             <MarketingMediaField
               label="Hero background"
@@ -534,9 +548,13 @@ export function AbacusClassicEditorForm({
         <EditorAccordion
           sectionId="about"
           title="About Us"
-          description="Company story, key features, team photos — full /about page"
-          enabled={isThemeSectionEnabled("about")}
-          onEnabledChange={(e) => setSection("about", e)}
+          description={
+            isSpark
+              ? "Company story, key features, team photos — published on /about (not on the homepage)"
+              : "Company story, key features, team photos — full /about page"
+          }
+          enabled={isSpark ? true : isThemeSectionEnabled("about")}
+          onEnabledChange={isSpark ? undefined : (e) => setSection("about", e)}
         >
           <AboutUsEditorFields
             config={config}

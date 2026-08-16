@@ -61,6 +61,30 @@ describe("AppShell responsive", () => {
     expect(document.querySelector(".ed-mobile-bar__title")?.textContent).toBe("Demo Academy");
   });
 
+  it("regression_staff_mobile_bar_shows_brand_logo", () => {
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <AppShell
+            portalLabel="Brand · Smart Brain Abacus"
+            productName="Smart Brain Abacus"
+            logoUrl="https://cdn.example/smart-brain-logo.png"
+            mobileNavMode="bottom"
+            mobileChrome={<nav aria-label="Brand navigation">Nav</nav>}
+            navSections={[{ title: "Main menu", items: [{ href: "/app", label: "Home", active: true }] }]}
+          >
+            <p>Page body</p>
+          </AppShell>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
+    const logo = document.querySelector(".ed-mobile-bar .ed-mobile-bar__logo") as HTMLImageElement | null;
+    expect(logo).toBeTruthy();
+    expect(logo?.getAttribute("src")).toBe("https://cdn.example/smart-brain-logo.png");
+    expect(document.querySelector(".ed-mobile-bar__title")?.textContent).toBe("Smart Brain Abacus");
+  });
+
   it("regression_mobile_nav_toggle_opens_drawer", () => {
     const { container } = render(
       <MemoryRouter>
@@ -203,5 +227,38 @@ describe("AppShell responsive", () => {
     expect(screen.queryByRole("button", { name: "Notifications" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Support" })).toBeNull();
     expect(container.querySelector(".ed-shell--student .ed-header")).toBeTruthy();
+  });
+
+  it("regression_staff_app_scrolls_to_top_on_tab_change", () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo as typeof window.scrollTo;
+
+    function Shell({ path }: { path: string }) {
+      return (
+        <MemoryRouter>
+          <ThemeProvider>
+            <AppShell
+              portalLabel="Brand"
+              welcomeName="Test"
+              mobileNavMode="bottom"
+              resetScrollKey={path}
+              navSections={[{ title: "Main menu", items: [{ href: "/app", label: "Home", active: true }] }]}
+            >
+              <p>Page body</p>
+            </AppShell>
+          </ThemeProvider>
+        </MemoryRouter>
+      );
+    }
+
+    const { rerender } = render(<Shell path="/app" />);
+    const content = document.querySelector(".ed-content") as HTMLElement;
+    expect(content).toBeTruthy();
+    content.scrollTop = 480;
+    scrollTo.mockClear();
+
+    rerender(<Shell path="/app/curriculum" />);
+    expect(scrollTo).toHaveBeenCalledWith(0, 0);
+    expect((document.querySelector(".ed-content") as HTMLElement).scrollTop).toBe(0);
   });
 });

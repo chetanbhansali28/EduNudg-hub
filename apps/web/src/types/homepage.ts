@@ -287,7 +287,7 @@ export interface HomepageConfig {
     fontSans: string;
     fontSerif: string;
     themeNote?: string;
-    /** Brand/center logo for marketing nav (from `brands.logo_url` or platform settings). */
+    /** Brand/center logo for marketing nav (homepage Site logo / `landing.meta.logoUrl`). */
     logoUrl?: string | null;
   };
   theme: {
@@ -356,7 +356,7 @@ export interface HomepageConfig {
   programsSection?: HomepageProgramsSection;
   /** Upcoming events (all themes) — competitions, workshops, demos, other. */
   upcomingEvents?: HomepageUpcomingEventsSection;
-  /** Brand About Us — `/about` + optional homepage `#about` (theme chrome on the public page). */
+  /** Brand About Us — `/about`; Novu/Abacus may also show homepage `#about`. Spark is `/about` only. */
   about?: HomepageAboutSection;
   /** Platform enterprise landing: hero stat overlay on side image. */
   heroOverlayCard?: HomepageHeroOverlayCard;

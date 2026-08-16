@@ -100,7 +100,7 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   faq: true,
   footer: true,
   programsGrid: true,
-  curriculumSyllabus: false,
+  curriculumSyllabus: true,
   featureGrid: true,
   founders: true,
   trustMedia: true,

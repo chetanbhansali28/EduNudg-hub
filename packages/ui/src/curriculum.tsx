@@ -362,44 +362,49 @@ export function CurriculumMobileCourseCard({
   readOnly?: boolean;
 }) {
   const isDraft = status === "draft";
+  const openLabel = readOnly ? "View course" : isDraft ? "Continue Setup" : "Edit course";
 
   return (
     <article className={`ed-curriculum-mobile-card${isDraft ? " is-draft" : ""}`}>
       <div className="ed-curriculum-mobile-card__head">
-        <CourseAvatar initials={initials} tone={tone} />
-        <div className="ed-curriculum-mobile-card__copy">
-          <p className="ed-curriculum-mobile-card__title">{title}</p>
-          {meta ? <p className="ed-curriculum-mobile-card__meta">{meta}</p> : null}
-        </div>
+        <button
+          type="button"
+          className="ed-curriculum-mobile-card__open"
+          onClick={onContinueSetup}
+          disabled={!onContinueSetup}
+        >
+          <CourseAvatar initials={initials} tone={tone} />
+          <div className="ed-curriculum-mobile-card__copy">
+            <p className="ed-curriculum-mobile-card__title">{title}</p>
+            {meta ? <p className="ed-curriculum-mobile-card__meta">{meta}</p> : null}
+          </div>
+        </button>
         <CurriculumStatusBadge status={status} />
       </div>
       {excerpt ? <p className="ed-curriculum-mobile-card__excerpt">{excerpt}</p> : null}
 
-      {isDraft ? (
-        onContinueSetup ? (
-          <button type="button" className="ed-curriculum-mobile-card__continue" onClick={onContinueSetup}>
-            Continue Setup
-          </button>
-        ) : null
-      ) : (
-        <>
-          {programs.length > 0 ? (
-            <div className="ed-curriculum-mobile-card__programs">
-              {programs.map((program) => (
-                <CurriculumProgramRow
-                  key={program.id}
-                  title={program.title}
-                  code={program.code}
-                  onEdit={onEditProgram && !readOnly ? () => onEditProgram(program.id) : undefined}
-                />
-              ))}
-            </div>
-          ) : null}
-          {!readOnly && onAddProgram ? (
-            <CurriculumAddProgramButton onClick={onAddProgram} />
-          ) : null}
-        </>
-      )}
+      {!isDraft && programs.length > 0 ? (
+        <div className="ed-curriculum-mobile-card__programs">
+          {programs.map((program) => (
+            <CurriculumProgramRow
+              key={program.id}
+              title={program.title}
+              code={program.code}
+              onEdit={onEditProgram && !readOnly ? () => onEditProgram(program.id) : undefined}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {!isDraft && !readOnly && onAddProgram ? (
+        <CurriculumAddProgramButton onClick={onAddProgram} />
+      ) : null}
+
+      {onContinueSetup ? (
+        <button type="button" className="ed-curriculum-mobile-card__continue" onClick={onContinueSetup}>
+          {openLabel}
+        </button>
+      ) : null}
     </article>
   );
 }

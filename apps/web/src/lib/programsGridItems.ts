@@ -146,3 +146,17 @@ export function resolveSparkCoursePrograms(
     return cardImage ? { ...program, marketingImageUrl: cardImage } : program;
   });
 }
+
+/** Spark public courses grid: published syllabus always renders when courses exist.
+ *  Named homepage cards still honor the Programs / Curriculum syllabus editor toggles.
+ */
+export function sparkShouldShowCoursesSection(
+  programsGridEnabled: boolean,
+  curriculumSyllabusEnabled: boolean,
+  publishedCourseCount: number,
+  displayCourseCount: number
+): boolean {
+  if (displayCourseCount <= 0) return false;
+  if (publishedCourseCount > 0) return true;
+  return programsGridEnabled || curriculumSyllabusEnabled;
+}

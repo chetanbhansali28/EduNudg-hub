@@ -27,6 +27,24 @@ describe("FeaturesSection", () => {
     expect(screen.getByText("55%")).toBeDefined();
   });
 
+  it("regression_spark_features_floats_sit_on_visual_corners", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    const { container } = render(
+      <FeaturesSection
+        sections={config.featureSections}
+        showcase={config.featuresShowcase}
+        imageUrlFallback="https://example.com/student.jpg"
+      />
+    );
+
+    const visual = container.querySelector(".sa-features__visual");
+    const stage = container.querySelector(".sa-features__photo-stage");
+    expect(visual?.querySelector(":scope > .sa-features__float--stats")).toBeDefined();
+    expect(visual?.querySelector(":scope > .sa-features__float--progress")).toBeDefined();
+    expect(stage?.querySelector(".sa-features__float--stats")).toBeNull();
+    expect(stage?.querySelector(".sa-features__float--progress")).toBeNull();
+  });
+
   it("uses_features_showcase_image_and_overlay_overrides", () => {
     const config = mergeSparkAcademyLandingConfig("Digitley");
     render(

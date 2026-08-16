@@ -274,6 +274,12 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
     setSelectedLevelId(levelId ?? null);
   };
 
+  useEffect(() => {
+    if (!isMobile || (!mobileDetailOpen && !addCourseOpen)) return;
+    const overlay = document.querySelector<HTMLElement>(".ed-ops-mobile-detail");
+    if (overlay) overlay.scrollTop = 0;
+  }, [addCourseOpen, isMobile, mobileDetailOpen, selectedCourseId]);
+
   const openAddCourse = () => {
     clear();
     setAddCourse(EMPTY_COURSE_FORM);

@@ -31,21 +31,23 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 
 ## Brand — `/app` (brand owner / admin)
 
+On mobile, the staff top bar shows the brand Site logo beside the product name.
+
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
 | Main menu | Home | `/app` | Exists — stale/unassigned lead KPIs |
 | Features | **Student Leads** | `/app/leads` | Exists — same pipeline chrome as Franchise Applications; Pending review / Decided; KPI stats; search; list + stacked detail (assignment below applicant); manual add, assign |
 | | **Franchise Applications** | `/app/franchise-applications` | Exists — Pending review / Decided; KPI stats; Add Franchise modal; deleted centers stay on Decided |
 | | Franchise Centers | `/app/centers` | Exists — import CSV, view frontend/backend, disable/enable, soft-delete; no Social Media editor |
-| | Curriculum | `/app/curriculum` | Exists — pipeline header + Active/Drafts/Programs/Total KPIs; 2-column master-detail; add via **+ Add Curriculum** in the page header (no **+** on Courses); on/off toggle and Save right-aligned in course detail |
+| | Curriculum | `/app/curriculum` | Exists — pipeline header + Active/Drafts/Programs/Total KPIs; 2-column master-detail on desktop; mobile **Edit course** opens the same editable overlay (live toggle + Save); add via **+ Add Curriculum** in the page header (no **+** on Courses) |
 | | **Competitions** | `/app/competitions` | Exists — Events + question bank; gated by `competitions` (default off) |
 | | Campaigns | `/app/campaigns` | Exists — CRUD |
 | | **Success stories** | `/app/success-stories` | Exists — pipeline chrome like Franchise Applications; KPI stats (Published, Draft, With photo, Total); Published / Draft tabs; Add Story modal; list + detail |
-| | Merchandise | `/app/merchandise` | Exists — pipeline header + Active/Draft/Orders/Total KPIs; catalog (photos), promos, orders, payment settings |
+| | Merchandise | `/app/merchandise` | Exists — pipeline header + Active/Draft/Orders/Total KPIs; Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
 | | Analytics | `/app/analytics` | Exists |
 | General | **Homepage** | `/app/homepage` | Exists — brand public site editor |
 | | **Center Site Configuration** | `/app/center-site` | Exists — parent enrollment template (`center_landing`) |
-| | Settings | `/app/settings` | Exists |
+| | Settings | `/app/settings` | Exists — white-label + SLA; logo is Homepage Site logo |
 | | **Billing** | `/app/billing` | Exists — subscription checkout stub |
 | Footer | Log out | — | Exists |
 

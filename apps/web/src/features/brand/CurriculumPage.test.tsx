@@ -1,15 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CurriculumPage } from "./CurriculumPage";
 import { exactAccessibleName } from "@/test/exactAccessibleName";
+
+const opsBreakpoint = { isDesktop: true, isMobile: false };
 
 vi.mock("./hooks/useBrandScope", () => ({
   useBrandScope: () => ({ brandId: "brand-1", brandSlug: "abacus", missingBrand: false }),
 }));
 
 vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
-  useOpsBreakpoint: () => ({ isDesktop: true, isMobile: false }),
+  useOpsBreakpoint: () => opsBreakpoint,
 }));
 
 vi.mock("@/features/platform/hooks/useMutationError", () => ({
@@ -87,6 +89,11 @@ function renderPage() {
 }
 
 describe("CurriculumPage", () => {
+  beforeEach(() => {
+    opsBreakpoint.isDesktop = true;
+    opsBreakpoint.isMobile = false;
+  });
+
   it("shows empty course list message", async () => {
     fromMock.mockImplementation((table: string) => {
       if (table === "programs") return chain([]);
@@ -304,5 +311,30 @@ describe("CurriculumPage", () => {
 
     fireEvent.click(container.querySelectorAll(".ed-lead-kpi")[1]!);
     expect(screen.getByRole("tab", { name: /Drafts \(0\)/ }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("regression_curriculum_mobile_active_course_opens_editable_detail", async () => {
+    opsBreakpoint.isDesktop = false;
+    opsBreakpoint.isMobile = true;
+    mockCurriculumTables();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Edit course" })).toBeDefined();
+    });
+
+    expect(screen.queryByRole("switch", { name: "Turn Abacus off" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Edit course" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: "Course details" })).toBeDefined();
+    });
+
+    expect(screen.getByRole("switch", { name: "Turn Abacus off" })).toBeDefined();
+    expect(screen.getByRole("button", { name: exactAccessibleName("Save") })).toBeDefined();
+    expect(screen.getByLabelText("Course Name")).toBeDefined();
+    expect(screen.getByLabelText("Short Description (Card Blurb)")).toBeDefined();
+    expect(screen.getByLabelText("Why parents choose this")).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Benefits & outcomes" })).toBeDefined();
   });
 });

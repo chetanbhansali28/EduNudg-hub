@@ -1,5 +1,7 @@
+import { useRef } from "react";
 import type { HomepageConfig } from "@/types/homepage";
 import { parseTestimonialAuthor } from "./testimonialHelpers";
+import { useSparkTestimonialsCarousel } from "./useSparkTestimonialsCarousel";
 
 type Props = {
   testimonials: HomepageConfig["testimonials"];
@@ -50,6 +52,8 @@ export function TestimonialsSection({
   const subtitle =
     testimonials.subtitle?.trim() ||
     "Hear directly from our students about how our courses have transformed their careers and lives.";
+  const trackRef = useRef<HTMLDivElement>(null);
+  useSparkTestimonialsCarousel(trackRef, items.length);
 
   return (
     <section className="sa-testimonials" id="testimonials">
@@ -58,7 +62,13 @@ export function TestimonialsSection({
         <h2 className="sa-section-title sa-testimonials__title">{title}</h2>
         <p className="sa-testimonials__subtitle">{subtitle}</p>
       </div>
-      <div className="sa-testimonials__grid sa-testimonials__grid--center">
+      <div
+        ref={trackRef}
+        className="sa-testimonials__grid sa-testimonials__grid--center sa-testimonials__carousel"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={title}
+      >
         {items.map((item, i) => (
           <TestimonialCard key={`${item.author}-${i}`} item={item} />
         ))}

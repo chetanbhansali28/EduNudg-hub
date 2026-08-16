@@ -42,13 +42,13 @@ Public bucket: **`brand-assets`** (migration `015_brand_assets_storage.sql`). RL
 
 | Asset | DB field / table | Object path |
 |-------|------------------|-------------|
-| Brand logo | `brands.logo_url` | `{brand_id}/logo.{ext}` |
+| Brand logo | Homepage **Site logo** (`landing.meta.logoUrl`); synced to `brands.logo_url` | `{brand_id}/marketing/…` (editor upload) or `{brand_id}/logo.{ext}` (legacy / platform) |
 | Merchandise product photo (×5 per SKU) | `merchandise_catalog.photo_urls` | `{brand_id}/merchandise/{catalog_item_id}/photo-{1-5}.{ext}` |
 | Marketing videos | editor config | under `{brand_id}/…` (see runbook) |
 
 | Host | Nav logo |
 |------|----------|
-| Brand public | `brands.logo_url` |
+| Brand public | `landing.meta.logoUrl` (homepage Site logo); fallback `brands.logo_url` |
 | Center public | Same brand logo; center facts from DB text fields |
 | Platform | EduNudg marketing assets |
 

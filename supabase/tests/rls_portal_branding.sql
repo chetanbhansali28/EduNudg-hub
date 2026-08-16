@@ -1,4 +1,4 @@
--- Portal branding RPC exists and is callable by anon
+-- Portal branding RPC exists, is callable by anon, and prefers homepage Site logo
 
 DO $$
 BEGIN
@@ -8,8 +8,9 @@ BEGIN
     JOIN pg_namespace n ON n.oid = p.pronamespace
     WHERE n.nspname = 'public'
       AND p.proname = 'get_portal_branding'
+      AND pg_get_functiondef(p.oid) LIKE '%landing,meta,logoUrl%'
   ) THEN
-    RAISE EXCEPTION 'Missing function get_portal_branding';
+    RAISE EXCEPTION 'Missing function get_portal_branding or Site logo preference';
   END IF;
 END $$;
 

@@ -4,7 +4,7 @@ import type { CenterPublicProfile } from "@/lib/centerLandingApi";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { isSparkSectionEnabled } from "@/lib/homepageSections";
-import { resolveSparkCoursePrograms } from "@/lib/programsGridItems";
+import { resolveSparkCoursePrograms, sparkShouldShowCoursesSection } from "@/lib/programsGridItems";
 import { SparkAcademyHero } from "./SparkAcademyHero";
 import { CoursesSection } from "./CoursesSection";
 import { FeaturesSection } from "./FeaturesSection";
@@ -14,8 +14,6 @@ import { TestimonialsSection } from "./TestimonialsSection";
 import { FaqSection } from "./FaqSection";
 import { UpcomingEventsSection } from "../UpcomingEventsSection";
 import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
-import { AboutUsHomepageSection } from "../AboutUsContent";
-import { aboutHasContent, isAboutPagePublished } from "@/lib/aboutUs";
 import { GallerySection, galleryPhotos } from "./GallerySection";
 
 type Props = {
@@ -35,7 +33,12 @@ export function SparkAcademyContent({
 }: Props) {
   const showHero = isSparkSectionEnabled(config, "hero");
   const programItems = resolveSparkCoursePrograms(config.programsSection, publicCurriculum);
-  const showPrograms = isSparkSectionEnabled(config, "programsGrid") && programItems.length > 0;
+  const showPrograms = sparkShouldShowCoursesSection(
+    isSparkSectionEnabled(config, "programsGrid"),
+    isSparkSectionEnabled(config, "curriculumSyllabus"),
+    publicCurriculum.length,
+    programItems.length
+  );
   const showFeatures = isSparkSectionEnabled(config, "featureGrid") && config.featureSections.length > 0;
   const showJourney = isSparkSectionEnabled(config, "trustMedia") && config.trustMedia;
   const showFounders = isSparkSectionEnabled(config, "founders") && (config.founders?.length ?? 0) > 0;
@@ -44,8 +47,6 @@ export function SparkAcademyContent({
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
   const showUpcomingEvents =
     isSparkSectionEnabled(config, "upcomingEvents") && upcomingEvents.length > 0;
-  const showAbout =
-    isSparkSectionEnabled(config, "about") && aboutHasContent(config.about);
   const galleryImages = config.gallery ? galleryPhotos(config.gallery) : [];
   const showGallery = galleryImages.length > 0;
 
@@ -54,6 +55,8 @@ export function SparkAcademyContent({
     config.gallery?.images[0]?.url?.trim() ||
     config.founders?.[0]?.photoUrl?.trim() ||
     "";
+  const programsTitle = config.programsSection?.title?.trim() || "";
+  const coursesTitle = /course/i.test(programsTitle) ? programsTitle : undefined;
 
   return (
     <main className="sa-main">
@@ -69,6 +72,7 @@ export function SparkAcademyContent({
         <CoursesSection
           programs={programItems}
           ctaHref={config.nav.ctaHref}
+          title={coursesTitle}
         />
       ) : null}
 
@@ -99,14 +103,6 @@ export function SparkAcademyContent({
       {showFaq ? <FaqSection items={config.faq} /> : null}
 
       {showGallery && config.gallery ? <GallerySection gallery={config.gallery} /> : null}
-
-      {showAbout ? (
-        <AboutUsHomepageSection
-          config={config}
-          marketingTheme="spark-academy"
-          showPageLink={isAboutPagePublished(config.about)}
-        />
-      ) : null}
     </main>
   );
 }

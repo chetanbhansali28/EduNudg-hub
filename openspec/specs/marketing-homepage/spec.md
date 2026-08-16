@@ -78,9 +78,30 @@ Brand and center public/editor loads SHALL merge stored `landing` / `center_land
 - **WHEN** `saveBrandMarketingLanding` runs
 - **THEN** the stored `brand-assets` URL is kept
 
+### Requirement: Brand Site logo is the identity image
+
+Brand staff SHALL upload the public and portal logo on `/app/homepage` **Site** → **Site logo**. Brand `/app/settings` SHALL NOT include a Brand Identity / logo card. Saving the brand homepage SHALL copy `landing.meta.logoUrl` onto `brands.logo_url` when the Site logo is non-empty. `get_portal_branding` SHALL prefer that Site logo over `brands.logo_url`.
+
+#### Scenario: Settings has no Brand Identity card
+
+- **WHEN** brand staff open `/app/settings`
+- **THEN** there is no Brand Identity card or logo uploader
+
+#### Scenario: Homepage save updates portal logo
+
+- **WHEN** brand staff save `/app/homepage` with a Site logo URL
+- **THEN** `brands.logo_url` is set to that URL
+- **AND** login / student / app chrome use it
+
+#### Scenario: Staff mobile bar shows Site logo
+
+- **GIVEN** brand or center staff are on `/app` with a Site logo
+- **AND** the viewport is mobile
+- **THEN** the staff top bar shows that logo beside the product name
+
 ### Requirement: Spark Academy public headings share one type scale
 
-Spark Academy public landings SHALL use shared `--sa-h2-*` tokens for section titles and `--sa-h3-*` for card/list headings. Features, journey, mentors, and testimonials SHALL NOT use a different clamp size than courses/FAQ/gallery. About teaser and upcoming events titles SHALL inherit the same Spark tokens. The hero MAY stay larger (`--sa-h1-size`). Footer column labels SHALL remain small uppercase chrome.
+Spark Academy public landings SHALL use shared `--sa-h2-*` tokens for section titles and `--sa-h3-*` for card/list headings. Features, journey, mentors, and testimonials SHALL NOT use a different clamp size than courses/FAQ/gallery. Upcoming events and `/about` titles SHALL inherit the same Spark tokens. The hero MAY stay larger (`--sa-h1-size`). Footer column labels SHALL remain small uppercase chrome.
 
 #### Scenario: Section titles share sa-section-title
 
@@ -88,6 +109,25 @@ Spark Academy public landings SHALL use shared `--sa-h2-*` tokens for section ti
 - **WHEN** courses, features, journey, mentors, testimonials, FAQ, and gallery titles render
 - **THEN** each section `h2` includes `sa-section-title`
 - **AND** CSS uses `--sa-h2-size` `clamp(1.75rem, 4vw, 2.25rem)` at weight 800
+
+### Requirement: Spark Academy image floats stay off the subject
+
+On Spark Academy Features, overlay badges SHALL sit on the corners of the entire image section (`.sa-features__visual`) — Last month at top-left, Learning Progress at bottom-right — and SHALL NOT be nested on the photo itself so the subject stays visible.
+
+#### Scenario: Hero course tag sits at the photo top-left on mobile
+
+- **GIVEN** a Spark Academy public homepage with a featured course float
+- **WHEN** the viewport is stacked (`max-width: 1023px`)
+- **THEN** the Course tag is inside `sa-hero__photo-stage`
+- **AND** CSS pins `.sa-hero__float-card--course` to the top-left of that photo
+
+#### Scenario: Features overlay cards sit on visual corners
+
+- **GIVEN** a Spark Academy public homepage Features section
+- **WHEN** the section renders on desktop or mobile
+- **THEN** Last month and Learning Progress cards are direct children of `sa-features__visual`
+- **AND** they are not inside `sa-features__photo-stage`
+- **AND** CSS pins Last month to the top-left and Learning Progress to the bottom-right of the visual
 
 ### Requirement: Spark Academy success stories cards are centered
 
@@ -98,6 +138,103 @@ Spark Academy **Success stories** (`#testimonials`) SHALL center story cards in 
 - **WHEN** a Spark Academy public homepage shows Success stories
 - **THEN** the testimonials grid uses `sa-testimonials__grid--center`
 - **AND** leftover cards sit in the center of the row, not the left edge
+
+### Requirement: Homepage editor Save stays available
+
+Brand `/app/homepage`, `/app/center-site`, and platform `/admin/homepage` **Save changes** SHALL stay clickable when the form is clean. Discard SHALL appear only when there are unsaved edits. **Save changes** SHALL disable only while a save is in flight.
+
+#### Scenario: Clean homepage editor can still save
+
+- **GIVEN** a brand owner opens Homepage Configuration with no unsaved edits
+- **WHEN** they click **Save changes**
+- **THEN** the save action runs
+- **AND** the button is not disabled because the form is clean
+
+### Requirement: Navigation CTA labels are draft until Save
+
+On Abacus Classic and Spark Academy Homepage Configuration, **Primary CTA label (demo)** and **Secondary CTA label (franchise)** SHALL update local editor state only (`onChange`). They SHALL NOT call persist/refetch on each keystroke. They SHALL update `nav` only — not `hero`.
+
+#### Scenario: Typing CTA labels does not persist
+
+- **GIVEN** a Spark Academy brand admin has Navigation & CTAs open
+- **WHEN** they type in Primary CTA label or Secondary CTA label
+- **THEN** the editor config updates locally
+- **AND** `hero.ctaLabel` / `hero.secondaryCtaLabel` are unchanged
+- **AND** no save/persist runs until they click **Save changes**
+
+### Requirement: Spark Academy hero CTA is independent
+
+Spark Academy and Abacus Classic Homepage Configuration **Hero** SHALL include **Hero CTA label** and **Hero CTA link**. The public hero button SHALL use `hero.ctaLabel` / `hero.ctaHref`, falling back to Navigation & CTAs Primary CTA only when those hero fields are empty.
+
+#### Scenario: Hero CTA field does not change the header button
+
+- **GIVEN** a Spark Academy brand admin has Hero open
+- **WHEN** they change Hero CTA label or Hero CTA link
+- **THEN** `hero.ctaLabel` / `hero.ctaHref` update locally
+- **AND** `nav.ctaLabel` / `nav.ctaHref` stay unchanged
+- **AND** no save/persist runs until they click **Save changes**
+
+#### Scenario: Public hero uses the Hero CTA
+
+- **GIVEN** a Spark Academy public homepage whose Hero CTA label differs from the Navigation Primary CTA
+- **WHEN** a visitor opens `/`
+- **THEN** the hero button shows the Hero CTA label
+- **AND** the header button still shows the Navigation Primary CTA
+
+### Requirement: Spark Academy nav comes from Navigation & CTAs
+
+Spark Academy public nav SHALL render `nav.links`, the primary CTA, and the secondary franchise CTA from Homepage Configuration **Navigation & CTAs**. It SHALL NOT hardcode a brand **Login** button (`nav.adminHref`). Franchise hosts SHALL keep **Student Login** in the header and hamburger drawer, SHALL NOT show a hardcoded brand **Login**, and SHALL NOT show the secondary franchise CTA.
+
+#### Scenario: Brand header omits hardcoded Login
+
+- **GIVEN** a Spark Academy brand public homepage whose Navigation & CTAs menu items do not include Login
+- **WHEN** a visitor opens `/`
+- **THEN** the header and hamburger drawer do not show a **Login** control
+- **AND** adding a **Login** → `/login` menu item in Navigation & CTAs shows that link in the header and drawer
+
+#### Scenario: Brand nav shows secondary franchise CTA
+
+- **GIVEN** a Spark Academy brand public homepage with a Secondary CTA label and href in Navigation & CTAs
+- **WHEN** a visitor opens `/`
+- **THEN** desktop header actions include that secondary CTA
+- **AND** the hamburger drawer includes the same secondary CTA
+- **AND** on viewports `max-width: 1023px` the secondary CTA is hidden from the header (`sa-nav__cta--header`) and shown only in the left-hand drawer
+- **AND** the drawer uses Spark Academy type and colors (`marketing-page--spark-academy`, Inter, navy/blue tokens)
+
+#### Scenario: Hamburger drawer shows logo before brand name
+
+- **GIVEN** a Spark Academy public homepage with a Site logo URL
+- **WHEN** a visitor opens the hamburger menu
+- **THEN** the left-hand drawer shows the brand logo immediately before the site name
+
+#### Scenario: Franchise hamburger menu keeps Student Login
+
+- **GIVEN** a Spark Academy franchise public homepage
+- **WHEN** a visitor opens the hamburger menu
+- **THEN** the drawer includes **Student Login**
+- **AND** it does not include a hardcoded brand **Login**
+
+### Requirement: Spark Academy photo gallery is a two-row mobile carousel
+
+On viewports `max-width: 767px`, Spark Academy **Photo gallery** (`#gallery`, including **Moments from our journey**) SHALL render as a two-row horizontal snap carousel (`grid-auto-flow: column` + `grid-template-rows: 2`) and auto-advance when there is more than one column. Auto-scroll SHALL pause on user swipe and SHALL NOT run when `prefers-reduced-motion: reduce`. Desktop SHALL keep a wrapping photo grid (not a one-row carousel).
+
+#### Scenario: Mobile gallery auto-scrolls two-row columns
+
+- **GIVEN** a Spark Academy public homepage with four or more gallery images
+- **WHEN** the viewport is `max-width: 767px`
+- **THEN** photos are paired into two-row columns
+- **AND** the track auto-advances to the next column
+
+### Requirement: Spark Academy success stories are a mobile carousel
+
+On viewports `max-width: 767px`, Spark Academy **Success stories** (`#testimonials`) SHALL render as a horizontal snap carousel (`sa-testimonials__carousel`) and auto-advance when there is more than one story. Auto-scroll SHALL pause on user swipe and SHALL NOT run when `prefers-reduced-motion: reduce`. Desktop SHALL keep the centered wrapping grid.
+
+#### Scenario: Mobile success stories auto-scroll
+
+- **GIVEN** a Spark Academy public homepage with more than one Success story
+- **WHEN** the viewport is `max-width: 767px`
+- **THEN** the stories track is a horizontal carousel
+- **AND** it auto-advances to the next card
 
 ### Requirement: Center enrollment template has its own brand nav page
 

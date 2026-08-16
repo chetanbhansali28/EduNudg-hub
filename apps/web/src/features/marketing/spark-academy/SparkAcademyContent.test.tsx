@@ -43,12 +43,37 @@ describe("SparkAcademyContent", () => {
     expect(screen.getByRole("main")).toBeDefined();
     expect(screen.getByText(/Shape your future with/)).toBeDefined();
     expect(screen.getByText("Courses designed for success")).toBeDefined();
+    expect(document.querySelector(".sa-courses .sa-section-head--center")).toBeDefined();
+    expect(document.querySelector(".sa-courses__grid--center")).toBeDefined();
     expect(screen.getByRole("heading", { level: 3, name: "Abacus Junior" })).toBeDefined();
     expect(screen.getByText("Our Journey to Excellence")).toBeDefined();
     expect(screen.getByText("What Our Learners Are Saying")).toBeDefined();
     expect(screen.getByText("What age group is suitable?")).toBeDefined();
     expect(screen.queryByText("Own an abacus center in your city")).toBeNull();
     expect(screen.queryByText("Give your child a head start in mental math")).toBeNull();
+  });
+
+  it("regression_spark_course_cards_center_in_grid", () => {
+    const config = mergeSparkAcademyLandingConfig("Educat Demo");
+    render(
+      <LeadModalProvider>
+        <SparkAcademyContent
+          config={config}
+          portalMode="brand"
+          brandSlug="educat-demo"
+          publicCurriculum={[
+            createPublicCurriculumProgram({
+              name: "Abacus Junior",
+              description: "Foundations for young learners",
+              levels: [],
+            }),
+          ]}
+        />
+      </LeadModalProvider>
+    );
+
+    expect(document.querySelector(".sa-courses__grid--center")).toBeDefined();
+    expect(screen.getByRole("heading", { level: 3, name: "Abacus Junior" })).toBeDefined();
   });
 
   it("regression_spark_courses_use_published_curriculum_over_homepage_cards", () => {
@@ -172,6 +197,30 @@ describe("SparkAcademyContent", () => {
     expect(screen.queryByRole("tab", { name: exactAccessibleName("Abacus") })).toBeNull();
   });
 
+  it("regression_spark_courses_show_published_syllabus_even_if_programs_grid_off", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
+    config.sections = { ...config.sections, programsGrid: false, curriculumSyllabus: false };
+
+    render(
+      <LeadModalProvider>
+        <SparkAcademyContent
+          config={config}
+          portalMode="brand"
+          brandSlug="smart-brain-abacus"
+          publicCurriculum={[
+            createPublicCurriculumProgram({
+              name: "Junior Abacus Path",
+              description: "From published syllabus",
+            }),
+          ]}
+        />
+      </LeadModalProvider>
+    );
+
+    expect(screen.getByText("Courses designed for success")).toBeDefined();
+    expect(screen.getByRole("heading", { level: 3, name: "Junior Abacus Path" })).toBeDefined();
+  });
+
   it("regression_spark_photo_gallery_renders_homepage_images", () => {
     const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus", {
       gallery: {
@@ -195,6 +244,25 @@ describe("SparkAcademyContent", () => {
     expect(screen.getByAltText("Classroom")).toBeDefined();
     const sectionIds = [...container.querySelectorAll("section[id]")].map((el) => el.id);
     expect(sectionIds.indexOf("faq")).toBeLessThan(sectionIds.indexOf("gallery"));
+  });
+
+  it("regression_spark_homepage_omits_about_teaser_sections", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
+    config.sections = { ...config.sections, about: true };
+
+    render(
+      <LeadModalProvider>
+        <SparkAcademyContent
+          config={config}
+          portalMode="brand"
+          brandSlug="smart-brain-abacus"
+        />
+      </LeadModalProvider>
+    );
+
+    expect(document.getElementById("about")).toBeNull();
+    expect(screen.queryByRole("heading", { name: /ABOUT SMART BRAIN ABACUS/i })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /WHAT MAKES US DIFFERENT/i })).toBeNull();
   });
 
   it("regression_spark_section_headings_use_shared_title_class", () => {

@@ -32,6 +32,15 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
+  const secondaryLabel = logins ? "" : config.nav.secondaryCtaLabel?.trim() || "";
+  const secondaryHref = config.nav.secondaryCtaHref?.trim() || (secondaryLabel ? "apply" : "");
+  const showSecondaryCta = Boolean(secondaryLabel && secondaryHref);
+  const renderBrandMark = () =>
+    logoUrl ? (
+      <img src={logoUrl} alt="" className="sa-nav__logo-img" width={logins ? 64 : 40} height={logins ? 64 : 40} />
+    ) : (
+      <span className="sa-nav__logo-fallback">{config.meta.siteName.charAt(0)}</span>
+    );
 
   const drawer =
     menuOpen && typeof document !== "undefined"
@@ -45,13 +54,16 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
             />
             <div
               id={menuId}
-              className="sa-nav__drawer"
+              className="sa-nav__drawer marketing-page--spark-academy"
               role="dialog"
               aria-modal="true"
               aria-label="Site menu"
             >
               <div className="sa-nav__drawer-head">
-                <span className="sa-nav__drawer-title">{config.meta.siteName}</span>
+                <Link to="/" className="sa-nav__drawer-brand" onClick={closeMenu}>
+                  {renderBrandMark()}
+                  <span className="sa-nav__drawer-title">{config.meta.siteName}</span>
+                </Link>
                 <button type="button" className="sa-nav__drawer-close" aria-label="Close menu" onClick={closeMenu}>
                   ×
                 </button>
@@ -62,14 +74,32 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
                     key={`${link.label}-${i}`}
                     href={link.href}
                     label={link.label}
+                    className="sa-nav__link"
                     onClick={closeMenu}
                   />
                 ))}
                 {logins ? (
-                  <a href={logins.studentLoginHref} onClick={closeMenu}>
+                  <a href={logins.studentLoginHref} className="sa-nav__link" onClick={closeMenu}>
                     Student Login
                   </a>
                 ) : null}
+              </div>
+              <div className="sa-nav__drawer-ctas">
+                {showSecondaryCta ? (
+                  <SparkAcademyCta
+                    label={secondaryLabel}
+                    href={secondaryHref}
+                    variant="outline"
+                    className="sa-nav__cta"
+                    onClick={closeMenu}
+                  />
+                ) : null}
+                <SparkAcademyCta
+                  label={config.nav.ctaLabel}
+                  href={config.nav.ctaHref}
+                  variant="dark"
+                  onClick={closeMenu}
+                />
               </div>
             </div>
           </>,
@@ -93,11 +123,7 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
           </button>
 
           <Link to="/" className="sa-nav__logo-link">
-            {logoUrl ? (
-              <img src={logoUrl} alt="" className="sa-nav__logo-img" width={logins ? 64 : 40} height={logins ? 64 : 40} />
-            ) : (
-              <span className="sa-nav__logo-fallback">{config.meta.siteName.charAt(0)}</span>
-            )}
+            {renderBrandMark()}
             <span className="sa-nav__wordmark">{config.meta.siteName}</span>
           </Link>
         </div>
@@ -118,11 +144,15 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
             <a href={logins.studentLoginHref} className="sa-btn sa-btn--outline">
               Student Login
             </a>
-          ) : (
-            <Link to={config.nav.adminHref} className="sa-btn sa-btn--outline">
-              Login
-            </Link>
-          )}
+          ) : null}
+          {showSecondaryCta ? (
+            <SparkAcademyCta
+              label={secondaryLabel}
+              href={secondaryHref}
+              variant="outline"
+              className="sa-nav__cta sa-nav__cta--header"
+            />
+          ) : null}
           <SparkAcademyCta label={config.nav.ctaLabel} href={config.nav.ctaHref} variant="dark" />
         </div>
       </div>

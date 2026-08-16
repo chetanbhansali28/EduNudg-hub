@@ -74,12 +74,12 @@ export function CoursesSection({
   return (
     <section className="sa-courses" id="programs">
       <span id="curriculum" className="ed-marketing-anchor" aria-hidden />
-      <div className="sa-section-head">
+      <div className="sa-section-head sa-section-head--center">
         <h2 className="sa-section-title">{title}</h2>
         {subtitle ? <p className="sa-section-subtitle">{subtitle}</p> : null}
       </div>
 
-      <div className="sa-courses__grid">
+      <div className="sa-courses__grid sa-courses__grid--center">
         {programs.map((program, index) => (
           <CourseCard
             key={program.name}

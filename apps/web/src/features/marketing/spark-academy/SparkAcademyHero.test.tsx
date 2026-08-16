@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
+import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { SparkAcademyHero, buildHeroStats } from "./SparkAcademyHero";
 
 describe("SparkAcademyHero", () => {
@@ -29,6 +30,39 @@ describe("SparkAcademyHero", () => {
     render(<SparkAcademyHero config={config} programCount={0} />);
     expect(screen.getByText("8k+")).toBeDefined();
     expect(screen.getByText("Learners")).toBeDefined();
+  });
+
+  it("regression_spark_hero_uses_hero_cta_not_nav", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    config.nav.ctaLabel = "Nav enroll";
+    config.nav.ctaHref = "enroll";
+    config.hero.ctaLabel = "Start learning";
+    config.hero.ctaHref = "enroll";
+    render(<SparkAcademyHero config={config} programCount={0} />);
+    expect(screen.getByRole("link", { name: "Start learning" })).toBeDefined();
+    expect(screen.queryByRole("link", { name: "Nav enroll" })).toBeNull();
+  });
+
+  it("regression_spark_hero_course_float_anchors_to_photo_stage", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    config.footer.rich = {
+      ...config.footer.rich!,
+      brandStats: { studentCount: "5k+" },
+    };
+    const { container } = render(
+      <SparkAcademyHero
+        config={config}
+        featuredProgram={createPublicCurriculumProgram({ name: "Abacus" })}
+        programCount={1}
+      />
+    );
+
+    const stage = container.querySelector(".sa-hero__photo-stage");
+    expect(stage).toBeDefined();
+    expect(stage?.querySelector(".sa-hero__float-card--course")).toBeDefined();
+    expect(stage?.querySelector(".sa-hero__float-card--stat")).toBeDefined();
+    expect(screen.getByText("Course")).toBeDefined();
+    expect(screen.getByText("Abacus")).toBeDefined();
   });
 });
 

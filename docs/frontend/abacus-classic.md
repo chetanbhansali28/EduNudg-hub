@@ -37,7 +37,7 @@ Add to hosts file:
 
 Assign theme: **Platform admin** → **Brands** → **Edit** → **Brand settings** → **Website theme** → choose *Abacus Classic* → **Save changes**.
 
-Brand owners cannot change the theme; they only edit content at `{brand}.localhost:9000/app/homepage` and `{brand}.localhost:9000/app/center-site`.
+Brand owners cannot change the theme; they only edit content at `{brand}.localhost:9000/app/homepage` and `{brand}.localhost:9000/app/center-site`. **Save changes** stays clickable with no edits. **Primary CTA label** / **Secondary CTA label** (header) and **Hero CTA label** / **Hero CTA link** are independent local drafts (no save-on-type).
 
 Public **`/about`** uses `.about-us--abacus-classic` (navy/blue Abacus tokens + `AbacusCtaButton` when lead modals are on). Spark Academy brands use `.about-us--spark-academy` instead — see [Spark Academy](./spark-academy.md).
 

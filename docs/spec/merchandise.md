@@ -6,7 +6,7 @@ Brand-managed catalog; franchise centers place orders from an ecommerce-style sh
 
 | Portal | Route | Purpose |
 |--------|-------|---------|
-| Brand | `/app/merchandise` | Catalog CRUD, promos, payment settings, order fulfillment — pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs) |
+| Brand | `/app/merchandise` | Catalog CRUD, promos, payment settings, order fulfillment — pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
 | Center | `/app/merchandise` | Shop (product grid + checkout), order history |
 | Platform | `/admin/brands/:slug` | Enable `merchandise` feature toggle |
 

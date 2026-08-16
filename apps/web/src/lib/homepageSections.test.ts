@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   ABACUS_CLASSIC_SECTION_DEFAULTS,
   DEFAULT_HOMEPAGE_SECTION_VISIBILITY,
+  SPARK_ACADEMY_SECTION_DEFAULTS,
   isAbacusSectionEnabled,
   isSectionEnabled,
   mergeAbacusClassicSectionVisibility,
@@ -66,5 +67,12 @@ describe("homepageSections", () => {
     expect(abacusSections.gallery).toBe(false);
     expect(abacusSections.curriculumSyllabus).toBe(false);
     expect(abacusSections.programsGrid).toBe(true);
+  });
+});
+
+describe("Spark Academy section defaults", () => {
+  it("regression_spark_curriculum_syllabus_defaults_on", () => {
+    expect(SPARK_ACADEMY_SECTION_DEFAULTS.programsGrid).toBe(true);
+    expect(SPARK_ACADEMY_SECTION_DEFAULTS.curriculumSyllabus).toBe(true);
   });
 });

@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input, MutationError, SaveButton, Select, Textarea } from "@edunudg/ui";
 import { PasskeySecurityCard } from "@/features/auth/PasskeySecurityCard";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
-import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { getSupabase } from "@/lib/supabase";
@@ -83,10 +82,10 @@ export function BrandSettingsPage() {
     queryFn: async () => {
       const { data, error: qErr } = await getSupabase()
         .from("brands")
-        .select("id, logo_url, name")
+        .select("id, name")
         .eq("id", brandId!)
         .maybeSingle();
-      return supabaseMaybe(data, qErr) as { id: string; logo_url: string | null; name: string } | null;
+      return supabaseMaybe(data, qErr) as { id: string; name: string } | null;
     },
   });
 
@@ -190,24 +189,6 @@ export function BrandSettingsPage() {
       <MutationError message={error} />
 
       <div className="ed-brand-settings-page__grid">
-        <section className="ed-brand-settings-card">
-          <div className="ed-brand-settings-card__mobile-label">{ICON_BRUSH} Brand Identity</div>
-          <header className="ed-brand-settings-card__head">
-            <div>
-              <h2 className="ed-brand-settings-card__title">Brand Identity</h2>
-              <p className="ed-brand-settings-card__subtitle">
-                Update your public facing logo and franchise identity.
-              </p>
-            </div>
-          </header>
-          <BrandLogoUpload
-            brandId={brandId}
-            currentLogoUrl={brandRow.data?.logo_url}
-            brandDisplayName={brandName}
-            variant="settings"
-          />
-        </section>
-
         <div className="ed-brand-settings-page__grid-col">
           <section className="ed-brand-settings-card">
             <div className="ed-brand-settings-card__mobile-label">{ICON_TAG} White-label Copy</div>

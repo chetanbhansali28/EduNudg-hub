@@ -25,7 +25,7 @@ vi.mock("./BrandMerchandiseOrdersSection", () => ({
 }));
 
 vi.mock("./BrandMerchandisePaymentSettings", () => ({
-  BrandMerchandisePaymentSettings: () => null,
+  BrandMerchandisePaymentSettings: () => <div data-testid="payment-section">Payment section</div>,
 }));
 
 vi.mock("@/lib/merchandiseOrdersApi", () => ({
@@ -104,5 +104,31 @@ describe("BrandMerchandisePage", () => {
     fireEvent.click(container.querySelectorAll(".ed-lead-kpi")[2]!);
     expect(await screen.findByTestId("orders-section")).toBeDefined();
     expect(screen.getByRole("tab", { name: /Orders/ }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("regression_merchandise_section_tabs_keep_catalog_workspace_chrome", () => {
+    renderPage();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Promo Codes" }));
+    expect(screen.getByTestId("promo-section")).toBeDefined();
+    expect(screen.getByRole("button", { name: "+ Add Promo Code" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "+ Add Merchandise" })).toBeNull();
+    fireEvent.change(screen.getByLabelText("Search promo codes"), { target: { value: "SUMMER" } });
+    expect(screen.getByRole("tab", { name: "Promo Codes" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.queryByTestId("catalog-section")).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Orders" }));
+    expect(screen.getByTestId("orders-section")).toBeDefined();
+    expect(screen.getByPlaceholderText("Search orders...")).toBeDefined();
+    fireEvent.change(screen.getByLabelText("Search orders"), { target: { value: "Pune" } });
+    expect(screen.getByRole("tab", { name: "Orders" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.queryByTestId("catalog-section")).toBeNull();
+    expect(screen.queryByRole("button", { name: "+ Add Merchandise" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Payment settings" }));
+    expect(screen.getByTestId("payment-section")).toBeDefined();
+    expect(screen.getByPlaceholderText("Search payment settings...")).toBeDefined();
+    fireEvent.change(screen.getByLabelText("Search payment settings"), { target: { value: "Razorpay" } });
+    expect(screen.getByRole("tab", { name: "Payment settings" }).getAttribute("aria-selected")).toBe("true");
   });
 });

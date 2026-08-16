@@ -46,7 +46,7 @@ The brand homepage editor previews center landing with placeholder **Sample Cent
 
 **Upcoming events:** Homepage editor section (like Leadership profiles). Brand adds competitions / workshops / demos with optional image, date, time, duration. Public `#events` shows only upcoming items (capped by `maxItems`). Works on Abacus, Spark, and Novu brand themes.
 
-**About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. The page chrome matches the brand **Website theme**: Novu keeps the Mastermind navy look; Spark Academy uses `.about-us--spark-academy` (light hero, Spark type scale, `SparkAcademyCta`); Abacus Classic uses `.about-us--abacus-classic`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — on Abacus Classic and Spark it renders **after Gallery**. When the homepage About section is enabled, public nav auto-injects **About Us → `#about`** (unless `/about` or `#about` already exists). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`. Regression: `regression_spark_about_page_uses_spark_theme_classes`.
+**About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. Loading `/about` scrolls the viewport to the top (`regression_about_page_scrolls_to_top_on_load`) unless a hash is present. The page chrome matches the brand **Website theme**: Novu keeps the Mastermind navy look; Spark Academy uses `.about-us--spark-academy` (light hero, Spark type scale, `SparkAcademyCta`); Abacus Classic uses `.about-us--abacus-classic`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — **Abacus Classic and Novu only**, after Gallery. Spark Academy does **not** render `#about` / ABOUT / WHAT MAKES US DIFFERENT on `/` (`regression_spark_homepage_omits_about_teaser_sections`); leftover `#about` nav is rewritten to `/about`. When the homepage About section is enabled on Abacus/Novu, public nav auto-injects **About Us → `#about`**. Spark does **not** auto-inject About Us — that menu item comes from **Navigation & CTAs** (`regression_spark_does_not_inject_about_nav`). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`. Regression: `regression_spark_about_page_uses_spark_theme_classes`.
 
 Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). On the **brand** site for **Abacus Classic**, named cards win; otherwise the grid falls back to all published curriculum programs. On **Spark Academy**, **Courses designed for success** prefers published `/app/curriculum` (`publicCurriculum`); leftover homepage cards are used only when no published courses exist (`resolveSparkCoursePrograms`). On a **franchise (center)** site, `get_center_landing_public` returns only programs in `center_program_enablement`, and Center sites cards are restricted to those names (`restrictProgramsSectionToEnabledCurriculum`).
 
@@ -60,7 +60,7 @@ Hash section links (`#gallery`, `#faq`, …) are resolved with `resolveMarketing
 |-------|----------------------|------------------------------|----------------------|
 | `novu` | — (auto **Curriculum** when published programs exist) | `#curriculum` → `CurriculumPublicSection` | Yes |
 | `abacus-classic` | **Programs** → `#programs` | **`#curriculum`** → syllabus section (`AbacusCurriculumSection`) | No (marketing grid + syllabus tree) |
-| `spark-academy` | **Programs** → `#programs` | `#curriculum` alias scrolls to **Courses designed for success** (published syllabus cards) | No |
+| `spark-academy` | **Courses** → `#programs` | `#curriculum` alias scrolls to **Courses designed for success** (published syllabus cards) | No |
 
 `syncMarketingNavLinks()` in `marketingPublicSite.ts` auto-adds **Curriculum → `#curriculum`** on Novu only when RPC returns published programs. Alternate themes keep default **Programs** links; custom `#curriculum` hrefs still work via an in-section anchor alias.
 
@@ -70,15 +70,27 @@ Direct URLs such as `/#curriculum` scroll after the landing bundle loads (`scrol
 
 In **Navigation & CTAs** (Abacus/Spark) or **Navigation Management** (Novu), each menu item **Link** field is a theme-aware dropdown plus optional **Custom link** text input. Presets match on-page section IDs above; Novu brand vs center templates differ (`#apply` vs `#register`). Helpers live in `marketingNavSectionOptions()` / `NavLinkHrefField` (`HomepageEditorShell.tsx`). Legacy mistyped anchors such as `#FoundersSection` normalize to `#founders` when saved.
 
-**Spark Academy Link dropdown:** do not list `Programs (#programs)` or `About us (#features)` — those duplicated Abacus-style labels. Use `Courses (#programs)` for the courses block (`#curriculum` is an in-section alias, not a second option) and `Features (#features)` for the features block. Include `Photo gallery (#gallery)`. `About page (/about)` and `About section (#about)` stay. Regression: `regression_spark_nav_dropdown_omits_duplicate_programs_and_about_us`.
+**Spark Academy Link dropdown:** do not list `Programs (#programs)` or `About us (#features)` — those duplicated Abacus-style labels. Use `Courses (#programs)` for the courses block (`#curriculum` is an in-section alias, not a second option) and `Features (#features)` for the features block. Include `Photo gallery (#gallery)` and `Login (/login)`. `About page (/about)` stays; `About section (#about)` is omitted (no homepage teaser). Regression: `regression_spark_nav_dropdown_omits_duplicate_programs_and_about_us`, `regression_spark_login_is_nav_preset`.
 
-**Spark Academy photo gallery:** public `#gallery` reads `config.gallery` from **Photo gallery** in `/app/homepage` / `/app/center-site`. Empty galleries stay hidden. Regression: `regression_spark_photo_gallery_renders_homepage_images`.
+**Spark Academy photo gallery:** public `#gallery` reads `config.gallery` from **Photo gallery** in `/app/homepage` / `/app/center-site`. Empty galleries stay hidden. Desktop is a wrapping grid; mobile is a two-row horizontal auto-scroll carousel. Regression: `regression_spark_photo_gallery_renders_homepage_images`, `regression_spark_gallery_mobile_carousel_markup`, `regression_spark_gallery_mobile_autoscroll_advances`.
 
-**Spark Academy headings:** section `h2`s share `--sa-h2-*` (Inter, `clamp(1.75rem, 4vw, 2.25rem)`, weight 800). Card/list `h3`s share `--sa-h3-*`. Hero stays `--sa-h1-size`. About teaser and upcoming events titles inherit the same Spark tokens. Regression: `regression_spark_section_headings_share_type_scale`.
+**Spark Academy public nav:** header and hamburger drawer render **Navigation & CTAs** menu items and the primary CTA. The secondary franchise CTA is in the desktop header and, on mobile/tablet (`max-width: 1023px`), only in the left-hand drawer. The drawer uses Spark Academy Inter and navy/blue tokens and shows the Site logo immediately before the brand name. Brand hosts do not hardcode **Login**. Franchise hosts keep **Student Login** and omit the secondary franchise CTA. Regression: `regression_spark_nav_omits_hardcoded_login_on_brand_site`, `regression_spark_nav_shows_secondary_cta_from_navigation`, `regression_spark_mobile_secondary_cta_header_uses_drawer_only_class`, `regression_spark_nav_drawer_css_uses_theme_tokens_and_hides_header_secondary`, `regression_spark_drawer_shows_logo_before_brand_name`, `regression_spark_drawer_uses_student_login_on_franchise`.
+
+**Homepage editor Save:** **Save changes** stays clickable with no edits (`EditorSaveBar` disables only while Saving…). Discard still appears only for unsaved diffs. Regression: `regression_homepage_save_stays_enabled_when_clean`.
+
+**Navigation & CTAs labels:** Primary CTA label and Secondary CTA label update the local `nav` draft only — they must not copy into `hero` or persist/refetch on each keystroke (`regression_nav_cta_labels_do_not_persist_on_type`).
+
+**Hero CTA (Abacus/Spark):** **Hero CTA label** and **Hero CTA link** in the Hero accordion control the public hero button (`hero.ctaLabel` / `hero.ctaHref`). Empty values fall back to the header Primary CTA. Regression: `regression_hero_cta_is_independent_of_nav_primary`, `regression_spark_hero_uses_hero_cta_not_nav`.
+
+**Spark Academy headings:** section `h2`s share `--sa-h2-*` (Inter, `clamp(1.75rem, 4vw, 2.25rem)`, weight 800). Card/list `h3`s share `--sa-h3-*`. Hero stays `--sa-h1-size`. Upcoming events and `/about` titles inherit the same Spark tokens. Regression: `regression_spark_section_headings_share_type_scale`.
+
+**Spark Academy Success stories:** desktop keeps a centered wrapping grid. On `max-width: 767px` the track is a horizontal snap carousel that auto-advances (paused on swipe / `prefers-reduced-motion`). Regression: `regression_spark_testimonials_mobile_carousel_markup`, `regression_spark_testimonials_mobile_autoscroll_advances`.
+
+**Spark Academy photo floats:** hero Course stays on `sa-hero__photo-stage` (top-left). Features Last month / Learning Progress sit on `sa-features__visual` corners (top-left / bottom-right) so they do not cover the photo. Regression: `regression_spark_hero_course_float_anchors_to_photo_stage`, `regression_spark_features_floats_sit_on_visual_corners`.
 
 **Abacus Classic syllabus:** Toggle **Curriculum syllabus** in the homepage editor (visible by default). Content comes from published `/app/curriculum` data; no separate copy fields in v1.
 
-**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`).
+**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`). Published courses still show if leftover `programsGrid` is off (`regression_spark_courses_show_published_syllabus_even_if_programs_grid_off`). The section title and course cards are centered (`sa-section-head--center`, `sa-courses__grid--center`).
 
 See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
 
@@ -122,7 +134,7 @@ Admin portal styling (Vivid Logic): shared shell, dark mode toggle, uniform two-
 - Centered glass pill: section links + CTA (no Apple icon in nav).
 - Theme follows content under the nav (`useNavTheme` uses `elementsFromPoint`, not sticky hero bounds).
 - Over **white** content: nav bar uses black gradient + white type (`novu-nav-bar--light`).
-- Logo from `config.meta.logoUrl` (brand `logo_url`); fallback initial badge.
+- Logo from `config.meta.logoUrl` (homepage **Site logo**). Brand `/app/settings` does not upload a logo. Saving `/app/homepage` copies Site logo onto `brands.logo_url` for login / student / app chrome. Fallback initial badge when empty.
 
 ### Mobile / tablet (&lt;1024px)
 

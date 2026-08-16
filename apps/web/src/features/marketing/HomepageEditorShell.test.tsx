@@ -39,6 +39,20 @@ describe("HomepageEditorShell", () => {
     expect(onSave).toHaveBeenCalled();
   });
 
+  it("regression_homepage_save_stays_enabled_when_clean", () => {
+    const onSave = vi.fn();
+    render(
+      <HomepageEditorShell title="Homepage Configuration" onSave={onSave}>
+        <p>Form</p>
+      </HomepageEditorShell>
+    );
+
+    const save = screen.getByRole("button", { name: /Save changes/i });
+    expect((save as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(save);
+    expect(onSave).toHaveBeenCalled();
+  });
+
   it("regression_panel_inline_save_bar", () => {
     const onSave = vi.fn();
     render(

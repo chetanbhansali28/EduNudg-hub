@@ -7,9 +7,17 @@ type Props = {
   variant?: "primary" | "dark" | "outline";
   className?: string;
   showArrow?: boolean;
+  onClick?: () => void;
 };
 
-export function SparkAcademyCta({ label, href, variant = "primary", className = "", showArrow = false }: Props) {
+export function SparkAcademyCta({
+  label,
+  href,
+  variant = "primary",
+  className = "",
+  showArrow = false,
+  onClick,
+}: Props) {
   const modal = useLeadModalOptional();
   const modalKind = resolveLeadModalKind(href);
 
@@ -23,14 +31,21 @@ export function SparkAcademyCta({ label, href, variant = "primary", className = 
 
   if (modalKind && modal) {
     return (
-      <button type="button" className={classes} onClick={() => modal.openModal(modalKind)}>
+      <button
+        type="button"
+        className={classes}
+        onClick={() => {
+          onClick?.();
+          modal.openModal(modalKind);
+        }}
+      >
         {content}
       </button>
     );
   }
 
   return (
-    <a href={href} className={classes}>
+    <a href={href} className={classes} onClick={onClick}>
       {content}
     </a>
   );

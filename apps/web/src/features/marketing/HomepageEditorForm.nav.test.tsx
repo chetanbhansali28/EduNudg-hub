@@ -129,9 +129,91 @@ describe("AbacusClassicEditorForm navigation", () => {
     expect(values).toContain("#programs");
     expect(values).toContain("#features");
     expect(values).toContain("/about");
+    expect(values).not.toContain("#about");
     expect(values).toContain("#gallery");
     expect(labels).toContain("Courses (#programs)");
     expect(labels).toContain("Features (#features)");
     expect(labels).toContain("Photo gallery (#gallery)");
+    expect(values).toContain("/login");
+    expect(labels).toContain("Login (/login)");
+  });
+
+  it("regression_nav_cta_labels_do_not_persist_on_type", () => {
+    let config = mergeSparkAcademyLandingConfig("Smart Brain");
+    const originalHeroCtaLabel = config.hero.ctaLabel;
+    const originalHeroSecondaryCtaLabel = config.hero.secondaryCtaLabel;
+    const onChange = vi.fn((next: typeof config) => {
+      config = next;
+    });
+    const onPersist = vi.fn();
+
+    const { rerender } = render(
+      <AbacusClassicEditorForm
+        config={config}
+        marketingTheme="spark-academy"
+        portalMode="brand"
+        onChange={onChange}
+        onPersist={onPersist}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Navigation & CTAs/i }));
+
+    fireEvent.change(screen.getByLabelText("Primary CTA label (demo)"), { target: { value: "Enroll today" } });
+    expect(onChange).toHaveBeenCalled();
+    expect(onPersist).not.toHaveBeenCalled();
+
+    const afterPrimary = onChange.mock.calls.at(-1)?.[0];
+    expect(afterPrimary?.nav.ctaLabel).toBe("Enroll today");
+    expect(afterPrimary?.hero.ctaLabel).toBe(originalHeroCtaLabel);
+
+    rerender(
+      <AbacusClassicEditorForm
+        config={afterPrimary!}
+        marketingTheme="spark-academy"
+        portalMode="brand"
+        onChange={onChange}
+        onPersist={onPersist}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Secondary CTA label (franchise)"), { target: { value: "Partner with us" } });
+    expect(onPersist).not.toHaveBeenCalled();
+    const afterSecondary = onChange.mock.calls.at(-1)?.[0];
+    expect(afterSecondary?.nav.secondaryCtaLabel).toBe("Partner with us");
+    expect(afterSecondary?.hero.secondaryCtaLabel).toBe(originalHeroSecondaryCtaLabel);
+  });
+
+  it("regression_hero_cta_is_independent_of_nav_primary", () => {
+    const original = mergeSparkAcademyLandingConfig("Smart Brain");
+    let config = original;
+    const onChange = vi.fn((next: typeof config) => {
+      config = next;
+    });
+    const onPersist = vi.fn();
+
+    render(
+      <AbacusClassicEditorForm
+        config={config}
+        marketingTheme="spark-academy"
+        portalMode="brand"
+        onChange={onChange}
+        onPersist={onPersist}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /^Hero/i }));
+
+    fireEvent.change(screen.getByLabelText("Hero CTA label"), { target: { value: "Start learning" } });
+    expect(onPersist).not.toHaveBeenCalled();
+    const afterLabel = onChange.mock.calls.at(-1)?.[0];
+    expect(afterLabel?.hero.ctaLabel).toBe("Start learning");
+    expect(afterLabel?.nav.ctaLabel).toBe(original.nav.ctaLabel);
+
+    fireEvent.change(screen.getByLabelText("Hero CTA link"), { target: { value: "apply" } });
+    expect(onPersist).not.toHaveBeenCalled();
+    const afterLink = onChange.mock.calls.at(-1)?.[0];
+    expect(afterLink?.hero.ctaHref).toBe("apply");
+    expect(afterLink?.nav.ctaHref).toBe(original.nav.ctaHref);
   });
 });

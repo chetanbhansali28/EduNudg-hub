@@ -406,8 +406,8 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
     },
     nav: {
       links: [
-        { label: "Programs", href: "#programs" },
-        { label: "About us", href: "#features" },
+        { label: "Courses", href: "#programs" },
+        { label: "Features", href: "#features" },
         { label: "About", href: "/about" },
         { label: "FAQ", href: "#faq" },
         { label: "Contact", href: "#apply" },

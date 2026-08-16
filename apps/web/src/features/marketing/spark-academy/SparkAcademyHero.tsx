@@ -88,25 +88,27 @@ export function SparkAcademyHero({ config, featuredProgram, programCount = 0 }: 
 
         <div className="sa-hero__visual">
           <div className="sa-hero__visual-bg" aria-hidden />
-          {heroImage ? (
-            <div className="sa-hero__photo-wrap">
-              <MarketingBackgroundMedia src={heroImage} />
-            </div>
-          ) : (
-            <div className="sa-hero__photo-placeholder" aria-hidden />
-          )}
-          {featuredProgram ? (
-            <div className="sa-hero__float-card sa-hero__float-card--course">
-              <span className="sa-hero__float-label">Course</span>
-              <strong>{featuredProgram.name}</strong>
-            </div>
-          ) : null}
-          {studentDisplay ? (
-            <div className="sa-hero__float-card sa-hero__float-card--stat">
-              <strong>{studentDisplay}</strong>
-              <span>Learners</span>
-            </div>
-          ) : null}
+          <div className="sa-hero__photo-stage">
+            {heroImage ? (
+              <div className="sa-hero__photo-wrap">
+                <MarketingBackgroundMedia src={heroImage} />
+              </div>
+            ) : (
+              <div className="sa-hero__photo-placeholder" aria-hidden />
+            )}
+            {featuredProgram ? (
+              <div className="sa-hero__float-card sa-hero__float-card--course">
+                <span className="sa-hero__float-label">Course</span>
+                <strong>{featuredProgram.name}</strong>
+              </div>
+            ) : null}
+            {studentDisplay ? (
+              <div className="sa-hero__float-card sa-hero__float-card--stat">
+                <strong>{studentDisplay}</strong>
+                <span>Learners</span>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
