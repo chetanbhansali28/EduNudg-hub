@@ -1,3 +1,5 @@
+import { resolveLoginBranding, type LoginBrandingCopy } from "@/lib/portalBranding";
+
 export const BRAND_TIMEZONE_OPTIONS = [
   { value: "Asia/Kolkata", label: "Asia/Kolkata (IST)" },
   { value: "Asia/Dubai", label: "Asia/Dubai (GST)" },
@@ -25,4 +27,45 @@ export function formatSettingsUpdated(iso: string | null | undefined, nowMs: num
 export function normalizeStaleLeadDays(value: string): number {
   const parsed = parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 15;
+}
+
+const EMPTY_BRANDING = {
+  brandId: null,
+  brandSlug: null,
+  brandName: null,
+  brandLogoUrl: null,
+  centerId: null,
+  centerSlug: null,
+  centerName: null,
+  loginHeadline: null,
+  loginSubtext: null,
+};
+
+/** Draft login greeting as it will appear on the brand staff /login screen. */
+export function previewBrandLoginCopy(
+  brandName: string,
+  headline: string,
+  subtext: string,
+  logoUrl: string | null = null
+): LoginBrandingCopy {
+  return resolveLoginBranding(
+    "brand",
+    {
+      ...EMPTY_BRANDING,
+      brandName,
+      brandLogoUrl: logoUrl,
+      loginHeadline: headline.trim() || null,
+      loginSubtext: subtext.trim() || null,
+    },
+    null,
+    null
+  );
+}
+
+export function siteLogoFromBrandSettings(settings: Record<string, unknown> | undefined): string | null {
+  const landing = settings?.landing;
+  if (!landing || typeof landing !== "object") return null;
+  const meta = (landing as { meta?: { logoUrl?: unknown } }).meta;
+  const url = typeof meta?.logoUrl === "string" ? meta.logoUrl.trim() : "";
+  return url || null;
 }

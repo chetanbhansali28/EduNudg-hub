@@ -13,7 +13,7 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 | Curriculum | Master-detail `/app/curriculum` — pipeline header + Active/Drafts/Programs/Total KPIs; courses/levels/units; on/off toggle in course detail header (mobile **Edit course** overlay includes the same controls); parent marketing stays editable after create |
 | Merchandise | Catalog, promos, payment settings, and franchise orders — pipeline header + Active/Draft/Orders/Total KPIs; each tab is list + detail |
 | Analytics | Cross-center metrics |
-| Settings | White-label login copy, **`lead_stale_days`**, **timezone**. Logo is Homepage **Site logo**. |
+| Settings | White-label login copy (live split-login preview), **`lead_stale_days`**, **timezone**. Logo is Homepage **Site logo**. |
 | **Billing** | Pay EduNudg platform subscription (payment gateway) |
 
 ## Student lead operations

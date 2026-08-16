@@ -43,7 +43,7 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 
 **Marketing landing UI** (shared nav, hero, feature phone stage, footer): see [marketing-landing.md](../frontend/marketing-landing.md). On mobile/tablet, nav CTA is right-aligned; feature blocks snap one per screen.
 
-**White-label copy** (optional): in `brand_settings.settings` JSON, set `login_headline` and `login_subtext`. Requires migration `011_portal_branding_public.sql` (`supabase db push`).
+**White-label copy** (optional): Brand Settings → **White-label & Login Copy**. Saves `login_headline` / `login_subtext` on `brand_settings.settings`. Login screens read them via `get_portal_branding`. Empty fields use per-portal defaults. Settings shows a mini login split that updates as you type (hero stays visible). **Save Copy** publishes and clears the in-memory branding cache so `/login` (desktop, where the real hero is shown) picks up new text.
 
 Hosts (add to `/etc/hosts`):
 

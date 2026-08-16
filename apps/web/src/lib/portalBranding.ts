@@ -57,6 +57,10 @@ export function readPortalBrandingCache(
   return portalBrandingCache.get(portalBrandingCacheKey(brandSlug, centerSlug));
 }
 
+export function clearPortalBrandingCache(): void {
+  portalBrandingCache.clear();
+}
+
 export function parsePortalBrandingRpc(data: unknown): PortalBranding {
   if (!data || typeof data !== "object") return EMPTY;
   const row = data as BrandingRow;

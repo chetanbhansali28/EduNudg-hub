@@ -22,4 +22,4 @@ See [Navigation spec](../spec/navigation-spec.md). On mobile the top bar shows t
 - **Marketing pages** (`/app/homepage`) — brand franchise recruitment site (hero copy + independent Hero CTA, FAQ, footer; success stories feed brand testimonials)
 - **Center Site Configuration** (`/app/center-site`) — parent enrollment template for every franchise hostname
 - **Billing** (`/app/billing`)
-- Settings (white-label login copy, `lead_stale_days`, timezone default IST). Logo is **Site logo** on `/app/homepage`, not Settings.
+- Settings (white-label login copy with a live split-login preview on `/app/settings`, `lead_stale_days`, timezone default IST). Logo is **Site logo** on `/app/homepage`, not Settings.

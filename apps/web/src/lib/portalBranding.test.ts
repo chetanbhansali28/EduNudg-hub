@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveLoginBranding } from "./portalBranding";
+import { clearPortalBrandingCache, readPortalBrandingCache, resolveLoginBranding, seedPortalBrandingCache } from "./portalBranding";
 
 const empty = {
   brandId: null,
@@ -41,5 +41,16 @@ describe("resolveLoginBranding", () => {
     );
     expect(copy.productName).toBe("Downtown Center");
     expect(copy.headline).toContain("Downtown Center");
+  });
+
+  it("regression_clearPortalBrandingCacheDropsStaleLoginCopy", () => {
+    seedPortalBrandingCache("smart-brain-abacus", null, {
+      ...empty,
+      brandName: "Smart Brain Abacus",
+      loginHeadline: "Old headline",
+    });
+    expect(readPortalBrandingCache("smart-brain-abacus", null)?.loginHeadline).toBe("Old headline");
+    clearPortalBrandingCache();
+    expect(readPortalBrandingCache("smart-brain-abacus", null)).toBeUndefined();
   });
 });
