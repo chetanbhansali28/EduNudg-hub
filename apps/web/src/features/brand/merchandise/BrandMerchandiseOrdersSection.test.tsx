@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandMerchandiseOrdersSection } from "./BrandMerchandiseOrdersSection";
 
@@ -59,6 +59,8 @@ describe("BrandMerchandiseOrdersSection", () => {
     expect(screen.getByText("Overdue payments only")).toBeDefined();
     expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
     expect(document.querySelectorAll(".ed-franchise-app-list-item")).toHaveLength(1);
-    expect(document.querySelector(".ed-franchise-app-list-item--selected")).toBeTruthy();
+    await waitFor(() => {
+      expect(document.querySelector(".ed-franchise-app-list-item--selected")).toBeTruthy();
+    });
   });
 });
