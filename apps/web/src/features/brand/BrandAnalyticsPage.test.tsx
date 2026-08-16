@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandAnalyticsPage } from "./BrandAnalyticsPage";
@@ -32,6 +32,7 @@ const mockStats: BrandAnalyticsStats = {
   enrollments30d: 8,
   unpaidInvoices: 1,
   unpaidAmountCents: 50000,
+  royaltyPendingCents: 0,
   recentDaily: [
     { metric_date: "2026-06-01", enrollments_count: 2, revenue_cents: 120000, active_centers: 2 },
     { metric_date: "2026-05-31", enrollments_count: 0, revenue_cents: 0, active_centers: 2 },
@@ -57,8 +58,22 @@ describe("BrandAnalyticsPage", () => {
     expect(screen.getByText(/Live metrics from your franchise network/)).toBeDefined();
     expect(screen.getByText("New Enrollments (30D)")).toBeDefined();
     expect(screen.getByText("Performance Breakdown")).toBeDefined();
+    expect(screen.getAllByText("Peak day").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Processed")).toBeNull();
     expect(screen.queryByText("Add snapshot")).toBeNull();
     expect(screen.queryByRole("button", { name: "Edit" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Export CSV" })).toBeDefined();
+    expect(screen.getByLabelText("From")).toBeDefined();
+    expect(screen.getByLabelText("To")).toBeDefined();
+  });
+
+  it("regression_analyticsDateRangeUpdatesTableImmediately", () => {
+    renderPage();
+    fireEvent.change(screen.getByLabelText("From"), { target: { value: "2026-06-01" } });
+    fireEvent.change(screen.getByLabelText("To"), { target: { value: "2026-06-01" } });
+    expect(screen.getByText("Period total")).toBeDefined();
+    expect(screen.getAllByRole("button", { name: "14D" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "30D" }).length).toBeGreaterThan(0);
   });
 });
 
@@ -71,6 +86,8 @@ describe("BrandAnalyticsView", () => {
     );
     expect(screen.getByText("Open Leads")).toBeDefined();
     expect(screen.getByText("Recent Activity")).toBeDefined();
-    expect(screen.queryByText("Performance Breakdown")).toBeNull();
+    expect(screen.getByText("Performance Breakdown")).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Performance Breakdown" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Export CSV" })).toBeDefined();
   });
 });

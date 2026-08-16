@@ -156,20 +156,31 @@ export function AnalyticsPanel({
   );
 }
 
-export type AnalyticsStatus = "processed" | "pending";
+export type AnalyticsStatus = "processed" | "pending" | "peak" | "enrolling" | "royalty" | "quiet";
+
+const STATUS_LABELS: Record<AnalyticsStatus, string> = {
+  processed: "Processed",
+  pending: "Pending",
+  peak: "Peak day",
+  enrolling: "Enrolling",
+  royalty: "Royalty in",
+  quiet: "Quiet",
+};
 
 export function StatusPill({ status, children }: { status: AnalyticsStatus; children?: ReactNode }) {
-  const label = children ?? (status === "processed" ? "Processed" : "Pending");
+  const label = children ?? STATUS_LABELS[status];
   return <span className={`ed-analytics-status ed-analytics-status--${status}`}>{label}</span>;
 }
 
 export function AnalyticsDataTable({
   columns,
   rows,
+  footer,
   emptyMessage = "No rows to display.",
 }: {
   columns: { key: string; label: string; align?: "left" | "right" }[];
-  rows: { key: string; cells: Record<string, ReactNode> }[];
+  rows: { key: string; cells: Record<string, ReactNode>; highlight?: boolean }[];
+  footer?: Record<string, ReactNode>;
   emptyMessage?: string;
 }) {
   if (rows.length === 0) {
@@ -190,7 +201,7 @@ export function AnalyticsDataTable({
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.key}>
+            <tr key={row.key} className={row.highlight ? "ed-analytics-table__row--peak" : undefined}>
               {columns.map((col) => (
                 <td key={col.key} className={col.align === "right" ? "ed-analytics-table__align-right" : undefined}>
                   {row.cells[col.key]}
@@ -199,6 +210,17 @@ export function AnalyticsDataTable({
             </tr>
           ))}
         </tbody>
+        {footer ? (
+          <tfoot>
+            <tr>
+              {columns.map((col) => (
+                <td key={col.key} className={col.align === "right" ? "ed-analytics-table__align-right" : undefined}>
+                  {footer[col.key]}
+                </td>
+              ))}
+            </tr>
+          </tfoot>
+        ) : null}
       </table>
     </div>
   );

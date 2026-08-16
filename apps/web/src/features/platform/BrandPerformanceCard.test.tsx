@@ -13,6 +13,7 @@ const sampleStats: BrandAnalyticsStats = {
   leadsOpen: 2,
   unpaidAmountCents: 2_500_000,
   unpaidInvoices: 1,
+  royaltyPendingCents: 0,
   recentDaily: Array.from({ length: 30 }, (_, i) => ({
     metric_date: `2026-06-${String(30 - i).padStart(2, "0")}`,
     enrollments_count: i === 0 ? 1 : 0,

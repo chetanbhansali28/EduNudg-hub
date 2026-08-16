@@ -44,7 +44,7 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 | | Campaigns | `/app/campaigns` | Exists — CRUD |
 | | **Success stories** | `/app/success-stories` | Exists — pipeline chrome like Franchise Applications; KPI stats (Published, Draft, With photo, Total); Published / Draft tabs; Add Story modal; list + detail |
 | | Merchandise | `/app/merchandise` | Exists — pipeline header + Active/Draft/Orders/Total KPIs; Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
-| | Analytics | `/app/analytics` | Exists |
+| | Analytics | `/app/analytics` | Exists — KPIs + Performance Breakdown pulse (14D/30D) |
 | General | **Homepage** | `/app/homepage` | Exists — brand public site editor |
 | | **Center Site Configuration** | `/app/center-site` | Exists — parent enrollment template (`center_landing`) |
 | | Settings | `/app/settings` | Exists — white-label + SLA; logo is Homepage Site logo |

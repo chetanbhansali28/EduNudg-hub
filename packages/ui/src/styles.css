@@ -1389,13 +1389,34 @@
   color: #166534;
 }
 
+.ed-analytics-status--peak {
+  background: color-mix(in srgb, var(--ed-primary) 18%, var(--ed-card));
+  color: var(--ed-primary);
+}
+
+.ed-analytics-status--enrolling {
+  background: var(--ed-success-bg);
+  color: #166534;
+}
+
+.ed-analytics-status--royalty {
+  background: var(--ed-success-bg);
+  color: #166534;
+}
+
+.ed-analytics-status--quiet {
+  background: var(--ed-surface-container-low);
+  color: var(--ed-muted);
+}
+
 .ed-analytics-status--pending {
   background: var(--ed-warning-bg);
   color: var(--ed-warning-fg);
 }
 
 .ed-analytics-table-wrap {
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 22rem;
   margin: 0 -0.25rem;
   padding: 0 0.25rem;
 }
@@ -1426,9 +1447,20 @@
   text-align: right;
 }
 
-.ed-analytics-table td.ed-analytics-table__enrollments {
+.ed-analytics-table td.ed-analytics-table__enrollments,
+.ed-analytics-table__enrollments {
   color: var(--ed-primary);
   font-weight: 600;
+}
+
+.ed-analytics-table__row--peak td {
+  background: color-mix(in srgb, var(--ed-primary) 8%, transparent);
+}
+
+.ed-analytics-table tfoot td {
+  font-weight: 700;
+  border-bottom: 0;
+  background: var(--ed-surface-container-low);
 }
 
 .ed-analytics-activity {
