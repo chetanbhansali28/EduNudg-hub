@@ -45,7 +45,7 @@ test.describe("E2E-04 — Student lead Path B (center register → convert)", ()
       const centerPage = await centerCtx.newPage();
       await centerPage.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/app/leads"));
       await expect(
-        centerPage.getByText(fields.parentName).or(centerPage.getByText(fields.childName)).first()
+        centerPage.getByRole("button", { name: new RegExp(fields.parentName, "i") })
       ).toBeVisible({
         timeout: 20_000,
       });
