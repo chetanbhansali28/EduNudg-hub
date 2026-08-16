@@ -1,16 +1,17 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandDetailPage } from "./BrandDetailPage";
 
 const fromMock = vi.fn();
 
-const { updateBrandMarketingThemeMock, upsertBrandOwnerCredentialsMock, fetchBrandOwnerLoginEmailMock } =
+const { updateBrandMarketingThemeMock, upsertBrandOwnerCredentialsMock, fetchBrandOwnerLoginEmailMock, patchBrandLandingSiteIdentityMock } =
   vi.hoisted(() => ({
     updateBrandMarketingThemeMock: vi.fn(),
     upsertBrandOwnerCredentialsMock: vi.fn(),
     fetchBrandOwnerLoginEmailMock: vi.fn(),
+    patchBrandLandingSiteIdentityMock: vi.fn(),
   }));
 
 vi.mock("@/lib/supabase", () => ({
@@ -18,6 +19,14 @@ vi.mock("@/lib/supabase", () => ({
     from: fromMock,
   }),
 }));
+
+vi.mock("@/lib/brandLandingEditorApi", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/brandLandingEditorApi")>();
+  return {
+    ...actual,
+    patchBrandLandingSiteIdentity: (...args: unknown[]) => patchBrandLandingSiteIdentityMock(...args),
+  };
+});
 
 vi.mock("@/lib/brandLandingApi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/brandLandingApi")>();
@@ -42,9 +51,13 @@ vi.mock("./PortalOpenButton", () => ({
   ),
 }));
 
-vi.mock("@/lib/brandSlug", () => ({
-  uniqueBrandSlug: vi.fn().mockResolvedValue("demo"),
-}));
+vi.mock("@/lib/brandSlug", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/brandSlug")>();
+  return {
+    ...actual,
+    uniqueBrandSlug: vi.fn().mockResolvedValue("demo"),
+  };
+});
 
 function chain(result: { data: unknown; error: unknown; count?: number }) {
   const c = {
@@ -95,6 +108,8 @@ describe("BrandDetailPage", () => {
     upsertBrandOwnerCredentialsMock.mockResolvedValue({ error: null });
     fetchBrandOwnerLoginEmailMock.mockReset();
     fetchBrandOwnerLoginEmailMock.mockResolvedValue("owner@demo.com");
+    patchBrandLandingSiteIdentityMock.mockReset();
+    patchBrandLandingSiteIdentityMock.mockResolvedValue(undefined);
     fromMock.mockImplementation((table: string) => {
       if (table === "brands") {
         return chain({
@@ -326,5 +341,170 @@ describe("BrandDetailPage", () => {
     await waitFor(() => {
       expect(screen.getAllByRole("button", { name: "Open" })).toHaveLength(3);
     });
+  });
+
+  it("regression_brand_detail_prefers_landing_site_logo_over_brands_logo_url", async () => {
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brands") {
+        return chain({
+          data: {
+            id: "b1",
+            slug: "demo",
+            name: "Demo Brand",
+            status: "active",
+            logo_url: "https://cdn.example/brands-logo.png",
+            marketing_theme: "novu",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          error: null,
+        });
+      }
+      if (table === "franchise_centers") {
+        return chain({ data: [], error: null });
+      }
+      if (table === "domain_mappings") {
+        return chain({
+          data: [{ hostname: "demo.localhost", portal_type: "brand", is_primary: true }],
+          error: null,
+        });
+      }
+      if (table === "brand_subscriptions") {
+        return chain({ data: null, error: null });
+      }
+      if (table === "brand_settings") {
+        return chain({
+          data: {
+            id: "settings-1",
+            settings: {
+              landing: { meta: { logoUrl: "https://cdn.example/homepage-logo.png" } },
+            },
+          },
+          error: null,
+        });
+      }
+      return countChain(0);
+    });
+
+    renderDetail("demo");
+    expect(await screen.findByText("Brand settings")).toBeDefined();
+    await waitFor(() => {
+      expect(document.querySelector(".ed-brand-detail__logo")?.getAttribute("src")).toBe(
+        "https://cdn.example/homepage-logo.png",
+      );
+    });
+  });
+
+  it("regression_platform_brand_name_save_writes_homepage_site_name", async () => {
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brands") {
+        return chain({
+          data: {
+            id: "b1",
+            slug: "demo",
+            name: "Demo Brand",
+            status: "draft",
+            logo_url: null,
+            marketing_theme: "novu",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          error: null,
+        });
+      }
+      if (table === "franchise_centers") {
+        return chain({ data: [], error: null });
+      }
+      if (table === "domain_mappings") {
+        return chain({
+          data: [{ hostname: "demo.localhost", portal_type: "brand", is_primary: true }],
+          error: null,
+        });
+      }
+      if (table === "brand_subscriptions") {
+        return chain({ data: null, error: null });
+      }
+      if (table === "brand_settings") {
+        return chain({
+          data: { id: "settings-1", settings: { features: { merchandise: false } } },
+          error: null,
+        });
+      }
+      return countChain(0);
+    });
+
+    renderDetail("demo");
+    const nameInput = await screen.findByLabelText("Name");
+    fireEvent.change(nameInput, { target: { value: "Smart Brain Abacus" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() => {
+      expect(patchBrandLandingSiteIdentityMock).toHaveBeenCalledWith("b1", { siteName: "Smart Brain Abacus" });
+    });
+    expect(upsertBrandOwnerCredentialsMock).not.toHaveBeenCalled();
+  });
+
+  it("regression_brand_detail_paginates_centers_and_domains", async () => {
+    const centers = Array.from({ length: 12 }, (_, index) => ({
+      id: `c${index + 1}`,
+      slug: `center-${index + 1}`,
+      name: `Center ${index + 1}`,
+      status: "active",
+      city: "Bengaluru",
+    }));
+    const domains = Array.from({ length: 12 }, (_, index) => ({
+      hostname: `host-${index + 1}.example.com`,
+      portal_type: index === 0 ? "brand" : "center",
+      is_primary: index === 0,
+    }));
+
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brands") {
+        return chain({
+          data: {
+            id: "b1",
+            slug: "smart-brain-abacus",
+            name: "Smart Brain Abacus",
+            status: "active",
+            logo_url: null,
+            marketing_theme: "novu",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          error: null,
+        });
+      }
+      if (table === "franchise_centers") {
+        return chain({ data: centers, error: null });
+      }
+      if (table === "domain_mappings") {
+        return chain({ data: domains, error: null });
+      }
+      if (table === "brand_subscriptions") {
+        return chain({ data: null, error: null });
+      }
+      if (table === "brand_settings") {
+        return chain({ data: { id: "settings-1", settings: {} }, error: null });
+      }
+      return countChain(0);
+    });
+
+    renderDetail("smart-brain-abacus");
+    expect(await screen.findByText(/^Center 1$/)).toBeDefined();
+    expect(screen.getByText("host-1.example.com — brand (primary)")).toBeDefined();
+    expect(screen.queryByText(/^Center 11$/)).toBeNull();
+    expect(screen.queryByText("host-11.example.com — center")).toBeNull();
+
+    const centersNav = screen.getByRole("navigation", { name: "Franchise centers pagination" });
+    expect(within(centersNav).getByText("1–10 of 12")).toBeDefined();
+    fireEvent.click(within(centersNav).getByRole("button", { name: "Next page" }));
+    expect(await screen.findByText(/^Center 11$/)).toBeDefined();
+    expect(screen.queryByText(/^Center 1$/)).toBeNull();
+
+    const domainsNav = screen.getByRole("navigation", { name: "Domains pagination" });
+    expect(within(domainsNav).getByText("1–10 of 12")).toBeDefined();
+    fireEvent.click(within(domainsNav).getByRole("button", { name: "Next page" }));
+    expect(await screen.findByText("host-11.example.com — center")).toBeDefined();
+    expect(screen.queryByText("host-1.example.com — brand (primary)")).toBeNull();
   });
 });

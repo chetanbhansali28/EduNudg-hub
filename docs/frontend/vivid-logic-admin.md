@@ -7,7 +7,7 @@ Admin portals (platform, brand, center) share the **Vivid Logic** design system 
 | Layer | Route | Components |
 |-------|-------|------------|
 | Platform | `/admin/homepage` | `HomepageEditorPage`, `HomepageEditorForm` |
-| Platform | `/admin/brands/:slug` | `BrandDetailPage`, `BrandEditForm` (**Website theme** in Brand settings) |
+| Platform | `/admin/brands/:slug` | `BrandDetailPage`, `BrandEditForm` (**Website theme** + **Site logo** / name into Homepage `landing.meta`); **Domains** and **Franchise centers** use `DirectoryPagination` after 10 rows |
 | Brand | `/app/homepage` | `BrandMarketingEditorPage`, `HomepageEditorForm` or theme-specific editor |
 | Center template | `/app/center-site` | `BrandCenterSiteEditorPage` — same forms as brand template (`center_landing`) |
 | Center detail | `/app/centers/:slug` | `BrandCenterDetailPage` (read-only KPIs; styling only) |

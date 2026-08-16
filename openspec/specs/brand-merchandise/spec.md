@@ -71,4 +71,13 @@ Center staff SHALL shop and track kit orders at `/app/merchandise` with the same
 - **AND** stats cards show Catalog, Unpaid, Orders, and Total
 - **AND** section tabs remain Shop and My Orders
 - **AND** desktop Shop keeps the catalog beside checkout in `PipelineWorkspace`
+- **AND** Shop catalog cards are full-width horizontal rows (one SKU per row), not a two-column product grid
 - **AND** desktop My Orders keeps order history beside allocations and shipping directory
+
+#### Scenario: Shop catalog matches inventory list density
+
+- **GIVEN** a center user on `/app/merchandise` Shop on desktop
+- **THEN** each catalog SKU is a horizontal card spanning the list column
+- **AND** the card header stays compact (thumbnail, name/SKU/badge, price) while quantity and **Add to Order** stack in a full-width footer so the add label is never clipped at Curriculum list width
+- **AND** the desktop list/detail split matches Curriculum (`minmax(16rem, 0.95fr)` list, `minmax(0, 2.05fr)` detail)
+- **AND** the list does not place two product cards side by side

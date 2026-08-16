@@ -56,6 +56,21 @@ Traceability: FR-P03, FR-P04
 
 Traceability: FR-P05
 
+### Requirement: Brand settings identity uses Homepage landing JSON
+
+Logo and public site name edited on `/admin/brands/:slug` SHALL persist in `brand_settings.settings.landing.meta` — the same store as `{brand}/app/homepage` Site identity. Operational fields (status, login credentials, `brands.marketing_theme`) remain on `brands` / Auth. `brands.logo_url` is a chrome copy of the Site logo, not a second source of truth.
+
+#### Scenario: Platform logo upload shares Homepage Site logo
+
+- **WHEN** a platform admin uploads a logo on brand detail
+- **THEN** Homepage `/app/homepage` Site logo reads the same `landing.meta.logoUrl`
+
+#### Scenario: Platform name save updates Homepage site name
+
+- **WHEN** a platform admin changes a non-locked brand name and saves
+- **THEN** `landing.meta.siteName` is set to that name
+- **AND** other landing sections and feature flags are preserved
+
 ### Requirement: Brand settings save without rewriting owner credentials
 
 Saving brand settings (name, status, marketing theme, etc.) on `/admin/brands/:slug` SHALL NOT call `brand-owner-credentials` unless the login email or password fields actually changed. Theme-only saves MUST succeed even when credential edge validation would fail.
@@ -97,6 +112,17 @@ On `/admin/brands`, each active brand row SHALL expose a **View Frontend ↗** l
 - **GIVEN** platform admin is on `/admin/brands/:slug`
 - **WHEN** they click **View Frontend ↗** in the page toolbar
 - **THEN** the browser opens the same brand public marketing URL as the brands list link
+
+### Requirement: Brand detail domains and centers paginate
+
+On `/admin/brands/:slug`, **Domains** and **Franchise centers** SHALL paginate with the same directory chrome as `/admin/brands` (`DirectoryPagination`, 10 rows per page) once a list has more than 10 items.
+
+#### Scenario: Paginate franchise centers and domains
+
+- **GIVEN** a brand has more than 10 franchise centers or domain mappings
+- **WHEN** a platform admin opens `/admin/brands/:slug`
+- **THEN** each section shows the first 10 rows plus Previous / Next controls
+- **AND** Next reveals the remaining rows
 
 ### Requirement: Ephemeral E2E brand hard purge
 

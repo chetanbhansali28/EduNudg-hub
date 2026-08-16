@@ -5,6 +5,7 @@ import { FormGrid, Input, MutationError, PasswordInput, SaveButton, Select } fro
 import { BrandLogoUpload } from "@/features/brand/BrandLogoUpload";
 import { fetchBrandOwnerLoginEmail, shouldSyncBrandOwnerCredentials, upsertBrandOwnerCredentials } from "@/lib/brandOwnerCredentialsApi";
 import { updateBrandMarketingTheme } from "@/lib/brandLandingApi";
+import { patchBrandLandingSiteIdentity } from "@/lib/brandLandingEditorApi";
 import { brandAdminPath } from "@/lib/adminPaths";
 import { slugifyBrandName, uniqueBrandSlug } from "@/lib/brandSlug";
 import { getSupabase } from "@/lib/supabase";
@@ -104,6 +105,10 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
         .eq("id", brandId);
       if (mErr) throw mErr;
 
+      if (!nameLocked && trimmedName !== name.trim()) {
+        await patchBrandLandingSiteIdentity(brandId, { siteName: trimmedName });
+      }
+
       if (form.marketingTheme !== savedTheme) {
         await updateBrandMarketingTheme(brandId, form.marketingTheme);
       }
@@ -141,6 +146,7 @@ export function BrandEditForm({ brandId, slug, name, status, logoUrl, marketingT
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
       void qc.invalidateQueries({ queryKey: ["center-landing"] });
       void qc.invalidateQueries({ queryKey: ["brand-marketing-editor"] });
+      void qc.invalidateQueries({ queryKey: ["brand-settings"] });
       setForm((prev) => ({ ...prev, password: "" }));
       setLoginFieldsTouched(false);
       brandSaved.flash();

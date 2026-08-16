@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { uploadBrandLogo } from "@/lib/brandLogoStorage";
 import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig, CENTER_LANDING_EDITOR_PLACEHOLDER_NAME } from "@/lib/centerLandingDefaults";
 import { mergeSectionVisibility, ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, DEFAULT_HOMEPAGE_SECTION_VISIBILITY } from "@/lib/homepageSections";
@@ -153,17 +154,11 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
   };
 }
 
-export async function saveBrandLegalPages(
+async function persistBrandSettings(
   brandId: string,
   settingsId: string | null,
-  existingSettings: Record<string, unknown>,
-  legalPages: BrandLegalPages
+  merged: Record<string, unknown>
 ): Promise<void> {
-  const merged = {
-    ...existingSettings,
-    legal_pages: legalPages,
-  };
-
   if (settingsId) {
     const { error } = await getSupabase().from("brand_settings").update({ settings: merged }).eq("id", settingsId);
     if (error) throw new Error(error.message);
@@ -172,6 +167,18 @@ export async function saveBrandLegalPages(
 
   const { error } = await getSupabase().from("brand_settings").insert({ brand_id: brandId, settings: merged });
   if (error) throw new Error(error.message);
+}
+
+export async function saveBrandLegalPages(
+  brandId: string,
+  settingsId: string | null,
+  existingSettings: Record<string, unknown>,
+  legalPages: BrandLegalPages
+): Promise<void> {
+  await persistBrandSettings(brandId, settingsId, {
+    ...existingSettings,
+    legal_pages: legalPages,
+  });
 }
 
 export async function saveBrandMarketingLanding(
@@ -192,17 +199,80 @@ export async function saveBrandMarketingLanding(
     [key]: nextPartial,
   };
 
-  if (settingsId) {
-    const { error } = await getSupabase().from("brand_settings").update({ settings: merged }).eq("id", settingsId);
-    if (error) throw new Error(error.message);
-  } else {
-    const { error } = await getSupabase().from("brand_settings").insert({ brand_id: brandId, settings: merged });
-    if (error) throw new Error(error.message);
-  }
+  await persistBrandSettings(brandId, settingsId, merged);
 
   if (key === "landing") {
     await syncBrandLogoFromSiteLogo(brandId, siteLogoUrlFromConfig(nextPartial));
   }
+}
+
+export function landingPartialFromBrandSettings(
+  settings: Record<string, unknown> | null | undefined
+): Partial<HomepageConfig> {
+  const landing = settings?.landing;
+  if (!landing || typeof landing !== "object" || Array.isArray(landing)) return {};
+  return landing as Partial<HomepageConfig>;
+}
+
+/** Homepage Site logo, then `brands.logo_url` fallback used by login / admin chrome. */
+export function resolvedBrandSiteLogoUrl(
+  settings: Record<string, unknown> | null | undefined,
+  brandLogoUrl: string | null | undefined
+): string | null {
+  return siteLogoUrlFromConfig(landingPartialFromBrandSettings(settings)) ?? (brandLogoUrl?.trim() || null);
+}
+
+export type BrandLandingSiteIdentityPatch = {
+  logoUrl?: string | null;
+  siteName?: string | null;
+};
+
+/**
+ * Writes platform-admin identity fields into the same `landing.meta` store as `/app/homepage`.
+ * Merges into existing `brand_settings.settings` so feature flags and other landing sections stay.
+ */
+export async function patchBrandLandingSiteIdentity(
+  brandId: string,
+  patch: BrandLandingSiteIdentityPatch
+): Promise<void> {
+  const logoUrl = patch.logoUrl?.trim() || undefined;
+  const siteName = patch.siteName?.trim() || undefined;
+  if (!logoUrl && !siteName) return;
+
+  const { data, error } = await getSupabase()
+    .from("brand_settings")
+    .select("id, settings")
+    .eq("brand_id", brandId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+
+  const existingSettings = { ...((data?.settings ?? {}) as Record<string, unknown>) };
+  const existingLanding = landingPartialFromBrandSettings(existingSettings);
+const existingMeta: Partial<HomepageConfig["meta"]> = { ...(existingLanding.meta ?? {}) };
+  if (logoUrl) existingMeta.logoUrl = logoUrl;
+  if (siteName) existingMeta.siteName = siteName;
+
+  const nextLanding = preserveCustomMarketingMediaUrls(existingLanding, {
+    ...existingLanding,
+    meta: existingMeta,
+  });
+  const merged = {
+    ...existingSettings,
+    landing: nextLanding,
+  };
+
+  await persistBrandSettings(brandId, data?.id ?? null, merged);
+
+  if (logoUrl) {
+    await syncBrandLogoFromSiteLogo(brandId, logoUrl);
+  }
+}
+
+/** Platform `/admin/brands/:slug` logo upload — same JSON as Homepage Site logo. */
+export async function uploadBrandSiteLogo(brandId: string, file: File): Promise<string> {
+  const publicUrl = await uploadBrandLogo(brandId, file);
+  await patchBrandLandingSiteIdentity(brandId, { logoUrl: publicUrl });
+  return publicUrl;
 }
 
 /** Homepage Site accordion logo (`landing.meta.logoUrl`). Empty does not clear `brands.logo_url`. */

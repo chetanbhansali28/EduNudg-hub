@@ -14,7 +14,7 @@ Public marketing landings share one UI kit under `apps/web/src/features/marketin
 
 ## Brand marketing themes
 
-Platform admins assign a theme per brand at **Platform → Brands → Edit** (`/admin/brands/:slug`) in **Brand settings** → **Website theme**. Stored on `brands.marketing_theme`.
+Platform admins assign a theme per brand at **Platform → Brands → Edit** (`/admin/brands/:slug`) in **Brand settings** → **Website theme**. Stored on `brands.marketing_theme`. **Site logo** and a renamed **Name** on that same form persist to Homepage `landing.meta` (shared with `{brand}/app/homepage`) — `brands.logo_url` is only the login/chrome copy.
 
 | Theme | Layout | Editor (brand owners) |
 |-------|--------|------------------------|
@@ -34,7 +34,7 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage` (brand si
 
 When a brand switches from Novu to Abacus Classic or Spark Academy, stored `landing` JSON is merged with the new theme defaults. **Novu-era section toggles do not disable Abacus/Spark sections** until the brand owner saves from the alternate-theme editor (detected via Abacus/Spark-specific fields in JSON). Shared copy (hero, FAQ, testimonials, features) is preserved. See `mergeAbacusClassicSectionVisibility()` in `homepageSections.ts`.
 
-Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings, domains, and franchise centers — not marketing theme.
+Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings (**Website theme**, **Site logo** / name into Homepage `landing.meta`), domains, and franchise centers.
 
 Abacus Classic sections (in order): hero → programs grid (from brand curriculum DB) → feature grid → founders → trust/video + stat cards → success stories carousel → FAQ → photo gallery → **About Us** (`#about`, when enabled) → rich footer (live center/student counts + custom stats). Brand staff manage carousel quotes at `/app/success-stories` (pipeline chrome + Published/Draft/With photo/Total KPIs).
 
@@ -138,7 +138,7 @@ Admin portal styling (Vivid Logic): shared shell, dark mode toggle, uniform two-
 - Centered glass pill: section links + CTA (no Apple icon in nav).
 - Theme follows content under the nav (`useNavTheme` uses `elementsFromPoint`, not sticky hero bounds).
 - Over **white** content: nav bar uses black gradient + white type (`novu-nav-bar--light`).
-- Logo from `config.meta.logoUrl` (homepage **Site logo**). Brand `/app/settings` does not upload a logo. Saving `/app/homepage` copies Site logo onto `brands.logo_url` for login / student / app chrome. Fallback initial badge when empty.
+- Logo from `config.meta.logoUrl` (homepage **Site logo**). Brand `/app/settings` does not upload a logo. Platform `/admin/brands/:slug` **Site logo** and a renamed brand name write the same `landing.meta` fields. Saving `/app/homepage` (or the platform Site logo) copies that URL onto `brands.logo_url` for login / student / app chrome. Fallback initial badge when empty.
 
 ### Mobile / tablet (&lt;1024px)
 
@@ -171,7 +171,7 @@ Brand and center marketing editors (**Feature sections (phone blocks)**) support
 
 - `apps/web/src/lib/marketingFeatureSections.ts` — default phone videos; Abacus program marquee palette
 - `apps/web/src/types/homepage.ts` — `HomepageConfig` including `meta.logoUrl`
-- `apps/web/src/features/platform/BrandEditForm.tsx` — **Website theme** in brand settings on `/admin/brands/:slug`
+- `apps/web/src/features/platform/BrandEditForm.tsx` — **Website theme** and **Site logo** on `/admin/brands/:slug` (logo/name persist to Homepage `landing.meta`)
 - `apps/web/src/features/platform/HomepageEditorPage.tsx` — `/admin/homepage`
 - `apps/web/src/routes/AppRoutes.tsx` — public `/` vs staff `/app`; `/auth/handoff` on all portal hosts
 

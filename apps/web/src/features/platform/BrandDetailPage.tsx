@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, Card, DataList, ListRow, PageToolbar } from "@edunudg/ui";
+import { Badge, Button, Card, DataList, DirectoryPagination, ListRow, PageToolbar } from "@edunudg/ui";
+import {
+  brandDetailPaginationSummary,
+  paginateBrandDetailList,
+  shouldPaginateBrandDetailList,
+} from "@/lib/brandDetailLists";
 import { getSupabase } from "@/lib/supabase";
 import { brandAdminPath, isUuid } from "@/lib/adminPaths";
 import { brandPortalHostname, portalOriginUrl, portalTargetFromDomain } from "@/lib/brandPortalUrl";
+import { resolvedBrandSiteLogoUrl } from "@/lib/brandLandingEditorApi";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
 import { useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
 import { BrandEditForm } from "./BrandEditForm";
@@ -45,6 +51,8 @@ export function BrandDetailPage() {
   const lookupById = isUuid(brandSlug);
   const qc = useQueryClient();
   const [importOpen, setImportOpen] = useState(false);
+  const [centersPage, setCentersPage] = useState(1);
+  const [domainsPage, setDomainsPage] = useState(1);
 
   const brand = useQuery({
     queryKey: ["brand", lookupById ? "id" : "slug", brandSlug],
@@ -119,6 +127,20 @@ export function BrandDetailPage() {
     },
   });
 
+  const centersList = useMemo(
+    () => paginateBrandDetailList(centers.data ?? [], centersPage),
+    [centers.data, centersPage]
+  );
+  const domainsList = useMemo(
+    () => paginateBrandDetailList(domains.data ?? [], domainsPage),
+    [domains.data, domainsPage]
+  );
+
+  useEffect(() => {
+    setCentersPage(1);
+    setDomainsPage(1);
+  }, [brandId]);
+
   useEffect(() => {
     if (brand.data?.name) {
       document.title = `${brand.data.name} · Brands · EduNudg Admin`;
@@ -151,6 +173,7 @@ export function BrandDetailPage() {
 
   const b = brand.data;
   const stats = monitoring.data;
+  const siteLogoUrl = resolvedBrandSiteLogoUrl(brandSettings.data?.settings, b.logo_url);
   const primaryBrandHost =
     domains.data?.find((d) => d.portal_type === "brand" && d.is_primary)?.hostname ??
     domains.data?.find((d) => d.portal_type === "brand")?.hostname;
@@ -170,7 +193,7 @@ export function BrandDetailPage() {
       <PageToolbar
         title={
           <h2 className="ed-page-title ed-page-title--with-sub ed-brand-detail__title">
-            {b.logo_url ? <img src={b.logo_url} alt="" className="ed-brand-detail__logo" /> : null}
+            {siteLogoUrl ? <img src={siteLogoUrl} alt="" className="ed-brand-detail__logo" /> : null}
             <span>{b.name}</span>
           </h2>
         }
@@ -211,7 +234,7 @@ export function BrandDetailPage() {
           slug={b.slug}
           name={b.name}
           status={b.status as "draft" | "active" | "suspended" | "archived"}
-          logoUrl={b.logo_url}
+          logoUrl={siteLogoUrl}
           marketingTheme={b.marketing_theme}
         />
       </Card>
@@ -230,7 +253,7 @@ export function BrandDetailPage() {
 
       <Card title="Domains">
         <DataList
-          items={(domains.data ?? []).map((d, i) => ({ ...d, id: `${d.hostname}-${i}` }))}
+          items={domainsList.items.map((d, i) => ({ ...d, id: `${d.hostname}-${i}` }))}
           empty="No domain mappings for this brand."
           render={(d) => {
             const target = portalTargetFromDomain(d.portal_type, d.hostname, b.slug);
@@ -244,6 +267,16 @@ export function BrandDetailPage() {
             );
           }}
         />
+        {shouldPaginateBrandDetailList(domainsList.total) ? (
+          <DirectoryPagination
+            aria-label="Domains pagination"
+            summary={brandDetailPaginationSummary(domainsList, "No domains")}
+            onPrevious={() => setDomainsPage((current) => Math.max(1, current - 1))}
+            onNext={() => setDomainsPage((current) => Math.min(domainsList.pageCount, current + 1))}
+            disablePrevious={domainsList.page <= 1}
+            disableNext={domainsList.page >= domainsList.pageCount}
+          />
+        ) : null}
       </Card>
 
       <Card
@@ -257,7 +290,7 @@ export function BrandDetailPage() {
         }
       >
         <DataList
-          items={centers.data ?? []}
+          items={centersList.items}
           empty="No centers yet. Import a CSV to onboard franchise locations."
           render={(c) => {
             const centerHost =
@@ -279,6 +312,16 @@ export function BrandDetailPage() {
             );
           }}
         />
+        {shouldPaginateBrandDetailList(centersList.total) ? (
+          <DirectoryPagination
+            aria-label="Franchise centers pagination"
+            summary={brandDetailPaginationSummary(centersList, "No centers")}
+            onPrevious={() => setCentersPage((current) => Math.max(1, current - 1))}
+            onNext={() => setCentersPage((current) => Math.min(centersList.pageCount, current + 1))}
+            disablePrevious={centersList.page <= 1}
+            disableNext={centersList.page >= centersList.pageCount}
+          />
+        ) : null}
       </Card>
 
       <FranchiseCenterImportDialog

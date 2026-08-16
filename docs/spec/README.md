@@ -32,7 +32,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [student-leads](../../openspec/specs/student-leads/spec.md) | Brand/center student leads + Abacus/Spark modals; center `/app/leads` Curriculum chrome |
 | [center-students-workspace](../../openspec/specs/center-students-workspace/spec.md) | Center `/app/students` pipeline chrome (Linked / Unassigned / Programs / Total) |
 | [center-fees-workspace](../../openspec/specs/center-fees-workspace/spec.md) | Center `/app/fees` pipeline chrome (Outstanding / Paid / Overdue / Total) |
-| [center-inventory-workspace](../../openspec/specs/center-inventory-workspace/spec.md) | Center `/app/inventory` pipeline chrome (In stock / Low stock / Incoming / Total) |
+| [center-inventory-workspace](../../openspec/specs/center-inventory-workspace/spec.md) | Center `/app/inventory` pipeline chrome (In stock / Low stock / Incoming / Total); themed `PipelineDetailPanel` |
 | [franchise-applications](../../openspec/specs/franchise-applications/spec.md) | Franchise apply + approve provision |
 | [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace |
 | [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform and brand CSV bulk center import |

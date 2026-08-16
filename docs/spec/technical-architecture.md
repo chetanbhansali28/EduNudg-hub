@@ -42,7 +42,7 @@ Public bucket: **`brand-assets`** (migration `015_brand_assets_storage.sql`). RL
 
 | Asset | DB field / table | Object path |
 |-------|------------------|-------------|
-| Brand logo | Homepage **Site logo** (`landing.meta.logoUrl`); synced to `brands.logo_url` | `{brand_id}/marketing/…` (editor upload) or `{brand_id}/logo.{ext}` (legacy / platform) |
+| Brand logo | Homepage **Site logo** (`landing.meta.logoUrl`); platform `/admin/brands/:slug` writes the same JSON; synced to `brands.logo_url` | `{brand_id}/marketing/…` (editor upload) or `{brand_id}/logo.{ext}` (platform / legacy) |
 | Merchandise product photo (×5 per SKU) | `merchandise_catalog.photo_urls` | `{brand_id}/merchandise/{catalog_item_id}/photo-{1-5}.{ext}` |
 | Marketing videos | editor config | under `{brand_id}/…` (see runbook) |
 

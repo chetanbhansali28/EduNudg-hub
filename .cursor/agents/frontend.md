@@ -29,7 +29,8 @@
 - [ ] Component tests added
 - [ ] E2E updated for user journeys when UI flow changes
 - [ ] Role-based locators: Playwright `{ exact: true }`; Testing Library `exactAccessibleName("…")` — never RTL `exact: true`
-- [ ] Platform / brand / center marketing changes respect `marketing-homepage-media` (never discard `brand-assets` URLs or landing JSON)
+- [ ] Platform / brand / center marketing changes respect `marketing-homepage-media` (never discard `brand-assets` URLs or landing JSON). Platform `/admin/brands/:slug` Site logo / renamed name write Homepage `landing.meta`.
+- [ ] Center `/app/merchandise` Shop cards keep Curriculum list width; stack qty and full-width **Add to Order** so the label never clips.
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills as needed)
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
 - [ ] If pushing: mandatory `edunudg-pre-push-ci` (`pnpm ci:local` green before `git push`)

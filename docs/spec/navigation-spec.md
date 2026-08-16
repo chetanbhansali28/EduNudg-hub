@@ -16,7 +16,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 |---------|------|-------|--------|
 | Main menu | Home | `/admin` | Exists |
 | Features | Brands | `/admin/brands` | Exists — list; **Edit** → detail with **Brand settings** |
-| | ↳ Brand detail | `/admin/brands/:brandSlug` | Exists — KPIs, settings (**Website theme**), domains, centers |
+| | ↳ Brand detail | `/admin/brands/:brandSlug` | Exists — KPIs, settings (**Website theme**, Site logo → Homepage `landing.meta`), domains and centers paginate after 10 rows |
 | | ↳ Brand signups | `/admin/brands` | Manual add + pending queue + approve |
 | | Subscriptions | `/admin/subscriptions` | Exists |
 | | Revenue & Usage | `/admin/revenue` | Exists |
@@ -64,8 +64,8 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 | | Students | `/app/students` | Exists — same pipeline chrome (Linked/Unassigned/Programs/Total) |
 | | Batches | `/app/batches` | Exists — gated by brand feature `batches` (default off) |
 | | Fees & Payments | `/app/fees` | Exists — same pipeline chrome (Outstanding/Paid/Overdue/Total); Invoices / Payments tabs |
-| | Inventory | `/app/inventory` | Exists — same pipeline chrome (In stock / Low stock / Incoming / Total) |
-| | Merchandise | `/app/merchandise` | Exists — same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders; checkout + order history |
+| | Inventory | `/app/inventory` | Exists — same pipeline chrome (In stock / Low stock / Incoming / Total); column 2 left-aligns a 50% photo beside stock facts, puts On the way and Orders on one row, and uses a primary **Place New Order** button |
+| | Merchandise | `/app/merchandise` | Exists — same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders; Shop list is one horizontal card per SKU with stacked qty / full-width Add to Order; checkout + order history |
 | | Assessments | `/app/assessments` | Phase D |
 | | Reports | `/app/reports` | Phase D |
 | General | Settings | `/app/settings` | Exists — public profile (photo, address, phone) |

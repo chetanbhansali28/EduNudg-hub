@@ -50,7 +50,7 @@ export function useFeatureFlag(key: string): boolean {
 
 - Platform `/admin/settings` — platform flags + gateway credentials (secrets via env/Edge only); **Export Data** downloads an Excel workbook of brands, franchise centers, and students (see `openspec/specs/platform-settings/spec.md`).
 - Platform `/admin/brands/:slug` — per-brand feature toggles (platform admin).
-- Brand `/app/settings` — white-label login copy, SLA, timezone (no Brand Identity / logo; Site logo is `/app/homepage`). Feature toggles are platform-admin only.
+- Brand `/app/settings` — white-label login copy, SLA, timezone (no Brand Identity / logo; Site logo is Homepage `landing.meta`, also writable from platform `/admin/brands/:slug`). Feature toggles are platform-admin only.
 
 ## RPC guard
 

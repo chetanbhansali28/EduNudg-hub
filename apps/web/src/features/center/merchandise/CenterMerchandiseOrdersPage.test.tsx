@@ -146,6 +146,8 @@ describe("CenterMerchandiseOrdersPage", () => {
     expect(await screen.findByText("Abacus kit")).toBeDefined();
     expect(screen.getByText("Your Order")).toBeDefined();
     expect(container.querySelector(".ed-pipeline-workspace")).toBeTruthy();
+    expect(container.querySelector(".ed-pipeline-workspace__list .ed-product-card--row")).toBeTruthy();
+    expect(container.querySelector(".ed-center-merch-page")).toBeTruthy();
   });
 
   it("regression_center_merchandise_page_matches_curriculum_stats_chrome", async () => {

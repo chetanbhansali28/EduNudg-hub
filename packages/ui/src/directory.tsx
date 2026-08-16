@@ -494,25 +494,39 @@ export function DirectoryPagination({
   onNext,
   disablePrevious,
   disableNext,
+  "aria-label": ariaLabel = "Pagination",
 }: {
   summary: string;
   onPrevious?: () => void;
   onNext?: () => void;
   disablePrevious?: boolean;
   disableNext?: boolean;
+  "aria-label"?: string;
 }) {
   return (
-    <div className="ed-directory-pagination">
+    <nav className="ed-directory-pagination" aria-label={ariaLabel}>
       <p className="ed-directory-pagination__summary">{summary}</p>
       <div className="ed-directory-pagination__nav">
-        <button type="button" className="ed-directory-pagination__btn" onClick={onPrevious} disabled={disablePrevious}>
+        <button
+          type="button"
+          className="ed-directory-pagination__btn"
+          onClick={onPrevious}
+          disabled={disablePrevious}
+          aria-label="Previous page"
+        >
           ‹
         </button>
-        <button type="button" className="ed-directory-pagination__btn" onClick={onNext} disabled={disableNext}>
+        <button
+          type="button"
+          className="ed-directory-pagination__btn"
+          onClick={onNext}
+          disabled={disableNext}
+          aria-label="Next page"
+        >
           ›
         </button>
       </div>
-    </div>
+    </nav>
   );
 }
 

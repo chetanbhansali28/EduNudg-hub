@@ -28,6 +28,8 @@ export function invalidateBrandLogoCaches(qc: QueryClient, brandId?: string): vo
   void qc.invalidateQueries({ queryKey: ["brand-marketing-editor"] });
   void qc.invalidateQueries({ queryKey: ["brand"] });
 
+  void qc.invalidateQueries({ queryKey: ["brand-settings"] });
+
   if (brandId) {
     void qc.invalidateQueries({ queryKey: ["brand-row", brandId] });
     void qc.invalidateQueries({ queryKey: ["brand-marketing-editor", brandId] });

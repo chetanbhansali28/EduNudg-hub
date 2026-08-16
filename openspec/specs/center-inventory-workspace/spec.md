@@ -32,3 +32,26 @@ Center staff SHALL manage inventory at `/app/inventory` with the same workspace 
 - **THEN** filter tabs are All items (All on mobile), In stock, and Low stock
 - **AND** search matches item name or SKU
 - **AND** desktop keeps `PipelineWorkspace` list visible beside item detail (order history, incoming, inventory value)
+- **AND** the item photo is left-aligned in a 50% top-row column beside stock facts
+- **AND** column 2 uses `PipelineDetailPanel` with a primary `@edunudg/ui` **Place New Order** button (not a custom blue link)
+
+#### Scenario: Detail photo is left and half width
+
+- **GIVEN** a center user selects an inventory item with a product photo
+- **WHEN** they view the second-column detail
+- **THEN** the photo sits in the left 50% of the top row (`ed-inv-detail__top`)
+- **AND** Available, On hand, Incoming, and Allocated sit beside the photo
+
+#### Scenario: Incoming and orders share a row
+
+- **GIVEN** a center user selects an inventory item
+- **WHEN** they view the second-column detail on desktop
+- **THEN** **On the way** and **Orders (last 6 months)** render side by side (`ed-inv-detail__split`)
+
+#### Scenario: Detail column follows pipeline theme
+
+- **GIVEN** a center user selects an inventory item
+- **THEN** the detail column is a `PipelineDetailPanel` (title, stock badge, stock facts, incoming, orders, inventory value)
+- **AND** **Place New Order** is a primary `Button` that opens `/app/merchandise`
+- **AND** inventory value uses theme tokens (`--ed-border`, `--ed-fg`, `--ed-success`) rather than a purple marketing card
+- **AND** the detail head and body have extra top padding so the column is not flush to the top edge

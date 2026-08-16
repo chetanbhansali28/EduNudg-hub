@@ -3,8 +3,8 @@ import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandLogoUpload } from "./BrandLogoUpload";
 
-vi.mock("@/lib/brandLogoStorage", () => ({
-  uploadBrandLogo: vi.fn(),
+vi.mock("@/lib/brandLandingEditorApi", () => ({
+  uploadBrandSiteLogo: vi.fn(),
 }));
 
 function renderUpload(brandId: string | null, currentLogoUrl?: string | null) {
@@ -24,6 +24,7 @@ describe("BrandLogoUpload", () => {
 
   it("renders file input when brandId is set", () => {
     renderUpload("b1", null);
-    expect(screen.getByLabelText("Brand logo")).toBeDefined();
+    expect(screen.getByLabelText("Site logo")).toBeDefined();
+    expect(screen.getByText(/same as homepage site logo/i)).toBeDefined();
   });
 });

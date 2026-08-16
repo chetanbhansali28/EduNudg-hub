@@ -26,7 +26,7 @@ describe("MerchandiseProductGrid", () => {
     expect(screen.getByText("Abacus kit")).toBeDefined();
     expect(screen.getByText("Workbook")).toBeDefined();
     expect(screen.getByText("Best Seller")).toBeDefined();
-    expect(screen.getByText("KIT001")).toBeDefined();
+    expect(screen.getByText("SKU KIT001")).toBeDefined();
 
     fireEvent.click(screen.getAllByRole("button", { name: "Increase quantity" })[0]!);
 
@@ -58,5 +58,38 @@ describe("MerchandiseProductGrid", () => {
       quantity: 1,
       studentId: "",
     });
+  });
+
+  it("regression_center_merchandise_shop_cards_are_horizontal_one_per_row", () => {
+    const { container } = render(
+      <MerchandiseProductGrid catalog={catalog} cart={{}} students={students} onUpdateLine={vi.fn()} />
+    );
+    const catalogList = container.querySelector(".ed-merch-catalog");
+    expect(catalogList).toBeTruthy();
+    const cards = container.querySelectorAll(".ed-product-card--row");
+    expect(cards).toHaveLength(2);
+    expect(catalogList?.querySelectorAll(":scope > .ed-product-card--row")).toHaveLength(2);
+  });
+
+  it("regression_center_merchandise_shop_omits_placeholder_description", () => {
+    render(
+      <MerchandiseProductGrid catalog={catalog} cart={{}} students={students} onUpdateLine={vi.fn()} />
+    );
+    expect(screen.queryByText("Training kits and supplies for your center.")).toBeNull();
+  });
+
+  it("regression_center_merchandise_shop_add_label_is_not_truncated", () => {
+    const { container } = render(
+      <MerchandiseProductGrid catalog={catalog} cart={{}} students={students} onUpdateLine={vi.fn()} />,
+    );
+    const addButtons = screen.getAllByRole("button", { name: "Add to Order" });
+    expect(addButtons).toHaveLength(2);
+    expect(addButtons[0]?.textContent).toBe("Add to Order");
+    expect(container.querySelector(".ed-product-card__main")).toBeTruthy();
+    expect(container.querySelector(".ed-product-card__body")).toBeNull();
+    const card = container.querySelector(".ed-product-card--row");
+    const actions = card?.querySelector(".ed-product-card__actions");
+    expect(card?.contains(actions ?? null)).toBe(true);
+    expect(actions?.parentElement).toBe(card);
   });
 });

@@ -29,7 +29,7 @@ Canonical behavior: [`openspec/specs/franchise-center-csv-import/spec.md`](../..
 ## Tests
 
 - Vitest: `FranchiseCenterImportDialog.test.tsx`, `franchiseCenterImportHelpers.test.ts`
-- Brand detail regressions on `/admin/brands/:slug`
+- Brand detail regressions on `/admin/brands/:slug` including `regression_brand_detail_paginates_centers_and_domains`
 - Brand Franchise Management regression: `regression_brand_centers_shows_franchise_csv_import`
 
 ## Related

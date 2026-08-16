@@ -3,14 +3,23 @@ import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAca
 import {
   fetchBrandMarketingEditor,
   landingConfigToPartial,
+  landingPartialFromBrandSettings,
+  patchBrandLandingSiteIdentity,
+  resolvedBrandSiteLogoUrl,
   saveBrandMarketingLanding,
   siteLogoUrlFromConfig,
+  uploadBrandSiteLogo,
 } from "./brandLandingEditorApi";
 
 const fromMock = vi.fn();
+const uploadBrandLogoMock = vi.fn();
 
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({ from: fromMock }),
+}));
+
+vi.mock("@/lib/brandLogoStorage", () => ({
+  uploadBrandLogo: (...args: unknown[]) => uploadBrandLogoMock(...args),
 }));
 
 function brandsAndSettingsChain(brand: Record<string, unknown>, settings: Record<string, unknown> | null) {
@@ -327,5 +336,162 @@ describe("site logo sync", () => {
     config.meta.logoUrl = "https://cdn.example/center-logo.png";
     await saveBrandMarketingLanding("brand-1", "settings-1", {}, "center_landing", config);
     expect(brandUpdate).not.toHaveBeenCalled();
+  });
+});
+
+describe("platform admin site identity store", () => {
+  const landingLogo = "https://cdn.example/storage/v1/object/public/brand-assets/brand-1/logo.png";
+
+  it("landingPartialFromBrandSettings reads stored homepage JSON", () => {
+    expect(landingPartialFromBrandSettings({ landing: { hero: { line1: "Hi" } } }).hero?.line1).toBe("Hi");
+    expect(landingPartialFromBrandSettings({ features: { merchandise: true } })).toEqual({});
+  });
+
+  it("regression_brand_detail_prefers_landing_site_logo_over_brands_logo_url", () => {
+    expect(
+      resolvedBrandSiteLogoUrl(
+        { landing: { meta: { logoUrl: "https://cdn.example/site-logo.png" } } },
+        "https://cdn.example/brands-logo.png",
+      )
+    ).toBe("https://cdn.example/site-logo.png");
+    expect(resolvedBrandSiteLogoUrl({}, "https://cdn.example/brands-logo.png")).toBe(
+      "https://cdn.example/brands-logo.png",
+    );
+  });
+
+  it("regression_platform_admin_logo_writes_homepage_landing_meta", async () => {
+    const settingsUpdate = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    }));
+    const brandUpdate = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    }));
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brand_settings") {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              maybeSingle: vi.fn(() =>
+                Promise.resolve({
+                  data: {
+                    id: "settings-1",
+                    settings: {
+                      features: { merchandise: true },
+                      landing: { hero: { line1: "Keep me" }, meta: { siteName: "Old Site" } },
+                    },
+                  },
+                  error: null,
+                }),
+              ),
+            })),
+          })),
+          update: settingsUpdate,
+        };
+      }
+      if (table === "brands") {
+        return { update: brandUpdate };
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    await patchBrandLandingSiteIdentity("brand-1", { logoUrl: landingLogo });
+
+    expect(settingsUpdate).toHaveBeenCalledWith({
+      settings: {
+        features: { merchandise: true },
+        landing: {
+          hero: { line1: "Keep me" },
+          meta: { siteName: "Old Site", logoUrl: landingLogo },
+        },
+      },
+    });
+    expect(brandUpdate).toHaveBeenCalledWith({ logo_url: landingLogo });
+  });
+
+  it("regression_platform_admin_name_writes_homepage_site_name", async () => {
+    const settingsUpdate = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    }));
+    const brandUpdate = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    }));
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brand_settings") {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              maybeSingle: vi.fn(() =>
+                Promise.resolve({
+                  data: {
+                    id: "settings-1",
+                    settings: {
+                      features: { student_leads: true },
+                      landing: { meta: { logoUrl: landingLogo, siteName: "Old" } },
+                    },
+                  },
+                  error: null,
+                }),
+              ),
+            })),
+          })),
+          update: settingsUpdate,
+        };
+      }
+      if (table === "brands") {
+        return { update: brandUpdate };
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    await patchBrandLandingSiteIdentity("brand-1", { siteName: "Smart Brain Abacus" });
+
+    expect(settingsUpdate).toHaveBeenCalledWith({
+      settings: {
+        features: { student_leads: true },
+        landing: { meta: { logoUrl: landingLogo, siteName: "Smart Brain Abacus" } },
+      },
+    });
+    expect(brandUpdate).not.toHaveBeenCalled();
+  });
+
+  it("regression_uploadBrandSiteLogo_persists_landing_then_brands_logo_url", async () => {
+    uploadBrandLogoMock.mockResolvedValue(`${landingLogo}?v=9`);
+    const settingsUpdate = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    }));
+    const brandUpdate = vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    }));
+    fromMock.mockImplementation((table: string) => {
+      if (table === "brand_settings") {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              maybeSingle: vi.fn(() =>
+                Promise.resolve({
+                  data: { id: "settings-1", settings: { landing: { meta: { siteName: "Brand" } } } },
+                  error: null,
+                }),
+              ),
+            })),
+          })),
+          update: settingsUpdate,
+        };
+      }
+      if (table === "brands") {
+        return { update: brandUpdate };
+      }
+      throw new Error(`Unexpected table ${table}`);
+    });
+
+    const file = new File(["x"], "logo.png", { type: "image/png" });
+    const url = await uploadBrandSiteLogo("brand-1", file);
+
+    expect(url).toBe(`${landingLogo}?v=9`);
+    expect(uploadBrandLogoMock).toHaveBeenCalledWith("brand-1", file);
+    expect(settingsUpdate).toHaveBeenCalledWith({
+      settings: { landing: { meta: { siteName: "Brand", logoUrl: `${landingLogo}?v=9` } } },
+    });
+    expect(brandUpdate).toHaveBeenCalledWith({ logo_url: `${landingLogo}?v=9` });
   });
 });

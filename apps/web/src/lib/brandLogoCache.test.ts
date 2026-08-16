@@ -22,6 +22,7 @@ describe("brandLogoCache", () => {
     expect(spy).toHaveBeenCalledWith({ queryKey: ["brand-landing"] });
     expect(spy).toHaveBeenCalledWith({ queryKey: ["portal-branding"] });
     expect(spy).toHaveBeenCalledWith({ queryKey: ["center-landing"] });
+    expect(spy).toHaveBeenCalledWith({ queryKey: ["brand-settings"] });
     expect(spy).toHaveBeenCalledWith({ queryKey: ["brand-row", "brand-1"] });
   });
 });

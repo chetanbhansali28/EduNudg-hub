@@ -49,6 +49,12 @@
   gap: 0.5rem;
 }
 
+.ed-brand-detail-page .ed-directory-pagination,
+.ed-card .ed-directory-pagination {
+  margin-top: 0.5rem;
+  padding-bottom: 0;
+}
+
 .ed-import-dialog {
   border: none;
   padding: 0;

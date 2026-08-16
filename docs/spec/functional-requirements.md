@@ -94,8 +94,8 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-C14 | C | Cannot convert unassigned brand leads | `center_id` must match self |
 | FR-C15 | C | **Students** `/app/students` | Same pipeline chrome as Curriculum (Linked / Unassigned / Programs / Total); list + detail |
 | FR-C16 | C | **Fees** `/app/fees` | Same pipeline chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs |
-| FR-C17 | C | **Inventory** `/app/inventory` | Same pipeline chrome as Curriculum (In stock / Low stock / Incoming / Total); list + item detail |
-| FR-C18 | C | **Merchandise** `/app/merchandise` | Same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs |
+| FR-C17 | C | **Inventory** `/app/inventory` | Same pipeline chrome as Curriculum (In stock / Low stock / Incoming / Total); list + `PipelineDetailPanel` item detail with theme **Place New Order** |
+| FR-C18 | C | **Merchandise** `/app/merchandise` | Same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; Shop list is one horizontal card per SKU |
 
 ---
 

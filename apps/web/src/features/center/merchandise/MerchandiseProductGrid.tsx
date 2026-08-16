@@ -13,8 +13,9 @@ type Props = {
 
 const STOCK_VALUE = "";
 
-function productDescription(item: MerchandiseCatalogItem): string {
-  return item.description?.trim() || "Training kits and supplies for your center.";
+function productDescription(item: MerchandiseCatalogItem): string | null {
+  const description = item.description?.trim();
+  return description || null;
 }
 
 function MerchandiseProductGallery({ photos, name }: { photos: string[]; name: string }) {
@@ -68,37 +69,38 @@ export function MerchandiseProductGrid({ catalog, cart, onUpdateLine }: Props) {
         };
 
         const photos = activeMerchandisePhotoUrls(item.photo_urls);
+        const description = productDescription(item);
 
         return (
-          <article key={item.id} role="listitem" className="ed-product-card">
-            <div className="ed-product-card__media">
-              <MerchandiseProductGallery photos={photos} name={item.name} />
-              <span className="ed-product-card__sku">{item.sku}</span>
-              {index === 0 ? <span className="ed-product-card__badge">Best Seller</span> : null}
-            </div>
-            <div className="ed-product-card__body">
-              <div className="ed-product-card__head">
+          <article key={item.id} role="listitem" className="ed-product-card ed-product-card--row">
+            <div className="ed-product-card__main">
+              <div className="ed-product-card__media">
+                <MerchandiseProductGallery photos={photos} name={item.name} />
+              </div>
+              <div className="ed-product-card__identity">
                 <h3 className="ed-product-card__name">{item.name}</h3>
-                <span className="ed-product-card__price">
-                  {formatInrFromPaise(item.price_cents, item.currency)}
-                </span>
+                {index === 0 ? <span className="ed-product-card__badge">Best Seller</span> : null}
+                <p className="ed-product-card__sku">SKU {item.sku}</p>
               </div>
-              <p className="ed-product-card__desc">{productDescription(item)}</p>
-              <div className="ed-product-card__actions">
-                <QuantityStepper
-                  value={line.quantity}
-                  onChange={setQty}
-                  aria-label={`Quantity for ${item.name}`}
-                />
-                <Button
-                  onClick={() => {
-                    if (line.quantity === 0) setQty(1);
-                  }}
-                  disabled={line.quantity > 0}
-                >
-                  Add to Order
-                </Button>
-              </div>
+              <span className="ed-product-card__price">
+                {formatInrFromPaise(item.price_cents, item.currency)}
+              </span>
+            </div>
+            {description ? <p className="ed-product-card__desc">{description}</p> : null}
+            <div className="ed-product-card__actions">
+              <QuantityStepper
+                value={line.quantity}
+                onChange={setQty}
+                aria-label={`Quantity for ${item.name}`}
+              />
+              <Button
+                onClick={() => {
+                  if (line.quantity === 0) setQty(1);
+                }}
+                disabled={line.quantity > 0}
+              >
+                Add to Order
+              </Button>
             </div>
           </article>
         );

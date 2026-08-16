@@ -15,7 +15,7 @@ import {
   PipelineWorkspace,
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
-import { InventoryItemDetailPanel, InventoryValueCard } from "@/features/center/inventory/InventoryItemDetailPanel";
+import { InventoryItemDetailPanel } from "@/features/center/inventory/InventoryItemDetailPanel";
 import { IconDownload } from "@/features/center/inventory/InventoryIcons";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import {
@@ -138,11 +138,12 @@ export function InventoryPage() {
 
   const detailPanel = selected ? (
     <div className="ed-center-inventory-detail">
-      <InventoryItemDetailPanel centerId={centerId} item={selected} />
-      <InventoryValueCard
-        totalCents={valueStats.data?.totalCents ?? 0}
-        trendPercent={valueStats.data?.trendPercent ?? null}
-        loading={valueStats.isLoading}
+      <InventoryItemDetailPanel
+        centerId={centerId}
+        item={selected}
+        valueTotalCents={valueStats.data?.totalCents ?? 0}
+        valueTrendPercent={valueStats.data?.trendPercent ?? null}
+        valueLoading={valueStats.isLoading}
       />
     </div>
   ) : (

@@ -15,7 +15,7 @@ See [Navigation spec](../spec/navigation-spec.md).
 - **Students** (`/app/students`) — same chrome (Linked / Unassigned / Programs / Total)
 - **Batches & Schedule** (`/app/batches`) — only when brand feature flag `batches` is ON (default off)
 - **Fees & Payments** (`/app/fees`) — same chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs
-- **Inventory** (`/app/inventory`) — same chrome (In stock / Low stock / Incoming / Total)
-- **Merchandise** (`/app/merchandise`) — same chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; gated by brand `merchandise` (legacy `/app/kits` redirects)
+- **Inventory** (`/app/inventory`) — same chrome (In stock / Low stock / Incoming / Total); column 2 is `PipelineDetailPanel` with left-aligned 50% photo beside stock facts, On the way and Orders on one row, and a theme **Place New Order** button
+- **Merchandise** (`/app/merchandise`) — same chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; Shop catalog is one horizontal card per SKU with a stacked qty / full-width **Add to Order** footer; desktop list column matches Curriculum width; gated by brand `merchandise` (legacy `/app/kits` redirects)
 - **Settings** (`/app/settings`) — edit public center profile (photo, address, phone); login email from auth; public footer social uses brand Social Media Connect
 - Assessments / Reports — Phase D

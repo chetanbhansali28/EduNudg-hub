@@ -27,7 +27,7 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | http://localhost:9000/login | Platform admin / staff login (split-screen UI) |
 | http://localhost:9000/admin | Platform app (Command Center KPIs) |
 | http://localhost:9000/admin/brands | Brands list — **Brand backend** opens target brand `/app`; **Edit** → brand detail |
-| http://localhost:9000/admin/brands/:slug | Brand detail — performance KPIs, settings, domains, centers |
+| http://localhost:9000/admin/brands/:slug | Brand detail — KPIs, settings (**Site logo** / name → Homepage `landing.meta`), domains, centers |
 | http://localhost:9000/admin/revenue | Revenue & usage KPIs |
 | http://localhost:9000/admin/homepage | Platform marketing homepage editor |
 | http://abacusworld.localhost:9000/ | Abacus World franchise landing (public) |

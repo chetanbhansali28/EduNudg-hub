@@ -80,7 +80,7 @@ Brand and center public/editor loads SHALL merge stored `landing` / `center_land
 
 ### Requirement: Brand Site logo is the identity image
 
-Brand staff SHALL upload the public and portal logo on `/app/homepage` **Site** → **Site logo**. Brand `/app/settings` SHALL NOT include a Brand Identity / logo card. Saving the brand homepage SHALL copy `landing.meta.logoUrl` onto `brands.logo_url` when the Site logo is non-empty. `get_portal_branding` SHALL prefer that Site logo over `brands.logo_url`.
+Brand identity copy and logo SHALL live in `brand_settings.settings.landing.meta` (Homepage **Site name** / **Site logo**). Brand staff upload on `/app/homepage` **Site** → **Site logo**. Platform admins SHALL upload the same Site logo (and persist a renamed brand name as `landing.meta.siteName`) on `/admin/brands/:slug` into that JSON — not a separate identity store. Brand `/app/settings` SHALL NOT include a Brand Identity / logo card. Saving the brand homepage or platform Site logo SHALL copy `landing.meta.logoUrl` onto `brands.logo_url` when the Site logo is non-empty. `get_portal_branding` SHALL prefer that Site logo over `brands.logo_url`.
 
 #### Scenario: Settings has no Brand Identity card
 
@@ -92,6 +92,13 @@ Brand staff SHALL upload the public and portal logo on `/app/homepage` **Site** 
 - **WHEN** brand staff save `/app/homepage` with a Site logo URL
 - **THEN** `brands.logo_url` is set to that URL
 - **AND** login / student / app chrome use it
+
+#### Scenario: Platform brand detail writes Homepage identity
+
+- **WHEN** a platform admin uploads a logo on `/admin/brands/:slug`
+- **THEN** `landing.meta.logoUrl` is set to that URL
+- **AND** `brands.logo_url` matches it
+- **AND** other `brand_settings.settings` keys and landing sections are preserved
 
 #### Scenario: Staff mobile bar shows Site logo
 

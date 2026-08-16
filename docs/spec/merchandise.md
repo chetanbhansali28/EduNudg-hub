@@ -7,7 +7,7 @@ Brand-managed catalog; franchise centers place orders from an ecommerce-style sh
 | Portal | Route | Purpose |
 |--------|-------|---------|
 | Brand | `/app/merchandise` | Catalog CRUD, promos, payment settings, order fulfillment — pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
-| Center | `/app/merchandise` | Shop + checkout and order history — pipeline chrome like Curriculum (`PipelinePageHeader` + Catalog/Unpaid/Orders/Total KPIs); Shop / My Orders tabs |
+| Center | `/app/merchandise` | Shop + checkout and order history — pipeline chrome like Curriculum (`PipelinePageHeader` + Catalog/Unpaid/Orders/Total KPIs); Shop / My Orders tabs; Shop list is one horizontal product card per row (same list density as Inventory) |
 | Platform | `/admin/brands/:slug` | Enable `merchandise` feature toggle |
 
 Legacy `/app/kits` redirects to `/app/merchandise`.
@@ -20,13 +20,13 @@ Legacy `/app/kits` redirects to `/app/merchandise`.
 - **Database:** `merchandise_catalog.photo_urls` — `text[]`, max length 5; index `0` = slot 1, etc. Empty strings mean no photo in that slot.
 - **Client:** `apps/web/src/lib/merchandiseProductPhotoStorage.ts`
 - **Brand UI:** five upload slots per catalog row on brand `/app/merchandise` → Catalog.
-- **Center UI:** product cards show a main image + thumbnail strip when multiple photos exist.
+- **Center UI:** Shop catalog uses horizontal product cards (`ed-product-card--row`), one SKU per row in the pipeline list column. Compact header (thumbnail, name/SKU/badge, price) plus a stacked qty / full-width **Add to Order** footer. Cards show a thumbnail plus a thumb strip when multiple photos exist.
 
 Allowed MIME types match the `brand-assets` bucket: PNG, JPEG, WebP, GIF (5 MB per file).
 
 ## Center shop UX
 
-1. **Shop** tab — product catalog with +/- quantity, optional per-line student assignment, checkout in the detail column on desktop (shipping, promo, payment). Page chrome matches Curriculum (`PipelinePageHeader`, `LeadKpiGrid`, search, `FilterTabs`, `PipelineWorkspace`).
+1. **Shop** tab — one horizontal catalog card per SKU. Title and SKU sit with price on the right; quantity and **Add to Order** stack in a full-width footer so the add label is never truncated at Curriculum list width (`regression_center_merchandise_shop_add_label_is_not_truncated`). Desktop `PipelineWorkspace` list column uses the same width as Curriculum (`minmax(16rem, 0.95fr)` / `minmax(0, 2.05fr)`). Do not fill empty descriptions with boilerplate copy (`regression_center_merchandise_shop_omits_placeholder_description`). Checkout in the detail column on desktop (shipping, promo, payment). Page chrome matches Curriculum (`PipelinePageHeader`, `LeadKpiGrid`, search, `FilterTabs`, `PipelineWorkspace`). Do not use a two-up product grid in column 1 (`regression_center_merchandise_shop_cards_are_horizontal_one_per_row`, `regression_center_merchandise_list_column_matches_curriculum_width`).
 2. **My orders** tab — order history in the list column; allocations and student shipping addresses in detail.
 
 ## Payments

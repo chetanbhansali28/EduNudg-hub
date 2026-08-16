@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { uploadBrandLogo } from "@/lib/brandLogoStorage";
+import { uploadBrandSiteLogo } from "@/lib/brandLandingEditorApi";
 import { invalidateBrandLogoCaches } from "@/lib/brandLogoCache";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/svg+xml,image/gif";
@@ -55,7 +55,7 @@ export function BrandLogoUpload({
     setLocalError(null);
     setPending(true);
     try {
-      const url = await uploadBrandLogo(brandId, file);
+      const url = await uploadBrandSiteLogo(brandId, file);
       setPreview(url);
       invalidateBrandLogoCaches(qc, brandId);
       onUploaded?.(url);
@@ -116,7 +116,7 @@ export function BrandLogoUpload({
   return (
     <div className={`ed-field ed-brand-logo-upload${editable ? " ed-field--editable" : ""}`}>
       <label className="ed-field__label" htmlFor={inputId}>
-        Brand logo
+        Site logo
       </label>
       <div className="ed-brand-logo-upload__row">
         {preview ? <img src={preview} alt="" className="ed-brand-logo-preview" width={40} height={40} /> : null}
@@ -130,6 +130,9 @@ export function BrandLogoUpload({
           onChange={(e) => void handleChange(e.target.files?.[0])}
         />
       </div>
+      <p className="ed-text-sm ed-muted ed-editor-field-hint">
+        Same as Homepage Site logo on the brand portal.
+      </p>
       {!brandId ? (
         <p className="ed-text-sm ed-muted">Create the brand first, then upload a logo.</p>
       ) : null}
