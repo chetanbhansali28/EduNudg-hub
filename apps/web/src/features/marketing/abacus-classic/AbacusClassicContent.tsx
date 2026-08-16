@@ -1,6 +1,7 @@
 import type { HomepageConfig } from "@/types/homepage";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { isAbacusSectionEnabled } from "@/lib/homepageSections";
+import { visiblePublicFounders } from "@/lib/centerLandingDefaults";
 import { TestimonialsCarousel } from "../TestimonialsCarousel";
 import { AbacusClassicHero } from "./AbacusClassicHero";
 import { ProgramsGridSection } from "./ProgramsMarqueeSection";
@@ -42,7 +43,8 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
   const showCurriculumSyllabus =
     isAbacusSectionEnabled(config, "curriculumSyllabus") && publicCurriculumHasSyllabus(publicCurriculum);
   const showFeatures = isAbacusSectionEnabled(config, "featureGrid") && config.featureSections.length > 0;
-  const showFounders = isAbacusSectionEnabled(config, "founders") && (config.founders?.length ?? 0) > 0;
+  const founders = visiblePublicFounders(config.founders);
+  const showFounders = isAbacusSectionEnabled(config, "founders") && founders.length > 0;
   const showTrust = isAbacusSectionEnabled(config, "trustMedia") && config.trustMedia;
   const showTestimonials = isAbacusSectionEnabled(config, "testimonials");
   const showFaq = isAbacusSectionEnabled(config, "faq") && config.faq.length > 0;
@@ -61,7 +63,7 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
       ) : null}
       {showCurriculumSyllabus ? <AbacusCurriculumSection programs={publicCurriculum} /> : null}
       {showFeatures ? <FeatureGridSection siteName={config.meta.siteName} sections={config.featureSections} /> : null}
-      {showFounders && config.founders ? <FoundersSection founders={config.founders} /> : null}
+      {showFounders ? <FoundersSection founders={founders} /> : null}
       {showTrust && config.trustMedia ? <TrustMediaSection trust={config.trustMedia} /> : null}
       {showUpcomingEvents && config.upcomingEvents ? (
         <UpcomingEventsSection section={config.upcomingEvents} events={upcomingEvents} useLeadModals />

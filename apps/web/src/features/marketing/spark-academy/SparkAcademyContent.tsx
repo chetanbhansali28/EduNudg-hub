@@ -4,6 +4,7 @@ import type { CenterPublicProfile } from "@/lib/centerLandingApi";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { isSparkSectionEnabled } from "@/lib/homepageSections";
+import { visiblePublicFounders } from "@/lib/centerLandingDefaults";
 import { resolveSparkCoursePrograms, sparkShouldShowCoursesSection } from "@/lib/programsGridItems";
 import { SparkAcademyHero } from "./SparkAcademyHero";
 import { CoursesSection } from "./CoursesSection";
@@ -42,7 +43,8 @@ export function SparkAcademyContent({
   );
   const showFeatures = isSparkSectionEnabled(config, "featureGrid") && config.featureSections.length > 0;
   const showJourney = isSparkSectionEnabled(config, "trustMedia") && config.trustMedia;
-  const showFounders = isSparkSectionEnabled(config, "founders") && (config.founders?.length ?? 0) > 0;
+  const founders = visiblePublicFounders(config.founders);
+  const showFounders = isSparkSectionEnabled(config, "founders") && founders.length > 0;
   const showTestimonials = isSparkSectionEnabled(config, "testimonials");
   const showFaq = isSparkSectionEnabled(config, "faq") && config.faq.length > 0;
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
@@ -54,7 +56,7 @@ export function SparkAcademyContent({
   const featureImageFallback =
     config.hero.backgroundImageUrl?.trim() ||
     config.gallery?.images[0]?.url?.trim() ||
-    config.founders?.[0]?.photoUrl?.trim() ||
+    founders[0]?.photoUrl?.trim() ||
     "";
   const programsTitle = config.programsSection?.title?.trim() || "";
   const coursesTitle = /course/i.test(programsTitle) ? programsTitle : undefined;
@@ -91,11 +93,11 @@ export function SparkAcademyContent({
         <JourneySection
           trust={config.trustMedia}
           rich={config.footer.rich}
-          highlightFounder={config.founders?.[0] ?? null}
+          highlightFounder={founders[0] ?? null}
         />
       ) : null}
 
-      {showFounders && config.founders ? <MentorsSection founders={config.founders} /> : null}
+      {showFounders ? <MentorsSection founders={founders} /> : null}
 
       {showUpcomingEvents && config.upcomingEvents ? (
         <div className="sa-reveal">

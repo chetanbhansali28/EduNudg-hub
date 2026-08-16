@@ -103,6 +103,22 @@ On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show
 - **AND** do not show **Sample Center**
 - **AND** copyright omits “Part of {brand}” when the franchise name matches the brand name
 
+#### Scenario: Mentors show franchiser first then brand founder
+
+- **GIVEN** Franchise Identity has a center owner name or master photo
+- **AND** the brand homepage has a founder profile
+- **WHEN** a visitor opens that center’s public site
+- **THEN** Mentors / Leadership lists the franchiser first
+- **AND** the brand founder remains on the page after the franchiser
+- **AND** Center sites placeholders such as **Founder name** / **Sample Center** are not shown, even when a photo was uploaded for that template row
+
+#### Scenario: Mentors fall back to brand owner first
+
+- **GIVEN** Franchise Identity has no distinct owner name and no master photo
+- **AND** the brand homepage has a founder profile
+- **WHEN** a visitor opens that center’s public site
+- **THEN** Mentors / Leadership shows the brand founder in first place
+
 ### Requirement: Franchise public programs match center enablement
 
 The center public homepage SHALL list only programs assigned to that franchise in `center_program_enablement` (via `center_public_curriculum_json`). Center sites marketing cards SHALL be restricted to matching enabled program names.

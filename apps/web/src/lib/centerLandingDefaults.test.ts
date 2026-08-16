@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   buildCenterLandingConfig,
   mergeAbacusClassicCenterLandingConfig,
+  overlayCenterFoundersFromIdentity,
   overlayCenterLandingIdentity,
+  brandPublicFoundersFromLanding,
   publicCenterDisplayName,
   centerPublicCopyright,
 } from "./centerLandingDefaults";
@@ -98,5 +100,84 @@ describe("overlayCenterLandingIdentity", () => {
 
   it("prefers display name over legal franchise name", () => {
     expect(publicCenterDisplayName("Legal LLC", "Smart Brain Abacus")).toBe("Smart Brain Abacus");
+  });
+});
+
+describe("overlayCenterFoundersFromIdentity", () => {
+  const brandOwner = {
+    roleBadge: "FOUNDER & CEO",
+    name: "Chetan Bhansali",
+    title: "Smart Brain Abacus Education Pvt. Ltd.",
+    bio: "Brand story",
+    photoUrl: "https://cdn.example/brand-founder.jpg",
+  };
+  const sparkStock = {
+    roleBadge: "Mentor",
+    name: "Sarah Johnson",
+    title: "AI Expert & Data Scientist",
+    bio: "",
+    photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=480&h=600&q=80",
+  };
+
+  it("regression_center_mentors_show_franchiser_first_then_brand_founder", () => {
+    const config = mergeAbacusClassicCenterLandingConfig("Sample Center", "Smart Brain Abacus", "Pune");
+    const overlaid = overlayCenterFoundersFromIdentity(config, {
+      ownerName: "Bhavana Soni",
+      photoUrl: "https://cdn.example/bhavana.jpg",
+      displayName: "Shree Samarth Smart Brain Abacus",
+      brandName: "Shree Samarth Smart Brain Abacus",
+      brandFounders: [brandOwner, sparkStock],
+    });
+
+    expect(overlaid.founders?.map((row) => row.name)).toEqual(["Bhavana Soni", "Chetan Bhansali"]);
+    expect(overlaid.founders?.[0]?.photoUrl).toBe("https://cdn.example/bhavana.jpg");
+    expect(overlaid.founders?.[0]?.title).toBe("Shree Samarth Smart Brain Abacus");
+    expect(overlaid.founders?.[1]?.photoUrl).toBe("https://cdn.example/brand-founder.jpg");
+    expect(overlaid.founders?.some((row) => row.name === "Founder name")).toBe(false);
+    expect(overlaid.founders?.some((row) => row.name === "Sarah Johnson")).toBe(false);
+  });
+
+  it("regression_center_mentors_brand_owner_first_when_franchiser_missing", () => {
+    const config = mergeAbacusClassicCenterLandingConfig("Sample Center", "Smart Brain Abacus", "Pune");
+    const overlaid = overlayCenterFoundersFromIdentity(config, {
+      ownerName: "Shree Samarth Smart Brain Abacus",
+      photoUrl: null,
+      displayName: "Shree Samarth Smart Brain Abacus",
+      brandName: "Shree Samarth Smart Brain Abacus",
+      brandFounders: [brandOwner],
+    });
+
+    expect(overlaid.founders?.map((row) => row.name)).toEqual(["Chetan Bhansali"]);
+    expect(overlaid.founders?.[0]?.photoUrl).toBe("https://cdn.example/brand-founder.jpg");
+  });
+
+  it("regression_brand_public_founders_use_saved_homepage_mentors", () => {
+    const founders = brandPublicFoundersFromLanding("spark-academy", "Shree Samarth Smart Brain Abacus", {
+      founders: [
+        {
+          roleBadge: "FOUNDER",
+          name: "Chetan Bhansali",
+          title: "Brand owner",
+          bio: "",
+          photoUrl: "https://cdn.example/brand-founder.jpg",
+        },
+      ],
+    });
+    expect(founders.map((row) => row.name)).toEqual(["Chetan Bhansali"]);
+  });
+
+  it("regression_brand_founders_omit_founder_name_placeholder_even_with_photo", () => {
+    const founders = brandPublicFoundersFromLanding("abacus-classic", "Smart Brain Abacus", {
+      founders: [
+        {
+          roleBadge: "FOUNDER & CEO",
+          name: "Founder name",
+          title: "Smart Brain Abacus Education Pvt. Ltd.",
+          bio: "",
+          photoUrl: "https://cdn.example/brand-founder.jpg",
+        },
+      ],
+    });
+    expect(founders).toEqual([]);
   });
 });

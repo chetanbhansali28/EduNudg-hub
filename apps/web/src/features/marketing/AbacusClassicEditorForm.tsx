@@ -504,10 +504,15 @@ export function AbacusClassicEditorForm({
 
       <EditorAccordion
         sectionId="founders"
-        title="Leadership profiles"
+        title={isSpark ? "Mentors / Leadership" : "Leadership profiles"}
         enabled={isThemeSectionEnabled("founders")}
         onEnabledChange={(e) => setSection("founders", e)}
       >
+        <EditorSectionNote>
+          {isSpark
+            ? "Public site: Meet Our Expert Mentors. Enter the real person’s name — template text like Founder name is hidden on the live site."
+            : "Public site: Leadership. Enter the real person’s name — template text like Founder name is hidden on the live site."}
+        </EditorSectionNote>
         <EditorItemList
           onAdd={() => commit({ ...config, founders: [...(config.founders ?? []), emptyFounder()] })}
           addLabel="+ Add profile"
@@ -1077,8 +1082,10 @@ function ProgramCardEditor({
 }
 
 function emptyFounder(): HomepageFounderProfile {
-  return { roleBadge: "FOUNDER", name: "Name", title: "Title", bio: "Bio", photoUrl: "" };
+  return { roleBadge: "FOUNDER", name: "", title: "", bio: "", photoUrl: "" };
 }
+
+const TEMPLATE_FOUNDER_NAMES = new Set(["founder name", "name"]);
 
 function FeatureBlockEditor({
   section,
@@ -1156,7 +1163,12 @@ function FounderEditor({
     <EditorItemPanel title={`Profile ${index + 1}`} onRemove={onRemove} removeLabel="Remove profile">
       <EditorFieldsGrid>
         <Input label="Role badge" value={founder.roleBadge} onChange={(v) => update({ roleBadge: v })} />
-        <Input label="Name" value={founder.name} onChange={(v) => update({ name: v })} />
+        <Input
+          label="Person's name"
+          value={TEMPLATE_FOUNDER_NAMES.has(founder.name.trim().toLowerCase()) ? "" : founder.name}
+          placeholder="Shown on public Mentors / Leadership"
+          onChange={(v) => update({ name: v })}
+        />
         <Input label="Title" value={founder.title} onChange={(v) => update({ title: v })} />
         <Input label="Bio" value={founder.bio} onChange={(v) => update({ bio: v })} />
         <EditorFieldSpan>

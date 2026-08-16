@@ -3,7 +3,11 @@ import {
   buildCenterLandingConfig,
   mergeSparkAcademyCenterLandingConfig,
   mergeAbacusClassicCenterLandingConfig,
+  overlayCenterFoundersFromIdentity,
   overlayCenterLandingIdentity,
+  brandPublicFoundersFromLanding,
+  isThemeDefaultFounder,
+  parseHomepageFounders,
   publicCenterDisplayName,
 } from "@/lib/centerLandingDefaults";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
@@ -14,7 +18,7 @@ import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPu
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { parseBrandLegalPagesRecord, type BrandLegalPages } from "@/lib/brandLegalPages";
 import { parseBrandSocialConnect, type BrandSocialConnect } from "@/lib/brandSocialConnect";
-import type { HomepageConfig, MarketingTheme } from "@/types/homepage";
+import type { HomepageConfig, HomepageFounderProfile, MarketingTheme } from "@/types/homepage";
 import { parseMarketingTheme } from "@/types/homepage";
 
 export type CenterSocialLink = {
@@ -70,6 +74,7 @@ type CenterLandingRow = {
   legal_pages?: unknown;
   social_connect?: unknown;
   landing?: Partial<HomepageConfig>;
+  brand_founders?: unknown;
   success_stories?: unknown;
   curriculum?: unknown;
 };
@@ -131,6 +136,24 @@ function parseCenterBrandMarketingExtras(row: CenterLandingRow | undefined): {
 
 const EMPTY_CENTER_MARKETING = { legalPages: {} as BrandLegalPages, socialConnect: {} as BrandSocialConnect };
 
+async function resolveBrandFounders(
+  row: CenterLandingRow,
+  brandSlug: string,
+  theme: MarketingTheme,
+  brandName: string
+): Promise<HomepageFounderProfile[]> {
+  const { data } = await getSupabase().rpc("get_brand_landing_public", { p_brand_slug: brandSlug });
+  const brandRow = data && typeof data === "object" ? (data as CenterLandingRow) : null;
+  const fromBrandPage = brandPublicFoundersFromLanding(
+    parseMarketingTheme(brandRow?.marketing_theme ?? theme),
+    brandRow?.brand_name ?? brandName,
+    brandRow?.landing,
+    brandRow?.brand_logo_url ?? row.brand_logo_url ?? null
+  );
+  if (fromBrandPage.length > 0) return fromBrandPage;
+  return parseHomepageFounders(row.brand_founders).filter((founder) => !isThemeDefaultFounder(founder));
+}
+
 function parsePublicStats(raw: unknown): BrandPublicStats {
   if (typeof raw !== "object" || raw === null) {
     return { centersCount: 0, studentsCount: 0 };
@@ -167,6 +190,26 @@ function applyCanonicalCenterName(
   return applyCanonicalSiteName(overlayCenterLandingIdentity(config, centerName, brandName), centerName);
 }
 
+function applyCenterPublicOverlays(
+  config: HomepageConfig,
+  publicName: string,
+  brandName: string,
+  identity: {
+    ownerName: string;
+    photoUrl: string | null;
+    displayName: string | null;
+    brandFounders: HomepageFounderProfile[];
+  }
+): HomepageConfig {
+  return overlayCenterFoundersFromIdentity(applyCanonicalCenterName(config, publicName, brandName), {
+    ownerName: identity.ownerName,
+    photoUrl: identity.photoUrl,
+    displayName: identity.displayName,
+    brandName,
+    brandFounders: identity.brandFounders,
+  });
+}
+
 function buildConfigWithStories(
   centerName: string,
   brandName: string,
@@ -175,16 +218,28 @@ function buildConfigWithStories(
   logoUrl: string | null,
   stories: ReturnType<typeof parsePublicSuccessStories>,
   curriculum: PublicCurriculumProgram[],
-  theme: MarketingTheme = "novu"
+  theme: MarketingTheme = "novu",
+  founderIdentity?: {
+    ownerName: string;
+    photoUrl: string | null;
+    displayName: string | null;
+    brandFounders: HomepageFounderProfile[];
+  }
 ): HomepageConfig {
   const config = buildCenterConfigForTheme(theme, centerName, brandName, city, landing, logoUrl);
-  const merged = applyCanonicalCenterName(
+  const merged = applyCenterPublicOverlays(
     {
       ...config,
       testimonials: mergePublishedSuccessStories(config.testimonials, stories),
     },
     centerName,
-    brandName
+    brandName,
+    founderIdentity ?? {
+      ownerName: "",
+      photoUrl: null,
+      displayName: null,
+      brandFounders: [],
+    }
   );
   const withEnabledPrograms = {
     ...merged,
@@ -216,7 +271,17 @@ export async function fetchCenterLandingBundle(
 
     if (error || !data || typeof data !== "object") {
       return {
-        config: buildConfigWithStories(fallbackCenter, fallbackBrand, null, undefined, null, stories, curriculum),
+        config: buildConfigWithStories(
+          fallbackCenter,
+          fallbackBrand,
+          null,
+          undefined,
+          null,
+          stories,
+          curriculum,
+          "novu",
+          { ownerName: "", photoUrl: null, displayName: null, brandFounders: [] }
+        ),
         profile: fallbackProfile(brandSlug, centerSlug),
         publicCurriculum: curriculum,
         marketingTheme: "novu",
@@ -230,6 +295,18 @@ export async function fetchCenterLandingBundle(
     const publicStats = parsePublicStats(row.public_stats);
     const socialLinks = parseCenterSocialLinks(row.center_social_links);
     const { legalPages, socialConnect } = parseCenterBrandMarketingExtras(row);
+    const brandFounders = await resolveBrandFounders(
+      row,
+      brandSlug,
+      theme,
+      row.brand_name ?? fallbackBrand
+    );
+    const founderIdentity = {
+      ownerName: row.center_name ?? fallbackCenter,
+      photoUrl: row.center_photo_url ?? null,
+      displayName: row.center_display_name ?? null,
+      brandFounders,
+    };
 
     if (!row.center_name || !row.brand_name) {
       const publicName = publicCenterDisplayName(row.center_name ?? fallbackCenter, row.center_display_name);
@@ -242,7 +319,8 @@ export async function fetchCenterLandingBundle(
           row.brand_logo_url ?? null,
           stories,
           curriculum,
-          theme
+          theme,
+          founderIdentity
         ),
         profile: {
           ...fallbackProfile(brandSlug, centerSlug),
@@ -269,7 +347,8 @@ export async function fetchCenterLandingBundle(
         row.brand_logo_url ?? null,
         stories,
         curriculum,
-        theme
+        theme,
+        founderIdentity
       ),
       profile: {
         centerId: row.center_id ?? "",
@@ -296,10 +375,18 @@ export async function fetchCenterLandingBundle(
   } catch {
     const config = buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
     return {
-      config: syncMarketingNavLinks(applyCanonicalCenterName(config, fallbackCenter, fallbackBrand), {
-        theme: "novu",
-        publicCurriculum: [],
-      }),
+      config: syncMarketingNavLinks(
+        applyCenterPublicOverlays(config, fallbackCenter, fallbackBrand, {
+          ownerName: "",
+          photoUrl: null,
+          displayName: null,
+          brandFounders: [],
+        }),
+        {
+          theme: "novu",
+          publicCurriculum: [],
+        }
+      ),
       profile: fallbackProfile(brandSlug, centerSlug),
       publicCurriculum: [],
       marketingTheme: "novu",
