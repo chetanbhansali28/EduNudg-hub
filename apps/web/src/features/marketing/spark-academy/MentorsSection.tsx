@@ -12,7 +12,7 @@ export function MentorCard({ founder }: { founder: HomepageFounderProfile }) {
   const photoUrl = founder.photoUrl?.trim() || "";
 
   return (
-    <article className="sa-mentor-card">
+    <article className="sa-mentor-card sa-reveal-item">
       <div className="sa-mentor-card__photo">
         {photoUrl ? (
           <MarketingBackgroundMedia src={photoUrl} />
@@ -37,8 +37,8 @@ export function MentorsSection({
   if (founders.length === 0) return null;
 
   return (
-    <section className="sa-mentors" id="founders">
-      <div className="sa-mentors__header">
+    <section className="sa-mentors sa-reveal" id="founders">
+      <div className="sa-mentors__header sa-reveal-item">
         <span className="sa-mentors__badge">{eyebrow}</span>
         <h2 className="sa-section-title sa-mentors__title">{title}</h2>
         {subtitle ? <p className="sa-mentors__subtitle">{subtitle}</p> : null}

@@ -90,10 +90,26 @@ describe("FeesPage", () => {
       expect(screen.getByText("Fees & Payments")).toBeDefined();
       expect(screen.getByText("FEE-001")).toBeDefined();
       expect(screen.getAllByText(/Aarav Sharma/).length).toBeGreaterThan(0);
-      expect(screen.getByText(/via upi/i)).toBeDefined();
     });
+    expect(document.querySelector(".ed-lead-kpi-grid")).toBeTruthy();
+    expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
+    expect(screen.getByText("Outstanding")).toBeDefined();
     expect(screen.getByRole("heading", { name: "Add invoice" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Record payment" })).toBeDefined();
+    fireEvent.click(screen.getByRole("tab", { name: /Payments/ }));
+    expect(await screen.findByText(/via upi/i)).toBeDefined();
+  });
+
+  it("regression_center_fees_page_matches_curriculum_stats_chrome", async () => {
+    const { container } = renderPage();
+    await waitFor(() => expect(screen.getByText("Fees & Payments")).toBeDefined());
+    expect(container.querySelector(".ed-lead-kpi-grid")).toBeTruthy();
+    const kpiLabels = [...container.querySelectorAll(".ed-lead-kpi__label")].map((el) => el.textContent);
+    expect(kpiLabels).toEqual(["Outstanding", "Paid", "Overdue", "Total"]);
+    expect(screen.getByRole("tablist", { name: "Fees sections" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Add invoice" })).toBeDefined();
+    expect(container.querySelector(".ed-pipeline-workspace")).toBeTruthy();
+    expect(container.querySelector(".ed-pipeline-page-header")).toBeTruthy();
   });
 
   it("regression_center_fees_create_invoice_submits_form", async () => {

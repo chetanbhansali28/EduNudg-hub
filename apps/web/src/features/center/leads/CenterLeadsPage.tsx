@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   FilterTabs,
+  LeadKpiCard,
+  LeadKpiGrid,
   MutationError,
-  PipelineMetricCard,
-  PipelineMetricStrip,
   PipelinePageHeader,
   PipelinePanel,
   PipelineStatusBadge,
@@ -51,7 +51,15 @@ import { bulkConvertCenterLeads } from "@/lib/centerStudentLeadImportApi";
 import { initialsFromName } from "@/lib/welcomeMessage";
 import { CenterLeadDetailPanel } from "./CenterLeadDetailPanel";
 import { CenterStudentLeadImportDialog } from "./CenterStudentLeadImportDialog";
+import "@/features/brand/franchiseApplications/franchiseApplications.css";
 import "./centerLeads.css";
+
+const ICON_SEARCH = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
 
 function slaHint(lead: LeadRow, now: number): string | null {
   if (!lead.center_id || lead.status === "converted" || lead.status === "lost") return null;
@@ -69,29 +77,6 @@ function slaHint(lead: LeadRow, now: number): string | null {
   return "Update status after each parent contact (resets SLA).";
 }
 
-const ICON_OPEN = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <path d="M3 3v18h18" />
-    <path d="m19 9-5 5-4-4-3 3" />
-  </svg>
-);
-
-const ICON_LOST = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M17 11l2 2 4-4" />
-  </svg>
-);
-
-const ICON_CONVERTED = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M22 11v6M19 14h6" />
-  </svg>
-);
-
 export function CenterLeadsPage() {
   const tenant = useTenant();
   const centerId = tenant.centerId;
@@ -99,6 +84,7 @@ export function CenterLeadsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<LeadFilter>("open");
+  const [search, setSearch] = useState("");
   const [addLeadOpen, setAddLeadOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [convertAllMode, setConvertAllMode] = useState(false);
@@ -220,8 +206,14 @@ export function CenterLeadsPage() {
   const eligibleBulkConvertCount = useMemo(() => countEligibleBulkConvertLeads(allLeads), [allLeads]);
 
   const filtered = useMemo(() => {
-    return filterCenterLeads(allLeads, filter, "");
-  }, [allLeads, filter]);
+    return filterCenterLeads(allLeads, filter, search);
+  }, [allLeads, filter, search]);
+
+  const applyFilter = (value: LeadFilter) => {
+    setFilter(value);
+    setPage(1);
+    setConvertAllMode(false);
+  };
 
   const openAddLead = () => setAddLeadOpen(true);
 
@@ -242,7 +234,7 @@ export function CenterLeadsPage() {
   const selectedHint = selected ? slaHint(selected, now) : null;
 
   return (
-    <div className="ed-center-leads-page">
+    <div className="ed-franchise-apps-page ed-center-leads-page">
       <PipelinePageHeader
         title="Leads"
         subtitle="Call parents on WhatsApp, update status, then convert when enrolled."
@@ -262,67 +254,66 @@ export function CenterLeadsPage() {
         </p>
       ) : null}
 
-      <PipelineMetricStrip>
-        <PipelineMetricCard
-          icon={ICON_OPEN}
-          tone="blue"
-          label="Open Pipeline"
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="Open"
           value={stats.open}
-          hint={openHint ?? undefined}
-          badge={
-            stats.stale > 0 ? <span className="ed-pipeline-attention-badge">Needs Attention</span> : undefined
-          }
+          hint={openHint ?? (stats.open > 0 ? "In pipeline" : undefined)}
           active={filter === "open"}
-          onClick={() => {
-            setFilter("open");
-            setPage(1);
-          }}
+          onClick={() => applyFilter("open")}
         />
-        <PipelineMetricCard
-          icon={ICON_LOST}
-          tone="red"
-          label="Lost Leads"
-          value={stats.lost}
-          hint={lostHint ?? undefined}
-          active={filter === "lost"}
-          onClick={() => {
-            setFilter("lost");
-            setPage(1);
-          }}
-        />
-        <PipelineMetricCard
-          icon={ICON_CONVERTED}
-          tone="purple"
+        <LeadKpiCard
           label="Converted"
           value={stats.converted}
           hint={convertedPipelineHint(stats.converted)}
           active={filter === "converted"}
-          onClick={() => {
-            setFilter("converted");
-            setPage(1);
-          }}
+          onClick={() => applyFilter("converted")}
         />
-      </PipelineMetricStrip>
+        <LeadKpiCard
+          label="Lost"
+          value={stats.lost}
+          hint={lostHint ?? undefined}
+          tone="lost"
+          active={filter === "lost"}
+          onClick={() => applyFilter("lost")}
+        />
+        <LeadKpiCard
+          label="Total"
+          value={stats.all}
+          hint="All leads"
+          tone="total"
+          active={filter === "all"}
+          onClick={() => applyFilter("all")}
+        />
+      </LeadKpiGrid>
+
+      <div className="ed-franchise-apps-page__toolbar">
+        <label className="ed-franchise-apps-page__search">
+          <span className="ed-franchise-apps-page__search-icon">{ICON_SEARCH}</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
+            placeholder="Search leads..."
+            aria-label="Search leads"
+          />
+        </label>
+        <FilterTabs
+          options={filterTabs}
+          value={filter}
+          onChange={applyFilter}
+          aria-label="Lead filter"
+        />
+      </div>
 
       <PipelineWorkspace
         detailOpen={!!selected}
         list={
           <PipelinePanel>
-            <PipelineTableToolbar
-              tabs={
-                <FilterTabs
-                  options={filterTabs}
-                  value={filter}
-                  onChange={(value) => {
-                    setFilter(value);
-                    setPage(1);
-                    setConvertAllMode(false);
-                  }}
-                  aria-label="Lead filter"
-                />
-              }
-              meta={paginationLabel(filtered.length, page, LEAD_PAGE_SIZE)}
-            />
+            <PipelineTableToolbar meta={paginationLabel(filtered.length, page, LEAD_PAGE_SIZE)} />
 
             {filter === "open" && eligibleBulkConvertCount > 0 ? (
               <div className="ed-center-leads-page__bulk-bar">

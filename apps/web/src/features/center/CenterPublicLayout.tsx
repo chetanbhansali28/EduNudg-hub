@@ -124,7 +124,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
         />
       ) : null}
       {themeUsesLeadModals(theme) ? (
-        <MarketingLeadModals brandSlug={brandSlug} centerSlug={centerSlug} />
+        <MarketingLeadModals brandSlug={brandSlug} centerSlug={centerSlug} theme={theme} />
       ) : null}
     </div>
   );

@@ -3,6 +3,7 @@ import { Button, Input, MutationError } from "@edunudg/ui";
 import { submitFranchiseInquiry } from "@/lib/brandLandingApi";
 import { submitBrandStudentApplication, submitCenterStudentRegistration } from "@/lib/leadsApi";
 import { isIndiaPincode } from "@/lib/leadSla";
+import type { MarketingTheme } from "@/types/homepage";
 import { useLeadModal, type LeadModalKind } from "./LeadModalContext";
 import { resolveLeadModalKind } from "./resolveLeadModalKind";
 
@@ -12,6 +13,8 @@ type Props = {
   brandSlug: string;
   /** When set, enroll modal submits center registration (Path B) instead of brand application. */
   centerSlug?: string;
+  /** Spark Academy skins the dialog to Inter / navy / pill CTAs. */
+  theme?: MarketingTheme;
 };
 
 export function AcModalShell({
@@ -19,13 +22,16 @@ export function AcModalShell({
   open,
   onClose,
   children,
+  appearance = "abacus-classic",
 }: {
   title: string;
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  appearance?: "abacus-classic" | "spark-academy";
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const isSpark = appearance === "spark-academy";
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -37,7 +43,7 @@ export function AcModalShell({
   return (
     <dialog
       ref={dialogRef}
-      className="ac-modal"
+      className={isSpark ? "ac-modal ac-modal--spark" : "ac-modal"}
       onClose={onClose}
       onClick={(e) => e.target === dialogRef.current && onClose()}
     >
@@ -234,20 +240,31 @@ const MODAL_TITLES: Record<Exclude<LeadModalKind, null>, string> = {
   apply: "Apply for franchise",
 };
 
-export function MarketingLeadModals({ brandSlug, centerSlug }: Props) {
+export function MarketingLeadModals({ brandSlug, centerSlug, theme }: Props) {
   const { activeModal, closeModal } = useLeadModal();
   const enrollTitle = centerSlug ? "Book a free trial at this center" : MODAL_TITLES.enroll;
+  const appearance = theme === "spark-academy" ? "spark-academy" : "abacus-classic";
 
   return (
     <>
-      <AcModalShell title={enrollTitle} open={activeModal === "enroll"} onClose={closeModal}>
+      <AcModalShell
+        title={enrollTitle}
+        open={activeModal === "enroll"}
+        onClose={closeModal}
+        appearance={appearance}
+      >
         <EnrollForm
           brandSlug={brandSlug}
           centerSlug={centerSlug}
           onSuccess={() => setTimeout(closeModal, 2000)}
         />
       </AcModalShell>
-      <AcModalShell title={MODAL_TITLES.apply} open={activeModal === "apply"} onClose={closeModal}>
+      <AcModalShell
+        title={MODAL_TITLES.apply}
+        open={activeModal === "apply"}
+        onClose={closeModal}
+        appearance={appearance}
+      >
         <FranchiseForm brandSlug={brandSlug} onSuccess={() => setTimeout(closeModal, 2000)} />
       </AcModalShell>
     </>

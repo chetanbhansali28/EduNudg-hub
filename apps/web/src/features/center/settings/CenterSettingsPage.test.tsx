@@ -1,7 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@edunudg/ui";
+import { updateCenterPublicProfile } from "@/lib/centerProfileApi";
 import { CenterSettingsPage } from "./CenterSettingsPage";
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
@@ -45,6 +46,9 @@ vi.mock("./CenterPhotoUpload", () => ({
 }));
 
 describe("CenterSettingsPage", () => {
+  beforeEach(() => {
+    vi.mocked(updateCenterPublicProfile).mockClear();
+  });
   it("regression_center_settings_catalog_theme", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
@@ -64,6 +68,46 @@ describe("CenterSettingsPage", () => {
     expect(screen.getByDisplayValue("Abacus Koramangala")).toBeDefined();
     expect(screen.getByRole("button", { name: "Save profile" })).toBeDefined();
     expect(document.querySelector(".ed-settings-stack")).toBeTruthy();
+    expect(screen.queryByText("Social presence")).toBeNull();
+    expect(screen.queryByRole("button", { name: "+ Add social link" })).toBeNull();
+  });
+
+  it("regression_center_settings_omits_social_presence", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <CenterSettingsPage />
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText("Public Center Profile")).toBeDefined();
+    expect(screen.queryByText("Social presence")).toBeNull();
+    expect(screen.queryByRole("button", { name: "+ Add social link" })).toBeNull();
+    expect(screen.queryByLabelText("Facebook")).toBeNull();
+  });
+
+  it("regression_center_settings_save_passthrough_social_links", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <CenterSettingsPage />
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+
+    fireEvent.click(await screen.findByRole("button", { name: "Save profile" }));
+    await waitFor(() => {
+      expect(updateCenterPublicProfile).toHaveBeenCalled();
+    });
+    expect(updateCenterPublicProfile).toHaveBeenCalledWith(
+      "center-1",
+      expect.objectContaining({
+        socialLinks: [{ platform: "Facebook", url: "https://facebook.com/center" }],
+      })
+    );
   });
 
   it("regression_center_settings_save_profile_button_present", async () => {

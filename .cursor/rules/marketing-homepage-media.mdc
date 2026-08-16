@@ -24,6 +24,7 @@ Bucket: `brand-assets` (`platform/marketing/…`, `{brandId}/marketing/…`, log
 - Seed / upserts of `brand_settings` must prefer existing settings (`EXCLUDED.settings || brand_settings.settings`) — never full-replace.
 - Theme switch updates `brands.marketing_theme` only — do not clear landing JSON.
 - Keep `regression_*` coverage for platform + brand/center media preservation.
+- Center public footers use brand `social_connect` (Homepage Social Media Connect), not `franchise_centers.social_links`.
 
 ## MUST NOT
 
@@ -32,7 +33,8 @@ Bucket: `brand-assets` (`platform/marketing/…`, `{brandId}/marketing/…`, log
 - `ON CONFLICT … DO UPDATE SET settings = EXCLUDED.settings` for `brand_settings`.
 - Save an editor while the UI is showing stock defaults over customized DB content.
 - Delete Storage objects to “fix” missing images — fix JSON URLs.
-- Inherit brand `social_connect` Facebook/Instagram onto center public footers (use `franchise_centers.social_links`).
+- Render `franchise_centers.social_links` on center public footers (use brand `social_connect` from Social Media Connect).
+- Show a Social presence / **+ Add social link** editor on center Settings.
 
 ## Code / specs
 

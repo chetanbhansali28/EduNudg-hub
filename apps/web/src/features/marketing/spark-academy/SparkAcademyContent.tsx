@@ -14,6 +14,7 @@ import { TestimonialsSection } from "./TestimonialsSection";
 import { FaqSection } from "./FaqSection";
 import { UpcomingEventsSection } from "../UpcomingEventsSection";
 import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
+import { useScrollReveal } from "../useScrollReveal";
 import { GallerySection, galleryPhotos } from "./GallerySection";
 
 type Props = {
@@ -58,6 +59,8 @@ export function SparkAcademyContent({
   const programsTitle = config.programsSection?.title?.trim() || "";
   const coursesTitle = /course/i.test(programsTitle) ? programsTitle : undefined;
 
+  useScrollReveal(true, ".sa-reveal", { threshold: 0.16, rootMargin: "0px 0px -12% 0px" });
+
   return (
     <main className="sa-main">
       {showHero ? (
@@ -95,7 +98,9 @@ export function SparkAcademyContent({
       {showFounders && config.founders ? <MentorsSection founders={config.founders} /> : null}
 
       {showUpcomingEvents && config.upcomingEvents ? (
-        <UpcomingEventsSection section={config.upcomingEvents} events={upcomingEvents} useLeadModals />
+        <div className="sa-reveal">
+          <UpcomingEventsSection section={config.upcomingEvents} events={upcomingEvents} useLeadModals />
+        </div>
       ) : null}
 
       {showTestimonials ? <TestimonialsSection testimonials={config.testimonials} /> : null}

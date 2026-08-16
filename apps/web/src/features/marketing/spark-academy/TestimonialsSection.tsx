@@ -19,7 +19,7 @@ function TestimonialCard({ item }: { item: HomepageConfig["testimonials"]["items
     .join("");
 
   return (
-    <article className="sa-testimonial-card">
+    <article className="sa-testimonial-card sa-reveal-item">
       <div className="sa-testimonial-card__stars" aria-label="5 out of 5 stars">
         ★★★★★
       </div>
@@ -56,8 +56,8 @@ export function TestimonialsSection({
   useSparkTestimonialsCarousel(trackRef, items.length);
 
   return (
-    <section className="sa-testimonials" id="testimonials">
-      <div className="sa-testimonials__header">
+    <section className="sa-testimonials sa-reveal" id="testimonials">
+      <div className="sa-testimonials__header sa-reveal-item">
         <span className="sa-testimonials__badge">{eyebrow}</span>
         <h2 className="sa-section-title sa-testimonials__title">{title}</h2>
         <p className="sa-testimonials__subtitle">{subtitle}</p>

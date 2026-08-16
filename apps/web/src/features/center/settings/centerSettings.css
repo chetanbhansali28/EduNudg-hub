@@ -79,12 +79,6 @@
   padding: 0;
 }
 
-.ed-center-social-links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
 @media (max-width: 767px) {
   .ed-center-settings-page__mobile-photo {
     display: block;

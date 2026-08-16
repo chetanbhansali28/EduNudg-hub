@@ -60,19 +60,19 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
 | Main menu | Home | `/app` | Exists — open leads KPI |
-| Features | **Leads** | `/app/leads` | Exists — manual add, convert, mark lost |
-| | Students | `/app/students` | Exists |
+| Features | **Leads** | `/app/leads` | Exists — curriculum-style pipeline chrome (KPI stats Open/Converted/Lost/Total, search, filter tabs, list + detail); manual add, convert, mark lost |
+| | Students | `/app/students` | Exists — same pipeline chrome (Linked/Unassigned/Programs/Total) |
 | | Batches | `/app/batches` | Exists — gated by brand feature `batches` (default off) |
-| | Fees & Payments | `/app/fees` | Exists |
+| | Fees & Payments | `/app/fees` | Exists — same pipeline chrome (Outstanding/Paid/Overdue/Total); Invoices / Payments tabs |
 | | Merchandise | `/app/merchandise` | Exists — shop, checkout, order history |
 | | Assessments | `/app/assessments` | Phase D |
 | | Reports | `/app/reports` | Phase D |
-| General | Settings | `/app/settings` | Exists — public profile (photo, address, phone, social) |
+| General | Settings | `/app/settings` | Exists — public profile (photo, address, phone) |
 | Footer | Log out | — | Exists |
 
-**Center `/app/settings`:** franchise staff edit display name, description, address, photo, phone, and social links. Login email is read-only from auth; public marketing URL is the center website.
+**Center `/app/settings`:** franchise staff edit display name, description, address, photo, and phone. Login email is read-only from auth; public marketing URL is the center website. Footer social icons use brand Social Media Connect.
 
-**Center `/app/leads`:** assigned leads + direct `lead_source = center`; status changes reset SLA; **Convert** action.
+**Center `/app/leads`:** assigned leads + direct `lead_source = center`; status changes reset SLA; **Convert** action. Page chrome matches center Curriculum (`PipelinePageHeader`, `LeadKpiGrid`, search + `FilterTabs`, `PipelineWorkspace`). Center `/app/students` and `/app/fees` use the same stats + list/detail chrome.
 
 ---
 

@@ -69,7 +69,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 
 ## Center public
 
-> Canonical specs: [`student-leads`](../../openspec/specs/student-leads/spec.md) (registration), [`center-public-profile`](../../openspec/specs/center-public-profile/spec.md) (blurb, photo, social)
+> Canonical specs: [`student-leads`](../../openspec/specs/student-leads/spec.md) (registration), [`center-public-profile`](../../openspec/specs/center-public-profile/spec.md) (blurb, photo; footer social from brand Social Media Connect)
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
@@ -82,16 +82,18 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 
 ## Center app
 
-> Canonical spec: [`openspec/specs/student-leads/spec.md`](../../openspec/specs/student-leads/spec.md)
+> Canonical specs: [`student-leads`](../../openspec/specs/student-leads/spec.md), [`center-students-workspace`](../../openspec/specs/center-students-workspace/spec.md), [`center-fees-workspace`](../../openspec/specs/center-fees-workspace/spec.md)
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
-| FR-C10 | C | **Leads** `/app/leads` | Assigned + direct center leads |
+| FR-C10 | C | **Leads** `/app/leads` | Assigned + direct center leads; curriculum-style pipeline chrome (Open / Converted / Lost / Total KPIs) |
 | FR-C11 | C | Status change only resets SLA | `update_lead_status` sets `last_center_action_at` |
 | FR-C11b | C | **Mark lead lost** — center only | `mark_lead_lost(p_lead_id, p_reason)` — requires `lost_reason`; brand cannot call |
 | FR-C12 | C | Staff-only **Convert** | No parent self-serve link v1 |
 | FR-C13 | C | Convert field mapping | See [Convert mapping](#fr-c13--convert_lead_to_student-field-mapping) |
 | FR-C14 | C | Cannot convert unassigned brand leads | `center_id` must match self |
+| FR-C15 | C | **Students** `/app/students` | Same pipeline chrome as Curriculum (Linked / Unassigned / Programs / Total); list + detail |
+| FR-C16 | C | **Fees** `/app/fees` | Same pipeline chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs |
 
 ---
 

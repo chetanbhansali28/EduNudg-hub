@@ -44,6 +44,10 @@ describe("SparkAcademyContent", () => {
     expect(screen.getByText(/Shape your future with/)).toBeDefined();
     expect(screen.getByText("Courses designed for success")).toBeDefined();
     expect(document.querySelector(".sa-courses .sa-section-head--center")).toBeDefined();
+    expect(document.querySelector(".sa-courses.sa-reveal")).toBeDefined();
+    expect(document.querySelector(".sa-faq.sa-reveal")).toBeDefined();
+    expect(document.querySelector(".sa-course-card.sa-reveal-item")).toBeDefined();
+    expect(document.querySelector(".sa-faq__item.sa-reveal-item")).toBeDefined();
     expect(document.querySelector(".sa-courses__grid--center")).toBeDefined();
     expect(screen.getByRole("heading", { level: 3, name: "Abacus Junior" })).toBeDefined();
     expect(screen.getByText("Our Journey to Excellence")).toBeDefined();
@@ -303,5 +307,32 @@ describe("SparkAcademyContent", () => {
     itemH3s.forEach((heading) => {
       expect(heading.classList.contains("sa-item-title")).toBe(true);
     });
+  });
+
+  it("regression_spark_section_items_stagger_inside_blocks", () => {
+    const config = mergeSparkAcademyLandingConfig("Educat Demo");
+    render(
+      <LeadModalProvider>
+        <SparkAcademyContent
+          config={config}
+          portalMode="brand"
+          brandSlug="educat-demo"
+          publicCurriculum={[
+            createPublicCurriculumProgram({
+              name: "Abacus Junior",
+              description: "Foundations for young learners",
+              levels: [],
+            }),
+          ]}
+        />
+      </LeadModalProvider>
+    );
+
+    expect(document.querySelector(".sa-course-card.sa-reveal-item")).toBeDefined();
+    expect(document.querySelector(".sa-features__item.sa-reveal-item")).toBeDefined();
+    expect(document.querySelector(".sa-journey__row.sa-reveal-item")).toBeDefined();
+    expect(document.querySelector(".sa-mentor-card.sa-reveal-item")).toBeDefined();
+    expect(document.querySelector(".sa-testimonial-card.sa-reveal-item")).toBeDefined();
+    expect(document.querySelector(".sa-faq__item.sa-reveal-item")).toBeDefined();
   });
 });

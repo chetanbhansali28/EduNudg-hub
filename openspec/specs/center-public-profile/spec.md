@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Franchise staff maintain how their center appears on the public marketing host: contact details, photo, description, and social links. Changes in center Settings flow to the public landing page via `get_center_landing_public`.
+Franchise staff maintain how their center appears on the public marketing host: contact details, photo, and description. Footer social icons come from brand Social Media Connect (`social_connect`), not franchise `social_links`. Changes in center Settings flow to the public landing page via `get_center_landing_public`.
 
 ## Related
 
@@ -13,7 +13,7 @@ Franchise staff maintain how their center appears on the public marketing host: 
 ## Requirements
 ### Requirement: Center public profile settings
 
-Franchise staff SHALL edit center public profile fields at `/app/settings`: display name, short description, address line, city, region, pincode, country, contact phone, photo, and up to six social links.
+Franchise staff SHALL edit center public profile fields at `/app/settings`: display name, short description, address line, city, region, pincode, country, contact phone, and photo. Center Settings SHALL NOT show a Social presence editor or **+ Add social link**. Profile Save SHALL pass through existing `franchise_centers.social_links` without editing them.
 
 #### Scenario: Staff saves profile
 
@@ -42,35 +42,42 @@ Franchise staff SHALL upload a center photo stored in the `brand-assets` bucket 
 - **THEN** `photo_url` is saved on the center record
 - **AND** the photo appears on the center public landing page
 
-### Requirement: Social links validation
+### Requirement: Social links RPC validation
 
-The system SHALL accept `social_links` as a JSON array of `{platform, url}` with at most six entries.
+The RPC SHALL still accept `social_links` as a JSON array of `{platform, url}` with at most six entries when a save pass-through sends the existing column. Center Settings SHALL NOT collect new links.
 
 #### Scenario: Reject invalid social links
 
-- **WHEN** staff save a profile with more than six social links or non-array `social_links`
+- **WHEN** a save payload contains more than six social links or non-array `social_links`
 - **THEN** the RPC rejects the update with an error message
+
+#### Scenario: Center Settings omits Social presence
+
+- **WHEN** franchise staff open `/app/settings`
+- **THEN** Public Center Profile has no **Social presence** section and no **+ Add social link**
+- **AND** Save profile still sends existing `social_links` unchanged
 
 ### Requirement: Public landing reflects profile
 
-The center public homepage SHALL display profile fields from `get_center_landing_public` including display name, description, address, contact phone, photo, and social links.
+The center public homepage SHALL display profile fields from `get_center_landing_public` including display name, description, address, contact phone, and photo.
 
-Footer social icons on the **center** host SHALL use `franchise_centers.social_links` (Facebook, Instagram, YouTube, WhatsApp, LinkedIn, X when a valid `https` URL is saved in **center Settings**), not brand `social_connect`. Brand **Franchise Management** (`/app/centers`) SHALL NOT show or edit those links. Brand landing Social Media Connect remains Facebook/Instagram only and SHALL NOT show a WhatsApp float.
+Footer social icons on the **center** host SHALL use brand `social_connect` (the same Social Media Connect Facebook/Instagram URLs as the brand homepage), not `franchise_centers.social_links`. Brand **Franchise Management** (`/app/centers`) and center **Settings** SHALL NOT show or edit those links. Brand landing Social Media Connect remains Facebook/Instagram only and SHALL NOT show a WhatsApp float.
 
 On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show the same franchise Location & Contact overlay (`centerFooterContactFromProfile`) — street, city · region · pincode, and phone — and SHALL NOT show brand `headOffice`, brand “Our presence”, or Spark’s placeholder phone. Brand hosts keep Head office / presence unchanged.
 
-#### Scenario: Footer social uses franchise URLs
+#### Scenario: Footer social uses brand Social Media Connect
 
 - **GIVEN** the brand Social Media Connect points at the brand owner's Facebook/Instagram
-- **AND** the franchise saved its own social URLs in center Settings
+- **AND** leftover `franchise_centers.social_links` still exist on the franchise row
 - **WHEN** a visitor opens the center public site (View Frontend)
-- **THEN** the footer shows icons for each saved https link (including YouTube)
-- **AND** does not open the brand owner's social pages
+- **THEN** the footer icons open the brand Social Media Connect URLs
+- **AND** do not use the franchise `social_links` (including leftover YouTube)
 
 #### Scenario: Public page after settings save
 
 - **WHEN** a visitor opens the center public homepage after staff save profile changes
-- **THEN** updated display name, blurb, contact, photo, and social links are visible
+- **THEN** updated display name, blurb, contact, and photo are visible
+- **AND** footer social icons still come from brand Social Media Connect
 - **AND** the nav shows the brand logo only (no center logo)
 
 #### Scenario: Franchise frontend nav highlights logo and name

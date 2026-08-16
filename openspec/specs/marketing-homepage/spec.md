@@ -236,6 +236,18 @@ On viewports `max-width: 767px`, Spark Academy **Success stories** (`#testimonia
 - **THEN** the stories track is a horizontal carousel
 - **AND** it auto-advances to the next card
 
+### Requirement: Spark Academy homepage uses motion that respects reduced-motion
+
+Spark Academy public `/` SHALL animate the hero on load (rise/fade, floating photo cards) and scroll-reveal lower sections (`sa-reveal` + `useScrollReveal`). Cards, list rows, and other items inside those sections SHALL enter with a delayed fade-and-scale (`sa-reveal-item` / `sa-item-in`), distinct from the section’s vertical lift. Section lift and item entries SHALL be unhurried (about one second per beat, with ~200ms stagger) so they remain visible while scrolling. Animations SHALL disable when `prefers-reduced-motion: reduce`.
+
+#### Scenario: Spark homepage sections use reveal classes
+
+- **GIVEN** a Spark Academy public homepage
+- **WHEN** a visitor opens `/`
+- **THEN** courses, features, journey, mentors, testimonials, FAQ, and gallery sections have `sa-reveal`
+- **AND** course cards, feature rows, journey rows, mentor/testimonial cards, and FAQ items have `sa-reveal-item`
+- **AND** CSS includes unhurried inner fade-and-scale (`sa-item-in` ~1.1s, distinct from the ~0.95s section lift) plus reduced-motion fallbacks
+
 ### Requirement: Center enrollment template has its own brand nav page
 
 Brand staff SHALL edit the parent enrollment template (`center_landing`) at `/app/center-site` (**Center Site Configuration**). The brand Homepage editor at `/app/homepage` SHALL NOT include that Center sites panel.

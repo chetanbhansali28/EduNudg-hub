@@ -95,6 +95,7 @@ describe("BrandPublicLayout", () => {
     expect(screen.queryByTestId("novu-footer")).toBeNull();
     expect(screen.getByText("Franchises")).toBeDefined();
     expect(screen.getByText("5+")).toBeDefined();
+    expect(document.querySelector(".ac-modal--spark")).toBeNull();
   });
 
   it("sprint1_renders_spark_academy_layout_for_spark_theme", async () => {
@@ -127,5 +128,6 @@ describe("BrandPublicLayout", () => {
     expect(screen.getByRole("heading", { name: "Explore" })).toBeDefined();
     expect(screen.queryByText(/Start Your Learning Journey Today!/i)).toBeNull();
     expect(screen.queryByText(/Start your network differently/i)).toBeNull();
+    expect(document.querySelectorAll("dialog.ac-modal--spark")).toHaveLength(2);
   });
 });

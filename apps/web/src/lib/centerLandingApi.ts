@@ -13,7 +13,7 @@ import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
 import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPublicSite";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { parseBrandLegalPagesRecord, type BrandLegalPages } from "@/lib/brandLegalPages";
-import { socialConnectFromCenterLinks, type BrandSocialConnect } from "@/lib/brandSocialConnect";
+import { parseBrandSocialConnect, type BrandSocialConnect } from "@/lib/brandSocialConnect";
 import type { HomepageConfig, MarketingTheme } from "@/types/homepage";
 import { parseMarketingTheme } from "@/types/homepage";
 
@@ -113,19 +113,20 @@ function parseCenterSocialLinks(raw: unknown): CenterSocialLink[] {
     .filter((x): x is CenterSocialLink => x !== null);
 }
 
-function parseCenterBrandMarketingExtras(
-  row: CenterLandingRow | undefined,
-  socialLinks: CenterSocialLink[]
-): {
+function parseCenterBrandMarketingExtras(row: CenterLandingRow | undefined): {
   legalPages: BrandLegalPages;
   socialConnect: BrandSocialConnect;
 } {
-  if (!row) return { legalPages: {}, socialConnect: socialConnectFromCenterLinks(socialLinks) };
+  if (!row) return { legalPages: {}, socialConnect: {} };
   const legalPages =
     row.legal_pages && typeof row.legal_pages === "object"
       ? parseBrandLegalPagesRecord(row.legal_pages as Record<string, unknown>)
       : {};
-  return { legalPages, socialConnect: socialConnectFromCenterLinks(socialLinks) };
+  const settings =
+    row.social_connect && typeof row.social_connect === "object"
+      ? { social_connect: row.social_connect as Record<string, unknown> }
+      : {};
+  return { legalPages, socialConnect: parseBrandSocialConnect(settings, row.landing ?? undefined) };
 }
 
 const EMPTY_CENTER_MARKETING = { legalPages: {} as BrandLegalPages, socialConnect: {} as BrandSocialConnect };
@@ -228,7 +229,7 @@ export async function fetchCenterLandingBundle(
     const theme = parseMarketingTheme(row.marketing_theme);
     const publicStats = parsePublicStats(row.public_stats);
     const socialLinks = parseCenterSocialLinks(row.center_social_links);
-    const { legalPages, socialConnect } = parseCenterBrandMarketingExtras(row, socialLinks);
+    const { legalPages, socialConnect } = parseCenterBrandMarketingExtras(row);
 
     if (!row.center_name || !row.brand_name) {
       const publicName = publicCenterDisplayName(row.center_name ?? fallbackCenter, row.center_display_name);

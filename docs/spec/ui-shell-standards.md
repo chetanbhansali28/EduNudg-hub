@@ -111,23 +111,23 @@ Staff `AppShell` layouts (brand `/app`, center `/app`, platform `/admin`) pass `
 
 ## Lead / application pipelines
 
-Franchise applications, brand student leads, center leads, platform brand signups, brand/center curriculum, brand success stories, and brand merchandise share the **pipeline** pattern from `@edunudg/ui`. Brand Student Leads (`/app/leads`), Curriculum (`/app/curriculum`), Success Stories (`/app/success-stories`), and Merchandise (`/app/merchandise`) use the same workspace chrome as Franchise Applications: `PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`, and `PipelineWorkspace` with the list staying visible beside detail on desktop. Merchandise Catalog, Promo Codes, Orders, and Payment settings all use that list + detail workspace. On Student Leads, assignment management stacks below applicant details in that detail column (do not add a third page column).
+Franchise applications, brand student leads, center leads, center students, center fees, platform brand signups, brand/center curriculum, brand success stories, and brand merchandise share the **pipeline** pattern from `@edunudg/ui`. Brand Student Leads (`/app/leads`), Curriculum (`/app/curriculum`), Success Stories (`/app/success-stories`), Merchandise (`/app/merchandise`), and center **Leads** / **Students** / **Fees** use the same workspace chrome as Franchise Applications: `PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`, and `PipelineWorkspace` with the list staying visible beside detail on desktop. Merchandise Catalog, Promo Codes, Orders, and Payment settings all use that list + detail workspace. On Student Leads, assignment management stacks below applicant details in that detail column (do not add a third page column).
 
 | Primitive | Use |
 |-----------|-----|
 | `PipelineMasterDetail` | List column + sticky detail column from 1024px |
-| `PipelineWorkspace` | Persistent list + detail chrome used by Franchise Applications, brand Student Leads, Curriculum, Success Stories, and Merchandise |
-| `FilterTabs` | Pill filters with optional counts (replaces lone `Select`). Brand Franchise Applications and Student Leads use **Pending review** / **Decided** only. |
+| `PipelineWorkspace` | Persistent list + detail chrome used by Franchise Applications, brand Student Leads, Curriculum, Success Stories, Merchandise, and center Leads / Students / Fees |
+| `FilterTabs` | Pill filters with optional counts (replaces lone `Select`). Brand Franchise Applications and Student Leads use **Pending review** / **Decided** only. Center Leads uses Open Pipeline / Lost / Converted / All. Center Students uses All students (All on mobile) / Linked / Unassigned. Center Fees uses Invoices / Payments. |
 | `PipelineListItem` | Avatar, title, meta, badges, relative time |
-| `KpiCard` / `LeadKpiGrid` + `onClick` | KPI strip doubles as filter shortcuts. Franchise Applications: Pending review, Approved, Rejected, Total. Brand Student Leads: Pending review, Converted, Lost, Total. Curriculum: Active, Drafts, Programs (informational), Total. Merchandise: Active, Draft, Orders, Total. |
+| `KpiCard` / `LeadKpiGrid` + `onClick` | KPI strip doubles as filter shortcuts. Franchise Applications: Pending review, Approved, Rejected, Total. Brand Student Leads: Pending review, Converted, Lost, Total. Curriculum: Active, Drafts, Programs (informational), Total. Merchandise: Active, Draft, Orders, Total. Center Leads: Open, Converted, Lost, Total. Center Students: Linked, Unassigned, Programs (informational), Total. Center Fees: Outstanding, Paid, Overdue, Total. |
 | `PipelineEmptyState` | Compact empty message + optional CTA |
 | `PipelineDetailPlaceholder` | Desktop hint when no row is selected |
 
 Styles use admin theme tokens (`--ed-primary-soft`, `--ed-card`, etc.) for light and dark mode.
 
-Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `CurriculumWorkspace` (`/app/curriculum` and center curriculum), `BrandMerchandisePage`, `BrandsSignupReviewSection` (on `/admin/brands`; detail via `PlatformSignupDetailCard`).
+Pages: `FranchiseApplicationsPage`, `StudentLeadsPage`, `CenterLeadsPage`, `StudentsPage`, `FeesPage`, `CurriculumWorkspace` (`/app/curriculum` and center curriculum), `BrandMerchandisePage`, `BrandsSignupReviewSection` (on `/admin/brands`; detail via `PlatformSignupDetailCard`).
 
-Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `CurriculumPage.test.tsx`, `CenterCurriculumPage.test.tsx`, `BrandMerchandisePage.test.tsx`, `BrandMerchandisePromoSection.test.tsx`, `BrandMerchandiseOrdersSection.test.tsx`, `BrandMerchandisePaymentSettings.test.tsx`, `BrandsSignupReviewSection.test.tsx`, `PlatformSignupDetailCard.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`, `AppShell.responsive.test.tsx`.
+Tests: `FranchiseApplicationsPage.test.tsx`, `StudentLeadsPage.test.tsx`, `CenterLeadsPage.test.tsx`, `StudentsPage.test.tsx`, `FeesPage.test.tsx`, `CurriculumPage.test.tsx`, `CenterCurriculumPage.test.tsx`, `BrandMerchandisePage.test.tsx`, `BrandMerchandisePromoSection.test.tsx`, `BrandMerchandiseOrdersSection.test.tsx`, `BrandMerchandisePaymentSettings.test.tsx`, `BrandsSignupReviewSection.test.tsx`, `PlatformSignupDetailCard.test.tsx`, `welcomeMessage.test.ts`, `useShellContextCounts.test.ts`, `AppShell.responsive.test.tsx`.
 
 ## Backend catalog workspace
 
@@ -161,7 +161,7 @@ Staff account and public profile settings use reusable primitives from `@edunudg
 | `SettingsAccountLayout` | Photo + account fields grid |
 | `SettingsMetaList` | Mobile account summary rows |
 | `SettingsProfileBanner` | Public profile preview strip |
-| `SettingsSubsection` | Contact / social blocks (split cards on mobile) |
+| `SettingsSubsection` | Contact blocks (split cards on mobile) |
 | `SettingsPhoneField` | +91 prefixed phone input |
 | `SettingsMapsButton` | Google Maps verify CTA |
 | `SettingsSocialField` | Platform icon + URL row |

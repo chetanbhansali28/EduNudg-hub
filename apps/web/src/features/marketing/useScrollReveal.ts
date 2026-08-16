@@ -1,8 +1,20 @@
 import { useEffect } from "react";
 
-export function useScrollReveal(active: boolean, selector = ".novu-reveal") {
+type ScrollRevealOptions = {
+  threshold?: number;
+  rootMargin?: string;
+};
+
+export function useScrollReveal(
+  active: boolean,
+  selector = ".novu-reveal",
+  options?: ScrollRevealOptions
+) {
+  const threshold = options?.threshold ?? 0.12;
+  const rootMargin = options?.rootMargin ?? "0px 0px -40px 0px";
+
   useEffect(() => {
-    if (!active) return;
+    if (!active || typeof IntersectionObserver === "undefined") return;
     const els = document.querySelectorAll(selector);
     const io = new IntersectionObserver(
       (entries) => {
@@ -10,9 +22,9 @@ export function useScrollReveal(active: boolean, selector = ".novu-reveal") {
           if (e.isIntersecting) e.target.classList.add("is-visible");
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+      { threshold, rootMargin }
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, [active, selector]);
+  }, [active, selector, threshold, rootMargin]);
 }

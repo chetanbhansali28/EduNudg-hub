@@ -31,17 +31,6 @@ export function CenterBlurbSection({ profile }: Props) {
           {profile.addressLine1 && <li>{profile.addressLine1}</li>}
           {profile.contactPhone && <li>Call / WhatsApp: {profile.contactPhone}</li>}
         </ul>
-        {profile.socialLinks.length > 0 ? (
-          <ul className="novu-center-blurb__social">
-            {profile.socialLinks.map((link) => (
-              <li key={`${link.platform}-${link.url}`}>
-                <a href={link.url} target="_blank" rel="noreferrer">
-                  {link.platform}
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : null}
       </div>
     </section>
   );

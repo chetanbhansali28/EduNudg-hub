@@ -37,7 +37,7 @@ Brand staff SHALL edit franchise details except slug.
 
 ### Requirement: Franchise Management has no social media editor
 
-Brand `/app/centers` SHALL NOT show or edit franchise social media. Profile Save SHALL pass through existing `franchise_centers.social_links` without a Social Media form.
+Brand `/app/centers` SHALL NOT show or edit franchise social media. Profile Save SHALL pass through existing `franchise_centers.social_links` without a Social Media form. Center public footers SHALL use brand `social_connect` instead of those stored links.
 
 #### Scenario: Detail panel omits Social Media
 

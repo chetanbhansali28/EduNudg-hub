@@ -4,13 +4,17 @@ import {
   Badge,
   Button,
   CatalogFormPanel,
-  CatalogPageHeader,
-  CatalogWorkspace,
   DataList,
+  FilterTabs,
   FormGrid,
   Input,
-  ListRow,
+  LeadKpiCard,
+  LeadKpiGrid,
   MutationError,
+  PipelineEmptyState,
+  PipelineListItem,
+  PipelinePageHeader,
+  PipelineWorkspace,
   Select,
 } from "@edunudg/ui";
 import { useTenant } from "@/bootstrap/TenantProvider";
@@ -25,6 +29,9 @@ import {
 } from "@/lib/centerFeesApi";
 import {
   CREATE_INVOICE_STATUS_OPTIONS,
+  feesInvoiceCounts,
+  filterFeeInvoices,
+  filterFeePayments,
   formatFeeDate,
   invoiceDisplayLabel,
   invoiceOptionLabel,
@@ -33,9 +40,12 @@ import {
   isInvoicePayable,
   PAYMENT_METHOD_OPTIONS,
   paymentSummaryLabel,
+  type FeesSectionTab,
+  type InvoiceListFilter,
 } from "@/lib/centerFeesHelpers";
 import { formatInrFromPaise, rupeesToPaise } from "@/lib/inrCurrency";
 import type { InvoiceStatus } from "@/lib/centerFeesHelpers";
+import "@/features/brand/franchiseApplications/franchiseApplications.css";
 import "./fees/centerFees.css";
 
 const emptyInvoiceForm = {
@@ -53,6 +63,13 @@ const emptyPaymentForm = {
   paidAt: "",
 };
 
+const ICON_SEARCH = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
+
 function invoiceToneForBadge(status: InvoiceStatus): "default" | "success" | "warning" {
   const tone = invoiceStatusTone(status);
   if (tone === "success") return "success";
@@ -69,6 +86,10 @@ export function FeesPage() {
 
   const [invoiceForm, setInvoiceForm] = useState(emptyInvoiceForm);
   const [paymentForm, setPaymentForm] = useState(emptyPaymentForm);
+  const [activeTab, setActiveTab] = useState<FeesSectionTab>("invoices");
+  const [invoiceFilter, setInvoiceFilter] = useState<InvoiceListFilter>("all");
+  const [search, setSearch] = useState("");
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
 
   const students = useQuery({
     queryKey: ["center-students", centerId, brandId],
@@ -153,6 +174,21 @@ export function FeesPage() {
     () => (invoices.data ?? []).filter((invoice) => isInvoicePayable(invoice.status)),
     [invoices.data]
   );
+
+  const pageCounts = useMemo(() => feesInvoiceCounts(invoices.data ?? []), [invoices.data]);
+  const visibleInvoices = useMemo(
+    () => filterFeeInvoices(invoices.data ?? [], invoiceFilter, search),
+    [invoices.data, invoiceFilter, search]
+  );
+  const visiblePayments = useMemo(
+    () => filterFeePayments(payments.data ?? [], search),
+    [payments.data, search]
+  );
+
+  const openInvoiceFilter = (filter: InvoiceListFilter) => {
+    setActiveTab("invoices");
+    setInvoiceFilter(filter);
+  };
 
   const invoiceOptions = useMemo(
     () => [
@@ -266,76 +302,119 @@ export function FeesPage() {
   );
 
   return (
-    <div className="ed-center-fees-page">
-      <CatalogPageHeader
+    <div className="ed-franchise-apps-page ed-center-fees-page">
+      <PipelinePageHeader
         title="Fees & Payments"
         subtitle="Create student invoices and record fee payments for your center."
       />
       <MutationError message={error} />
 
-      <CatalogWorkspace
-        asideOpen
-        main={
-          <>
-            <section className="ed-center-fees-page__section">
-              <div className="ed-center-fees-page__section-head">
-                <h2 className="ed-center-fees-page__section-title">Invoices</h2>
-                <span className="ed-center-fees-page__section-meta">{(invoices.data ?? []).length} total</span>
-              </div>
-              {invoices.isLoading ? <p className="ed-text-sm ed-muted">Loading invoices…</p> : null}
-              <DataList
-                items={invoices.data ?? []}
-                empty="No invoices yet — add one for an enrolled student."
-                render={(invoice: CenterInvoiceRow) => (
-                  <ListRow
-                    aside={
-                      <Badge tone={invoiceToneForBadge(invoice.status)}>
-                        {invoiceStatusLabel(invoice.status)}
-                      </Badge>
-                    }
-                  >
-                    <div className="ed-center-fees-page__row">
-                      <strong>{invoiceDisplayLabel(invoice.invoice_number, invoice.id)}</strong>
-                      <p className="ed-text-sm ed-muted">
-                        {invoice.student_name}
-                        {invoice.student_code ? ` · ${invoice.student_code}` : ""}
-                      </p>
-                      <p className="ed-text-sm">
-                        {formatInrFromPaise(invoice.amount_cents)} · Due {formatFeeDate(invoice.due_at)}
-                      </p>
-                    </div>
-                  </ListRow>
-                )}
-              />
-            </section>
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="Outstanding"
+          value={pageCounts.outstanding}
+          hint="Sent or partial"
+          active={activeTab === "invoices" && invoiceFilter === "outstanding"}
+          onClick={() => openInvoiceFilter("outstanding")}
+        />
+        <LeadKpiCard
+          label="Paid"
+          value={pageCounts.paid}
+          hint="Settled"
+          active={activeTab === "invoices" && invoiceFilter === "paid"}
+          onClick={() => openInvoiceFilter("paid")}
+        />
+        <LeadKpiCard
+          label="Overdue"
+          value={pageCounts.overdue}
+          hint="Past due"
+          tone="lost"
+          active={activeTab === "invoices" && invoiceFilter === "overdue"}
+          onClick={() => openInvoiceFilter("overdue")}
+        />
+        <LeadKpiCard
+          label="Total"
+          value={pageCounts.total}
+          hint="All invoices"
+          tone="total"
+          active={activeTab === "invoices" && invoiceFilter === "all"}
+          onClick={() => openInvoiceFilter("all")}
+        />
+      </LeadKpiGrid>
 
-            <section className="ed-center-fees-page__section">
-              <div className="ed-center-fees-page__section-head">
-                <h2 className="ed-center-fees-page__section-title">Payments</h2>
-                <span className="ed-center-fees-page__section-meta">{(payments.data ?? []).length} recorded</span>
-              </div>
-              {payments.isLoading ? <p className="ed-text-sm ed-muted">Loading payments…</p> : null}
-              <DataList
-                items={payments.data ?? []}
-                empty="No payments recorded yet."
-                render={(payment) => (
-                  <ListRow>
-                    <div className="ed-center-fees-page__row">
-                      <strong>{paymentSummaryLabel(payment.amount_cents, payment.method, payment.paid_at)}</strong>
-                      <p className="ed-text-sm ed-muted">
-                        {payment.student_name ?? "Student"}
-                        {payment.invoice_number ? ` · ${payment.invoice_number}` : ""}
-                      </p>
-                    </div>
-                  </ListRow>
-                )}
-              />
-            </section>
-          </>
+      <div className="ed-franchise-apps-page__toolbar">
+        <label className="ed-franchise-apps-page__search">
+          <span className="ed-franchise-apps-page__search-icon">{ICON_SEARCH}</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder={activeTab === "payments" ? "Search payments..." : "Search invoices..."}
+            aria-label={activeTab === "payments" ? "Search payments" : "Search invoices"}
+          />
+        </label>
+        <FilterTabs
+          options={[
+            { value: "invoices", label: "Invoices", count: pageCounts.total },
+            { value: "payments", label: "Payments", count: payments.data?.length ?? 0 },
+          ]}
+          value={activeTab}
+          onChange={(value) => setActiveTab(value)}
+          aria-label="Fees sections"
+        />
+      </div>
+
+      <PipelineWorkspace
+        detailOpen
+        list={
+          <div className="ed-pipeline-list-panel">
+            {activeTab === "invoices" ? (
+              <>
+                {invoices.isLoading ? <p className="ed-text-sm ed-muted">Loading invoices…</p> : null}
+                <DataList
+                  variant="pipeline"
+                  items={visibleInvoices}
+                  empty={
+                    <PipelineEmptyState message="No invoices yet — add one for an enrolled student." />
+                  }
+                  render={(invoice: CenterInvoiceRow) => (
+                    <PipelineListItem
+                      title={invoiceDisplayLabel(invoice.invoice_number, invoice.id)}
+                      meta={`${invoice.student_name}${invoice.student_code ? ` · ${invoice.student_code}` : ""}`}
+                      lines={[`${formatInrFromPaise(invoice.amount_cents)} · Due ${formatFeeDate(invoice.due_at)}`]}
+                      badges={
+                        <Badge tone={invoiceToneForBadge(invoice.status)}>
+                          {invoiceStatusLabel(invoice.status)}
+                        </Badge>
+                      }
+                      selected={invoice.id === selectedInvoiceId}
+                      onSelect={() => setSelectedInvoiceId(invoice.id)}
+                    />
+                  )}
+                />
+              </>
+            ) : (
+              <>
+                {payments.isLoading ? <p className="ed-text-sm ed-muted">Loading payments…</p> : null}
+                <DataList
+                  variant="pipeline"
+                  items={visiblePayments}
+                  empty={<PipelineEmptyState message="No payments recorded yet." />}
+                  render={(payment) => (
+                    <PipelineListItem
+                      title={paymentSummaryLabel(payment.amount_cents, payment.method, payment.paid_at)}
+                      meta={`${payment.student_name ?? "Student"}${payment.invoice_number ? ` · ${payment.invoice_number}` : ""}`}
+                      onSelect={() => undefined}
+                    />
+                  )}
+                />
+              </>
+            )}
+          </div>
         }
-        aside={
+        detail={
           <div className="ed-center-fees-page__aside">
-            {invoiceAside}
+            {activeTab === "invoices" ? invoiceAside : null}
             {paymentAside}
           </div>
         }

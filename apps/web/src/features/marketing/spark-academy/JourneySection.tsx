@@ -59,8 +59,8 @@ export function JourneySection({
   const heading = [trust.title, trust.titleHighlight].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
 
   return (
-    <section className="sa-journey" id="journey">
-      <div className="sa-journey__header">
+    <section className="sa-journey sa-reveal" id="journey">
+      <div className="sa-journey__header sa-reveal-item">
         <span className="sa-journey__badge">{badge}</span>
         <h2 className="sa-section-title sa-journey__title">{heading || "Our Journey to Excellence"}</h2>
         {trust.intro ? <p className="sa-journey__intro">{trust.intro}</p> : null}
@@ -71,7 +71,7 @@ export function JourneySection({
           {cards.map((card, i) => (
             <div
               key={`${card.title}-${i}`}
-              className={`sa-journey__row${i < cards.length - 1 ? " sa-journey__row--divider" : ""}`}
+              className={`sa-journey__row sa-reveal-item${i < cards.length - 1 ? " sa-journey__row--divider" : ""}`}
             >
               <JourneyRowIcon />
               <div>
@@ -82,7 +82,7 @@ export function JourneySection({
           ))}
         </article>
 
-        <article className="sa-journey__highlight-card">
+        <article className="sa-journey__highlight-card sa-reveal-item">
           <div className="sa-journey__highlight-copy">
             <p className="sa-journey__highlight-label">{heroStats.label}</p>
             <strong className="sa-journey__highlight-primary">{heroStats.primary}</strong>

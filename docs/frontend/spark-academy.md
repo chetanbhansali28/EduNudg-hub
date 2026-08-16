@@ -52,18 +52,22 @@ Hero **Course** stays on the photo top-left (`sa-hero__photo-stage`). Features *
 
 ## Lead modals (shared with Abacus Classic)
 
-Spark uses the same modal stack as Abacus Classic:
+Spark uses the same modal stack as Abacus Classic, with Spark chrome:
 
 | Deep link / CTA | Modal | Submit |
 |-----------------|-------|--------|
 | `#enroll`, `#enroll-student`, `#register`, href `enroll` | Enroll | Brand: `submitBrandStudentApplication`; Center (+ `centerSlug`): `submitCenterStudentRegistration` |
 | `#apply`, href `apply` | Franchise apply | `submitFranchiseInquiry` (brand host only) |
 
-- Provider + modals: `LeadModalProvider`, `MarketingLeadModals` in brand/center public layouts
+- Provider + modals: `LeadModalProvider`, `MarketingLeadModals theme="spark-academy"` in brand/center public layouts (`ac-modal--spark`: Inter, navy heading, pill close, navy submit, blue focus)
 - Hash opener: `LeadModalHashOpener` (opens modal from URL hash)
 - Mapping: `resolveLeadModalKind.ts`
 
-Playwright: `e2e/helpers/leadModals.ts`. Vitest: `MarketingLeadModals.test.ts` (`regression_deep_link_aliases_open_enroll_modal`).
+Playwright: `e2e/helpers/leadModals.ts`. Vitest: `MarketingLeadModals.test.ts` (`regression_deep_link_aliases_open_enroll_modal`), `SparkAcademyLeadModals.test.tsx` (`regression_spark_lead_modals_use_theme_classes`).
+
+## Motion
+
+Hero copy/photo fade up on load; course floats gently bob. Lower sections use `sa-reveal` + `useScrollReveal(".sa-reveal", { threshold: 0.16, rootMargin: "0px 0px -12% 0px" })` — an unhurried ~0.95s vertical lift. Items inside use `sa-reveal-item` with a ~1.1s fade-and-scale (`sa-item-in`) starting ~0.55s after the section, staggered ~200ms, so the inner beat is readable. Respect `prefers-reduced-motion`. Regressions: `regression_spark_homepage_motion_css_respects_reduced_motion`, `regression_spark_section_items_stagger_inside_blocks`.
 
 ## Related
 

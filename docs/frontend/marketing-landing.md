@@ -26,7 +26,7 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage` (brand si
 
 **Social Media Connect** configures Facebook and Instagram footer icons only. Brand public landing does **not** show a floating WhatsApp chat button or message bubble (legacy `social_connect` WhatsApp fields are ignored on render).
 
-**Center public footer:** icons use that franchise’s `franchise_centers.social_links` (edited in **center Settings**, not brand `/app/centers`) — Facebook, Instagram, YouTube, WhatsApp, LinkedIn, and X when the URL is `https`. They must **not** inherit brand `social_connect`. Incomplete WhatsApp text without a full `https://` URL is omitted. Brand landing stays Facebook/Instagram only (no WhatsApp float). Franchise Management (`/app/centers`) has no Social Media section; profile save does not edit `social_links` (`regression_brand_centers_detail_omits_social_media_section`).
+**Center public footer:** icons use brand **Social Media Connect** (`social_connect` Facebook/Instagram) — the same URLs as the brand homepage. They must **not** use `franchise_centers.social_links`. Center Settings has no **Social presence** / **+ Add social link** editor; profile save passes through existing `social_links` (`regression_center_settings_omits_social_presence`, `regression_center_landing_footer_uses_brand_social_connect`). Brand landing stays Facebook/Instagram only (no WhatsApp float). Franchise Management (`/app/centers`) has no Social Media section (`regression_brand_centers_detail_omits_social_media_section`).
 
 **Center public contact:** all three themes overlay Franchise Management Location & Contact in the footer (`centerFooterContactFromProfile` → `centerContact` on `CenterPublicLayout`). Novu adds a **This center** column (and still shows the about-center blurb). Abacus replaces **Head office** with **This center**. Spark **Contact Us** uses the franchise phone and address (no `(222)` placeholder). Brand HQ / “Our presence” stay on the **brand** site only.
 
@@ -109,7 +109,7 @@ Sharing one key caused login to stick on **Loading…** after visiting the publi
 
 ## Lead modals (Abacus / Spark)
 
-Deep links `#enroll`, `#enroll-student`, `#register` → enroll modal; `#apply` → franchise modal. Center Path B passes `centerSlug` so enroll submits `submit_center_student_registration`. See [spark-academy.md](./spark-academy.md) and [abacus-classic.md](./abacus-classic.md).
+Deep links `#enroll`, `#enroll-student`, `#register` → enroll modal; `#apply` → franchise modal. Spark Academy skins those dialogs (`ac-modal--spark`, Inter/navy/pill). Center Path B passes `centerSlug` so enroll submits `submit_center_student_registration`. See [spark-academy.md](./spark-academy.md) and [abacus-classic.md](./abacus-classic.md). The Spark homepage also fades the hero in, scroll-reveals sections with an unhurried vertical lift (`sa-reveal` ~0.95s), then staggers items inside each block with a slower fade-and-scale (`sa-reveal-item` ~1.1s; `prefers-reduced-motion` off). Regression: `regression_spark_lead_modals_use_theme_classes`, `regression_spark_homepage_motion_css_respects_reduced_motion`, `regression_spark_section_items_stagger_inside_blocks`.
 
 Staff apps live under `/login` (public) and `/app` (authenticated) for brand and center portals.
 

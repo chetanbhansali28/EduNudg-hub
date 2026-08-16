@@ -47,10 +47,10 @@ export function FeaturesSection({ sections, showcase, imageUrlFallback }: Props)
   const resolved = resolveFeaturesShowcase(showcase, imageUrlFallback);
 
   return (
-    <section className="sa-features" id="features">
+    <section className="sa-features sa-reveal" id="features">
       <div className="sa-features__panel">
         <div className="sa-features__inner">
-          <div className="sa-features__visual">
+          <div className="sa-features__visual sa-reveal-item">
             <div className="sa-features__yellow-ring" aria-hidden />
             <div className="sa-features__scribble sa-features__scribble--loop" aria-hidden />
             <div className="sa-features__scribble sa-features__scribble--zigzag" aria-hidden />
@@ -87,14 +87,14 @@ export function FeaturesSection({ sections, showcase, imageUrlFallback }: Props)
           </div>
 
           <div className="sa-features__content">
-            <p className="sa-features__eyebrow">{resolved.eyebrow}</p>
-            <h2 className="sa-section-title sa-features__title">{resolved.title}</h2>
-            <p className="sa-features__subtitle">{resolved.subtitle}</p>
+            <p className="sa-features__eyebrow sa-reveal-item">{resolved.eyebrow}</p>
+            <h2 className="sa-section-title sa-features__title sa-reveal-item">{resolved.title}</h2>
+            <p className="sa-features__subtitle sa-reveal-item">{resolved.subtitle}</p>
             <ul className="sa-features__list">
               {sections.map((section, index) => (
                 <li
                   key={section.id}
-                  className={`sa-features__item${index < sections.length - 1 ? " sa-features__item--divider" : ""}`}
+                  className={`sa-features__item sa-reveal-item${index < sections.length - 1 ? " sa-features__item--divider" : ""}`}
                 >
                   <span className="sa-features__check" aria-hidden>
                     <svg viewBox="0 0 12 10" width="12" height="10" fill="none" aria-hidden>

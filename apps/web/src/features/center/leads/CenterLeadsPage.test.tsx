@@ -61,7 +61,7 @@ vi.mock("@/lib/supabase", () => ({
 describe("CenterLeadsPage", () => {
   it("regression_center_leads_pipeline_workspace_theme", async () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
+    const { container } = render(
       <QueryClientProvider client={qc}>
         <ThemeProvider>
           <CenterLeadsPage />
@@ -71,7 +71,10 @@ describe("CenterLeadsPage", () => {
 
     expect(await screen.findByText("Leads")).toBeDefined();
     expect(screen.getByText(/Call parents on WhatsApp/i)).toBeDefined();
-    expect(await screen.findByText("Open Pipeline")).toBeDefined();
+    expect(container.querySelector(".ed-lead-kpi-grid")).toBeTruthy();
+    const kpiLabels = [...container.querySelectorAll(".ed-lead-kpi__label")].map((el) => el.textContent);
+    expect(kpiLabels).toEqual(["Open", "Converted", "Lost", "Total"]);
+    expect(screen.getByLabelText("Search leads")).toBeDefined();
     expect(await screen.findByText("Meera Reddy")).toBeDefined();
     expect(screen.getByRole("link", { name: "+919876543210" }).getAttribute("href")).toBe("tel:+919876543210");
     expect(screen.getByRole("tablist", { name: "Lead filter" })).toBeDefined();

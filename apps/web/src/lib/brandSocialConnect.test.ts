@@ -52,7 +52,7 @@ describe("brandSocialConnect", () => {
     );
   });
 
-  it("regression_center_footer_uses_franchise_social_not_brand", () => {
+  it("socialConnectFromCenterLinks maps franchise platform urls", () => {
     const connect = socialConnectFromCenterLinks([
       { platform: "Facebook", url: "https://facebook.com/koramangala-center" },
       { platform: "Instagram", url: "https://instagram.com/koramangala-center" },

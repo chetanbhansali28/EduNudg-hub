@@ -64,7 +64,7 @@ describe("fetchCenterLandingBundle", () => {
     expect(bundle?.config.meta.siteName).toBe("Smart Brain Abacus");
   });
 
-  it("regression_center_landing_footer_ignores_brand_social_connect", async () => {
+  it("regression_center_landing_footer_uses_brand_social_connect", async () => {
     rpc.mockResolvedValue({
       data: {
         brand_name: "Abacus World",
@@ -89,10 +89,10 @@ describe("fetchCenterLandingBundle", () => {
     });
 
     const bundle = await fetchCenterLandingBundle("abacusworld", "koramangala");
-    expect(bundle?.socialConnect.facebookUrl).toBe("https://facebook.com/koramangala-center");
-    expect(bundle?.socialConnect.instagramUrl).toBe("https://instagram.com/koramangala-center");
-    expect(bundle?.socialConnect.facebookUrl).not.toContain("chetan-bhansali");
-    expect(bundle?.socialConnect.youtubeUrl).toBe("https://youtube.com/@koramangala");
+    expect(bundle?.socialConnect.facebookUrl).toBe("https://facebook.com/chetan-bhansali");
+    expect(bundle?.socialConnect.instagramUrl).toBe("https://instagram.com/chetan-bhansali");
+    expect(bundle?.socialConnect.facebookUrl).not.toContain("koramangala-center");
+    expect(bundle?.socialConnect.youtubeUrl).toBeUndefined();
   });
 
   it("regression_center_public_programs_filter_to_enabled_curriculum", async () => {

@@ -7,13 +7,13 @@ export function FaqSection({ items, title = "Your questions, answered" }: Props)
   if (items.length === 0) return null;
 
   return (
-    <section className="sa-faq" id="faq">
-      <div className="sa-section-head sa-section-head--center">
+    <section className="sa-faq sa-reveal" id="faq">
+      <div className="sa-section-head sa-section-head--center sa-reveal-item">
         <h2 className="sa-section-title">{title}</h2>
       </div>
       <div className="sa-faq__list">
         {items.map((item, i) => (
-          <details key={`${item.question}-${i}`} className="sa-faq__item" open={i === 0}>
+          <details key={`${item.question}-${i}`} className="sa-faq__item sa-reveal-item" open={i === 0}>
             <summary>
               {item.question}
               <span className="sa-faq__chevron" aria-hidden />

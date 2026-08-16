@@ -142,7 +142,7 @@ export function hasBrandSocialFooterIcons(connect: BrandSocialConnect): boolean 
   );
 }
 
-/** Footer social icons for a center host — from franchise `social_links`, not brand `social_connect`. */
+/** Footer social icons from franchise `social_links` (legacy mapper; public center footers use brand `social_connect`). */
 export function socialConnectFromCenterLinks(
   links: Array<{ platform: string; url: string }>
 ): BrandSocialConnect {

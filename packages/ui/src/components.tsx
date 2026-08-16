@@ -1374,7 +1374,7 @@ export function PipelineTableToolbar({
   tabs,
   meta,
 }: {
-  tabs: ReactNode;
+  tabs?: ReactNode;
   meta?: ReactNode;
 }) {
   return (

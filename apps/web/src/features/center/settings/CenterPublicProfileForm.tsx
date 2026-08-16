@@ -11,7 +11,6 @@ import {
   SettingsPhoneField,
   SettingsProfileBanner,
   SettingsSection,
-  SettingsSocialField,
   SettingsSubsection,
   Textarea,
 } from "@edunudg/ui";
@@ -32,18 +31,9 @@ import { initialsFromName } from "@/lib/welcomeMessage";
 import { CenterPhotoUpload } from "./CenterPhotoUpload";
 import "./centerSettings.css";
 
-const SOCIAL_PLATFORMS = [
-  "Facebook",
-  "Instagram",
-  "WhatsApp",
-  "YouTube",
-  "LinkedIn",
-  "X (Twitter)",
-];
-
-const MAX_SOCIAL_LINKS = 6;
-
-function profileToForm(row: CenterPublicProfileRow): CenterPublicProfileInput & { phoneNational: string } {
+function profileToForm(row: CenterPublicProfileRow): Omit<CenterPublicProfileInput, "socialLinks"> & {
+  phoneNational: string;
+} {
   return {
     displayName: row.displayName,
     shortDescription: row.shortDescription,
@@ -55,8 +45,6 @@ function profileToForm(row: CenterPublicProfileRow): CenterPublicProfileInput & 
     contactPhone: row.contactPhone,
     phoneNational: splitIndiaPhone(row.contactPhone),
     photoUrl: row.photoUrl,
-    socialLinks:
-      row.socialLinks.length > 0 ? row.socialLinks : [{ platform: "Facebook", url: "" }],
   };
 }
 
@@ -83,6 +71,7 @@ export function CenterPublicProfileForm({ brandId, centerId, profile }: Props) {
       await updateCenterPublicProfile(centerId, {
         ...payload,
         contactPhone: joinIndiaPhone(phoneNational),
+        socialLinks: profile.socialLinks,
       });
     },
     onSuccess: () => {
@@ -96,28 +85,6 @@ export function CenterPublicProfileForm({ brandId, centerId, profile }: Props) {
 
   const setField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const updateSocial = (index: number, patch: Partial<{ platform: string; url: string }>) => {
-    setForm((prev) => ({
-      ...prev,
-      socialLinks: prev.socialLinks.map((link, i) => (i === index ? { ...link, ...patch } : link)),
-    }));
-  };
-
-  const addSocial = () => {
-    if (form.socialLinks.length >= MAX_SOCIAL_LINKS) return;
-    setForm((prev) => ({
-      ...prev,
-      socialLinks: [...prev.socialLinks, { platform: "Instagram", url: "" }],
-    }));
-  };
-
-  const removeSocial = (index: number) => {
-    setForm((prev) => ({
-      ...prev,
-      socialLinks: prev.socialLinks.filter((_, i) => i !== index),
-    }));
   };
 
   const resetForm = () => setForm(profileToForm(profile));
@@ -195,29 +162,6 @@ export function CenterPublicProfileForm({ brandId, centerId, profile }: Props) {
         </FormGrid>
         <Input label="Pincode" value={form.pincode} onChange={(value) => setField("pincode", value)} />
         {mapsUrl ? <SettingsMapsButton href={mapsUrl} /> : null}
-      </SettingsSubsection>
-
-      <SettingsSubsection label="Social presence" cardOnMobile>
-        <div className="ed-center-social-links">
-          {form.socialLinks.map((link, index) => (
-            <SettingsSocialField
-              key={`social-${index}`}
-              platform={link.platform}
-              value={link.url}
-              onChange={(url) => updateSocial(index, { url })}
-              removable={form.socialLinks.length > 1}
-              onRemove={() => removeSocial(index)}
-            />
-          ))}
-          <button
-            type="button"
-            className="ed-settings-add-link"
-            onClick={addSocial}
-            disabled={form.socialLinks.length >= MAX_SOCIAL_LINKS}
-          >
-            + Add social link
-          </button>
-        </div>
       </SettingsSubsection>
 
       <SettingsFormFooter hint={lastEdited ?? undefined}>

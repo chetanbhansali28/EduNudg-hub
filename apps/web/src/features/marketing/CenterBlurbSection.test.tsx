@@ -27,6 +27,6 @@ describe("CenterBlurbSection", () => {
     expect(screen.getByText("Abacus Koramangala")).toBeDefined();
     expect(screen.getByText("Flagship center in South Bengaluru.")).toBeDefined();
     expect(screen.getByText(/12 Main Road/)).toBeDefined();
-    expect(screen.getByRole("link", { name: "Instagram" })).toBeDefined();
+    expect(screen.queryByRole("link", { name: "Instagram" })).toBeNull();
   });
 });

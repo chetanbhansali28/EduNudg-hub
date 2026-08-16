@@ -29,7 +29,7 @@ export function CourseCard({
   const blurb = program.description?.trim() || program.whyTake?.trim() || "";
 
   return (
-    <article className="sa-course-card">
+    <article className="sa-course-card sa-reveal-item">
       <div
         className={`sa-course-card__media${imageUrl ? " sa-course-card__media--image" : ""}`}
         style={
@@ -72,9 +72,9 @@ export function CoursesSection({
   if (programs.length === 0) return null;
 
   return (
-    <section className="sa-courses" id="programs">
+    <section className="sa-courses sa-reveal" id="programs">
       <span id="curriculum" className="ed-marketing-anchor" aria-hidden />
-      <div className="sa-section-head sa-section-head--center">
+      <div className="sa-section-head sa-section-head--center sa-reveal-item">
         <h2 className="sa-section-title">{title}</h2>
         {subtitle ? <p className="sa-section-subtitle">{subtitle}</p> : null}
       </div>
@@ -91,7 +91,7 @@ export function CoursesSection({
         ))}
       </div>
 
-      <div className="sa-courses__action">
+      <div className="sa-courses__action sa-reveal-item">
         <SparkAcademyCta label="View all courses" href={ctaHref} variant="dark" />
       </div>
     </section>

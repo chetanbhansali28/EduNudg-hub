@@ -110,7 +110,7 @@ describe("SparkAcademyNav", () => {
 
   it("regression_spark_nav_drawer_css_uses_theme_tokens_and_hides_header_secondary", () => {
     const css = readFileSync(resolve(__dirname, "spark-academy.css"), "utf8");
-    expect(css).toMatch(/\.marketing-page--spark-academy,\s*\.sa-nav__drawer\s*\{/);
+    expect(css).toMatch(/\.marketing-page--spark-academy,\s*\.sa-nav__drawer,\s*\.ac-modal--spark\s*\{/);
     expect(css).toMatch(/\.sa-nav__drawer\s*\{[\s\S]*?font-family:\s*var\(--sa-heading-font\)/);
     expect(css).toMatch(/\.sa-nav__drawer-title\s*\{[\s\S]*?color:\s*var\(--sa-navy\)/);
     expect(css).toMatch(

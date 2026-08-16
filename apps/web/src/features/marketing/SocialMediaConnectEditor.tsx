@@ -16,11 +16,11 @@ export function SocialMediaConnectEditor({ socialConnect, onSocialConnectChange 
     <EditorAccordion
       sectionId="socialConnect"
       title="Social Media Connect"
-      description="Footer social icons for brand homepage visitors"
+      description="Footer social icons for brand and franchise public sites"
     >
       <EditorSectionNote>
-        Facebook and Instagram appear as icons in the site footer. Click <strong>Save</strong> on this panel after
-        editing.
+        Facebook and Instagram appear as icons in the brand and franchise site footers. Click <strong>Save</strong> on
+        this panel after editing. Franchise Settings does not collect social links.
       </EditorSectionNote>
 
       <EditorFieldsGrid>

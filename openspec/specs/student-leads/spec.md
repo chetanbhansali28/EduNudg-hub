@@ -19,7 +19,14 @@ The brand host SHALL expose a student application with required fields: parent n
 
 On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`), not an inline Novu section. CTA hrefs and URL hashes `#enroll`, `#enroll-student`, and `#register` SHALL map to the enroll modal via `resolveLeadModalKind` / `LeadModalHashOpener`. The lead modal SHALL fit the device viewport: mobile near full-width single-column fields; desktop a centered card with two-column fields; modal body SHALL scroll within `100dvh` so the submit control is never clipped.
 
-Traceability: FR-B02, FR-B03, FR-B04
+On Spark Academy, lead dialogs SHALL use Spark chrome (`ac-modal--spark`): Inter, navy headings, pill close control, navy submit, and blue focus rings. Abacus Classic SHALL keep the default `ac-modal` chrome.
+
+#### Scenario: Spark enroll and apply modals match the theme
+
+- **GIVEN** a Spark Academy brand public homepage
+- **WHEN** a visitor opens Book a free demo class or Apply for franchise
+- **THEN** the dialog uses `ac-modal--spark` with Spark Academy Inter/navy/blue tokens
+- **AND** Abacus Classic dialogs do not receive that Spark class
 
 #### Scenario: Parent applies on brand site
 
@@ -148,6 +155,14 @@ Traceability: FR-C10
 - **WHEN** center staff open Leads
 - **THEN** they see leads assigned to their center and center-originated leads only
 - **AND** they do not see unassigned brand leads or other centers' leads
+
+#### Scenario: Center leads chrome matches curriculum
+
+- **GIVEN** a center user on `/app/leads`
+- **THEN** the page uses `PipelinePageHeader` + `LeadKpiGrid` like Curriculum
+- **AND** stats cards show Open, Converted, Lost, and Total
+- **AND** search and filter tabs (Open Pipeline / Lost / Converted / All) sit above `PipelineWorkspace`
+- **AND** the list stays visible beside lead detail on desktop
 
 ### Requirement: Center lead status updates
 

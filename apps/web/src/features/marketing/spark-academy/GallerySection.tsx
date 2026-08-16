@@ -20,8 +20,8 @@ export function GallerySection({ gallery }: Props) {
   useSparkGalleryCarousel(trackRef, galleryColumnCount(photos.length));
 
   return (
-    <section className="sa-gallery" id="gallery">
-      <div className="sa-section-head sa-section-head--center">
+    <section className="sa-gallery sa-reveal" id="gallery">
+      <div className="sa-section-head sa-section-head--center sa-reveal-item">
         <h2 className="sa-section-title">{title}</h2>
       </div>
       <div
@@ -32,7 +32,7 @@ export function GallerySection({ gallery }: Props) {
         aria-label={title}
       >
         {photos.map((image, index) => (
-          <figure key={`${image.url}-${index}`} className="sa-gallery__item">
+          <figure key={`${image.url}-${index}`} className="sa-gallery__item sa-reveal-item">
             <img src={image.url} alt={image.alt ?? ""} loading="lazy" />
           </figure>
         ))}

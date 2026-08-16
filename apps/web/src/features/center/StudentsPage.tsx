@@ -4,81 +4,37 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   DataList,
-  OpsListHeader,
-  OpsMobileFab,
-  OpsPageHeader,
-  OpsSearchField,
+  FilterTabs,
+  LeadKpiCard,
+  LeadKpiGrid,
   PipelineDetailPlaceholder,
   PipelineEmptyState,
   PipelineListItem,
-  PipelineMasterDetail,
+  PipelinePageHeader,
+  PipelineWorkspace,
 } from "@edunudg/ui";
 import { CenterStudentDetailPanel } from "@/features/center/students/CenterStudentDetailPanel";
 import { parseCenterStudentDetailTab } from "@/features/center/students/centerStudentDetailTabs";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
-import { fetchCenterStudents, type CenterStudentRow } from "@/lib/centerStudentsApi";
+import { fetchCenterStudents } from "@/lib/centerStudentsApi";
+import {
+  filterCenterStudents,
+  studentPageCounts,
+  studentProgramLabel,
+  type StudentTabFilter,
+} from "@/lib/centerStudentsHelpers";
 import { markBatchJoinsSeen } from "@/lib/centerBatchesApi";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { initialsFromName } from "@/lib/welcomeMessage";
+import "@/features/brand/franchiseApplications/franchiseApplications.css";
 import "@/features/center/centerOps.css";
 
-const LIST_PREVIEW = 8;
-
-function studentProgramLabel(student: CenterStudentRow): string {
-  if (!student.program_name) return "Not assigned";
-  return student.starting_level_name
-    ? `${student.program_name} · ${student.starting_level_name}`
-    : student.program_name;
-}
-
-function matchesSearch(student: CenterStudentRow, query: string): boolean {
-  const q = query.trim().toLowerCase();
-  if (!q) return true;
-  return [student.full_name, student.student_code, student.login_email]
-    .filter(Boolean)
-    .some((value) => value!.toLowerCase().includes(q));
-}
-
-function FeaturedStudentCard({
-  student,
-  onViewDetails,
-  onQuickBatch,
-}: {
-  student: CenterStudentRow;
-  onViewDetails: () => void;
-  onQuickBatch: () => void;
-}) {
-  return (
-    <article className="ed-ops-featured-card">
-      <div className="ed-ops-featured-card__head">
-        <span className="ed-ops-featured-card__avatar" aria-hidden>
-          {initialsFromName(student.full_name)}
-        </span>
-        <div>
-          <h3 className="ed-ops-featured-card__name">{student.full_name}</h3>
-          <p className="ed-ops-featured-card__meta">ID: {student.student_code ?? student.id.slice(0, 8).toUpperCase()}</p>
-        </div>
-        {student.user_id ? <span className="ed-ops-featured-card__linked">LINKED</span> : null}
-      </div>
-      <div className="ed-ops-featured-card__grid">
-        <div>
-          <p className="ed-ops-featured-card__label">Program</p>
-          <p className="ed-ops-featured-card__value">{studentProgramLabel(student)}</p>
-        </div>
-        <div>
-          <p className="ed-ops-featured-card__label">Portal access</p>
-          <p className="ed-ops-featured-card__value">{student.user_id ? "● Active" : "Not linked"}</p>
-        </div>
-      </div>
-      <div className="ed-ops-featured-card__actions">
-        <Button onClick={onViewDetails}>View Details</Button>
-        <Button variant="ghost" onClick={onQuickBatch}>
-          Quick Batch
-        </Button>
-      </div>
-    </article>
-  );
-}
+const ICON_SEARCH = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </svg>
+);
 
 export function StudentsPage() {
   const tenant = useTenant();
@@ -89,6 +45,7 @@ export function StudentsPage() {
   const deepLinkStudentId = searchParams.get("studentId");
   const [selectedId, setSelectedId] = useState<string | null>(deepLinkStudentId);
   const [search, setSearch] = useState("");
+  const [listFilter, setListFilter] = useState<StudentTabFilter>("all");
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const { isDesktop, isMobile } = useOpsBreakpoint();
   const qc = useQueryClient();
@@ -108,9 +65,10 @@ export function StudentsPage() {
   });
 
   const allStudents = students.data ?? [];
+  const pageCounts = useMemo(() => studentPageCounts(allStudents), [allStudents]);
   const filteredStudents = useMemo(
-    () => allStudents.filter((student) => matchesSearch(student, search)),
-    [allStudents, search]
+    () => filterCenterStudents(allStudents, listFilter, search),
+    [allStudents, listFilter, search]
   );
 
   useEffect(() => {
@@ -125,30 +83,35 @@ export function StudentsPage() {
     setSelectedId(filteredStudents[0]!.id);
   }, [selectedId, filteredStudents, deepLinkStudentId]);
 
-  const selected = filteredStudents.find((s) => s.id === selectedId) ?? allStudents.find((s) => s.id === selectedId) ?? null;
+  const selected =
+    filteredStudents.find((s) => s.id === selectedId) ?? allStudents.find((s) => s.id === selectedId) ?? null;
 
   useEffect(() => {
     if (isMobile && selected && detailTab === "assessments") {
       setMobileDetailOpen(true);
     }
   }, [isMobile, selected, detailTab]);
-  const listPreview = filteredStudents.slice(0, LIST_PREVIEW);
 
   const selectStudent = (id: string) => {
     setSelectedId(id);
-    if (isMobile) setMobileDetailOpen(false);
+    if (isMobile) setMobileDetailOpen(true);
   };
 
   if (!centerId || !brandId) {
     return <p className="ed-empty">Center context not found.</p>;
   }
 
+  const filterTabs = [
+    { value: "all" as const, label: isMobile ? "All" : "All students", count: pageCounts.total },
+    { value: "linked" as const, label: "Linked", count: pageCounts.linked },
+    { value: "unassigned" as const, label: "Unassigned", count: pageCounts.unassigned },
+  ];
+
   const listPanel = (
     <div className="ed-pipeline-list-panel">
-      {!isMobile ? <OpsListHeader title="Enrolled students" badge={`ACTIVE: ${allStudents.length}`} /> : null}
       <DataList
         variant="pipeline"
-        items={isMobile ? listPreview : filteredStudents}
+        items={filteredStudents}
         empty={
           <PipelineEmptyState
             message="No active enrollments at this center."
@@ -163,7 +126,7 @@ export function StudentsPage() {
           return (
             <PipelineListItem
               title={s.full_name}
-              meta={s.student_code ? `ID: ${s.student_code}` : undefined}
+              meta={s.student_code ? `ID: ${s.student_code}` : studentProgramLabel(s)}
               lines={[
                 batchCount > 0 ? `${batchCount} batch${batchCount === 1 ? "" : "es"}` : "No batches assigned",
                 s.login_email ?? "No portal email",
@@ -176,25 +139,29 @@ export function StudentsPage() {
           );
         }}
       />
-      {isMobile && filteredStudents.length > LIST_PREVIEW ? (
-        <p className="ed-ops-list-footer">
-          <Link to="/app/students">View all {filteredStudents.length} students</Link>
-        </p>
-      ) : null}
-      {isDesktop && filteredStudents.length > LIST_PREVIEW ? (
-        <p className="ed-ops-list-footer">
-          Showing {filteredStudents.length} enrolled students
-        </p>
-      ) : null}
+    </div>
+  );
+
+  const detailPanel = selected ? (
+    <CenterStudentDetailPanel
+      student={selected}
+      brandId={brandId}
+      centerId={centerId}
+      initialTab={detailTab}
+      onSaved={() => void students.refetch()}
+    />
+  ) : (
+    <div className="ed-pipeline-list-panel">
+      <PipelineDetailPlaceholder message="Select a student to manage enrollment, batches, portal access, and assessments." />
     </div>
   );
 
   return (
-    <div className={isMobile ? "ed-ops-pipeline-hide-detail" : undefined}>
-      <OpsPageHeader
+    <div className={`ed-franchise-apps-page${isMobile ? " ed-franchise-apps-page--detail-open" : ""}`}>
+      <PipelinePageHeader
         title="Students"
         subtitle="Manage enrollments, batches, portal access, and record level assessments in one place."
-        action={
+        actions={
           isDesktop ? (
             <Link to="/app/leads">
               <Button>+ Add students</Button>
@@ -203,51 +170,70 @@ export function StudentsPage() {
         }
       />
 
-      <OpsSearchField
-        value={search}
-        onChange={setSearch}
-        placeholder="Search by student name or ID…"
-      />
+      <LeadKpiGrid>
+        <LeadKpiCard
+          label="Linked"
+          value={pageCounts.linked}
+          hint="Portal access"
+          active={listFilter === "linked"}
+          onClick={() => setListFilter("linked")}
+        />
+        <LeadKpiCard
+          label="Unassigned"
+          value={pageCounts.unassigned}
+          hint="No batches"
+          active={listFilter === "unassigned"}
+          onClick={() => setListFilter("unassigned")}
+        />
+        <LeadKpiCard
+          label="Programs"
+          value={pageCounts.programs}
+          hint="Course assigned"
+        />
+        <LeadKpiCard
+          label={isMobile ? "All students" : "Total"}
+          value={pageCounts.total}
+          hint="Enrolled"
+          tone="total"
+          active={listFilter === "all"}
+          onClick={() => setListFilter("all")}
+        />
+      </LeadKpiGrid>
+
+      <div className="ed-franchise-apps-page__toolbar">
+        <label className="ed-franchise-apps-page__search">
+          <span className="ed-franchise-apps-page__search-icon">{ICON_SEARCH}</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by student name or ID…"
+            aria-label="Search students"
+          />
+        </label>
+        <FilterTabs
+          options={filterTabs}
+          value={listFilter}
+          onChange={setListFilter}
+          aria-label="Student filter"
+        />
+      </div>
 
       {isMobile ? (
-        <>
-          <OpsListHeader
-            title={`Enrolled Students (${filteredStudents.length})`}
-            badge={search ? "FILTERED" : undefined}
-          />
-          {listPanel}
-          {selected ? (
-            <FeaturedStudentCard
-              student={selected}
-              onViewDetails={() => setMobileDetailOpen(true)}
-              onQuickBatch={() => setMobileDetailOpen(true)}
-            />
-          ) : null}
-        </>
+        listPanel
       ) : (
-        <PipelineMasterDetail
+        <PipelineWorkspace
+          detailOpen={!!selected}
           list={listPanel}
-          detail={
-            selected ? (
-              <CenterStudentDetailPanel
-                student={selected}
-                brandId={brandId}
-                centerId={centerId}
-                initialTab={detailTab}
-                onSaved={() => void students.refetch()}
-              />
-            ) : (
-              <div className="ed-pipeline-list-panel">
-                <PipelineDetailPlaceholder message="Select a student to manage enrollment, batches, portal access, and assessments." />
-              </div>
-            )
-          }
+          detail={detailPanel}
         />
       )}
 
       {isMobile ? (
         <>
-          <OpsMobileFab label="Add students" onClick={() => { window.location.href = "/app/leads"; }} />
+          <Link to="/app/leads" className="ed-franchise-apps-page__fab" aria-label="Add students">
+            +
+          </Link>
           {mobileDetailOpen && selected ? (
             <div className="ed-ops-mobile-detail" role="dialog" aria-modal aria-label="Student details">
               <div className="ed-ops-mobile-detail__bar">

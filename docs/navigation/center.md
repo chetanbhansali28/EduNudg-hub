@@ -11,10 +11,10 @@ Details: [Portal host matrix](../spec/portal-host-matrix.md), [Prospective stude
 See [Navigation spec](../spec/navigation-spec.md).
 
 - Operations Dashboard
-- **Leads** (`/app/leads`) — replaces Admissions; assign convert
-- Students & Transfers
+- **Leads** (`/app/leads`) — Curriculum-style pipeline chrome (Open / Converted / Lost / Total KPIs), search, convert, CSV import
+- **Students** (`/app/students`) — same chrome (Linked / Unassigned / Programs / Total)
 - **Batches & Schedule** (`/app/batches`) — only when brand feature flag `batches` is ON (default off)
-- Fees & Payments
+- **Fees & Payments** (`/app/fees`) — same chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs
 - **Merchandise** (`/app/merchandise`) — when brand enables `merchandise` (legacy `/app/kits` redirects)
-- **Settings** (`/app/settings`) — edit public center profile (photo, address, phone, social links); login email from auth
+- **Settings** (`/app/settings`) — edit public center profile (photo, address, phone); login email from auth; public footer social uses brand Social Media Connect
 - Assessments / Reports — Phase D

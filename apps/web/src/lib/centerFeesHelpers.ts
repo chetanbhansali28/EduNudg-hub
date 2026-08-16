@@ -82,3 +82,59 @@ export function paymentSummaryLabel(amountCents: number, method: string | null, 
   const methodLabel = method ? method.replace(/_/g, " ") : "Payment";
   return `${formatInrFromPaise(amountCents)} via ${methodLabel} on ${formatFeeDate(paidAt)}`;
 }
+
+export type FeesSectionTab = "invoices" | "payments";
+export type InvoiceListFilter = "all" | "outstanding" | "paid" | "overdue";
+
+export type FeesInvoiceCounts = {
+  outstanding: number;
+  paid: number;
+  overdue: number;
+  total: number;
+};
+
+export function feesInvoiceCounts(invoices: { status: InvoiceStatus }[]): FeesInvoiceCounts {
+  return {
+    outstanding: invoices.filter((invoice) => invoice.status === "sent" || invoice.status === "partial").length,
+    paid: invoices.filter((invoice) => invoice.status === "paid").length,
+    overdue: invoices.filter((invoice) => invoice.status === "overdue").length,
+    total: invoices.length,
+  };
+}
+
+function matchesFeeSearch(values: Array<string | null | undefined>, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return values.filter(Boolean).some((value) => value!.toLowerCase().includes(q));
+}
+
+export function filterFeeInvoices<T extends { status: InvoiceStatus; invoice_number?: string | null; student_name?: string; student_code?: string | null }>(
+  invoices: T[],
+  filter: InvoiceListFilter,
+  search: string
+): T[] {
+  return invoices.filter((invoice) => {
+    const matchesFilter =
+      filter === "outstanding"
+        ? invoice.status === "sent" || invoice.status === "partial"
+        : filter === "paid"
+          ? invoice.status === "paid"
+          : filter === "overdue"
+            ? invoice.status === "overdue"
+            : true;
+    return (
+      matchesFilter &&
+      matchesFeeSearch([invoice.invoice_number, invoice.student_name, invoice.student_code], search)
+    );
+  });
+}
+
+export function filterFeePayments<T extends { student_name?: string | null; invoice_number?: string | null; method?: string | null }>(
+  payments: T[],
+  search: string
+): T[] {
+  return payments.filter((payment) =>
+    matchesFeeSearch([payment.student_name, payment.invoice_number, payment.method], search)
+  );
+}
+
