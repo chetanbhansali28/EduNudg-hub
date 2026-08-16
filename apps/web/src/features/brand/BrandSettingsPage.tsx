@@ -7,11 +7,15 @@ import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseMaybe } from "@/lib/supabaseResult";
+import { clearPortalBrandingCache } from "@/lib/portalBranding";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { LoginCopyPreview } from "@/features/brand/settings/LoginCopyPreview";
 import {
   BRAND_TIMEZONE_OPTIONS,
   formatSettingsUpdated,
   normalizeStaleLeadDays,
+  previewBrandLoginCopy,
+  siteLogoFromBrandSettings,
 } from "@/features/brand/settings/brandSettingsHelpers";
 import "./settings/brandSettings.css";
 
@@ -90,12 +94,13 @@ export function BrandSettingsPage() {
   });
 
   useEffect(() => {
-    const s = settings.data?.settings ?? {};
+    if (!settings.data) return;
+    const s = settings.data.settings ?? {};
     setLoginHeadline(String(s.login_headline ?? ""));
     setLoginSubtext(String(s.login_subtext ?? ""));
     setLeadStaleDays(String(s.lead_stale_days ?? 15));
     setTimezone(String(s.timezone ?? "Asia/Kolkata"));
-  }, [settings.data]);
+  }, [settings.data?.id, settings.data?.updated_at]);
 
   const saveSettings = useMutation({
     mutationFn: async (patch: Record<string, unknown>) => {
@@ -116,9 +121,11 @@ export function BrandSettingsPage() {
       }
     },
     onSuccess: () => {
+      clearPortalBrandingCache();
       void qc.invalidateQueries({ queryKey: ["brand-settings", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-features", brandId] });
       void qc.invalidateQueries({ queryKey: ["brand-landing"] });
+      void qc.invalidateQueries({ queryKey: ["portal-branding"] });
     },
     onError: capture,
   });
@@ -129,6 +136,9 @@ export function BrandSettingsPage() {
 
   const brandName = brandRow.data?.name ?? "your brand";
   const updatedLabel = formatSettingsUpdated(settings.data?.updated_at);
+  const logoUrl = siteLogoFromBrandSettings(settings.data?.settings);
+  const defaultLoginCopy = useMemo(() => previewBrandLoginCopy(brandName, "", "", logoUrl), [brandName, logoUrl]);
+  const loginPreview = previewBrandLoginCopy(brandName, loginHeadline, loginSubtext, logoUrl);
 
   const timezoneOptions = useMemo(() => {
     const options: { value: string; label: string }[] = BRAND_TIMEZONE_OPTIONS.map((option) => ({
@@ -196,7 +206,8 @@ export function BrandSettingsPage() {
               <div>
                 <h2 className="ed-brand-settings-card__title">White-label &amp; Login Copy</h2>
                 <p className="ed-brand-settings-card__subtitle">
-                  Customize the messaging for the student and admin login screens.
+                  Greeting on every {brandName} login — brand staff, franchise staff, students, and parents.
+                  Leave blank to use the default for each portal. Site logo is set on Homepage, not here.
                 </p>
               </div>
               <span className="ed-brand-settings-card__head-icon ed-brand-settings-card__head-icon--corner">
@@ -205,12 +216,24 @@ export function BrandSettingsPage() {
             </header>
             <div className="ed-brand-settings-fields">
               <div className="ed-brand-settings-field">
-                <Input label="Login headline" value={loginHeadline} onChange={setLoginHeadline} />
+                <Input
+                  label="Login headline"
+                  value={loginHeadline}
+                  onChange={setLoginHeadline}
+                  placeholder={defaultLoginCopy.headline}
+                />
               </div>
               <div className="ed-brand-settings-field">
-                <Textarea label="Login subtext" value={loginSubtext} onChange={setLoginSubtext} rows={4} />
+                <Textarea
+                  label="Login subtext"
+                  value={loginSubtext}
+                  onChange={setLoginSubtext}
+                  rows={4}
+                  placeholder={defaultLoginCopy.subtext}
+                />
               </div>
             </div>
+            <LoginCopyPreview copy={loginPreview} />
             {isDesktop ? (
               <footer className="ed-brand-settings-card__footer ed-brand-settings-card__footer--end ed-brand-settings-card__footer--desktop-only">
                 <SaveButton
