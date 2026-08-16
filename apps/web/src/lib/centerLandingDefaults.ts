@@ -79,29 +79,31 @@ export type CenterFounderIdentity = {
 
 export function parseHomepageFounders(raw: unknown): HomepageFounderProfile[] {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") return null;
-      const row = entry as Record<string, unknown>;
-      const name = String(row.name ?? "").trim();
-      if (!name) return null;
-      const stat =
-        row.statBadge && typeof row.statBadge === "object"
-          ? (row.statBadge as { value?: unknown; label?: unknown })
-          : null;
-      return {
-        roleBadge: String(row.roleBadge ?? "").trim(),
-        name,
-        title: String(row.title ?? "").trim(),
-        bio: String(row.bio ?? ""),
-        photoUrl: String(row.photoUrl ?? "").trim(),
-        statBadge:
-          stat && String(stat.value ?? "").trim() && String(stat.label ?? "").trim()
-            ? { value: String(stat.value).trim(), label: String(stat.label).trim() }
-            : undefined,
-      } satisfies HomepageFounderProfile;
-    })
-    .filter((row): row is HomepageFounderProfile => row !== null);
+  const founders: HomepageFounderProfile[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object") continue;
+    const row = entry as Record<string, unknown>;
+    const name = String(row.name ?? "").trim();
+    if (!name) continue;
+    const founder: HomepageFounderProfile = {
+      roleBadge: String(row.roleBadge ?? "").trim(),
+      name,
+      title: String(row.title ?? "").trim(),
+      bio: String(row.bio ?? ""),
+      photoUrl: String(row.photoUrl ?? "").trim(),
+    };
+    const stat =
+      row.statBadge && typeof row.statBadge === "object"
+        ? (row.statBadge as { value?: unknown; label?: unknown })
+        : null;
+    const statValue = String(stat?.value ?? "").trim();
+    const statLabel = String(stat?.label ?? "").trim();
+    if (statValue && statLabel) {
+      founder.statBadge = { value: statValue, label: statLabel };
+    }
+    founders.push(founder);
+  }
+  return founders;
 }
 
 export function isThemeDefaultFounder(founder: HomepageFounderProfile): boolean {
@@ -122,19 +124,19 @@ function aboutMembersAsFounders(
   members: { name?: string; role?: string; photoUrl?: string }[] | undefined
 ): HomepageFounderProfile[] {
   if (!members?.length) return [];
-  return members
-    .map((member) => {
-      const name = member.name?.trim() ?? "";
-      if (!name) return null;
-      return {
-        roleBadge: member.role?.trim() || "FOUNDER",
-        name,
-        title: member.role?.trim() || "",
-        bio: "",
-        photoUrl: member.photoUrl?.trim() || "",
-      } satisfies HomepageFounderProfile;
-    })
-    .filter((row): row is HomepageFounderProfile => row !== null);
+  const founders: HomepageFounderProfile[] = [];
+  for (const member of members) {
+    const name = member.name?.trim() ?? "";
+    if (!name) continue;
+    founders.push({
+      roleBadge: member.role?.trim() || "FOUNDER",
+      name,
+      title: member.role?.trim() || "",
+      bio: "",
+      photoUrl: member.photoUrl?.trim() || "",
+    });
+  }
+  return founders;
 }
 
 /** Same mentor list the brand public homepage uses, minus Center sites placeholders. */
