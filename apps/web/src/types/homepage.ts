@@ -23,6 +23,7 @@ export interface HomepageFeaturesShowcase {
   imageUrl?: string;
   floatStatsLabel?: string;
   floatStatsValue?: string;
+  /** Leftover JSON only — Spark Features does not render a stats-card action. */
   floatStatsAction?: string;
   floatProgressLabel?: string;
   floatProgressValue?: string;

@@ -433,17 +433,6 @@ export function AbacusClassicEditorForm({
               placeholder="25.20%"
             />
             <Input
-              label="Stats card action"
-              value={config.featuresShowcase?.floatStatsAction ?? ""}
-              onChange={(v) =>
-                onChange({
-                  ...config,
-                  featuresShowcase: { ...config.featuresShowcase, floatStatsAction: v },
-                })
-              }
-              placeholder="View all →"
-            />
-            <Input
               label="Progress card label"
               value={config.featuresShowcase?.floatProgressLabel ?? ""}
               onChange={(v) =>

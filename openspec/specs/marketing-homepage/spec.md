@@ -161,6 +161,18 @@ On Spark Academy Features, overlay badges SHALL sit on the corners of the entire
 - **AND** they are not inside `sa-features__photo-stage`
 - **AND** CSS pins Last month to the top-left and Learning Progress to the bottom-right of the visual
 
+### Requirement: Spark Academy Features omits the stats-card action
+
+Spark Academy **Powerful Features for Your Learning Journey** SHALL render Last month value and Learning Progress overlays only. It SHALL NOT render a stats-card action (including leftover `floatStatsAction` / “View all →”). Homepage Configuration SHALL NOT expose a Stats card action field.
+
+#### Scenario: Features Last month card has no View all control
+
+- **GIVEN** a Spark Academy public homepage Features section
+- **AND** stored landing JSON still has `featuresShowcase.floatStatsAction` “View all →”
+- **WHEN** the section renders
+- **THEN** the Last month overlay does not include a View all control
+- **AND** `.sa-features__float-btn` is not in the DOM
+
 ### Requirement: Spark Academy success stories cards are centered
 
 Spark Academy **Success stories** (`#testimonials`) SHALL center story cards in the row when there are fewer than a full grid of cards (`sa-testimonials__grid--center`).

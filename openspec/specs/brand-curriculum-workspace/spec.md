@@ -169,8 +169,23 @@ On Spark Academy public sites, **Courses designed for success** SHALL show that 
 
 - **GIVEN** a Spark Academy public homepage with published curriculum courses
 - **WHEN** a visitor views **Courses designed for success**
-- **THEN** all published course cards are visible in one grid
+- **THEN** published course cards appear in one wrapping grid
 - **AND** there are no **All courses** / course-name filter tabs
+
+#### Scenario: View all courses only when the row overflows
+
+- **GIVEN** a Spark Academy public homepage whose published catalog fits one courses row (`flex: 1 1 18rem` + `gap: 1.5rem`; desktop fallback 3)
+- **WHEN** a visitor views **Courses designed for success**
+- **THEN** every published card is visible
+- **AND** **View all courses** is hidden
+- **GIVEN** more published courses than that row can show
+- **WHEN** a visitor views the section
+- **THEN** only one row of cards is shown
+- **AND** **View all courses** is visible
+- **WHEN** they choose **View all courses**
+- **THEN** the remaining cards appear in the same grid
+- **AND** **View all courses** is hidden
+- **AND** the control does not open the enroll modal
 
 ### Requirement: Delete guards
 

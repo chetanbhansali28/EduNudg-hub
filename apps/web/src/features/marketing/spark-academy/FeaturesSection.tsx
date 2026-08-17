@@ -19,7 +19,6 @@ const SHOWCASE_DEFAULTS = {
     "From personalized recommendations to interactive content, we've got everything you need to succeed.",
   floatStatsLabel: "Last month",
   floatStatsValue: "25.20%",
-  floatStatsAction: "View all →",
   floatProgressLabel: "Learning Progress",
   floatProgressValue: "55%",
 } as const;
@@ -35,7 +34,6 @@ export function resolveFeaturesShowcase(
     imageUrl: showcase?.imageUrl?.trim() || imageUrlFallback?.trim() || "",
     floatStatsLabel: showcase?.floatStatsLabel?.trim() || SHOWCASE_DEFAULTS.floatStatsLabel,
     floatStatsValue: showcase?.floatStatsValue?.trim() || SHOWCASE_DEFAULTS.floatStatsValue,
-    floatStatsAction: showcase?.floatStatsAction?.trim() || SHOWCASE_DEFAULTS.floatStatsAction,
     floatProgressLabel: showcase?.floatProgressLabel?.trim() || SHOWCASE_DEFAULTS.floatProgressLabel,
     floatProgressValue: showcase?.floatProgressValue?.trim() || SHOWCASE_DEFAULTS.floatProgressValue,
   };
@@ -74,7 +72,6 @@ export function FeaturesSection({ sections, showcase, imageUrlFallback }: Props)
                 </span>{" "}
                 {resolved.floatStatsValue}
               </strong>
-              <span className="sa-features__float-btn">{resolved.floatStatsAction}</span>
             </div>
 
             <div className="sa-features__float sa-features__float--progress">

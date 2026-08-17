@@ -90,11 +90,11 @@ In **Navigation & CTAs** (Abacus/Spark) or **Navigation Management** (Novu), eac
 
 **Spark Academy Success stories:** desktop keeps a centered wrapping grid. On `max-width: 767px` the track is a horizontal snap carousel that auto-advances (paused on swipe / `prefers-reduced-motion`). Regression: `regression_spark_testimonials_mobile_carousel_markup`, `regression_spark_testimonials_mobile_autoscroll_advances`.
 
-**Spark Academy photo floats:** hero Course stays on `sa-hero__photo-stage` (top-left). Features Last month / Learning Progress sit on `sa-features__visual` corners (top-left / bottom-right) so they do not cover the photo. Regression: `regression_spark_hero_course_float_anchors_to_photo_stage`, `regression_spark_features_floats_sit_on_visual_corners`.
+**Spark Academy photo floats:** hero Course stays on `sa-hero__photo-stage` (top-left). Features Last month / Learning Progress sit on `sa-features__visual` corners (top-left / bottom-right) so they do not cover the photo. Last month has no **View all →** action (`regression_spark_features_omits_view_all_float_action`). Regression: `regression_spark_hero_course_float_anchors_to_photo_stage`, `regression_spark_features_floats_sit_on_visual_corners`.
 
 **Abacus Classic syllabus:** Toggle **Curriculum syllabus** in the homepage editor (visible by default). Content comes from published `/app/curriculum` data; no separate copy fields in v1.
 
-**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`). Published courses still show if leftover `programsGrid` is off (`regression_spark_courses_show_published_syllabus_even_if_programs_grid_off`). The section title and course cards are centered (`sa-section-head--center`, `sa-courses__grid--center`).
+**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`). Published courses still show if leftover `programsGrid` is off (`regression_spark_courses_show_published_syllabus_even_if_programs_grid_off`). The section title and course cards are centered (`sa-section-head--center`, `sa-courses__grid--center`). **View all courses** shows only when the catalog overflows one row (`regression_spark_view_all_courses_only_when_overflow`).
 
 See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
 
