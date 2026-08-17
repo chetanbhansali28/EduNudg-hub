@@ -36,6 +36,7 @@
 - [ ] Center `/app/merchandise` Shop cards keep Curriculum list width; stack qty and full-width **Add to Order** so the label never clips.
 - [ ] Center `/app/students` **Import students** uses `CenterStudentImportDialog` + `import_center_students` (enroll existing students; do not create leads).
 - [ ] `Input type="tel"` keeps a stable wrap while typing (delivery Phone on `/app/students`); do not remount or live-strip the value.
+- [ ] Center `/app` staff chrome lockup shows the **brand name** next to the Site logo, with the franchise **display name** as a smaller tagline (`regression_center_shell_lockup_shows_brand_then_franchise_name`).
 - [ ] Center student detail **Portal access** shows `login_email` or the parent email, and **Copy Profile URL** copies the learn-portal login (no password).
 - [ ] Center student **Save address** shows a **Saved** / **Address saved.** confirmation next to the button.
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills as needed)

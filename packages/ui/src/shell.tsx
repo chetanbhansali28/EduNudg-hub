@@ -170,7 +170,12 @@ function SidebarPanel({
   return (
     <>
       <div className="ed-sidebar__top">
-        <Link to="/" className="ed-sidebar__brand" onClick={onNavigate} title={productName}>
+        <Link
+          to="/"
+          className="ed-sidebar__brand"
+          onClick={onNavigate}
+          title={portalTagline ? `${productName} · ${portalTagline}` : productName}
+        >
           <BrandMark logoUrl={logoUrl} className="ed-sidebar__logo-img" />
           <span className="ed-sidebar__brand-text">
             <span className="ed-sidebar__name">{productName}</span>
@@ -270,7 +275,7 @@ export function AppShell({
   productName?: string;
   logoUrl?: string | null;
   portalLabel: string;
-  /** Short label under product name in sidebar (e.g. Student portal). */
+  /** Short label under product name in sidebar and mobile bar (franchise display name or Student portal). */
   portalTagline?: string | null;
   welcomeName?: string;
   /** Full greeting line; defaults to "Welcome back, {name} 👋". */
@@ -358,6 +363,7 @@ export function AppShell({
     shellClassName ?? "",
     mobileNavMode === "bottom" ? "ed-shell--bottom-nav" : "",
     mobileChrome ? "ed-shell--mobile-chrome" : "",
+    portalTagline ? "ed-shell--has-portal-tagline" : "",
     navOpen ? "ed-shell--nav-open" : "",
     sidebarCollapsed ? "ed-shell--sidebar-collapsed" : "",
   ]
@@ -409,7 +415,10 @@ export function AppShell({
           ) : null}
           <div className="ed-mobile-bar__brand">
             {logoUrl ? <img src={logoUrl} alt="" className="ed-mobile-bar__logo" /> : null}
-            <span className="ed-mobile-bar__title">{mobileTitle}</span>
+            <span className="ed-mobile-bar__brand-text">
+              <span className="ed-mobile-bar__title">{mobileTitle}</span>
+              {portalTagline ? <span className="ed-mobile-bar__subtitle">{portalTagline}</span> : null}
+            </span>
           </div>
           {!titleOnlyMobileBar && mobileBarEnd ? (
             <div className="ed-mobile-bar__end">{mobileBarEnd}</div>

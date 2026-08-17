@@ -58,6 +58,8 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 
 ## Center (franchise) — `/app`
 
+On desktop and mobile, the staff chrome lockup shows the **brand name** next to the Site logo, with the franchise **display name** (from Franchise Identity) in a smaller line under it. Login still greets with the franchise name.
+
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
 | Main menu | Home | `/app` | Exists — open leads KPI |

@@ -2,7 +2,7 @@
 
 ## Public `/` (`http://localhost:9000`)
 
-EduNudg marketing homepage + **self-serve brand signup** (B2B). No franchise or student forms. Sign-in: `/login`.
+EduNudg marketing homepage + **self-serve brand signup** (B2B). No franchise or student forms. Sign-in: `/login` (same Site nav and enterprise footer as `/`).
 
 Details: [Portal host matrix](../spec/portal-host-matrix.md), [Platform brand onboarding](../journeys/platform-brand-onboarding.md).
 

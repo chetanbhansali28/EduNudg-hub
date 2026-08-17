@@ -17,5 +17,6 @@ See [Navigation spec](../spec/navigation-spec.md).
 - **Fees & Payments** (`/app/fees`) — same chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs
 - **Inventory** (`/app/inventory`) — same chrome (In stock / Low stock / Incoming / Total) for SKUs tied to this franchise’s assigned curriculum; column 1 is name / SKU / stock badge only; column 2 is `PipelineDetailPanel` with Curriculum (course) and Program (level), left-aligned 50% photo beside stock facts, On the way and Orders on one row, and a theme **Place New Order** button
 - **Merchandise** (`/app/merchandise`) — same chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; Shop catalog is one horizontal card per SKU with Curriculum/Program under the SKU and a stacked qty / full-width **Add to Order** footer for courses assigned to this franchise; desktop list column matches Curriculum width; gated by brand `merchandise` (legacy `/app/kits` redirects)
+- Staff chrome (all `/app` routes) shows the **brand name** next to the Site logo, with the franchise display name in a smaller line under it
 - **Settings** (`/app/settings`) — edit public center profile (photo, address, phone); login email from auth; public footer social uses brand Social Media Connect
 - Assessments / Reports — Phase D

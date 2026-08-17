@@ -50,8 +50,9 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
 
   useEffect(() => {
     if (isLoading || !isBrandLandingBundleReady(bundle)) return;
+    if (location.pathname === "/login") return;
     scrollToMarketingHash(location.hash);
-  }, [isLoading, bundle, location.hash]);
+  }, [isLoading, bundle, location.hash, location.pathname]);
 
   if (isLoading || !isBrandLandingBundleReady(bundle)) {
     return (
@@ -61,8 +62,9 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
     );
   }
 
+  const isLoginRoute = location.pathname === "/login";
   const layoutInner = (
-    <div className={marketingPageClassName(theme)}>
+    <div className={`${marketingPageClassName(theme)}${isLoginRoute ? " marketing-page--login" : ""}`}>
       {isAbacusClassic ? (
         <AbacusClassicNav config={bundle.config} />
       ) : isSparkAcademy ? (
@@ -79,6 +81,7 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
           publicStats: bundle.publicStats,
           legalPages: bundle.legalPages,
           socialConnect: bundle.socialConnect,
+          marketingChrome: true as const,
         }}
       />
       {showFooter && !isAbacusClassic && !isSparkAcademy ? (
@@ -114,4 +117,6 @@ export type BrandLandingOutletContext = {
   publicStats: import("@/lib/brandLandingBundle").BrandPublicStats;
   legalPages: import("@/lib/brandLegalPages").BrandLegalPages;
   socialConnect: import("@/lib/brandSocialConnect").BrandSocialConnect;
+  /** True when page is wrapped by brand public nav/footer. */
+  marketingChrome?: true;
 };

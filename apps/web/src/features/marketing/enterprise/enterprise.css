@@ -1023,102 +1023,16 @@ body.ent-nav-drawer-open {
   }
 }
 
-/* Login nested under marketing chrome — clear fixed nav + solid bar so they don't blend */
-.marketing-page--enterprise:has(.ed-login-page--marketing) .ent-nav {
+/* Platform login: fixed enterprise nav needs offset; shared form styles live in marketing.css */
+.marketing-page--enterprise.marketing-page--login {
+  padding-top: var(--ent-nav-h);
+}
+
+.marketing-page--login .ent-nav {
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(24px);
   border-bottom-color: var(--ent-border);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-}
-
-/* ThemeProvider defaults to min-height: 100vh — that stretches the login and pushes the footer away */
-.marketing-page--enterprise:has(.ed-login-page--marketing) > .ed-theme {
-  min-height: 0;
-  background: transparent;
-}
-
-.ed-login-page--marketing {
-  padding-top: var(--ent-nav-h);
-}
-
-.ed-login-page--marketing .ed-login-page {
-  box-sizing: border-box;
-  /* Content-sized — don't stretch to fill the viewport under nav + footer */
-  min-height: 0;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 2rem 1.25rem 2.25rem;
-  background: transparent;
-}
-
-.ed-login-page--marketing .ed-login-footer {
-  display: none;
-}
-
-@media (min-width: 960px) {
-  .ed-login-page--marketing .ed-login-page__frame {
-    min-height: 0;
-    max-width: 50rem;
-  }
-
-  .ed-login-page--marketing .ed-login-hero {
-    padding: 2rem 2rem 2.5rem;
-    justify-content: center;
-  }
-
-  .ed-login-page--marketing .ed-login-hero__emblem {
-    width: 4rem;
-    height: 4rem;
-    margin-bottom: 1.15rem;
-    border-radius: 0.85rem;
-  }
-
-  .ed-login-page--marketing .ed-login-hero__headline {
-    margin-bottom: 0.65rem;
-    font-size: clamp(1.35rem, 2vw, 1.7rem);
-  }
-
-  .ed-login-page--marketing .ed-login-hero__subtext {
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-
-  .ed-login-page--marketing .ed-login-hero__dots {
-    left: 1.5rem;
-    bottom: 1.25rem;
-  }
-
-  .ed-login-page--marketing .ed-login-panel {
-    padding: 1.5rem 1.35rem;
-  }
-
-  .ed-login-page--marketing .ed-login-card {
-    padding: 1.35rem 1.35rem 1.25rem;
-  }
-
-  .ed-login-page--marketing .ed-login-card__head {
-    margin-bottom: 0.85rem;
-  }
-
-  .ed-login-page--marketing .ed-login-card__title {
-    font-size: 1.35rem;
-  }
-
-  .ed-login-page--marketing .ed-login-card .ed-field {
-    margin-bottom: 0.75rem;
-  }
-
-  .ed-login-page--marketing .ed-login-form__remember {
-    margin: 0.1rem 0 0.95rem;
-  }
-
-  .ed-login-page--marketing .ed-login-form__divider {
-    margin: 0.85rem 0;
-  }
-
-  .ed-login-page--marketing .ed-login-form__oauth {
-    gap: 0.55rem;
-  }
 }
 
 /* Pre-footer CTA */

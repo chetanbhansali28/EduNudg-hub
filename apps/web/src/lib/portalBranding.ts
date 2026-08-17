@@ -186,12 +186,38 @@ export function resolveLoginBranding(
   };
 }
 
+export type ShellLockup = {
+  productName: string;
+  logoUrl: string | null;
+  portalTagline: string | null;
+  franchiseName: string | null;
+};
+
+function displaySlugName(slug: string | null, fallback: string): string {
+  return slug ? slug.replace(/-/g, " ") : fallback;
+}
+
 export function resolveShellProductName(
   portalType: PortalType,
   row: PortalBranding,
   brandSlug: string | null,
   centerSlug: string | null
-): { productName: string; logoUrl: string | null } {
+): ShellLockup {
   const login = resolveLoginBranding(portalType, row, brandSlug, centerSlug);
-  return { productName: login.productName, logoUrl: login.logoUrl };
+  if (portalType === "center") {
+    const brandName = row.brandName ?? displaySlugName(brandSlug, "Your brand");
+    const franchiseName = row.centerName ?? displaySlugName(centerSlug, "");
+    return {
+      productName: brandName,
+      logoUrl: login.logoUrl,
+      portalTagline: franchiseName || null,
+      franchiseName: franchiseName || null,
+    };
+  }
+  return {
+    productName: login.productName,
+    logoUrl: login.logoUrl,
+    portalTagline: null,
+    franchiseName: null,
+  };
 }

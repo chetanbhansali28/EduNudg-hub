@@ -125,7 +125,7 @@ Centers with `merchandise` enabled can **SELECT** active rows **tied to a curric
 
 | Function | Description |
 |----------|-------------|
-| `get_portal_branding` | Login white-label |
+| `get_portal_branding` | Login + staff chrome (Site logo; franchise `display_name`) |
 | `get_brand_landing_public` | Brand marketing |
 | `submit_franchise_inquiry_v2` | Franchise application |
 | `submit_brand_student_application` | Student application (`lead_source=brand`) |

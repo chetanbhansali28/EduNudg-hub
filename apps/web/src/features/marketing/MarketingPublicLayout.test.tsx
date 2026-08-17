@@ -152,10 +152,38 @@ describe("MarketingPublicLayout", () => {
 
     expect(await screen.findByLabelText("Email")).toBeDefined();
     expect(screen.getByRole("heading", { name: "Welcome back!" })).toBeDefined();
+    expect(screen.getByLabelText("Site")).toBeDefined();
+    expect(screen.getByText(DEFAULT_HOMEPAGE_CONFIG.footer.copyright)).toBeDefined();
+    expect(document.querySelector(".marketing-page--login")).toBeTruthy();
+    expect(document.querySelector(".ent-nav")).toBeTruthy();
+    expect(document.querySelector(".ent-footer")).toBeTruthy();
     expect(screen.queryByText("Loading…")).toBeNull();
     expect(qc.getQueryData(MARKETING_PUBLIC_BUNDLE_QUERY_KEY)).toEqual(
       expect.objectContaining({ config: expect.objectContaining({ hero: expect.any(Object) }) })
     );
+  });
+
+  it("regression_login_renders_platform_nav_and_footer", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={["/login"]}>
+          <Routes>
+            <Route element={<MarketingPublicLayout />}>
+              <Route path="/login" element={<LoginPage />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByRole("heading", { name: "Welcome back!" })).toBeDefined();
+    expect(screen.getByRole("navigation", { name: "Site" })).toBeDefined();
+    expect(screen.getByRole("link", { name: "EduNudg home" })).toBeDefined();
+    expect(document.querySelector(".marketing-page--login")).toBeTruthy();
+    expect(document.querySelector(".ed-theme")).toBeNull();
+    expect(document.querySelector(".ent-footer")).toBeTruthy();
+    expect(screen.getByText(DEFAULT_HOMEPAGE_CONFIG.footer.copyright)).toBeDefined();
   });
 
   it("regression_homepage_uses_outlet_config_under_public_layout", async () => {

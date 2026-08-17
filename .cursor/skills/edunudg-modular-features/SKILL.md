@@ -61,6 +61,8 @@ description: Add EduNudg features using modular files, service layer, base theme
 - **Never** discard stored media when migrating defaults — rule `marketing-homepage-media`.
 - `isLegacyPlatformHomepageSeed`: enterprise blocks / `brand-assets` URLs win over Novu markers.
 - Do not Save the editor while it is showing Unsplash/stock defaults over a customized DB row.
+- Platform `/login` stays inside `MarketingPublicLayout` (`marketing-page--login`) with the same `EnterpriseNav` / `EnterpriseSiteFooter` as `/` — do not wrap that form in a full-viewport `ThemeProvider`. Regression: `regression_login_renders_platform_nav_and_footer`.
+- Brand `/login` stays inside `BrandPublicLayout` (`marketing-page--login`) with that brand’s public nav/footer (Abacus / Spark / Novu). Regression: `regression_brand_login_renders_public_nav_and_footer`.
 
 ## Brand / franchise / student marketing
 
@@ -110,7 +112,7 @@ description: Add EduNudg features using modular files, service layer, base theme
 - Brand Success Stories (`/app/success-stories`): same pipeline chrome as Franchise Applications (`PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`, `PipelineWorkspace` list stays visible with detail). KPI cards: Published, Draft, With photo, Total. Tabs: **Published** / **Draft**. **Add Story** uses `ed-import-dialog`, not `AddFormSection` — `regression_success_stories_kpi_cards_match_pipeline_stats`, `regression_add_story_opens_modal_instead_of_below_fold_form`.
 - Brand Merchandise (`/app/merchandise`): same pipeline chrome as Franchise Applications (`PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`). KPI cards: Active, Draft, Orders, Total. Tabs stay **Catalog** / **Promo Codes** / **Orders** / **Payment settings**. Desktop Catalog, Promo Codes, Orders, and Payment settings all use `PipelineWorkspace` list + detail — `regression_merchandise_page_matches_franchise_apps_stats_chrome`, `regression_merchandise_section_tabs_keep_catalog_workspace_chrome`. Search stays on the current tab. Promo Codes use **+ Add Promo Code** in the page header. Catalog SKUs must be tied to curriculum; franchise Shop and Inventory only show SKUs for courses assigned on `/app/centers` (`regression_unassigned_sku_is_hidden_from_center`, `regression_inventory_omits_skus_not_in_assigned_catalog`). Do not add a Competitions tab.
 - App pages use `PageGrid` / `FormGrid` from `@edunudg/ui` — see [`ui-shell-standards.md`](../../docs/spec/ui-shell-standards.md).
-- Staff `AppShell` (brand/center `/app`, platform `/admin`) passes `resetScrollKey={pathname}` so tab changes scroll to the top — `regression_staff_app_scrolls_to_top_on_tab_change`. The mobile top bar shows `logoUrl` beside the product name — `regression_staff_mobile_bar_shows_brand_logo`.
+- Staff `AppShell` (brand/center `/app`, platform `/admin`) passes `resetScrollKey={pathname}` so tab changes scroll to the top — `regression_staff_app_scrolls_to_top_on_tab_change`. The mobile top bar shows `logoUrl` beside the product name — `regression_staff_mobile_bar_shows_brand_logo`. Center `/app` lockup uses the **brand name** with the franchise display name as `portalTagline` — `regression_center_shell_lockup_shows_brand_then_franchise_name`.
 
 ## Before finish
 

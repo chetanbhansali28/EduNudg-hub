@@ -2,7 +2,7 @@
 
 ## Public `/` (marketing landing)
 
-**Franchise application** + **student application** forms (no subscription gate on public). Staff: `/login`. App: `/app/*`.
+**Franchise application** + **student application** forms (no subscription gate on public). Staff: `/login` (same public nav and footer as `/`). App: `/app/*`.
 
 Details: [Portal host matrix](../spec/portal-host-matrix.md), [Marketing landing pages](../frontend/marketing-landing.md).
 

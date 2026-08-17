@@ -24,7 +24,7 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | URL | Portal |
 |-----|--------|
 | http://localhost:9000/ | Platform marketing homepage (shared nav + footer) |
-| http://localhost:9000/login | Platform admin / staff login (split-screen UI) |
+| http://localhost:9000/login | Platform admin / staff login (same Site nav + footer as `/`) |
 | http://localhost:9000/admin | Platform app (Command Center KPIs) |
 | http://localhost:9000/admin/brands | Brands list — **Brand backend** opens target brand `/app`; **Edit** → brand detail |
 | http://localhost:9000/admin/brands/:slug | Brand detail — KPIs, settings (**Site logo** / name → Homepage `landing.meta`), domains, centers |
@@ -32,7 +32,8 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | http://localhost:9000/admin/homepage | Platform marketing homepage editor |
 | http://abacusworld.localhost:9000/ | Abacus World franchise landing (public) |
 | http://smart-brain-abacus.localhost:9000/ | Smart Brain Abacus (Abacus Classic theme) |
-| http://abacusworld.localhost:9000/login | Brand staff login |
+| http://abacusworld.localhost:9000/login | Brand staff login (same public nav + footer as `/`) |
+| http://smart-brain-abacus.localhost:9000/login | Smart Brain Abacus staff login (Abacus Classic nav + footer) |
 | http://abacusworld.localhost:9000/app | Brand operator backend (compact KPI dashboard) |
 | http://abacusworld.localhost:9000/app/analytics | Brand analytics KPIs + Performance Breakdown pulse |
 | http://{brand}.localhost:9000/auth/handoff | Platform-admin cross-portal sign-in (token in query) |

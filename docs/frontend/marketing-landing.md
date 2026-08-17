@@ -111,6 +111,10 @@ See `apps/web/src/features/marketing/abacus-classic/` and `apps/web/src/features
 
 Sharing one key caused login to stick on **Loading…** after visiting the public homepage. Spec: [`openspec/specs/marketing-homepage/spec.md`](../../openspec/specs/marketing-homepage/spec.md).
 
+**Platform `/login` chrome:** `MarketingPublicLayout` wraps `/login` with the same `EnterpriseNav` + `EnterpriseSiteFooter` as `/`. The layout root adds `marketing-page--login` so the form sits between header and footer without a full-viewport admin `ThemeProvider`. Regression: `regression_login_renders_platform_nav_and_footer`, `regression_platform_login_renders_marketing_nav_and_footer`.
+
+**Brand `/login` chrome:** `BrandPublicLayout` wraps `{brand}/login` with the same theme nav and footer as `{brand}/` (Abacus Classic, Spark Academy, or Novu). Regression: `regression_brand_login_renders_public_nav_and_footer`.
+
 ## Lead modals (Abacus / Spark)
 
 Deep links `#enroll`, `#enroll-student`, `#register` → enroll modal; `#apply` → franchise modal. Spark Academy skins those dialogs (`ac-modal--spark`, Inter/navy/pill). Center Path B passes `centerSlug` so enroll submits `submit_center_student_registration`. See [spark-academy.md](./spark-academy.md) and [abacus-classic.md](./abacus-classic.md). The Spark homepage also fades the hero in, scroll-reveals sections with an unhurried vertical lift (`sa-reveal` ~0.95s), then staggers items inside each block with a slower fade-and-scale (`sa-reveal-item` ~1.1s; `prefers-reduced-motion` off). Regression: `regression_spark_lead_modals_use_theme_classes`, `regression_spark_homepage_motion_css_respects_reduced_motion`, `regression_spark_section_items_stagger_inside_blocks`.

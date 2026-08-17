@@ -39,5 +39,7 @@ test.describe("P-PUB — platform public marketing", () => {
     await expect(page.getByRole("heading", { name: "Welcome back!" })).toBeVisible({
       timeout: 15_000,
     });
+    await expect(page.getByRole("navigation", { name: "Site", exact: true })).toBeVisible();
+    await expect(page.locator("footer.ent-footer")).toBeVisible();
   });
 });

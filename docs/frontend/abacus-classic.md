@@ -4,7 +4,7 @@ Success Abacus–style public brand sites (`marketing_theme = 'abacus-classic'`)
 
 Platform admins assign the theme at **Platform → Brands → Edit** (`/admin/brands/:slug`) → **Brand settings** → **Website theme**. Brand owners edit copy and media at `{brand}.localhost:9000/app/homepage` via `AbacusClassicEditorForm`. Editor uses the shared Vivid Logic accordion system (`HomepageEditorShell.tsx`) — icon tiles, single-open sections, hero save card. See [Vivid Logic admin UX](./vivid-logic-admin.md).
 
-Local demo brand: `smart-brain-abacus.localhost:9000` (see [Operations runbook](../ops/runbook.md#urls-port-9000)).
+Local demo brand: `smart-brain-abacus.localhost:9000` (see [Operations runbook](../ops/runbook.md#urls-port-9000)). Staff login at `{brand}/login` uses the same Abacus nav and footer as `/` (`BrandPublicLayout` + `marketing-page--login`).
 
 ## Sprint 1 (delivered)
 

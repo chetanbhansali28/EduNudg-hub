@@ -43,6 +43,31 @@ The staff login form SHALL render a primary email/password submit button whose a
 - **WHEN** the page loads
 - **THEN** heading `Welcome back!`, platform account copy, Email field, and exact `Log in` submit are visible
 - **AND** `Log in with Google` is available when Google auth is enabled
+- **AND** the page SHALL render the same enterprise Site nav and site footer as platform `/`
+
+### Requirement: Platform login uses public marketing chrome
+
+Platform host `/login` SHALL render as a child of `MarketingPublicLayout` with the homepage Site header (`EnterpriseNav`) and site footer (`EnterpriseSiteFooter`). The login split SHALL NOT use a full-viewport `ThemeProvider` shell that hides that chrome.
+
+#### Scenario: Platform login keeps homepage nav and footer
+
+- **GIVEN** a visitor opens `/login` on the platform host
+- **WHEN** the login form is ready
+- **THEN** navigation labelled `Site` is visible
+- **AND** the enterprise site footer is visible
+- **AND** the layout root has class `marketing-page--login`
+
+### Requirement: Brand login uses that brand’s public marketing chrome
+
+Brand host `/login` SHALL render as a child of `BrandPublicLayout` with the same nav and footer as brand `/` for the assigned `marketing_theme` (Abacus Classic, Spark Academy, or Novu). The login split SHALL NOT use a full-viewport `ThemeProvider` shell that hides that chrome.
+
+#### Scenario: Brand login keeps homepage nav and footer
+
+- **GIVEN** a visitor opens `/login` on a brand host (for example `smart-brain-abacus.localhost`)
+- **WHEN** the login form is ready
+- **THEN** the brand public header (Abacus `header.ac-nav`, Spark `header.sa-nav`, or Novu Site nav) is visible
+- **AND** the matching site footer is visible
+- **AND** the layout root has class `marketing-page--login`
 
 ### Requirement: Automated tests use library-correct exact name matchers
 

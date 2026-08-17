@@ -63,11 +63,15 @@ export function MarketingPublicLayout({ showFooter = true }: Props) {
     );
   }
 
-  const showSiteFooter = showFooter && isPlatformSectionEnabled(config, "footer");
+  const isLoginRoute = location.pathname === "/login";
+  const showSiteFooter =
+    (showFooter && isPlatformSectionEnabled(config, "footer")) || isLoginRoute;
   const outletContext: MarketingPublicOutletContext = { config, legalPages, marketingChrome: true };
 
   return (
-    <div className="marketing-page marketing-page--enterprise">
+    <div
+      className={`marketing-page marketing-page--enterprise${isLoginRoute ? " marketing-page--login" : ""}`}
+    >
       <EnterpriseNav config={config} />
       <Outlet context={outletContext} />
       {showSiteFooter ? <EnterpriseSiteFooter config={config} legalPages={legalPages} /> : null}

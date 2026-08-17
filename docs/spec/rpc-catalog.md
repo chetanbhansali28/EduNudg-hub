@@ -11,7 +11,7 @@ All functions `SECURITY DEFINER`, `SET search_path = public`, validate tenant fr
 | `get_brand_success_stories_public(p_brand_slug)` | Brand | *(deprecated — use landing payload `success_stories`)* |
 | `submit_franchise_inquiry_v2(...)` | Brand | Insert `franchise_inquiries` |
 | `submit_brand_student_application(...)` | Brand | `upsert_lead_by_whatsapp`, `lead_source = brand` |
-| `get_portal_branding(p_brand_slug, p_center_slug)` | Brand / center / learn | Login chrome; logo prefers `landing.meta.logoUrl` (Site logo) then `brands.logo_url` |
+| `get_portal_branding(p_brand_slug, p_center_slug)` | Brand / center / learn | Login + staff chrome; logo prefers `landing.meta.logoUrl` (Site logo) then `brands.logo_url`; `center_name` prefers `franchise_centers.display_name` (migration `091`) |
 | `get_center_landing_public(p_brand_slug, p_center_slug)` | Center | Brand logo + center blurb; curriculum limited to `center_program_enablement` |
 | `submit_center_student_registration(...)` | Center | `upsert_lead_by_whatsapp`, `lead_source = center`, `center_id` set |
 

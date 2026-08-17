@@ -19,6 +19,13 @@ test("login page renders split-screen form", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Log in", exact: true })).toBeVisible();
 });
 
+test("regression_platform_login_renders_marketing_nav_and_footer", async ({ page }) => {
+  await page.goto("/login");
+  await expectLoginFormReady(page);
+  await expect(page.getByRole("navigation", { name: "Site", exact: true })).toBeVisible();
+  await expect(page.locator("footer.ent-footer")).toBeVisible();
+});
+
 test("login page exposes default alternate sign-in options", async ({ page }) => {
   await page.goto("/login");
   await expectLoginFormReady(page);

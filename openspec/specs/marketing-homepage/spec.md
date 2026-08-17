@@ -47,6 +47,17 @@ Navigating from the platform public homepage to `/login` SHALL NOT leave the log
 - **WHEN** a visitor loads platform `/` then navigates to `/login`
 - **THEN** the login form (Email field) becomes available
 - **AND** the page is not stuck on a loading state caused by homepage query-cache collision
+- **AND** the same Site nav and enterprise footer as `/` remain visible
+
+### Requirement: Platform login shares homepage chrome
+
+Platform `/login` SHALL use `MarketingPublicLayout` (`marketing-page--login`) so `EnterpriseNav` and `EnterpriseSiteFooter` wrap the staff login form. Login SHALL NOT mount a full-viewport admin `ThemeProvider` under that layout.
+
+#### Scenario: Direct /login load shows nav and footer
+
+- **GIVEN** the platform host
+- **WHEN** a visitor opens `/login` without visiting `/` first
+- **THEN** navigation labelled `Site` and `footer.ent-footer` are present with the login form
 
 ### Requirement: Legacy Novu seed discard must not drop uploaded media
 
@@ -105,6 +116,13 @@ Brand identity copy and logo SHALL live in `brand_settings.settings.landing.meta
 - **GIVEN** brand or center staff are on `/app` with a Site logo
 - **AND** the viewport is mobile
 - **THEN** the staff top bar shows that logo beside the product name
+
+#### Scenario: Center staff chrome shows brand then franchise name
+
+- **GIVEN** franchise staff are on center `/app` (including `/app/merchandise`)
+- **THEN** the sidebar and mobile bar show the brand name next to the Site logo
+- **AND** the franchise display name appears in a smaller line under the brand name
+- **AND** `/login` still uses the franchise name as the product name
 
 #### Scenario: Public nav logo is franchise size without a frame
 

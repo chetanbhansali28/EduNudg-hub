@@ -131,9 +131,9 @@ export function AppRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/legal/:kind" element={<MarketingLegalPage />} />
         </Route>
-      ) : (
+      ) : tenant.portalType !== "brand" ? (
         <Route path="/login" element={<LoginPage />} />
-      )}
+      ) : null}
 
       {tenant.portalType === "platform" && (
         <>
@@ -165,6 +165,7 @@ export function AppRoutes() {
             <Route path="/" element={<BrandLandingPage />} />
             <Route path="/about" element={<BrandAboutPage />} />
             <Route path="/legal/:kind" element={<BrandLegalPage />} />
+            <Route path="/login" element={<LoginPage />} />
           </Route>
           <Route
             path="/app"

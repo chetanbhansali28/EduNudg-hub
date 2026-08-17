@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clearPortalBrandingCache, readPortalBrandingCache, resolveLoginBranding, seedPortalBrandingCache } from "./portalBranding";
+import { clearPortalBrandingCache, readPortalBrandingCache, resolveLoginBranding, resolveShellProductName, seedPortalBrandingCache } from "./portalBranding";
 
 const empty = {
   brandId: null,
@@ -41,6 +41,35 @@ describe("resolveLoginBranding", () => {
     );
     expect(copy.productName).toBe("Downtown Center");
     expect(copy.headline).toContain("Downtown Center");
+  });
+
+  it("regression_center_shell_lockup_shows_brand_then_franchise_name", () => {
+    const shell = resolveShellProductName(
+      "center",
+      {
+        ...empty,
+        brandName: "Smart Brain Abacus",
+        brandLogoUrl: "https://cdn/logo.png",
+        centerName: "Koramangala Franchise",
+      },
+      "smart-brain-abacus",
+      "koramangala"
+    );
+    expect(shell.productName).toBe("Smart Brain Abacus");
+    expect(shell.portalTagline).toBe("Koramangala Franchise");
+    expect(shell.franchiseName).toBe("Koramangala Franchise");
+    expect(shell.logoUrl).toBe("https://cdn/logo.png");
+  });
+
+  it("regression_brand_shell_lockup_omits_franchise_tagline", () => {
+    const shell = resolveShellProductName(
+      "brand",
+      { ...empty, brandName: "Smart Brain Abacus" },
+      "smart-brain-abacus",
+      null
+    );
+    expect(shell.productName).toBe("Smart Brain Abacus");
+    expect(shell.portalTagline).toBeNull();
   });
 
   it("regression_clearPortalBrandingCacheDropsStaleLoginCopy", () => {
