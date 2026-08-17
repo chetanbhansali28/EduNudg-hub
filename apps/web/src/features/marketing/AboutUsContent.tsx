@@ -172,9 +172,6 @@ export function AboutUsPageContent({
     <div className={`about-us about-us--page ${aboutUsThemeClass(marketingTheme)}`}>
       <header className="about-us__hero">
         <div className="about-us__hero-inner">
-          {marketingTheme === "spark-academy" ? (
-            <span className="about-us__hero-badge">About us</span>
-          ) : null}
           {section.heroHeadline?.trim() ? <h1>{section.heroHeadline}</h1> : null}
           {section.heroSubtitle?.trim() ? <p className="about-us__hero-sub">{section.heroSubtitle}</p> : null}
           {config.meta.logoUrl ? (
