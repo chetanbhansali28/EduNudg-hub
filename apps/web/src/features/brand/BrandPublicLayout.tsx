@@ -99,10 +99,10 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
     </div>
   );
 
-  if (themeUsesLeadModals(theme) && !isLoginRoute) {
+  if (themeUsesLeadModals(theme)) {
     return (
       <LeadModalProvider>
-        <LeadModalHashOpener />
+        {!isLoginRoute ? <LeadModalHashOpener /> : null}
         {layoutInner}
       </LeadModalProvider>
     );
