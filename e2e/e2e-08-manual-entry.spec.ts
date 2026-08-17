@@ -42,7 +42,7 @@ test.describe("E2E-08 — Manual staff lead entry", () => {
       await newLead.click();
       await page.getByLabel("Parent name").fill(fields.parentName);
       await page.getByLabel("WhatsApp number").fill(fields.whatsapp);
-      await page.getByLabel("Email").fill(fields.email);
+      await page.getByLabel("Email", { exact: true }).fill(fields.email);
       await page.getByLabel("City", { exact: true }).fill(fields.city);
       await page.getByLabel("Pincode", { exact: true }).fill(fields.pincode);
       await page.getByLabel("Student name").fill(fields.childName);

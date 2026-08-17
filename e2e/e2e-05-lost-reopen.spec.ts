@@ -44,8 +44,9 @@ test.describe("E2E-05 — Lost lead lifecycle", () => {
       const centerCtx = await browser.newContext({ storageState: authStatePath("center") });
       const centerPage = await centerCtx.newPage();
       await centerPage.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/app/leads"));
-      await expect(centerPage.getByText(fields.childName).first()).toBeVisible({ timeout: 20_000 });
-      await centerPage.getByText(fields.childName).first().click();
+      const leadRow = centerPage.getByRole("button", { name: new RegExp(fields.parentName, "i") });
+      await expect(leadRow).toBeVisible({ timeout: 20_000 });
+      await leadRow.click();
       const lostBtn = centerPage.getByRole("button", { name: /mark lost|lost/i }).first();
       await expect(lostBtn).toBeVisible({ timeout: 15_000 });
       await lostBtn.click();
