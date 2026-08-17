@@ -9,24 +9,32 @@ Brand marketing sites can publish a themed **About Us** page (`/about`) with com
 ### Brand About Us editor
 
 GIVEN a brand admin opens Homepage Configuration
-WHEN they edit About Us fields (story, philosophy, features, team members with photos) and save
+WHEN they edit About Us fields (story, philosophy, features, team members with photos, hero banner, philosophy image) and save
 THEN the config is stored in `brand_settings.settings.landing.about`
-AND uploads use `brand-assets`
+AND uploads use `brand-assets` (`heroImageUrl`, `imageUrl`, `philosophyImageUrl`, member photos)
 AND saves run `preserveCustomMarketingMediaUrls`
 
 ### Dedicated public About page
 
 GIVEN `about.publishPage` is not false and About has content
 WHEN a visitor opens `/about` on the brand host
-THEN the About page renders (hero, story, philosophy, features, what we do, team grid, optional CTAs)
+THEN Novu and Abacus Classic render the dedicated About layout (hero, story, philosophy, features, what we do, team grid, optional CTAs)
+AND Spark Academy instead composes `/about` from homepage blocks: Hero, Features, Journey, Mentors
 AND the viewport scrolls to the top of the page (smooth unless `prefers-reduced-motion`)
 AND a hash target is left alone
-AND the root uses a theme modifier (`about-us--novu`, `about-us--abacus-classic`, or `about-us--spark-academy`) matching `brands.marketing_theme`
+AND Novu/Abacus roots use a theme modifier (`about-us--novu` or `about-us--abacus-classic`) matching `brands.marketing_theme`
 
 GIVEN a Spark Academy brand
 WHEN a visitor opens `/about`
-THEN the page uses Spark tokens (light hero, Inter type scale, Spark pill CTAs) instead of Mastermind navy chrome
-AND enroll/franchise CTAs use `SparkAcademyCta` (lead modals when the layout provides them)
+THEN the page uses the same homepage section components as `/` (`SparkAcademyHero`, `FeaturesSection`, `JourneySection`, `MentorsSection`) with `landing.about` copy
+AND it SHALL NOT render Mastermind-only About chrome (`.about-us__hero`, numbered `.about-us__feature`, `.about-us__cta-band`)
+AND section ids are `about-hero`, `about-features`, `about-journey`, `about-team` so homepage hashes (`#hero`, `#features`, `#founders`) still resolve to `/`
+AND the hero enroll CTA uses `SparkAcademyCta` (lead modals when the layout provides them)
+AND the hero SHALL NOT render homepage badges (About chip, Course/Learners floats, stats bar)
+AND Features SHALL NOT render Last month / Learning Progress floats
+AND the public homepage `/` still renders those badges on Hero and Features
+AND `landing.about.heroImageUrl` fills the `/about` hero photo when set
+AND `landing.about.philosophyImageUrl` fills the Journey / philosophy highlight photo when set
 
 GIVEN About is unpublished or empty
 WHEN a visitor opens `/about`

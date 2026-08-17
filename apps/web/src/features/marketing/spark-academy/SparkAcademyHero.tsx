@@ -8,6 +8,13 @@ type Props = {
   config: HomepageConfig;
   featuredProgram?: PublicCurriculumProgram | null;
   programCount?: number;
+  /** Section id; `/about` uses `about-hero` so homepage `#hero` still targets `/`. */
+  id?: string;
+  /**
+   * Homepage keeps the ABOUT badge, course/learner floats, and stats bar.
+   * `/about` passes false so those overlays stay homepage-only.
+   */
+  showOverlays?: boolean;
 };
 
 const HERO_STAT_FALLBACKS: { value: string; label: string }[] = [
@@ -54,17 +61,23 @@ function buildHeroStats(
   return stats.slice(0, 4);
 }
 
-export function SparkAcademyHero({ config, featuredProgram, programCount = 0 }: Props) {
+export function SparkAcademyHero({
+  config,
+  featuredProgram,
+  programCount = 0,
+  id = "hero",
+  showOverlays = true,
+}: Props) {
   const hero = config.hero;
   const stats = buildHeroStats(config, programCount);
   const heroImage = hero.backgroundImageUrl?.trim() || hero.phoneFrameUrl?.trim() || "";
   const studentDisplay = config.footer.rich?.brandStats?.studentCount?.trim();
 
   return (
-    <section className="sa-hero" id="hero">
+    <section className="sa-hero" id={id}>
       <div className="sa-hero__inner">
         <div className="sa-hero__copy">
-          {hero.badge ? <span className="sa-hero__badge">{hero.badge}</span> : null}
+          {showOverlays && hero.badge ? <span className="sa-hero__badge">{hero.badge}</span> : null}
           <h1 className="sa-hero__title">
             {hero.line1}{" "}
             {hero.line1Serif ? <span className="sa-hero__highlight">{hero.line1Serif}</span> : null}
@@ -96,13 +109,13 @@ export function SparkAcademyHero({ config, featuredProgram, programCount = 0 }: 
             ) : (
               <div className="sa-hero__photo-placeholder" aria-hidden />
             )}
-            {featuredProgram ? (
+            {showOverlays && featuredProgram ? (
               <div className="sa-hero__float-card sa-hero__float-card--course">
                 <span className="sa-hero__float-label">Course</span>
                 <strong>{featuredProgram.name}</strong>
               </div>
             ) : null}
-            {studentDisplay ? (
+            {showOverlays && studentDisplay ? (
               <div className="sa-hero__float-card sa-hero__float-card--stat">
                 <strong>{studentDisplay}</strong>
                 <span>Learners</span>
@@ -112,19 +125,21 @@ export function SparkAcademyHero({ config, featuredProgram, programCount = 0 }: 
         </div>
       </div>
 
-      <div className="sa-hero__stats">
-        <div className="sa-hero__stats-bar">
-          {stats.map((stat, i) => (
-            <Fragment key={`${stat.label}-${i}`}>
-              {i > 0 ? <span className="sa-hero__stats-dot" aria-hidden /> : null}
-              <div className="sa-hero__stat">
-                <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
-              </div>
-            </Fragment>
-          ))}
+      {showOverlays ? (
+        <div className="sa-hero__stats">
+          <div className="sa-hero__stats-bar">
+            {stats.map((stat, i) => (
+              <Fragment key={`${stat.label}-${i}`}>
+                {i > 0 ? <span className="sa-hero__stats-dot" aria-hidden /> : null}
+                <div className="sa-hero__stat">
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                </div>
+              </Fragment>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
     </section>
   );
 }

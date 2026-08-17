@@ -6,7 +6,7 @@ import { scrollPublicPageToTop } from "@/lib/marketingPublicSite";
 import { themeUsesLeadModals } from "@/lib/marketingThemeLayout";
 import type { BrandLandingOutletContext } from "@/features/brand/BrandPublicLayout";
 
-/** Brand public `/about` — theme-aware About Us page (Novu / Abacus / Spark). */
+/** Brand public `/about` — Spark reuses homepage blocks; Novu / Abacus keep dedicated About chrome. */
 export function BrandAboutPage() {
   const { config, marketingTheme } = useOutletContext<BrandLandingOutletContext>();
   const { hash } = useLocation();

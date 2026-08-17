@@ -39,7 +39,7 @@ Assign theme: **Platform admin** → **Brands** → **Edit** → **Brand setting
 
 Brand owners cannot change the theme; they only edit content at `{brand}.localhost:9000/app/homepage` and `{brand}.localhost:9000/app/center-site`. **Save changes** stays clickable with no edits. **Primary CTA label** / **Secondary CTA label** (header) and **Hero CTA label** / **Hero CTA link** are independent local drafts (no save-on-type).
 
-Public **`/about`** uses `.about-us--abacus-classic` (navy/blue Abacus tokens + `AbacusCtaButton` when lead modals are on). Spark Academy brands use `.about-us--spark-academy` instead — see [Spark Academy](./spark-academy.md).
+Public **`/about`** uses `.about-us--abacus-classic` (navy/blue Abacus tokens + `AbacusCtaButton` when lead modals are on). Spark Academy brands reuse homepage Hero / Features / Journey / Mentors on `/about` — see [Spark Academy](./spark-academy.md).
 
 ## Sprint 2 (delivered)
 

@@ -81,6 +81,29 @@ describe("FeaturesSection", () => {
     expect(screen.getByText("Completion")).toBeDefined();
     expect(screen.getByText("72%")).toBeDefined();
   });
+
+  it("regression_spark_homepage_features_keep_float_badges", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    render(
+      <FeaturesSection sections={config.featureSections} showcase={config.featuresShowcase} />
+    );
+    expect(document.querySelector(".sa-features__float--stats")).toBeTruthy();
+    expect(document.querySelector(".sa-features__float--progress")).toBeTruthy();
+  });
+
+  it("hides_float_badges_when_showFloats_false", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    render(
+      <FeaturesSection
+        sections={config.featureSections}
+        showcase={config.featuresShowcase}
+        showFloats={false}
+      />
+    );
+    expect(document.querySelector(".sa-features__float")).toBeNull();
+    expect(screen.queryByText("Last month")).toBeNull();
+    expect(screen.queryByText("Learning Progress")).toBeNull();
+  });
 });
 
 describe("JourneySection", () => {

@@ -21,6 +21,8 @@ export type MarketingConfigPartial = {
   upcomingEvents?: { items?: Array<{ imageUrl?: string }> };
   about?: {
     imageUrl?: string;
+    heroImageUrl?: string;
+    philosophyImageUrl?: string;
     members?: Array<{ photoUrl?: string }>;
   };
 };
@@ -63,6 +65,8 @@ function collectMarketingMediaUrls(
     ...(p.testimonials?.items?.map((t) => t.avatarUrl) ?? []),
     ...(p.upcomingEvents?.items?.map((e) => e.imageUrl) ?? []),
     p.about?.imageUrl,
+    p.about?.heroImageUrl,
+    p.about?.philosophyImageUrl,
     ...(p.about?.members?.map((m) => m.photoUrl) ?? []),
   ];
   return urls.filter((u): u is string => typeof u === "string" && u.trim().length > 0);
@@ -211,6 +215,11 @@ export function preserveCustomMarketingMediaUrls<T extends Partial<HomepageConfi
     out.about = {
       ...draft.about,
       imageUrl: preferCustomUrl(prev.about?.imageUrl, draft.about.imageUrl) ?? draft.about.imageUrl,
+      heroImageUrl:
+        preferCustomUrl(prev.about?.heroImageUrl, draft.about.heroImageUrl) ?? draft.about.heroImageUrl,
+      philosophyImageUrl:
+        preferCustomUrl(prev.about?.philosophyImageUrl, draft.about.philosophyImageUrl) ??
+        draft.about.philosophyImageUrl,
       members: draft.about.members?.map((member, i) => ({
         ...member,
         photoUrl:

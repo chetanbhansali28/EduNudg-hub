@@ -2,6 +2,12 @@ import type {
   HomepageAboutFeature,
   HomepageAboutMember,
   HomepageAboutSection,
+  HomepageConfig,
+  HomepageFeatureSection,
+  HomepageFeaturesShowcase,
+  HomepageFounderProfile,
+  HomepageTrustCard,
+  HomepageTrustMedia,
 } from "@/types/homepage";
 
 export function emptyAboutFeature(): HomepageAboutFeature {
@@ -26,12 +32,14 @@ export function defaultAboutSection(brandName: string): HomepageAboutSection {
   return {
     heroHeadline: "WE MAKE WINNERS WHO LEAD",
     heroSubtitle: "A complete brain development program on a live online learning platform",
+    heroImageUrl: "",
     title: `ABOUT ${brandName.toUpperCase()}`,
     body: `We are ${brandName}, an education company focused on the next generation of learners. We identify basic learning challenges in kids and develop programs that make learning simpler — shared globally through our franchise network.`,
     imageUrl: "",
     philosophyTitle: "Our Endeavour",
     philosophyBody:
       "To 'Simplify The Learning Methods' so that every student can RISE — Research, Innovate, Share & Educate.",
+    philosophyImageUrl: "",
     differentTitle: "WHAT MAKES US DIFFERENT?",
     features: [
       {
@@ -107,5 +115,126 @@ export function mergeAboutSection(
     ...partial,
     features: partial.features?.length ? partial.features.map((f) => ({ ...f })) : base.features,
     members: partial.members ? partial.members.map((m) => ({ ...m })) : base.members,
+  };
+}
+
+/** Map About differentiators onto the Spark Features list. */
+export function aboutFeaturesAsHomepageSections(
+  section: HomepageAboutSection
+): HomepageFeatureSection[] {
+  return (section.features ?? [])
+    .filter((feature) => hasText(feature.title) || hasText(feature.body))
+    .map((feature) => ({
+      id: feature.id || feature.title,
+      title: feature.title,
+      titleSerif: "",
+      body: feature.body,
+    }));
+}
+
+/** Spark Features showcase: About copy + homepage float stats / fallback photo. */
+export function aboutFeaturesShowcase(
+  section: HomepageAboutSection,
+  fallback?: HomepageFeaturesShowcase | null
+): HomepageFeaturesShowcase {
+  return {
+    ...fallback,
+    eyebrow: section.title?.trim() || fallback?.eyebrow || "About us",
+    title: section.differentTitle?.trim() || "What makes us different",
+    subtitle: section.body?.trim() || fallback?.subtitle || "",
+    imageUrl: section.imageUrl?.trim() || fallback?.imageUrl,
+  };
+}
+
+/** Map team grid members onto Spark mentor / founder cards. */
+export function aboutMembersAsFounders(
+  members: HomepageAboutMember[] | undefined
+): HomepageFounderProfile[] {
+  return (members ?? [])
+    .filter((member) => hasText(member.name) || hasText(member.photoUrl))
+    .map((member) => ({
+      roleBadge: member.role,
+      name: member.name,
+      title: member.role,
+      bio: member.bio ?? "",
+      photoUrl: member.photoUrl,
+    }));
+}
+
+function whatWeDoParagraphs(section: HomepageAboutSection): string[] {
+  return (section.whatWeDoBody ?? "")
+    .split(/\n\n+/)
+    .map((para) => para.trim())
+    .filter(Boolean);
+}
+
+/** Journey rows from “what we do” copy (first short paragraph can be the card title). */
+export function aboutJourneyCards(section: HomepageAboutSection): HomepageTrustCard[] {
+  const whatTitle = section.whatWeDoTitle?.trim() || "What we do";
+  const paras = whatWeDoParagraphs(section);
+  if (paras.length === 0) return [];
+  if (paras.length >= 2 && paras[0]!.length <= 80) {
+    return [
+      {
+        title: paras[0]!.replace(/\.$/, ""),
+        subtitle: paras.slice(1).join(" "),
+      },
+    ];
+  }
+  return paras.slice(0, 3).map((para) => ({ title: whatTitle, subtitle: para }));
+}
+
+/**
+ * Spark Journey block for `/about`: philosophy header + what-we-do rows,
+ * keeping the homepage highlight photo/stats so the block matches `/`.
+ */
+export function aboutJourneyTrust(
+  section: HomepageAboutSection,
+  fallback?: HomepageTrustMedia | null
+): HomepageTrustMedia | null {
+  const philosophyTitle = section.philosophyTitle?.trim() || "";
+  const philosophyBody = section.philosophyBody?.trim() || "";
+  const whatTitle = section.whatWeDoTitle?.trim() || "";
+  const whatBody = section.whatWeDoBody?.trim() || "";
+  if (!philosophyTitle && !philosophyBody && !whatTitle && !whatBody) return null;
+
+  const cards = aboutJourneyCards(section);
+
+  return {
+    youtubeUrl: fallback?.youtubeUrl ?? "",
+    ...fallback,
+    eyebrow: whatTitle || fallback?.eyebrow || "Our story",
+    title: philosophyTitle || fallback?.title || "Our journey",
+    titleHighlight: "",
+    intro: philosophyBody,
+    imageUrl: section.philosophyImageUrl?.trim() || fallback?.imageUrl,
+    cards,
+  };
+}
+
+/** Spark hero on `/about`: About headline/subtitle/CTA on the homepage hero block. */
+export function aboutHeroConfig(
+  config: HomepageConfig,
+  about: HomepageAboutSection
+): HomepageConfig {
+  const headline = about.heroHeadline?.trim();
+  const subtitle = about.heroSubtitle?.trim();
+  const ctaLabel = about.onlineCtaLabel?.trim();
+  const ctaHref = about.onlineCtaHref?.trim();
+
+  return {
+    ...config,
+    hero: {
+      ...config.hero,
+      badge: "",
+      line1: headline || config.hero.line1,
+      line1Serif: headline ? "" : config.hero.line1Serif,
+      line2: headline ? "" : config.hero.line2,
+      line2Serif: headline ? "" : config.hero.line2Serif,
+      subtitle: subtitle || config.hero.subtitle,
+      ctaLabel: ctaLabel || config.hero.ctaLabel,
+      ctaHref: ctaHref || config.hero.ctaHref,
+      backgroundImageUrl: about.heroImageUrl?.trim() || config.hero.backgroundImageUrl,
+    },
   };
 }

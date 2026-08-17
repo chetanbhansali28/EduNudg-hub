@@ -39,9 +39,11 @@ export function AboutUsEditorFields({
   return (
     <>
       <EditorSectionNote>
-        Mastermind-style About Us: company story, differentiators, what you do, and a team photo grid
-        (photo → name → role). Publish a full <code>/about</code> page and optionally show a teaser on
-        the homepage (use the section toggle above).
+        About Us copy for the public <code>/about</code> page. Spark Academy renders that page with the
+        same Hero, Features, Journey, and Mentors blocks as the homepage. Hero banner and Philosophy
+        images are About-only uploads. Spark <code>/about</code> hides homepage badges (hero
+        Course/Learners/stats bar, Features Last month / Learning Progress) so those stay on{" "}
+        <code>/</code>.
       </EditorSectionNote>
 
       <ToggleField
@@ -66,6 +68,19 @@ export function AboutUsEditorFields({
             onChange={(v) => patch({ heroSubtitle: v })}
           />
         </EditorFieldSpan>
+        <EditorFieldSpan>
+          <MarketingMediaField
+            label="Hero banner image"
+            value={section.heroImageUrl ?? ""}
+            onChange={(v) => {
+              commitMedia({ ...config, about: { ...section, heroImageUrl: v } });
+            }}
+            mediaType="image"
+            uploadSubdir="about-hero"
+            uploadScope={uploadScope}
+            layout="hero"
+          />
+        </EditorFieldSpan>
         <Input
           label="About title"
           value={section.title ?? ""}
@@ -80,7 +95,7 @@ export function AboutUsEditorFields({
         </EditorFieldSpan>
         <EditorFieldSpan>
           <MarketingMediaField
-            label="About image (optional, beside story)"
+            label="Story / differentiators image"
             value={section.imageUrl ?? ""}
             onChange={(v) => {
               commitMedia({ ...config, about: { ...section, imageUrl: v } });
@@ -101,6 +116,19 @@ export function AboutUsEditorFields({
             label="Philosophy body"
             value={section.philosophyBody ?? ""}
             onChange={(v) => patch({ philosophyBody: v })}
+          />
+        </EditorFieldSpan>
+        <EditorFieldSpan>
+          <MarketingMediaField
+            label="Philosophy image"
+            value={section.philosophyImageUrl ?? ""}
+            onChange={(v) => {
+              commitMedia({ ...config, about: { ...section, philosophyImageUrl: v } });
+            }}
+            mediaType="image"
+            uploadSubdir="about-philosophy"
+            uploadScope={uploadScope}
+            layout="hero"
           />
         </EditorFieldSpan>
         <Input

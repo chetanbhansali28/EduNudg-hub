@@ -6,6 +6,8 @@ type Props = {
   rich?: HomepageRichFooter;
   /** @deprecated Prefer trust.imageUrl — kept as fallback for older configs. */
   highlightFounder?: HomepageFounderProfile | null;
+  /** Section id; `/about` uses `about-journey` so homepage `#journey` still targets `/`. */
+  id?: string;
 };
 
 function JourneyRowIcon() {
@@ -51,6 +53,7 @@ export function JourneySection({
   trust,
   rich,
   highlightFounder,
+  id = "journey",
 }: Props) {
   const cards = trust.cards.slice(0, 3);
   const photoUrl = resolveJourneyImageUrl(trust, highlightFounder);
@@ -59,7 +62,7 @@ export function JourneySection({
   const heading = [trust.title, trust.titleHighlight].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
 
   return (
-    <section className="sa-journey sa-reveal" id="journey">
+    <section className="sa-journey sa-reveal" id={id}>
       <div className="sa-journey__header sa-reveal-item">
         <span className="sa-journey__badge">{badge}</span>
         <h2 className="sa-section-title sa-journey__title">{heading || "Our Journey to Excellence"}</h2>
@@ -67,6 +70,7 @@ export function JourneySection({
       </div>
 
       <div className="sa-journey__grid">
+        {cards.length > 0 ? (
         <article className="sa-journey__list-card">
           {cards.map((card, i) => (
             <div
@@ -81,6 +85,7 @@ export function JourneySection({
             </div>
           ))}
         </article>
+        ) : null}
 
         <article className="sa-journey__highlight-card sa-reveal-item">
           <div className="sa-journey__highlight-copy">

@@ -91,10 +91,32 @@ describe("BrandAboutPage", () => {
         })}
       />
     );
-    const root = document.querySelector(".about-us--page");
-    expect(root?.classList.contains("about-us--spark-academy")).toBe(true);
-    expect(screen.getByText("About us")).toBeTruthy();
+    expect(document.querySelector("main.sa-about")).toBeTruthy();
+    expect(document.querySelector("#about-hero.sa-hero")).toBeTruthy();
     expect(document.querySelector(".sa-btn")).toBeTruthy();
+    expect(document.querySelector(".about-us--spark-academy")).toBeNull();
+    expect(document.querySelector(".sa-hero__badge")).toBeNull();
+  });
+
+  it("regression_spark_about_page_uses_homepage_section_blocks", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Brand");
+    config.about = {
+      ...config.about!,
+      members: [{ id: "1", name: "Naveen Chowdhari", role: "Director", photoUrl: "" }],
+    };
+    render(
+      <AboutRoute
+        ctx={baseCtx({
+          marketingTheme: "spark-academy",
+          config,
+        })}
+      />
+    );
+    expect(document.querySelector("#about-features.sa-features")).toBeTruthy();
+    expect(document.querySelector("#about-journey.sa-journey")).toBeTruthy();
+    expect(document.querySelector("#about-team.sa-mentors")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Naveen Chowdhari" })).toBeDefined();
+    expect(document.querySelector(".about-us__cta-band")).toBeNull();
   });
 
   it("regression_abacus_about_page_uses_abacus_theme_classes", () => {

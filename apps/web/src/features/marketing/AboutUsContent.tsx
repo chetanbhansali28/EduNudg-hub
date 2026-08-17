@@ -5,6 +5,7 @@ import { aboutHasContent, mergeAboutSection } from "@/lib/aboutUs";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { AbacusCtaButton } from "./abacus-classic/MarketingLeadModals";
 import { SparkAcademyCta } from "./spark-academy/SparkAcademyCta";
+import { SparkAcademyAbout } from "./spark-academy/SparkAcademyAbout";
 
 type FullProps = {
   config: HomepageConfig;
@@ -156,8 +157,15 @@ function CtaBand({
 }
 
 /** Full About Us page — Novu (Mastermind), Abacus Classic, or Spark Academy chrome. */
-export function AboutUsPageContent({ config, marketingTheme, useLeadModals = false }: FullProps) {
+export function AboutUsPageContent({
+  config,
+  marketingTheme,
+  useLeadModals = false,
+}: FullProps) {
   if (!aboutHasContent(config.about)) return null;
+  if (marketingTheme === "spark-academy") {
+    return <SparkAcademyAbout config={config} />;
+  }
   const section = resolveAbout(config);
 
   return (
@@ -194,6 +202,9 @@ export function AboutUsPageContent({ config, marketingTheme, useLeadModals = fal
           <section className="about-us__philosophy">
             {section.philosophyTitle?.trim() ? <h2>{section.philosophyTitle}</h2> : null}
             {section.philosophyBody?.trim() ? <p>{section.philosophyBody}</p> : null}
+            {section.philosophyImageUrl?.trim() ? (
+              <img src={section.philosophyImageUrl} alt="" className="about-us__story-image" />
+            ) : null}
           </section>
         )}
 

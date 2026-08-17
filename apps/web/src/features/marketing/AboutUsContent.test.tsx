@@ -74,9 +74,13 @@ describe("AboutUsContent", () => {
         <AboutUsPageContent config={config} marketingTheme="spark-academy" useLeadModals />
       </MemoryRouter>
     );
-    expect(container.querySelector(".about-us--spark-academy.about-us--page")).toBeTruthy();
-    expect(container.querySelector(".about-us__hero-badge")?.textContent).toBe("About us");
-    expect(container.querySelector(".sa-btn--primary")).toBeTruthy();
-    expect(container.querySelector(".sa-btn--dark")).toBeTruthy();
+    expect(container.querySelector("main.sa-about.sa-main")).toBeTruthy();
+    expect(container.querySelector("#about-hero.sa-hero")).toBeTruthy();
+    expect(container.querySelector(".sa-features")).toBeTruthy();
+    expect(container.querySelector(".sa-journey")).toBeTruthy();
+    expect(container.querySelector(".about-us--spark-academy")).toBeNull();
+    expect(container.querySelector(".sa-btn")).toBeTruthy();
+    expect(container.querySelector(".sa-hero__badge")).toBeNull();
+    expect(screen.queryByText("About us")).toBeNull();
   });
 });

@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  aboutFeaturesAsHomepageSections,
   aboutHasContent,
+  aboutHeroConfig,
+  aboutJourneyCards,
+  aboutJourneyTrust,
+  aboutMembersAsFounders,
   defaultAboutSection,
   isAboutPagePublished,
   mergeAboutSection,
 } from "./aboutUs";
+import { mergeSparkAcademyLandingConfig } from "./brandLandingDefaults";
 
 describe("aboutUs", () => {
   it("defaultAboutSection_includes_mastermind_style_structure", () => {
@@ -44,5 +50,66 @@ describe("aboutUs", () => {
     expect(merged.title).toBe("Custom");
     expect(merged.features).toHaveLength(1);
     expect(merged.members[0]?.name).toBe("Naveen");
+  });
+
+  it("aboutFeaturesAsHomepageSections_maps_differentiators", () => {
+    const about = defaultAboutSection("BrightMind");
+    const items = aboutFeaturesAsHomepageSections(about);
+    expect(items).toHaveLength(4);
+    expect(items[0]?.title).toBe("We Research");
+    expect(items[0]?.titleSerif).toBe("");
+  });
+
+  it("aboutJourneyCards_uses_first_short_paragraph_as_title", () => {
+    const about = defaultAboutSection("BrightMind");
+    const cards = aboutJourneyCards(about);
+    expect(cards).toHaveLength(1);
+    expect(cards[0]?.title).toBe("Striving to Educate, Not Just Teach");
+    expect(cards[0]?.subtitle).toContain("BrightMind");
+  });
+
+  it("aboutMembersAsFounders_maps_photo_name_role", () => {
+    const founders = aboutMembersAsFounders([
+      { id: "1", name: "Naveen Chowdhari", role: "Director", photoUrl: "https://example.com/n.jpg" },
+    ]);
+    expect(founders[0]).toMatchObject({
+      name: "Naveen Chowdhari",
+      title: "Director",
+      roleBadge: "Director",
+      photoUrl: "https://example.com/n.jpg",
+    });
+  });
+
+  it("aboutHeroConfig_puts_about_copy_on_spark_hero_block", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Brand");
+    const about = defaultAboutSection("Spark Brand");
+    const hero = aboutHeroConfig(config, about).hero;
+    expect(hero.badge).toBe("");
+    expect(hero.line1).toBe("WE MAKE WINNERS WHO LEAD");
+    expect(hero.line1Serif).toBe("");
+    expect(hero.subtitle).toContain("brain development");
+    expect(hero.ctaLabel).toBe("Book a free demo");
+  });
+
+  it("aboutHeroConfig_uses_about_hero_image_when_uploaded", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Brand");
+    const about = {
+      ...defaultAboutSection("Spark Brand"),
+      heroImageUrl: "https://example.com/about-hero.jpg",
+    };
+    expect(aboutHeroConfig(config, about).hero.backgroundImageUrl).toBe(
+      "https://example.com/about-hero.jpg"
+    );
+  });
+
+  it("aboutJourneyTrust_uses_philosophy_image_when_uploaded", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Brand");
+    const about = {
+      ...defaultAboutSection("Spark Brand"),
+      philosophyImageUrl: "https://example.com/about-philosophy.jpg",
+    };
+    expect(aboutJourneyTrust(about, config.trustMedia)?.imageUrl).toBe(
+      "https://example.com/about-philosophy.jpg"
+    );
   });
 });
