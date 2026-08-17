@@ -3,20 +3,11 @@ import { authStatePath, hasE2EBackend } from "./helpers/env";
 import { brandUrl, centerUrl, platformUrl, SEED } from "./helpers/portal";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
 test.describe("E2E-08 — Manual staff lead entry", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
-
-  test.afterAll(async () => {
-    try {
-      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
-    } catch {
-      // Non-fatal
-    }
-  });
 
   test("platform admin can open brands and see manual signup card", async ({ browser }) => {
     const context = await browser.newContext({ storageState: authStatePath("platform") });

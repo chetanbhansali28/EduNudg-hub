@@ -4,20 +4,11 @@ import { brandUrl, centerUrl, SEED } from "./helpers/portal";
 import { fillCenterStudentRegistration } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
 test.describe("E2E-04 — Student lead Path B (center register → convert)", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
-
-  test.afterAll(async () => {
-    try {
-      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
-    } catch {
-      // Non-fatal
-    }
-  });
 
   test("parent registers on center site → center lead → brand visibility", async ({ browser }) => {
     const fields = makeE2ELeadFields({ tag: `path-b-${Date.now().toString(36)}` });
