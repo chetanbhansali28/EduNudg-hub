@@ -102,5 +102,6 @@ describe("BrandPublicLayout login chrome", () => {
     expect(document.querySelector(".ac-nav")).toBeTruthy();
     expect(document.querySelector(".ac-footer")).toBeTruthy();
     expect(document.querySelector(".ed-theme")).toBeNull();
+    expect(document.querySelector("dialog.ac-modal")).toBeNull();
   });
 });

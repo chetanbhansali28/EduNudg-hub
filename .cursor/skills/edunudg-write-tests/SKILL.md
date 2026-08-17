@@ -91,7 +91,7 @@ Both need **exact** matching when labels share a prefix (`Log in` vs `Log in wit
 
 | Library | Exact match |
 |---------|-------------|
-| **Playwright** (`e2e/`) | `{ name: "Log in", exact: true }` or `getByLabel("Email", { exact: true })` (not **Login email (optional)**). Center lead list buttons match **parent** name, not child name. |
+| **Playwright** (`e2e/`) | `{ name: "Log in", exact: true }` or `getByLabel("Email", { exact: true })` (not **Login email (optional)**). Staff login Email is scoped to `.ed-login-card`. Center lead list buttons match **parent** name, not child name. |
 | **Testing Library** (Vitest) | `{ name: exactAccessibleName("Log in") }` → `/^Log in$/` |
 
 **Never** pass `{ exact: true }` to Testing Library `getByRole` — it is not on `ByRoleOptions` and **fails `pnpm typecheck`**. Helper: `apps/web/src/test/exactAccessibleName.ts`.

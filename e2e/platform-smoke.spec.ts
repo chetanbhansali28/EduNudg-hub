@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 async function expectLoginFormReady(page: import("@playwright/test").Page) {
   await expect(page.getByText("Loading…")).toHaveCount(0, { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: "Welcome back!" })).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+  await expect(page.locator(".ed-login-card").getByLabel("Email", { exact: true })).toBeVisible();
 }
 
 async function expectMarketingHomeReady(page: import("@playwright/test").Page) {

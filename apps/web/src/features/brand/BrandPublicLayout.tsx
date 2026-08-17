@@ -93,11 +93,13 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
       {showFooter && isSparkAcademy ? (
         <SparkAcademyFooter config={bundle.config} legalPages={bundle.legalPages} socialConnect={bundle.socialConnect} />
       ) : null}
-      {themeUsesLeadModals(theme) ? <MarketingLeadModals brandSlug={brandSlug} theme={theme} /> : null}
+      {themeUsesLeadModals(theme) && !isLoginRoute ? (
+        <MarketingLeadModals brandSlug={brandSlug} theme={theme} />
+      ) : null}
     </div>
   );
 
-  if (themeUsesLeadModals(theme)) {
+  if (themeUsesLeadModals(theme) && !isLoginRoute) {
     return (
       <LeadModalProvider>
         <LeadModalHashOpener />

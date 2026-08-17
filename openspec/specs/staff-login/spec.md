@@ -65,9 +65,10 @@ Brand host `/login` SHALL render as a child of `BrandPublicLayout` with the same
 
 - **GIVEN** a visitor opens `/login` on a brand host (for example `smart-brain-abacus.localhost`)
 - **WHEN** the login form is ready
-- **THEN** the brand public header (Abacus `header.ac-nav`, Spark `header.sa-nav`, or Novu Site nav) is visible
+- **THEN** the brand public header (Abacus `header.ac-nav`, Spark `header.sa-nav`, or Novu `.novu-nav-bar`) is visible
 - **AND** the matching site footer is visible
 - **AND** the layout root has class `marketing-page--login`
+- **AND** enroll/apply lead modals SHALL NOT mount on `/login` (so staff Email is unique)
 
 ### Requirement: Automated tests use library-correct exact name matchers
 
@@ -78,7 +79,7 @@ Exact accessible-name matching SHALL use the API supported by each test library:
 | **Playwright** (`e2e/`) | `{ name: "Log in", exact: true }` |
 | **Testing Library** (Vitest) | `{ name: exactAccessibleName("Log in") }` which is `/^Log in$/` — **not** `{ exact: true }` (invalid on `ByRoleOptions`; fails `tsc`) |
 
-OAuth queries SHALL use the full provider label with the same library-specific exact matcher. A regression E2E SHALL assert that Playwright non-exact `Log in` matches more than one button when OAuth is shown. A Vitest regression SHALL fail if Testing Library role queries pass `exact: true`.
+OAuth queries SHALL use the full provider label with the same library-specific exact matcher. Playwright staff login Email SHALL target `.ed-login-card` so public marketing chrome cannot match extra Email fields. A regression E2E SHALL assert that Playwright non-exact `Log in` matches more than one button when OAuth is shown. A Vitest regression SHALL fail if Testing Library role queries pass `exact: true`.
 
 #### Scenario: Testing Library rejects Playwright exact option
 
