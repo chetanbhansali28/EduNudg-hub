@@ -106,6 +106,13 @@ Brand identity copy and logo SHALL live in `brand_settings.settings.landing.meta
 - **AND** the viewport is mobile
 - **THEN** the staff top bar shows that logo beside the product name
 
+#### Scenario: Public nav logo is franchise size without a frame
+
+- **GIVEN** a brand public homepage with a Site logo
+- **WHEN** a visitor opens the brand host `/` or a franchise host `/`
+- **THEN** the sticky nav logo uses the same size on both hosts
+- **AND** the logo has no ring, border, or background frame
+
 ### Requirement: Spark Academy public headings share one type scale
 
 Spark Academy public landings SHALL use shared `--sa-h2-*` tokens for section titles and `--sa-h3-*` for card/list headings. Features, journey, mentors, and testimonials SHALL NOT use a different clamp size than courses/FAQ/gallery. Upcoming events and `/about` titles SHALL inherit the same Spark tokens. The hero MAY stay larger (`--sa-h1-size`). Footer column labels SHALL remain small uppercase chrome.
@@ -271,3 +278,16 @@ Brand staff SHALL edit the parent enrollment template (`center_landing`) at `/ap
 - **WHEN** they open **Center Site Configuration**
 - **THEN** they land on `/app/center-site`
 - **AND** they can edit the parent enrollment template
+
+### Requirement: Pricing feature checkmarks survive production CSS
+
+Platform homepage **Simple pricing for growing brands.** feature bullets SHALL use a CSS Unicode escape (`content: "\2713"`) for the checkmark glyph. Raw UTF-8 checkmarks and double-encoded mojibake (`â` plus C1 controls) SHALL NOT appear in `marketing.css` `content` values — production CSS minify strips those controls and leaves `â` on Vercel.
+
+#### Scenario: Pricing bullets use an ASCII-safe checkmark escape
+
+- **GIVEN** `marketing.css` styles `.novu-pricing-card__features li::before`
+- **WHEN** the production stylesheet is built
+- **THEN** `content` is `"\2713"` (CHECK MARK)
+- **AND** the rule does not contain a raw `✓` or the mojibake sequence U+00E2 U+009C U+0093
+
+Traceability: regression — `regression_pricing_feature_checkmarks_use_css_unicode_escape`.

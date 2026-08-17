@@ -30,7 +30,14 @@
 - [ ] E2E updated for user journeys when UI flow changes
 - [ ] Role-based locators: Playwright `{ exact: true }`; Testing Library `exactAccessibleName("…")` — never RTL `exact: true`
 - [ ] Platform / brand / center marketing changes respect `marketing-homepage-media` (never discard `brand-assets` URLs or landing JSON). Platform `/admin/brands/:slug` Site logo / renamed name write Homepage `landing.meta`.
+- [ ] Catalog SKUs on brand `/app/merchandise` are tied to curriculum; center Shop and Inventory hide SKUs not assigned to that franchise.
+- [ ] Brand `/app/students` is a Franchise Management-style read-only roster across all franchises (search by student, franchise, or city; contact + current curriculum levels; **Export CSV** downloads the full roster).
+- [ ] Center `/app/inventory` detail and `/app/merchandise` Shop show **Curriculum** (course) and **Program** (level) (`regression_center_inventory_shows_catalog_curriculum`, `regression_center_merchandise_shop_shows_catalog_curriculum`). Inventory list cards stay identity-only (`regression_center_inventory_list_omits_detail_duplicates`).
 - [ ] Center `/app/merchandise` Shop cards keep Curriculum list width; stack qty and full-width **Add to Order** so the label never clips.
+- [ ] Center `/app/students` **Import students** uses `CenterStudentImportDialog` + `import_center_students` (enroll existing students; do not create leads).
+- [ ] `Input type="tel"` keeps a stable wrap while typing (delivery Phone on `/app/students`); do not remount or live-strip the value.
+- [ ] Center student detail **Portal access** shows `login_email` or the parent email, and **Copy Profile URL** copies the learn-portal login (no password).
+- [ ] Center student **Save address** shows a **Saved** / **Address saved.** confirmation next to the button.
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills as needed)
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
 - [ ] If pushing: mandatory `edunudg-pre-push-ci` (`pnpm ci:local` green before `git push`)

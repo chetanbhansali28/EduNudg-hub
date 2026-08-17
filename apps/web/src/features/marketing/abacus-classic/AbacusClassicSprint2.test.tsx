@@ -66,6 +66,25 @@ describe("Abacus Classic Sprint 2 — nav and hero CTAs", () => {
     expect(screen.getByRole("button", { name: "Apply franchise" })).toBeDefined();
   });
 
+  it("regression_brand_public_nav_logo_matches_franchise_size", () => {
+    const brandConfig = {
+      ...config,
+      meta: { ...config.meta, logoUrl: "https://cdn.example/logo.png" },
+    };
+    const { container } = render(
+      wrapWithLeadModal(
+        <MemoryRouter>
+          <AbacusClassicNav config={brandConfig} />
+        </MemoryRouter>
+      )
+    );
+
+    expect(container.querySelector(".ac-nav--franchise")).toBeNull();
+    const logo = container.querySelector(".ac-nav__logo-img") as HTMLImageElement;
+    expect(logo?.getAttribute("width")).toBe("64");
+    expect(logo?.getAttribute("height")).toBe("64");
+  });
+
   it("renders hero badge, headline, and dual CTAs", () => {
     render(wrapWithLeadModal(<AbacusClassicHero config={config} />));
 

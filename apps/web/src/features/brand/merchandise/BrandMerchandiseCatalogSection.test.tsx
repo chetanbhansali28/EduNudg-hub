@@ -19,7 +19,16 @@ vi.mock("@/lib/merchandiseOrdersApi", () => ({
       currency: "INR",
       is_active: true,
       photo_urls: ["https://cdn.example/photo-1.jpg"],
+      programIds: ["prog-1"],
+      programNames: ["Abacus Core"],
+      curriculumLinks: [{ programId: "prog-1", levelId: null }],
     },
+  ]),
+}));
+
+vi.mock("@/lib/centerProgramApi", () => ({
+  fetchBrandProgramsWithLevels: vi.fn().mockResolvedValue([
+    { id: "prog-1", name: "Abacus Core", levels: [{ id: "lvl-1", name: "Level 1", sortOrder: 1 }] },
   ]),
 }));
 
@@ -67,6 +76,7 @@ describe("BrandMerchandiseCatalogSection", () => {
     );
 
     expect(await screen.findByText("Level 1 Kit")).toBeDefined();
+    expect(screen.getByText("Curriculum: Abacus Core")).toBeDefined();
     expect(screen.getAllByText("Active").length).toBeGreaterThan(0);
     expect(screen.getByText("Edit Details")).toBeDefined();
     expect(screen.getByText("Product Assets (1/5 uploaded)")).toBeDefined();
@@ -93,6 +103,9 @@ describe("BrandMerchandiseCatalogSection", () => {
     expect(screen.getByLabelText("Price (₹)")).toBeDefined();
     expect(screen.getByLabelText("Currency")).toBeDefined();
     expect(screen.getByRole("switch", { name: "Active" })).toBeDefined();
+    expect(await screen.findByRole("group", { name: "Curriculum" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Abacus Core" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Level 1" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Add item" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeDefined();
     expect(screen.getByText(/Product photos can be added after the catalog item is saved/)).toBeDefined();

@@ -21,6 +21,7 @@ import {
   centerListTitle,
   centerLocationLine,
   centerStatusTone,
+  downloadBrandCentersCsv,
   filterCenters,
   type CenterFilter,
 } from "@/features/brand/centers/brandCentersHelpers";
@@ -164,9 +165,19 @@ export function CentersView() {
         title="Franchise Management"
         subtitle="Manage franchise profile, curriculum, and lifecycle from one workspace."
         actions={
-          <Button type="button" variant="primary" onClick={() => setImportOpen(true)}>
-            Import Franchise
-          </Button>
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={all.length === 0}
+              onClick={() => downloadBrandCentersCsv(all, brandSlug)}
+            >
+              Export Franchise
+            </Button>
+            <Button type="button" variant="primary" onClick={() => setImportOpen(true)}>
+              Import Franchise
+            </Button>
+          </>
         }
       />
 

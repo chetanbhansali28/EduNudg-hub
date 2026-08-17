@@ -15,6 +15,7 @@ import { supabaseList } from "@/lib/supabaseResult";
 import { isLeadStale } from "@/lib/leadSla";
 import {
   assignLeadToCenter,
+  listBrandLeads,
   reopenLead,
   reassignLead,
   suggestCentersForLead,
@@ -74,16 +75,7 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
 
   const leads = useQuery({
     queryKey: ["brand-leads", brandId],
-    queryFn: async () => {
-      const { data, error: qErr } = await getSupabase()
-        .from("leads")
-        .select(
-          "id, brand_id, center_id, full_name, parent_name, email, whatsapp_e164, child_name, child_dob, pincode, city, school_name, status, lead_source, lost_reason, assigned_at, stale_at, last_center_action_at, created_at"
-        )
-        .eq("brand_id", brandId)
-        .order("created_at", { ascending: false });
-      return supabaseList(data, qErr) as LeadRow[];
-    },
+    queryFn: () => listBrandLeads(brandId),
   });
 
   const centers = useQuery({

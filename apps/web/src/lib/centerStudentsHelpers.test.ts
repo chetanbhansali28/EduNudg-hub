@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   filterCenterStudents,
   studentPageCounts,
+  studentProfileLoginUrl,
   studentProgramLabel,
 } from "./centerStudentsHelpers";
 import type { CenterStudentRow } from "./centerStudentsApi";
@@ -11,6 +12,7 @@ const sample = (overrides: Partial<CenterStudentRow> = {}): CenterStudentRow => 
   full_name: "Aarav Sharma",
   student_code: "STU-001",
   login_email: "aarav@example.com",
+  parent_email: "parent@example.com",
   user_id: "user-1",
   enrollment_id: "enr-1",
   enrollment_status: "active",
@@ -61,5 +63,15 @@ describe("centerStudentsHelpers", () => {
     expect(filterCenterStudents(rows, "linked", "").map((row) => row.id)).toEqual(["student-1"]);
     expect(filterCenterStudents(rows, "unassigned", "").map((row) => row.id)).toEqual(["student-2"]);
     expect(filterCenterStudents(rows, "all", "meera")).toHaveLength(1);
+  });
+
+  it("regression_student_profile_login_url_is_learn_portal_without_password", () => {
+    vi.stubGlobal("window", {
+      location: { protocol: "http:", hostname: "smart-brain-abacus.smart-brain-abacus.localhost", port: "9000" },
+    });
+    const url = studentProfileLoginUrl("smart-brain-abacus");
+    expect(url).toBe("http://learn.smart-brain-abacus.localhost:9000/login");
+    expect(url).not.toMatch(/password/i);
+    vi.unstubAllGlobals();
   });
 });

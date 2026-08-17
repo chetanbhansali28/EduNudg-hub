@@ -56,8 +56,8 @@
   border: 2px solid var(--ed-border);
   border-radius: 6px;
   overflow: hidden;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 2.75rem;
+  height: 2.75rem;
   cursor: pointer;
   background: none;
 }

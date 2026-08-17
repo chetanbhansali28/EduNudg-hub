@@ -29,6 +29,22 @@ describe("MarketingNav", () => {
     expect(screen.queryByText("koramangala abacus center")).toBeNull();
   });
 
+  it("regression_brand_novu_nav_logo_is_franchise_size", () => {
+    const config = buildBrandLandingConfig("Abacus World");
+    config.meta.logoUrl = "https://cdn.example/logo.png";
+
+    const { container } = render(
+      <MemoryRouter>
+        <MarketingNav config={config} />
+      </MemoryRouter>
+    );
+
+    expect(container.querySelector(".novu-nav-bar--franchise")).toBeNull();
+    const logo = container.querySelector(".novu-nav-bar__logo-img") as HTMLImageElement;
+    expect(logo?.getAttribute("width")).toBe("64");
+    expect(logo?.getAttribute("height")).toBe("64");
+  });
+
   it("shows Student Login only when brandSlug is set for center sites", () => {
     vi.stubGlobal("window", {
       location: { protocol: "http:", hostname: "koramangala.abacusworld.localhost", port: "9000" },

@@ -13,6 +13,8 @@ import {
   filterMerchandiseCatalog,
   type CatalogTabFilter,
 } from "./merchandisePageHelpers";
+import { fetchBrandProgramsWithLevels } from "@/lib/centerProgramApi";
+import { catalogFormNeedsCurriculum } from "@/lib/merchandiseCurriculum";
 import { paiseToRupeesInput, rupeesToPaise } from "@/lib/inrCurrency";
 import { getSupabase } from "@/lib/supabase";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -26,7 +28,14 @@ import {
 import { MerchandisePipelineListItem } from "./MerchandisePipelineListItem";
 import "./brandMerchandiseCatalog.css";
 
-const emptyForm: CatalogItemForm = { sku: "", name: "", priceRupees: "", currency: "INR", isActive: true };
+const emptyForm: CatalogItemForm = {
+  sku: "",
+  name: "",
+  priceRupees: "",
+  currency: "INR",
+  isActive: true,
+  curriculumLinks: [],
+};
 
 type Props = {
   brandId: string;
@@ -59,6 +68,14 @@ export function BrandMerchandiseCatalogSection({
     enabled: !!brandId,
     queryFn: () => listMerchandiseCatalog(brandId),
   });
+
+  const programs = useQuery({
+    queryKey: ["brand-programs-for-merchandise", brandId],
+    enabled: !!brandId,
+    queryFn: () => fetchBrandProgramsWithLevels(brandId),
+  });
+
+  const programOptions = programs.data ?? [];
 
   const allItems = catalog.data ?? [];
   const filteredItems = useMemo(
@@ -110,6 +127,7 @@ export function BrandMerchandiseCatalogSection({
         priceCents: rupeesToPaise(form.priceRupees),
         currency: form.currency,
         isActive: form.isActive,
+        curriculumLinks: form.curriculumLinks,
       });
     },
     onSuccess: (itemId) => {
@@ -130,6 +148,7 @@ export function BrandMerchandiseCatalogSection({
         priceCents: rupeesToPaise(editForm.priceRupees),
         currency: editForm.currency,
         isActive: editForm.isActive,
+        curriculumLinks: editForm.curriculumLinks,
       });
     },
     onSuccess: () => {
@@ -162,6 +181,7 @@ export function BrandMerchandiseCatalogSection({
       priceRupees: paiseToRupeesInput(item.price_cents),
       currency: item.currency,
       isActive: item.is_active,
+      curriculumLinks: item.curriculumLinks,
     });
   };
 
@@ -174,7 +194,7 @@ export function BrandMerchandiseCatalogSection({
       brandId={brandId}
       editing={editingId === item.id}
       editForm={editForm}
-      saveDisabled={!editForm.sku.trim() || !editForm.name.trim()}
+      saveDisabled={!editForm.sku.trim() || !editForm.name.trim() || catalogFormNeedsCurriculum(editForm.isActive, editForm.curriculumLinks)}
       savePending={update.isPending}
       saveSaved={catalogSaved.saved && editingId === item.id}
       onEdit={() => startEdit(item)}
@@ -183,6 +203,7 @@ export function BrandMerchandiseCatalogSection({
       onDelete={() => setDeleteId(item.id)}
       onEditFormChange={setEditForm}
       onPhotosChange={invalidate}
+      programs={programOptions}
     />
   );
 
@@ -193,12 +214,15 @@ export function BrandMerchandiseCatalogSection({
       onFormChange={setForm}
       onSubmit={() => create.mutate()}
       onClose={closeAddForm}
-      submitDisabled={!form.sku.trim() || !form.name.trim()}
+      submitDisabled={
+        !form.sku.trim() || !form.name.trim() || catalogFormNeedsCurriculum(form.isActive, form.curriculumLinks)
+      }
       submitPending={create.isPending}
       brandId={brandId}
       savedItemId={savedItemId}
       photoUrls={savedItemPhotos.data ?? []}
       onPhotosChange={invalidate}
+      programs={programOptions}
     />
   );
 
@@ -227,7 +251,11 @@ export function BrandMerchandiseCatalogSection({
             badgeTone={item.is_active ? "approved" : "pending"}
             when={formatCatalogPrice(item.price_cents, item.currency, item.is_active)}
             title={item.name}
-            location={formatCatalogSku(item.sku)}
+            location={
+              item.programNames.length > 0
+                ? `${formatCatalogSku(item.sku)} · ${item.programNames.join(", ")}`
+                : formatCatalogSku(item.sku)
+            }
             onClick={() => {
               setSelectedId(item.id);
               onFormOpenChange(false);

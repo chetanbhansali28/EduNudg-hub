@@ -8,7 +8,13 @@ import {
   photoAssetsLabel,
 } from "@/lib/brandMerchandiseHelpers";
 import { activeMerchandisePhotoUrls } from "@/lib/merchandiseProductPhotoStorage";
+import {
+  catalogCurriculumLabel,
+  type BrandProgramOption,
+  type CatalogCurriculumLink,
+} from "@/lib/merchandiseCurriculum";
 import { MerchandiseProductPhotos } from "./MerchandiseProductPhotos";
+import { MerchandiseCurriculumPicker } from "./MerchandiseCurriculumPicker";
 
 const TRASH_ICON = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -22,6 +28,7 @@ export type CatalogItemForm = {
   priceRupees: string;
   currency: string;
   isActive: boolean;
+  curriculumLinks: CatalogCurriculumLink[];
 };
 
 export type CatalogItemRow = {
@@ -32,6 +39,9 @@ export type CatalogItemRow = {
   currency: string;
   is_active: boolean;
   photo_urls: string[] | null;
+  programIds: string[];
+  programNames: string[];
+  curriculumLinks: CatalogCurriculumLink[];
 };
 
 type Props = {
@@ -48,6 +58,7 @@ type Props = {
   onDelete: () => void;
   onEditFormChange: (next: CatalogItemForm) => void;
   onPhotosChange: () => void;
+  programs: BrandProgramOption[];
 };
 
 export function BrandMerchandiseCatalogCard({
@@ -64,6 +75,7 @@ export function BrandMerchandiseCatalogCard({
   onDelete,
   onEditFormChange,
   onPhotosChange,
+  programs,
 }: Props) {
   const galleryRef = useRef<HTMLDivElement>(null);
   const status = catalogStatusBadge(item.is_active);
@@ -134,9 +146,14 @@ export function BrandMerchandiseCatalogCard({
               </FormGrid>
               <ToggleField
                 label="Active"
-                description="Available to franchise centers"
+                description="Available to franchise centers assigned this curriculum"
                 checked={editForm.isActive}
                 onChange={(checked) => onEditFormChange({ ...editForm, isActive: checked })}
+              />
+              <MerchandiseCurriculumPicker
+                programs={programs}
+                selectedLinks={editForm.curriculumLinks}
+                onChange={(curriculumLinks) => onEditFormChange({ ...editForm, curriculumLinks })}
               />
               <div className="ed-brand-merch-card__edit-actions">
                 <SaveButton
@@ -154,6 +171,7 @@ export function BrandMerchandiseCatalogCard({
           ) : (
             <>
               <p className="ed-brand-merch-card__description">{catalogItemDescription(item.name)}</p>
+              <p className="ed-brand-merch-card__curriculum">{catalogCurriculumLabel(item.programNames)}</p>
               <div className="ed-brand-merch-card__fields">
                 <div className="ed-brand-merch-card__field">
                   <span>SKU</span>

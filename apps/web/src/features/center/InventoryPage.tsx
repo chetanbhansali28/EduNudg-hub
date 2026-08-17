@@ -121,10 +121,6 @@ export function InventoryPage() {
             <PipelineListItem
               title={item.name}
               meta={`SKU ${item.sku}`}
-              lines={[
-                `Available ${item.available} · On hand ${item.onHand}`,
-                item.incoming > 0 ? `${item.incoming} incoming` : "No incoming units",
-              ]}
               initials={initialsFromName(item.name)}
               badges={<Badge tone={badge.tone}>{badge.label}</Badge>}
               selected={item.catalogItemId === selectedId}
@@ -207,7 +203,7 @@ export function InventoryPage() {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by name or SKU…"
+            placeholder="Search by name, SKU, or curriculum…"
             aria-label="Search inventory"
           />
         </label>

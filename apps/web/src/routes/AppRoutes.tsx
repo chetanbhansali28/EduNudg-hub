@@ -22,6 +22,7 @@ import { BrandPublicLayout } from "@/features/brand/BrandPublicLayout";
 import { BrandDashboard } from "@/features/brand/BrandDashboard";
 import { CurriculumPage } from "@/features/brand/CurriculumPage";
 import { CentersPage } from "@/features/brand/CentersPage";
+import { BrandStudentsPage } from "@/features/brand/BrandStudentsPage";
 import { BrandAnalyticsPage } from "@/features/brand/BrandAnalyticsPage";
 import { BrandCenterDetailPage } from "@/features/brand/BrandCenterDetailPage";
 import { BrandSettingsPage } from "@/features/brand/BrandSettingsPage";
@@ -195,6 +196,7 @@ export function AppRoutes() {
             />
             <Route path="centers" element={<CentersPage />} />
             <Route path="centers/:centerSlug" element={<BrandCenterDetailPage />} />
+            <Route path="students" element={<BrandStudentsPage />} />
             <Route path="royalties" element={<Navigate to="/app" replace />} />
             <Route path="analytics" element={<BrandAnalyticsPage />} />
             <Route

@@ -81,7 +81,7 @@ Staff lead, application, **and curriculum** workspaces use reusable primitives f
 | `PipelineDetailPanel` | Right-hand lead detail shell |
 | `PipelineTimeline` | Lead history timeline |
 
-Row markup uses `.ed-pipeline-lead-row` classes in `packages/ui/src/styles.css`. Center leads helpers live in `apps/web/src/lib/centerLeadsHelpers.ts`.
+Row markup for center `/app/leads` uses Franchise Applications list cards (`.ed-franchise-app-list-item`): status badge, date, name, location. Center leads helpers live in `apps/web/src/lib/centerLeadsHelpers.ts`.
 
 ## Marketing (public)
 
@@ -92,6 +92,10 @@ Row markup uses `.ed-pipeline-lead-row` classes in `packages/ui/src/styles.css`.
 ## Form fields (`@edunudg/ui`)
 
 `Input`, `PasswordInput`, `Select`, and `Textarea` generate stable `id` and `name` from labels (for autofill and a11y). Labels use `htmlFor`. Override with optional `id` / `name` props when needed.
+
+`Input type="tel"` always wraps the native input (so typing the first digit does not remount the field or drop focus). A Call control is optional chrome after the value has digits — do not live-format or strip spaces while the staff member is typing. Regression: `regression_tel_input_does_not_remount_while_typing`.
+
+`CentersPageHeader` `actions` sit top-right. Brand Students uses **Export CSV**; Franchise Management uses **Export Franchise** (secondary) beside **Import Franchise**.
 
 ## Accessibility
 
@@ -113,7 +117,7 @@ Staff `AppShell` layouts (brand `/app`, center `/app`, platform `/admin`) pass `
 
 ## Lead / application pipelines
 
-Franchise applications, brand student leads, center leads, center students, center fees, center inventory, center merchandise, platform brand signups, brand/center curriculum, brand success stories, and brand merchandise share the **pipeline** pattern from `@edunudg/ui`. Brand Student Leads (`/app/leads`), Curriculum (`/app/curriculum`), Success Stories (`/app/success-stories`), Merchandise (`/app/merchandise`), and center **Leads** / **Students** / **Fees** / **Inventory** / **Merchandise** use the same workspace chrome as Franchise Applications: `PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`, and `PipelineWorkspace` with the list staying visible beside detail on desktop. Merchandise Catalog, Promo Codes, Orders, and Payment settings all use that list + detail workspace. Center Merchandise Shop catalog cards are horizontal (`ed-product-card--row`), one SKU per row — do not use a two-column product grid in column 1. Quantity and **Add to Order** stack in a full-width footer so the add label is not clipped at Curriculum list width. Desktop shop list/detail split matches Curriculum (`0.95fr` / `2.05fr`). Center Inventory column 2 is a `PipelineDetailPanel`: extra top padding on the head and body, left-aligned 50% photo beside stock facts, then **On the way** and **Orders** on one row, with a primary **Place New Order** `Button` — do not use a custom blue link or purple value marketing card. On Student Leads, assignment management stacks below applicant details in that detail column (do not add a third page column).
+Franchise applications, brand student leads, center leads, center students, center fees, center inventory, center merchandise, platform brand signups, brand/center curriculum, brand success stories, and brand merchandise share the **pipeline** pattern from `@edunudg/ui`. Brand Student Leads (`/app/leads`), Curriculum (`/app/curriculum`), Success Stories (`/app/success-stories`), Merchandise (`/app/merchandise`), and center **Leads** / **Students** / **Fees** / **Inventory** / **Merchandise** use the same workspace chrome as Franchise Applications: `PipelinePageHeader`, search + `FilterTabs`, `LeadKpiGrid`, and `PipelineWorkspace` with the list staying visible beside detail on desktop. Merchandise Catalog, Promo Codes, Orders, and Payment settings all use that list + detail workspace. Center Merchandise Shop catalog cards are horizontal (`ed-product-card--row`), one SKU per row — do not use a two-column product grid in column 1. The photo is 8rem (at least 2× the prior 3.25rem thumb) with title + price beside it, then SKU and **Curriculum** / **Program**. Quantity and **Add to Order** stack in a full-width footer so the add label is not clipped at Curriculum list width. Desktop shop list/detail split matches Curriculum (`0.95fr` / `2.05fr`). Center Inventory column 1 is identity-only (name, SKU, stock badge). Column 2 is a `PipelineDetailPanel`: extra top padding on the head and body, left-aligned 50% photo beside stock facts, Curriculum/Program under the SKU, then **On the way** and **Orders** on one row, with a primary **Place New Order** `Button` — do not use a custom blue link or purple value marketing card. On Student Leads, assignment management stacks below applicant details in that detail column (do not add a third page column).
 
 | Primitive | Use |
 |-----------|-----|

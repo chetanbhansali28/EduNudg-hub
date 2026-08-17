@@ -8,6 +8,12 @@ export type CenterProgramAuth = {
   authorizedAt: string;
 };
 
+export type BrandProgramWithLevels = {
+  id: string;
+  name: string;
+  levels: { id: string; name: string; sortOrder: number }[];
+};
+
 export async function fetchBrandPrograms(brandId: string): Promise<{ id: string; name: string }[]> {
   const { data, error } = await getSupabase()
     .from("programs")
@@ -16,6 +22,33 @@ export async function fetchBrandPrograms(brandId: string): Promise<{ id: string;
     .is("deleted_at", null)
     .order("name");
   return supabaseList(data, error);
+}
+
+export async function fetchBrandProgramsWithLevels(brandId: string): Promise<BrandProgramWithLevels[]> {
+  const { data, error } = await getSupabase()
+    .from("programs")
+    .select("id, name, levels(id, name, sort_order)")
+    .eq("brand_id", brandId)
+    .is("deleted_at", null)
+    .order("name");
+  const rows = supabaseList(data, error) as {
+    id: string;
+    name: string;
+    levels:
+      | { id: string; name: string; sort_order: number }[]
+      | { id: string; name: string; sort_order: number }
+      | null;
+  }[];
+  return rows.map((row) => {
+    const levels = Array.isArray(row.levels) ? row.levels : row.levels ? [row.levels] : [];
+    return {
+      id: row.id,
+      name: row.name,
+      levels: levels
+        .map((level) => ({ id: level.id, name: level.name, sortOrder: level.sort_order }))
+        .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name)),
+    };
+  });
 }
 
 export async function fetchCenterAuthorizedPrograms(centerId: string): Promise<CenterProgramAuth[]> {

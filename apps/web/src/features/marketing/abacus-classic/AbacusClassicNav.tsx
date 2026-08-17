@@ -97,7 +97,7 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
 
           <Link to="/" className="ac-nav__logo-link">
             {logoUrl ? (
-              <img src={logoUrl} alt="" className="ac-nav__logo-img" width={logins ? 64 : 48} height={logins ? 64 : 48} />
+              <img src={logoUrl} alt="" className="ac-nav__logo-img" width={64} height={64} />
             ) : (
               <span className="ac-nav__logo-fallback">{config.meta.siteName.charAt(0)}</span>
             )}

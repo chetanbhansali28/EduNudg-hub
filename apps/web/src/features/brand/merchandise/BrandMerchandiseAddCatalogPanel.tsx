@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Button, CatalogFormPanel, FormGrid, Input, ToggleField } from "@edunudg/ui";
 import { MerchandiseProductPhotos } from "./MerchandiseProductPhotos";
+import { MerchandiseCurriculumPicker } from "./MerchandiseCurriculumPicker";
 import type { CatalogItemForm } from "./BrandMerchandiseCatalogCard";
+import type { BrandProgramOption } from "@/lib/merchandiseCurriculum";
 
 type Props = {
   open: boolean;
@@ -15,6 +17,7 @@ type Props = {
   savedItemId: string | null;
   photoUrls: string[];
   onPhotosChange: () => void;
+  programs: BrandProgramOption[];
 };
 
 export function BrandMerchandiseAddCatalogPanel({
@@ -29,6 +32,7 @@ export function BrandMerchandiseAddCatalogPanel({
   savedItemId,
   photoUrls,
   onPhotosChange,
+  programs,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const saved = savedItemId != null;
@@ -100,9 +104,15 @@ export function BrandMerchandiseAddCatalogPanel({
         </FormGrid>
         <ToggleField
           label="Active"
-          description="Available to franchise centers"
+          description="Available to franchise centers assigned this curriculum"
           checked={form.isActive}
           onChange={(checked) => onFormChange({ ...form, isActive: checked })}
+        />
+        <MerchandiseCurriculumPicker
+          programs={programs}
+          selectedLinks={form.curriculumLinks}
+          onChange={(curriculumLinks) => onFormChange({ ...form, curriculumLinks })}
+          disabled={saved}
         />
         {saved ? (
           <div className="ed-brand-merch-add-panel__photos">

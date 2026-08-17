@@ -24,22 +24,24 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [functional-requirements.md](./functional-requirements.md) | FR ID index → links to `openspec/specs/` |
 | OpenSpec behavioral specs | [`openspec/specs/`](../../openspec/specs/) | GIVEN/WHEN/THEN requirements; supersedes FR tables over time |
 | [staff-login](../../openspec/specs/staff-login/spec.md) | Platform/brand/center `/login` labels + exact accessible-name testing |
-| [marketing-homepage](../../openspec/specs/marketing-homepage/spec.md) | Platform public bundle vs config-only React Query keys; brand Homepage vs Center Site Configuration |
+| [marketing-homepage](../../openspec/specs/marketing-homepage/spec.md) | Platform public bundle vs config-only React Query keys; brand Homepage vs Center Site Configuration; pricing ticks use CSS Unicode escape U+2713 |
 | [marketing-footer](../../openspec/specs/marketing-footer/spec.md) | Public footer columns + legal pages; Spark has no newsletter CTA |
 | [brand-upcoming-events](../../openspec/specs/brand-upcoming-events/spec.md) | Homepage upcoming events (competitions/workshops/demos) |
 | [platform-settings](../../openspec/specs/platform-settings/spec.md) | Platform settings / feature flags |
 | [platform-brand-onboarding](../../openspec/specs/platform-brand-onboarding/spec.md) | Brand signup approve + credential-skip on theme save |
 | [student-leads](../../openspec/specs/student-leads/spec.md) | Brand/center student leads + Abacus/Spark modals; center `/app/leads` Curriculum chrome |
 | [center-students-workspace](../../openspec/specs/center-students-workspace/spec.md) | Center `/app/students` pipeline chrome (Linked / Unassigned / Programs / Total) |
+| [center-student-csv-import](../../openspec/specs/center-student-csv-import/spec.md) | Center `/app/students` CSV bulk enroll (template + `import_center_students`) |
 | [center-fees-workspace](../../openspec/specs/center-fees-workspace/spec.md) | Center `/app/fees` pipeline chrome (Outstanding / Paid / Overdue / Total) |
-| [center-inventory-workspace](../../openspec/specs/center-inventory-workspace/spec.md) | Center `/app/inventory` pipeline chrome (In stock / Low stock / Incoming / Total); themed `PipelineDetailPanel` |
+| [center-inventory-workspace](../../openspec/specs/center-inventory-workspace/spec.md) | Center `/app/inventory` pipeline chrome; stock limited to SKUs tied to assigned curriculum |
 | [franchise-applications](../../openspec/specs/franchise-applications/spec.md) | Franchise apply + approve provision |
-| [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace |
+| [franchise-center-management](../../openspec/specs/franchise-center-management/spec.md) | Brand `/app/centers` workspace (Import / Export Franchise) |
+| [brand-students-workspace](../../openspec/specs/brand-students-workspace/spec.md) | Brand `/app/students` all-franchise roster (contact + curriculum levels; Export CSV) |
 | [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform and brand CSV bulk center import |
 | [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` courses/levels/units; on/off toggle; mobile **Edit course** overlay matches desktop controls; parent marketing stays editable after create; Spark public courses use published syllabus |
 | [brand-batches-feature-flag](../../openspec/specs/brand-batches-feature-flag/spec.md) | Per-brand Batches module gate |
 | [brand-success-stories](../../openspec/specs/brand-success-stories/spec.md) | Brand `/app/success-stories` pipeline CRUD for testimonials |
-| [brand-merchandise](../../openspec/specs/brand-merchandise/spec.md) | Brand `/app/merchandise` pipeline chrome; catalog, promos, orders, payment settings; center shop Catalog/Unpaid/Orders/Total |
+| [brand-merchandise](../../openspec/specs/brand-merchandise/spec.md) | Brand `/app/merchandise` pipeline chrome; catalog tied to courses/levels; center shop/inventory filtered by assigned courses |
 | [student-learn-portal](../../openspec/specs/student-learn-portal/spec.md) | Learn host enrollment-gated portal |
 | [agent-artifact-sync](../../openspec/specs/agent-artifact-sync/spec.md) | Mandatory sync of specs/docs/tests/skills/agents; agent boundaries |
 | [rpc-catalog.md](./rpc-catalog.md) | Supabase RPC signatures |

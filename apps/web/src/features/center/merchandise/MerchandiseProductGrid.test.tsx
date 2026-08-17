@@ -10,6 +10,8 @@ const catalog = [
     price_cents: 150000,
     currency: "INR",
     photo_urls: ["https://cdn/kit.jpg", "https://cdn/kit-2.jpg"],
+    courseNames: ["Abacus Core"],
+    levelNames: ["Level 1"],
   },
   { id: "item-2", sku: "KIT002", name: "Workbook", price_cents: 50000, currency: "INR", photo_urls: [] },
 ];
@@ -91,5 +93,23 @@ describe("MerchandiseProductGrid", () => {
     const actions = card?.querySelector(".ed-product-card__actions");
     expect(card?.contains(actions ?? null)).toBe(true);
     expect(actions?.parentElement).toBe(card);
+  });
+
+  it("regression_center_merchandise_shop_places_price_beside_title", () => {
+    const { container } = render(
+      <MerchandiseProductGrid catalog={catalog} cart={{}} students={students} onUpdateLine={vi.fn()} />,
+    );
+    const heading = container.querySelector(".ed-product-card__heading");
+    expect(heading?.querySelector(".ed-product-card__name")).toBeTruthy();
+    expect(heading?.querySelector(".ed-product-card__price")).toBeTruthy();
+    expect(container.querySelector(".ed-product-card__copy")).toBeTruthy();
+  });
+
+  it("regression_center_merchandise_shop_shows_catalog_curriculum", () => {
+    render(
+      <MerchandiseProductGrid catalog={catalog} cart={{}} students={students} onUpdateLine={vi.fn()} />,
+    );
+    expect(screen.getByText("Curriculum: Abacus Core")).toBeDefined();
+    expect(screen.getByText("Program: Level 1")).toBeDefined();
   });
 });

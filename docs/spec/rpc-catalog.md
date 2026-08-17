@@ -28,8 +28,8 @@ All functions `SECURITY DEFINER`, `SET search_path = public`, validate tenant fr
 |----------|-------|-------------|
 | `create_platform_brand_signup_staff(...)` | Platform admin | Pending `platform_brand_signups` |
 | `create_franchise_inquiry_staff(p_brand_id, ...)` | Brand | `franchise_inquiries` |
-| `create_brand_student_lead_staff(p_brand_id, ...)` | Brand | `leads` via upsert, `lead_source = brand` |
-| `create_center_student_lead_staff(p_center_id, ...)` | Center | `leads` via upsert, `lead_source = center` |
+| `create_brand_student_lead_staff(p_brand_id, …)` | Brand | `leads` via upsert, `lead_source = brand`; optional CSV-aligned login/address/program fields |
+| `create_center_student_lead_staff(p_center_id, …)` | Center | `leads` via upsert, `lead_source = center`; same extra fields as CSV template |
 
 See [manual-leads.md](./manual-leads.md).
 
@@ -48,6 +48,9 @@ See [manual-leads.md](./manual-leads.md).
 |----------|-------------|
 | `get_center_owner_login(p_center_id)` | Active `center_owner` login email (brand access or platform admin) |
 | `sync_center_owner_membership(...)` | Service-role only — upsert profile + unique `center_owner` after `center-owner-credentials` |
+| `sync_merchandise_catalog_programs(p_brand_id, p_catalog_item_id, p_links jsonb)` | Replace SKU curriculum links (`[{program_id, level_id}]`); franchise shop uses `center_program_enablement` |
+| `list_center_active_merchandise_catalog(p_center_id)` | Active SKUs the franchise may order (`SETOF merchandise_catalog`; ignores brand-wide catalog `FOR ALL`) |
+| `center_can_order_catalog_item(p_center_id, p_catalog_item_id)` | True when the SKU is active and tied to a course assigned to that franchise |
 | `suggest_centers_for_lead(p_lead_id)` | Exact + near pincode list |
 | `assign_lead_to_center(p_lead_id, p_center_id)` | Manual; sets `assigned_at`, `stale_at` from `lead_stale_days` + brand TZ |
 | `reassign_lead(p_lead_id, p_center_id)` | Rejects if `converted`; resets SLA timestamps |
@@ -64,6 +67,7 @@ See [manual-leads.md](./manual-leads.md).
 |----------|-------------|
 | `update_lead_status(p_lead_id, p_status)` | Sets `last_center_action_at` |
 | `convert_lead_to_student(p_lead_id, p_overrides jsonb)` | Field mapping per FR-C13; transactional |
+| `import_center_students(p_center_id, p_rows jsonb)` | CSV bulk enroll; auto `STU-NNN` student_code; profile phone from WhatsApp |
 
 ## SLA computation
 

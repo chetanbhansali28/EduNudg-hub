@@ -115,6 +115,15 @@ describe("merchandiseOrdersHelpers", () => {
     ];
     expect(filterMerchandiseShopCatalog(items, "abacus").map((item) => item.sku)).toEqual(["AB-01"]);
     expect(filterMerchandiseShopCatalog(items, "wb-02")).toHaveLength(1);
+    expect(
+      filterMerchandiseShopCatalog(
+        [
+          { name: "Kit", sku: "K1", courseNames: ["Abacus Core"], levelNames: ["Level 1"] },
+          { name: "Workbook", sku: "WB", courseNames: ["Vedic Maths"], levelNames: ["Junior"] },
+        ],
+        "vedic"
+      ).map((item) => item.sku)
+    ).toEqual(["WB"]);
   });
 
   it("filterCenterMerchandiseOrders matches invoice number", () => {

@@ -24,6 +24,8 @@ const inventoryRows = [
     name: "Level 1 Book",
     priceCents: 50000,
     photoUrl: "https://cdn.example.com/book.jpg",
+    courseNames: ["Abacus Core"],
+    levelNames: ["Level 1"],
     onHand: 10,
     incoming: 5,
     allocated: 2,
@@ -150,5 +152,30 @@ describe("InventoryPage", () => {
 
     const css = readFileSync(resolve(__dirname, "inventory/inventory.css"), "utf8");
     expect(css).toMatch(/\.ed-inv-detail__split \{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\) minmax\(0,\s*1fr\)/);
+  });
+
+  it("regression_center_inventory_shows_catalog_curriculum", async () => {
+    const { container } = renderPage();
+    await waitFor(() => {
+      expect(container.querySelector(".ed-inv-detail")?.textContent).toContain("Curriculum: Abacus Core");
+      expect(container.querySelector(".ed-inv-detail")?.textContent).toContain("Program: Level 1");
+    });
+  });
+
+  it("regression_center_inventory_list_omits_detail_duplicates", async () => {
+    const { container } = renderPage();
+    await waitFor(() => {
+      expect(container.querySelector(".ed-pipeline-detail-panel")).toBeTruthy();
+      expect(screen.getAllByText("Level 1 Book").length).toBeGreaterThan(0);
+    });
+    const listText = container.querySelector(".ed-pipeline-workspace__list")?.textContent ?? "";
+    expect(listText).toContain("Level 1 Book");
+    expect(listText).toContain("SKU BOOK-1");
+    expect(listText).toContain("IN STOCK");
+    expect(listText).not.toContain("Curriculum:");
+    expect(listText).not.toContain("Program:");
+    expect(listText).not.toMatch(/Available\s+8/);
+    expect(listText).not.toMatch(/On hand\s+10/);
+    expect(listText).not.toMatch(/incoming/i);
   });
 });

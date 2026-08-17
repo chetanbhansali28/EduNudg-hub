@@ -207,6 +207,20 @@
   gap: 1rem;
 }
 
+.ed-center-students-page__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ed-ops-save-status {
+  margin: 0;
+  align-self: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ed-success);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ed-ops-animate-in,
   .ed-ops-detail-enter,

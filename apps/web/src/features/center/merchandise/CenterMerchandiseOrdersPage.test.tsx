@@ -18,6 +18,8 @@ vi.mock("@/lib/merchandiseOrdersApi", () => ({
       price_cents: 150000,
       currency: "INR",
       photo_urls: ["https://cdn/kit.jpg"],
+      courseNames: ["Abacus Core"],
+      levelNames: ["Level 1"],
     },
   ]),
   listCenterMerchandiseOrders: vi.fn().mockResolvedValue([
@@ -144,6 +146,8 @@ describe("CenterMerchandiseOrdersPage", () => {
     expect(screen.getByRole("tab", { name: /Shop/ })).toBeDefined();
     expect(screen.getByLabelText("Search catalog")).toBeDefined();
     expect(await screen.findByText("Abacus kit")).toBeDefined();
+    expect(await screen.findByText("Curriculum: Abacus Core")).toBeDefined();
+    expect(screen.getByText("Program: Level 1")).toBeDefined();
     expect(screen.getByText("Your Order")).toBeDefined();
     expect(container.querySelector(".ed-pipeline-workspace")).toBeTruthy();
     expect(container.querySelector(".ed-pipeline-workspace__list .ed-product-card--row")).toBeTruthy();

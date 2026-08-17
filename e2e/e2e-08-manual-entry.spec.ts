@@ -45,7 +45,7 @@ test.describe("E2E-08 — Manual staff lead entry", () => {
       await page.getByLabel("Email").fill(fields.email);
       await page.getByLabel("City", { exact: true }).fill(fields.city);
       await page.getByLabel("Pincode", { exact: true }).fill(fields.pincode);
-      await page.getByLabel("Child name").fill(fields.childName);
+      await page.getByLabel("Student name").fill(fields.childName);
       await page.getByRole("button", { name: "Create lead", exact: true }).click();
       await expect(
         page.getByText(new RegExp(`${fields.parentName}|created|added`, "i")).first()

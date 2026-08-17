@@ -173,6 +173,7 @@ pnpm test:rls
 - Saving theme/name/status alone does **not** call `brand-owner-credentials` — only when login email/password fields change (see [edge-functions](./edge-functions.md))
 - Brand **Franchise Centers** → Franchise Identity: set center **Login email** / **Password** the same way (`center-owner-credentials`); profile-only saves do not call the edge function; passwords must be at least 6 characters (`admin` is too short)
 - React Query: keep `MARKETING_HOMEPAGE_CONFIG_QUERY_KEY` vs `MARKETING_PUBLIC_BUNDLE_QUERY_KEY` separate ([marketing-homepage OpenSpec](../../openspec/specs/marketing-homepage/spec.md))
+- Platform `/` pricing ticks: `marketing.css` must use `content: "\2713"` (CSS Unicode escape). A raw `✓` that gets double-encoded shows as `â` on Vercel while localhost still looks like a tick.
 - Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
 - Brand owners edit brand page **content** at `{brand}.localhost:9000/app/homepage`
 - Brand owners edit the center enrollment template at `{brand}.localhost:9000/app/center-site`
@@ -181,11 +182,17 @@ pnpm test:rls
 
 Bulk-onboard centers from platform brand detail or brand Franchise Management — see [franchise-center-csv-import](./franchise-center-csv-import.md).
 
+## Center student CSV import
+
+Franchise staff bulk-enroll existing students from **Students** (`/app/students`) → **Import students** — see [center-student-csv-import](./center-student-csv-import.md). Walk-in enquiries still use **Leads** → **Import CSV**. **Add student lead** on `/app/leads` uses the same CSV template fields.
+
 ## Merchandise product photos
 
 - Enable **`merchandise`** on platform **Brand detail** → Features (or `brand_settings.settings.features.merchandise`).
 - Apply migration `045_merchandise_catalog_photos.sql`: `supabase db push`
-- Brand staff: **Brand portal → Merchandise → Catalog** — add SKUs, then upload up to **5 photos per product** (PNG/JPEG/WebP/GIF, 5 MB).
+- Brand staff: **Brand portal → Merchandise → Catalog** — add SKUs, tie each SKU to curriculum, then upload up to **5 photos per product** (PNG/JPEG/WebP/GIF, 5 MB).
+- Apply migration `084_merchandise_catalog_programs.sql`, `085_merchandise_catalog_levels.sql`, `087_fix_sync_merchandise_catalog_programs.sql`, `088_list_center_merchandise_catalog_price_bigint.sql`, then `089_list_center_merchandise_catalog_setof.sql`: `supabase db push` — brand catalog tags courses **and** levels; franchise Shop and Inventory call `list_center_active_merchandise_catalog` so only assigned-course SKUs appear.
+- Apply migration `090_lead_csv_aligned_fields.sql` so staff lead lists can select `login_email`, `address_line1`, `state`, `program_name`, `starting_level` (do not reuse prefix `089` — that version is the merchandise SETOF RPC).
 - Storage path: `{brand_id}/merchandise/{catalog_item_id}/photo-{1-5}.{ext}` in the **`brand-assets`** bucket (re-upload to a slot replaces that slot).
 - Franchise centers see photos on **Center portal → Merchandise → Shop**.
 

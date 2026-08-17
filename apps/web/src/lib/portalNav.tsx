@@ -114,6 +114,7 @@ export function brandNavSections(pathname: string): ShellNavSection[] {
         { path: "/app/curriculum", label: "Curriculum", icon: <IconBook /> },
         { path: "/app/competitions", label: "Competitions", icon: <IconGraduation /> },
         { path: "/app/centers", label: "Franchise Management", icon: <IconBuilding /> },
+        { path: "/app/students", label: "Students", icon: <IconUsers /> },
         { path: "/app/campaigns", label: "Campaigns", icon: <IconChart /> },
         { path: "/app/success-stories", label: "Success stories", icon: <IconUsers /> },
         { path: "/app/merchandise", label: "Merchandise", icon: <IconBook /> },

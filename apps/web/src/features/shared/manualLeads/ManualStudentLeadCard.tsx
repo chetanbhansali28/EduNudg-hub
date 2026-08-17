@@ -20,7 +20,12 @@ const emptyForm = {
   pincode: "",
   childName: "",
   childDob: "",
+  loginEmail: "",
   schoolName: "",
+  addressLine1: "",
+  state: "",
+  programName: "",
+  startingLevel: "",
   notes: "",
 };
 
@@ -74,6 +79,11 @@ export function ManualStudentLeadCard(props: Props) {
         childDob: form.childDob || undefined,
         schoolName: form.schoolName || undefined,
         notes: form.notes,
+        loginEmail: form.loginEmail || undefined,
+        addressLine1: form.addressLine1 || undefined,
+        state: form.state || undefined,
+        programName: form.programName || undefined,
+        startingLevel: form.startingLevel || undefined,
       };
       if (props.scope === "brand") {
         const { error: err } = await createBrandStudentLeadStaff(props.brandId, payload);
@@ -125,8 +135,7 @@ export function ManualStudentLeadCard(props: Props) {
 
         <div className="ed-import-dialog__body">
           <p className="ed-import-dialog__intro">
-            Walk-in or phone enquiry — same fields as the public {isBrand ? "student application" : "center registration"}{" "}
-            form. Duplicate WhatsApp merges per brand.
+            Same fields as the student CSV import template on Students. Duplicate WhatsApp merges per brand.
           </p>
           <MutationError message={error} />
 
@@ -147,13 +156,18 @@ export function ManualStudentLeadCard(props: Props) {
             </section>
 
             <section className="ed-franchise-app-detail__card">
-              <h3 className="ed-franchise-app-detail__card-title">Child</h3>
+              <h3 className="ed-franchise-app-detail__card-title">Student</h3>
               <FormGrid>
-                <Input label="Child name" value={form.childName} onChange={setField("childName")} />
-                <Input label="Child date of birth" value={form.childDob} onChange={setField("childDob")} type="date" />
-                {isBrand ? (
-                  <Input label="School name (optional)" value={form.schoolName} onChange={setField("schoolName")} />
-                ) : null}
+                <Input label="Student name" value={form.childName} onChange={setField("childName")} />
+                <Input label="Student date of birth" value={form.childDob} onChange={setField("childDob")} type="date" />
+                <Input
+                  label="Login email (optional)"
+                  value={form.loginEmail}
+                  onChange={setField("loginEmail")}
+                  type="email"
+                  autoComplete="email"
+                />
+                <Input label="School name (optional)" value={form.schoolName} onChange={setField("schoolName")} />
               </FormGrid>
             </section>
 
@@ -161,10 +175,22 @@ export function ManualStudentLeadCard(props: Props) {
               <h3 className="ed-franchise-app-detail__card-title">Location</h3>
               <FormGrid>
                 <Input
+                  label="Address line 1 (optional)"
+                  value={form.addressLine1}
+                  onChange={setField("addressLine1")}
+                  autoComplete="street-address"
+                />
+                <Input
                   label={isBrand ? "City" : "City (optional)"}
                   value={form.city}
                   onChange={setField("city")}
                   autoComplete="address-level2"
+                />
+                <Input
+                  label="State (optional)"
+                  value={form.state}
+                  onChange={setField("state")}
+                  autoComplete="address-level1"
                 />
                 <Input
                   label={isBrand ? "Pincode" : "Pincode (optional)"}
@@ -174,6 +200,18 @@ export function ManualStudentLeadCard(props: Props) {
                 />
               </FormGrid>
               {pincodeHint ? <p className="ed-text-sm ed-muted">{pincodeHint}</p> : null}
+            </section>
+
+            <section className="ed-franchise-app-detail__card">
+              <h3 className="ed-franchise-app-detail__card-title">Course</h3>
+              <FormGrid>
+                <Input label="Program name (optional)" value={form.programName} onChange={setField("programName")} />
+                <Input
+                  label="Starting level (optional)"
+                  value={form.startingLevel}
+                  onChange={setField("startingLevel")}
+                />
+              </FormGrid>
             </section>
 
             <section className="ed-franchise-app-detail__card ed-franchise-app-detail__card--wide">

@@ -238,6 +238,7 @@ Prerequisites: migration `039` applied, seed run, hosts entry for `smart-brain-a
 ### Nav and hero
 
 - [ ] Sticky nav shows logo/wordmark, section links, **Book free demo** and **Apply franchise** (brand host only)
+- [ ] Brand and franchise sticky nav logos are the same size with no ring or frame
 - [ ] Center host sticky nav shows **Book a free trial** (or enroll CTA) and **does not** show **Apply franchise**
 - [ ] Mobile: hamburger opens dropdown with section links; both CTAs remain visible
 - [ ] Hero shows age badge, headline, subtitle, and both CTAs
@@ -302,7 +303,7 @@ Prerequisites: migration `039` applied, Abacus Classic theme assigned, seed or e
 - [ ] **Our presence** regions and cities render when configured
 - [ ] **Head office** address, phone, and website display correctly on the **brand** site
 - [ ] Center View Frontend footer shows **This center** (franchise address/phone), not brand Head office
-- [ ] Center View Frontend nav shows a larger, highlighted brand logo and franchise name
+- [ ] Center View Frontend nav uses the same unframed brand logo size as the brand homepage; franchise **name** is larger/bolder
 - [ ] Social links open in a new tab
 - [ ] Copyright and legal links appear in the footer bottom bar
 

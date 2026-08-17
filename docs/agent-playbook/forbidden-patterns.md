@@ -31,11 +31,12 @@
 - Shipping integrations without an OFF feature flag
 - Center marking leads lost from brand UI (center only); brand may reopen via `reopen_lead` or WhatsApp re-apply auto-reopens
 - “Docs/tests/skills later” — sync in the same change
+- Raw multi-byte glyphs in CSS `content` (e.g. `✓`) — use `\2713` so production minify cannot show `â`
 
 ## Vibe-coding red flags
 
 - "I'll add RLS later"
 - "Quick mock auth for now"
-- Inventing column names not in ERD
+- Duplicate numeric prefixes (`089_foo.sql` and `089_bar.sql`) — only one migration version applies; the other schema never lands (lead CSV columns vs merchandise SETOF was `089`)
 - Duplicate Supabase clients per component
 - "Skip OpenSpec / agent brief updates this once"

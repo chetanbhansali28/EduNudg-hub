@@ -21,6 +21,8 @@
 - [ ] `pnpm test:rls` passes
 - [ ] `pnpm audit:schema` passes
 - [ ] OpenSpec / docs updated for new RPC or table behavior
+- [ ] Center student CSV import uses `import_center_students` (enroll + profile; not leads)
+- [ ] Manual student lead RPCs persist CSV-aligned fields on `leads` (`090_lead_csv_aligned_fields.sql`; never reuse version `089`)
 - [ ] `edunudg-sync-artifacts` run before finish
 - [ ] No git commit/push unless the user explicitly asked (`git-publish-gate`)
 - [ ] If pushing: mandatory `edunudg-pre-push-ci` (`pnpm ci:local` green before `git push`)

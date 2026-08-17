@@ -47,7 +47,16 @@ const MATRIX: Record<string, Record<string, string[]>> = {
   },
   enrollments: {
     create: ["center_owner", "center_manager", "center_admissions"],
-    read: ["platform_super_admin", "brand_owner", "center_owner", "center_admissions"],
+    read: [
+      "platform_super_admin",
+      "platform_ops",
+      "brand_owner",
+      "brand_admin",
+      "center_owner",
+      "center_manager",
+      "center_admissions",
+      "center_finance",
+    ],
   },
   audit_logs: {
     read: ["platform_super_admin", "platform_ops"],

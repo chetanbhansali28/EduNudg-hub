@@ -4,7 +4,8 @@ import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CentersPage } from "./CentersPage";
 
-const { mockCenters } = vi.hoisted(() => ({
+const { mockCenters, downloadTextFile } = vi.hoisted(() => ({
+  downloadTextFile: vi.fn(),
   mockCenters: [
     {
       id: "c1",
@@ -40,6 +41,14 @@ const { mockCenters } = vi.hoisted(() => ({
     },
   ],
 }));
+
+vi.mock("@/lib/platformDataExportHelpers", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/platformDataExportHelpers")>();
+  return {
+    ...actual,
+    downloadTextFile,
+  };
+});
 
 vi.mock("./hooks/useBrandScope", () => ({
   useBrandScope: () => ({
@@ -130,6 +139,7 @@ describe("CentersPage", () => {
     expect(screen.getByText("Total Centers")).toBeDefined();
     expect(screen.getByText("Directory")).toBeDefined();
     expect(screen.getByRole("link", { name: "Add New" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Export Franchise" })).toBeDefined();
   });
 
   it("regression_brand_centers_shows_franchise_csv_import", async () => {
@@ -174,5 +184,22 @@ describe("CentersPage", () => {
       expect(screen.getByText("Jayanagar")).toBeDefined();
       expect(screen.queryByText("Abacus Koramangala")).toBeNull();
     });
+  });
+
+  it("regression_brand_centers_exports_full_franchise_csv", async () => {
+    renderPage();
+    expect(await screen.findByText("Abacus Koramangala")).toBeDefined();
+    const exportBtn = screen.getByRole("button", { name: "Export Franchise" });
+    expect(exportBtn.className).toContain("ed-btn--secondary");
+    expect((exportBtn as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(exportBtn);
+    expect(downloadTextFile).toHaveBeenCalledTimes(1);
+    const [csv, filename, mime] = downloadTextFile.mock.calls[0]!;
+    expect(filename).toMatch(/^abacusworld-franchises-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(mime).toBe("text/csv;charset=utf-8");
+    expect(csv).toContain("koramangala");
+    expect(csv).toContain("jayanagar");
+    expect(csv).toContain("Abacus Koramangala");
+    expect(csv).toContain("suspended");
   });
 });

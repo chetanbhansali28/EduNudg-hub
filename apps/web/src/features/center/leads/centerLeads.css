@@ -32,8 +32,10 @@
   color: var(--ed-color-success, #15803d);
 }
 
-.ed-center-leads-page {
-  min-width: 0;
+.ed-center-leads-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .ed-center-leads-page__bulk-bar {
@@ -60,6 +62,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.ed-center-leads-page .ed-pipeline-detail-panel__head {
+  padding-top: 1.5rem;
+}
+
+.ed-center-leads-page .ed-pipeline-detail-panel__body {
+  padding-top: 1.75rem;
 }
 
 @media (min-width: 1024px) {

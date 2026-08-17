@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { upsertStudentDeliveryAddress } from "./studentProfileApi";
+import { resolveStudentPortalLoginEmail, upsertStudentDeliveryAddress } from "./studentProfileApi";
 
 const upsert = vi.fn();
 
@@ -32,5 +32,11 @@ describe("studentProfileApi", () => {
       }),
       { onConflict: "student_id" }
     );
+  });
+
+  it("resolveStudentPortalLoginEmail prefers login email then parent email", () => {
+    expect(resolveStudentPortalLoginEmail(" login@example.com ", "parent@example.com")).toBe("login@example.com");
+    expect(resolveStudentPortalLoginEmail(null, " parent@example.com ")).toBe("parent@example.com");
+    expect(resolveStudentPortalLoginEmail("", "")).toBe("");
   });
 });

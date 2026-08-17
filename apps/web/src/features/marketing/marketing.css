@@ -1,4 +1,4 @@
-/* Marketing public site â Inter + Instrument Serif */
+/* Marketing public site — Inter + Instrument Serif */
 
 .marketing-page {
   --novu-font-sans: "Inter", system-ui, -apple-system, sans-serif;
@@ -71,7 +71,7 @@
   font-weight: 400;
 }
 
-/* âââ Nav (slide-in + data-nav-theme) âââ */
+/* ─── Nav (slide-in + data-nav-theme) ─── */
 .novu-nav-bar {
   position: fixed;
   inset: 0 0 auto;
@@ -83,7 +83,7 @@
     background 0.35s ease;
 }
 
-/* Over white page content â transparent nav, dark type */
+/* Over white page content → transparent nav, dark type */
 .novu-nav-bar--light {
   background: transparent;
 }
@@ -150,26 +150,28 @@
 }
 
 .novu-nav-bar__logo-img {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: none;
+  border-radius: 0;
   object-fit: contain;
   flex-shrink: 0;
-  background: rgb(255 255 255 / 0.12);
+  background: transparent;
+  box-shadow: none;
 }
 
 .novu-nav-bar--light .novu-nav-bar__logo-img {
-  background: rgb(0 0 0 / 0.06);
+  background: transparent;
 }
 
 .novu-nav-bar__logo-mark {
   display: grid;
   place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: 0.5rem;
   background: rgb(255 255 255 / 0.18);
-  font-size: 1.125rem;
+  font-size: 1.35rem;
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -516,7 +518,7 @@ body.novu-nav-drawer-open {
   }
 }
 
-/* âââ Unified marketing CTA (nav, hero, footer) âââ */
+/* ─── Unified marketing CTA (nav, hero, footer) ─── */
 .novu-marketing-cta {
   display: inline-flex;
   align-items: center;
@@ -633,7 +635,7 @@ body.novu-nav-drawer-open {
   transform: translateY(-100%);
 }
 
-/* âââ Hero âââ */
+/* ─── Hero ─── */
 .novu-hero-wrap {
   position: relative;
 }
@@ -742,7 +744,7 @@ body.novu-nav-drawer-open {
   margin-top: 0;
 }
 
-/* âââ Main white panel âââ */
+/* ─── Main white panel ─── */
 .novu-main {
   position: relative;
   z-index: 10;
@@ -758,7 +760,7 @@ body.novu-nav-drawer-open {
   }
 }
 
-/* âââ Feature scroll âââ */
+/* ─── Feature scroll ─── */
 @media (max-width: 1023.98px) {
   html:has(.marketing-page) {
     scroll-snap-type: y proximity;
@@ -1085,7 +1087,7 @@ body.novu-nav-drawer-open {
   cursor: not-allowed;
 }
 
-/* âââ Highlights horizontal scroller âââ */
+/* ─── Highlights horizontal scroller ─── */
 .novu-highlights {
   position: relative;
   padding: 5rem 0 6rem;
@@ -1387,7 +1389,7 @@ body.novu-nav-drawer-open {
   color: #0b0f11;
 }
 
-/* âââ Reveal âââ */
+/* ─── Reveal ─── */
 .novu-reveal {
   opacity: 0;
   transform: translateY(20px);
@@ -1401,7 +1403,7 @@ body.novu-nav-drawer-open {
   transform: translateY(0);
 }
 
-/* âââ Pricing (platform homepage) âââ */
+/* ─── Pricing (platform homepage) ─── */
 .novu-pricing-section {
   position: relative;
   z-index: 30;
@@ -1575,7 +1577,7 @@ body.novu-nav-drawer-open {
 }
 
 .novu-pricing-card__features li::before {
-  content: "â";
+  content: "\2713";
   position: absolute;
   left: 0;
   font-weight: 700;
@@ -1601,7 +1603,7 @@ body.novu-nav-drawer-open {
   outline-offset: 3px;
 }
 
-/* âââ Privacy (black card + lock) âââ */
+/* ─── Privacy (black card + lock) ─── */
 .novu-privacy-section {
   position: relative;
   z-index: 20;
@@ -1733,7 +1735,7 @@ body.novu-nav-drawer-open {
   }
 }
 
-/* âââ Public curriculum (horizontal scroller) âââ */
+/* ─── Public curriculum (horizontal scroller) ─── */
 .novu-curriculum-section {
   position: relative;
   z-index: 10;
@@ -2029,7 +2031,7 @@ body.novu-nav-drawer-open {
   color: var(--novu-muted);
 }
 
-/* âââ Testimonials (infinite marquee) âââ */
+/* ─── Testimonials (infinite marquee) ─── */
 .novu-testimonials-section {
   position: relative;
   z-index: 10;
@@ -2181,7 +2183,7 @@ body.novu-nav-drawer-open {
   height: 17px;
 }
 
-/* âââ FAQ âââ */
+/* ─── FAQ ─── */
 .novu-faq {
   position: relative;
   z-index: 20;
@@ -2265,7 +2267,7 @@ body.novu-nav-drawer-open {
   margin: 0;
 }
 
-/* âââ Footer CTA + site footer (single dark section) âââ */
+/* ─── Footer CTA + site footer (single dark section) ─── */
 .novu-footer-section {
   position: relative;
   z-index: 10;
@@ -2461,7 +2463,7 @@ body.novu-nav-drawer-open {
   color: rgb(255 255 255 / 0.45);
 }
 
-/* âââ Responsive: mobile & tablet âââ */
+/* ─── Responsive: mobile & tablet ─── */
 @media (max-width: 767.98px) {
   .novu-nav-bar__wordmark {
     font-size: 1rem;
@@ -2688,7 +2690,7 @@ body.novu-nav-drawer-open {
   }
 }
 
-/* âââ Franchise application form (brand landing) âââ */
+/* ─── Franchise application form (brand landing) ─── */
 .novu-franchise-apply {
   max-width: 48rem;
   margin: 0 auto;
@@ -2848,7 +2850,7 @@ body.novu-nav-drawer-open {
 }
 
 .novu-enquiry-promo__perks li::before {
-  content: "â";
+  content: "\2713";
   flex-shrink: 0;
   width: 1.25rem;
   height: 1.25rem;
@@ -2981,7 +2983,7 @@ body.novu-nav-drawer-open {
 .ac-nav__inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.75rem 1.25rem;
+  padding: 0.9rem 1.25rem;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 1rem;
@@ -3021,18 +3023,24 @@ body.novu-nav-drawer-open {
 
 .ac-nav__logo-img,
 .ac-nav__logo-fallback {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
+  width: 3.75rem;
+  height: 3.75rem;
+  border: none;
+  border-radius: 0;
   object-fit: contain;
+  background: transparent;
+  box-shadow: none;
+  flex-shrink: 0;
 }
 
 .ac-nav__logo-fallback {
   display: grid;
   place-items: center;
+  border-radius: 0.85rem;
   background: var(--ac-blue);
   color: #fff;
   font-weight: 700;
+  font-size: 1.35rem;
 }
 
 .ac-nav__wordmark {
@@ -3053,13 +3061,6 @@ body.novu-nav-drawer-open {
 .ac-nav--franchise .ac-nav__logo-fallback {
   width: 3.75rem;
   height: 3.75rem;
-  border-radius: 0.85rem;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--ac-orange);
-  flex-shrink: 0;
-}
-
-.ac-nav--franchise .ac-nav__logo-fallback {
-  font-size: 1.35rem;
 }
 
 .ac-nav--franchise .ac-nav__wordmark {
@@ -3658,7 +3659,7 @@ body.ac-nav-drawer-open {
 }
 
 .ac-program-details__benefits-list li::before {
-  content: "â";
+  content: "\2713";
   position: absolute;
   left: 0;
   top: 0.1rem;
@@ -4532,7 +4533,7 @@ body.ac-nav-drawer-open {
   gap: 0.75rem;
 }
 
-/* âââ Shared marketing footer shell (platform + brand themes) âââ */
+/* ─── Shared marketing footer shell (platform + brand themes) ─── */
 .mkt-footer-shell {
   --mkt-footer-heading-font: var(--novu-font-serif, Georgia, serif);
   --mkt-footer-heading-size: 1.25rem;
@@ -4879,7 +4880,7 @@ body.ac-nav-drawer-open {
   display: inline-flex;
 }
 
-/*  Brand About Us (Mastermind-style)  */
+/* —— Brand About Us (Mastermind-style) —— */
 .about-us--page {
   background: #fff;
   color: #0f172a;

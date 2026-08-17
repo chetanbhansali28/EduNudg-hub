@@ -98,13 +98,16 @@ export function centerMerchandisePageCounts(
   };
 }
 
-export function filterMerchandiseShopCatalog<T extends { name: string; sku: string }>(
-  items: T[],
-  search: string
-): T[] {
+export function filterMerchandiseShopCatalog<
+  T extends { name: string; sku: string; courseNames?: string[]; levelNames?: string[] }
+>(items: T[], search: string): T[] {
   const q = search.trim().toLowerCase();
   if (!q) return items;
-  return items.filter((item) => item.name.toLowerCase().includes(q) || item.sku.toLowerCase().includes(q));
+  return items.filter((item) =>
+    [item.name, item.sku, ...(item.courseNames ?? []), ...(item.levelNames ?? [])].some((value) =>
+      value.toLowerCase().includes(q)
+    )
+  );
 }
 
 function orderInvoiceNumber(order: MerchandiseOrderRow): string | null {

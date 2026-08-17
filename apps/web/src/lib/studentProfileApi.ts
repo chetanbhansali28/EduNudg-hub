@@ -12,6 +12,16 @@ export type StudentProfileAddress = StudentDeliveryAddress & {
   school_name: string | null;
 };
 
+/** Portal Login email prefers students.login_email, then the parent email collected on import/add. */
+export function resolveStudentPortalLoginEmail(
+  loginEmail: string | null | undefined,
+  parentEmail: string | null | undefined
+): string {
+  const login = loginEmail?.trim() ?? "";
+  if (login) return login;
+  return parentEmail?.trim() ?? "";
+}
+
 export async function fetchStudentProfileAddress(
   studentId: string
 ): Promise<StudentProfileAddress | null> {

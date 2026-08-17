@@ -12,6 +12,7 @@ import {
 } from "@/lib/centerInventoryApi";
 import { LOW_STOCK_THRESHOLD } from "@/lib/centerDashboardStats";
 import { IconCalendar, IconHistory, IconPlus, IconTruck } from "./InventoryIcons";
+import { CatalogCurriculumMeta } from "@/features/shared/merchandise/CatalogCurriculumMeta";
 
 type Props = {
   centerId: string;
@@ -71,6 +72,7 @@ export function InventoryItemDetailPanel({
           </div>
           <div className="ed-inv-detail__stats">
             <p className="ed-inv-detail__sku">SKU {item.sku}</p>
+            <CatalogCurriculumMeta courseNames={item.courseNames} levelNames={item.levelNames} />
             <div className="ed-pipeline-detail-facts">
               <div>
                 <p className="ed-pipeline-detail-facts__label">Available</p>

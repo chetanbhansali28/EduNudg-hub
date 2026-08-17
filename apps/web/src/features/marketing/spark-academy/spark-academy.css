@@ -180,18 +180,24 @@
 
 .sa-nav__logo-img,
 .sa-nav__logo-fallback {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.5rem;
+  width: 3.75rem;
+  height: 3.75rem;
+  border: none;
+  border-radius: 0;
   object-fit: contain;
+  background: transparent;
+  box-shadow: none;
+  flex-shrink: 0;
 }
 
 .sa-nav__logo-fallback {
   display: grid;
   place-items: center;
+  border-radius: 0.85rem;
   background: var(--sa-blue);
   color: #fff;
   font-weight: 700;
+  font-size: 1.35rem;
 }
 
 .sa-nav--franchise .sa-nav__inner {
@@ -208,8 +214,6 @@
 .sa-nav--franchise .sa-nav__logo-fallback {
   width: 3.75rem;
   height: 3.75rem;
-  border-radius: 0.85rem;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--sa-blue);
 }
 
 .sa-nav--franchise .sa-nav__wordmark {

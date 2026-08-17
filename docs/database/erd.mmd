@@ -24,6 +24,9 @@ erDiagram
   leads ||--o{ lead_events : timeline
   leads ||--o{ lead_assignment_history : reassignments
   brands ||--o{ merchandise_catalog : defines
+  merchandise_catalog ||--o{ merchandise_catalog_programs : ties
+  programs ||--o{ merchandise_catalog_programs : supplies
+  levels ||--o{ merchandise_catalog_programs : tags
   franchise_centers ||--o{ merchandise_orders : places
   brands ||--o{ brand_campaigns : runs
   brands ||--o{ brand_competitions : hosts

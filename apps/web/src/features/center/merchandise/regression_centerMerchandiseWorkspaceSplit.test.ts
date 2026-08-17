@@ -37,4 +37,21 @@ describe("center merchandise workspace split", () => {
     );
     expect(merchCss).not.toMatch(/min-width:\s*max-content/);
   });
+
+  it("regression_center_merchandise_shop_row_image_is_at_least_double_width", () => {
+    const uiCss = readFileSync(
+      resolve(__dirname, "../../../../../../packages/ui/src/styles.css"),
+      "utf8",
+    );
+    const merchCss = readFileSync(resolve(__dirname, "merchandiseShop.css"), "utf8");
+    expect(uiCss).toMatch(
+      /\.ed-product-card--row \.ed-product-card__main\s*\{[^}]*grid-template-columns:\s*8rem\s+minmax\(0,\s*1fr\)/s,
+    );
+    expect(uiCss).not.toMatch(
+      /\.ed-product-card--row \.ed-product-card__main\s*\{[^}]*grid-template-columns:\s*3\.25rem/s,
+    );
+    expect(merchCss).toMatch(
+      /\.ed-merch-product__thumb\s*\{[^}]*width:\s*2\.75rem/s,
+    );
+  });
 });

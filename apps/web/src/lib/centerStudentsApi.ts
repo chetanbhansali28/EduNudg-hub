@@ -6,6 +6,7 @@ export type CenterStudentRow = {
   full_name: string;
   student_code: string | null;
   login_email: string | null;
+  parent_email: string | null;
   user_id: string | null;
   enrollment_id: string;
   enrollment_status: string;
@@ -49,15 +50,27 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
   const studentIds = rows.map((r) => r.students?.id ?? r.student_id);
   if (studentIds.length === 0) return [];
 
-  const { data: batchRows, error: bErr } = await getSupabase()
-    .from("batch_enrollments")
-    .select("student_id, batch_id, batches(name, deleted_at)")
-    .eq("center_id", centerId)
-    .in("student_id", studentIds);
+  const sb = getSupabase();
+  const [{ data: batchRows, error: bErr }, { data: parentRows, error: pErr }] = await Promise.all([
+    sb
+      .from("batch_enrollments")
+      .select("student_id, batch_id, batches(name, deleted_at)")
+      .eq("center_id", centerId)
+      .in("student_id", studentIds),
+    sb
+      .from("parent_student_links")
+      .select("student_id, parents(email)")
+      .eq("brand_id", brandId)
+      .in("student_id", studentIds),
+  ]);
   const batches = supabaseList(batchRows, bErr) as unknown as {
     student_id: string;
     batch_id: string;
     batches: { name: string; deleted_at: string | null } | null;
+  }[];
+  const parents = supabaseList(parentRows, pErr) as unknown as {
+    student_id: string;
+    parents: { email: string | null } | { email: string | null }[] | null;
   }[];
 
   const batchMap = new Map<string, { ids: string[]; names: string[] }>();
@@ -67,6 +80,13 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
     entry.ids.push(b.batch_id);
     entry.names.push(b.batches?.name ?? "Batch");
     batchMap.set(b.student_id, entry);
+  }
+
+  const parentEmailMap = new Map<string, string>();
+  for (const row of parents) {
+    const parent = Array.isArray(row.parents) ? row.parents[0] : row.parents;
+    const email = parent?.email?.trim();
+    if (email && !parentEmailMap.has(row.student_id)) parentEmailMap.set(row.student_id, email);
   }
 
   return rows.map((r) => {
@@ -79,6 +99,7 @@ export async function fetchCenterStudents(centerId: string, brandId: string): Pr
       full_name: r.students?.full_name ?? "Student",
       student_code: r.students?.student_code ?? null,
       login_email: r.students?.login_email ?? null,
+      parent_email: parentEmailMap.get(sid) ?? null,
       user_id: r.students?.user_id ?? null,
       enrollment_id: r.id,
       enrollment_status: r.status,

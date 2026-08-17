@@ -9,7 +9,7 @@ vi.mock("./MerchandiseProductPhotos", () => ({
 describe("BrandMerchandiseAddCatalogPanel", () => {
   const baseProps = {
     open: true,
-    form: { sku: "", name: "", priceRupees: "", currency: "INR", isActive: true },
+    form: { sku: "", name: "", priceRupees: "", currency: "INR", isActive: true, curriculumLinks: [] },
     onFormChange: vi.fn(),
     onSubmit: vi.fn(),
     onClose: vi.fn(),
@@ -19,6 +19,7 @@ describe("BrandMerchandiseAddCatalogPanel", () => {
     savedItemId: null as string | null,
     photoUrls: [] as string[],
     onPhotosChange: vi.fn(),
+    programs: [{ id: "prog-1", name: "Abacus Core", levels: [] }],
   };
 
   it("renders nothing when closed", () => {
@@ -39,5 +40,12 @@ describe("BrandMerchandiseAddCatalogPanel", () => {
     expect(screen.getByRole("button", { name: "Done" })).toBeDefined();
     expect(screen.getByTestId("add-form-photos")).toBeDefined();
     expect(screen.getByText(/Item saved/)).toBeDefined();
+  });
+
+  it("regression_add_catalog_panel_shows_curriculum_picker", () => {
+    render(<BrandMerchandiseAddCatalogPanel {...baseProps} />);
+    expect(screen.getByRole("group", { name: "Curriculum" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Abacus Core" })).toBeDefined();
+    expect(screen.getByText(/Tag courses and levels/)).toBeDefined();
   });
 });

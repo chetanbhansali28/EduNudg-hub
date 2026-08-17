@@ -81,6 +81,18 @@ Brand staff with `centers.create` SHALL bulk-onboard franchise centers from CSV 
 
 See [`openspec/specs/franchise-center-csv-import/spec.md`](../franchise-center-csv-import/spec.md).
 
+### Requirement: Export franchise CSV
+
+Brand staff SHALL download the full live franchise directory as UTF-8 CSV from `/app/centers`. Search and KPI filters SHALL NOT shrink the export. Soft-deleted centers SHALL NOT appear (they are already omitted from the directory query).
+
+#### Scenario: Export Franchise from the page header
+
+- **GIVEN** brand staff are on `/app/centers` with at least one franchise
+- **WHEN** they click **Export Franchise** in the top-right header (secondary, beside **Import Franchise**)
+- **THEN** the browser downloads a CSV named `{brandSlug}-franchises-{YYYY-MM-DD}.csv`
+- **AND** the file includes every live franchise (active and suspended), not only the filtered directory
+- **AND** columns include `center_slug`, import-aligned profile fields, and `status`
+
 ### Requirement: View franchise frontend and backend
 
 Brand staff SHALL open the selected franchise public site and staff app from `/app/centers`.

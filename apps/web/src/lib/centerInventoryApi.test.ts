@@ -117,6 +117,32 @@ describe("centerInventoryApi", () => {
     expect(kit).toMatchObject({ onHand: 3, incoming: 0, allocated: 0, available: 3 });
   });
 
+  it("regression_inventory_omits_skus_not_in_assigned_catalog", () => {
+    const summary = buildCenterInventorySummary({
+      catalog: [catalog[0]!],
+      orders: [
+        order({
+          id: "other-course",
+          status: "received",
+          created_at: "2026-01-10T00:00:00Z",
+          merchandise_order_lines: [
+            {
+              id: "line-other",
+              catalog_item_id: "item-b",
+              quantity: 8,
+              unit_price_cents: 120000,
+              student_id: null,
+              merchandise_catalog: { name: "Starter Kit", sku: "KIT-1" },
+            },
+          ],
+        }),
+      ],
+      allocatedLineIds: new Set(),
+    });
+    expect(summary.map((row) => row.catalogItemId)).toEqual(["item-a"]);
+    expect(summary.find((row) => row.catalogItemId === "item-b")).toBeUndefined();
+  });
+
   it("regression_buildCenterInventorySummary_ignores_cancelled_orders", () => {
     const summary = buildCenterInventorySummary({
       catalog,
@@ -288,6 +314,59 @@ describe("centerInventoryApi", () => {
 
     expect(csv).toContain('"BOOK,1"');
     expect(csv).toContain('"Level ""1"" Book"');
+  });
+
+  it("inventorySummaryToCsv includes curriculum and program", () => {
+    const csv = inventorySummaryToCsv([
+      {
+        catalogItemId: "item-a",
+        sku: "BOOK-1",
+        name: "Level 1 Book",
+        priceCents: 50000,
+        photoUrl: null,
+        courseNames: ["Abacus Core"],
+        levelNames: ["Level 1"],
+        onHand: 2,
+        incoming: 1,
+        allocated: 0,
+        available: 2,
+      },
+    ]);
+    expect(csv.split("\n")[0]).toBe("SKU,Name,Curriculum,Program,On hand,Allocated,Available,Incoming");
+    expect(csv).toContain("Abacus Core,Level 1");
+  });
+
+  it("filterCenterInventory search matches curriculum names", () => {
+    const rows: InventorySummaryRow[] = [
+      {
+        catalogItemId: "item-a",
+        sku: "BOOK-1",
+        name: "Level 1 Book",
+        priceCents: 50000,
+        photoUrl: null,
+        courseNames: ["Abacus Core"],
+        levelNames: ["Level 1"],
+        onHand: 10,
+        incoming: 0,
+        allocated: 2,
+        available: 8,
+      },
+      {
+        catalogItemId: "item-b",
+        sku: "KIT-1",
+        name: "Starter Kit",
+        priceCents: 120000,
+        photoUrl: null,
+        courseNames: ["Vedic Maths"],
+        levelNames: ["Junior"],
+        onHand: 2,
+        incoming: 4,
+        allocated: 0,
+        available: 2,
+      },
+    ];
+    expect(filterCenterInventory(rows, "all", "abacus", 5).map((row) => row.catalogItemId)).toEqual(["item-a"]);
+    expect(filterCenterInventory(rows, "all", "junior", 5).map((row) => row.catalogItemId)).toEqual(["item-b"]);
   });
 
   it("countLowStockItems uses available quantity", () => {

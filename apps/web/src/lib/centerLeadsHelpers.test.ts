@@ -5,7 +5,10 @@ import {
   countEligibleBulkConvertLeads,
   filterCenterLeads,
   formatLeadContactWhen,
+  formatLeadListDate,
   isLeadEligibleForBulkConvert,
+  leadListStatusBadge,
+  leadLocationLine,
   leadStatusPresentation,
   leadStudentInterest,
   paginateItems,
@@ -78,6 +81,24 @@ describe("centerLeadsHelpers", () => {
         Date.parse("2026-06-15T12:00:00Z")
       ).tone
     ).toBe("hot");
+  });
+
+  it("leadLocationLine joins city and pincode", () => {
+    expect(leadLocationLine(sampleLead())).toBe("Bengaluru 560034");
+    expect(leadLocationLine(sampleLead({ city: null, pincode: "411047" }))).toBe("411047");
+    expect(leadLocationLine(sampleLead({ city: null, pincode: null }))).toBeNull();
+  });
+
+  it("formatLeadListDate uses day/month/year", () => {
+    expect(formatLeadListDate("2026-08-09T07:19:00+05:30")).toBe("09/08/2026");
+  });
+
+  it("leadListStatusBadge uppercases status for list cards", () => {
+    expect(leadListStatusBadge(sampleLead({ status: "new" }))).toEqual({ label: "NEW", tone: "new" });
+    expect(leadListStatusBadge(sampleLead({ status: "converted" }))).toEqual({
+      label: "CONVERTED",
+      tone: "approved",
+    });
   });
 
   it("formatLeadContactWhen renders today with time", () => {

@@ -1,6 +1,7 @@
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
 import { activeMerchandisePhotoUrls } from "@/lib/merchandiseProductPhotoStorage";
+import { formatCenterSkuCurriculum } from "@/lib/merchandiseCurriculum";
 import {
   listActiveMerchandiseCatalog,
   listCenterMerchandiseOrders,
@@ -16,6 +17,8 @@ export type InventoryCatalogItem = {
   name: string;
   priceCents: number;
   photoUrl: string | null;
+  courseNames?: string[];
+  levelNames?: string[];
 };
 
 export type InventorySummaryRow = InventoryCatalogItem & {
@@ -41,11 +44,6 @@ export type IncomingOrderLine = {
   estimatedDelivery: string | null;
 };
 
-function catalogFromOrderLine(line: MerchandiseOrderRow["merchandise_order_lines"][number]) {
-  const catalog = line.merchandise_catalog;
-  return Array.isArray(catalog) ? catalog[0] : catalog;
-}
-
 function isBulkCenterLine(line: MerchandiseOrderRow["merchandise_order_lines"][number]) {
   return !line.student_id;
 }
@@ -68,21 +66,6 @@ export function buildCenterInventorySummary(input: {
     });
   }
 
-  const ensureRow = (
-    catalogItemId: string,
-    sku: string,
-    name: string,
-    priceCents = 0,
-    photoUrl: string | null = null
-  ) => {
-    let row = byCatalog.get(catalogItemId);
-    if (!row) {
-      row = { catalogItemId, sku, name, priceCents, photoUrl, onHand: 0, incoming: 0, allocated: 0, available: 0 };
-      byCatalog.set(catalogItemId, row);
-    }
-    return row;
-  };
-
   for (const order of input.orders) {
     if (order.status === "cancelled") continue;
 
@@ -96,12 +79,8 @@ export function buildCenterInventorySummary(input: {
     for (const line of order.merchandise_order_lines) {
       if (!isBulkCenterLine(line)) continue;
 
-      const catalog = catalogFromOrderLine(line);
-      const row = ensureRow(
-        line.catalog_item_id,
-        catalog?.sku ?? "—",
-        catalog?.name ?? "Item"
-      );
+      const row = byCatalog.get(line.catalog_item_id);
+      if (!row) continue;
 
       if (isIncoming) {
         row.incoming += line.quantity;
@@ -248,10 +227,22 @@ function escapeCsvCell(value: string | number): string {
 }
 
 export function inventorySummaryToCsv(rows: InventorySummaryRow[]): string {
-  const header = ["SKU", "Name", "On hand", "Allocated", "Available", "Incoming"];
-  const body = rows.map((row) =>
-    [row.sku, row.name, row.onHand, row.allocated, row.available, row.incoming].map(escapeCsvCell).join(",")
-  );
+  const header = ["SKU", "Name", "Curriculum", "Program", "On hand", "Allocated", "Available", "Incoming"];
+  const body = rows.map((row) => {
+    const { curriculum, program } = formatCenterSkuCurriculum(row.courseNames, row.levelNames);
+    return [
+      row.sku,
+      row.name,
+      curriculum ?? "",
+      program ?? "",
+      row.onHand,
+      row.allocated,
+      row.available,
+      row.incoming,
+    ]
+      .map(escapeCsvCell)
+      .join(",");
+  });
   return [header.join(","), ...body].join("\n");
 }
 
@@ -296,7 +287,7 @@ export async function fetchCenterInventorySummary(
   centerId: string
 ): Promise<InventorySummaryRow[]> {
   const [catalog, orders, allocatedLineIds] = await Promise.all([
-    listActiveMerchandiseCatalog(brandId),
+    listActiveMerchandiseCatalog(brandId, centerId),
     listCenterMerchandiseOrders(centerId),
     fetchAllocatedBulkLineIds(centerId),
   ]);
@@ -307,24 +298,11 @@ export async function fetchCenterInventorySummary(
     name: item.name,
     priceCents: item.price_cents,
     photoUrl: activeMerchandisePhotoUrls(item.photo_urls)[0] ?? null,
+    courseNames: item.courseNames,
+    levelNames: item.levelNames,
   }));
 
   const catalogMeta = new Map(catalogItems.map((item) => [item.catalogItemId, item]));
-
-  // Include inactive catalog items that still appear in order history
-  for (const order of orders) {
-    for (const line of order.merchandise_order_lines) {
-      if (catalogItems.some((c) => c.catalogItemId === line.catalog_item_id)) continue;
-      const meta = catalogFromOrderLine(line);
-      catalogItems.push({
-        catalogItemId: line.catalog_item_id,
-        sku: meta?.sku ?? "—",
-        name: meta?.name ?? "Item",
-        priceCents: line.unit_price_cents,
-        photoUrl: null,
-      });
-    }
-  }
 
   const summary = buildCenterInventorySummary({ catalog: catalogItems, orders, allocatedLineIds });
 
@@ -401,7 +379,9 @@ export function inventoryPageCounts(rows: InventorySummaryRow[], threshold: numb
 export function matchesInventorySearch(item: InventorySummaryRow, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
-  return [item.name, item.sku].some((value) => value.toLowerCase().includes(q));
+  return [item.name, item.sku, ...(item.courseNames ?? []), ...(item.levelNames ?? [])].some((value) =>
+    value.toLowerCase().includes(q)
+  );
 }
 
 export function filterCenterInventory(

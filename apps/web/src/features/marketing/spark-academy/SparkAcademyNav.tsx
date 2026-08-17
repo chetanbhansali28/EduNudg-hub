@@ -37,7 +37,7 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
   const showSecondaryCta = Boolean(secondaryLabel && secondaryHref);
   const renderBrandMark = () =>
     logoUrl ? (
-      <img src={logoUrl} alt="" className="sa-nav__logo-img" width={logins ? 64 : 40} height={logins ? 64 : 40} />
+      <img src={logoUrl} alt="" className="sa-nav__logo-img" width={64} height={64} />
     ) : (
       <span className="sa-nav__logo-fallback">{config.meta.siteName.charAt(0)}</span>
     );

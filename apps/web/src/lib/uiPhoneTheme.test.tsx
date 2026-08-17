@@ -42,4 +42,15 @@ describe("Input phone dial", () => {
       "tel:+919876543210"
     );
   });
+
+  it("regression_empty_tel_input_does_not_show_dial_chrome", () => {
+    render(
+      <ThemeProvider>
+        <Input label="Phone" type="tel" value="" onChange={() => undefined} />
+      </ThemeProvider>
+    );
+
+    expect(screen.getByLabelText("Phone").closest(".ed-field")?.className).toContain("ed-field--dialable");
+    expect(screen.queryByRole("link", { name: /^Call / })).toBeNull();
+  });
 });

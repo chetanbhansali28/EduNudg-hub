@@ -82,6 +82,12 @@ Traceability: FR-B10
 - **AND** assignment management stacks below applicant details (two-column page: list + stacked detail)
 - **AND** **Recent Activity** is the last section in the detail column
 
+#### Scenario: Lead list select includes CSV-aligned columns
+
+- **WHEN** brand staff load Student Leads
+- **THEN** the app selects `login_email`, `address_line1`, `state`, `program_name`, `starting_level`, and `notes` from `leads`
+- **AND** those columns exist via migration `090_lead_csv_aligned_fields.sql` (version `089` is reserved for the merchandise SETOF RPC)
+
 ### Requirement: Pincode-based center suggestions
 
 Brand staff SHALL receive pincode-ranked center suggestions and MUST manually confirm assignment.
@@ -163,6 +169,8 @@ Traceability: FR-C10
 - **AND** stats cards show Open, Converted, Lost, and Total
 - **AND** search and filter tabs (Open Pipeline / Lost / Converted / All) sit above `PipelineWorkspace`
 - **AND** the list stays visible beside lead detail on desktop
+- **AND** each lead in the list is a card (status badge, `dd/mm/yyyy` date, parent name, city/pincode) like Franchise Applications — not a cramped Parent/Student/Status table
+- **AND** column 2 (`PipelineDetailPanel`) has extra top padding on the head and body (`1.5rem` / `1.75rem`)
 
 ### Requirement: Center lead status updates
 
@@ -208,7 +216,7 @@ Traceability: FR-X02
 
 ### Requirement: Manual student lead entry
 
-Staff SHALL create leads without public forms via staff RPCs. Brand **+ New Lead** and center **+ Add Lead** SHALL open a modal (`ManualStudentLeadCard`, same chrome as Add Franchise), not an inline `AddFormSection`. Fields are grouped Parent / Child / Location / Notes.
+Staff SHALL create leads without public forms via staff RPCs. Brand **+ New Lead** and center **+ Add Lead** SHALL open a modal (`ManualStudentLeadCard`, same chrome as Add Franchise), not an inline `AddFormSection`. Fields SHALL match the student CSV import template: parent name, WhatsApp, email, student name, student date of birth, login email, school name, address line 1, city, state, pincode, program name, and starting level, plus optional notes.
 
 #### Scenario: Brand manual unassigned lead
 
@@ -224,6 +232,7 @@ Staff SHALL create leads without public forms via staff RPCs. Brand **+ New Lead
 
 - **WHEN** center or brand staff click **+ Add Lead** / **+ New Lead**
 - **THEN** a dialog titled **Add student lead** opens
+- **AND** the form includes the student CSV import template fields (student name, parent name, WhatsApp, email, student date of birth, login email, school name, address line 1, city, state, pincode, program name, starting level)
 - **AND** Cancel or Close dismisses it without creating a lead
 
 #### Scenario: Center CSV import

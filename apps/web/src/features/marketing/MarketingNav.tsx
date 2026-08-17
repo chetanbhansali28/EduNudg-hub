@@ -121,8 +121,8 @@ export function MarketingNav({ config, brandSlug }: Props) {
                 src={logoUrl}
                 alt=""
                 className="novu-nav-bar__logo-img"
-                width={brandSlug ? 64 : 40}
-                height={brandSlug ? 64 : 40}
+                width={64}
+                height={64}
               />
             ) : (
               <span className="novu-nav-bar__logo-mark" aria-hidden>

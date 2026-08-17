@@ -14,6 +14,7 @@ import {
   PipelineWorkspace,
 } from "@edunudg/ui";
 import { CenterStudentDetailPanel } from "@/features/center/students/CenterStudentDetailPanel";
+import { CenterStudentImportDialog } from "@/features/center/students/CenterStudentImportDialog";
 import { parseCenterStudentDetailTab } from "@/features/center/students/centerStudentDetailTabs";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { fetchCenterStudents } from "@/lib/centerStudentsApi";
@@ -40,6 +41,8 @@ export function StudentsPage() {
   const tenant = useTenant();
   const centerId = tenant.centerId;
   const brandId = tenant.brandId;
+  const centerSlug = tenant.centerSlug ?? "center";
+  const [importOpen, setImportOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const detailTab = parseCenterStudentDetailTab(searchParams.get("tab"));
   const deepLinkStudentId = searchParams.get("studentId");
@@ -162,11 +165,16 @@ export function StudentsPage() {
         title="Students"
         subtitle="Manage enrollments, batches, portal access, and record level assessments in one place."
         actions={
-          isDesktop ? (
-            <Link to="/app/leads">
-              <Button>+ Add students</Button>
-            </Link>
-          ) : null
+          <div className="ed-center-students-page__header-actions">
+            <Button variant="secondary" type="button" onClick={() => setImportOpen(true)}>
+              Import students
+            </Button>
+            {isDesktop ? (
+              <Link to="/app/leads">
+                <Button>+ Add students</Button>
+              </Link>
+            ) : null}
+          </div>
         }
       />
 
@@ -228,6 +236,14 @@ export function StudentsPage() {
           detail={detailPanel}
         />
       )}
+
+      <CenterStudentImportDialog
+        centerId={centerId}
+        centerSlug={centerSlug}
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => void students.refetch()}
+      />
 
       {isMobile ? (
         <>
