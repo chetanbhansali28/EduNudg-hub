@@ -3,6 +3,7 @@ import {
   ABACUS_CLASSIC_SECTION_DEFAULTS,
   DEFAULT_HOMEPAGE_SECTION_VISIBILITY,
   SPARK_ACADEMY_SECTION_DEFAULTS,
+  EDU_LEARN_SECTION_DEFAULTS,
   isAbacusSectionEnabled,
   isSectionEnabled,
   mergeAbacusClassicSectionVisibility,
@@ -74,5 +75,17 @@ describe("Spark Academy section defaults", () => {
   it("regression_spark_curriculum_syllabus_defaults_on", () => {
     expect(SPARK_ACADEMY_SECTION_DEFAULTS.programsGrid).toBe(true);
     expect(SPARK_ACADEMY_SECTION_DEFAULTS.curriculumSyllabus).toBe(true);
+  });
+});
+
+describe("EduLearn section defaults", () => {
+  it("regression_edu_learn_defaults_match_screenshot_sections", () => {
+    expect(EDU_LEARN_SECTION_DEFAULTS.featureGrid).toBe(true);
+    expect(EDU_LEARN_SECTION_DEFAULTS.gallery).toBe(true);
+    expect(EDU_LEARN_SECTION_DEFAULTS.footerCta).toBe(true);
+    expect(EDU_LEARN_SECTION_DEFAULTS.programsGrid).toBe(true);
+    expect(EDU_LEARN_SECTION_DEFAULTS.curriculumSyllabus).toBe(true);
+    expect(EDU_LEARN_SECTION_DEFAULTS.faq).toBe(true);
+    expect(EDU_LEARN_SECTION_DEFAULTS.about).toBe(false);
   });
 });

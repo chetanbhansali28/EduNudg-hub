@@ -1,13 +1,15 @@
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
-import { ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeAbacusClassicSectionVisibility, mergeSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
+import { mergeAbacusClassicSectionVisibility, mergeEduLearnSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig, HomepageFounderProfile, MarketingTheme } from "@/types/homepage";
 import {
   buildBrandLandingConfig,
   buildSparkAcademyLandingPartial,
+  buildEduLearnLandingPartial,
   mergeAbacusClassicLandingConfig,
   mergeSparkAcademyLandingConfig,
+  mergeEduLearnLandingConfig,
 } from "@/lib/brandLandingDefaults";
 
 /** Brand editor preview name for `center_landing` — never show this on a live center host. */
@@ -149,9 +151,11 @@ export function brandPublicFoundersFromLanding(
   const config =
     theme === "spark-academy"
       ? mergeSparkAcademyLandingConfig(brandName, landing, logoUrl)
-      : theme === "abacus-classic"
-        ? mergeAbacusClassicLandingConfig(brandName, landing, logoUrl)
-        : buildBrandLandingConfig(brandName, landing, logoUrl);
+      : theme === "edu-learn"
+        ? mergeEduLearnLandingConfig(brandName, landing, logoUrl)
+        : theme === "abacus-classic"
+          ? mergeAbacusClassicLandingConfig(brandName, landing, logoUrl)
+          : buildBrandLandingConfig(brandName, landing, logoUrl);
   const saved = parseHomepageFounders(landing?.founders).filter((row) => !isThemeDefaultFounder(row));
   if (saved.length > 0) return saved;
   const merged = (config.founders ?? []).filter((row) => !isThemeDefaultFounder(row));
@@ -417,6 +421,82 @@ export function mergeSparkAcademyCenterLandingConfig(
       rich: { ...sparkBase.footer!.rich, ...partial?.footer?.rich, ...centerBase.footer.rich },
     },
     sections: mergeSparkAcademySectionVisibility(partial),
+  });
+}
+
+/** Center enrollment landing merged with EduLearn theme defaults. */
+export function mergeEduLearnCenterLandingConfig(
+  centerName: string,
+  brandName: string,
+  city: string | null,
+  partial?: Partial<HomepageConfig>,
+  logoUrl?: string | null
+): HomepageConfig {
+  const centerBase = buildCenterLandingConfig(centerName, brandName, city, partial, logoUrl);
+  const eduBase = buildEduLearnLandingPartial(centerName);
+
+  return mergeHomepageConfig({
+    ...eduBase,
+    ...centerBase,
+    meta: {
+      ...centerBase.meta,
+      siteName: partial?.meta?.siteName ?? centerBase.meta.siteName,
+      logoUrl: partial?.meta?.logoUrl ?? logoUrl ?? centerBase.meta.logoUrl ?? null,
+    },
+    theme: {
+      ...eduBase.theme!,
+      ...centerBase.theme,
+      ...partial?.theme,
+      bgColor: "#f6f3ed",
+    },
+    nav: {
+      ...eduBase.nav!,
+      ...centerBase.nav,
+      links: partial?.nav?.links ?? eduBase.nav!.links,
+      ctaLabel: partial?.nav?.ctaLabel ?? "Get Started",
+      ctaHref: partial?.nav?.ctaHref ?? "enroll",
+      secondaryCtaLabel: undefined,
+      secondaryCtaHref: undefined,
+    },
+    hero: {
+      ...eduBase.hero!,
+      ...centerBase.hero,
+      line1: partial?.hero?.line1 ?? eduBase.hero!.line1,
+      line1Serif: partial?.hero?.line1Serif ?? eduBase.hero!.line1Serif,
+      line2: partial?.hero?.line2 ?? eduBase.hero!.line2,
+      subtitle: centerBase.hero.subtitle,
+      ctaLabel: "Get Started",
+      ctaHref: "enroll",
+      secondaryCtaLabel: undefined,
+      secondaryCtaHref: undefined,
+    },
+    featureSections: partial?.featureSections ?? eduBase.featureSections,
+    trustMedia: {
+      ...eduBase.trustMedia!,
+      ...partial?.trustMedia,
+      cards: partial?.trustMedia?.cards ?? eduBase.trustMedia!.cards,
+    },
+    founders: partial?.founders ?? eduBase.founders,
+    programsSection: {
+      ...eduBase.programsSection,
+      ...partial?.programsSection,
+      cards: partial?.programsSection?.cards ?? eduBase.programsSection?.cards,
+    },
+    faq: partial?.faq ?? eduBase.faq,
+    testimonials: partial?.testimonials ?? eduBase.testimonials,
+    upcomingEvents: partial?.upcomingEvents ?? eduBase.upcomingEvents,
+    gallery: { ...eduBase.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? eduBase.gallery!.images },
+    footerCta: {
+      ...eduBase.footerCta!,
+      ...partial?.footerCta,
+      ctaHref: "enroll",
+    },
+    footer: {
+      ...centerBase.footer,
+      ...partial?.footer,
+      rich: { ...eduBase.footer!.rich, ...partial?.footer?.rich, ...centerBase.footer.rich },
+    },
+    sections: mergeEduLearnSectionVisibility(partial),
   });
 }
 

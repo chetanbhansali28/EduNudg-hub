@@ -6,7 +6,7 @@ Public marketing landings share one UI kit under `apps/web/src/features/marketin
 |------|-----------|---------------|
 | Platform | `MarketingPublicLayout` | `platform_settings` key `marketing_homepage` |
 | Brand | `BrandPublicLayout` | RPC `get_brand_landing_public` + `buildBrandLandingConfig` |
-| Center | `CenterPublicLayout` | RPC `get_center_landing_public` + theme-aware merge (`mergeAbacusClassicCenterLandingConfig`, `mergeSparkAcademyCenterLandingConfig`, or `buildCenterLandingConfig`) |
+| Center | `CenterPublicLayout` | RPC `get_center_landing_public` + theme-aware merge (`mergeAbacusClassicCenterLandingConfig`, `mergeSparkAcademyCenterLandingConfig`, `mergeEduLearnCenterLandingConfig`, or `buildCenterLandingConfig`) |
 
 **Platform legacy gate:** `isLegacyPlatformHomepageSeed()` only replaces the virgin Novu seed. Rows with enterprise blocks or uploaded `brand-assets` URLs are merged as-is (Novu `bgGradient` / `themeNote` alone must not discard media).
 
@@ -21,6 +21,7 @@ Platform admins assign a theme per brand at **Platform → Brands → Edit** (`/
 | `novu` (default) | Phone-scroll features, Novu nav | `HomepageEditorForm` at `/app/homepage` and `/app/center-site` |
 | `abacus-classic` | Success Abacus-style sections, dual CTAs, modals | `AbacusClassicEditorForm` at `/app/homepage` and `/app/center-site` |
 | `spark-academy` | Educat-style courses grid, mentors, journey stats | `AbacusClassicEditorForm` at `/app/homepage` and `/app/center-site` |
+| `edu-learn` | Green/orange EduLearn layout (doodle underlines, rounded cards). Same courses, FAQ, and **Apply franchise** as Spark when that JSON exists | `AbacusClassicEditorForm` at `/app/homepage` and `/app/center-site` |
 
 Brand owners edit **content** at `{brand}.localhost:9000/app/homepage` (brand site) and `{brand}.localhost:9000/app/center-site` (center enrollment template). Theme selection is platform-only (brand detail **Brand settings**, not the brands list).
 
@@ -28,11 +29,11 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage` (brand si
 
 **Center public footer:** icons use brand **Social Media Connect** (`social_connect` Facebook/Instagram) — the same URLs as the brand homepage. They must **not** use `franchise_centers.social_links`. Center Settings has no **Social presence** / **+ Add social link** editor; profile save passes through existing `social_links` (`regression_center_settings_omits_social_presence`, `regression_center_landing_footer_uses_brand_social_connect`). Brand landing stays Facebook/Instagram only (no WhatsApp float). Franchise Management (`/app/centers`) has no Social Media section (`regression_brand_centers_detail_omits_social_media_section`).
 
-**Center public contact:** all three themes overlay Franchise Management Location & Contact in the footer (`centerFooterContactFromProfile` → `centerContact` on `CenterPublicLayout`). Novu adds a **This center** column (and still shows the about-center blurb). Abacus replaces **Head office** with **This center**. Spark **Contact Us** uses the franchise phone and address (no `(222)` placeholder). Brand HQ / “Our presence” stay on the **brand** site only.
+**Center public contact:** all four themes overlay Franchise Management Location & Contact in the footer (`centerFooterContactFromProfile` → `centerContact` on `CenterPublicLayout`). Novu adds a **This center** column (and still shows the about-center blurb). Abacus replaces **Head office** with **This center**. Spark **Contact Us** uses the franchise phone and address (no `(222)` placeholder). EduLearn uses the same franchise overlay in `EduLearnFooter`. Brand HQ / “Our presence” stay on the **brand** site only.
 
-**Center public nav lockup:** franchise hosts (`brandSlug` on `AbacusClassicNav` / `SparkAcademyNav` / `MarketingNav`) use `--franchise` modifiers so the brand logo and site name are larger and bolder than the brand homepage nav.
+**Center public nav lockup:** franchise hosts (`brandSlug` on `AbacusClassicNav` / `SparkAcademyNav` / `EduLearnNav` / `MarketingNav`) use `--franchise` modifiers so the brand logo and site name are larger and bolder than the brand homepage nav.
 
-When a brand switches from Novu to Abacus Classic or Spark Academy, stored `landing` JSON is merged with the new theme defaults. **Novu-era section toggles do not disable Abacus/Spark sections** until the brand owner saves from the alternate-theme editor (detected via Abacus/Spark-specific fields in JSON). Shared copy (hero, FAQ, testimonials, features) is preserved. See `mergeAbacusClassicSectionVisibility()` in `homepageSections.ts`.
+When a brand switches from Novu to Abacus Classic, Spark Academy, or EduLearn, stored `landing` JSON is merged with the new theme defaults. **Novu-era section toggles do not disable Abacus/Spark/EduLearn sections** until the brand owner saves from the alternate-theme editor (detected via Abacus/Spark-specific fields in JSON; EduLearn also honors those markers). Shared copy (hero, FAQ, testimonials, features, courses, **Apply franchise**) is preserved. See `mergeAbacusClassicSectionVisibility()` / `mergeEduLearnSectionVisibility()` in `homepageSections.ts`.
 
 Brand detail (`/admin/brands/:slug`) covers performance KPIs, brand settings (**Website theme**, **Site logo** / name into Homepage `landing.meta`), domains, and franchise centers.
 
@@ -48,11 +49,11 @@ Center/franchise **Mentors** (`#founders`) always keep the brand homepage founde
 
 **Franchise apply is brand-only:** center public layouts run `sanitizeCenterPublicNavConfig()` so **Apply franchise** / `#apply` secondary CTAs never appear on center hosts (Vercel `?portal=center` or `{center}.{brand}.localhost`). Brand landings keep dual CTAs.
 
-**Upcoming events:** Homepage editor section (like Leadership profiles). Brand adds competitions / workshops / demos with optional image, date, time, duration. Public `#events` shows only upcoming items (capped by `maxItems`). Works on Abacus, Spark, and Novu brand themes.
+**Upcoming events:** Homepage editor section (like Leadership profiles). Brand adds competitions / workshops / demos with optional image, date, time, duration. Public `#events` shows only upcoming items (capped by `maxItems`). Works on Abacus, Spark, EduLearn, and Novu brand themes.
 
 **About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. Loading `/about` scrolls the viewport to the top (`regression_about_page_scrolls_to_top_on_load`) unless a hash is present. The page chrome matches the brand **Website theme**: Novu keeps the Mastermind navy look; Spark Academy uses `.about-us--spark-academy` (light hero, Spark type scale, `SparkAcademyCta`); Abacus Classic uses `.about-us--abacus-classic`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — **Abacus Classic and Novu only**, after Gallery. Spark Academy does **not** render `#about` / ABOUT / WHAT MAKES US DIFFERENT on `/` (`regression_spark_homepage_omits_about_teaser_sections`); leftover `#about` nav is rewritten to `/about`. When the homepage About section is enabled on Abacus/Novu, public nav auto-injects **About Us → `#about`**. Spark does **not** auto-inject About Us — that menu item comes from **Navigation & CTAs** (`regression_spark_does_not_inject_about_nav`). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`. Regression: `regression_spark_about_page_uses_spark_theme_classes`.
 
-Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). On the **brand** site for **Abacus Classic**, named cards win; otherwise the grid falls back to all published curriculum programs. On **Spark Academy**, **Courses designed for success** prefers published `/app/curriculum` (`publicCurriculum`); leftover homepage cards are used only when no published courses exist (`resolveSparkCoursePrograms`). On a **franchise (center)** site, `get_center_landing_public` returns only programs in `center_program_enablement`, and Center sites cards are restricted to those names (`restrictProgramsSectionToEnabledCurriculum`).
+Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). On the **brand** site for **Abacus Classic**, named cards win; otherwise the grid falls back to all published curriculum programs. On **Spark Academy** and **EduLearn**, **Courses** prefers published `/app/curriculum` (`publicCurriculum`); leftover homepage cards are used only when no published courses exist (`resolveSparkCoursePrograms`). On a **franchise (center)** site, `get_center_landing_public` returns only programs in `center_program_enablement`, and Center sites cards are restricted to those names (`restrictProgramsSectionToEnabledCurriculum`).
 
 **Public nav anchors (all themes)**
 
@@ -65,6 +66,7 @@ Hash section links (`#gallery`, `#faq`, …) are resolved with `resolveMarketing
 | `novu` | — (auto **Curriculum** when published programs exist) | `#curriculum` → `CurriculumPublicSection` | Yes |
 | `abacus-classic` | **Programs** → `#programs` | **`#curriculum`** → syllabus section (`AbacusCurriculumSection`) | No (marketing grid + syllabus tree) |
 | `spark-academy` | **Courses** → `#programs` | `#curriculum` alias scrolls to **Courses designed for success** (published syllabus cards) | No |
+| `edu-learn` | **Courses** → `#programs` | `#curriculum` alias scrolls to **Courses** (published syllabus cards) | No |
 
 `syncMarketingNavLinks()` in `marketingPublicSite.ts` auto-adds **Curriculum → `#curriculum`** on Novu only when RPC returns published programs. Alternate themes keep default **Programs** links; custom `#curriculum` hrefs still work via an in-section anchor alias.
 
@@ -100,7 +102,9 @@ See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, componen
 
 See [Spark Academy theme](./spark-academy.md) for Educat-style sections and shared lead-modal deep links.
 
-See `apps/web/src/features/marketing/abacus-classic/` and `apps/web/src/features/marketing/spark-academy/`.
+See [EduLearn theme](./edu-learn.md) for the green/orange screenshot layout (same homepage JSON, Curriculum courses, **Apply franchise**, and lead modals).
+
+See `apps/web/src/features/marketing/abacus-classic/`, `apps/web/src/features/marketing/spark-academy/`, and `apps/web/src/features/marketing/edu-learn/`.
 
 ## Platform React Query keys (do not collapse)
 

@@ -3,6 +3,7 @@ import {
   buildCenterLandingConfig,
   mergeSparkAcademyCenterLandingConfig,
   mergeAbacusClassicCenterLandingConfig,
+  mergeEduLearnCenterLandingConfig,
   overlayCenterFoundersFromIdentity,
   overlayCenterLandingIdentity,
   brandPublicFoundersFromLanding,
@@ -175,6 +176,9 @@ function buildCenterConfigForTheme(
 ): HomepageConfig {
   if (theme === "spark-academy") {
     return mergeSparkAcademyCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
+  }
+  if (theme === "edu-learn") {
+    return mergeEduLearnCenterLandingConfig(centerName, brandName, city, landing, logoUrl);
   }
   if (theme === "abacus-classic") {
     return mergeAbacusClassicCenterLandingConfig(centerName, brandName, city, landing, logoUrl);

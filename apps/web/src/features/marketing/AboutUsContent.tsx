@@ -5,6 +5,7 @@ import { aboutHasContent, mergeAboutSection } from "@/lib/aboutUs";
 import { MarketingCtaLink } from "./MarketingCtaLink";
 import { AbacusCtaButton } from "./abacus-classic/MarketingLeadModals";
 import { SparkAcademyCta } from "./spark-academy/SparkAcademyCta";
+import { EduLearnCta } from "./edu-learn/EduLearnCta";
 
 type FullProps = {
   config: HomepageConfig;
@@ -92,6 +93,9 @@ function AboutThemeCta({
   if (marketingTheme === "spark-academy") {
     return <SparkAcademyCta href={href} label={label} variant={sparkVariant} />;
   }
+  if (marketingTheme === "edu-learn") {
+    return <EduLearnCta href={href} label={label} />;
+  }
   if (marketingTheme === "abacus-classic" && useLeadModals) {
     return (
       <AbacusCtaButton
@@ -164,7 +168,7 @@ export function AboutUsPageContent({ config, marketingTheme, useLeadModals = fal
     <div className={`about-us about-us--page ${aboutUsThemeClass(marketingTheme)}`}>
       <header className="about-us__hero">
         <div className="about-us__hero-inner">
-          {marketingTheme === "spark-academy" ? (
+          {marketingTheme === "spark-academy" || marketingTheme === "edu-learn" ? (
             <span className="about-us__hero-badge">About us</span>
           ) : null}
           {section.heroHeadline?.trim() ? <h1>{section.heroHeadline}</h1> : null}

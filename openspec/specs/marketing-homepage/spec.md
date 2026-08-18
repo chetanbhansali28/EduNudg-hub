@@ -271,3 +271,24 @@ Brand staff SHALL edit the parent enrollment template (`center_landing`) at `/ap
 - **WHEN** they open **Center Site Configuration**
 - **THEN** they land on `/app/center-site`
 - **AND** they can edit the parent enrollment template
+
+### Requirement: EduLearn theme uses existing landing JSON
+
+`edu-learn` SHALL be a valid `brands.marketing_theme`. Public brand and center sites SHALL render EduLearn chrome (`marketing-page--edu-learn`) from the same `landing` / `center_landing` JSON as other themes. Switching theme SHALL NOT wipe stored media URLs.
+
+#### Scenario: EduLearn public homepage uses screenshot layout blocks
+
+- **GIVEN** a brand with `marketing_theme = edu-learn`
+- **WHEN** a visitor opens `/`
+- **THEN** the page uses a cream/off-white canvas (`#F6F3ED`), orange CTAs, forest-green frames, and rounded feature/testimonial/resource cards
+- **AND** hero, features, stats, testimonials, gallery resources, and footer CTA read from homepage config
+- **AND** enroll/apply CTAs open lead modals (`ac-modal--edu-learn`)
+- **AND** course cards pad title and description inside `.el-course-card__body` so copy is not clipped
+
+#### Scenario: EduLearn reuses Spark courses and franchise apply
+
+- **GIVEN** a brand whose stored `landing` JSON was edited under Spark Academy (curriculum courses, FAQ, **Apply franchise** nav)
+- **WHEN** platform admin sets `marketing_theme = edu-learn`
+- **THEN** the public homepage still lists published Curriculum courses at `#programs` (with `#curriculum` alias)
+- **AND** FAQ items from stored landing still render
+- **AND** the header still shows **Apply franchise** from `nav.secondaryCtaLabel` / `nav.secondaryCtaHref`

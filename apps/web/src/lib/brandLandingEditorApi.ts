@@ -1,8 +1,8 @@
 import { getSupabase } from "@/lib/supabase";
 import { uploadBrandLogo } from "@/lib/brandLogoStorage";
-import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
-import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig, CENTER_LANDING_EDITOR_PLACEHOLDER_NAME } from "@/lib/centerLandingDefaults";
-import { mergeSectionVisibility, ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, DEFAULT_HOMEPAGE_SECTION_VISIBILITY } from "@/lib/homepageSections";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeEduLearnLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
+import { buildCenterLandingConfig, mergeSparkAcademyCenterLandingConfig, mergeAbacusClassicCenterLandingConfig, mergeEduLearnCenterLandingConfig, CENTER_LANDING_EDITOR_PLACEHOLDER_NAME } from "@/lib/centerLandingDefaults";
+import { mergeSectionVisibility, ABACUS_CLASSIC_SECTION_DEFAULTS, EDU_LEARN_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, DEFAULT_HOMEPAGE_SECTION_VISIBILITY } from "@/lib/homepageSections";
 import { preserveCustomMarketingMediaUrls } from "@/lib/marketingMediaGuard";
 import { parseMarketingTheme, type MarketingTheme } from "@/types/homepage";
 import { parseBrandLegalPages, type BrandLegalPages } from "@/lib/brandLegalPages";
@@ -34,7 +34,9 @@ export function landingConfigToPartial(
       ? ABACUS_CLASSIC_SECTION_DEFAULTS
       : options?.marketingTheme === "spark-academy"
         ? SPARK_ACADEMY_SECTION_DEFAULTS
-        : DEFAULT_HOMEPAGE_SECTION_VISIBILITY;
+        : options?.marketingTheme === "edu-learn"
+          ? EDU_LEARN_SECTION_DEFAULTS
+          : DEFAULT_HOMEPAGE_SECTION_VISIBILITY;
 
   return {
     meta: { ...config.meta },
@@ -115,7 +117,9 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
       ? mergeAbacusClassicLandingConfig(brand.name, landingPartial, brand.logo_url)
       : marketingTheme === "spark-academy"
         ? mergeSparkAcademyLandingConfig(brand.name, landingPartial, brand.logo_url)
-        : buildBrandLandingConfig(brand.name, landingPartial, brand.logo_url);
+        : marketingTheme === "edu-learn"
+          ? mergeEduLearnLandingConfig(brand.name, landingPartial, brand.logo_url)
+          : buildBrandLandingConfig(brand.name, landingPartial, brand.logo_url);
 
   return {
     settingsId: settings?.id ?? null,
@@ -142,7 +146,15 @@ export async function fetchBrandMarketingEditor(brandId: string): Promise<BrandM
               centerLandingPartial,
               brand.logo_url
             )
-          : buildCenterLandingConfig(
+          : marketingTheme === "edu-learn"
+            ? mergeEduLearnCenterLandingConfig(
+                CENTER_LANDING_EDITOR_PLACEHOLDER_NAME,
+                brand.name,
+                "your city",
+                centerLandingPartial,
+                brand.logo_url
+              )
+            : buildCenterLandingConfig(
               CENTER_LANDING_EDITOR_PLACEHOLDER_NAME,
               brand.name,
               "your city",

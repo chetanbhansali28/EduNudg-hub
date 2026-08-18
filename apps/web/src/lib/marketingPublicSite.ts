@@ -5,6 +5,7 @@ import { aboutHasContent } from "@/lib/aboutUs";
 import {
   ABACUS_CLASSIC_SECTION_DEFAULTS,
   DEFAULT_HOMEPAGE_SECTION_VISIBILITY,
+  EDU_LEARN_SECTION_DEFAULTS,
   SPARK_ACADEMY_SECTION_DEFAULTS,
   mergeSectionVisibility,
   type HomepageSectionKey,
@@ -91,9 +92,24 @@ const SPARK_ACADEMY_OPTIONS: NavOptionDef[] = [
   { value: "/login", label: "Login (/login)" },
 ];
 
+const EDU_LEARN_OPTIONS: NavOptionDef[] = [
+  { value: PROGRAMS_NAV_HREF, label: "Courses (#programs)", sectionKey: "programsGrid" },
+  { value: "#features", label: "Features (#features)", sectionKey: "featureGrid" },
+  { value: "/about", label: "About page (/about)" },
+  { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
+  { value: "#stats", label: "Why choose us (#stats)", sectionKey: "trustMedia" },
+  { value: "#testimonials", label: "Success stories (#testimonials)", sectionKey: "testimonials" },
+  { value: "#faq", label: "FAQ (#faq)", sectionKey: "faq" },
+  { value: "#gallery", label: "Resources (#gallery)", sectionKey: "gallery" },
+  { value: "enroll", label: "Open enroll modal (enroll)" },
+  { value: "apply", label: "Open franchise modal (apply)" },
+  { value: "/login", label: "Login (/login)" },
+];
+
 function baseNavOptionDefs(theme: MarketingTheme, portalMode: PortalMode): NavOptionDef[] {
   if (theme === "abacus-classic") return ABACUS_CLASSIC_OPTIONS;
   if (theme === "spark-academy") return SPARK_ACADEMY_OPTIONS;
+  if (theme === "edu-learn") return EDU_LEARN_OPTIONS;
   if (portalMode === "center") return NOVU_CENTER_OPTIONS;
   if (portalMode === "brand") return NOVU_BRAND_OPTIONS;
   return NOVU_PLATFORM_OPTIONS;
@@ -217,6 +233,7 @@ function injectAboutNavLink(links: HomepageConfig["nav"]["links"], href: string)
 function sectionDefaultsForTheme(theme: MarketingTheme): Record<HomepageSectionKey, boolean> {
   if (theme === "abacus-classic") return ABACUS_CLASSIC_SECTION_DEFAULTS;
   if (theme === "spark-academy") return SPARK_ACADEMY_SECTION_DEFAULTS;
+  if (theme === "edu-learn") return EDU_LEARN_SECTION_DEFAULTS;
   return DEFAULT_HOMEPAGE_SECTION_VISIBILITY;
 }
 
@@ -228,7 +245,7 @@ export function syncMarketingNavLinks(
   const { theme, publicCurriculum } = options;
   let links = stripAutoInjectedCurriculumLink(config.nav.links);
 
-  if (theme !== "spark-academy") {
+  if (theme !== "spark-academy" && theme !== "edu-learn") {
     links = stripAutoInjectedAboutLink(links);
   }
 
@@ -237,7 +254,7 @@ export function syncMarketingNavLinks(
   }
 
   const sections = mergeSectionVisibility(config.sections, sectionDefaultsForTheme(theme));
-  if (theme === "spark-academy") {
+  if (theme === "spark-academy" || theme === "edu-learn") {
     links = rewriteSparkAboutHashLinks(links);
   } else if (sections.about && aboutHasContent(config.about)) {
     links = injectAboutNavLink(links, ABOUT_NAV_HREF);

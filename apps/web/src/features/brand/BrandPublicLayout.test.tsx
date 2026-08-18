@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { mergeAbacusClassicLandingConfig, buildBrandLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
+import { mergeAbacusClassicLandingConfig, buildBrandLandingConfig, mergeSparkAcademyLandingConfig, mergeEduLearnLandingConfig } from "@/lib/brandLandingDefaults";
 import { BrandPublicLayout } from "./BrandPublicLayout";
 
 vi.mock("@/bootstrap/TenantProvider", () => ({
@@ -129,5 +129,37 @@ describe("BrandPublicLayout", () => {
     expect(screen.queryByText(/Start Your Learning Journey Today!/i)).toBeNull();
     expect(screen.queryByText(/Start your network differently/i)).toBeNull();
     expect(document.querySelectorAll("dialog.ac-modal--spark")).toHaveLength(2);
+  });
+
+  it("regression_renders_edu_learn_layout_for_edu_learn_theme", async () => {
+    const { fetchBrandLandingBundle } = await import("@/lib/brandLandingApi");
+    vi.mocked(fetchBrandLandingBundle).mockResolvedValue({
+      config: mergeEduLearnLandingConfig("AbacusWorld"),
+      publicCurriculum: [],
+      marketingTheme: "edu-learn",
+      publicStats: { centersCount: 2, studentsCount: 400 },
+      legalPages: {},
+      socialConnect: {},
+    });
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route element={<BrandPublicLayout />}>
+              <Route path="/" element={<div>Page body</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText("Page body")).toBeDefined();
+    expect(document.querySelector(".marketing-page--edu-learn")).toBeDefined();
+    expect(screen.getByRole("banner")).toBeDefined();
+    expect(screen.getByRole("button", { name: "Get Started" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Apply franchise" })).toBeDefined();
+    expect(document.querySelectorAll("dialog.ac-modal--edu-learn")).toHaveLength(2);
   });
 });

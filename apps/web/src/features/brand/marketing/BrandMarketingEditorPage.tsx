@@ -21,6 +21,7 @@ import { getSupabase } from "@/lib/supabase";
 import { formatLastSavedLabel } from "@/lib/formatRelativeTime";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
+import { usesAlternateThemeEditor } from "@/lib/marketingThemeLayout";
 import type { HomepageConfig } from "@/types/homepage";
 
 function configsEqual(a: HomepageConfig, b: HomepageConfig): boolean {
@@ -211,7 +212,7 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
             saved={centerSaved}
             description="Public enrollment pages on each franchise hostname inherit this template."
           >
-            {marketingTheme === "abacus-classic" || marketingTheme === "spark-academy" ? (
+            {usesAlternateThemeEditor(marketingTheme) ? (
               <AbacusClassicEditorForm
                 config={centerConfig}
                 marketingTheme={marketingTheme}
@@ -274,7 +275,7 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
             </>
           }
         >
-          {marketingTheme === "abacus-classic" || marketingTheme === "spark-academy" ? (
+          {usesAlternateThemeEditor(marketingTheme) ? (
             <AbacusClassicEditorForm
               config={brandConfig}
               marketingTheme={marketingTheme}

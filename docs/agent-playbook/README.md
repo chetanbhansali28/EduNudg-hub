@@ -16,6 +16,7 @@ Instructions for humans and AI agents working on EduNudg.
 - [Marketing landing pages](../frontend/marketing-landing.md) — platform / brand / center public `/` theme
 - [Abacus Classic theme](../frontend/abacus-classic.md) — brand marketing theme variant
 - [Spark Academy theme](../frontend/spark-academy.md) — Educat-style theme + shared lead modals
+- [EduLearn theme](../frontend/edu-learn.md) — green/orange public layout + shared lead modals
 - [UI shell standards](../spec/ui-shell-standards.md) — backend KPI grid, forms, accessibility
 
 ## Operations

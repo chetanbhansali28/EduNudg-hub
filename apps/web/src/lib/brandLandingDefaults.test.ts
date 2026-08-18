@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig, buildBrandLandingConfig } from "./brandLandingDefaults";
+import { mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig, mergeEduLearnLandingConfig, buildBrandLandingConfig } from "./brandLandingDefaults";
 import { isAbacusSectionEnabled } from "./homepageSections";
 import { landingConfigToPartial } from "./brandLandingEditorApi";
 
@@ -82,5 +82,36 @@ describe("mergeSparkAcademyLandingConfig", () => {
     expect(config.featuresShowcase?.floatStatsValue).toBe("25.20%");
     expect(config.featuresShowcase?.floatProgressLabel).toBe("Learning Progress");
     expect(config.featuresShowcase?.title).toContain("Powerful Features");
+  });
+});
+
+describe("mergeEduLearnLandingConfig", () => {
+  it("regression_edu_learn_defaults_match_screenshot_structure", () => {
+    const config = mergeEduLearnLandingConfig("Abacus World");
+    expect(config.hero.line1Serif).toBe("Learning");
+    expect(config.hero.ctaLabel).toBe("Get Started");
+    expect(config.nav.ctaLabel).toBe("Get Started");
+    expect(config.nav.secondaryCtaLabel).toBe("Apply franchise");
+    expect(config.nav.secondaryCtaHref).toBe("apply");
+    expect(config.theme.accent).toBe("#f9a825");
+    expect(config.theme.bgColor).toBe("#f6f3ed");
+    expect(config.featureSections).toHaveLength(3);
+    expect(config.gallery?.images).toHaveLength(3);
+    expect(config.footerCta?.title).toMatch(/school partners/i);
+    expect(config.sections?.footerCta).toBe(true);
+    expect(config.sections?.programsGrid).toBe(true);
+    expect(config.sections?.faq).toBe(true);
+    expect(config.sections?.featureScroll).toBe(false);
+  });
+
+  it("regression_edu_learn_keeps_spark_courses_and_apply_franchise", () => {
+    const spark = mergeSparkAcademyLandingConfig("Abacus World");
+    const config = mergeEduLearnLandingConfig("Abacus World", landingConfigToPartial(spark));
+    expect(config.nav.secondaryCtaLabel).toBe("Apply franchise");
+    expect(config.nav.secondaryCtaHref).toBe("apply");
+    expect(config.nav.links.some((link) => link.href === "#programs")).toBe(true);
+    expect(config.sections?.programsGrid).toBe(true);
+    expect(config.sections?.curriculumSyllabus).toBe(true);
+    expect(config.faq.length).toBeGreaterThan(0);
   });
 });

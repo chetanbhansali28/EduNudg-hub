@@ -21,8 +21,13 @@ import {
   SparkAcademyNav,
   SparkAcademyFooter,
 } from "@/features/marketing/spark-academy";
+import {
+  EduLearnNav,
+  EduLearnFooter,
+} from "@/features/marketing/edu-learn";
 import "@/features/marketing/marketing.css";
 import "@/features/marketing/spark-academy/spark-academy.css";
+import "@/features/marketing/edu-learn/edu-learn.css";
 
 type Props = {
   showFooter?: boolean;
@@ -54,6 +59,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
   const theme = bundle?.marketingTheme ?? "novu";
   const isAbacusClassic = theme === "abacus-classic";
   const isSparkAcademy = theme === "spark-academy";
+  const isEduLearn = theme === "edu-learn";
 
   useEffect(() => {
     if (bundle?.config) {
@@ -83,6 +89,8 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
         <AbacusClassicNav config={publicConfig} brandSlug={brandSlug} />
       ) : isSparkAcademy ? (
         <SparkAcademyNav config={publicConfig} brandSlug={brandSlug} />
+      ) : isEduLearn ? (
+        <EduLearnNav config={publicConfig} brandSlug={brandSlug} />
       ) : (
         <MarketingNav config={publicConfig} brandSlug={brandSlug} />
       )}
@@ -99,7 +107,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           socialConnect: bundle.socialConnect,
         }}
       />
-      {showFooter && !isAbacusClassic && !isSparkAcademy ? (
+      {showFooter && !isAbacusClassic && !isSparkAcademy && !isEduLearn ? (
         <FooterSection
           config={publicConfig}
           legalPages={bundle.legalPages}
@@ -117,6 +125,14 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
       ) : null}
       {showFooter && isSparkAcademy ? (
         <SparkAcademyFooter
+          config={publicConfig}
+          legalPages={bundle.legalPages}
+          socialConnect={bundle.socialConnect}
+          centerContact={centerContact}
+        />
+      ) : null}
+      {showFooter && isEduLearn ? (
+        <EduLearnFooter
           config={publicConfig}
           legalPages={bundle.legalPages}
           socialConnect={bundle.socialConnect}

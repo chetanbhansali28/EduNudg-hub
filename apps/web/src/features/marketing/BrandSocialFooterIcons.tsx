@@ -79,9 +79,11 @@ export function BrandSocialFooterIcons({ socialConnect, variant }: Props) {
   const className =
     variant === "spark-academy"
       ? "brand-social-footer-icons brand-social-footer-icons--spark"
-      : variant === "abacus-classic"
-        ? "brand-social-footer-icons brand-social-footer-icons--abacus"
-        : "brand-social-footer-icons brand-social-footer-icons--novu";
+      : variant === "edu-learn"
+        ? "brand-social-footer-icons brand-social-footer-icons--edu-learn"
+        : variant === "abacus-classic"
+          ? "brand-social-footer-icons brand-social-footer-icons--abacus"
+          : "brand-social-footer-icons brand-social-footer-icons--novu";
 
   return (
     <div className={className} aria-label="Social media">

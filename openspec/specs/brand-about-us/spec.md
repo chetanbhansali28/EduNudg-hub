@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Brand marketing sites can publish a themed **About Us** page (`/about`) with company story, differentiators, longer “what we do” copy, and a team photo grid (photo → name → role). Chrome follows `brands.marketing_theme` (Novu Mastermind, Abacus Classic, or Spark Academy). Novu and Abacus Classic can optionally show the same content as a homepage `#about` teaser. Spark Academy publishes About only on `/about`.
+Brand marketing sites can publish a themed **About Us** page (`/about`) with company story, differentiators, longer “what we do” copy, and a team photo grid (photo → name → role). Chrome follows `brands.marketing_theme` (Novu Mastermind, Abacus Classic, Spark Academy, or EduLearn). Novu and Abacus Classic can optionally show the same content as a homepage `#about` teaser. Spark Academy and EduLearn publish About only on `/about`.
 
 ## Requirements
 
@@ -21,7 +21,7 @@ WHEN a visitor opens `/about` on the brand host
 THEN the About page renders (hero, story, philosophy, features, what we do, team grid, optional CTAs)
 AND the viewport scrolls to the top of the page (smooth unless `prefers-reduced-motion`)
 AND a hash target is left alone
-AND the root uses a theme modifier (`about-us--novu`, `about-us--abacus-classic`, or `about-us--spark-academy`) matching `brands.marketing_theme`
+AND the root uses a theme modifier (`about-us--novu`, `about-us--abacus-classic`, `about-us--spark-academy`, or `about-us--edu-learn`) matching `brands.marketing_theme`
 
 GIVEN a Spark Academy brand
 WHEN a visitor opens `/about`

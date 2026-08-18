@@ -13,7 +13,7 @@ import type {
 } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import type { PortalMode } from "@/lib/portalMode";
-import { isAbacusSectionEnabled, isSparkSectionEnabled, setSectionEnabled, ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, type HomepageSectionKey } from "@/lib/homepageSections";
+import { isAbacusSectionEnabled, isEduLearnSectionEnabled, isSparkSectionEnabled, setSectionEnabled, ABACUS_CLASSIC_SECTION_DEFAULTS, EDU_LEARN_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, type HomepageSectionKey } from "@/lib/homepageSections";
 import { emptyHomepageProgramCard } from "@/lib/programsGridItems";
 import { FooterRichEditorFields } from "@/features/marketing/FooterRichEditorFields";
 import { FooterLegalPagesEditor } from "@/features/marketing/FooterLegalPagesEditor";
@@ -79,9 +79,19 @@ export function AbacusClassicEditorForm({
   };
 
   const isSpark = marketingTheme === "spark-academy";
-  const sectionDefaults = isSpark ? SPARK_ACADEMY_SECTION_DEFAULTS : ABACUS_CLASSIC_SECTION_DEFAULTS;
+  const isEduLearn = marketingTheme === "edu-learn";
+  const isCurriculumCoursesTheme = isSpark || isEduLearn;
+  const sectionDefaults = isEduLearn
+    ? EDU_LEARN_SECTION_DEFAULTS
+    : isSpark
+      ? SPARK_ACADEMY_SECTION_DEFAULTS
+      : ABACUS_CLASSIC_SECTION_DEFAULTS;
   const isThemeSectionEnabled = (key: HomepageSectionKey) =>
-    isSpark ? isSparkSectionEnabled(config, key) : isAbacusSectionEnabled(config, key);
+    isEduLearn
+      ? isEduLearnSectionEnabled(config, key)
+      : isSpark
+        ? isSparkSectionEnabled(config, key)
+        : isAbacusSectionEnabled(config, key);
 
   const setSection = (key: HomepageSectionKey, enabled: boolean) => {
     commit(setSectionEnabled(config, key, enabled, sectionDefaults));
@@ -236,9 +246,9 @@ export function AbacusClassicEditorForm({
 
       <EditorAccordion
         sectionId="programsGrid"
-        title={isSpark ? "Courses designed for success" : "Programs grid"}
+        title={isCurriculumCoursesTheme ? "Courses designed for success" : "Programs grid"}
         description={
-          isSpark
+          isCurriculumCoursesTheme
             ? "Shows or hides the public courses grid. Published Curriculum fills the cards."
             : "Program cards shown in the World-Class Brain Development section"
         }
@@ -266,9 +276,9 @@ export function AbacusClassicEditorForm({
           </EditorFieldSpan>
         </EditorFieldsGrid>
         <EditorSectionNote>
-          {isSpark ? (
+          {isCurriculumCoursesTheme ? (
             <>
-              Spark Academy’s <strong>Courses designed for success</strong> uses published{" "}
+              Public <strong>Courses</strong> uses published{" "}
               <Link to="/app/curriculum">Curriculum</Link> courses (the same catalog as Curriculum syllabus).
               Homepage program cards below are used only when no published courses exist. Matching card images
               fill in when a course has no banner.
@@ -323,18 +333,18 @@ export function AbacusClassicEditorForm({
         sectionId="curriculumSyllabus"
         title="Curriculum syllabus"
         description={
-          isSpark
-            ? "Published Curriculum catalog for Courses designed for success (#programs / #curriculum)"
+          isCurriculumCoursesTheme
+            ? "Published Curriculum catalog for Courses (#programs / #curriculum)"
             : "Full published syllabus at #curriculum on your public site"
         }
         enabled={isThemeSectionEnabled("curriculumSyllabus")}
         onEnabledChange={(e) => setSection("curriculumSyllabus", e)}
       >
         <EditorSectionNote>
-          {isSpark ? (
+          {isCurriculumCoursesTheme ? (
             <>
-              Manage courses, programs, and chapters at <Link to="/app/curriculum">Curriculum</Link>. Spark Academy
-              shows those published courses in <strong>Courses designed for success</strong> — not leftover marketing
+              Manage courses, programs, and chapters at <Link to="/app/curriculum">Curriculum</Link>. This theme
+              shows those published courses in the public <strong>Courses</strong> section — not leftover marketing
               program cards from another theme.
             </>
           ) : (
