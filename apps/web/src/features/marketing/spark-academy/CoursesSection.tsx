@@ -1,5 +1,10 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { programCardPalette } from "@/lib/marketingFeatureSections";
+import {
+  SPARK_COURSES_PREVIEW_FALLBACK,
+  sparkCoursesHomepagePreviewLimit,
+} from "@/lib/sparkCoursesPreview";
 import { programLessonLabel } from "./curriculumHelpers";
 import { SparkAcademyCta } from "./SparkAcademyCta";
 
@@ -63,13 +68,40 @@ export function CourseCard({
   );
 }
 
+function measureCoursesPreviewLimit(el: HTMLElement): number {
+  const style = getComputedStyle(el);
+  const pad =
+    (Number.parseFloat(style.paddingLeft) || 0) + (Number.parseFloat(style.paddingRight) || 0);
+  return sparkCoursesHomepagePreviewLimit(el.clientWidth - pad);
+}
+
 export function CoursesSection({
   programs,
   ctaHref,
   title = "Courses designed for success",
   subtitle = "Explore programs built for real outcomes.",
 }: Props) {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [previewLimit, setPreviewLimit] = useState(SPARK_COURSES_PREVIEW_FALLBACK);
+  const [expanded, setExpanded] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const update = () => {
+      setPreviewLimit(measureCoursesPreviewLimit(el));
+    };
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [programs.length]);
+
   if (programs.length === 0) return null;
+
+  const overflow = programs.length > previewLimit;
+  const visiblePrograms = expanded || !overflow ? programs : programs.slice(0, previewLimit);
 
   return (
     <section className="sa-courses sa-reveal" id="programs">
@@ -79,8 +111,8 @@ export function CoursesSection({
         {subtitle ? <p className="sa-section-subtitle">{subtitle}</p> : null}
       </div>
 
-      <div className="sa-courses__grid sa-courses__grid--center">
-        {programs.map((program, index) => (
+      <div ref={gridRef} className="sa-courses__grid sa-courses__grid--center">
+        {visiblePrograms.map((program, index) => (
           <CourseCard
             key={program.name}
             program={program}
@@ -91,9 +123,13 @@ export function CoursesSection({
         ))}
       </div>
 
-      <div className="sa-courses__action sa-reveal-item">
-        <SparkAcademyCta label="View all courses" href={ctaHref} variant="dark" />
-      </div>
+      {overflow && !expanded ? (
+        <div className="sa-courses__action sa-reveal-item">
+          <button type="button" className="sa-btn sa-btn--dark" onClick={() => setExpanded(true)}>
+            View all courses
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

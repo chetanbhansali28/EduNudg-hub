@@ -1,5 +1,14 @@
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
+import { fetchCenterAuthorizedPrograms } from "@/lib/centerProgramApi";
+import {
+  catalogLinkDisplayName,
+  filterCatalogForCenter,
+  toSyncCurriculumLinks,
+  uniqueProgramIds,
+  uniqueTrimmedNames,
+  type CatalogCurriculumLink,
+} from "@/lib/merchandiseCurriculum";
 
 export type MerchandiseOrderLineRow = {
   id: string;
@@ -156,6 +165,8 @@ export async function upsertMerchandiseCatalogItem(
     priceCents: number;
     currency?: string;
     isActive?: boolean;
+    curriculumLinks?: CatalogCurriculumLink[];
+    programIds?: string[];
   }
 ): Promise<string> {
   const { data, error } = await getSupabase().rpc("upsert_merchandise_catalog_item", {
@@ -168,7 +179,27 @@ export async function upsertMerchandiseCatalogItem(
     p_is_active: input.isActive ?? true,
   });
   if (error) throw error;
-  return data as string;
+  const itemId = data as string;
+  const links =
+    input.curriculumLinks ??
+    (input.programIds ? input.programIds.map((programId) => ({ programId, levelId: null })) : undefined);
+  if (links) {
+    await syncMerchandiseCatalogPrograms(brandId, itemId, links);
+  }
+  return itemId;
+}
+
+export async function syncMerchandiseCatalogPrograms(
+  brandId: string,
+  catalogItemId: string,
+  links: CatalogCurriculumLink[]
+): Promise<void> {
+  const { error } = await getSupabase().rpc("sync_merchandise_catalog_programs", {
+    p_brand_id: brandId,
+    p_catalog_item_id: catalogItemId,
+    p_links: toSyncCurriculumLinks(links),
+  });
+  if (error) throw error;
 }
 
 export async function deleteMerchandiseCatalogItem(brandId: string, itemId: string): Promise<void> {
@@ -181,6 +212,13 @@ export async function deleteMerchandiseCatalogItem(brandId: string, itemId: stri
   if (error) throw error;
 }
 
+export type MerchandiseCatalogProgramLink = {
+  program_id: string;
+  level_id?: string | null;
+  programs?: { id?: string; name: string } | { id?: string; name: string }[] | null;
+  levels?: { id?: string; name: string } | { id?: string; name: string }[] | null;
+};
+
 export type MerchandiseCatalogListItem = {
   id: string;
   sku: string;
@@ -189,33 +227,198 @@ export type MerchandiseCatalogListItem = {
   currency: string;
   is_active: boolean;
   photo_urls: string[] | null;
+  programIds: string[];
+  programNames: string[];
+  curriculumLinks: CatalogCurriculumLink[];
 };
+
+export type ActiveMerchandiseCatalogItem = {
+  id: string;
+  sku: string;
+  name: string;
+  price_cents: number;
+  currency: string;
+  photo_urls: string[] | null;
+  programIds: string[];
+  courseNames: string[];
+  levelNames: string[];
+};
+
+const CATALOG_SELECT =
+  "id, sku, name, price_cents, currency, is_active, photo_urls, merchandise_catalog_programs(program_id, level_id, programs(id, name), levels(id, name))";
+
+function parseCatalogPrograms(
+  raw: MerchandiseCatalogProgramLink[] | null | undefined
+): {
+  programIds: string[];
+  programNames: string[];
+  courseNames: string[];
+  levelNames: string[];
+  curriculumLinks: CatalogCurriculumLink[];
+} {
+  const rows = Array.isArray(raw) ? raw : [];
+  const curriculumLinks: CatalogCurriculumLink[] = [];
+  const programNames: string[] = [];
+  const courses: string[] = [];
+  const levels: string[] = [];
+  for (const link of rows) {
+    const program = Array.isArray(link.programs) ? link.programs[0] : link.programs;
+    const level = Array.isArray(link.levels) ? link.levels[0] : link.levels;
+    const programId = link.program_id || program?.id;
+    if (!programId) continue;
+    const levelId = link.level_id || level?.id || null;
+    curriculumLinks.push({ programId, levelId });
+    const course = (program?.name ?? "").trim();
+    const levelName = (level?.name ?? "").trim();
+    if (course) courses.push(course);
+    if (levelName) levels.push(levelName);
+    programNames.push(catalogLinkDisplayName(course || "Curriculum", levelName || null));
+  }
+  return {
+    programIds: uniqueProgramIds(curriculumLinks),
+    programNames,
+    courseNames: uniqueTrimmedNames(courses),
+    levelNames: uniqueTrimmedNames(levels),
+    curriculumLinks,
+  };
+}
+
+function toActiveCatalogItem(
+  row: Pick<ActiveMerchandiseCatalogItem, "id" | "sku" | "name" | "price_cents" | "currency" | "photo_urls">,
+  parsed: Pick<ReturnType<typeof parseCatalogPrograms>, "programIds" | "courseNames" | "levelNames">
+): ActiveMerchandiseCatalogItem {
+  return {
+    id: row.id,
+    sku: row.sku,
+    name: row.name,
+    price_cents: row.price_cents,
+    currency: row.currency,
+    photo_urls: row.photo_urls,
+    programIds: parsed.programIds,
+    courseNames: parsed.courseNames,
+    levelNames: parsed.levelNames,
+  };
+}
+
+async function attachActiveCatalogCurriculum(
+  items: Array<Pick<ActiveMerchandiseCatalogItem, "id" | "sku" | "name" | "price_cents" | "currency" | "photo_urls">>
+): Promise<ActiveMerchandiseCatalogItem[]> {
+  if (items.length === 0) return [];
+  const { data, error } = await getSupabase()
+    .from("merchandise_catalog_programs")
+    .select("catalog_item_id, program_id, level_id, programs(id, name), levels(id, name)")
+    .in(
+      "catalog_item_id",
+      items.map((item) => item.id)
+    );
+  const rows = supabaseList(data, error) as Array<MerchandiseCatalogProgramLink & { catalog_item_id: string }>;
+  const byItem = new Map<string, MerchandiseCatalogProgramLink[]>();
+  for (const row of rows) {
+    const list = byItem.get(row.catalog_item_id) ?? [];
+    list.push(row);
+    byItem.set(row.catalog_item_id, list);
+  }
+  return items.map((item) => toActiveCatalogItem(item, parseCatalogPrograms(byItem.get(item.id))));
+}
+
+function mapCatalogRow(
+  row: Omit<MerchandiseCatalogListItem, "programIds" | "programNames" | "curriculumLinks"> & {
+    merchandise_catalog_programs?: MerchandiseCatalogProgramLink[] | null;
+  }
+): MerchandiseCatalogListItem {
+  const linked = parseCatalogPrograms(row.merchandise_catalog_programs);
+  return {
+    id: row.id,
+    sku: row.sku,
+    name: row.name,
+    price_cents: row.price_cents,
+    currency: row.currency,
+    is_active: row.is_active,
+    photo_urls: row.photo_urls,
+    programIds: linked.programIds,
+    programNames: linked.programNames,
+    curriculumLinks: linked.curriculumLinks,
+  };
+}
+
+function shouldFallbackCenterCatalogRpc(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false;
+  const code = error.code ?? "";
+  const message = error.message ?? "";
+  return (
+    code === "PGRST202" ||
+    code === "42883" ||
+    code === "42804" ||
+    /could not find the function|does not exist|does not match expected type/i.test(message)
+  );
+}
 
 export async function listMerchandiseCatalog(brandId: string): Promise<MerchandiseCatalogListItem[]> {
   const { data, error } = await getSupabase()
     .from("merchandise_catalog")
-    .select("id, sku, name, price_cents, currency, is_active, photo_urls")
+    .select(CATALOG_SELECT)
     .eq("brand_id", brandId)
     .order("name");
-  return supabaseList(data, error) as MerchandiseCatalogListItem[];
+  return supabaseList(data, error).map((row) =>
+    mapCatalogRow(row as Parameters<typeof mapCatalogRow>[0])
+  );
 }
 
-export async function listActiveMerchandiseCatalog(brandId: string) {
+export async function listActiveMerchandiseCatalog(
+  brandId: string,
+  centerId?: string | null
+): Promise<ActiveMerchandiseCatalogItem[]> {
+  if (centerId) {
+    const { data, error } = await getSupabase().rpc("list_center_active_merchandise_catalog", {
+      p_center_id: centerId,
+    });
+    if (!error) {
+      return attachActiveCatalogCurriculum(
+        supabaseList(data, null) as Array<
+          Pick<ActiveMerchandiseCatalogItem, "id" | "sku" | "name" | "price_cents" | "currency" | "photo_urls">
+        >
+      );
+    }
+    if (!shouldFallbackCenterCatalogRpc(error)) throw error;
+  }
+
+  if (!centerId) {
+    const { data, error } = await getSupabase()
+      .from("merchandise_catalog")
+      .select("id, sku, name, price_cents, currency, photo_urls")
+      .eq("brand_id", brandId)
+      .eq("is_active", true)
+      .order("name");
+    if (error) throw error;
+    return supabaseList(data, null).map((row) =>
+      toActiveCatalogItem(
+        row as Pick<ActiveMerchandiseCatalogItem, "id" | "sku" | "name" | "price_cents" | "currency" | "photo_urls">,
+        { programIds: [], courseNames: [], levelNames: [] }
+      )
+    );
+  }
+
   const { data, error } = await getSupabase()
     .from("merchandise_catalog")
-    .select("id, sku, name, price_cents, currency, photo_urls")
+    .select(CATALOG_SELECT)
     .eq("brand_id", brandId)
     .eq("is_active", true)
     .order("name");
   if (error) throw error;
-  return supabaseList(data, null) as {
-    id: string;
-    sku: string;
-    name: string;
-    price_cents: number;
-    currency: string;
-    photo_urls: string[] | null;
-  }[];
+  const rows = supabaseList(data, null).map((row) => {
+    const parsed = parseCatalogPrograms(
+      (row as { merchandise_catalog_programs?: MerchandiseCatalogProgramLink[] | null }).merchandise_catalog_programs
+    );
+    return toActiveCatalogItem(
+      row as Pick<ActiveMerchandiseCatalogItem, "id" | "sku" | "name" | "price_cents" | "currency" | "photo_urls">,
+      parsed
+    );
+  });
+  const enabled = await fetchCenterAuthorizedPrograms(centerId);
+  return filterCatalogForCenter(
+    rows,
+    enabled.map((program) => program.programId)
+  );
 }
 
 export async function validateMerchandisePromoCode(brandId: string, code: string, totalQuantity: number) {

@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 async function expectLoginFormReady(page: import("@playwright/test").Page) {
   await expect(page.getByText("Loading…")).toHaveCount(0, { timeout: 15_000 });
   await expect(page.getByRole("heading", { name: "Welcome back!" })).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+  await expect(page.locator(".ed-login-card").getByLabel("Email", { exact: true })).toBeVisible();
 }
 
 async function expectMarketingHomeReady(page: import("@playwright/test").Page) {
@@ -17,6 +17,13 @@ test("login page renders split-screen form", async ({ page }) => {
   await expect(page.getByText(/EduNudg platform account/i)).toBeVisible();
   // exact: true — "Log in with Google/Facebook" also match substring "Log in"
   await expect(page.getByRole("button", { name: "Log in", exact: true })).toBeVisible();
+});
+
+test("regression_platform_login_renders_marketing_nav_and_footer", async ({ page }) => {
+  await page.goto("/login");
+  await expectLoginFormReady(page);
+  await expect(page.getByRole("navigation", { name: "Site", exact: true })).toBeVisible();
+  await expect(page.locator("footer.ent-footer")).toBeVisible();
 });
 
 test("login page exposes default alternate sign-in options", async ({ page }) => {

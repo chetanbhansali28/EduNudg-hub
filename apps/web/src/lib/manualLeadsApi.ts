@@ -52,22 +52,25 @@ export async function createFranchiseInquiryStaff(
   return { id: data as string, error: null };
 }
 
-export async function createBrandStudentLeadStaff(
-  brandId: string,
-  input: {
-    parentName: string;
-    whatsappE164: string;
-    email?: string;
-    city?: string;
-    pincode?: string;
-    childName?: string;
-    childDob?: string;
-    schoolName?: string;
-    notes?: string;
-  }
-): Promise<{ id: string | null; error: string | null }> {
-  const { data, error } = await getSupabase().rpc("create_brand_student_lead_staff", {
-    p_brand_id: brandId,
+export type ManualStudentLeadInput = {
+  parentName: string;
+  whatsappE164: string;
+  email?: string;
+  city?: string;
+  pincode?: string;
+  childName?: string;
+  childDob?: string;
+  schoolName?: string;
+  notes?: string;
+  loginEmail?: string;
+  addressLine1?: string;
+  state?: string;
+  programName?: string;
+  startingLevel?: string;
+};
+
+function manualStudentLeadRpcArgs(input: ManualStudentLeadInput) {
+  return {
     p_parent_name: input.parentName.trim(),
     p_whatsapp_e164: input.whatsappE164.trim(),
     p_email: input.email?.trim() || null,
@@ -77,6 +80,21 @@ export async function createBrandStudentLeadStaff(
     p_child_dob: input.childDob || null,
     p_school_name: input.schoolName?.trim() || null,
     p_notes: input.notes?.trim() || null,
+    p_login_email: input.loginEmail?.trim() || null,
+    p_address_line1: input.addressLine1?.trim() || null,
+    p_state: input.state?.trim() || null,
+    p_program_name: input.programName?.trim() || null,
+    p_starting_level: input.startingLevel?.trim() || null,
+  };
+}
+
+export async function createBrandStudentLeadStaff(
+  brandId: string,
+  input: ManualStudentLeadInput
+): Promise<{ id: string | null; error: string | null }> {
+  const { data, error } = await getSupabase().rpc("create_brand_student_lead_staff", {
+    p_brand_id: brandId,
+    ...manualStudentLeadRpcArgs(input),
   });
   if (error) return { id: null, error: error.message };
   return { id: data as string, error: null };
@@ -84,29 +102,11 @@ export async function createBrandStudentLeadStaff(
 
 export async function createCenterStudentLeadStaff(
   centerId: string,
-  input: {
-    parentName: string;
-    whatsappE164: string;
-    email?: string;
-    city?: string;
-    pincode?: string;
-    childName?: string;
-    childDob?: string;
-    schoolName?: string;
-    notes?: string;
-  }
+  input: ManualStudentLeadInput
 ): Promise<{ id: string | null; error: string | null }> {
   const { data, error } = await getSupabase().rpc("create_center_student_lead_staff", {
     p_center_id: centerId,
-    p_parent_name: input.parentName.trim(),
-    p_whatsapp_e164: input.whatsappE164.trim(),
-    p_email: input.email?.trim() || null,
-    p_city: input.city?.trim() || null,
-    p_pincode: input.pincode?.trim() || null,
-    p_child_name: input.childName?.trim() || null,
-    p_child_dob: input.childDob || null,
-    p_school_name: input.schoolName?.trim() || null,
-    p_notes: input.notes?.trim() || null,
+    ...manualStudentLeadRpcArgs(input),
   });
   if (error) return { id: null, error: error.message };
   return { id: data as string, error: null };

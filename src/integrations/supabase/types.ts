@@ -1639,6 +1639,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          address_line1: string | null
           assigned_at: string | null
           assigned_by: string | null
           brand_id: string
@@ -1654,20 +1655,25 @@ export type Database = {
           id: string
           last_center_action_at: string | null
           lead_source: string | null
+          login_email: string | null
           lost_reason: string | null
           notes: string | null
           parent_name: string | null
           phone_e164: string | null
           pincode: string | null
+          program_name: string | null
           school_name: string | null
           source: string | null
           stale_at: string | null
+          starting_level: string | null
+          state: string | null
           status: Database["public"]["Enums"]["lead_status"]
           updated_at: string
           updated_by: string | null
           whatsapp_e164: string | null
         }
         Insert: {
+          address_line1?: string | null
           assigned_at?: string | null
           assigned_by?: string | null
           brand_id: string
@@ -1683,20 +1689,25 @@ export type Database = {
           id?: string
           last_center_action_at?: string | null
           lead_source?: string | null
+          login_email?: string | null
           lost_reason?: string | null
           notes?: string | null
           parent_name?: string | null
           phone_e164?: string | null
           pincode?: string | null
+          program_name?: string | null
           school_name?: string | null
           source?: string | null
           stale_at?: string | null
+          starting_level?: string | null
+          state?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
           updated_by?: string | null
           whatsapp_e164?: string | null
         }
         Update: {
+          address_line1?: string | null
           assigned_at?: string | null
           assigned_by?: string | null
           brand_id?: string
@@ -1712,14 +1723,18 @@ export type Database = {
           id?: string
           last_center_action_at?: string | null
           lead_source?: string | null
+          login_email?: string | null
           lost_reason?: string | null
           notes?: string | null
           parent_name?: string | null
           phone_e164?: string | null
           pincode?: string | null
+          program_name?: string | null
           school_name?: string | null
           source?: string | null
           stale_at?: string | null
+          starting_level?: string | null
+          state?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
           updated_by?: string | null

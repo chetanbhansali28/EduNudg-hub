@@ -12,7 +12,7 @@ import { fetchHomepageConfig, MARKETING_HOMEPAGE_CONFIG_QUERY_KEY } from "@/lib/
 import { hasPortalMembership } from "@/lib/portalMembership";
 import { resolveLoginBranding } from "@/lib/portalBranding";
 import { learnPortalLoginUrl } from "@/lib/centerPublicNavUrls";
-import type { MarketingPublicOutletContext } from "@/features/marketing/MarketingPublicLayout";
+import type { HomepageConfig } from "@/types/homepage";
 import { postLoginPath } from "./postLoginPath";
 import { formatLoginAccessDeniedMessage } from "./loginAccessMessage";
 import { buildStaffOAuthRedirectUrl } from "@/services/auth/oauthRedirect";
@@ -28,7 +28,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const marketingOutlet = useOutletContext<MarketingPublicOutletContext | undefined>();
+  const marketingOutlet = useOutletContext<{ marketingChrome?: true; config?: HomepageConfig } | undefined>();
   const inMarketingChrome = marketingOutlet?.marketingChrome === true;
   const { data: memberships, isLoading: membershipsLoading } = useMembership();
   const brandingQuery = usePortalBranding();
@@ -167,9 +167,8 @@ export function LoginPage() {
   const showSocialAuth = showGoogleAuth || showFacebookAuth || showWhatsappAuth;
   const showAlternateAuth = showSocialAuth || showPasskeyAuth;
 
-  return (
-    <ThemeProvider>
-      <div className={inMarketingChrome ? "ed-login-page--marketing" : undefined}>
+  const form = (
+    <div className={inMarketingChrome ? "ed-login-page--marketing" : undefined}>
       <LoginLayout
         branding={branding}
         footerLinks={footerLinks}
@@ -331,7 +330,9 @@ export function LoginPage() {
           </p>
         ) : null}
       </LoginLayout>
-      </div>
-    </ThemeProvider>
+    </div>
   );
+
+  if (inMarketingChrome) return form;
+  return <ThemeProvider>{form}</ThemeProvider>;
 }

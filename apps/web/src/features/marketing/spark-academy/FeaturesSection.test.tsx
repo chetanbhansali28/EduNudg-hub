@@ -27,6 +27,22 @@ describe("FeaturesSection", () => {
     expect(screen.getByText("55%")).toBeDefined();
   });
 
+  it("regression_spark_features_omits_view_all_float_action", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    render(
+      <FeaturesSection
+        sections={config.featureSections}
+        showcase={{
+          ...config.featuresShowcase,
+          floatStatsAction: "View all →",
+        }}
+      />
+    );
+
+    expect(screen.queryByText("View all →")).toBeNull();
+    expect(document.querySelector(".sa-features__float-btn")).toBeNull();
+  });
+
   it("regression_spark_features_floats_sit_on_visual_corners", () => {
     const config = mergeSparkAcademyLandingConfig("Digitley");
     const { container } = render(
@@ -64,6 +80,29 @@ describe("FeaturesSection", () => {
     expect(screen.getByText("40%")).toBeDefined();
     expect(screen.getByText("Completion")).toBeDefined();
     expect(screen.getByText("72%")).toBeDefined();
+  });
+
+  it("regression_spark_homepage_features_keep_float_badges", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    render(
+      <FeaturesSection sections={config.featureSections} showcase={config.featuresShowcase} />
+    );
+    expect(document.querySelector(".sa-features__float--stats")).toBeTruthy();
+    expect(document.querySelector(".sa-features__float--progress")).toBeTruthy();
+  });
+
+  it("hides_float_badges_when_showFloats_false", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    render(
+      <FeaturesSection
+        sections={config.featureSections}
+        showcase={config.featuresShowcase}
+        showFloats={false}
+      />
+    );
+    expect(document.querySelector(".sa-features__float")).toBeNull();
+    expect(screen.queryByText("Last month")).toBeNull();
+    expect(screen.queryByText("Learning Progress")).toBeNull();
   });
 });
 

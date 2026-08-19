@@ -60,6 +60,34 @@ The Merchandise page SHALL NOT include a Competitions tab.
 - **THEN** section tabs are Catalog, Promo Codes, Orders, and Payment settings
 - **AND** no Competitions tab is present
 
+### Requirement: Catalog SKUs are tied to curriculum
+
+Brand staff SHALL assign each merchandise SKU to one or more curriculum courses and MAY tag specific levels. Franchise `/app/merchandise` Shop and `/app/inventory` SHALL list only active SKUs linked to a course in that center’s `center_program_enablement`, via `list_center_active_merchandise_catalog` (not a brand-wide catalog SELECT). SKUs with no curriculum link SHALL NOT appear on the franchise shop or inventory.
+
+#### Scenario: Brand catalog editor assigns curriculum
+
+- **GIVEN** a brand user adding or editing a catalog SKU
+- **WHEN** the catalog form renders
+- **THEN** a Curriculum picker lists brand courses and their levels
+- **AND** an Active SKU cannot save until at least one course or level is selected
+- **AND** saving those tags calls `sync_merchandise_catalog_programs` with a jsonb array of `{program_id, level_id}` (parsed via `SELECT value FROM jsonb_array_elements`)
+
+#### Scenario: Center shop hides unrelated kits
+
+- **GIVEN** a franchise whose assigned curriculum is Abacus Core
+- **AND** the brand catalog has a Vedic Math kit and an Abacus Core kit
+- **WHEN** center staff open `/app/merchandise` Shop
+- **THEN** only the Abacus Core kit is listed
+
+#### Scenario: Brand owner on franchise host sees assigned kits only
+
+- **GIVEN** a user with brand access opens the franchise Shop or Inventory
+- **WHEN** the catalog loads
+- **THEN** the client calls `list_center_active_merchandise_catalog` for that center
+- **AND** SKUs for courses not assigned to the franchise are omitted
+
+Traceability: regression — `regression_unassigned_sku_is_hidden_from_center`, `regression_sku_visible_when_center_has_matching_curriculum`, `regression_merchandise_curriculum_picker_toggles_course`, `regression_merchandise_curriculum_picker_toggles_level`, `regression_list_active_merchandise_catalog_filters_by_center_curriculum`, `regression_list_center_active_catalog_rpc_returns_bigint_price_cents`, `regression_list_center_active_catalog_rpc_returns_setof_catalog`, `regression_list_active_catalog_falls_back_when_rpc_price_type_mismatches`, `regression_sync_merchandise_catalog_programs_reads_jsonb_array_value_column`, `regression_postgrest_error_object_is_not_generic_something_went_wrong`, `regression_center_merchandise_shop_row_image_is_at_least_double_width`, `regression_center_merchandise_shop_shows_catalog_curriculum`.
+
 ### Requirement: Pipeline chrome on center Merchandise
 
 Center staff SHALL shop and track kit orders at `/app/merchandise` with the same pipeline chrome as Curriculum: page header, KPI stats strip, search, section tabs, and list + detail on desktop.
@@ -72,12 +100,22 @@ Center staff SHALL shop and track kit orders at `/app/merchandise` with the same
 - **AND** section tabs remain Shop and My Orders
 - **AND** desktop Shop keeps the catalog beside checkout in `PipelineWorkspace`
 - **AND** Shop catalog cards are full-width horizontal rows (one SKU per row), not a two-column product grid
+- **AND** the Shop list includes only SKUs tied to curriculum assigned to that franchise (`center_program_enablement`)
 - **AND** desktop My Orders keeps order history beside allocations and shipping directory
 
 #### Scenario: Shop catalog matches inventory list density
 
 - **GIVEN** a center user on `/app/merchandise` Shop on desktop
 - **THEN** each catalog SKU is a horizontal card spanning the list column
-- **AND** the card header stays compact (thumbnail, name/SKU/badge, price) while quantity and **Add to Order** stack in a full-width footer so the add label is never clipped at Curriculum list width
+- **AND** the card header uses an 8rem photo beside title + price (badge/SKU and Curriculum/Program under the title), while quantity and **Add to Order** stack in a full-width footer so the add label is never clipped at Curriculum list width
 - **AND** the desktop list/detail split matches Curriculum (`minmax(16rem, 0.95fr)` list, `minmax(0, 2.05fr)` detail)
 - **AND** the list does not place two product cards side by side
+
+#### Scenario: Shop cards name curriculum and program
+
+- **GIVEN** a center SKU tagged to Abacus Core Level 1
+- **WHEN** staff open `/app/merchandise` Shop
+- **THEN** the catalog card shows **Curriculum: Abacus Core** and **Program: Level 1**
+- **AND** search also matches those course and level names
+
+Traceability: regression — `regression_center_merchandise_shop_shows_catalog_curriculum`.

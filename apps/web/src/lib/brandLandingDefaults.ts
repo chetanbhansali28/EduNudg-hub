@@ -465,7 +465,6 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
         "From personalized recommendations to interactive content, we've got everything you need to succeed.",
       floatStatsLabel: "Last month",
       floatStatsValue: "25.20%",
-      floatStatsAction: "View all →",
       floatProgressLabel: "Learning Progress",
       floatProgressValue: "55%",
     },

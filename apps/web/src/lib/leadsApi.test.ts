@@ -1,24 +1,61 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
-  reassignLead,
+  LEAD_LIST_SELECT,
+  assignLeadToCenter,
   convertLeadToStudent,
   countStaleBrandLeads,
-  submitBrandStudentApplication,
-  assignLeadToCenter,
+  listBrandLeads,
+  listCenterLeads,
   markLeadLost,
+  reassignLead,
   reopenLead,
+  submitBrandStudentApplication,
   updateLeadStatus,
 } from "./leadsApi";
 
 const rpc = vi.fn();
+const from = vi.fn();
 
 vi.mock("@/lib/supabase", () => ({
-  getSupabase: () => ({ rpc }),
+  getSupabase: () => ({ rpc, from }),
 }));
 
 describe("leadsApi", () => {
   beforeEach(() => {
     rpc.mockReset();
+    from.mockReset();
+  });
+
+  it("regression_lead_list_select_includes_csv_aligned_columns", () => {
+    for (const column of ["login_email", "address_line1", "state", "program_name", "starting_level", "notes"]) {
+      expect(LEAD_LIST_SELECT).toContain(column);
+    }
+  });
+
+  it("regression_listBrandLeads_selects_csv_aligned_columns", async () => {
+    const order = vi.fn().mockResolvedValue({ data: [], error: null });
+    const eq = vi.fn(() => ({ order }));
+    const select = vi.fn(() => ({ eq }));
+    from.mockReturnValue({ select });
+
+    await listBrandLeads("brand-1");
+
+    expect(from).toHaveBeenCalledWith("leads");
+    expect(select).toHaveBeenCalledWith(LEAD_LIST_SELECT);
+    expect(eq).toHaveBeenCalledWith("brand_id", "brand-1");
+  });
+
+  it("regression_listCenterLeads_selects_csv_aligned_columns", async () => {
+    const order = vi.fn().mockResolvedValue({ data: [], error: null });
+    const eq = vi.fn(() => ({ order }));
+    const select = vi.fn(() => ({ eq }));
+    from.mockReturnValue({ select });
+
+    await listCenterLeads("center-1");
+
+    expect(from).toHaveBeenCalledWith("leads");
+    expect(select).toHaveBeenCalledWith(LEAD_LIST_SELECT);
+    expect(eq).toHaveBeenCalledWith("center_id", "center-1");
   });
 
   it("B-PUB / submitBrandStudentApplication calls RPC with required fields", async () => {

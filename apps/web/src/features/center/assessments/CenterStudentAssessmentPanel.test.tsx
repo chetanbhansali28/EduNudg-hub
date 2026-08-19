@@ -46,6 +46,7 @@ const student: CenterStudentRow = {
   full_name: "Alex Student",
   student_code: "STU001",
   login_email: "alex@example.com",
+  parent_email: "parent@example.com",
   user_id: "u1",
   enrollment_id: "e1",
   enrollment_status: "active",

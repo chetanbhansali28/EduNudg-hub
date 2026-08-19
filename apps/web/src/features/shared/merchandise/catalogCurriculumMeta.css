@@ -1,0 +1,22 @@
+.ed-catalog-curriculum {
+  display: grid;
+  gap: 0.08rem;
+  margin: 0.25rem 0 0;
+  min-width: 0;
+}
+
+.ed-catalog-curriculum p {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ed-muted);
+}
+
+.ed-product-card--row .ed-catalog-curriculum {
+  margin-top: 0;
+}
+
+.ed-inv-stock-card__identity .ed-catalog-curriculum p,
+.ed-inv-detail__stats .ed-catalog-curriculum p {
+  font-size: 0.8125rem;
+}

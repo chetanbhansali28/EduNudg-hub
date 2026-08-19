@@ -181,6 +181,7 @@ export function CenterDetailHero({
   imageUrl,
   title,
   franchiseId,
+  idLabel = "Franchise ID",
   status,
   titleAction,
   actions,
@@ -189,6 +190,7 @@ export function CenterDetailHero({
   imageUrl?: string | null;
   title: string;
   franchiseId?: string;
+  idLabel?: string;
   status?: ReactNode;
   titleAction?: ReactNode;
   actions?: ReactNode;
@@ -203,7 +205,11 @@ export function CenterDetailHero({
             {status}
             {titleAction}
           </div>
-          {franchiseId ? <p className="ed-center-detail-hero__id">Franchise ID: {franchiseId}</p> : null}
+          {franchiseId ? (
+            <p className="ed-center-detail-hero__id">
+              {idLabel}: {franchiseId}
+            </p>
+          ) : null}
         </div>
       </div>
       {actions ? <div className="ed-center-detail-hero__actions">{actions}</div> : null}
@@ -216,12 +222,14 @@ export function CenterMobileHeroBanner({
   imageUrl,
   title,
   slug,
+  slugLabel = "slug",
   titleAction,
 }: {
   initials: string;
   imageUrl?: string | null;
   title: string;
   slug: string;
+  slugLabel?: string;
   titleAction?: ReactNode;
 }) {
   return (
@@ -232,7 +240,9 @@ export function CenterMobileHeroBanner({
           <h2 className="ed-center-mobile-hero__title">{title}</h2>
           {titleAction}
         </div>
-        <p className="ed-center-mobile-hero__slug">slug: {slug}</p>
+        <p className="ed-center-mobile-hero__slug">
+          {slugLabel}: {slug}
+        </p>
       </div>
     </div>
   );
@@ -421,6 +431,7 @@ export function CentersSearchField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
       />
     </label>
   );

@@ -2,6 +2,7 @@
 export { SparkAcademyNav } from "./SparkAcademyNav";
 export { SparkAcademyHero } from "./SparkAcademyHero";
 export { SparkAcademyContent } from "./SparkAcademyContent";
+export { SparkAcademyAbout } from "./SparkAcademyAbout";
 export { SparkAcademyFooter } from "./SparkAcademyFooter";
 export { SparkAcademyCta } from "./SparkAcademyCta";
 export { CourseCard, CoursesSection } from "./CoursesSection";

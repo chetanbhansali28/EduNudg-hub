@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, QuantityStepper } from "@edunudg/ui";
 import { formatInrFromPaise } from "@/lib/inrCurrency";
 import { activeMerchandisePhotoUrls } from "@/lib/merchandiseProductPhotoStorage";
+import { CatalogCurriculumMeta } from "@/features/shared/merchandise/CatalogCurriculumMeta";
 import type { MerchandiseCatalogItem, MerchandiseShopLine, MerchandiseStudentOption } from "./merchandiseShopTypes";
 
 type Props = {
@@ -77,14 +78,19 @@ export function MerchandiseProductGrid({ catalog, cart, onUpdateLine }: Props) {
               <div className="ed-product-card__media">
                 <MerchandiseProductGallery photos={photos} name={item.name} />
               </div>
-              <div className="ed-product-card__identity">
-                <h3 className="ed-product-card__name">{item.name}</h3>
-                {index === 0 ? <span className="ed-product-card__badge">Best Seller</span> : null}
-                <p className="ed-product-card__sku">SKU {item.sku}</p>
+              <div className="ed-product-card__copy">
+                <div className="ed-product-card__heading">
+                  <h3 className="ed-product-card__name">{item.name}</h3>
+                  <span className="ed-product-card__price">
+                    {formatInrFromPaise(item.price_cents, item.currency)}
+                  </span>
+                </div>
+                <div className="ed-product-card__identity">
+                  {index === 0 ? <span className="ed-product-card__badge">Best Seller</span> : null}
+                  <p className="ed-product-card__sku">SKU {item.sku}</p>
+                </div>
+                <CatalogCurriculumMeta courseNames={item.courseNames} levelNames={item.levelNames} />
               </div>
-              <span className="ed-product-card__price">
-                {formatInrFromPaise(item.price_cents, item.currency)}
-              </span>
             </div>
             {description ? <p className="ed-product-card__desc">{description}</p> : null}
             <div className="ed-product-card__actions">

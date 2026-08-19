@@ -239,7 +239,8 @@ export function Input({
   const autoId = useId();
   const inputId = id ?? autoId;
   const inputName = name ?? fieldNameFromLabel(label);
-  const dialHref = type === "tel" ? telHref(value) : null;
+  const isTel = type === "tel";
+  const dialHref = isTel ? telHref(value) : null;
   const input = (
     <input
       id={inputId}
@@ -257,12 +258,15 @@ export function Input({
   );
 
   return (
-    <label className={`ed-field${editable ? " ed-field--editable" : ""}${dialHref ? " ed-field--dialable" : ""}`} htmlFor={inputId}>
+    <label
+      className={`ed-field${editable ? " ed-field--editable" : ""}${isTel ? " ed-field--dialable" : ""}`}
+      htmlFor={inputId}
+    >
       <span className="ed-field__label">{label}</span>
-      {dialHref ? (
+      {isTel ? (
         <div className="ed-field__input-wrap">
           {input}
-          <PhoneDialButton phone={value} label={`Call ${value.trim()}`} />
+          {dialHref ? <PhoneDialButton phone={value} label={`Call ${value.trim()}`} /> : null}
         </div>
       ) : (
         input

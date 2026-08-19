@@ -61,9 +61,9 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 |----|--------|-------------|------------|
 | FR-B20 | B | **Franchise Applications** nav `/app/franchise-applications` | Moved out of Settings |
 | FR-B21 | B | Approve creates center + domain + operator invite | Same transaction: `franchise_centers`, `{center}.{brand}` mapping |
-| FR-B22 | B | 360° read-only student/center views | All centers under brand (Phase B/C) |
+| FR-B22 | B | 360° read-only student views | Brand `/app/students` lists every active enrollment across franchises; search by student, franchise name, or city; detail card shows contact + current curriculum levels (Franchise Management chrome); **Export CSV** downloads the full roster |
 | FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Drafts/Programs/Total KPIs); master-detail: courses → levels → units; on/off toggle per course (`programs.is_active`); mobile overlay includes the same editable controls; parent marketing stays editable after create via Save |
-| FR-B24 | B | **Merchandise** workspace `/app/merchandise` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
+| FR-B24 | B | **Merchandise** workspace `/app/merchandise` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail; catalog SKUs tied to curriculum courses and levels |
 
 ---
 
@@ -82,20 +82,21 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 
 ## Center app
 
-> Canonical specs: [`student-leads`](../../openspec/specs/student-leads/spec.md), [`center-students-workspace`](../../openspec/specs/center-students-workspace/spec.md), [`center-fees-workspace`](../../openspec/specs/center-fees-workspace/spec.md), [`center-inventory-workspace`](../../openspec/specs/center-inventory-workspace/spec.md), [`brand-merchandise`](../../openspec/specs/brand-merchandise/spec.md)
+> Canonical specs: [`student-leads`](../../openspec/specs/student-leads/spec.md), [`center-students-workspace`](../../openspec/specs/center-students-workspace/spec.md), [`center-student-csv-import`](../../openspec/specs/center-student-csv-import/spec.md), [`center-fees-workspace`](../../openspec/specs/center-fees-workspace/spec.md), [`center-inventory-workspace`](../../openspec/specs/center-inventory-workspace/spec.md), [`brand-merchandise`](../../openspec/specs/brand-merchandise/spec.md)
 
 | ID | Portal | Requirement | Acceptance |
 |----|--------|-------------|------------|
-| FR-C10 | C | **Leads** `/app/leads` | Assigned + direct center leads; curriculum-style pipeline chrome (Open / Converted / Lost / Total KPIs) |
+| FR-C10 | C | **Leads** `/app/leads` | Assigned + direct center leads; curriculum-style pipeline chrome (Open / Converted / Lost / Total KPIs); list cards like Franchise Applications (status, date, name, city/pincode) |
 | FR-C11 | C | Status change only resets SLA | `update_lead_status` sets `last_center_action_at` |
 | FR-C11b | C | **Mark lead lost** — center only | `mark_lead_lost(p_lead_id, p_reason)` — requires `lost_reason`; brand cannot call |
 | FR-C12 | C | Staff-only **Convert** | No parent self-serve link v1 |
 | FR-C13 | C | Convert field mapping | See [Convert mapping](#fr-c13--convert_lead_to_student-field-mapping) |
 | FR-C14 | C | Cannot convert unassigned brand leads | `center_id` must match self |
-| FR-C15 | C | **Students** `/app/students` | Same pipeline chrome as Curriculum (Linked / Unassigned / Programs / Total); list + detail |
+| FR-C15 | C | **Students** `/app/students` | Same pipeline chrome as Curriculum (Linked / Unassigned / Programs / Total); list + detail; Delivery **Phone** is free-form while typing (no remount / live format); **Save address** shows **Saved** plus **Address saved.** next to the button; **Copy Profile URL** copies the student/parent learn-portal login URL (no password) |
+| FR-C15b | C | **Import students** CSV | Template + `import_center_students`; auto `STU-NNN` code; profile phone = WhatsApp |
 | FR-C16 | C | **Fees** `/app/fees` | Same pipeline chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs |
-| FR-C17 | C | **Inventory** `/app/inventory` | Same pipeline chrome as Curriculum (In stock / Low stock / Incoming / Total); list + `PipelineDetailPanel` item detail with theme **Place New Order** |
-| FR-C18 | C | **Merchandise** `/app/merchandise` | Same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; Shop list is one horizontal card per SKU |
+| FR-C17 | C | **Inventory** `/app/inventory` | Same pipeline chrome as Curriculum (In stock / Low stock / Incoming / Total); list is name / SKU / stock badge; `PipelineDetailPanel` has Curriculum/Program + stock facts + theme **Place New Order**; rows limited to assigned-curriculum SKUs |
+| FR-C18 | C | **Merchandise** `/app/merchandise` | Same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; Shop list is one horizontal card per SKU with Curriculum/Program under the SKU for curriculum assigned to that franchise |
 
 ---
 
@@ -111,6 +112,10 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | `school_name` | `student_profiles.school_name` or `students` JSONB | Phase A: JSONB on student ok |
 | `pincode` | `student_profiles.pincode` or lead copy on enrollment notes | |
 | `city` | `student_profiles.city` | From lead |
+| `login_email` | `students.login_email` | Prefers lead `login_email`, then lead `email` |
+| `address_line1` | `student_profiles.address_line1` | Optional |
+| `state` | `student_profiles.state` | Optional |
+| `program_name` / `starting_level` | `pin_enrollment_program` | When the course is assigned to the center |
 | `id` | `students.source_lead_id` | Lineage |
 | — | `student_enrollments` | Created in same RPC transaction; status per product default |
 | — | `leads.status` | Set to `converted` |

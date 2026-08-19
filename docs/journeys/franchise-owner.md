@@ -26,7 +26,7 @@ flowchart LR
    - `franchise_centers` row (slug from proposed name)
    - `domain_mappings`: `{center_slug}.{brand_slug}.localhost`
    - Center operator membership + auth invite
-5. Franchise operator logs in on **center host** `/app` — Leads, Students, Fees, Inventory, and Merchandise share Curriculum pipeline chrome (header, KPI stats, search, list + detail) (no public franchise branding).
+5. Franchise operator logs in on **center host** `/app` — sidebar lockup shows the **brand name** next to the Site logo with the franchise display name underneath; Leads, Students, Fees, Inventory, and Merchandise share Curriculum pipeline chrome (header, KPI stats, search, list + detail). Existing students can be bulk-enrolled from **Students** → **Import students** ([ops](../ops/center-student-csv-import.md)). **Copy Profile URL** on student Portal access shares the learn-portal login (no password) with parents.
 
 ## Success criteria
 

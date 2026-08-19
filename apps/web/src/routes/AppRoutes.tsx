@@ -22,6 +22,7 @@ import { BrandPublicLayout } from "@/features/brand/BrandPublicLayout";
 import { BrandDashboard } from "@/features/brand/BrandDashboard";
 import { CurriculumPage } from "@/features/brand/CurriculumPage";
 import { CentersPage } from "@/features/brand/CentersPage";
+import { BrandStudentsPage } from "@/features/brand/BrandStudentsPage";
 import { BrandAnalyticsPage } from "@/features/brand/BrandAnalyticsPage";
 import { BrandCenterDetailPage } from "@/features/brand/BrandCenterDetailPage";
 import { BrandSettingsPage } from "@/features/brand/BrandSettingsPage";
@@ -130,9 +131,9 @@ export function AppRoutes() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/legal/:kind" element={<MarketingLegalPage />} />
         </Route>
-      ) : (
+      ) : tenant.portalType !== "brand" ? (
         <Route path="/login" element={<LoginPage />} />
-      )}
+      ) : null}
 
       {tenant.portalType === "platform" && (
         <>
@@ -164,6 +165,7 @@ export function AppRoutes() {
             <Route path="/" element={<BrandLandingPage />} />
             <Route path="/about" element={<BrandAboutPage />} />
             <Route path="/legal/:kind" element={<BrandLegalPage />} />
+            <Route path="/login" element={<LoginPage />} />
           </Route>
           <Route
             path="/app"
@@ -195,6 +197,7 @@ export function AppRoutes() {
             />
             <Route path="centers" element={<CentersPage />} />
             <Route path="centers/:centerSlug" element={<BrandCenterDetailPage />} />
+            <Route path="students" element={<BrandStudentsPage />} />
             <Route path="royalties" element={<Navigate to="/app" replace />} />
             <Route path="analytics" element={<BrandAnalyticsPage />} />
             <Route

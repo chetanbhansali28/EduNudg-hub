@@ -9,6 +9,7 @@ Center staff bulk-add prospective students to the leads pipeline from CSV on `/a
 - Student leads pipeline: `openspec/specs/student-leads/spec.md`
 - Manual entry: `docs/spec/manual-leads.md`
 - Franchise center CSV import pattern: `openspec/specs/franchise-center-csv-import/spec.md`
+- Enrolled students CSV (not leads): [`center-student-csv-import`](../center-student-csv-import/spec.md)
 
 ## Requirements
 

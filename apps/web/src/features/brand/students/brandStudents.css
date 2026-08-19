@@ -1,0 +1,36 @@
+.ed-brand-student-levels {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ed-brand-student-level {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius-md);
+  background: var(--ed-bg);
+}
+
+.ed-brand-student-level.is-current {
+  border-color: var(--ed-primary);
+  background: color-mix(in srgb, var(--ed-primary) 6%, var(--ed-card));
+}
+
+.ed-brand-student-level__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.ed-brand-student-level__meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: var(--ed-muted);
+}
+
+.ed-brand-student-empty {
+  margin: 0;
+}

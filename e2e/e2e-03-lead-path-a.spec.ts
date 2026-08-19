@@ -4,20 +4,11 @@ import { brandUrl, centerUrl, SEED } from "./helpers/portal";
 import { fillBrandStudentLead } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
 test.describe("E2E-03 — Student lead Path A (brand → assign → convert)", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
-
-  test.afterAll(async () => {
-    try {
-      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
-    } catch {
-      // Non-fatal
-    }
-  });
 
   test("parent applies on brand → brand sees unassigned → center convert path", async ({ browser }) => {
     test.setTimeout(90_000);

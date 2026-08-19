@@ -32,7 +32,7 @@ export function CenterLayout() {
     tenant.brandSlug,
     tenant.centerSlug
   );
-  const portalLabel = `Center · ${shell.productName}`;
+  const portalLabel = `Center · ${shell.franchiseName ?? shell.productName}`;
   const welcome = useStaffShellWelcome(portalLabel);
   const isMerchandise = pathname.startsWith("/app/merchandise");
   const shellClassName = isMerchandise ? "ed-shell--commerce" : undefined;
@@ -41,6 +41,7 @@ export function CenterLayout() {
     <AppShell
       productName={shell.productName}
       logoUrl={shell.logoUrl}
+      portalTagline={shell.portalTagline}
       portalLabel={portalLabel}
       welcomeHeading={welcome.welcomeHeading}
       welcomeSubtitle={welcome.welcomeSubtitle}

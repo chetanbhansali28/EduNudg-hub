@@ -41,11 +41,16 @@ export function StudentLeadDetailCard({
           <RecordDetailField label="Parent name" value={lead.parent_name ?? lead.full_name} />
           <RecordDetailField label="Email" value={lead.email} />
           <RecordDetailField label="WhatsApp" value={lead.whatsapp_e164} linkKind="phone" />
-          <RecordDetailField label="Child name" value={lead.child_name} />
-          <RecordDetailField label="Child date of birth" value={lead.child_dob} />
+          <RecordDetailField label="Student name" value={lead.child_name} />
+          <RecordDetailField label="Student date of birth" value={lead.child_dob} />
+          <RecordDetailField label="Login email" value={lead.login_email} />
           <RecordDetailField label="School" value={lead.school_name} />
+          <RecordDetailField label="Address line 1" value={lead.address_line1} />
           <RecordDetailField label="City" value={lead.city} />
+          <RecordDetailField label="State" value={lead.state} />
           <RecordDetailField label="Pincode" value={lead.pincode} />
+          <RecordDetailField label="Program name" value={lead.program_name} />
+          <RecordDetailField label="Starting level" value={lead.starting_level} />
           <RecordDetailField label="Lead source" value={lead.lead_source} />
         </dl>
 

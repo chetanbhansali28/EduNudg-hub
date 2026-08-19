@@ -24,7 +24,8 @@ export async function loginOnPage(
   }
 
   await page.goto(loginUrl);
-  await page.getByLabel("Email", { exact: true }).fill(user.email);
+  // Scope to the staff login card so public marketing chrome cannot match extra Email fields.
+  await page.locator(".ed-login-card").getByLabel("Email", { exact: true }).fill(user.email);
   await page.locator('input[type="password"][name="password"]').fill(user.password);
   await page.getByRole("button", { name: "Log in", exact: true }).click();
 }

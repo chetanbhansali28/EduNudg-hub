@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@edunudg/ui";
@@ -76,10 +78,21 @@ describe("CenterLeadsPage", () => {
     expect(kpiLabels).toEqual(["Open", "Converted", "Lost", "Total"]);
     expect(screen.getByLabelText("Search leads")).toBeDefined();
     expect(await screen.findByText("Meera Reddy")).toBeDefined();
-    expect(screen.getByRole("link", { name: "+919876543210" }).getAttribute("href")).toBe("tel:+919876543210");
+    expect(screen.getByText("CONTACTED")).toBeDefined();
+    expect(screen.getByText("Bengaluru 560034")).toBeDefined();
+    expect(screen.getByText("01/06/2026")).toBeDefined();
+    expect(screen.queryByText("Parent Name")).toBeNull();
+    expect(document.querySelector(".ed-pipeline-table-head")).toBeNull();
+    expect(document.querySelector(".ed-franchise-app-list-item")).toBeTruthy();
     expect(screen.getByRole("tablist", { name: "Lead filter" })).toBeDefined();
     expect(await screen.findByText("Showing 1-1 of 1 leads")).toBeDefined();
     expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
+  });
+
+  it("regression_center_leads_detail_has_top_padding", () => {
+    const css = readFileSync(resolve(__dirname, "centerLeads.css"), "utf8");
+    expect(css).toMatch(/\.ed-center-leads-page \.ed-pipeline-detail-panel__head \{[\s\S]*padding-top:\s*1\.5rem/);
+    expect(css).toMatch(/\.ed-center-leads-page \.ed-pipeline-detail-panel__body \{[\s\S]*padding-top:\s*1\.75rem/);
   });
 
   it("regression_center_leads_add_lead_opens_modal", async () => {
@@ -110,5 +123,22 @@ describe("CenterLeadsPage", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Import CSV" }));
     expect(screen.getByText("Import student leads dialog")).toBeDefined();
+  });
+
+  it("regression_center_leads_list_uses_application_cards", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <CenterLeadsPage />
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText("Meera Reddy")).toBeDefined();
+    expect(screen.queryByText("Student Interest")).toBeNull();
+    expect(screen.queryByText("Last Contacted")).toBeNull();
+    fireEvent.click(screen.getByText("Meera Reddy"));
+    expect(await screen.findByRole("link", { name: "Call Meera Reddy" })).toBeDefined();
   });
 });

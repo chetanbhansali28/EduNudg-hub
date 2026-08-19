@@ -64,6 +64,37 @@ describe("SparkAcademyHero", () => {
     expect(screen.getByText("Course")).toBeDefined();
     expect(screen.getByText("Abacus")).toBeDefined();
   });
+
+  it("regression_spark_homepage_hero_keeps_overlays_when_showOverlays_default", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    config.hero.badge = "FOR AGED 6–14 YEARS";
+    render(
+      <SparkAcademyHero
+        config={config}
+        featuredProgram={createPublicCurriculumProgram({ name: "Abacus" })}
+        programCount={1}
+      />
+    );
+    expect(screen.getByText("FOR AGED 6–14 YEARS")).toBeDefined();
+    expect(document.querySelector(".sa-hero__stats")).toBeTruthy();
+    expect(document.querySelector(".sa-hero__float-card--course")).toBeTruthy();
+  });
+
+  it("hides_badge_floats_and_stats_when_showOverlays_false", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    config.hero.badge = "FOR AGED 6–14 YEARS";
+    render(
+      <SparkAcademyHero
+        config={config}
+        featuredProgram={createPublicCurriculumProgram({ name: "Abacus" })}
+        showOverlays={false}
+      />
+    );
+    expect(screen.queryByText("FOR AGED 6–14 YEARS")).toBeNull();
+    expect(document.querySelector(".sa-hero__badge")).toBeNull();
+    expect(document.querySelector(".sa-hero__float-card")).toBeNull();
+    expect(document.querySelector(".sa-hero__stats")).toBeNull();
+  });
 });
 
 describe("buildHeroStats", () => {

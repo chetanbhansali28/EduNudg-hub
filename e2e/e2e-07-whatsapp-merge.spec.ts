@@ -4,20 +4,11 @@ import { brandUrl, SEED } from "./helpers/portal";
 import { fillBrandStudentLead, expectLeadFormReady } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
 test.describe("E2E-07 — WhatsApp duplicate merge", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
-
-  test.afterAll(async () => {
-    try {
-      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
-    } catch {
-      // Non-fatal
-    }
-  });
 
   test("second application same WhatsApp merges (success, no duplicate toast of two creates)", async ({
     page,

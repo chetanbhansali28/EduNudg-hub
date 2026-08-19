@@ -3,7 +3,7 @@
 Platform admins and brand staff bulk-onboard franchise centers from a CSV template:
 
 - **Platform** — **Platform → Brands → Edit** (`/admin/brands/:slug`) → Franchise centers → **Import Franchise**
-- **Brand** — **Franchise Management** (`/app/centers`) → **Import Franchise**
+- **Brand** — **Franchise Management** (`/app/centers`) → **Import Franchise**; **Export Franchise** downloads the live roster (slug, profile columns, status) as `{brandSlug}-franchises-{date}.csv`
 
 Both surfaces use the same dialog, client validation, and RPC.
 
@@ -30,7 +30,7 @@ Canonical behavior: [`openspec/specs/franchise-center-csv-import/spec.md`](../..
 
 - Vitest: `FranchiseCenterImportDialog.test.tsx`, `franchiseCenterImportHelpers.test.ts`
 - Brand detail regressions on `/admin/brands/:slug` including `regression_brand_detail_paginates_centers_and_domains`
-- Brand Franchise Management regression: `regression_brand_centers_shows_franchise_csv_import`
+- Brand Franchise Management regression: `regression_brand_centers_shows_franchise_csv_import`, `regression_brand_centers_exports_full_franchise_csv`
 
 ## Related
 

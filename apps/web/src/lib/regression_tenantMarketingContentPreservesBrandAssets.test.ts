@@ -88,6 +88,28 @@ describe("regression_tenantMarketingContentPreservesBrandAssets", () => {
     expect(preserved.about?.members?.[0]?.photoUrl).toContain("brand-assets");
   });
 
+  it("editor save does not replace about hero and philosophy brand-assets with unsplash stock", () => {
+    const existing = {
+      about: {
+        heroImageUrl: asset("brand/marketing/about-hero/asset.jpeg"),
+        philosophyImageUrl: asset("brand/marketing/about-philosophy/asset.jpeg"),
+        features: [],
+        members: [],
+      },
+    };
+    const next = {
+      about: {
+        heroImageUrl: unsplash,
+        philosophyImageUrl: unsplash,
+        features: [],
+        members: [],
+      },
+    };
+    const preserved = preserveCustomMarketingMediaUrls(existing, next);
+    expect(preserved.about?.heroImageUrl).toContain("brand-assets");
+    expect(preserved.about?.philosophyImageUrl).toContain("brand-assets");
+  });
+
   it("brand_settings merge prefers existing landing content", () => {
     const merged = mergeBrandSettingsPreserveContent(
       {

@@ -13,6 +13,8 @@ export type MerchandiseCatalogItem = {
   currency: string;
   photo_urls?: string[] | null;
   description?: string | null;
+  courseNames?: string[];
+  levelNames?: string[];
 };
 
 export type MerchandiseStudentOption = {

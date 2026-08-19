@@ -26,6 +26,22 @@ describe("SparkAcademyNav", () => {
     expect(within(drawer).queryByRole("link", { name: exactAccessibleName("Student Login") })).toBeNull();
   });
 
+  it("regression_brand_spark_nav_logo_is_franchise_size", () => {
+    const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
+    config.meta.logoUrl = "https://cdn.example.com/brand-assets/logo.png";
+
+    const { container } = render(
+      <MemoryRouter>
+        <SparkAcademyNav config={config} />
+      </MemoryRouter>
+    );
+
+    expect(container.querySelector(".sa-nav--franchise")).toBeNull();
+    const logo = container.querySelector(".sa-nav__logo-img") as HTMLImageElement;
+    expect(logo?.getAttribute("width")).toBe("64");
+    expect(logo?.getAttribute("height")).toBe("64");
+  });
+
   it("regression_spark_nav_login_comes_from_navigation_ctas", () => {
     const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
     config.nav.links = [...config.nav.links, { label: "Login", href: "/login" }];

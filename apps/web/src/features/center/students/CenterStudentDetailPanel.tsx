@@ -7,23 +7,28 @@ import {
   Input,
   MutationError,
   OpsSectionCard,
+  SaveButton,
   Select,
   ToggleField,
 } from "@edunudg/ui";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import {
   fetchStudentProfileAddress,
+  resolveStudentPortalLoginEmail,
   upsertStudentDeliveryAddress,
 } from "@/lib/studentProfileApi";
 import { inviteStudentPortalAccess, pinEnrollmentProgram } from "@/lib/studentPortalAdminApi";
 import { fetchCenterStudentProgramContext } from "@/lib/centerStudentProgramApi";
 import { syncStudentBatchAssignments, type CenterStudentRow } from "@/lib/centerStudentsApi";
 import { fetchAuthorizedPrograms, fetchCenterBatches, type CenterBatchRow } from "@/lib/centerBatchesApi";
+import { studentProfileLoginUrl } from "@/lib/centerStudentsHelpers";
 import { fetchLevels } from "@/lib/curriculumApi";
 import { initialsFromName } from "@/lib/welcomeMessage";
 import { CenterStudentAssessmentPanel } from "@/features/center/assessments/CenterStudentAssessmentPanel";
 import type { CenterStudentDetailTab } from "@/features/center/students/centerStudentDetailTabs";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
+import { useTenant } from "@/bootstrap/TenantProvider";
 
 type Props = {
   student: CenterStudentRow;
@@ -81,11 +86,14 @@ export function CenterStudentDetailPanel({
   onSaved,
   initialTab = "enrollment",
 }: Props) {
+  const tenant = useTenant();
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const batchesEnabled = useFeatureFlag("batches");
   const [activeTab, setActiveTab] = useState<CenterStudentDetailTab>(initialTab);
-  const [loginEmail, setLoginEmail] = useState(student.login_email ?? "");
+  const [loginEmail, setLoginEmail] = useState(
+    resolveStudentPortalLoginEmail(student.login_email, student.parent_email)
+  );
   const [address, setAddress] = useState({
     address_line1: "",
     city: "",
@@ -97,6 +105,8 @@ export function CenterStudentDetailPanel({
   const [programId, setProgramId] = useState(student.program_id ?? "");
   const [levelId, setLevelId] = useState(student.starting_level_id ?? "");
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [copiedProfileUrl, setCopiedProfileUrl] = useState(false);
+  const addressSaved = useSavedFlash();
 
   const batches = useQuery({
     queryKey: ["center-batches", centerId],
@@ -127,10 +137,17 @@ export function CenterStudentDetailPanel({
 
   useEffect(() => {
     setSelectedBatches(student.batch_ids);
-    setLoginEmail(student.login_email ?? "");
+    setLoginEmail(resolveStudentPortalLoginEmail(student.login_email, student.parent_email));
     setProgramId(student.program_id ?? "");
     setLevelId(student.starting_level_id ?? "");
-  }, [student.id, student.batch_ids, student.login_email, student.program_id, student.starting_level_id]);
+  }, [
+    student.id,
+    student.batch_ids,
+    student.login_email,
+    student.parent_email,
+    student.program_id,
+    student.starting_level_id,
+  ]);
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -177,7 +194,7 @@ export function CenterStudentDetailPanel({
       await upsertStudentDeliveryAddress(brandId, student.id, address);
     },
     onSuccess: () => {
-      setSaveMessage("Address saved.");
+      addressSaved.flash();
       void qc.invalidateQueries({ queryKey: ["student-profile-address", student.id] });
     },
     onError: capture,
@@ -214,6 +231,18 @@ export function CenterStudentDetailPanel({
       prev.includes(batchId) ? prev.filter((id) => id !== batchId) : [...prev, batchId]
     );
   };
+
+  async function copyProfileUrl() {
+    const slug = tenant.brandSlug?.trim();
+    if (!slug) return;
+    try {
+      await navigator.clipboard.writeText(studentProfileLoginUrl(slug));
+      setCopiedProfileUrl(true);
+      window.setTimeout(() => setCopiedProfileUrl(false), 2000);
+    } catch {
+      setCopiedProfileUrl(false);
+    }
+  }
 
   const portalLinked = !!student.user_id;
   const currentLevel = programContext.data?.current_level_name;
@@ -340,9 +369,20 @@ export function CenterStudentDetailPanel({
               LINKED TO LOGIN · Last active: recently
             </div>
           ) : null}
-          <Button variant="ghost" onClick={() => invite.mutate()} disabled={invite.isPending || !loginEmail.trim()}>
-            {portalLinked ? "Update invite" : "Send invite"}
-          </Button>
+          <FormActions>
+            <Button variant="ghost" onClick={() => invite.mutate()} disabled={invite.isPending || !loginEmail.trim()}>
+              {portalLinked ? "Update invite" : "Send invite"}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                void copyProfileUrl();
+              }}
+              disabled={!tenant.brandSlug?.trim()}
+            >
+              {copiedProfileUrl ? "Copied" : "Copy Profile URL"}
+            </Button>
+          </FormActions>
         </OpsSectionCard>
       </div>
 
@@ -397,9 +437,19 @@ export function CenterStudentDetailPanel({
           />
           <Input label="Phone" type="tel" value={address.phone} onChange={(v) => setAddress((a) => ({ ...a, phone: v }))} editable />
         </FormGrid>
-        <Button onClick={() => saveAddress.mutate()} disabled={saveAddress.isPending}>
-          Save address
-        </Button>
+        <FormActions>
+          <SaveButton
+            onClick={() => saveAddress.mutate()}
+            pending={saveAddress.isPending}
+            saved={addressSaved.saved}
+            label="Save address"
+          />
+          {addressSaved.saved ? (
+            <p className="ed-ops-save-status" role="status" aria-live="polite">
+              Address saved.
+            </p>
+          ) : null}
+        </FormActions>
       </OpsSectionCard>
         </>
       )}

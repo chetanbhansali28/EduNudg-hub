@@ -40,6 +40,12 @@ describe("can", () => {
     expect(canAny(["center_owner"], "competitions", "create")).toBe(false);
   });
 
+  it("allows brand owner and admin to read enrollments", () => {
+    expect(can("brand_owner", "enrollments", "read")).toBe(true);
+    expect(can("brand_admin", "enrollments", "read")).toBe(true);
+    expect(can("brand_admin", "enrollments", "create")).toBe(false);
+  });
+
   it("allows brand owner and admin to update programs", () => {
     expect(can("brand_owner", "programs", "update")).toBe(true);
     expect(can("brand_admin", "programs", "update")).toBe(true);

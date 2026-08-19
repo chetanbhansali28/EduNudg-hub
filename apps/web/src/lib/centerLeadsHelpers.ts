@@ -111,6 +111,45 @@ export function leadDisplayName(lead: LeadRow): string {
   return lead.parent_name ?? lead.full_name;
 }
 
+export function leadLocationLine(lead: LeadRow): string | null {
+  const city = lead.city?.trim();
+  const pincode = lead.pincode?.trim();
+  if (city && pincode) return `${city} ${pincode}`;
+  return city || pincode || null;
+}
+
+export function formatLeadListDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Kolkata",
+  }).format(date);
+}
+
+export type LeadListStatusTone = "new" | "pending" | "approved" | "rejected" | "neutral";
+
+export function leadListStatusBadge(
+  lead: LeadRow,
+  nowMs = Date.now()
+): { label: string; tone: LeadListStatusTone } {
+  const status = leadStatusPresentation(lead, nowMs);
+  const tone: LeadListStatusTone =
+    status.tone === "converted"
+      ? "approved"
+      : status.tone === "lost"
+        ? "rejected"
+        : status.tone === "new" || status.tone === "hot"
+          ? "new"
+          : status.tone === "contacted" || status.tone === "trial"
+            ? "pending"
+            : "neutral";
+  return { label: status.label.toUpperCase(), tone };
+}
+
 export function leadStatusPresentation(
   lead: LeadRow,
   nowMs = Date.now()

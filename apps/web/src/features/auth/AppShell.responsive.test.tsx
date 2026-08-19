@@ -83,6 +83,33 @@ describe("AppShell responsive", () => {
     expect(logo).toBeTruthy();
     expect(logo?.getAttribute("src")).toBe("https://cdn.example/smart-brain-logo.png");
     expect(document.querySelector(".ed-mobile-bar__title")?.textContent).toBe("Smart Brain Abacus");
+    expect(document.querySelector(".ed-mobile-bar__subtitle")).toBeNull();
+  });
+
+  it("regression_center_shell_lockup_shows_brand_then_franchise_name", () => {
+    render(
+      <MemoryRouter>
+        <ThemeProvider>
+          <AppShell
+            portalLabel="Center · Koramangala Franchise"
+            productName="Smart Brain Abacus"
+            portalTagline="Koramangala Franchise"
+            logoUrl="https://cdn.example/smart-brain-logo.png"
+            mobileNavMode="bottom"
+            mobileChrome={<nav aria-label="Center navigation">Nav</nav>}
+            navSections={[{ title: "Main menu", items: [{ href: "/app", label: "Home", active: true }] }]}
+          >
+            <p>Page body</p>
+          </AppShell>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
+    expect(document.querySelector(".ed-sidebar__name")?.textContent).toBe("Smart Brain Abacus");
+    expect(document.querySelector(".ed-sidebar__tagline")?.textContent).toBe("Koramangala Franchise");
+    expect(document.querySelector(".ed-mobile-bar__title")?.textContent).toBe("Smart Brain Abacus");
+    expect(document.querySelector(".ed-mobile-bar__subtitle")?.textContent).toBe("Koramangala Franchise");
+    expect(document.querySelector(".ed-shell--has-portal-tagline")).toBeTruthy();
   });
 
   it("regression_mobile_nav_toggle_opens_drawer", () => {

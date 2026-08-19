@@ -8,7 +8,7 @@ description: Add or change Supabase database schema for EduNudg. Use when creati
 ## Steps
 
 1. Read `supabase/migrations/000_audit_standard.sql` for audit helpers.
-2. Create `supabase/migrations/NNN_short_name.sql`.
+2. Create `supabase/migrations/NNN_short_name.sql`. **The numeric prefix must be unique** — two files sharing `089_*.sql` means only one applies (PostgREST then 400s on the missing columns/RPC).
 3. Include `brand_id` / `center_id` per tenant scope.
 4. Add `created_by`, `updated_by`, trigger `set_row_audit()` for mutable tables.
 5. `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` + policies using `is_platform_admin()`, `has_brand_access()`, `has_center_access()`.
@@ -16,7 +16,10 @@ description: Add or change Supabase database schema for EduNudg. Use when creati
 7. Add RLS test in `supabase/tests/`.
 8. Run `supabase db push` against linked Supabase Cloud project (no Docker).
 
+Replace existing RPCs with `CREATE OR REPLACE FUNCTION` (and `DROP FUNCTION IF EXISTS` when changing argument lists). Plain `CREATE FUNCTION` fails with `42723` if that signature already exists from a prior SQL-editor run.
+
 ## Forbidden
 
 - Tables without RLS
 - Mutable tables without audit columns
+- Reusing a numeric prefix already used by another `supabase/migrations/NNN_*.sql` file

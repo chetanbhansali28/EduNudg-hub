@@ -52,7 +52,7 @@ RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended` (Disab
 
 | Table | Scope | Description |
 |-------|-------|-------------|
-| `leads` | brand / center | Student pipeline; `lead_source` brand \| center; nullable `center_id` |
+| `leads` | brand / center | Student pipeline; `lead_source` brand \| center; nullable `center_id`; optional CSV-aligned `login_email`, `address_line1`, `state`, `program_name`, `starting_level` (migration `090`; do not reuse prefix `089`) |
 | `lead_events` | brand | Merge, lost, reopen, assign audit |
 | `lead_assignment_history` | brand | Center reassignments |
 | `franchise_inquiries` | brand | Prospective franchisee applications. Soft-deleting the converted center does not delete the inquiry; Franchise Applications shows it on **Decided** with a DELETED badge. |
@@ -61,14 +61,15 @@ RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended` (Disab
 
 | Table | Scope | Description |
 |-------|-------|-------------|
-| `students` | brand | `source_lead_id` optional lineage |
-| `student_profiles` | brand | Extended profile JSON/columns |
+| `students` | brand | `source_lead_id` optional lineage; CSV import via `import_center_students` auto-assigns `STU-NNN` `student_code` |
+| `student_profiles` | brand | Extended profile JSON/columns; CSV import fills school, address, city, state, pincode; phone copies WhatsApp |
 
 ## Merchandise (Phase D)
 
 | Table | Scope | Description |
 |-------|-------|-------------|
 | `merchandise_catalog` | brand | SKUs centers can order (see columns below) |
+| `merchandise_catalog_programs` | brand | SKU ↔ course (+ optional `level_id`); franchise shop/inventory use `list_center_active_merchandise_catalog` so brand owners on a franchise host still only see assigned courses |
 | `merchandise_orders` | center | Orders to brand |
 | `merchandise_order_lines` | center | Line items (optional `student_id`) |
 | `student_merchandise_allocations` | center | Hidden from student portal |
@@ -92,7 +93,7 @@ RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended` (Disab
 |--------|------|-------|
 | `photo_urls` | `text[]` | Up to 5 public image URLs; slot *n* stored at index *n−1*. Files live in `brand-assets` at `{brand_id}/merchandise/{id}/photo-{1-5}.{ext}`. Re-upload replaces same slot. |
 
-Centers with `merchandise` enabled can **SELECT** active rows for their brand (policy `merchandise_catalog_center_read`, migration `045`).
+Centers with `merchandise` enabled can **SELECT** active rows **tied to a curriculum assigned to their franchise** (policy `merchandise_catalog_center_read`, migrations `045` + `084`). Brand membership `FOR ALL` still matches every SKU, so franchise Shop/Inventory **must** call `list_center_active_merchandise_catalog` (migrations `085` + `088` + `089`). SKUs with no curriculum link stay on the brand catalog only. Optional `level_id` is the brand tag; visibility stays program-based.
 
 ## Campaigns & ops (Phase E)
 
@@ -124,7 +125,7 @@ Centers with `merchandise` enabled can **SELECT** active rows for their brand (p
 
 | Function | Description |
 |----------|-------------|
-| `get_portal_branding` | Login white-label |
+| `get_portal_branding` | Login + staff chrome (Site logo; franchise `display_name`) |
 | `get_brand_landing_public` | Brand marketing |
 | `submit_franchise_inquiry_v2` | Franchise application |
 | `submit_brand_student_application` | Student application (`lead_source=brand`) |
@@ -141,7 +142,7 @@ Centers with `merchandise` enabled can **SELECT** active rows for their brand (p
 | `convert_lead_to_student` | Center staff |
 | `create_platform_brand_signup_staff` | Platform manual brand signup |
 | `create_franchise_inquiry_staff` | Brand manual franchise application |
-| `create_brand_student_lead_staff` | Brand manual student lead |
-| `create_center_student_lead_staff` | Center manual student lead |
+| `create_brand_student_lead_staff` | Brand manual student lead (CSV-aligned extras) |
+| `create_center_student_lead_staff` | Center manual student lead (CSV-aligned extras) |
 
 See migrations `016`–`019`.

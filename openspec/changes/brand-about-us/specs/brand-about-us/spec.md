@@ -20,8 +20,18 @@ Brands SHALL expose a public `/about` page when published.
 
 - **GIVEN** `about.publishPage` is true (default) and About has renderable content
 - **WHEN** a visitor opens `/{brand host}/about`
-- **THEN** the page shows Mastermind-style sections in order: hero, about/story (+ optional image), philosophy, what makes us different (features), what we do, team grid (photo → name → role), optional dual CTA band
+- **THEN** Novu and Abacus Classic show Mastermind-style sections in order: hero, about/story (+ optional image), philosophy, what makes us different (features), what we do, team grid (photo → name → role), optional dual CTA band
+- **AND** Spark Academy `/about` reuses homepage blocks (Hero, Features, Journey, Mentors) filled from `landing.about` instead of that dedicated chrome
 - **AND** the page uses the brand marketing theme chrome (nav/footer)
+
+#### Scenario: Spark Academy about uses homepage blocks
+
+- **GIVEN** a Spark Academy brand with published About content
+- **WHEN** a visitor opens `/about`
+- **THEN** the page renders `SparkAcademyHero`, `FeaturesSection`, `JourneySection`, and `MentorsSection`
+- **AND** section ids are `about-hero`, `about-features`, `about-journey`, `about-team`
+- **AND** the hero omits homepage badges (Course/Learners/stats) and Features omit Last month / Learning Progress
+- **AND** Mastermind-only About classes (`.about-us__hero`, `.about-us__cta-band`) are omitted
 
 #### Scenario: Unpublished about page
 

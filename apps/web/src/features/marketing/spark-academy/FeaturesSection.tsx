@@ -6,6 +6,13 @@ type Props = {
   showcase?: HomepageFeaturesShowcase | null;
   /** Fallback when showcase.imageUrl is empty (legacy hero/gallery/founder chain). */
   imageUrlFallback?: string;
+  /** Section id; `/about` uses `about-features` so homepage `#features` still targets `/`. */
+  id?: string;
+  /**
+   * Homepage keeps Last month / Learning Progress floats.
+   * `/about` passes false so those badges stay homepage-only.
+   */
+  showFloats?: boolean;
 };
 
 function featureHeading(section: HomepageFeatureSection): string {
@@ -19,7 +26,6 @@ const SHOWCASE_DEFAULTS = {
     "From personalized recommendations to interactive content, we've got everything you need to succeed.",
   floatStatsLabel: "Last month",
   floatStatsValue: "25.20%",
-  floatStatsAction: "View all →",
   floatProgressLabel: "Learning Progress",
   floatProgressValue: "55%",
 } as const;
@@ -35,19 +41,24 @@ export function resolveFeaturesShowcase(
     imageUrl: showcase?.imageUrl?.trim() || imageUrlFallback?.trim() || "",
     floatStatsLabel: showcase?.floatStatsLabel?.trim() || SHOWCASE_DEFAULTS.floatStatsLabel,
     floatStatsValue: showcase?.floatStatsValue?.trim() || SHOWCASE_DEFAULTS.floatStatsValue,
-    floatStatsAction: showcase?.floatStatsAction?.trim() || SHOWCASE_DEFAULTS.floatStatsAction,
     floatProgressLabel: showcase?.floatProgressLabel?.trim() || SHOWCASE_DEFAULTS.floatProgressLabel,
     floatProgressValue: showcase?.floatProgressValue?.trim() || SHOWCASE_DEFAULTS.floatProgressValue,
   };
 }
 
-export function FeaturesSection({ sections, showcase, imageUrlFallback }: Props) {
+export function FeaturesSection({
+  sections,
+  showcase,
+  imageUrlFallback,
+  id = "features",
+  showFloats = true,
+}: Props) {
   if (sections.length === 0) return null;
 
   const resolved = resolveFeaturesShowcase(showcase, imageUrlFallback);
 
   return (
-    <section className="sa-features sa-reveal" id="features">
+    <section className="sa-features sa-reveal" id={id}>
       <div className="sa-features__panel">
         <div className="sa-features__inner">
           <div className="sa-features__visual sa-reveal-item">
@@ -66,24 +77,27 @@ export function FeaturesSection({ sections, showcase, imageUrlFallback }: Props)
               )}
             </div>
 
-            <div className="sa-features__float sa-features__float--stats">
-              <span className="sa-features__float-label">{resolved.floatStatsLabel}</span>
-              <strong>
-                <span className="sa-features__float-trend" aria-hidden>
-                  ↗
-                </span>{" "}
-                {resolved.floatStatsValue}
-              </strong>
-              <span className="sa-features__float-btn">{resolved.floatStatsAction}</span>
-            </div>
+            {showFloats ? (
+              <div className="sa-features__float sa-features__float--stats">
+                <span className="sa-features__float-label">{resolved.floatStatsLabel}</span>
+                <strong>
+                  <span className="sa-features__float-trend" aria-hidden>
+                    ↗
+                  </span>{" "}
+                  {resolved.floatStatsValue}
+                </strong>
+              </div>
+            ) : null}
 
-            <div className="sa-features__float sa-features__float--progress">
-              <span className="sa-features__float-label">{resolved.floatProgressLabel}</span>
-              <strong>{resolved.floatProgressValue}</strong>
-              <span className="sa-features__progress-track" aria-hidden>
-                <span className="sa-features__progress-fill" />
-              </span>
-            </div>
+            {showFloats ? (
+              <div className="sa-features__float sa-features__float--progress">
+                <span className="sa-features__float-label">{resolved.floatProgressLabel}</span>
+                <strong>{resolved.floatProgressValue}</strong>
+                <span className="sa-features__progress-track" aria-hidden>
+                  <span className="sa-features__progress-fill" />
+                </span>
+              </div>
+            ) : null}
           </div>
 
           <div className="sa-features__content">

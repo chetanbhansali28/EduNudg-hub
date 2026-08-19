@@ -131,6 +131,19 @@ sequenceDiagram
 
 Student learn data is **always** scoped to active `student_enrollments.center_id`. Paid competition enrollment shows **Coming soon** on the portal until payment integration ships.
 
+## Flow 9 — Center CSV enroll existing students
+
+```mermaid
+sequenceDiagram
+  participant CA as Center_app
+  participant RPC as Supabase_RPC
+
+  CA->>RPC: import_center_students
+  RPC->>RPC: parents students profiles enrollment
+```
+
+Franchise staff download a template on `/app/students`, upload CSV, and `import_center_students` creates enrolled students (no lead). Optional `program_name` pins an assigned course.
+
 ## What does not cross portals
 
 | Data | Rule |

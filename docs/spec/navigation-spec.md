@@ -38,7 +38,8 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 | Main menu | Home | `/app` | Exists — stale/unassigned lead KPIs |
 | Features | **Student Leads** | `/app/leads` | Exists — same pipeline chrome as Franchise Applications; Pending review / Decided; KPI stats; search; list + stacked detail (assignment below applicant); manual add, assign |
 | | **Franchise Applications** | `/app/franchise-applications` | Exists — Pending review / Decided; KPI stats; Add Franchise modal; deleted centers stay on Decided |
-| | Franchise Centers | `/app/centers` | Exists — import CSV, view frontend/backend, disable/enable, soft-delete; no Social Media editor |
+| | Franchise Centers | `/app/centers` | Exists — import CSV, **Export Franchise**, view frontend/backend, disable/enable, soft-delete; no Social Media editor |
+| | **Students** | `/app/students` | Exists — Franchise Management chrome; all-franchise roster; search by student, franchise, or city; read-only contact + curriculum levels; **Export CSV** downloads the full roster |
 | | Curriculum | `/app/curriculum` | Exists — pipeline header + Active/Drafts/Programs/Total KPIs; 2-column master-detail on desktop; mobile **Edit course** opens the same editable overlay (live toggle + Save); add via **+ Add Curriculum** in the page header (no **+** on Courses) |
 | | **Competitions** | `/app/competitions` | Exists — Events + question bank; gated by `competitions` (default off) |
 | | Campaigns | `/app/campaigns` | Exists — CRUD |
@@ -57,15 +58,17 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 
 ## Center (franchise) — `/app`
 
+On desktop and mobile, the staff chrome lockup shows the **brand name** next to the Site logo, with the franchise **display name** (from Franchise Identity) in a smaller line under it. Login still greets with the franchise name.
+
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
 | Main menu | Home | `/app` | Exists — open leads KPI |
-| Features | **Leads** | `/app/leads` | Exists — curriculum-style pipeline chrome (KPI stats Open/Converted/Lost/Total, search, filter tabs, list + detail); manual add, convert, mark lost |
-| | Students | `/app/students` | Exists — same pipeline chrome (Linked/Unassigned/Programs/Total) |
+| Features | **Leads** | `/app/leads` | Exists — curriculum-style pipeline chrome (KPI stats Open/Converted/Lost/Total, search, filter tabs, list + detail); list cards like Franchise Applications; manual add, convert, mark lost |
+| | Students | `/app/students` | Exists — same pipeline chrome (Linked/Unassigned/Programs/Total); **Import students** CSV; **Copy Profile URL** copies learn-portal login (no password); **Save address** confirms next to the button |
 | | Batches | `/app/batches` | Exists — gated by brand feature `batches` (default off) |
 | | Fees & Payments | `/app/fees` | Exists — same pipeline chrome (Outstanding/Paid/Overdue/Total); Invoices / Payments tabs |
-| | Inventory | `/app/inventory` | Exists — same pipeline chrome (In stock / Low stock / Incoming / Total); column 2 left-aligns a 50% photo beside stock facts, puts On the way and Orders on one row, and uses a primary **Place New Order** button |
-| | Merchandise | `/app/merchandise` | Exists — same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders; Shop list is one horizontal card per SKU with stacked qty / full-width Add to Order; checkout + order history |
+| | Inventory | `/app/inventory` | Exists — same pipeline chrome (In stock / Low stock / Incoming / Total); list is name / SKU / stock badge; column 2 shows Curriculum (course) and Program (level), left-aligns a 50% photo beside stock facts, puts On the way and Orders on one row, and uses a primary **Place New Order** button |
+| | Merchandise | `/app/merchandise` | Exists — same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders; Shop list is one horizontal card per SKU with Curriculum/Program under the SKU and stacked qty / full-width Add to Order; checkout + order history |
 | | Assessments | `/app/assessments` | Phase D |
 | | Reports | `/app/reports` | Phase D |
 | General | Settings | `/app/settings` | Exists — public profile (photo, address, phone) |

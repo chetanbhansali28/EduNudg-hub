@@ -1,5 +1,6 @@
 import type { CenterStatusTone } from "@edunudg/ui";
 import type { BrandCenterRow, CenterStatus } from "@/lib/centerCentersApi";
+import { downloadTextFile } from "@/lib/platformDataExportHelpers";
 import { initialsFromName } from "@/lib/welcomeMessage";
 
 export type CenterFilter = "active" | "suspended" | "all";
@@ -90,4 +91,59 @@ export function centerStatsItems(
 export function programCurriculumSubtitle(ageLabel?: string | null, description?: string | null): string | undefined {
   const parts = [ageLabel?.trim(), description?.trim()].filter(Boolean);
   return parts.length > 0 ? parts.join(" · ") : undefined;
+}
+
+export const BRAND_CENTERS_CSV_HEADERS = [
+  "center_slug",
+  "name",
+  "display_name",
+  "city",
+  "region",
+  "country",
+  "address",
+  "pincode",
+  "contact_phone",
+  "short_description",
+  "status",
+] as const;
+
+function escapeCsvCell(value: string | number | null | undefined): string {
+  if (value == null) return "";
+  const text = String(value);
+  if (/[",\n\r]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+  return text;
+}
+
+/** UTF-8 BOM CSV of every live franchise (not the current search/filter). Soft-deleted centers are omitted. */
+export function brandCentersToCsv(centers: BrandCenterRow[]): string {
+  const lines = [
+    BRAND_CENTERS_CSV_HEADERS.join(","),
+    ...centers.map((center) =>
+      [
+        center.slug,
+        center.name,
+        center.display_name,
+        center.city,
+        center.region,
+        center.country,
+        center.address_line1,
+        center.pincode,
+        center.contact_phone,
+        center.short_description,
+        center.status,
+      ]
+        .map(escapeCsvCell)
+        .join(",")
+    ),
+  ];
+  return `\uFEFF${lines.join("\n")}`;
+}
+
+export function brandCentersCsvFilename(brandSlug: string, now = new Date()): string {
+  const slug = brandSlug.trim() || "brand";
+  return `${slug}-franchises-${now.toISOString().slice(0, 10)}.csv`;
+}
+
+export function downloadBrandCentersCsv(centers: BrandCenterRow[], brandSlug: string, now = new Date()): void {
+  downloadTextFile(brandCentersToCsv(centers), brandCentersCsvFilename(brandSlug, now), "text/csv;charset=utf-8");
 }

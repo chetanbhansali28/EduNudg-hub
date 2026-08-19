@@ -23,6 +23,7 @@ export interface HomepageFeaturesShowcase {
   imageUrl?: string;
   floatStatsLabel?: string;
   floatStatsValue?: string;
+  /** Leftover JSON only — Spark Features does not render a stats-card action. */
   floatStatsAction?: string;
   floatProgressLabel?: string;
   floatProgressValue?: string;
@@ -215,17 +216,22 @@ export interface HomepageAboutMember {
 }
 
 /**
- * Brand About Us content (theme-aware layout: Novu, Abacus Classic, Spark Academy).
+ * Brand About Us content. Spark `/about` maps this onto homepage Hero / Features /
+ * Journey / Mentors blocks. Novu and Abacus Classic keep a dedicated About layout.
  * Stored in `brand_settings.settings.landing.about`. Homepage visibility uses `sections.about`.
  */
 export interface HomepageAboutSection {
   heroHeadline?: string;
   heroSubtitle?: string;
+  /** Spark `/about` hero photo (independent of homepage hero). */
+  heroImageUrl?: string;
   title?: string;
   body?: string;
   imageUrl?: string;
   philosophyTitle?: string;
   philosophyBody?: string;
+  /** Spark `/about` Journey / philosophy highlight photo. */
+  philosophyImageUrl?: string;
   differentTitle?: string;
   features: HomepageAboutFeature[];
   whatWeDoTitle?: string;

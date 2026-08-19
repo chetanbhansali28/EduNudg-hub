@@ -36,7 +36,7 @@ test.describe("E2E-01 — New brand onboarding", () => {
       await publicPage.getByLabel("Work email").fill(email);
       await publicPage.getByLabel("Phone").fill("9890111222");
       await publicPage.getByLabel("City").fill("Bengaluru");
-      await publicPage.getByRole("button", { name: /submit|request|launch/i }).first().click();
+      await publicPage.locator("#brand-signup").locator('button[type="submit"]').click();
       await expect(publicPage.getByRole("status").filter({ hasText: /received|thank/i })).toBeVisible({
         timeout: 20_000,
       });

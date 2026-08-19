@@ -3,20 +3,11 @@ import { authStatePath, hasE2EBackend } from "./helpers/env";
 import { brandUrl, centerUrl, platformUrl, SEED } from "./helpers/portal";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
 test.describe("E2E-08 — Manual staff lead entry", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
-
-  test.afterAll(async () => {
-    try {
-      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
-    } catch {
-      // Non-fatal
-    }
-  });
 
   test("platform admin can open brands and see manual signup card", async ({ browser }) => {
     const context = await browser.newContext({ storageState: authStatePath("platform") });
@@ -42,10 +33,10 @@ test.describe("E2E-08 — Manual staff lead entry", () => {
       await newLead.click();
       await page.getByLabel("Parent name").fill(fields.parentName);
       await page.getByLabel("WhatsApp number").fill(fields.whatsapp);
-      await page.getByLabel("Email").fill(fields.email);
+      await page.getByLabel("Email", { exact: true }).fill(fields.email);
       await page.getByLabel("City", { exact: true }).fill(fields.city);
       await page.getByLabel("Pincode", { exact: true }).fill(fields.pincode);
-      await page.getByLabel("Child name").fill(fields.childName);
+      await page.getByLabel("Student name").fill(fields.childName);
       await page.getByRole("button", { name: "Create lead", exact: true }).click();
       await expect(
         page.getByText(new RegExp(`${fields.parentName}|created|added`, "i")).first()

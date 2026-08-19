@@ -1,4 +1,5 @@
 import type { CenterStudentRow } from "@/lib/centerStudentsApi";
+import { learnPortalLoginUrl } from "@/lib/centerPublicNavUrls";
 
 export type StudentTabFilter = "all" | "linked" | "unassigned";
 
@@ -47,4 +48,9 @@ export function filterCenterStudents(
           : true;
     return matchesFilter && matchesStudentSearch(student, search);
   });
+}
+
+/** Student/parent learn-portal login URL to share — host + /login only, never a password. */
+export function studentProfileLoginUrl(brandSlug: string): string {
+  return learnPortalLoginUrl(brandSlug.trim());
 }

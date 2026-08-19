@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { BrandCenterRow } from "@/lib/centerCentersApi";
 import {
+  brandCentersCsvFilename,
+  brandCentersToCsv,
   centerCounts,
   centerFranchiseId,
   centerListTitle,
@@ -84,6 +86,33 @@ describe("brandCentersHelpers", () => {
   it("formats program curriculum subtitle", () => {
     expect(programCurriculumSubtitle("Ages 6-12", "Mental arithmetic program")).toBe(
       "Ages 6-12 · Mental arithmetic program"
+    );
+  });
+
+  it("regression_brand_centers_csv_includes_every_live_franchise", () => {
+    const csv = brandCentersToCsv([
+      sample,
+      {
+        ...sample,
+        id: "c2",
+        slug: "jayanagar",
+        name: "Jayanagar, South",
+        display_name: null,
+        status: "suspended",
+        contact_phone: "+91 90000 11111",
+      },
+    ]);
+    expect(csv.startsWith("\uFEFF")).toBe(true);
+    expect(csv).toContain("center_slug,name,display_name");
+    expect(csv).toContain("koramangala,Koramangala 4th Block,Abacus Koramangala");
+    expect(csv).toContain('"Jayanagar, South"');
+    expect(csv).toContain("jayanagar");
+    expect(csv).toContain(",suspended");
+  });
+
+  it("regression_brand_centers_csv_filename_uses_brand_slug", () => {
+    expect(brandCentersCsvFilename("smart-brain-abacus", new Date("2026-08-17T06:00:00Z"))).toBe(
+      "smart-brain-abacus-franchises-2026-08-17.csv"
     );
   });
 });

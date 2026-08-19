@@ -29,6 +29,15 @@ describe("portalNav", () => {
     expect(brands?.active).toBe(true);
   });
 
+  it("regression_brand_nav_includes_students_after_franchise_management", () => {
+    const sections = brandNavSections("/app/students");
+    const labels = sections.find((s) => s.title === "Features")?.items.map((i) => i.label) ?? [];
+    expect(labels.indexOf("Students")).toBe(labels.indexOf("Franchise Management") + 1);
+    expect(sections.find((s) => s.title === "Features")?.items.find((i) => i.href === "/app/students")?.active).toBe(
+      true
+    );
+  });
+
   it("regression_brand_analytics_follows_merchandise_in_features", () => {
     const sections = brandNavSections("/app");
     const labels = sections.find((s) => s.title === "Features")?.items.map((i) => i.label) ?? [];

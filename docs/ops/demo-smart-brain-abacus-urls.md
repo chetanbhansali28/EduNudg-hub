@@ -69,6 +69,7 @@ Append `?portal=brand&brand=smart-brain-abacus` to each path.
 |--------|-----|
 | Dashboard | https://edunudg-hub.vercel.app/app?portal=brand&brand=smart-brain-abacus |
 | Franchise centers | https://edunudg-hub.vercel.app/app/centers?portal=brand&brand=smart-brain-abacus |
+| Students | https://edunudg-hub.vercel.app/app/students?portal=brand&brand=smart-brain-abacus |
 | Center detail | https://edunudg-hub.vercel.app/app/centers/{center-slug}?portal=brand&brand=smart-brain-abacus |
 | Student leads | https://edunudg-hub.vercel.app/app/leads?portal=brand&brand=smart-brain-abacus |
 | Franchise applications | https://edunudg-hub.vercel.app/app/franchise-applications?portal=brand&brand=smart-brain-abacus |

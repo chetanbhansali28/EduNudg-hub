@@ -4,20 +4,11 @@ import { brandUrl, centerUrl, SEED } from "./helpers/portal";
 import { fillCenterStudentRegistration } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
-  hardDeleteEphemeralE2ELeads,
   makeE2ELeadFields,
 } from "./helpers/leadCleanup";
 
 test.describe("E2E-05 — Lost lead lifecycle", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
-
-  test.afterAll(async () => {
-    try {
-      await hardDeleteEphemeralE2ELeads({ brandId: SEED.brandId });
-    } catch {
-      // Non-fatal
-    }
-  });
 
   test("center marks lost with reason; brand sees lost; brand reopens", async ({ browser }) => {
     const fields = makeE2ELeadFields({ tag: `lost-${Date.now().toString(36)}` });
@@ -44,8 +35,19 @@ test.describe("E2E-05 — Lost lead lifecycle", () => {
       const centerCtx = await browser.newContext({ storageState: authStatePath("center") });
       const centerPage = await centerCtx.newPage();
       await centerPage.goto(centerUrl(SEED.brandSlug, SEED.centerSlug, "/app/leads"));
-      await expect(centerPage.getByText(fields.childName).first()).toBeVisible({ timeout: 20_000 });
-      await centerPage.getByText(fields.childName).first().click();
+      const allTab = centerPage.getByRole("tab", { name: /^All \(/i });
+      if (await allTab.isVisible().catch(() => false)) {
+        await allTab.click();
+      }
+      const search = centerPage.getByRole("searchbox", { name: /search leads/i });
+      if (await search.isVisible().catch(() => false)) {
+        await search.fill(fields.parentName);
+      }
+      const leadRow = centerPage.getByRole("button", {
+        name: new RegExp(`${fields.parentName}|${fields.childName}`, "i"),
+      });
+      await expect(leadRow).toBeVisible({ timeout: 20_000 });
+      await leadRow.click();
       const lostBtn = centerPage.getByRole("button", { name: /mark lost|lost/i }).first();
       await expect(lostBtn).toBeVisible({ timeout: 15_000 });
       await lostBtn.click();

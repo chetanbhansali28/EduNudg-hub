@@ -140,9 +140,9 @@ export function CenterMerchandiseOrdersPage() {
   const [search, setSearch] = useState("");
 
   const catalog = useQuery({
-    queryKey: ["merchandise-catalog-active", brandId],
-    enabled: !!brandId,
-    queryFn: () => listActiveMerchandiseCatalog(brandId!),
+    queryKey: ["merchandise-catalog-active", brandId, centerId],
+    enabled: !!brandId && !!centerId,
+    queryFn: () => listActiveMerchandiseCatalog(brandId!, centerId!),
   });
 
   const brandSettings = useQuery({
@@ -561,7 +561,7 @@ export function CenterMerchandiseOrdersPage() {
             type="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder={tab === "orders" ? "Search orders..." : "Search catalog..."}
+            placeholder={tab === "orders" ? "Search orders..." : "Search catalog, curriculum, or SKU..."}
             aria-label={tab === "orders" ? "Search orders" : "Search catalog"}
           />
         </label>

@@ -3,6 +3,7 @@ import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { mergeAbacusClassicSectionVisibility, mergeEduLearnSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import type { HomepageConfig, HomepageFounderProfile, MarketingTheme } from "@/types/homepage";
+import { aboutMembersAsFounders } from "@/lib/aboutUs";
 import {
   buildBrandLandingConfig,
   buildSparkAcademyLandingPartial,
@@ -120,25 +121,6 @@ export function isThemeDefaultFounder(founder: HomepageFounderProfile): boolean 
 
 export function visiblePublicFounders(founders?: HomepageFounderProfile[]): HomepageFounderProfile[] {
   return (founders ?? []).filter((row) => !isThemeDefaultFounder(row));
-}
-
-function aboutMembersAsFounders(
-  members: { name?: string; role?: string; photoUrl?: string }[] | undefined
-): HomepageFounderProfile[] {
-  if (!members?.length) return [];
-  const founders: HomepageFounderProfile[] = [];
-  for (const member of members) {
-    const name = member.name?.trim() ?? "";
-    if (!name) continue;
-    founders.push({
-      roleBadge: member.role?.trim() || "FOUNDER",
-      name,
-      title: member.role?.trim() || "",
-      bio: "",
-      photoUrl: member.photoUrl?.trim() || "",
-    });
-  }
-  return founders;
 }
 
 /** Same mentor list the brand public homepage uses, minus Center sites placeholders. */

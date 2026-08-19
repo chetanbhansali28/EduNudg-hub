@@ -1,4 +1,9 @@
 import { getSupabase } from "@/lib/supabase";
+import { supabaseList } from "@/lib/supabaseResult";
+
+/** PostgREST select for staff lead lists. Requires migration 090 CSV-aligned columns. */
+export const LEAD_LIST_SELECT =
+  "id, brand_id, center_id, full_name, parent_name, email, whatsapp_e164, child_name, child_dob, pincode, city, school_name, login_email, address_line1, state, program_name, starting_level, notes, status, lead_source, lost_reason, assigned_at, stale_at, last_center_action_at, created_at";
 
 export type LeadStatus = "new" | "contacted" | "qualified" | "lost" | "converted";
 
@@ -15,6 +20,12 @@ export interface LeadRow {
   pincode: string | null;
   city: string | null;
   school_name: string | null;
+  login_email?: string | null;
+  address_line1?: string | null;
+  state?: string | null;
+  program_name?: string | null;
+  starting_level?: string | null;
+  notes?: string | null;
   status: LeadStatus;
   lead_source: string | null;
   lost_reason: string | null;
@@ -22,6 +33,24 @@ export interface LeadRow {
   stale_at: string | null;
   last_center_action_at: string | null;
   created_at: string;
+}
+
+export async function listBrandLeads(brandId: string): Promise<LeadRow[]> {
+  const { data, error } = await getSupabase()
+    .from("leads")
+    .select(LEAD_LIST_SELECT)
+    .eq("brand_id", brandId)
+    .order("created_at", { ascending: false });
+  return supabaseList(data, error) as LeadRow[];
+}
+
+export async function listCenterLeads(centerId: string): Promise<LeadRow[]> {
+  const { data, error } = await getSupabase()
+    .from("leads")
+    .select(LEAD_LIST_SELECT)
+    .eq("center_id", centerId)
+    .order("created_at", { ascending: false });
+  return supabaseList(data, error) as LeadRow[];
 }
 
 export async function submitBrandStudentApplication(

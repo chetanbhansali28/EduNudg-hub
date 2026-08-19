@@ -31,7 +31,7 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage` (brand si
 
 **Center public contact:** all four themes overlay Franchise Management Location & Contact in the footer (`centerFooterContactFromProfile` → `centerContact` on `CenterPublicLayout`). Novu adds a **This center** column (and still shows the about-center blurb). Abacus replaces **Head office** with **This center**. Spark **Contact Us** uses the franchise phone and address (no `(222)` placeholder). EduLearn uses the same franchise overlay in `EduLearnFooter`. Brand HQ / “Our presence” stay on the **brand** site only.
 
-**Center public nav lockup:** franchise hosts (`brandSlug` on `AbacusClassicNav` / `SparkAcademyNav` / `EduLearnNav` / `MarketingNav`) use `--franchise` modifiers so the brand logo and site name are larger and bolder than the brand homepage nav.
+**Center public nav lockup:** franchise hosts (`brandSlug` on `AbacusClassicNav` / `SparkAcademyNav` / `EduLearnNav` / `MarketingNav`) use `--franchise` modifiers so the site name is larger and bolder. The brand Site logo uses the same size on brand and franchise public nav and has no ring or frame (`regression_public_nav_logo_matches_franchise_size_without_border`).
 
 When a brand switches from Novu to Abacus Classic, Spark Academy, or EduLearn, stored `landing` JSON is merged with the new theme defaults. **Novu-era section toggles do not disable Abacus/Spark/EduLearn sections** until the brand owner saves from the alternate-theme editor (detected via Abacus/Spark-specific fields in JSON; EduLearn also honors those markers). Shared copy (hero, FAQ, testimonials, features, courses, **Apply franchise**) is preserved. See `mergeAbacusClassicSectionVisibility()` / `mergeEduLearnSectionVisibility()` in `homepageSections.ts`.
 
@@ -51,7 +51,7 @@ Center/franchise **Mentors** (`#founders`) always keep the brand homepage founde
 
 **Upcoming events:** Homepage editor section (like Leadership profiles). Brand adds competitions / workshops / demos with optional image, date, time, duration. Public `#events` shows only upcoming items (capped by `maxItems`). Works on Abacus, Spark, EduLearn, and Novu brand themes.
 
-**About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. Loading `/about` scrolls the viewport to the top (`regression_about_page_scrolls_to_top_on_load`) unless a hash is present. The page chrome matches the brand **Website theme**: Novu keeps the Mastermind navy look; Spark Academy uses `.about-us--spark-academy` (light hero, Spark type scale, `SparkAcademyCta`); Abacus Classic uses `.about-us--abacus-classic`. Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — **Abacus Classic and Novu only**, after Gallery. Spark Academy does **not** render `#about` / ABOUT / WHAT MAKES US DIFFERENT on `/` (`regression_spark_homepage_omits_about_teaser_sections`); leftover `#about` nav is rewritten to `/about`. When the homepage About section is enabled on Abacus/Novu, public nav auto-injects **About Us → `#about`**. Spark does **not** auto-inject About Us — that menu item comes from **Navigation & CTAs** (`regression_spark_does_not_inject_about_nav`). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`. Regression: `regression_spark_about_page_uses_spark_theme_classes`.
+**About Us (brand only):** Homepage editor **About Us** accordion stores `landing.about` (company story, philosophy, differentiators, what we do, team photo grid, dual CTAs). Public route **`/about`** when `publishPage` is not false and content exists; unpublished/empty redirects to `/`. Loading `/about` scrolls the viewport to the top (`regression_about_page_scrolls_to_top_on_load`) unless a hash is present. Novu keeps the Mastermind navy layout; Abacus Classic uses `.about-us--abacus-classic`. Spark Academy `/about` reuses homepage Hero / Features / Journey / Mentors blocks (`SparkAcademyAbout`; `regression_spark_about_page_uses_homepage_section_blocks`) instead of Mastermind About chrome. About-only media is `landing.about.heroImageUrl` and `philosophyImageUrl`. Spark `/about` omits homepage hero/features badges (`regression_spark_about_hero_omits_homepage_badges`, `regression_spark_about_features_omits_float_badges`). Optional homepage `#about` teaser via section toggle (`sections.about`, default off) — **Abacus Classic and Novu only**, after Gallery. Spark Academy does **not** render `#about` / ABOUT / WHAT MAKES US DIFFERENT on `/` (`regression_spark_homepage_omits_about_teaser_sections`); leftover `#about` nav is rewritten to `/about`. When the homepage About section is enabled on Abacus/Novu, public nav auto-injects **About Us → `#about`**. Spark does **not** auto-inject About Us — that menu item comes from **Navigation & CTAs** (`regression_spark_does_not_inject_about_nav`). Media via `brand-assets` + `preserveCustomMarketingMediaUrls`. Regression: `regression_spark_about_page_uses_spark_theme_classes`.
 
 Program cards can be managed directly in **Marketing pages → Programs grid** (`programsSection.cards[]`). On the **brand** site for **Abacus Classic**, named cards win; otherwise the grid falls back to all published curriculum programs. On **Spark Academy** and **EduLearn**, **Courses** prefers published `/app/curriculum` (`publicCurriculum`); leftover homepage cards are used only when no published courses exist (`resolveSparkCoursePrograms`). On a **franchise (center)** site, `get_center_landing_public` returns only programs in `center_program_enablement`, and Center sites cards are restricted to those names (`restrictProgramsSectionToEnabledCurriculum`).
 
@@ -92,11 +92,11 @@ In **Navigation & CTAs** (Abacus/Spark) or **Navigation Management** (Novu), eac
 
 **Spark Academy Success stories:** desktop keeps a centered wrapping grid. On `max-width: 767px` the track is a horizontal snap carousel that auto-advances (paused on swipe / `prefers-reduced-motion`). Regression: `regression_spark_testimonials_mobile_carousel_markup`, `regression_spark_testimonials_mobile_autoscroll_advances`.
 
-**Spark Academy photo floats:** hero Course stays on `sa-hero__photo-stage` (top-left). Features Last month / Learning Progress sit on `sa-features__visual` corners (top-left / bottom-right) so they do not cover the photo. Regression: `regression_spark_hero_course_float_anchors_to_photo_stage`, `regression_spark_features_floats_sit_on_visual_corners`.
+**Spark Academy photo floats:** hero Course stays on `sa-hero__photo-stage` (top-left). Features Last month / Learning Progress sit on `sa-features__visual` corners (top-left / bottom-right) so they do not cover the photo. Last month has no **View all →** action (`regression_spark_features_omits_view_all_float_action`). Regression: `regression_spark_hero_course_float_anchors_to_photo_stage`, `regression_spark_features_floats_sit_on_visual_corners`.
 
 **Abacus Classic syllabus:** Toggle **Curriculum syllabus** in the homepage editor (visible by default). Content comes from published `/app/curriculum` data; no separate copy fields in v1.
 
-**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`). Published courses still show if leftover `programsGrid` is off (`regression_spark_courses_show_published_syllabus_even_if_programs_grid_off`). The section title and course cards are centered (`sa-section-head--center`, `sa-courses__grid--center`).
+**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`). Published courses still show if leftover `programsGrid` is off (`regression_spark_courses_show_published_syllabus_even_if_programs_grid_off`). The section title and course cards are centered (`sa-section-head--center`, `sa-courses__grid--center`). **View all courses** shows only when the catalog overflows one row (`regression_spark_view_all_courses_only_when_overflow`).
 
 See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
 
@@ -114,6 +114,10 @@ See `apps/web/src/features/marketing/abacus-classic/`, `apps/web/src/features/ma
 | `MARKETING_PUBLIC_BUNDLE_QUERY_KEY` | `["marketing-homepage", "public-bundle"]` | `MarketingPublicLayout` | `{ config, legalPages }` |
 
 Sharing one key caused login to stick on **Loading…** after visiting the public homepage. Spec: [`openspec/specs/marketing-homepage/spec.md`](../../openspec/specs/marketing-homepage/spec.md).
+
+**Platform `/login` chrome:** `MarketingPublicLayout` wraps `/login` with the same `EnterpriseNav` + `EnterpriseSiteFooter` as `/`. The layout root adds `marketing-page--login` so the form sits between header and footer without a full-viewport admin `ThemeProvider`. Regression: `regression_login_renders_platform_nav_and_footer`, `regression_platform_login_renders_marketing_nav_and_footer`.
+
+**Brand `/login` chrome:** `BrandPublicLayout` wraps `{brand}/login` with the same theme nav and footer as `{brand}/` (Abacus Classic, Spark Academy, or Novu). Regression: `regression_brand_login_renders_public_nav_and_footer`.
 
 ## Lead modals (Abacus / Spark)
 
@@ -133,6 +137,7 @@ Admin portal styling (Vivid Logic): shared shell, dark mode toggle, uniform two-
 | Highlights | `HighlightsScroller.tsx` | Horizontal cards; nav buttons below carousel |
 | Footer CTA | `FooterSection.tsx` | Dark band + link columns |
 | Styles | `marketing.css` | All `novu-*` tokens |
+| Pricing | `PlatformPricingSection.tsx` | Live `subscription_plans`; feature ticks use CSS Unicode escape U+2713 (not a raw `✓`, which production minify can render as `â`) |
 
 ## Navigation behavior
 

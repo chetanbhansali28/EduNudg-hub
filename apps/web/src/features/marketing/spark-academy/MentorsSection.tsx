@@ -6,6 +6,8 @@ type Props = {
   eyebrow?: string;
   title?: string;
   subtitle?: string;
+  /** Section id; `/about` uses `about-team` so homepage `#founders` still targets `/`. */
+  id?: string;
 };
 
 export function MentorCard({ founder }: { founder: HomepageFounderProfile }) {
@@ -33,11 +35,12 @@ export function MentorsSection({
   eyebrow = "Our Mentors",
   title = "Meet Our Expert Mentors",
   subtitle = "Learn from the best in the industry—our mentors bring years of experience, knowledge, and passion to guide you on your learning journey.",
+  id = "founders",
 }: Props) {
   if (founders.length === 0) return null;
 
   return (
-    <section className="sa-mentors sa-reveal" id="founders">
+    <section className="sa-mentors sa-reveal" id={id}>
       <div className="sa-mentors__header sa-reveal-item">
         <span className="sa-mentors__badge">{eyebrow}</span>
         <h2 className="sa-section-title sa-mentors__title">{title}</h2>

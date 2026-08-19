@@ -47,6 +47,17 @@ Navigating from the platform public homepage to `/login` SHALL NOT leave the log
 - **WHEN** a visitor loads platform `/` then navigates to `/login`
 - **THEN** the login form (Email field) becomes available
 - **AND** the page is not stuck on a loading state caused by homepage query-cache collision
+- **AND** the same Site nav and enterprise footer as `/` remain visible
+
+### Requirement: Platform login shares homepage chrome
+
+Platform `/login` SHALL use `MarketingPublicLayout` (`marketing-page--login`) so `EnterpriseNav` and `EnterpriseSiteFooter` wrap the staff login form. Login SHALL NOT mount a full-viewport admin `ThemeProvider` under that layout.
+
+#### Scenario: Direct /login load shows nav and footer
+
+- **GIVEN** the platform host
+- **WHEN** a visitor opens `/login` without visiting `/` first
+- **THEN** navigation labelled `Site` and `footer.ent-footer` are present with the login form
 
 ### Requirement: Legacy Novu seed discard must not drop uploaded media
 
@@ -106,6 +117,20 @@ Brand identity copy and logo SHALL live in `brand_settings.settings.landing.meta
 - **AND** the viewport is mobile
 - **THEN** the staff top bar shows that logo beside the product name
 
+#### Scenario: Center staff chrome shows brand then franchise name
+
+- **GIVEN** franchise staff are on center `/app` (including `/app/merchandise`)
+- **THEN** the sidebar and mobile bar show the brand name next to the Site logo
+- **AND** the franchise display name appears in a smaller line under the brand name
+- **AND** `/login` still uses the franchise name as the product name
+
+#### Scenario: Public nav logo is franchise size without a frame
+
+- **GIVEN** a brand public homepage with a Site logo
+- **WHEN** a visitor opens the brand host `/` or a franchise host `/`
+- **THEN** the sticky nav logo uses the same size on both hosts
+- **AND** the logo has no ring, border, or background frame
+
 ### Requirement: Spark Academy public headings share one type scale
 
 Spark Academy public landings SHALL use shared `--sa-h2-*` tokens for section titles and `--sa-h3-*` for card/list headings. Features, journey, mentors, and testimonials SHALL NOT use a different clamp size than courses/FAQ/gallery. Upcoming events and `/about` titles SHALL inherit the same Spark tokens. The hero MAY stay larger (`--sa-h1-size`). Footer column labels SHALL remain small uppercase chrome.
@@ -135,6 +160,18 @@ On Spark Academy Features, overlay badges SHALL sit on the corners of the entire
 - **THEN** Last month and Learning Progress cards are direct children of `sa-features__visual`
 - **AND** they are not inside `sa-features__photo-stage`
 - **AND** CSS pins Last month to the top-left and Learning Progress to the bottom-right of the visual
+
+### Requirement: Spark Academy Features omits the stats-card action
+
+Spark Academy **Powerful Features for Your Learning Journey** SHALL render Last month value and Learning Progress overlays only. It SHALL NOT render a stats-card action (including leftover `floatStatsAction` / “View all →”). Homepage Configuration SHALL NOT expose a Stats card action field.
+
+#### Scenario: Features Last month card has no View all control
+
+- **GIVEN** a Spark Academy public homepage Features section
+- **AND** stored landing JSON still has `featuresShowcase.floatStatsAction` “View all →”
+- **WHEN** the section renders
+- **THEN** the Last month overlay does not include a View all control
+- **AND** `.sa-features__float-btn` is not in the DOM
 
 ### Requirement: Spark Academy success stories cards are centered
 
@@ -292,3 +329,16 @@ Brand staff SHALL edit the parent enrollment template (`center_landing`) at `/ap
 - **THEN** the public homepage still lists published Curriculum courses at `#programs` (with `#curriculum` alias)
 - **AND** FAQ items from stored landing still render
 - **AND** the header still shows **Apply franchise** from `nav.secondaryCtaLabel` / `nav.secondaryCtaHref`
+
+### Requirement: Pricing feature checkmarks survive production CSS
+
+Platform homepage **Simple pricing for growing brands.** feature bullets SHALL use a CSS Unicode escape (`content: "\2713"`) for the checkmark glyph. Raw UTF-8 checkmarks and double-encoded mojibake (`â` plus C1 controls) SHALL NOT appear in `marketing.css` `content` values — production CSS minify strips those controls and leaves `â` on Vercel.
+
+#### Scenario: Pricing bullets use an ASCII-safe checkmark escape
+
+- **GIVEN** `marketing.css` styles `.novu-pricing-card__features li::before`
+- **WHEN** the production stylesheet is built
+- **THEN** `content` is `"\2713"` (CHECK MARK)
+- **AND** the rule does not contain a raw `✓` or the mojibake sequence U+00E2 U+009C U+0093
+
+Traceability: regression — `regression_pricing_feature_checkmarks_use_css_unicode_escape`.

@@ -8,17 +8,14 @@ import {
   MutationError,
   PipelinePageHeader,
   PipelinePanel,
-  PipelineStatusBadge,
   PipelineTableToolbar,
   PipelineWorkspace,
 } from "@edunudg/ui";
 import { ManualStudentLeadCard } from "@/features/shared/manualLeads/ManualStudentLeadCard";
-import { PhoneLink } from "@edunudg/ui";
-import { getSupabase } from "@/lib/supabase";
-import { supabaseList } from "@/lib/supabaseResult";
 import { isLeadStale } from "@/lib/leadSla";
 import {
   convertLeadToStudent,
+  listCenterLeads,
   markLeadLost,
   updateLeadStatus,
   type LeadRow,
@@ -29,26 +26,22 @@ import {
   convertedPipelineHint,
   countEligibleBulkConvertLeads,
   filterCenterLeads,
-  formatLeadContactWhen,
+  formatLeadListDate,
   LEAD_FILTER_OPTIONS,
   LEAD_PAGE_SIZE,
-  leadContactTimestamp,
   leadDisplayName,
-  leadStatusPresentation,
-  leadStudentInterest,
+  leadListStatusBadge,
+  leadLocationLine,
   lostPipelineHint,
   openPipelineHint,
   paginateItems,
   paginationLabel,
   summarizeBulkConvertResult,
-  telHref,
-  whatsappHref,
   type LeadFilter,
 } from "@/lib/centerLeadsHelpers";
 import { useTenant } from "@/bootstrap/TenantProvider";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { bulkConvertCenterLeads } from "@/lib/centerStudentLeadImportApi";
-import { initialsFromName } from "@/lib/welcomeMessage";
 import { CenterLeadDetailPanel } from "./CenterLeadDetailPanel";
 import { CenterStudentLeadImportDialog } from "./CenterStudentLeadImportDialog";
 import "@/features/brand/franchiseApplications/franchiseApplications.css";
@@ -58,6 +51,13 @@ const ICON_SEARCH = (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <circle cx="11" cy="11" r="7" />
     <path d="m20 20-3.5-3.5" />
+  </svg>
+);
+
+const ICON_PIN = (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <path d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11z" />
+    <circle cx="12" cy="10" r="2.5" />
   </svg>
 );
 
@@ -105,16 +105,7 @@ export function CenterLeadsPage() {
   const leads = useQuery({
     queryKey: ["center-leads", centerId],
     enabled: !!centerId,
-    queryFn: async () => {
-      const { data, error: qErr } = await getSupabase()
-        .from("leads")
-        .select(
-          "id, brand_id, center_id, full_name, parent_name, email, whatsapp_e164, child_name, child_dob, pincode, city, school_name, status, lead_source, lost_reason, assigned_at, stale_at, last_center_action_at, created_at"
-        )
-        .eq("center_id", centerId!)
-        .order("created_at", { ascending: false });
-      return supabaseList(data, qErr) as LeadRow[];
-    },
+    queryFn: () => listCenterLeads(centerId!),
   });
 
   const selected = (leads.data ?? []).find((row) => row.id === selectedId) ?? null;
@@ -340,82 +331,36 @@ export function CenterLeadsPage() {
               </div>
             ) : null}
 
-            <div className="ed-pipeline-table-head" aria-hidden>
-              <span>Parent Name</span>
-              <span>Student Interest</span>
-              <span>Status</span>
-              <span>Last Contacted</span>
-            </div>
-
-            <div className="ed-pipeline-table-body">
+            <div className="ed-center-leads-page__list">
               {leads.isLoading ? <p className="ed-text-sm ed-muted">Loading leads…</p> : null}
               {!leads.isLoading && pageItems.length === 0 ? (
                 <p className="ed-text-sm ed-muted">No leads in this view.</p>
               ) : null}
               {pageItems.map((lead) => {
                 const name = leadDisplayName(lead);
-                const status = leadStatusPresentation(lead, now);
-                const interest = leadStudentInterest(lead);
-                const contact = formatLeadContactWhen(leadContactTimestamp(lead), now);
-                const followUpDue = isLeadStale(lead, now) || contact.followUpDue;
-                const wa = whatsappHref(lead.whatsapp_e164);
-                const tel = telHref(lead.whatsapp_e164);
+                const status = leadListStatusBadge(lead, now);
+                const location = leadLocationLine(lead);
 
                 return (
                   <button
                     key={lead.id}
                     type="button"
-                    className={`ed-pipeline-lead-row${lead.id === selectedId ? " ed-pipeline-lead-row--selected" : ""}`}
+                    className={`ed-franchise-app-list-item${lead.id === selectedId ? " ed-franchise-app-list-item--selected" : ""}`}
                     onClick={() => selectLead(lead.id)}
                   >
-                    <div className="ed-pipeline-lead-row__parent">
-                      <span className="ed-pipeline-lead-row__avatar" aria-hidden>
-                        {initialsFromName(name)}
+                    <div className="ed-franchise-app-list-item__head">
+                      <span className={`ed-franchise-app-status-badge ed-franchise-app-status-badge--${status.tone}`}>
+                        {status.label}
                       </span>
-                      <div>
-                        <p className="ed-pipeline-lead-row__name">{name}</p>
-                        <p className="ed-pipeline-lead-row__phone">
-                          {lead.whatsapp_e164 ? (
-                            <PhoneLink
-                              phone={lead.whatsapp_e164}
-                              onClick={(event) => event.stopPropagation()}
-                            />
-                          ) : (
-                            lead.email ?? "—"
-                          )}
-                        </p>
-                      </div>
+                      <span className="ed-franchise-app-list-item__when">{formatLeadListDate(lead.created_at)}</span>
                     </div>
-                    <div>
-                      <p className="ed-pipeline-lead-row__interest-title">{interest.title}</p>
-                      <p className="ed-pipeline-lead-row__interest-sub">{interest.subtitle}</p>
-                    </div>
-                    <div>
-                      <PipelineStatusBadge label={status.label} tone={status.tone} />
-                    </div>
-                    <div className="ed-pipeline-lead-row__contact">
-                      <p style={{ margin: 0 }}>{contact.label}</p>
-                      {followUpDue ? <p className="ed-pipeline-lead-row__followup">Follow-up due</p> : null}
-                    </div>
-                    <div className="ed-pipeline-lead-row__mobile-actions">
-                      {tel ? (
-                        <a className="ed-pipeline-lead-row__call" href={tel} onClick={(e) => e.stopPropagation()}>
-                          Call
-                        </a>
-                      ) : null}
-                      {wa ? (
-                        <a
-                          className="ed-pipeline-lead-row__chat"
-                          href={wa}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          aria-label={`WhatsApp ${name}`}
-                        >
-                          💬
-                        </a>
-                      ) : null}
-                    </div>
+                    <p className="ed-franchise-app-list-item__title">{name}</p>
+                    {location ? (
+                      <p className="ed-franchise-app-list-item__location">
+                        {ICON_PIN}
+                        {location}
+                      </p>
+                    ) : null}
                   </button>
                 );
               })}
