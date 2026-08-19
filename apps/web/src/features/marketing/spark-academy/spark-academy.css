@@ -8,6 +8,7 @@
   --sa-navy: #0f172a;
   --sa-muted: #64748b;
   --sa-border: #e2e8f0;
+  --sa-page: #f8fafc;
   --sa-yellow: #facc15;
   --sa-radius: 1rem;
   --sa-max: 1200px;
@@ -22,11 +23,17 @@
   --sa-h3-line: 1.35;
 }
 
-.marketing-page--spark-academy,
+/* Beat Novu `.marketing-page { background: #000 }` regardless of CSS import order. */
+.marketing-page.marketing-page--spark-academy,
 .sa-nav__drawer {
   background: #fff;
   color: var(--sa-navy);
   font-family: var(--sa-heading-font);
+}
+
+html:has(.marketing-page--spark-academy),
+body:has(.marketing-page--spark-academy) {
+  background: #fff;
 }
 
 /* Buttons */
@@ -571,7 +578,21 @@ body.sa-nav-drawer-open {
 }
 
 .sa-courses {
+  background: var(--sa-page);
+}
+
+.sa-course-detail {
+  background: var(--sa-page);
+  min-height: 70vh;
+}
+
+html:has(.marketing-page--spark-academy .sa-course-detail),
+body:has(.marketing-page--spark-academy .sa-course-detail) {
   background: #f8fafc;
+}
+
+.marketing-page.marketing-page--spark-academy:has(.sa-course-detail) {
+  background: var(--sa-page);
 }
 
 .sa-courses__grid {
@@ -2023,6 +2044,7 @@ body.sa-nav-drawer-open {
   --sa-navy: #0f172a;
   --sa-muted: #64748b;
   --sa-border: #e2e8f0;
+  --sa-page: #f8fafc;
   --sa-yellow: #facc15;
   --sa-radius: 1rem;
   --sa-heading-font: Inter, system-ui, -apple-system, sans-serif;

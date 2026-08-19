@@ -136,6 +136,10 @@
   color: var(--sa-navy, #0f172a);
 }
 
+.marketing-page--spark-academy .sa-course-detail {
+  background: var(--sa-page, #f8fafc);
+}
+
 .marketing-page--spark-academy .pub-course__level {
   border-color: var(--sa-border, #e2e8f0);
 }

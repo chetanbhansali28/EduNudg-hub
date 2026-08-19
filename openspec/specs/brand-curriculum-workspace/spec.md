@@ -181,7 +181,7 @@ On Spark Academy public sites, **Courses designed for success** SHALL show that 
 
 ### Requirement: Public course detail page
 
-Published `/app/curriculum` programs SHALL be reachable at `/courses/:slug` on brand and center public hosts. The page SHALL show the public marketing fields for that program (when present) and SHALL inherit the same public layout/theme as `/`. Spark/EduLearn course media and titles SHALL link to that URL while **Enroll now** remains a lead-modal button. Abacus **Know More →** SHALL link when the card matches a published program. Unknown or center-disabled slugs SHALL redirect to `/`.
+Published `/app/curriculum` programs SHALL be reachable at `/courses/:slug` on brand and center public hosts. The page SHALL show the public marketing fields for that program (when present) and SHALL inherit the same public layout/theme as `/`. Spark Academy pages SHALL use the same `--sa-page` canvas as **Courses designed for success**. Spark/EduLearn course media and titles SHALL link to that URL while **Enroll now** remains a lead-modal button. Abacus **Know More →** SHALL link when the card matches a published program. Unknown or center-disabled slugs SHALL redirect to `/`.
 
 #### Scenario: Spark card links to course page
 

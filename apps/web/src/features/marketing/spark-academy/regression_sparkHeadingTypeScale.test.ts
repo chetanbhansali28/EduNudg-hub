@@ -22,3 +22,20 @@ describe("Spark Academy heading type scale", () => {
     expect(css).not.toMatch(/\.sa-features__title\s*\{[^}]*font-size:\s*clamp/s);
   });
 });
+
+describe("Spark Academy course page canvas", () => {
+  const css = readFileSync(resolve(__dirname, "spark-academy.css"), "utf8");
+
+  it("regression_spark_course_page_uses_courses_section_background", () => {
+    expect(css).toMatch(/--sa-page:\s*#f8fafc/);
+    expect(css).toMatch(/\.marketing-page\.marketing-page--spark-academy,\s*\.sa-nav__drawer\s*\{[^}]*background:\s*#fff/s);
+    expect(css).toMatch(/\.sa-courses\s*\{[^}]*background:\s*var\(--sa-page\)/s);
+    expect(css).toMatch(/\.sa-course-detail\s*\{[^}]*background:\s*var\(--sa-page\)/s);
+    expect(css).toMatch(
+      /html:has\(\.marketing-page--spark-academy \.sa-course-detail\),\s*body:has\(\.marketing-page--spark-academy \.sa-course-detail\)\s*\{[^}]*background:\s*#f8fafc/s
+    );
+    expect(css).toMatch(
+      /\.marketing-page\.marketing-page--spark-academy:has\(\.sa-course-detail\)\s*\{[^}]*background:\s*var\(--sa-page\)/s
+    );
+  });
+});

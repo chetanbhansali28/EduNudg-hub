@@ -8,7 +8,7 @@ Brand and center public sites expose a themed `/courses/:slug` page for each pub
 
 ### Requirement: Public course detail URL
 
-Brand and center public sites SHALL expose `/courses/:slug` for each published curriculum program in that host’s `publicCurriculum` payload. The page SHALL render inside the existing public layout so nav, footer, CSS variables, and lead modals match the homepage theme. A slug that does not match an enabled published program SHALL redirect to `/`.
+Brand and center public sites SHALL expose `/courses/:slug` for each published curriculum program in that host’s `publicCurriculum` payload. The page SHALL render inside the existing public layout so nav, footer, CSS variables, and lead modals match the homepage theme. Spark Academy course pages SHALL use the same `--sa-page` (`#f8fafc`) canvas as **Courses designed for success**, not a plain white sheet. A slug that does not match an enabled published program SHALL redirect to `/`.
 
 #### Scenario: Spark card opens course page
 
@@ -16,6 +16,7 @@ Brand and center public sites SHALL expose `/courses/:slug` for each published c
 - **WHEN** a visitor activates the course title or media link
 - **THEN** the app opens `/courses/junior-abacus`
 - **AND** the page heading is Junior Abacus
+- **AND** the page canvas uses the Spark courses-section background (`--sa-page`)
 - **AND** **Enroll now** on the homepage card remains a lead-modal button
 
 #### Scenario: Unknown slug returns home
