@@ -15,6 +15,9 @@ export function EduLearnHero({ config, showFranchiseCta = true }: Props) {
   const accentImage = hero.phoneFrameUrl?.trim() && hero.phoneFrameUrl !== heroImage ? hero.phoneFrameUrl : "";
   const founder = visiblePublicFounders(config.founders)[0];
   const highlight = hero.line1Serif?.trim() || "Learning";
+  const franchiseCtaLabel =
+    hero.secondaryCtaLabel?.trim() || config.nav.secondaryCtaLabel?.trim() || "";
+  const franchiseCtaHref = hero.secondaryCtaHref?.trim() || config.nav.secondaryCtaHref || "apply";
 
   return (
     <section className="el-hero" id="hero">
@@ -32,12 +35,8 @@ export function EduLearnHero({ config, showFranchiseCta = true }: Props) {
           <p className="el-hero__subtitle">{hero.subtitle}</p>
           <div className="el-hero__actions">
             <EduLearnCta label={hero.ctaLabel || config.nav.ctaLabel} href={hero.ctaHref || config.nav.ctaHref} />
-            {showFranchiseCta && (hero.secondaryCtaLabel?.trim() || config.nav.secondaryCtaLabel?.trim()) ? (
-              <EduLearnCta
-                label={hero.secondaryCtaLabel?.trim() || config.nav.secondaryCtaLabel}
-                href={hero.secondaryCtaHref?.trim() || config.nav.secondaryCtaHref || "apply"}
-                variant="outline"
-              />
+            {showFranchiseCta && franchiseCtaLabel ? (
+              <EduLearnCta label={franchiseCtaLabel} href={franchiseCtaHref} variant="outline" />
             ) : null}
           </div>
         </div>
