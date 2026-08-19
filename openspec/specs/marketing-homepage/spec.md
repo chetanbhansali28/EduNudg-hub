@@ -258,16 +258,17 @@ Spark Academy public nav SHALL render `nav.links`, the primary CTA, and the seco
 - **THEN** the drawer includes **Student Login**
 - **AND** it does not include a hardcoded brand **Login**
 
-### Requirement: Spark Academy photo gallery is a two-row mobile carousel
+### Requirement: Spark Academy photo gallery is a horizontal marquee
 
-On viewports `max-width: 767px`, Spark Academy **Photo gallery** (`#gallery`, including **Moments from our journey**) SHALL render as a two-row horizontal snap carousel (`grid-auto-flow: column` + `grid-template-rows: 2`) and auto-advance when there is more than one column. Auto-scroll SHALL pause on user swipe and SHALL NOT run when `prefers-reduced-motion: reduce`. Desktop SHALL keep a wrapping photo grid (not a one-row carousel).
+Spark Academy **Photo gallery** (`#gallery`, including **Moments from our journey**) SHALL render as a single-row CSS marquee. The image set SHALL be duplicated so the loop is seamless. Every photo SHALL participate in the horizontal scroll; photos SHALL NOT wrap into extra rows. Auto-scroll SHALL pause on hover and SHALL NOT run when `prefers-reduced-motion: reduce`.
 
-#### Scenario: Mobile gallery auto-scrolls two-row columns
+#### Scenario: Gallery marquee scrolls all photos
 
 - **GIVEN** a Spark Academy public homepage with four or more gallery images
-- **WHEN** the viewport is `max-width: 767px`
-- **THEN** photos are paired into two-row columns
-- **AND** the track auto-advances to the next column
+- **WHEN** a visitor opens `/`
+- **THEN** the gallery is a single horizontal row
+- **AND** the track is duplicated for a continuous loop
+- **AND** photos do not wrap into additional rows
 
 ### Requirement: Spark Academy success stories are a mobile carousel
 

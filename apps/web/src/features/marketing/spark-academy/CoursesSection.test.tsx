@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModalContext";
 import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
@@ -26,7 +26,7 @@ describe("CoursesSection", () => {
     expect(screen.queryByRole("button", { name: exactAccessibleName("View all courses") })).toBeNull();
   });
 
-  it("regression_spark_view_all_courses_only_when_overflow", () => {
+  it("regression_spark_courses_lists_all_published_programs", () => {
     render(
       <LeadModalProvider>
         <CoursesSection
@@ -44,11 +44,6 @@ describe("CoursesSection", () => {
     expect(screen.getByRole("heading", { level: 3, name: "Abacus" })).toBeDefined();
     expect(screen.getByRole("heading", { level: 3, name: "Handwriting" })).toBeDefined();
     expect(screen.getByRole("heading", { level: 3, name: "Vedic Math" })).toBeDefined();
-    expect(screen.queryByRole("heading", { level: 3, name: "Rubik's Cube" })).toBeNull();
-
-    const viewAll = screen.getByRole("button", { name: exactAccessibleName("View all courses") });
-    fireEvent.click(viewAll);
-
     expect(screen.getByRole("heading", { level: 3, name: "Rubik's Cube" })).toBeDefined();
     expect(screen.queryByRole("button", { name: exactAccessibleName("View all courses") })).toBeNull();
   });
