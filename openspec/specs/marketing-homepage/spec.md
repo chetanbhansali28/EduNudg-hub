@@ -142,6 +142,17 @@ Spark Academy public landings SHALL use shared `--sa-h2-*` tokens for section ti
 - **THEN** each section `h2` includes `sa-section-title`
 - **AND** CSS uses `--sa-h2-size` `clamp(1.75rem, 4vw, 2.25rem)` at weight 800
 
+### Requirement: Public course detail uses homepage theme chrome
+
+Brand and center `/courses/:slug` SHALL render inside `BrandPublicLayout` / `CenterPublicLayout` so nav, footer, CSS variables, and lead modals match that host’s homepage. The page SHALL NOT wrap a second `marketing-page--*` class. Hash section links from this route SHALL resolve to `/#…` like `/about`.
+
+#### Scenario: Course page stays in public layout
+
+- **GIVEN** a Spark, Abacus, EduLearn, or Novu public host
+- **WHEN** a visitor opens a published `/courses/:slug`
+- **THEN** the same theme nav and footer as `/` are present
+- **AND** **Enroll now** on the course page can open the existing lead modal
+
 ### Requirement: Spark Academy image floats stay off the subject
 
 On Spark Academy Features, overlay badges SHALL sit on the corners of the entire image section (`.sa-features__visual`) — Last month at top-left, Learning Progress at bottom-right — and SHALL NOT be nested on the photo itself so the subject stays visible.

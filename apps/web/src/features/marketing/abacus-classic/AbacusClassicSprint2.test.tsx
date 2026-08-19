@@ -14,6 +14,7 @@ import { AbacusCtaButton, MarketingLeadModals } from "./MarketingLeadModals";
 
 function sampleProgram(name: string, description = "Program overview"): PublicCurriculumProgram {
   return {
+    id: null,
     name,
     description,
     whyTake: null,
@@ -194,14 +195,18 @@ describe("Abacus Classic — programs grid", () => {
 
   it("returns null when curriculum is empty and no homepage cards", () => {
     const { container } = render(
-      <ProgramsGridSection programs={[]} programsSection={{ cards: [] }} />
+      <MemoryRouter>
+        <ProgramsGridSection programs={[]} programsSection={{ cards: [] }} />
+      </MemoryRouter>
     );
     expect(container.firstChild).toBeNull();
   });
 
   it("renders homepage program cards with editable section headings", () => {
     const { container } = render(
-      <ProgramsGridSection programs={programs} programsSection={config.programsSection} />
+      <MemoryRouter>
+        <ProgramsGridSection programs={programs} programsSection={config.programsSection} />
+      </MemoryRouter>
     );
 
     expect(container.querySelector("#programs.ac-programs-grid")).toBeTruthy();
@@ -215,7 +220,11 @@ describe("Abacus Classic — programs grid", () => {
   });
 
   it("opens program details modal with benefits and brand scholarship default", () => {
-    render(<ProgramsGridSection programs={programs} programsSection={config.programsSection} />);
+    render(
+      <MemoryRouter>
+        <ProgramsGridSection programs={programs} programsSection={config.programsSection} />
+      </MemoryRouter>
+    );
 
     fireEvent.click(screen.getAllByRole("button", { name: "Know More →" })[0]!);
 
@@ -226,14 +235,32 @@ describe("Abacus Classic — programs grid", () => {
 
   it("falls back to curriculum programs when homepage cards are not configured", () => {
     render(
-      <ProgramsGridSection
-        programs={programs}
-        programsSection={{ eyebrow: "WHAT WE TEACH", title: "Programs", cards: [] }}
-      />
+      <MemoryRouter>
+        <ProgramsGridSection
+          programs={programs}
+          programsSection={{ eyebrow: "WHAT WE TEACH", title: "Programs", cards: [] }}
+        />
+      </MemoryRouter>
     );
 
     expect(screen.getByRole("heading", { level: 3, name: "Abacus Level 1" })).toBeDefined();
     expect(screen.getByRole("heading", { level: 3, name: "Vedic Maths" })).toBeDefined();
+    expect(screen.getAllByRole("link", { name: "Know More →" })).toHaveLength(2);
+  });
+
+  it("regression_abacus_know_more_opens_course_page", () => {
+    render(
+      <MemoryRouter>
+        <ProgramsGridSection
+          programs={[sampleProgram("Junior Abacus")]}
+          programsSection={{ eyebrow: "WHAT WE TEACH", title: "Programs", cards: [] }}
+        />
+      </MemoryRouter>
+    );
+
+    const knowMore = screen.getByRole("link", { name: "Know More →" });
+    expect(knowMore.getAttribute("href")).toBe("/courses/junior-abacus");
+    expect(screen.queryByRole("heading", { level: 2, name: "Junior Abacus Course Details" })).toBeNull();
   });
 });
 

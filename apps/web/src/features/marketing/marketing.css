@@ -1997,6 +1997,11 @@ body.novu-nav-drawer-open {
   line-height: 1.25;
 }
 
+.novu-curriculum-card__title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
 .novu-curriculum-card__title .serif {
   font-family: var(--novu-font-serif);
   font-style: italic;
@@ -3568,6 +3573,7 @@ body.ac-nav-drawer-open {
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .ac-programs-grid__know-more:hover {

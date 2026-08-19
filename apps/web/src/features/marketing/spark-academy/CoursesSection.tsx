@@ -1,4 +1,6 @@
+import { Link } from "react-router-dom";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
+import { publicCoursePath } from "@/lib/publicCourseSlug";
 import { programCardPalette } from "@/lib/marketingFeatureSections";
 import { programLessonLabel } from "./curriculumHelpers";
 import { SparkAcademyCta } from "./SparkAcademyCta";
@@ -12,11 +14,13 @@ type Props = {
 
 export function CourseCard({
   program,
+  catalog,
   index,
   enrollHref,
   enrollLabel,
 }: {
   program: PublicCurriculumProgram;
+  catalog: PublicCurriculumProgram[];
   index: number;
   enrollHref: string;
   enrollLabel: string;
@@ -27,37 +31,40 @@ export function CourseCard({
   const imageUrl = program.marketingImageUrl?.trim() || null;
   const category = program.ageLabel?.trim() || program.name.split(" ")[0] || "Program";
   const blurb = program.description?.trim() || program.whyTake?.trim() || "";
+  const detailHref = publicCoursePath(program, catalog);
 
   return (
     <article className="sa-course-card sa-reveal-item">
-      <div
-        className={`sa-course-card__media${imageUrl ? " sa-course-card__media--image" : ""}`}
-        style={
-          imageUrl
-            ? { backgroundImage: `url(${imageUrl})` }
-            : { background: `linear-gradient(135deg, ${palette.bg}, #1e3a8a)` }
-        }
-      >
-        {isBestSeller ? <span className="sa-course-card__tag">Best seller</span> : null}
-        {!imageUrl ? (
-          <span className="sa-course-card__icon" aria-hidden>
-            {palette.icon}
-          </span>
-        ) : null}
-      </div>
-      <div className="sa-course-card__body">
-        <div className="sa-course-card__meta">
-          <span>{category}</span>
-          <span className="sa-course-card__lessons">⏱ {lessonLabel}</span>
+      <Link to={detailHref} className="sa-course-card__link">
+        <div
+          className={`sa-course-card__media${imageUrl ? " sa-course-card__media--image" : ""}`}
+          style={
+            imageUrl
+              ? { backgroundImage: `url(${imageUrl})` }
+              : { background: `linear-gradient(135deg, ${palette.bg}, #1e3a8a)` }
+          }
+        >
+          {isBestSeller ? <span className="sa-course-card__tag">Best seller</span> : null}
+          {!imageUrl ? (
+            <span className="sa-course-card__icon" aria-hidden>
+              {palette.icon}
+            </span>
+          ) : null}
         </div>
-        <h3 className="sa-item-title sa-course-card__title">{program.name}</h3>
-        {blurb ? <p className="sa-course-card__desc">{blurb}</p> : null}
-        <div className="sa-course-card__actions">
-          <SparkAcademyCta label={enrollLabel} href={enrollHref} variant="outline" className="sa-course-card__btn" />
-          <span className="sa-course-card__rating" aria-label="Rated 5 out of 5">
-            ★★★★★ <small>({program.levels.length || 1}+)</small>
-          </span>
+        <div className="sa-course-card__body">
+          <div className="sa-course-card__meta">
+            <span>{category}</span>
+            <span className="sa-course-card__lessons">⏱ {lessonLabel}</span>
+          </div>
+          <h3 className="sa-item-title sa-course-card__title">{program.name}</h3>
+          {blurb ? <p className="sa-course-card__desc">{blurb}</p> : null}
         </div>
+      </Link>
+      <div className="sa-course-card__actions">
+        <SparkAcademyCta label={enrollLabel} href={enrollHref} variant="outline" className="sa-course-card__btn" />
+        <span className="sa-course-card__rating" aria-label="Rated 5 out of 5">
+          ★★★★★ <small>({program.levels.length || 1}+)</small>
+        </span>
       </div>
     </article>
   );
@@ -82,8 +89,9 @@ export function CoursesSection({
       <div className="sa-courses__grid sa-courses__grid--center">
         {programs.map((program, index) => (
           <CourseCard
-            key={`${program.name}-${index}`}
+            key={`${program.id ?? program.name}-${index}`}
             program={program}
+            catalog={programs}
             index={index}
             enrollHref={ctaHref}
             enrollLabel="Enroll now"

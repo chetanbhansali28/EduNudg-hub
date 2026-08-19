@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import type { ReactNode } from "react";
 import { mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
 import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
@@ -10,10 +11,12 @@ import { MarketingLeadModals } from "./MarketingLeadModals";
 
 function wrapWithLeadModal(ui: ReactNode) {
   return (
-    <LeadModalProvider>
-      {ui}
-      <MarketingLeadModals brandSlug="abacus" />
-    </LeadModalProvider>
+    <MemoryRouter>
+      <LeadModalProvider>
+        {ui}
+        <MarketingLeadModals brandSlug="abacus" />
+      </LeadModalProvider>
+    </MemoryRouter>
   );
 }
 

@@ -51,6 +51,7 @@ describe("normalizeBrandLandingBundle", () => {
       config,
       publicCurriculum: [
         {
+          id: null,
           name: "Abacus",
           description: null,
           whyTake: null,

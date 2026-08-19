@@ -147,3 +147,14 @@ Center (franchise) public landing pages SHALL NOT show brand franchise-applicati
 - **WHEN** a user without center, brand, or platform access attempts to update another center's profile
 - **THEN** `update_center_public_profile_rpc` rejects the request
 
+### Requirement: Center public course detail uses enabled catalog
+
+Center `/courses/:slug` SHALL use the same `publicCurriculum` as the center homepage (`center_public_curriculum_json` / enabled programs only). A slug for a brand course that is not enabled at that center SHALL redirect to `/`.
+
+#### Scenario: Disabled center program is not addressable
+
+- **GIVEN** a center host whose public curriculum omits a brand course
+- **WHEN** a visitor opens that course’s `/courses/:slug` on the center host
+- **THEN** they are redirected to `/`
+
+

@@ -25,6 +25,7 @@ describe("parsePublicCurriculum", () => {
   it("reads snake_case rpc rows", () => {
     const [program] = parsePublicCurriculum([
       {
+        id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
         name: "Abacus",
         marketing_image_url: "https://cdn.example/banner.png",
         age_label: "6-14",
@@ -32,6 +33,7 @@ describe("parsePublicCurriculum", () => {
         levels: [],
       },
     ]);
+    expect(program?.id).toBe("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa");
     expect(program?.marketingImageUrl).toBe("https://cdn.example/banner.png");
     expect(program?.ageLabel).toBe("6-14");
     expect(program?.marketingBenefits).toEqual(["Speed"]);

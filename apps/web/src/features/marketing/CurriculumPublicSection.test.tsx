@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { CurriculumPublicSection } from "./CurriculumPublicSection";
 
@@ -30,12 +31,20 @@ const sampleProgram = createPublicCurriculumProgram({
 
 describe("CurriculumPublicSection", () => {
   it("renders nothing when no published programs", () => {
-    const { container } = render(<CurriculumPublicSection programs={[]} />);
+    const { container } = render(
+      <MemoryRouter>
+        <CurriculumPublicSection programs={[]} />
+      </MemoryRouter>
+    );
     expect(container.firstChild).toBeNull();
   });
 
   it("regression_renders_horizontal_scroller_with_full_program_details", () => {
-    render(<CurriculumPublicSection programs={[sampleProgram, { ...sampleProgram, name: "Senior Track" }]} />);
+    render(
+      <MemoryRouter>
+        <CurriculumPublicSection programs={[sampleProgram, { ...sampleProgram, name: "Senior Track" }]} />
+      </MemoryRouter>
+    );
 
     expect(document.querySelector(".novu-curriculum-section__scroller")).toBeTruthy();
     expect(screen.getAllByText("Foundations for ages 4–7")).toHaveLength(2);

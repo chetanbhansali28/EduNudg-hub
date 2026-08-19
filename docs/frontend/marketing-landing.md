@@ -61,7 +61,7 @@ Program cards can be managed directly in **Marketing pages → Programs grid** (
 
 Nav links are configured in the homepage editor (`config.nav.links`). Brand owners choose **labels** freely; hrefs must match on-page section IDs.
 
-Hash section links (`#gallery`, `#faq`, …) are resolved with `resolveMarketingSectionHref` via `MarketingSectionNavLink` in Abacus / Spark / Novu navs: on `/` they stay as `#…`; from `/about` (or other routes) they become `/#…` so Gallery and other homepage sections remain reachable.
+Hash section links (`#gallery`, `#faq`, …) are resolved with `resolveMarketingSectionHref` via `MarketingSectionNavLink` in Abacus / Spark / Novu navs: on `/` they stay as `#…`; from `/about`, `/courses/:slug`, or other routes they become `/#…` so Gallery and other homepage sections remain reachable.
 
 | Theme | Default programs link | Curriculum / programs target | Full curriculum tree |
 |-------|----------------------|------------------------------|----------------------|
@@ -98,7 +98,7 @@ In **Navigation & CTAs** (Abacus/Spark) or **Navigation Management** (Novu), eac
 
 **Abacus Classic syllabus:** Toggle **Curriculum syllabus** in the homepage editor (visible by default). Content comes from published `/app/curriculum` data; no separate copy fields in v1.
 
-**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`). Published courses still show if leftover `programsGrid` is off (`regression_spark_courses_show_published_syllabus_even_if_programs_grid_off`). The section title and course cards are centered (`sa-section-head--center`, `sa-courses__grid--center`). Every published course is listed (`regression_spark_courses_lists_all_published_programs`).
+**Spark Academy syllabus:** The same published `/app/curriculum` catalog fills **Courses designed for success**. Homepage program cards do not override published courses (`regression_spark_courses_use_published_curriculum_over_homepage_cards`). Published courses still show if leftover `programsGrid` is off (`regression_spark_courses_show_published_syllabus_even_if_programs_grid_off`). The section title and course cards are centered (`sa-section-head--center`, `sa-courses__grid--center`). Every published course is listed (`regression_spark_courses_lists_all_published_programs`). Course media/title open `/courses/:slug` (`regression_spark_course_card_links_to_public_detail`). The detail page uses the same public layout/theme as `/` and shows curriculum marketing fields (`regression_public_course_page_shows_curriculum_fields`).
 
 See [Abacus Classic theme](./abacus-classic.md) for Sprint 1–3 scope, component map, automated tests, and manual QA checklists.
 

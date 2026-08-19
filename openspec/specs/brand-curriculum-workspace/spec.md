@@ -179,6 +179,23 @@ On Spark Academy public sites, **Courses designed for success** SHALL show that 
 - **THEN** every published card is visible in the wrapping grid
 - **AND** **View all courses** is not shown
 
+### Requirement: Public course detail page
+
+Published `/app/curriculum` programs SHALL be reachable at `/courses/:slug` on brand and center public hosts. The page SHALL show the public marketing fields for that program (when present) and SHALL inherit the same public layout/theme as `/`. Spark/EduLearn course media and titles SHALL link to that URL while **Enroll now** remains a lead-modal button. Abacus **Know More →** SHALL link when the card matches a published program. Unknown or center-disabled slugs SHALL redirect to `/`.
+
+#### Scenario: Spark card links to course page
+
+- **GIVEN** a Spark Academy public homepage with a published course
+- **WHEN** a visitor activates the course title or media
+- **THEN** they open `/courses/:slug` for that program
+- **AND** **Enroll now** on the card remains a button that opens the enroll modal
+
+#### Scenario: Unknown slug redirects home
+
+- **GIVEN** a public brand or center host
+- **WHEN** a visitor opens `/courses/not-a-real-course`
+- **THEN** they are redirected to `/`
+
 ### Requirement: Delete guards
 
 The system SHALL block level deletes that would break student progress or active batch ranges.

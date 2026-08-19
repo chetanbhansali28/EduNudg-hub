@@ -63,7 +63,7 @@ export function CourseParentMarketingFields({
 
   return (
     <>
-      <p className="ed-text-sm ed-muted">Benefits appear as bullet points in the public Know More popup.</p>
+      <p className="ed-text-sm ed-muted">Benefits appear as bullet points on the public course page.</p>
       {value.benefits.map((benefit, index) => (
         <div key={`benefit-${index}`} className="ed-form-section">
           <Input

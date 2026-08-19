@@ -1047,7 +1047,7 @@ function ProgramCardEditor({
       </EditorFieldsGrid>
 
       <EditorGroupedPanel
-        title="Benefits (Know More popup)"
+        title="Benefits (public course page)"
         note="Each benefit appears as a bullet point in the program details modal."
         isEmpty={benefits.length === 0}
         emptyLabel="No benefits yet."

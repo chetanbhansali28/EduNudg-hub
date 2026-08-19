@@ -110,6 +110,7 @@ export function programsGridToPublicPrograms(
   curriculum: PublicCurriculumProgram[]
 ): PublicCurriculumProgram[] {
   return resolveProgramsGridItems(programsSection, curriculum).map((item) => ({
+    id: null,
     name: item.name,
     description: item.description,
     whyTake: item.intro,

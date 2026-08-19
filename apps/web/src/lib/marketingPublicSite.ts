@@ -267,7 +267,7 @@ export function syncMarketingNavLinks(
 export function applyCurriculumNavLink(config: HomepageConfig, hasCurriculum: boolean): HomepageConfig {
   return syncMarketingNavLinks(config, {
     theme: "novu",
-    publicCurriculum: hasCurriculum ? [{ name: "_", description: null, whyTake: null, whatYouLearn: null, marketingVideoUrl: null, marketingImageUrl: null, ageLabel: null, marketingBenefits: [], scholarshipHighlight: null, versionNumber: 1, levels: [] }] : [],
+    publicCurriculum: hasCurriculum ? [{ id: null, name: "_", description: null, whyTake: null, whatYouLearn: null, marketingVideoUrl: null, marketingImageUrl: null, ageLabel: null, marketingBenefits: [], scholarshipHighlight: null, versionNumber: 1, levels: [] }] : [],
   });
 }
 

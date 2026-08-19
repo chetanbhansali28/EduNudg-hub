@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { buildBrandLandingConfig } from "@/lib/brandLandingDefaults";
 import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { setSectionEnabled } from "@/lib/homepageSections";
@@ -57,17 +58,19 @@ describe("MarketingContent", () => {
   it("regression_renders_curriculum_section_on_brand_home_when_programs_exist", () => {
     const config = buildBrandLandingConfig("Abacus World");
     render(
-      <MarketingContent
-        config={config}
-        portalMode="brand"
-        brandSlug="abacusworld"
-        publicCurriculum={[
-          createPublicCurriculumProgram({
-            name: "Junior Track",
-            description: "Foundations",
-          }),
-        ]}
-      />
+      <MemoryRouter>
+        <MarketingContent
+          config={config}
+          portalMode="brand"
+          brandSlug="abacusworld"
+          publicCurriculum={[
+            createPublicCurriculumProgram({
+              name: "Junior Track",
+              description: "Foundations",
+            }),
+          ]}
+        />
+      </MemoryRouter>
     );
 
     expect(document.getElementById("curriculum")).toBeTruthy();
@@ -77,20 +80,22 @@ describe("MarketingContent", () => {
   it("regression_renders_curriculum_section_on_center_home_when_programs_exist", () => {
     const config = buildBrandLandingConfig("Abacus World");
     render(
-      <MarketingContent
-        config={config}
-        portalMode="center"
-        brandSlug="abacusworld"
-        centerSlug="koramangala"
-        publicCurriculum={[
-          createPublicCurriculumProgram({
-            name: "Core Program",
-            description: null,
-            whyTake: "Build focus",
-            versionNumber: 0,
-          }),
-        ]}
-      />
+      <MemoryRouter>
+        <MarketingContent
+          config={config}
+          portalMode="center"
+          brandSlug="abacusworld"
+          centerSlug="koramangala"
+          publicCurriculum={[
+            createPublicCurriculumProgram({
+              name: "Core Program",
+              description: null,
+              whyTake: "Build focus",
+              versionNumber: 0,
+            }),
+          ]}
+        />
+      </MemoryRouter>
     );
 
     expect(document.getElementById("curriculum")).toBeTruthy();

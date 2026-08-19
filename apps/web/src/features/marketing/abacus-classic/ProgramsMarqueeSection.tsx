@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import type { HomepageProgramsSection } from "@/types/homepage";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import {
   resolveProgramsGridItems,
   type ProgramsGridDisplayItem,
 } from "@/lib/programsGridItems";
+import { matchPublishedProgramByName, publicCoursePath } from "@/lib/publicCourseSlug";
 import { programCardPalette } from "@/lib/marketingFeatureSections";
 import { AcModalShell } from "./MarketingLeadModals";
 
@@ -66,13 +68,28 @@ export function ProgramsGridSection({ programs, programsSection }: Props) {
                     {item.description ? (
                       <p className="ac-programs-grid__desc">{item.description}</p>
                     ) : null}
-                    <button
-                      type="button"
-                      className="ac-programs-grid__know-more"
-                      onClick={() => setActiveItem(item)}
-                    >
-                      Know More →
-                    </button>
+                    {(() => {
+                      const published = matchPublishedProgramByName(programs, item.name);
+                      if (published) {
+                        return (
+                          <Link
+                            to={publicCoursePath(published, programs)}
+                            className="ac-programs-grid__know-more"
+                          >
+                            Know More →
+                          </Link>
+                        );
+                      }
+                      return (
+                        <button
+                          type="button"
+                          className="ac-programs-grid__know-more"
+                          onClick={() => setActiveItem(item)}
+                        >
+                          Know More →
+                        </button>
+                      );
+                    })()}
                   </div>
                 </article>
               );

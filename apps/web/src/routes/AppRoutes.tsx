@@ -16,6 +16,7 @@ import { AuditLogsPage } from "@/features/platform/AuditLogsPage";
 import { SettingsPage } from "@/features/platform/SettingsPage";
 import { BrandLandingPage } from "@/features/brand/BrandLandingPage";
 import { BrandAboutPage } from "@/features/brand/BrandAboutPage";
+import { PublicCoursePage } from "@/features/marketing/course-detail/PublicCoursePage";
 import { BrandLegalPage } from "@/features/brand/BrandLegalPage";
 import { BrandLayout } from "@/features/brand/BrandLayout";
 import { BrandPublicLayout } from "@/features/brand/BrandPublicLayout";
@@ -164,6 +165,7 @@ export function AppRoutes() {
           <Route element={<BrandPublicLayout />}>
             <Route path="/" element={<BrandLandingPage />} />
             <Route path="/about" element={<BrandAboutPage />} />
+            <Route path="/courses/:slug" element={<PublicCoursePage />} />
             <Route path="/legal/:kind" element={<BrandLegalPage />} />
             <Route path="/login" element={<LoginPage />} />
           </Route>
@@ -245,6 +247,7 @@ export function AppRoutes() {
         <>
           <Route element={<CenterPublicLayout />}>
             <Route path="/" element={<CenterLandingPage />} />
+            <Route path="/courses/:slug" element={<PublicCoursePage />} />
             <Route path="/legal/:kind" element={<BrandLegalPage />} />
           </Route>
           <Route

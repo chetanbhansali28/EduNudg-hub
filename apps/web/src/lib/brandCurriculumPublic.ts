@@ -20,6 +20,7 @@ export type PublicCurriculumLevel = {
 };
 
 export type PublicCurriculumProgram = {
+  id: string | null;
   name: string;
   description: string | null;
   whyTake: string | null;
@@ -105,6 +106,7 @@ function parseProgram(raw: unknown): PublicCurriculumProgram | null {
   const levelsRaw = Array.isArray(row.levels) ? row.levels : [];
   const levels = levelsRaw.map(parseLevel).filter((l): l is PublicCurriculumLevel => l !== null);
   return {
+    id: pickString(row, "id"),
     name: row.name,
     description: pickString(row, "description"),
     whyTake: pickString(row, "why_take", "whyTake"),
@@ -140,6 +142,7 @@ export function publicCurriculumHasSyllabus(programs: PublicCurriculumProgram[])
 }
 
 const PUBLIC_CURRICULUM_PROGRAM_DEFAULTS: Omit<PublicCurriculumProgram, "name"> = {
+  id: null,
   description: null,
   whyTake: null,
   whatYouLearn: null,

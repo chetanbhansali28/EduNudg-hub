@@ -1,0 +1,151 @@
+.pub-course {
+  --pub-course-max: 46rem;
+}
+
+.pub-course__article {
+  max-width: var(--pub-course-max);
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4.5rem;
+}
+
+.pub-course__banner {
+  height: 14rem;
+  border-radius: 1rem;
+  background-size: cover;
+  background-position: center;
+  margin-bottom: 1.25rem;
+}
+
+.pub-course__badge {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.pub-course__lede {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.pub-course__enroll {
+  margin: 0 0 1.75rem;
+}
+
+.pub-course__enroll-link {
+  font-weight: 700;
+}
+
+.pub-course__video {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  margin: 0 0 1.75rem;
+  border-radius: 0.85rem;
+  overflow: hidden;
+}
+
+.pub-course__video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.pub-course__video-link {
+  display: inline-block;
+  margin: 0 0 1.5rem;
+}
+
+.pub-course__block {
+  margin: 0 0 1.75rem;
+}
+
+.pub-course__block h1,
+.pub-course__block h2,
+.pub-course h1 {
+  margin: 0 0 0.65rem;
+}
+
+.pub-course__pre {
+  white-space: pre-wrap;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.pub-course__benefits {
+  margin: 0;
+}
+
+.pub-course__scholarship {
+  margin: 0 0 1.75rem;
+}
+
+.pub-course__level {
+  border: 1px solid rgb(15 23 42 / 0.12);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin: 0 0 0.75rem;
+  background: #fff;
+}
+
+.pub-course__level-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-weight: 700;
+}
+
+.pub-course__level-code {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.pub-course__level-body {
+  margin-top: 0.85rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pub-course__topics,
+.pub-course__lessons {
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.pub-course__lessons li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pub-course__module-title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.marketing-page--spark-academy .pub-course__badge {
+  background: var(--sa-yellow, #facc15);
+  color: var(--sa-navy, #0f172a);
+}
+
+.marketing-page--spark-academy .pub-course__level {
+  border-color: var(--sa-border, #e2e8f0);
+}
+
+.marketing-page--edu-learn .pub-course__badge {
+  background: var(--el-orange, #f9a825);
+  color: var(--el-green-dark, #163f24);
+}
+
+.marketing-page--abacus-classic .pub-course__badge {
+  background: #0f172a;
+  color: #fff;
+}

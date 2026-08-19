@@ -1,4 +1,6 @@
+import { Link } from "react-router-dom";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
+import { publicCoursePath } from "@/lib/publicCourseSlug";
 import { EduLearnCta, EduLearnMark } from "./EduLearnCta";
 
 type Props = {
@@ -21,16 +23,20 @@ export function EduLearnCourses({ programs, ctaHref, title }: Props) {
           </h2>
         </div>
         <div className="el-courses__grid">
-          {programs.map((program) => (
-            <article key={program.name} className="el-course-card">
-              {program.marketingImageUrl ? (
-                <img className="el-course-card__media" src={program.marketingImageUrl} alt="" />
-              ) : (
-                <div className="el-course-card__media el-course-card__media--empty" aria-hidden />
-              )}
-              <div className="el-course-card__body">
-                <h3>{program.name}</h3>
-                {program.description ? <p>{program.description}</p> : null}
+          {programs.map((program, index) => (
+            <article key={`${program.id ?? program.name}-${index}`} className="el-course-card">
+              <Link to={publicCoursePath(program, programs)} className="el-course-card__link">
+                {program.marketingImageUrl ? (
+                  <img className="el-course-card__media" src={program.marketingImageUrl} alt="" />
+                ) : (
+                  <div className="el-course-card__media el-course-card__media--empty" aria-hidden />
+                )}
+                <div className="el-course-card__body">
+                  <h3>{program.name}</h3>
+                  {program.description ? <p>{program.description}</p> : null}
+                </div>
+              </Link>
+              <div className="el-course-card__cta">
                 <EduLearnCta label="Enroll now" href={ctaHref} icon />
               </div>
             </article>

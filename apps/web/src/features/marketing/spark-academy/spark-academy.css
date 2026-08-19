@@ -601,6 +601,15 @@ body.sa-nav-drawer-open {
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+.sa-course-card__link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
 .sa-course-card:hover {
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.1);
   transform: translateY(-4px);
@@ -682,7 +691,7 @@ body.sa-nav-drawer-open {
   align-items: center;
   gap: 0.5rem;
   margin-top: auto;
-  padding-top: 0.5rem;
+  padding: 0.5rem 1.125rem 1.125rem;
 }
 
 .sa-course-card__rating {

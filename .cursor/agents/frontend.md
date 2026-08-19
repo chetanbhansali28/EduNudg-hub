@@ -39,6 +39,7 @@
 - [ ] Center `/app` staff chrome lockup shows the **brand name** next to the Site logo, with the franchise **display name** as a smaller tagline (`regression_center_shell_lockup_shows_brand_then_franchise_name`).
 - [ ] Spark Academy `/about` reuses homepage Hero / Features / Journey / Mentors (`regression_spark_about_page_uses_homepage_section_blocks`) and hides homepage badges on that route (`regression_spark_about_hero_omits_homepage_badges`, `regression_spark_about_features_omits_float_badges`).
 - [ ] Spark Academy **Courses designed for success** lists every published course (`regression_spark_courses_lists_all_published_programs`).
+- [ ] Public `/courses/:slug` uses homepage theme chrome and curriculum fields (`regression_public_course_page_shows_curriculum_fields`).
 - [ ] Center student detail **Portal access** shows `login_email` or the parent email, and **Copy Profile URL** copies the learn-portal login (no password).
 - [ ] Center student **Save address** shows a **Saved** / **Address saved.** confirmation next to the button.
 - [ ] `edunudg-sync-artifacts` run (OpenSpec/docs/skills as needed)

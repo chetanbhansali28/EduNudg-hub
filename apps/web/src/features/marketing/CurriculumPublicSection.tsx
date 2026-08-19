@@ -1,5 +1,7 @@
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
+import { publicCoursePath } from "@/lib/publicCourseSlug";
 
 function VideoLink({ url, label }: { url: string; label: string }) {
   return (
@@ -66,7 +68,13 @@ function LevelBlock({ level }: { level: PublicCurriculumProgram["levels"][number
   );
 }
 
-function ProgramCard({ program }: { program: PublicCurriculumProgram }) {
+function ProgramCard({
+  program,
+  catalog,
+}: {
+  program: PublicCurriculumProgram;
+  catalog: PublicCurriculumProgram[];
+}) {
   const titleParts = program.name.match(/^(.+?)(\s+)(\S+\.?)$/);
   const titleMain = titleParts?.[1] ?? program.name;
   const titleSerif = titleParts?.[3] ?? "";
@@ -76,13 +84,15 @@ function ProgramCard({ program }: { program: PublicCurriculumProgram }) {
       <div className="novu-curriculum-card">
         <header className="novu-curriculum-card__header">
           <h3 className="novu-curriculum-card__title">
-            {titleSerif ? (
-              <>
-                {titleMain} <span className="serif">{titleSerif}</span>
-              </>
-            ) : (
-              program.name
-            )}
+            <Link to={publicCoursePath(program, catalog)} className="novu-curriculum-card__title-link">
+              {titleSerif ? (
+                <>
+                  {titleMain} <span className="serif">{titleSerif}</span>
+                </>
+              ) : (
+                program.name
+              )}
+            </Link>
           </h3>
           {program.versionNumber > 0 && (
             <span className="novu-curriculum-card__version">v{program.versionNumber}</span>
@@ -158,7 +168,7 @@ export function CurriculumPublicSection({
       </div>
       <div ref={scrollerRef} className="novu-curriculum-section__scroller">
         {programs.map((program) => (
-          <ProgramCard key={program.name} program={program} />
+          <ProgramCard key={program.id ?? program.name} program={program} catalog={programs} />
         ))}
       </div>
       {programs.length > 1 && (

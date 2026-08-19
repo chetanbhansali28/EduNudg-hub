@@ -11,6 +11,7 @@ import type { PublicCurriculumProgram } from "./brandCurriculumPublic";
 
 function sampleCurriculum(name: string): PublicCurriculumProgram {
   return {
+    id: null,
     name,
     description: "From curriculum",
     whyTake: null,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModalContext";
 import {
   mergeAbacusClassicLandingConfig,
@@ -13,6 +14,7 @@ describe("SparkAcademyContent", () => {
   it("regression_renders_hero_courses_and_faq_from_homepage_config", () => {
     const config = mergeSparkAcademyLandingConfig("Educat Demo");
     render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -38,6 +40,7 @@ describe("SparkAcademyContent", () => {
           publicStats={{ centersCount: 10, studentsCount: 5000 }}
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     expect(screen.getByRole("main")).toBeDefined();
@@ -60,6 +63,7 @@ describe("SparkAcademyContent", () => {
   it("regression_spark_course_cards_center_in_grid", () => {
     const config = mergeSparkAcademyLandingConfig("Educat Demo");
     render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -74,6 +78,7 @@ describe("SparkAcademyContent", () => {
           ]}
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     expect(document.querySelector(".sa-courses__grid--center")).toBeDefined();
@@ -87,6 +92,7 @@ describe("SparkAcademyContent", () => {
     });
 
     render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -118,6 +124,7 @@ describe("SparkAcademyContent", () => {
           ]}
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     expect(screen.getByText("Courses designed for success")).toBeDefined();
@@ -133,6 +140,7 @@ describe("SparkAcademyContent", () => {
   it("regression_spark_course_card_keeps_enroll_now_and_centers_rating_below", () => {
     const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
     const { container } = render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -157,6 +165,7 @@ describe("SparkAcademyContent", () => {
           ]}
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     const enrollNow = screen.getByRole("button", { name: exactAccessibleName("Enroll now") });
@@ -172,6 +181,7 @@ describe("SparkAcademyContent", () => {
   it("regression_spark_courses_section_has_no_curriculum_tabs", () => {
     const config = mergeSparkAcademyLandingConfig("Smart Brain Abacus");
     render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -189,6 +199,7 @@ describe("SparkAcademyContent", () => {
           ]}
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     expect(screen.getByText("Courses designed for success")).toBeDefined();
@@ -206,6 +217,7 @@ describe("SparkAcademyContent", () => {
     config.sections = { ...config.sections, programsGrid: false, curriculumSyllabus: false };
 
     render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -219,6 +231,7 @@ describe("SparkAcademyContent", () => {
           ]}
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     expect(screen.getByText("Courses designed for success")).toBeDefined();
@@ -237,9 +250,11 @@ describe("SparkAcademyContent", () => {
     });
     config.sections = { ...config.sections, gallery: false };
     const { container } = render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent config={config} portalMode="brand" brandSlug="smart-brain-abacus" />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     expect(container.querySelector("#gallery")).toBeTruthy();
@@ -255,6 +270,7 @@ describe("SparkAcademyContent", () => {
     config.sections = { ...config.sections, about: true };
 
     render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -262,6 +278,7 @@ describe("SparkAcademyContent", () => {
           brandSlug="smart-brain-abacus"
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     expect(document.getElementById("about")).toBeNull();
@@ -277,6 +294,7 @@ describe("SparkAcademyContent", () => {
       },
     });
     const { container } = render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -290,6 +308,7 @@ describe("SparkAcademyContent", () => {
           ]}
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     const sectionH2s = container.querySelectorAll(
@@ -312,6 +331,7 @@ describe("SparkAcademyContent", () => {
   it("regression_spark_section_items_stagger_inside_blocks", () => {
     const config = mergeSparkAcademyLandingConfig("Educat Demo");
     render(
+      <MemoryRouter>
       <LeadModalProvider>
         <SparkAcademyContent
           config={config}
@@ -326,6 +346,7 @@ describe("SparkAcademyContent", () => {
           ]}
         />
       </LeadModalProvider>
+      </MemoryRouter>
     );
 
     expect(document.querySelector(".sa-course-card.sa-reveal-item")).toBeDefined();
