@@ -28,10 +28,11 @@ export function AcModalShell({
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  appearance?: "abacus-classic" | "spark-academy";
+  appearance?: "abacus-classic" | "spark-academy" | "edu-learn";
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const isSpark = appearance === "spark-academy";
+  const isEduLearn = appearance === "edu-learn";
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -43,7 +44,7 @@ export function AcModalShell({
   return (
     <dialog
       ref={dialogRef}
-      className={isSpark ? "ac-modal ac-modal--spark" : "ac-modal"}
+      className={isEduLearn ? "ac-modal ac-modal--edu-learn" : isSpark ? "ac-modal ac-modal--spark" : "ac-modal"}
       onClose={onClose}
       onClick={(e) => e.target === dialogRef.current && onClose()}
     >
@@ -243,7 +244,8 @@ const MODAL_TITLES: Record<Exclude<LeadModalKind, null>, string> = {
 export function MarketingLeadModals({ brandSlug, centerSlug, theme }: Props) {
   const { activeModal, closeModal } = useLeadModal();
   const enrollTitle = centerSlug ? "Book a free trial at this center" : MODAL_TITLES.enroll;
-  const appearance = theme === "spark-academy" ? "spark-academy" : "abacus-classic";
+  const appearance =
+    theme === "spark-academy" ? "spark-academy" : theme === "edu-learn" ? "edu-learn" : "abacus-classic";
 
   return (
     <>

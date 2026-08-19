@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
-import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig, mergeEduLearnLandingConfig } from "@/lib/brandLandingDefaults";
 import { createPublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModalContext";
 import type { BrandLandingOutletContext } from "./BrandPublicLayout";
@@ -33,7 +33,7 @@ function renderWithOutlet(context: BrandLandingOutletContext) {
     </MemoryRouter>
   );
 
-  if (context.marketingTheme === "abacus-classic" || context.marketingTheme === "spark-academy") {
+  if (context.marketingTheme === "abacus-classic" || context.marketingTheme === "spark-academy" || context.marketingTheme === "edu-learn") {
     return render(<LeadModalProvider>{page}</LeadModalProvider>);
   }
 
@@ -94,6 +94,22 @@ describe("BrandLandingPage", () => {
 
     expect(screen.getByRole("main")).toBeDefined();
     expect(screen.getByText(/Shape your future with/)).toBeDefined();
+  });
+
+  it("renders EduLearnContent when marketingTheme is edu-learn", () => {
+    const config = mergeEduLearnLandingConfig("AbacusWorld");
+    renderWithOutlet({
+      config,
+      brandSlug: "abacusworld",
+      marketingTheme: "edu-learn",
+      publicCurriculum: [],
+      publicStats: { centersCount: 3, studentsCount: 200 },
+      legalPages: {},
+      socialConnect: {},
+    });
+
+    expect(screen.getByRole("main")).toBeDefined();
+    expect(screen.getByText("Learning")).toBeDefined();
   });
 
   it("regression_brandLandingOmitsWhatsAppFloat", () => {

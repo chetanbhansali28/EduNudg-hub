@@ -1,6 +1,6 @@
 import { mergeHomepageConfig } from "@/lib/homepageApi";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
-import { ABACUS_CLASSIC_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeAbacusClassicSectionVisibility, mergeSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
+import { ABACUS_CLASSIC_SECTION_DEFAULTS, EDU_LEARN_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeAbacusClassicSectionVisibility, mergeEduLearnSectionVisibility, mergeSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import { mergeAboutSection } from "@/lib/aboutUs";
 import type { HomepageConfig } from "@/types/homepage";
@@ -700,5 +700,236 @@ export function mergeSparkAcademyLandingConfig(
     },
     about: mergeAboutSection(brandName, partial?.about ?? base.about),
     sections: mergeSparkAcademySectionVisibility(partial),
+  });
+}
+
+const EDU_LEARN_HERO =
+  "https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?auto=format&fit=crop&w=900&h=1200&q=80";
+const EDU_LEARN_ACCENT =
+  "https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=640&h=420&q=80";
+const EDU_LEARN_STATS =
+  "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=900&h=1100&q=80";
+
+/** Default landing content for the EduLearn (green/orange) marketing theme. */
+export function buildEduLearnLandingPartial(brandName: string): Partial<HomepageConfig> {
+  return {
+    meta: {
+      siteName: brandName,
+      fontSans: "Inter",
+      fontSerif: "Inter",
+    },
+    theme: {
+      bgColor: "#f6f3ed",
+      accent: "#f9a825",
+      muted: "#5b6168",
+      ctaBg: "#f9a825",
+      ctaFg: "#ffffff",
+      yellowGlow: "#f9a825",
+      radiusSection: "1.25rem",
+    },
+    nav: {
+      links: [
+        { label: "Courses", href: "#programs" },
+        { label: "Features", href: "#features" },
+        { label: "About us", href: "/about" },
+        { label: "Success stories", href: "#testimonials" },
+      ],
+      ctaLabel: "Get Started",
+      ctaHref: "enroll",
+      secondaryCtaLabel: "Apply franchise",
+      secondaryCtaHref: "apply",
+      adminHref: "/login",
+    },
+    hero: {
+      line1: "Keep",
+      line1Serif: "Learning",
+      line2: "on Track",
+      line2Serif: "",
+      subtitle: `${brandName} helps centers keep every class staffed, every student progressing, and every parent informed—without the chaos.`,
+      ctaLabel: "Get Started",
+      ctaHref: "enroll",
+      secondaryCtaLabel: "Apply franchise",
+      secondaryCtaHref: "apply",
+      backgroundImageUrl: EDU_LEARN_HERO,
+      phoneFrameUrl: EDU_LEARN_ACCENT,
+    },
+    featureSections: [
+      {
+        id: "match",
+        title: "Find the right",
+        titleSerif: "fit fast",
+        body: "Match families to programs and centers with clear next steps—demo, enroll, or apply.",
+      },
+      {
+        id: "school",
+        title: "Run your",
+        titleSerif: "school calmly.",
+        body: "Curriculum, batches, and parent communication stay in one place as you grow.",
+      },
+      {
+        id: "resources",
+        title: "Share resources",
+        titleSerif: "parents trust.",
+        body: "Guides, photos, and stories that show what learning looks like at your centers.",
+      },
+    ],
+    featuresShowcase: {
+      title: "",
+      subtitle: "",
+    },
+    trustMedia: {
+      eyebrow: "Why choose us",
+      title: "Why choose our services?",
+      intro: `${brandName} partners with schools and franchise centers that want reliable operations.`,
+      youtubeUrl: "",
+      imageUrl: EDU_LEARN_STATS,
+      highlightPrimary: "48+",
+      highlightCaption: "Graduate programs",
+      cards: [
+        { title: "3k", subtitle: "School partners" },
+        { title: "300+", subtitle: "Daily active learners" },
+        { title: "48+", subtitle: "Graduate programs" },
+      ],
+    },
+    founders: [
+      {
+        roleBadge: "Teacher",
+        name: "Certified faculty",
+        title: "Lead instructor",
+        bio: "",
+        photoUrl:
+          "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=160&h=160&q=80",
+        statBadge: { value: "210+", label: "Certified teachers" },
+      },
+    ],
+    gallery: {
+      title: "Useful content for your center",
+      images: [
+        {
+          url: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=640&h=420&q=80",
+          alt: "The guide to becoming a great teacher",
+        },
+        {
+          url: "https://images.unsplash.com/photo-1588072432836-e10032774350?auto=format&fit=crop&w=640&h=420&q=80",
+          alt: "How centers keep learning on track",
+        },
+        {
+          url: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=640&h=420&q=80",
+          alt: "Partnering with schools that care",
+        },
+      ],
+    },
+    testimonials: {
+      title: "What our lovely clients say",
+      subtitle: "",
+      items: [
+        {
+          quote: "Scheduling used to eat our week. Now families book demos and we stay focused on teaching.",
+          author: "James Huet",
+          role: "Full-teacher in Texas",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+        {
+          quote: "Parents see progress without chasing WhatsApp threads. The center finally feels organized.",
+          author: "Sarah Lee",
+          role: "Center director",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+        {
+          quote: "The public site matches how we actually teach—warm, clear, and easy to enroll.",
+          author: "Michael Davis",
+          role: "Franchise owner",
+          avatarUrl:
+            "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=96&h=96&q=80",
+        },
+      ],
+    },
+    faq: [],
+    footerCta: {
+      title: "Join our community of school partners",
+      subtitle: "",
+      ctaLabel: "Get in Touch",
+      ctaHref: "apply",
+    },
+    footer: {
+      productLinks: [
+        { label: "Features", href: "#features" },
+        { label: "Resources", href: "#gallery" },
+        { label: "About us", href: "/about" },
+      ],
+      companyLinks: [{ label: "Partner login", href: "/login" }],
+      connectLinks: [{ label: "Get Started", href: "enroll" }],
+      copyright: `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`,
+      privacyHref: "/legal/privacy",
+      termsHref: "/legal/terms",
+      refundHref: "/legal/refund",
+      rich: {
+        description: `${brandName} keeps learning on track for schools and franchise centers.`,
+        badges: [],
+        customStats: [],
+        brandStats: { franchiseCount: "12+", studentCount: "3k+" },
+        presence: [],
+        headOffice: { address: "", phone: "", website: "" },
+        socialLinks: [],
+      },
+    },
+    about: mergeAboutSection(brandName),
+    sections: mergeSectionVisibility(undefined, EDU_LEARN_SECTION_DEFAULTS),
+  };
+}
+
+export function mergeEduLearnLandingConfig(
+  brandName: string,
+  partial?: Partial<HomepageConfig>,
+  logoUrl?: string | null
+): HomepageConfig {
+  const base = buildEduLearnLandingPartial(brandName);
+  return mergeHomepageConfig({
+    ...base,
+    ...partial,
+    meta: {
+      siteName: partial?.meta?.siteName ?? base.meta!.siteName,
+      fontSans: partial?.meta?.fontSans ?? base.meta!.fontSans,
+      fontSerif: partial?.meta?.fontSerif ?? base.meta!.fontSerif,
+      themeNote: partial?.meta?.themeNote ?? base.meta!.themeNote,
+      logoUrl: partial?.meta?.logoUrl ?? logoUrl ?? null,
+    },
+    theme: {
+      ...base.theme!,
+      ...partial?.theme,
+      bgColor: "#f6f3ed",
+    },
+    nav: { ...base.nav!, ...partial?.nav, links: partial?.nav?.links ?? base.nav!.links },
+    hero: { ...base.hero!, ...partial?.hero },
+    featureSections: partial?.featureSections ?? base.featureSections,
+    featuresShowcase: {
+      ...base.featuresShowcase!,
+      ...partial?.featuresShowcase,
+    },
+    trustMedia: {
+      ...base.trustMedia!,
+      ...partial?.trustMedia,
+      cards: partial?.trustMedia?.cards ?? base.trustMedia!.cards,
+    },
+    founders: partial?.founders ?? base.founders,
+    programsSection: {
+      ...base.programsSection,
+      ...partial?.programsSection,
+      cards: partial?.programsSection?.cards ?? base.programsSection?.cards,
+    },
+    faq: partial?.faq ?? base.faq,
+    testimonials: partial?.testimonials ?? base.testimonials,
+    upcomingEvents: partial?.upcomingEvents ?? base.upcomingEvents,
+    gallery: { ...base.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? base.gallery!.images },
+    footerCta: { ...base.footerCta!, ...partial?.footerCta },
+    footer: {
+      ...base.footer!,
+      ...partial?.footer,
+      rich: { ...base.footer!.rich, ...partial?.footer?.rich },
+    },
+    about: mergeAboutSection(brandName, partial?.about ?? base.about),
+    sections: mergeEduLearnSectionVisibility(partial),
   });
 }

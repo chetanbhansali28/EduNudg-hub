@@ -1,6 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import { AbacusClassicContent } from "@/features/marketing/abacus-classic";
 import { SparkAcademyContent } from "@/features/marketing/spark-academy";
+import { EduLearnContent } from "@/features/marketing/edu-learn";
 import { MarketingContent } from "@/features/marketing/MarketingContent";
 import type { CenterLandingOutletContext } from "@/features/center/CenterPublicLayout";
 
@@ -19,6 +20,20 @@ export function CenterLandingPage() {
   if (ctx.marketingTheme === "spark-academy") {
     return (
       <SparkAcademyContent
+        config={ctx.config}
+        portalMode="center"
+        brandSlug={ctx.brandSlug}
+        centerSlug={ctx.centerSlug}
+        centerProfile={ctx.profile}
+        publicCurriculum={ctx.publicCurriculum}
+        publicStats={ctx.publicStats}
+      />
+    );
+  }
+
+  if (ctx.marketingTheme === "edu-learn") {
+    return (
+      <EduLearnContent
         config={ctx.config}
         portalMode="center"
         brandSlug={ctx.brandSlug}

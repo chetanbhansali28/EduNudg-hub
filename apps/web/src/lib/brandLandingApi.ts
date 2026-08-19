@@ -1,5 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
-import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
+import { buildBrandLandingConfig, mergeAbacusClassicLandingConfig, mergeEduLearnLandingConfig, mergeSparkAcademyLandingConfig } from "@/lib/brandLandingDefaults";
 import { parseBrandLegalPages, parseBrandLegalPagesRecord } from "@/lib/brandLegalPages";
 import { parseBrandSocialConnect } from "@/lib/brandSocialConnect";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
@@ -48,6 +48,9 @@ function buildConfigForTheme(
   }
   if (theme === "spark-academy") {
     return mergeSparkAcademyLandingConfig(brandName, partial, logoUrl);
+  }
+  if (theme === "edu-learn") {
+    return mergeEduLearnLandingConfig(brandName, partial, logoUrl);
   }
   return buildBrandLandingConfig(brandName, partial, logoUrl);
 }
@@ -226,7 +229,7 @@ export async function updateBrandMarketingTheme(brandId: string, theme: Marketin
 
 function formatMarketingThemeUpdateError(message: string): string {
   if (message.includes("brands_marketing_theme_check")) {
-    return "Spark Academy requires the latest database migration. Ask your platform admin to run: supabase db push";
+    return "EduLearn requires the latest database migration. Ask your platform admin to run: supabase db push";
   }
   return message;
 }

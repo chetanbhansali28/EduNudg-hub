@@ -51,9 +51,10 @@ description: Add EduNudg features using modular files, service layer, base theme
 ## Marketing themes (Abacus / Spark)
 
 - Theme assigned by platform admin on brand detail (`brands.marketing_theme`).
-- Abacus/Spark public CTAs use **modals** (`MarketingLeadModals` + `LeadModalHashOpener`), not Novu inline forms. Pass `theme="spark-academy"` so Spark dialogs use `ac-modal--spark` (Inter, navy, pill close/submit) — `regression_spark_lead_modals_use_theme_classes`. Spark homepage motion: hero rise/float + unhurried `sa-reveal` section lift (~0.95s) + delayed `sa-reveal-item` fade-and-scale (~1.1s, ~200ms stagger) inside blocks; honor `prefers-reduced-motion` — `regression_spark_homepage_motion_css_respects_reduced_motion`, `regression_spark_section_items_stagger_inside_blocks`.
+- Abacus/Spark/EduLearn public CTAs use **modals** (`MarketingLeadModals` + `LeadModalHashOpener`), not Novu inline forms. Pass `theme="spark-academy"` or `theme="edu-learn"` so dialogs use `ac-modal--spark` / `ac-modal--edu-learn`.
+- EduLearn MUST render Spark/Abacus stored landing (courses from Curriculum, FAQ, **Apply franchise** nav) — restyle only, do not hide those sections by default.
 - Deep links: `#enroll` / `#enroll-student` / `#register` → enroll; `#apply` → franchise (brand only).
-- Docs: `docs/frontend/abacus-classic.md`, `docs/frontend/spark-academy.md`.
+- Docs: `docs/frontend/abacus-classic.md`, `docs/frontend/spark-academy.md`, `docs/frontend/edu-learn.md`.
 
 ## Platform homepage (`/admin/homepage`)
 

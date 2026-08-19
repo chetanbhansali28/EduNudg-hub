@@ -6,6 +6,7 @@ import { MarketingCtaLink } from "./MarketingCtaLink";
 import { AbacusCtaButton } from "./abacus-classic/MarketingLeadModals";
 import { SparkAcademyCta } from "./spark-academy/SparkAcademyCta";
 import { SparkAcademyAbout } from "./spark-academy/SparkAcademyAbout";
+import { EduLearnCta } from "./edu-learn/EduLearnCta";
 
 type FullProps = {
   config: HomepageConfig;
@@ -93,6 +94,9 @@ function AboutThemeCta({
   if (marketingTheme === "spark-academy") {
     return <SparkAcademyCta href={href} label={label} variant={sparkVariant} />;
   }
+  if (marketingTheme === "edu-learn") {
+    return <EduLearnCta href={href} label={label} />;
+  }
   if (marketingTheme === "abacus-classic" && useLeadModals) {
     return (
       <AbacusCtaButton
@@ -156,7 +160,7 @@ function CtaBand({
   );
 }
 
-/** Full About Us page — Novu (Mastermind), Abacus Classic, or Spark Academy chrome. */
+/** Full About Us page — Novu (Mastermind), Abacus Classic, or EduLearn chrome. Spark uses SparkAcademyAbout. */
 export function AboutUsPageContent({
   config,
   marketingTheme,
@@ -172,6 +176,9 @@ export function AboutUsPageContent({
     <div className={`about-us about-us--page ${aboutUsThemeClass(marketingTheme)}`}>
       <header className="about-us__hero">
         <div className="about-us__hero-inner">
+          {marketingTheme === "edu-learn" ? (
+            <span className="about-us__hero-badge">About us</span>
+          ) : null}
           {section.heroHeadline?.trim() ? <h1>{section.heroHeadline}</h1> : null}
           {section.heroSubtitle?.trim() ? <p className="about-us__hero-sub">{section.heroSubtitle}</p> : null}
           {config.meta.logoUrl ? (

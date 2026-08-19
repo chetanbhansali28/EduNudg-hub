@@ -170,7 +170,7 @@ pnpm test:rls
 - Virgin Novu seed (no enterprise blocks / no `brand-assets` URLs) is replaced at read time with `DEFAULT_HOMEPAGE_CONFIG`. Customized rows that still carry Novu markers (`theme.bgGradient`, `meta.themeNote`) are **kept** and merged — otherwise uploaded hero/logo assets appear “reset” while files remain in Storage. Never Save from `/admin/homepage` while viewing substituted defaults.
 - Brand/center landings: always merge `landing` / `center_landing`; saves use `preserveCustomMarketingMediaUrls`; seed uses `EXCLUDED.settings || brand_settings.settings` so existing content wins. Rule: `marketing-homepage-media`.
 - Edit platform homepage at **Platform → Homepage** (`/admin/homepage`) after signing in as `admin@edunudg.com`
-- **Brand marketing themes** (Novu / Abacus Classic / Spark Academy) are assigned on **Platform → Brands → Edit** → **Brand settings** → **Website theme**
+- **Brand marketing themes** (Novu / Abacus Classic / Spark Academy / EduLearn) are assigned on **Platform → Brands → Edit** → **Brand settings** → **Website theme**
 - Saving theme/name/status alone does **not** call `brand-owner-credentials` — only when login email/password fields change (see [edge-functions](./edge-functions.md))
 - Brand **Franchise Centers** → Franchise Identity: set center **Login email** / **Password** the same way (`center-owner-credentials`); profile-only saves do not call the edge function; passwords must be at least 6 characters (`admin` is too short)
 - React Query: keep `MARKETING_HOMEPAGE_CONFIG_QUERY_KEY` vs `MARKETING_PUBLIC_BUNDLE_QUERY_KEY` separate ([marketing-homepage OpenSpec](../../openspec/specs/marketing-homepage/spec.md))

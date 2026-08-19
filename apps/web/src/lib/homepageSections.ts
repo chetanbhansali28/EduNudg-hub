@@ -113,6 +113,28 @@ export const SPARK_ACADEMY_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean>
   about: false,
 };
 
+export const EDU_LEARN_SECTION_DEFAULTS: Record<HomepageSectionKey, boolean> = {
+  hero: true,
+  featureScroll: false,
+  highlights: false,
+  privacy: false,
+  testimonials: true,
+  faq: true,
+  footer: true,
+  programsGrid: true,
+  curriculumSyllabus: true,
+  featureGrid: true,
+  founders: true,
+  trustMedia: true,
+  gallery: true,
+  footerRich: true,
+  ecosystemIntro: false,
+  connectivityShowcase: false,
+  footerCta: true,
+  upcomingEvents: true,
+  about: false,
+};
+
 /** Section toggles honored when alternate-theme landing JSON was saved from that theme's editor. */
 const ABACUS_CLASSIC_SHARED_SECTION_KEYS: HomepageSectionKey[] = [
   "hero",
@@ -131,6 +153,11 @@ const ABACUS_CLASSIC_SHARED_SECTION_KEYS: HomepageSectionKey[] = [
 
 const SPARK_ACADEMY_SHARED_SECTION_KEYS: HomepageSectionKey[] = [
   ...ABACUS_CLASSIC_SHARED_SECTION_KEYS,
+];
+
+const EDU_LEARN_SHARED_SECTION_KEYS: HomepageSectionKey[] = [
+  ...SPARK_ACADEMY_SHARED_SECTION_KEYS,
+  "footerCta",
 ];
 
 export type HomepageSectionVisibilityInput = HomepageSectionVisibility & {
@@ -223,6 +250,31 @@ export function mergeSparkAcademySectionVisibility(
   );
 }
 
+export function hasEduLearnLandingMarkers(partial?: Partial<HomepageConfig>): boolean {
+  if (!partial) return false;
+  return (
+    hasSparkAcademyLandingMarkers(partial) ||
+    hasAbacusClassicLandingMarkers(partial) ||
+    Boolean(
+      partial.theme?.accent === "#f9a825" ||
+      partial.footerCta?.title ||
+      (partial.gallery?.images?.length ?? 0) > 0 ||
+      (partial.founders?.length ?? 0) > 0
+    )
+  );
+}
+
+export function mergeEduLearnSectionVisibility(
+  partial?: Partial<HomepageConfig>
+): Record<HomepageSectionKey, boolean> {
+  return mergeAlternateThemeSectionVisibility(
+    partial,
+    EDU_LEARN_SECTION_DEFAULTS,
+    EDU_LEARN_SHARED_SECTION_KEYS,
+    hasEduLearnLandingMarkers
+  );
+}
+
 export function isSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {
   return mergeSectionVisibility(config.sections)[key];
 }
@@ -237,6 +289,10 @@ export function isAbacusSectionEnabled(config: HomepageConfig, key: HomepageSect
 
 export function isSparkSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {
   return mergeSectionVisibility(config.sections, SPARK_ACADEMY_SECTION_DEFAULTS)[key];
+}
+
+export function isEduLearnSectionEnabled(config: HomepageConfig, key: HomepageSectionKey): boolean {
+  return mergeSectionVisibility(config.sections, EDU_LEARN_SECTION_DEFAULTS)[key];
 }
 
 export function setSectionEnabled(

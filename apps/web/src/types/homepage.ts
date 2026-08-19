@@ -377,17 +377,19 @@ export interface HomepageConfig {
 }
 
 /** Platform-assigned public marketing layout (see brands.marketing_theme). */
-export const MARKETING_THEMES = ["novu", "abacus-classic", "spark-academy"] as const;
+export const MARKETING_THEMES = ["novu", "abacus-classic", "spark-academy", "edu-learn"] as const;
 export type MarketingTheme = (typeof MARKETING_THEMES)[number];
 
 export const MARKETING_THEME_LABELS: Record<MarketingTheme, string> = {
   novu: "Novu (default)",
   "abacus-classic": "Abacus Classic",
   "spark-academy": "Spark Academy",
+  "edu-learn": "EduLearn",
 };
 
 export function parseMarketingTheme(value: unknown): MarketingTheme {
   if (value === "abacus-classic") return "abacus-classic";
   if (value === "spark-academy") return "spark-academy";
+  if (value === "edu-learn") return "edu-learn";
   return "novu";
 }

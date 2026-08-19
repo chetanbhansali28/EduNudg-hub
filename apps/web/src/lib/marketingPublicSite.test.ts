@@ -150,6 +150,15 @@ describe("marketingNavSectionOptions", () => {
     expect(options.find((o) => o.value === "#features")?.label).toBe("Features (#features)");
     expect(options.find((o) => o.value === "/login")?.label).toBe("Login (/login)");
   });
+
+  it("regression_edu_learn_nav_dropdown_includes_courses_and_apply", () => {
+    const options = marketingNavSectionOptions({ theme: "edu-learn", portalMode: "brand" });
+    const values = options.map((o) => o.value);
+    expect(values).toContain(PROGRAMS_NAV_HREF);
+    expect(values).toContain("#faq");
+    expect(values).toContain("apply");
+    expect(options.find((o) => o.value === PROGRAMS_NAV_HREF)?.label).toBe("Courses (#programs)");
+  });
 });
 
 describe("normalizeMarketingNavHref", () => {

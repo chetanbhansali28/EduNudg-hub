@@ -1,4 +1,4 @@
--- RLS / RPC: platform admin can set brand marketing theme (spark-academy).
+-- RLS / RPC: platform admin can set brand marketing theme (includes edu-learn).
 
 DO $$
 BEGIN

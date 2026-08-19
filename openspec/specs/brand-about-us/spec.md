@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Brand marketing sites can publish a themed **About Us** page (`/about`) with company story, differentiators, longer “what we do” copy, and a team photo grid (photo → name → role). Chrome follows `brands.marketing_theme` (Novu Mastermind, Abacus Classic, or Spark Academy). Novu and Abacus Classic can optionally show the same content as a homepage `#about` teaser. Spark Academy publishes About only on `/about`.
+Brand marketing sites can publish a themed **About Us** page (`/about`) with company story, differentiators, longer “what we do” copy, and a team photo grid (photo → name → role). Chrome follows `brands.marketing_theme` (Novu Mastermind, Abacus Classic, Spark Academy, or EduLearn). Novu and Abacus Classic can optionally show the same content as a homepage `#about` teaser. Spark Academy and EduLearn publish About only on `/about`.
 
 ## Requirements
 
@@ -22,7 +22,7 @@ THEN Novu and Abacus Classic render the dedicated About layout (hero, story, phi
 AND Spark Academy instead composes `/about` from homepage blocks: Hero, Features, Journey, Mentors
 AND the viewport scrolls to the top of the page (smooth unless `prefers-reduced-motion`)
 AND a hash target is left alone
-AND Novu/Abacus roots use a theme modifier (`about-us--novu` or `about-us--abacus-classic`) matching `brands.marketing_theme`
+AND Novu/Abacus/EduLearn roots use a theme modifier (`about-us--novu`, `about-us--abacus-classic`, or `about-us--edu-learn`) matching `brands.marketing_theme`
 
 GIVEN a Spark Academy brand
 WHEN a visitor opens `/about`
@@ -35,6 +35,11 @@ AND Features SHALL NOT render Last month / Learning Progress floats
 AND the public homepage `/` still renders those badges on Hero and Features
 AND `landing.about.heroImageUrl` fills the `/about` hero photo when set
 AND `landing.about.philosophyImageUrl` fills the Journey / philosophy highlight photo when set
+
+GIVEN an EduLearn brand
+WHEN a visitor opens `/about`
+THEN the dedicated About layout uses `.about-us--edu-learn` and EduLearn CTAs
+AND it SHALL NOT compose `/about` from Spark homepage section components
 
 GIVEN About is unpublished or empty
 WHEN a visitor opens `/about`

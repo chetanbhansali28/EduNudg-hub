@@ -20,8 +20,13 @@ import {
   SparkAcademyNav,
   SparkAcademyFooter,
 } from "@/features/marketing/spark-academy";
+import {
+  EduLearnNav,
+  EduLearnFooter,
+} from "@/features/marketing/edu-learn";
 import "@/features/marketing/marketing.css";
 import "@/features/marketing/spark-academy/spark-academy.css";
+import "@/features/marketing/edu-learn/edu-learn.css";
 
 type Props = {
   showFooter?: boolean;
@@ -41,6 +46,7 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
   const theme = bundle?.marketingTheme ?? "novu";
   const isAbacusClassic = theme === "abacus-classic";
   const isSparkAcademy = theme === "spark-academy";
+  const isEduLearn = theme === "edu-learn";
 
   useEffect(() => {
     if (bundle?.config) {
@@ -69,6 +75,8 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
         <AbacusClassicNav config={bundle.config} />
       ) : isSparkAcademy ? (
         <SparkAcademyNav config={bundle.config} />
+      ) : isEduLearn ? (
+        <EduLearnNav config={bundle.config} />
       ) : (
         <MarketingNav config={bundle.config} />
       )}
@@ -84,7 +92,7 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
           marketingChrome: true as const,
         }}
       />
-      {showFooter && !isAbacusClassic && !isSparkAcademy ? (
+      {showFooter && !isAbacusClassic && !isSparkAcademy && !isEduLearn ? (
         <FooterSection config={bundle.config} legalPages={bundle.legalPages} socialConnect={bundle.socialConnect} />
       ) : null}
       {showFooter && isAbacusClassic ? (
@@ -92,6 +100,9 @@ export function BrandPublicLayout({ showFooter = true }: Props) {
       ) : null}
       {showFooter && isSparkAcademy ? (
         <SparkAcademyFooter config={bundle.config} legalPages={bundle.legalPages} socialConnect={bundle.socialConnect} />
+      ) : null}
+      {showFooter && isEduLearn ? (
+        <EduLearnFooter config={bundle.config} legalPages={bundle.legalPages} socialConnect={bundle.socialConnect} />
       ) : null}
       {themeUsesLeadModals(theme) && !isLoginRoute ? (
         <MarketingLeadModals brandSlug={brandSlug} theme={theme} />

@@ -83,7 +83,7 @@ On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show
 #### Scenario: Franchise frontend nav highlights logo and name
 
 - **WHEN** a visitor opens a center (franchise) public site
-- **THEN** the sticky nav uses a franchise lockup (`ac-nav--franchise` / `sa-nav--franchise` / `novu-nav-bar--franchise`)
+- **THEN** the sticky nav uses a franchise lockup (`ac-nav--franchise` / `sa-nav--franchise` / `el-nav--franchise` / `novu-nav-bar--franchise`)
 - **AND** the brand logo matches the brand homepage nav size and has no ring or frame
 - **AND** the site name is larger and bolder than on the brand homepage nav
 
@@ -91,7 +91,7 @@ On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show
 
 - **GIVEN** Franchise Management saved this center’s address and phone
 - **AND** the brand homepage Head office still lists the brand owner HQ
-- **WHEN** a visitor opens View Frontend (Novu, Abacus Classic, or Spark Academy)
+- **WHEN** a visitor opens View Frontend (Novu, Abacus Classic, Spark Academy, or EduLearn)
 - **THEN** the footer shows **This center** / **Contact Us** with the franchise address and phone
 - **AND** does not show brand Head office, brand presence cities, or a placeholder phone
 
