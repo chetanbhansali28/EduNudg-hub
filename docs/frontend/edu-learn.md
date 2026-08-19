@@ -20,7 +20,7 @@ Switching a brand from Spark or Abacus to EduLearn keeps the existing `landing` 
 | FAQ | `EduLearnFaq` | Homepage FAQ |
 | Resources | `EduLearnResources` | Photo gallery (first 3 images) |
 | Green band | `EduLearnCtaBand` | Footer CTA |
-| Footer | `EduLearnFooter` | Footer + Social Media Connect |
+| Footer | `EduLearnFooter` | Footer + Social Media Connect. Legal links (Privacy / Terms / Refund) use `.el-footer__legal` flex gap so labels do not run together. Brand footers show Homepage **Head office** address/phone; franchise public footers overlay Franchise Management address/phone (`This center`) and hide brand HQ. |
 
 Lead modals: same `#enroll` / `#apply` stack as Spark/Abacus, skinned `ac-modal--edu-learn`.
 

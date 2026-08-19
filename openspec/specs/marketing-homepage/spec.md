@@ -330,6 +330,13 @@ Brand staff SHALL edit the parent enrollment template (`center_landing`) at `/ap
 - **AND** FAQ items from stored landing still render
 - **AND** the header still shows **Apply franchise** from `nav.secondaryCtaLabel` / `nav.secondaryCtaHref`
 
+#### Scenario: EduLearn footer shows contact address
+
+- **GIVEN** a brand with `marketing_theme = edu-learn` and Homepage Head office address/phone saved
+- **WHEN** a visitor opens the brand public site
+- **THEN** `EduLearnFooter` shows a **Contact** block with that address and phone
+- **AND** a franchise public site overlays Franchise Management Location & Contact as **This center** instead of brand HQ
+
 ### Requirement: Pricing feature checkmarks survive production CSS
 
 Platform homepage **Simple pricing for growing brands.** feature bullets SHALL use a CSS Unicode escape (`content: "\2713"`) for the checkmark glyph. Raw UTF-8 checkmarks and double-encoded mojibake (`â` plus C1 controls) SHALL NOT appear in `marketing.css` `content` values — production CSS minify strips those controls and leaves `â` on Vercel.

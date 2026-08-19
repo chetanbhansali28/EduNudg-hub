@@ -11,4 +11,10 @@ describe("EduLearn theme CSS", () => {
     );
     expect(css).not.toMatch(/\.marketing-page--edu-learn[^{]*\{[^}]*background:\s*#000/);
   });
+
+  it("regression_edu_learn_footer_legal_links_have_gap", () => {
+    const css = readFileSync(resolve(__dirname, "edu-learn.css"), "utf8");
+    expect(css).toMatch(/\.el-footer__legal\s*\{[\s\S]*?display:\s*flex/);
+    expect(css).toMatch(/\.el-footer__legal\s*\{[\s\S]*?gap:\s*0\.35rem 1\.25rem/);
+  });
 });

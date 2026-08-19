@@ -2,6 +2,7 @@ import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
 import type { CenterFooterContact } from "@/lib/centerFooterContact";
+import { centerPhoneHref } from "@/lib/centerFooterContact";
 import { hasBrandSocialFooterIcons } from "@/lib/brandSocialConnect";
 import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIcons";
 import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
@@ -27,6 +28,11 @@ export function EduLearnFooter({
   const logoUrl = config.meta.logoUrl?.trim() || null;
   const links = config.nav.links.length > 0 ? config.nav.links : config.footer.productLinks;
   const loginHref = config.nav.adminHref?.trim() || "/login";
+  const headOffice = config.footer.rich?.headOffice;
+  const brandAddress = headOffice?.address?.trim() || "";
+  const brandPhone = headOffice?.phone?.trim() || "";
+  const brandWebsite = headOffice?.website?.trim() || "";
+  const showBrandContact = !onCenterHost && Boolean(brandAddress || brandPhone || brandWebsite);
 
   return (
     <footer className="el-footer mkt-footer-shell">
@@ -49,7 +55,28 @@ export function EduLearnFooter({
           <EduLearnCta label="Log in now" href={loginHref} />
         </div>
         {onCenterHost && centerContact ? (
-          <CenterFooterContactBlock contact={centerContact} heading="This center" />
+          <div className="el-footer__contact">
+            <CenterFooterContactBlock
+              contact={centerContact}
+              heading="This center"
+              headingClassName="el-footer__contact-heading"
+              addressClassName="el-footer__contact-address"
+            />
+          </div>
+        ) : null}
+        {showBrandContact ? (
+          <div className="el-footer__contact">
+            <h3 className="el-footer__contact-heading">Contact</h3>
+            <address className="el-footer__contact-address">
+              {brandPhone ? (
+                <p>
+                  <a href={centerPhoneHref(brandPhone)}>{brandPhone}</a>
+                </p>
+              ) : null}
+              {brandAddress ? <p>{brandAddress}</p> : null}
+              {brandWebsite ? <p>{brandWebsite}</p> : null}
+            </address>
+          </div>
         ) : null}
         <div className="el-footer__bottom">
           <p>{config.footer.copyright}</p>

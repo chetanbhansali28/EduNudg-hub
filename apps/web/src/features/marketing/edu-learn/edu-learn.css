@@ -803,6 +803,44 @@ body:has(.marketing-page--edu-learn) {
   font-size: 0.88rem;
 }
 
+.el-footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1.25rem;
+}
+
+.el-footer__contact {
+  margin-top: 1.15rem;
+  padding-top: 1.15rem;
+  border-top: 1px solid rgb(30 86 49 / 0.08);
+}
+
+.el-footer__contact-heading {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--el-muted);
+}
+
+.el-footer__contact-address {
+  margin: 0;
+  font-style: normal;
+  color: var(--el-ink);
+  line-height: 1.55;
+}
+
+.el-footer__contact-address p {
+  margin: 0 0 0.2rem;
+}
+
+.el-footer__contact-address a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .el-footer .brand-social-footer-icons a {
   width: 2.2rem;
   height: 2.2rem;
