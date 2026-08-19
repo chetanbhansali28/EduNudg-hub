@@ -1,7 +1,5 @@
-import { useRef } from "react";
 import type { HomepageGallery } from "@/types/homepage";
-import { galleryColumnCount } from "./galleryHelpers";
-import { useSparkGalleryCarousel } from "./useSparkGalleryCarousel";
+import { sparkGalleryMarqueeDurationSec, sparkGalleryMarqueeLoop } from "./galleryHelpers";
 
 type Props = {
   gallery: HomepageGallery;
@@ -16,8 +14,9 @@ export function GallerySection({ gallery }: Props) {
   if (photos.length === 0) return null;
 
   const title = gallery.title?.trim() || "Photo gallery";
-  const trackRef = useRef<HTMLDivElement>(null);
-  useSparkGalleryCarousel(trackRef, galleryColumnCount(photos.length));
+  const loop = sparkGalleryMarqueeLoop(photos);
+  const duration = sparkGalleryMarqueeDurationSec(photos.length);
+  const marquee = photos.length > 1;
 
   return (
     <section className="sa-gallery sa-reveal" id="gallery">
@@ -25,17 +24,28 @@ export function GallerySection({ gallery }: Props) {
         <h2 className="sa-section-title">{title}</h2>
       </div>
       <div
-        ref={trackRef}
-        className="sa-gallery__track sa-gallery__carousel"
+        className="sa-gallery__marquee-wrap"
         role="region"
-        aria-roledescription="carousel"
+        aria-roledescription="marquee"
         aria-label={title}
       >
-        {photos.map((image, index) => (
-          <figure key={`${image.url}-${index}`} className="sa-gallery__item sa-reveal-item">
-            <img src={image.url} alt={image.alt ?? ""} loading="lazy" />
-          </figure>
-        ))}
+        <div
+          className={`sa-gallery__marquee${marquee ? "" : " sa-gallery__marquee--static"}`}
+          style={marquee ? { animationDuration: `${duration}s` } : undefined}
+        >
+          {loop.map((image, index) => {
+            const duplicate = marquee && index >= photos.length;
+            return (
+              <figure
+                key={`${image.url}-${index}`}
+                className="sa-gallery__item"
+                aria-hidden={duplicate ? true : undefined}
+              >
+                <img src={image.url} alt={duplicate ? "" : (image.alt ?? "")} loading="lazy" />
+              </figure>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
