@@ -278,7 +278,14 @@ describe("toYoutubeEmbedUrl", () => {
   it("parses watch URLs", async () => {
     const { toYoutubeEmbedUrl } = await import("./marketingPublicSite");
     expect(toYoutubeEmbedUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ")).toBe(
-      "https://www.youtube.com/embed/dQw4w9WgXcQ"
+      "https://www.youtube.com/embed/dQw4w9WgXcQ?playsinline=1"
+    );
+  });
+
+  it("regression_youtube_shorts_url_converts_to_embed", async () => {
+    const { toYoutubeEmbedUrl } = await import("./marketingPublicSite");
+    expect(toYoutubeEmbedUrl("https://youtube.com/shorts/IsPZdHWfXHQ?si=4NNTbMKatAfklg5W")).toBe(
+      "https://www.youtube.com/embed/IsPZdHWfXHQ?playsinline=1"
     );
   });
 });

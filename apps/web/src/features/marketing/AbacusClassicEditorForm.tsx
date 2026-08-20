@@ -603,6 +603,13 @@ export function AbacusClassicEditorForm({
               value={config.trustMedia?.youtubeUrl ?? ""}
               onChange={(v) => onChange({ ...config, trustMedia: { ...config.trustMedia!, youtubeUrl: v } })}
             />
+            {isSpark || isEduLearn ? (
+              <p className="ed-text-sm ed-muted ed-editor-field-hint">
+                {isSpark
+                  ? "Shows in a video block under Journey. The highlight photo stays in place."
+                  : "Shows in a video block under Why choose us. The stats photo stays in place."}
+              </p>
+            ) : null}
           </EditorFieldSpan>
           {marketingTheme === "spark-academy" ? (
             <>

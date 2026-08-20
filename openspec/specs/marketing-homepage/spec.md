@@ -173,6 +173,19 @@ Spark Academy **Powerful Features for Your Learning Journey** SHALL render Last 
 - **THEN** the Last month overlay does not include a View all control
 - **AND** `.sa-features__float-btn` is not in the DOM
 
+### Requirement: Spark Academy Journey shows YouTube below the photo
+
+Spark Academy **Our Journey to Excellence** SHALL keep the highlight photo/stats card. When Homepage **Trust & video** has a YouTube URL, the public homepage SHALL also render a 16:9 embed under that grid (`#trust`). Watch, youtu.be, embed, and Shorts URLs SHALL convert to `youtube.com/embed/{id}`. An empty URL SHALL omit the video block.
+
+#### Scenario: YouTube URL renders beside the existing photo
+
+- **GIVEN** a Spark Academy public homepage with a Journey highlight image
+- **AND** `trustMedia.youtubeUrl` is a YouTube Shorts or watch URL
+- **WHEN** a visitor opens `/`
+- **THEN** the highlight photo still renders
+- **AND** a video iframe under Journey uses `https://www.youtube.com/embed/{id}`
+- **AND** EduLearn **Why choose us** shows the same embed under the stats photo when that URL is set
+
 ### Requirement: Spark Academy success stories cards are centered
 
 Spark Academy **Success stories** (`#testimonials`) SHALL center story cards in the row when there are fewer than a full grid of cards (`sa-testimonials__grid--center`).
