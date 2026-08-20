@@ -20,6 +20,8 @@ export function EduLearnMentors({ founders }: Props) {
           {founders.map((founder, index) => {
             const roleBadge = founder.roleBadge?.trim() || "";
             const title = founder.title?.trim() || "";
+            const companyLine =
+              title && title.toLowerCase() !== roleBadge.toLowerCase() ? title : "";
             return (
               <article key={`${founder.name}-${index}`} className="el-mentor-card">
                 {founder.photoUrl ? (
@@ -31,7 +33,7 @@ export function EduLearnMentors({ founders }: Props) {
                 )}
                 {roleBadge ? <p className="el-mentor-card__badge">{roleBadge}</p> : null}
                 <h3>{founder.name}</h3>
-                {title ? <p className="el-mentor-card__title">{title}</p> : null}
+                {companyLine ? <p className="el-mentor-card__title">{companyLine}</p> : null}
               </article>
             );
           })}

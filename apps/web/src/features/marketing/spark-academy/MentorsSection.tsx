@@ -14,6 +14,8 @@ export function MentorCard({ founder }: { founder: HomepageFounderProfile }) {
   const photoUrl = founder.photoUrl?.trim() || "";
   const roleBadge = founder.roleBadge?.trim() || "";
   const title = founder.title?.trim() || "";
+  const companyLine =
+    title && title.toLowerCase() !== roleBadge.toLowerCase() ? title : "";
 
   return (
     <article className="sa-mentor-card sa-reveal-item">
@@ -28,7 +30,7 @@ export function MentorCard({ founder }: { founder: HomepageFounderProfile }) {
       </div>
       {roleBadge ? <p className="sa-mentor-card__badge">{roleBadge}</p> : null}
       <h3 className="sa-item-title sa-mentor-card__name">{founder.name}</h3>
-      {title ? <p className="sa-mentor-card__role">{title}</p> : null}
+      {companyLine ? <p className="sa-mentor-card__role">{companyLine}</p> : null}
     </article>
   );
 }

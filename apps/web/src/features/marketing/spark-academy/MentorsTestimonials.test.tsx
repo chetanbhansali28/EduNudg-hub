@@ -55,6 +55,24 @@ describe("MentorsSection", () => {
     expect(screen.getByText("Smart Brain Abacus Education Pvt. Ltd.")).toBeDefined();
     expect(document.querySelector(".sa-mentor-card__badge")).toBeDefined();
   });
+
+  it("regression_spark_mentor_card_does_not_duplicate_role_as_title", () => {
+    render(
+      <MentorsSection
+        founders={[
+          {
+            roleBadge: "Director",
+            name: "Naveen Chowdhari",
+            title: "Director",
+            bio: "",
+            photoUrl: "",
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getAllByText("Director")).toHaveLength(1);
+  });
 });
 
 describe("TestimonialsSection", () => {

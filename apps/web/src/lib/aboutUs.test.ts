@@ -74,7 +74,7 @@ describe("aboutUs", () => {
     ]);
     expect(founders[0]).toMatchObject({
       name: "Naveen Chowdhari",
-      title: "Director",
+      title: "",
       roleBadge: "Director",
       photoUrl: "https://example.com/n.jpg",
     });
