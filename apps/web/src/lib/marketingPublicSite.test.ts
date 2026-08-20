@@ -157,7 +157,9 @@ describe("marketingNavSectionOptions", () => {
     expect(values).toContain(PROGRAMS_NAV_HREF);
     expect(values).toContain("#faq");
     expect(values).toContain("apply");
+    expect(values).toContain("#founders");
     expect(options.find((o) => o.value === PROGRAMS_NAV_HREF)?.label).toBe("Courses (#programs)");
+    expect(options.find((o) => o.value === "#founders")?.label).toBe("Leadership (#founders)");
   });
 });
 

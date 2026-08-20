@@ -155,7 +155,7 @@ export function aboutMembersAsFounders(
     .map((member) => ({
       roleBadge: member.role,
       name: member.name,
-      title: member.role,
+      title: "",
       bio: member.bio ?? "",
       photoUrl: member.photoUrl,
     }));

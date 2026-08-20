@@ -503,14 +503,16 @@ export function AbacusClassicEditorForm({
 
       <EditorAccordion
         sectionId="founders"
-        title={isSpark ? "Mentors / Leadership" : "Leadership profiles"}
+        title={isCurriculumCoursesTheme ? "Mentors / Leadership" : "Leadership profiles"}
         enabled={isThemeSectionEnabled("founders")}
         onEnabledChange={(e) => setSection("founders", e)}
       >
         <EditorSectionNote>
           {isSpark
             ? "Public site: Meet Our Expert Mentors. Enter the real person’s name — template text like Founder name is hidden on the live site."
-            : "Public site: Leadership. Enter the real person’s name — template text like Founder name is hidden on the live site."}
+            : isEduLearn
+              ? "Public site: Meet our leadership. Role badge, name, and title match Abacus / Spark. Template text like Founder name is hidden on the live site."
+              : "Public site: Leadership. Enter the real person’s name — template text like Founder name is hidden on the live site."}
         </EditorSectionNote>
         <EditorItemList
           onAdd={() => commit({ ...config, founders: [...(config.founders ?? []), emptyFounder()] })}
