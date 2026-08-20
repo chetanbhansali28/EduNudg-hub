@@ -4,7 +4,8 @@
 -- Self-contained: ensures dev brand/center exist (same IDs as seed.sql).
 -- Optional: run seed.sql first for subscription plans + extra domain rows.
 --
--- All accounts use password: admin
+-- Platform admin password: admin1 (meets 6-character Auth minimum)
+-- Other seeded accounts use password: admin
 --
 -- | Role        | Email                         | Portal / URL                          |
 -- |-------------|-------------------------------|---------------------------------------|
@@ -86,7 +87,9 @@ DO $$
 DECLARE
   v_instance_id uuid;
   v_password text := 'admin';
+  v_platform_password text := 'admin1';
   v_encrypted_pw text;
+  v_encrypted_platform_pw text;
 BEGIN
   SELECT id INTO v_instance_id FROM auth.instances LIMIT 1;
   IF v_instance_id IS NULL THEN
@@ -94,6 +97,7 @@ BEGIN
   END IF;
 
   v_encrypted_pw := crypt(v_password, gen_salt('bf'));
+  v_encrypted_platform_pw := crypt(v_platform_password, gen_salt('bf'));
 
   -- -------------------------------------------------------------------------
   -- 1) Platform admin
@@ -110,7 +114,7 @@ BEGIN
       'f0000000-0000-4000-8000-000000000001',
       'authenticated', 'authenticated',
       'admin@edunudg.com',
-      v_encrypted_pw,
+      v_encrypted_platform_pw,
       now(), now(), now(),
       '{"provider":"email","providers":["email"]}'::jsonb,
       '{"full_name":"Platform Admin"}'::jsonb,

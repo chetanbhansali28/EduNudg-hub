@@ -28,7 +28,7 @@ No `?portal=` params — platform host only.
 | All brands | https://edunudg-hub.vercel.app/admin/brands |
 | Smart Brain Abacus detail | https://edunudg-hub.vercel.app/admin/brands/smart-brain-abacus |
 
-**Seeded login:** `admin@edunudg.com` / `admin` (when `test-users.sql` applied).
+**Seeded login:** `admin@edunudg.com` / `admin1` (when `test-users.sql` applied).
 
 **Demo buttons (prefer these over typing URLs):**
 

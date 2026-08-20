@@ -9,13 +9,14 @@
 
 Google OAuth per portal (tables, SQL, test checklists): [google-oauth-rollout-runbook.md](./google-oauth-rollout-runbook.md).
 
-**Password for all seeded accounts:** `admin`
+**Password for seeded brand/center/student accounts:** `admin`  
+**Platform admin (`admin@edunudg.com`):** `admin1` (6+ characters; `admin` is rejected by Auth).
 
 ## Accounts
 
 | Persona | Email | Role | Where to log in |
 |---------|-------|------|-----------------|
-| Platform admin | `admin@edunudg.com` | `platform_super_admin` | http://localhost:9000/login → redirects to `/admin` |
+| Platform admin | `admin@edunudg.com` | `platform_super_admin` | http://localhost:9000/login → redirects to `/admin` (`admin1`) |
 | Franchisor (brand) | `owner@edunudg.com` | `brand_owner` | http://abacusworld.localhost:9000/login |
 | Franchise (center) | `center@edunudg.com` | `center_owner` | http://koramangala.abacusworld.localhost:9000/login |
 | Student | `student@edunudg.com` | student (`students.user_id` linked) | http://learn.abacusworld.localhost:9000/login |
@@ -87,14 +88,14 @@ After editing **Brand → Marketing pages → Feature sections (phone blocks)**:
 
 If `test-users.sql` fails on `auth.users` (schema drift):
 
-1. **Authentication → Users → Add user** — create each email with password `admin`
+1. **Authentication → Users → Add user** — create platform admin with password `admin1`; other emails with password `admin`
 2. Copy each user's UUID from the dashboard
 3. Run only the `profiles` + `memberships` sections from `test-users.sql`, replacing UUIDs
 
 Or use CLI:
 
 ```bash
-supabase auth admin create-user --email admin@edunudg.com --password 'admin' --email-confirm
+supabase auth admin create-user --email admin@edunudg.com --password 'admin1' --email-confirm
 ```
 
 Then insert memberships with the returned user id.
@@ -116,7 +117,7 @@ DELETE FROM auth.users WHERE email LIKE '%@edunudg.com';
 |-------|-----|
 | Sign in succeeds but page stays on `/login` | Fixed in app: redirects to `/admin` (platform) or `/` (brand/center). Restart `pnpm dev`. |
 | `ERR_NAME_NOT_RESOLVED` / `your_project_ref.supabase.co` | Set real `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `apps/web/.env`, restart dev server |
-| Login "Invalid credentials" | Re-run `test-users.sql` or reset password in Dashboard; use `admin@edunudg.com` / `admin` |
+| Login "Invalid credentials" | Re-run `test-users.sql` or reset password in Dashboard; platform admin is `admin@edunudg.com` / `admin1` |
 | Brand login not working after platform edit | Deploy `brand-owner-credentials` Edge Function; set login email + password on Brands → Edit |
 | Center login not working after brand centers edit | Deploy `center-owner-credentials`; apply migration `073`; set Login email + Password under Franchise Identity |
 | Center login fails / stays on wrong portal on Vercel | Use `/login?portal=center&brand={brand}&center={center}` (not `{center}.{brand}.localhost:9000/login`). See [demo-smart-brain-abacus-urls.md](./demo-smart-brain-abacus-urls.md) |

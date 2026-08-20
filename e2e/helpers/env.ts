@@ -49,7 +49,7 @@ export function hasDatabaseUrl(): boolean {
 }
 
 export const E2E_USERS = {
-  platform: { email: "admin@edunudg.com", password: "admin" },
+  platform: { email: "admin@edunudg.com", password: "admin1" },
   brand: { email: "owner@edunudg.com", password: "admin" },
   center: { email: "center@edunudg.com", password: "admin" },
   student: { email: "student@edunudg.com", password: "admin" },

@@ -13,7 +13,7 @@ description: Write tests for EduNudg features and bugfixes. Required for every P
 | Migration / RLS | `supabase/tests/rls_*.sql` |
 | Bug fix | `regression_*` test |
 
-Use portal helpers in `e2e/helpers/portal.ts` (CI overrides; `E2E_USE_LOCAL_HOSTS=1` for subdomains). Skip OAuth/payment live flows. Golden paths require Supabase env.
+Use portal helpers in `e2e/helpers/portal.ts` (CI overrides; `E2E_USE_LOCAL_HOSTS=1` for subdomains). Skip OAuth/payment live flows. Golden paths require Supabase env. Playwright platform admin is `admin@edunudg.com` / `admin1` (`E2E_USERS.platform`); brand/center/student seed passwords stay `admin`.
 
 ## Commands
 

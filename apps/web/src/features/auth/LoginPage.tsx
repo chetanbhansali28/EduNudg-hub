@@ -175,7 +175,7 @@ export function LoginPage() {
         hint={
           import.meta.env.DEV && tenant.portalType === "platform" ? (
             <>
-              Dev: <code>admin@edunudg.com</code> / <code>admin</code> → <code>/admin</code> after sign in.
+              Dev: <code>admin@edunudg.com</code> / <code>admin1</code> → <code>/admin</code> after sign in.
             </>
           ) : import.meta.env.DEV && tenant.portalType === "center" && tenant.brandSlug ? (
             <>

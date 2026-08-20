@@ -197,6 +197,12 @@ describe("LoginPage", () => {
     expect(screen.getByRole("button", { name: exactAccessibleName("Log in") })).toBeDefined();
   });
 
+  it("regression_platform_dev_hint_uses_admin1_password", () => {
+    renderLogin();
+    expect(screen.getByText(/admin@edunudg\.com/)).toBeDefined();
+    expect(screen.getByText(/admin1/)).toBeDefined();
+  });
+
   it("regression_primary_submit_accessible_name_is_exact_log_in", () => {
     renderLogin();
     const primary = screen.getByRole("button", { name: exactAccessibleName("Log in") });
@@ -210,13 +216,13 @@ describe("LoginPage", () => {
     renderLogin();
 
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "admin@edunudg.com" } });
-    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin" } });
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin1" } });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: exactAccessibleName("Log in") }));
     });
 
     await expectRedirectTo("Admin home");
-    expect(signInWithEmail).toHaveBeenCalledWith("admin@edunudg.com", "admin");
+    expect(signInWithEmail).toHaveBeenCalledWith("admin@edunudg.com", "admin1");
   });
 
   it("regression_unauthorized_user_is_signed_out_with_access_denied_message", async () => {
