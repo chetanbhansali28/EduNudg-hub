@@ -38,4 +38,10 @@ describe("Spark Academy course page canvas", () => {
       /\.marketing-page\.marketing-page--spark-academy:has\(\.sa-course-detail\)\s*\{[^}]*background:\s*var\(--sa-page\)/s
     );
   });
+
+  it("regression_spark_course_card_photo_css_shows_full_banner", () => {
+    expect(css).toMatch(/\.sa-course-card__photo\s*\{[^}]*object-fit:\s*contain/s);
+    expect(css).toMatch(/\.sa-course-card__photo\s*\{[^}]*height:\s*auto/s);
+    expect(css).toMatch(/\.sa-course-card__media--image\s*\{[^}]*height:\s*auto/s);
+  });
 });

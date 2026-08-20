@@ -66,4 +66,26 @@ describe("CoursesSection", () => {
     expect(detail.getAttribute("href")).toBe("/courses/junior-abacus-path");
     expect(screen.getByRole("button", { name: exactAccessibleName("Enroll now") })).toBeDefined();
   });
+
+  it("regression_spark_course_card_banner_shows_full_image", () => {
+    render(
+      <MemoryRouter>
+        <LeadModalProvider>
+          <CoursesSection
+            programs={[
+              createPublicCurriculumProgram({
+                name: "Handwriting",
+                marketingImageUrl: "https://cdn.example/handwriting-banner.jpg",
+              }),
+            ]}
+            ctaHref="#enroll"
+          />
+        </LeadModalProvider>
+      </MemoryRouter>
+    );
+
+    const photo = document.querySelector(".sa-course-card__photo");
+    expect(photo?.getAttribute("src")).toBe("https://cdn.example/handwriting-banner.jpg");
+    expect(document.querySelector(".sa-course-card__media--image")).toBeTruthy();
+  });
 });

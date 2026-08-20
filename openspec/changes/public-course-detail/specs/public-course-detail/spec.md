@@ -34,6 +34,17 @@ The course page SHALL show the published program’s public fields when present:
 - **WHEN** a visitor opens its `/courses/:slug` page
 - **THEN** those fields and the lesson title are visible
 
+### Requirement: Course page enroll offer
+
+The course page SHALL present **Enroll now** as a full-width lead-modal button in a sticky enroll card. A mobile dock SHALL repeat **Enroll now**.
+
+#### Scenario: Enroll card on Spark course page
+
+- **GIVEN** a Spark Academy `/courses/:slug` page for a published program
+- **WHEN** a visitor views the page
+- **THEN** an enroll offer card is visible
+- **AND** **Enroll now** is a full-width lead-modal button
+
 ### Requirement: Abacus Know More uses the course page for published programs
 
 When an Abacus Classic program card matches a published curriculum program by name, **Know More →** SHALL be a link to `/courses/:slug` rather than the short details modal. Homepage-only cards with no matching published program MAY keep the modal.

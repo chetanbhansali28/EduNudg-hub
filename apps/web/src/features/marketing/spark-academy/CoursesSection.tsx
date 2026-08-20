@@ -39,11 +39,10 @@ export function CourseCard({
         <div
           className={`sa-course-card__media${imageUrl ? " sa-course-card__media--image" : ""}`}
           style={
-            imageUrl
-              ? { backgroundImage: `url(${imageUrl})` }
-              : { background: `linear-gradient(135deg, ${palette.bg}, #1e3a8a)` }
+            imageUrl ? undefined : { background: `linear-gradient(135deg, ${palette.bg}, #1e3a8a)` }
           }
         >
+          {imageUrl ? <img className="sa-course-card__photo" src={imageUrl} alt="" /> : null}
           {isBestSeller ? <span className="sa-course-card__tag">Best seller</span> : null}
           {!imageUrl ? (
             <span className="sa-course-card__icon" aria-hidden>

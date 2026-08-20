@@ -646,22 +646,24 @@ body:has(.marketing-page--spark-academy .sa-course-detail) {
   background-repeat: no-repeat;
 }
 
-.sa-course-card__media--image::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgb(15 23 42 / 0.05), rgb(15 23 42 / 0.28));
-  pointer-events: none;
+.sa-course-card__media--image {
+  height: auto;
+  background: #f1f5f9;
 }
 
-.sa-course-card__media--image .sa-course-card__tag {
-  z-index: 1;
+.sa-course-card__photo {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  object-position: center;
 }
 
 .sa-course-card__tag {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
+  z-index: 1;
   background: var(--sa-yellow);
   color: var(--sa-navy);
   font-size: 0.6875rem;

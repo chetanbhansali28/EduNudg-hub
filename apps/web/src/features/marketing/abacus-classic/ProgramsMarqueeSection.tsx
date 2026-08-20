@@ -47,18 +47,20 @@ export function ProgramsGridSection({ programs, programsSection }: Props) {
               return (
                 <article key={item.id} className="ac-programs-grid__card">
                   <div
-                    className="ac-programs-grid__media"
+                    className={`ac-programs-grid__media${item.imageUrl ? " ac-programs-grid__media--image" : ""}`}
                     style={
                       item.imageUrl
-                        ? { backgroundImage: `url(${item.imageUrl})` }
+                        ? undefined
                         : { background: `linear-gradient(135deg, ${palette.bg}, #1e3a8a)` }
                     }
                   >
-                    {!item.imageUrl ? (
+                    {item.imageUrl ? (
+                      <img className="ac-programs-grid__photo" src={item.imageUrl} alt="" />
+                    ) : (
                       <span className="ac-programs-grid__media-icon" aria-hidden>
                         {palette.icon}
                       </span>
-                    ) : null}
+                    )}
                     {item.ageLabel ? (
                       <span className="ac-programs-grid__badge">{item.ageLabel}</span>
                     ) : null}

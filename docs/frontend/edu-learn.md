@@ -12,7 +12,7 @@ Switching a brand from Spark or Abacus to EduLearn keeps the existing `landing` 
 |-------|-----------|----------------|
 | Nav | `EduLearnNav` | Navigation & CTAs |
 | Hero | `EduLearnHero` | Hero + Site logo |
-| Courses | `EduLearnCourses` | Published Curriculum (`#programs` / `#curriculum`), same as Spark. Cards use `.el-course-card` with padded body text (not the gallery overlay layout). Media and title link to `/courses/:slug`; **Enroll now** stays a lead-modal button. |
+| Courses | `EduLearnCourses` | Published Curriculum (`#programs` / `#curriculum`), same as Spark. Cards use `.el-course-card` with padded body text (not the gallery overlay layout). Course banners use `object-fit: contain` so the full upload is visible. Media and title link to `/courses/:slug`; **Enroll now** stays a lead-modal button. `/courses/:slug` uses a forest-green hero and sticky enroll offer card. |
 | Feature cards | `EduLearnFeatures` | Features (`featureSections`, first 3) |
 | Stats | `EduLearnStats` | Trust / journey + live center/student counts. YouTube URL from Trust & video renders below the photo (`#trust`) |
 | Events | `UpcomingEventsSection` | Homepage upcoming events |

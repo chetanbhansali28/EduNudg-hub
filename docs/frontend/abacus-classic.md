@@ -50,7 +50,7 @@ Sprint 2 covers the top-of-page conversion flow and curriculum-driven programs s
 | 1 | Sticky nav with dual CTAs | `AbacusClassicNav` | `config.nav.ctaLabel/Href`, `secondaryCtaLabel/Href` |
 | 2 | Hero with badge + dual CTAs | `AbacusClassicHero` | `config.hero.*` |
 | 3 | Enroll + franchise lead modals | `MarketingLeadModals`, `AbacusCtaButton` | Hrefs `enroll` / `apply` open modals; other hrefs render anchors |
-| 4 | Programs card grid + Know More | `ProgramsGridSection` (`ProgramsMarqueeSection.tsx`) | Published programs link **Know More →** to `/courses/:slug`; leftover homepage-only cards keep the modal |
+| 4 | Programs card grid + Know More | `ProgramsGridSection` (`ProgramsMarqueeSection.tsx`) | Published programs link **Know More →** to `/courses/:slug` (cinematic hero + sticky enroll offer); leftover homepage-only cards keep the modal |
 | 5 | Curriculum syllabus (full tree) | `AbacusCurriculumSection.tsx` | `publicCurriculum` from RPC; toggle `curriculumSyllabus`; anchor `#curriculum` |
 | 6 | Why-us feature grid (4 blocks) | `FeatureGridSection` | `config.featureSections`; heading uses `Why {siteName}` |
 | 7 | Smart Brain default copy | `mergeAbacusClassicLandingConfig()` | Seed + editor defaults in `brandLandingDefaults.ts` |
@@ -86,7 +86,7 @@ Card-based programs section (replacing the auto-scroll marquee) with curriculum-
 
 | # | Feature | Where | Config / data |
 |---|---------|-------|---------------|
-| 1 | Programs card grid | `ProgramsGridSection` | Image or gradient fallback, age badge, blurb, **Know More →** (published courses open `/courses/:slug`) |
+| 1 | Programs card grid | `ProgramsGridSection` | Full banner `img` (contain) or gradient fallback, age badge, blurb, **Know More →** (published courses open `/courses/:slug`) |
 | 2 | Program details modal | `AcModalShell` in `MarketingLeadModals.tsx` | Benefits list + scholarship banner |
 | 3 | Section headings + program cards (editable) | `AbacusClassicEditorForm` → **Programs grid** | Shared `EditorFieldsGrid` / `EditorItemPanel` helpers from `HomepageEditorShell.tsx` (same UX as Novu admin editor) |
 | 4 | Homepage program cards | `programsSection.cards[]` → `resolveProgramsGridItems()` | Name, image, age badge, blurb, benefits, scholarship; **Add program card** in homepage editor |
