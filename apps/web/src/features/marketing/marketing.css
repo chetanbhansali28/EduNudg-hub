@@ -3526,6 +3526,19 @@ body.ac-nav-drawer-open {
   justify-content: center;
 }
 
+.ac-programs-grid__media--image {
+  min-height: 0;
+  background: #f1f5f9;
+}
+
+.ac-programs-grid__photo {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+}
+
 .ac-programs-grid__media-icon {
   font-size: 2.5rem;
 }

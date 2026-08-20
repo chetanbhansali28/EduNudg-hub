@@ -78,6 +78,13 @@ Brand staff SHALL see allowed formats, maximum file size, and recommended dimens
 - **THEN** Course Banner (Thumbnail) shows PNG/JPEG/WebP/GIF, maximum 5 MB, and recommended 1280×720 (16:9)
 - **AND** uploads larger than 5 MB are rejected before storage
 
+#### Scenario: Loaded banner fills the preview without side gaps
+
+- **GIVEN** a course with a `marketing_image_url`
+- **WHEN** brand staff open that course on `/app/curriculum`
+- **THEN** the Course Banner preview uses the filled dropzone (no inner padding)
+- **AND** the image is full-width with auto height so the whole poster is visible
+
 ### Requirement: Parent marketing fields persist on existing courses
 
 Brand staff SHALL edit the same parent-facing marketing fields after a course is created as they see while adding it. Those fields SHALL persist on `programs` and remain available via **Save**.
@@ -181,7 +188,7 @@ On Spark Academy public sites, **Courses designed for success** SHALL show that 
 
 ### Requirement: Public course detail page
 
-Published `/app/curriculum` programs SHALL be reachable at `/courses/:slug` on brand and center public hosts. The page SHALL show the public marketing fields for that program (when present) and SHALL inherit the same public layout/theme as `/`. Spark Academy pages SHALL use the same `--sa-page` canvas as **Courses designed for success**. Spark/EduLearn course media and titles SHALL link to that URL while **Enroll now** remains a lead-modal button. Abacus **Know More →** SHALL link when the card matches a published program. Unknown or center-disabled slugs SHALL redirect to `/`.
+Published `/app/curriculum` programs SHALL be reachable at `/courses/:slug` on brand and center public hosts. The page SHALL show the public marketing fields for that program (when present) and SHALL inherit the same public layout/theme as `/`. Spark Academy pages SHALL use the same `--sa-page` canvas as **Courses designed for success**. The course page SHALL use a cinematic hero plus a sticky enroll offer card with a full-width **Enroll now** lead-modal button. Spark/EduLearn course media and titles SHALL link to that URL while homepage **Enroll now** remains a lead-modal button. Abacus **Know More →** SHALL link when the card matches a published program. Unknown or center-disabled slugs SHALL redirect to `/`.
 
 #### Scenario: Spark card links to course page
 

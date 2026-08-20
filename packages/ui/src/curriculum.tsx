@@ -505,7 +505,12 @@ export function CurriculumBannerDropzone({
 }) {
   return (
     <div className="ed-curriculum-banner">
-      <button type="button" className="ed-curriculum-banner-dropzone" onClick={onUploadClick} disabled={uploading}>
+      <button
+        type="button"
+        className={`ed-curriculum-banner-dropzone${imageUrl ? " ed-curriculum-banner-dropzone--filled" : ""}`}
+        onClick={onUploadClick}
+        disabled={uploading}
+      >
         {imageUrl ? (
           <img src={imageUrl} alt="" className="ed-curriculum-banner-dropzone__image" />
         ) : (

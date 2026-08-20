@@ -4,7 +4,7 @@
 
 ## Goals / Non-Goals
 
-**Goals:** shareable `/courses/:slug`; full published curriculum fields; theme-matched page; keep Enroll modal; center enablement filter.
+**Goals:** shareable `/courses/:slug`; full published curriculum fields; theme-matched cinematic hero + sticky enroll card; keep Enroll modal; center enablement filter.
 
 **Non-Goals:** staff `/app/curriculum` URLs; `programs.slug` column; removing homepage syllabus; feature flag.
 

@@ -2446,11 +2446,23 @@
   color: var(--ed-muted);
 }
 
+.ed-curriculum-banner-dropzone--filled {
+  padding: 0;
+  min-height: 0;
+  display: block;
+  line-height: 0;
+  overflow: hidden;
+  background: var(--ed-card);
+}
+
 .ed-curriculum-banner-dropzone__image {
   width: 100%;
-  max-height: 10rem;
-  object-fit: cover;
-  border-radius: var(--ed-radius);
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  border-radius: inherit;
 }
 
 .ed-curriculum-banner-dropzone__icon {
