@@ -95,6 +95,7 @@ const SPARK_ACADEMY_OPTIONS: NavOptionDef[] = [
 const EDU_LEARN_OPTIONS: NavOptionDef[] = [
   { value: PROGRAMS_NAV_HREF, label: "Courses (#programs)", sectionKey: "programsGrid" },
   { value: "#features", label: "Features (#features)", sectionKey: "featureGrid" },
+  { value: "#founders", label: "Leadership (#founders)", sectionKey: "founders" },
   { value: "/about", label: "About page (/about)" },
   { value: "#events", label: "Events (#events)", sectionKey: "upcomingEvents" },
   { value: "#stats", label: "Why choose us (#stats)", sectionKey: "trustMedia" },

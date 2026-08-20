@@ -462,7 +462,8 @@ body:has(.marketing-page--edu-learn) {
 
 .el-features__grid,
 .el-quotes__grid,
-.el-resources__grid {
+.el-resources__grid,
+.el-mentors__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.15rem;
@@ -489,6 +490,56 @@ body:has(.marketing-page--edu-learn) {
   height: 2.6rem;
   color: var(--el-green);
   margin-bottom: 1rem;
+}
+
+.el-mentor-card {
+  background: var(--el-card);
+  border-radius: var(--el-radius);
+  padding: 1.35rem 1.25rem 1.25rem;
+  text-align: center;
+}
+
+.el-mentor-card__photo {
+  width: 6.5rem;
+  height: 6.5rem;
+  border-radius: 999px;
+  object-fit: cover;
+  margin: 0 auto 0.85rem;
+  display: block;
+}
+
+.el-mentor-card__photo--empty {
+  display: grid;
+  place-items: center;
+  background: #e8f0e4;
+  color: var(--el-green);
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.el-mentor-card__badge {
+  display: inline-block;
+  margin: 0 0 0.45rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #1f2937;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.el-mentor-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.08rem;
+}
+
+.el-mentor-card__title {
+  margin: 0;
+  color: var(--el-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .el-feature-card h3,
@@ -960,6 +1011,7 @@ body:has(.marketing-page--edu-learn) {
   .el-features__grid,
   .el-quotes__grid,
   .el-resources__grid,
+  .el-mentors__grid,
   .el-courses__grid,
   .el-cta__inner {
     grid-template-columns: 1fr;

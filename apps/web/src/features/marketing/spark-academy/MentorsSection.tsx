@@ -12,6 +12,8 @@ type Props = {
 
 export function MentorCard({ founder }: { founder: HomepageFounderProfile }) {
   const photoUrl = founder.photoUrl?.trim() || "";
+  const roleBadge = founder.roleBadge?.trim() || "";
+  const title = founder.title?.trim() || "";
 
   return (
     <article className="sa-mentor-card sa-reveal-item">
@@ -24,8 +26,9 @@ export function MentorCard({ founder }: { founder: HomepageFounderProfile }) {
           </span>
         )}
       </div>
+      {roleBadge ? <p className="sa-mentor-card__badge">{roleBadge}</p> : null}
       <h3 className="sa-item-title sa-mentor-card__name">{founder.name}</h3>
-      <p className="sa-mentor-card__role">{founder.title || founder.roleBadge}</p>
+      {title ? <p className="sa-mentor-card__role">{title}</p> : null}
     </article>
   );
 }

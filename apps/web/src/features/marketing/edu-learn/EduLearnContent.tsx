@@ -4,6 +4,7 @@ import type { CenterPublicProfile } from "@/lib/centerLandingApi";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { isEduLearnSectionEnabled } from "@/lib/homepageSections";
+import { visiblePublicFounders } from "@/lib/centerLandingDefaults";
 import { resolveSparkCoursePrograms, sparkShouldShowCoursesSection } from "@/lib/programsGridItems";
 import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
 import { UpcomingEventsSection } from "../UpcomingEventsSection";
@@ -14,6 +15,7 @@ import { EduLearnStats } from "./EduLearnStats";
 import { EduLearnTestimonials } from "./EduLearnTestimonials";
 import { EduLearnResources, galleryPhotos } from "./EduLearnResources";
 import { EduLearnFaq } from "./EduLearnFaq";
+import { EduLearnMentors } from "./EduLearnMentors";
 import { EduLearnCtaBand } from "./EduLearnCtaBand";
 
 type Props = {
@@ -42,6 +44,8 @@ export function EduLearnContent({
   );
   const showFeatures = isEduLearnSectionEnabled(config, "featureGrid") && config.featureSections.length > 0;
   const showStats = isEduLearnSectionEnabled(config, "trustMedia") && Boolean(config.trustMedia);
+  const founders = visiblePublicFounders(config.founders);
+  const showFounders = isEduLearnSectionEnabled(config, "founders") && founders.length > 0;
   const showTestimonials = isEduLearnSectionEnabled(config, "testimonials");
   const showFaq = isEduLearnSectionEnabled(config, "faq") && config.faq.length > 0;
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
@@ -69,6 +73,7 @@ export function EduLearnContent({
       {showStats && config.trustMedia ? (
         <EduLearnStats trust={config.trustMedia} publicStats={publicStats} />
       ) : null}
+      {showFounders ? <EduLearnMentors founders={founders} /> : null}
       {showUpcomingEvents && config.upcomingEvents ? (
         <UpcomingEventsSection section={config.upcomingEvents} events={upcomingEvents} useLeadModals />
       ) : null}

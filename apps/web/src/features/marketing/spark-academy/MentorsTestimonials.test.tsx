@@ -34,6 +34,27 @@ describe("MentorsSection", () => {
     expect(document.querySelector(".sa-mentors__track--center")).toBeDefined();
     expect(screen.getByText("Sarah Johnson")).toBeDefined();
   });
+
+  it("regression_spark_mentor_card_shows_role_badge_and_title", () => {
+    render(
+      <MentorsSection
+        founders={[
+          {
+            roleBadge: "FOUNDER & CEO",
+            name: "Bhavana Soni",
+            title: "Smart Brain Abacus Education Pvt. Ltd.",
+            bio: "Share your story.",
+            photoUrl: "",
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByText("FOUNDER & CEO")).toBeDefined();
+    expect(screen.getByText("Bhavana Soni")).toBeDefined();
+    expect(screen.getByText("Smart Brain Abacus Education Pvt. Ltd.")).toBeDefined();
+    expect(document.querySelector(".sa-mentor-card__badge")).toBeDefined();
+  });
 });
 
 describe("TestimonialsSection", () => {

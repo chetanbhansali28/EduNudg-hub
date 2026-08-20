@@ -1237,6 +1237,19 @@ body:has(.marketing-page--spark-academy .sa-course-detail) {
   color: var(--sa-blue);
 }
 
+.sa-mentor-card__badge {
+  display: inline-block;
+  margin: 0 0 0.4rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #1f2937;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .sa-mentor-card__name {
   margin: 0 0 0.35rem;
 }

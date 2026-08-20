@@ -102,3 +102,20 @@ AND card / list headings share `--sa-h3-size` (1.0625rem, weight 700)
 AND the hero remains the larger display title (`--sa-h1-size`)
 AND footer column labels stay small uppercase chrome (not section titles)
 
+### Spark Academy mentors show role badge and title
+
+Spark Academy **Meet Our Expert Mentors** SHALL render the same Homepage founder fields as Abacus Classic leadership: **Role badge** (`roleBadge`, e.g. FOUNDER & CEO) and **Title** (`title`, e.g. company name) together. The card SHALL NOT hide the role badge when title is filled.
+
+- **GIVEN** a Spark Academy public homepage whose Mentors / Leadership profile has role badge `FOUNDER & CEO`, name, and title company name
+- **WHEN** a visitor views **Meet Our Expert Mentors**
+- **THEN** the card shows the role badge, the person’s name, and the title
+- **AND** it does not replace the role badge with the title
+
+### EduLearn leadership shows role badge and title
+
+EduLearn public sites SHALL render Homepage **Mentors / Leadership** (`landing.founders`) at `#founders` with the same fields as Abacus and Spark: role badge, name, and title.
+
+- **GIVEN** an EduLearn public homepage whose Leadership profile has role badge `FOUNDER & CEO`, name, and title company name
+- **WHEN** a visitor views **Meet our leadership**
+- **THEN** the card shows the role badge, the person’s name, and the title
+

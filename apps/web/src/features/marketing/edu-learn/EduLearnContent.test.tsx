@@ -33,6 +33,8 @@ describe("EduLearnContent", () => {
     expect(document.querySelector(".el-cta__action")).toBeTruthy();
     expect(document.querySelectorAll(".el-quote-card").length).toBe(3);
     expect(document.querySelectorAll(".el-resource-card").length).toBe(3);
+    expect(document.getElementById("founders")).toBeTruthy();
+    expect(screen.getByText("Certified faculty")).toBeDefined();
     expect(screen.getByText("Join our community of school partners")).toBeDefined();
   });
 

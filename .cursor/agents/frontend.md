@@ -37,6 +37,8 @@
 - [ ] Center `/app/students` **Import students** uses `CenterStudentImportDialog` + `import_center_students` (enroll existing students; do not create leads).
 - [ ] `Input type="tel"` keeps a stable wrap while typing (delivery Phone on `/app/students`); do not remount or live-strip the value.
 - [ ] Center `/app` staff chrome lockup shows the **brand name** next to the Site logo, with the franchise **display name** as a smaller tagline (`regression_center_shell_lockup_shows_brand_then_franchise_name`).
+- [ ] Spark Academy **Meet Our Expert Mentors** shows Role badge and Title (`regression_spark_mentor_card_shows_role_badge_and_title`).
+- [ ] EduLearn **Meet our leadership** shows the same Role badge and Title (`regression_edu_learn_mentor_card_shows_role_badge_and_title`).
 - [ ] Spark Academy `/about` reuses homepage Hero / Features / Journey / Mentors (`regression_spark_about_page_uses_homepage_section_blocks`) and hides homepage badges on that route (`regression_spark_about_hero_omits_homepage_badges`, `regression_spark_about_features_omits_float_badges`).
 - [ ] Spark Academy **Courses designed for success** lists every published course (`regression_spark_courses_lists_all_published_programs`).
 - [ ] Public `/courses/:slug` uses homepage theme chrome, curriculum fields, and a sticky enroll offer card (`regression_public_course_page_shows_curriculum_fields`, `regression_public_course_page_has_enroll_offer_card`).
