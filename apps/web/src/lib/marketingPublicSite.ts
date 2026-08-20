@@ -333,6 +333,12 @@ export function sanitizePublicFooter(config: HomepageConfig["footer"]): Homepage
 }
 
 /** Converts common YouTube watch/share URLs to embed URL. */
+function youtubeEmbedSrc(id: string | null | undefined): string | null {
+  const videoId = id?.trim();
+  if (!videoId) return null;
+  return `https://www.youtube.com/embed/${videoId}?playsinline=1`;
+}
+
 export function toYoutubeEmbedUrl(url: string): string | null {
   const trimmed = url.trim();
   if (!trimmed) return null;
@@ -343,18 +349,18 @@ export function toYoutubeEmbedUrl(url: string): string | null {
 
     if (host === "youtu.be") {
       const id = parsed.pathname.slice(1).split("/")[0];
-      return id ? `https://www.youtube.com/embed/${id}` : null;
+      return youtubeEmbedSrc(id);
     }
 
     if (host === "youtube.com" || host === "m.youtube.com") {
       if (parsed.pathname === "/watch") {
         const id = parsed.searchParams.get("v");
-        return id ? `https://www.youtube.com/embed/${id}` : null;
+        return youtubeEmbedSrc(id);
       }
       const embedMatch = parsed.pathname.match(/^\/embed\/([^/?]+)/);
-      if (embedMatch?.[1]) return `https://www.youtube.com/embed/${embedMatch[1]}`;
+      if (embedMatch?.[1]) return youtubeEmbedSrc(embedMatch[1]);
       const shortsMatch = parsed.pathname.match(/^\/shorts\/([^/?]+)/);
-      if (shortsMatch?.[1]) return `https://www.youtube.com/embed/${shortsMatch[1]}`;
+      if (shortsMatch?.[1]) return youtubeEmbedSrc(shortsMatch[1]);
     }
   } catch {
     return null;

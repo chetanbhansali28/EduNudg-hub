@@ -555,6 +555,34 @@ body:has(.marketing-page--edu-learn) {
   min-height: 18rem;
 }
 
+.el-stats__video {
+  width: 100%;
+  max-width: 56rem;
+  min-width: 0;
+  margin: 1.75rem auto 0;
+  box-sizing: border-box;
+}
+
+.el-stats__video-frame {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--el-radius);
+  overflow: hidden;
+  background: #163f24;
+}
+
+.el-stats__video-frame iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .el-stat-card {
   position: absolute;
   color: var(--el-white);
@@ -917,6 +945,14 @@ body:has(.marketing-page--edu-learn) {
   .el-hero__blob {
     width: 100%;
     height: 20rem;
+  }
+
+  .el-stats__video {
+    margin-top: 1.25rem;
+  }
+
+  .el-stats__video-frame {
+    border-radius: 0.9rem;
   }
 
   .el-hero__float {

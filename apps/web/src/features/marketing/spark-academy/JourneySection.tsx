@@ -1,4 +1,5 @@
 import type { HomepageFounderProfile, HomepageTrustMedia, HomepageRichFooter } from "@/types/homepage";
+import { toYoutubeEmbedUrl } from "@/lib/marketingPublicSite";
 import { MarketingBackgroundMedia } from "../MarketingBackgroundMedia";
 
 type Props = {
@@ -57,6 +58,7 @@ export function JourneySection({
 }: Props) {
   const cards = trust.cards.slice(0, 3);
   const photoUrl = resolveJourneyImageUrl(trust, highlightFounder);
+  const embedUrl = toYoutubeEmbedUrl(trust.youtubeUrl ?? "");
   const heroStats = buildJourneyHighlight(trust, rich);
   const badge = trust.eyebrow?.trim() || "Our Success";
   const heading = [trust.title, trust.titleHighlight].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
@@ -103,6 +105,20 @@ export function JourneySection({
           )}
         </article>
       </div>
+
+      {embedUrl ? (
+        <div className="sa-journey__video" id="trust">
+          <div className="sa-journey__video-frame">
+            <iframe
+              src={embedUrl}
+              title="Brand video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

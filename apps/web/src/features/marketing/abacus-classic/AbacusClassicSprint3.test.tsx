@@ -95,7 +95,7 @@ describe("Abacus Classic Sprint 3 — trust and video", () => {
     render(<TrustMediaSection trust={sprint3Config().trustMedia!} />);
 
     const iframe = document.querySelector("iframe");
-    expect(iframe?.getAttribute("src")).toBe("https://www.youtube.com/embed/dQw4w9WgXcQ");
+    expect(iframe?.getAttribute("src")).toBe("https://www.youtube.com/embed/dQw4w9WgXcQ?playsinline=1");
     expect(screen.getByText("MEDIA RECOGNITION")).toBeDefined();
     expect(screen.getByText("Smart Brain Abacus")).toBeDefined();
     expect(screen.getByRole("heading", { level: 3, name: "50,000+ students trained" })).toBeDefined();

@@ -14,7 +14,7 @@ Switching a brand from Spark or Abacus to EduLearn keeps the existing `landing` 
 | Hero | `EduLearnHero` | Hero + Site logo |
 | Courses | `EduLearnCourses` | Published Curriculum (`#programs` / `#curriculum`), same as Spark. Cards use `.el-course-card` with padded body text (not the gallery overlay layout). |
 | Feature cards | `EduLearnFeatures` | Features (`featureSections`, first 3) |
-| Stats | `EduLearnStats` | Trust / journey + live center/student counts |
+| Stats | `EduLearnStats` | Trust / journey + live center/student counts. YouTube URL from Trust & video renders below the photo (`#trust`) |
 | Events | `UpcomingEventsSection` | Homepage upcoming events |
 | Testimonials | `EduLearnTestimonials` | Success stories |
 | FAQ | `EduLearnFaq` | Homepage FAQ |
@@ -22,7 +22,7 @@ Switching a brand from Spark or Abacus to EduLearn keeps the existing `landing` 
 | Green band | `EduLearnCtaBand` | Footer CTA |
 | Footer | `EduLearnFooter` | Footer + Social Media Connect. Legal links (Privacy / Terms / Refund) use `.el-footer__legal` flex gap so labels do not run together. Brand footers show Homepage **Head office** address/phone; franchise public footers overlay Franchise Management address/phone (`This center`) and hide brand HQ. |
 
-Lead modals: same `#enroll` / `#apply` stack as Spark/Abacus, skinned `ac-modal--edu-learn`.
+Lead modals: same `#enroll` / `#apply` stack as Spark/Abacus, skinned `ac-modal--edu-learn`. Trust & video YouTube renders under stats when set (`regression_edu_learn_stats_renders_youtube_below_photo`, `regression_edu_learn_stats_video_css_is_fluid_on_mobile`).
 
 About Us (`/about`) uses `.about-us--edu-learn`. Homepage does not mount an About teaser; leftover `#about` nav rewrites to `/about`.
 

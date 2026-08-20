@@ -1,5 +1,6 @@
 import type { HomepageTrustMedia } from "@/types/homepage";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
+import { toYoutubeEmbedUrl } from "@/lib/marketingPublicSite";
 import { MarketingBackgroundMedia } from "../MarketingBackgroundMedia";
 import { EduLearnMark } from "./EduLearnCta";
 import { EduLearnDoodles } from "./EduLearnDoodles";
@@ -24,6 +25,7 @@ export function EduLearnStats({ trust, publicStats }: Props) {
       label: trust.cards[2]?.subtitle || trust.highlightCaption || "Programs",
     },
   ].slice(0, 3);
+  const embedUrl = toYoutubeEmbedUrl(trust.youtubeUrl ?? "");
 
   return (
     <section className="el-stats" id="stats">
@@ -46,6 +48,19 @@ export function EduLearnStats({ trust, publicStats }: Props) {
           ))}
         </div>
       </div>
+      {embedUrl ? (
+        <div className="el-stats__video" id="trust">
+          <div className="el-stats__video-frame">
+            <iframe
+              src={embedUrl}
+              title="Brand video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+              allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
