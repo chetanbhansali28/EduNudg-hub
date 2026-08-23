@@ -207,6 +207,17 @@ Spark Academy **Success stories** (`#testimonials`) SHALL center story cards in 
 - **THEN** the testimonials grid uses `sa-testimonials__grid--center`
 - **AND** leftover cards sit in the center of the row, not the left edge
 
+### Requirement: Homepage editor omits curriculum catalog editors
+
+Brand `/app/homepage` and `/app/center-site` SHALL NOT show **Courses designed for success**, **Programs grid**, or **Curriculum syllabus** accordions (Abacus Classic, Spark Academy, and EduLearn). Course banners and syllabus live on **Curriculum** (`/app/curriculum`). Public course grids SHALL keep rendering published curriculum. Stored `programsSection` JSON SHALL NOT be cleared by hiding the editor.
+
+#### Scenario: Brand homepage hides course catalog accordions
+
+- **GIVEN** a brand user on `/app/homepage` with Abacus Classic, Spark Academy, or EduLearn
+- **THEN** the editor has no **Courses designed for success**, **Programs grid**, or **Curriculum syllabus** row
+- **AND** there is no **+ Add program card** upload on that page
+- **AND** Site, Navigation & CTAs, and Hero remain
+
 ### Requirement: Homepage editor Save stays available
 
 Brand `/app/homepage`, `/app/center-site`, and platform `/admin/homepage` **Save changes** SHALL stay clickable when the form is clean. Discard SHALL appear only when there are unsaved edits. **Save changes** SHALL disable only while a save is in flight.

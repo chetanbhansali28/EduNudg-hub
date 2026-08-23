@@ -78,7 +78,7 @@ Sprint 3 covers social proof, media, gallery, and the rich footer with live data
 
 YouTube URLs are normalized via `toYoutubeEmbedUrl()` in `marketingPublicSite.ts`.
 
-Toggle sections in the brand homepage editor: **Programs grid**, **Leadership profiles**, **Trust & video**, **Photo gallery**, **Footer**.
+Toggle sections in the brand homepage editor: **Leadership profiles**, **Trust & video**, **Photo gallery**, **Footer**. **Programs grid** and **Curriculum syllabus** are not shown here — manage courses on **Curriculum** (`/app/curriculum`). Public Programs still list published curriculum (leftover named homepage cards in JSON still render until removed from stored landing).
 
 ## Sprint 4 (delivered) — Programs grid & curriculum marketing
 
@@ -88,8 +88,8 @@ Card-based programs section (replacing the auto-scroll marquee) with curriculum-
 |---|---------|-------|---------------|
 | 1 | Programs card grid | `ProgramsGridSection` | Full banner `img` (contain) or gradient fallback, age badge, blurb, **Know More →** (published courses open `/courses/:slug`) |
 | 2 | Program details modal | `AcModalShell` in `MarketingLeadModals.tsx` | Benefits list + scholarship banner |
-| 3 | Section headings + program cards (editable) | `AbacusClassicEditorForm` → **Programs grid** | Shared `EditorFieldsGrid` / `EditorItemPanel` helpers from `HomepageEditorShell.tsx` (same UX as Novu admin editor) |
-| 4 | Homepage program cards | `programsSection.cards[]` → `resolveProgramsGridItems()` | Name, image, age badge, blurb, benefits, scholarship; **Add program card** in homepage editor |
+| 3 | Section headings + program cards (not in Homepage editor) | Public `ProgramsGridSection` + **Curriculum** | Homepage **Programs grid** accordion is hidden; edit courses at `/app/curriculum` |
+| 4 | Homepage program cards | leftover `programsSection.cards[]` → `resolveProgramsGridItems()` | Named cards in stored JSON still render on Abacus if present; new cards are not added from Homepage |
 | 5 | Curriculum marketing fields (fallback) | `/app/curriculum` → `CurriculumWorkspace` | Used when no named homepage cards are configured. Create **and** the existing-course editor both include benefits, why parents choose this, skills & outcomes, and scholarship; **Save** updates the saved course. Course Banner uploads go to `{brandId}/marketing/program-marketing/{courseId}/` so one course cannot overwrite another. |
 | 6 | Public curriculum JSON | `brand_public_curriculum_json()` | Migration `042_program_marketing_fields.sql` |
 | 7 | Center sites inherit Abacus theme | `mergeAbacusClassicCenterLandingConfig()` | Brand + center `{center}.{brand}` use Abacus layout, sections, and programs grid |

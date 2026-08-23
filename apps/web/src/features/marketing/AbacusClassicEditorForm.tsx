@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
 import { Input, ToggleField } from "@edunudg/ui";
 import type {
   HomepageConfig,
@@ -8,13 +7,11 @@ import type {
   HomepageFounderProfile,
   HomepageGalleryImage,
   HomepageLink,
-  HomepageProgramCard,
   HomepageTrustCard,
 } from "@/types/homepage";
 import type { MarketingUploadScope } from "@/lib/marketingMediaStorage";
 import type { PortalMode } from "@/lib/portalMode";
 import { isAbacusSectionEnabled, isEduLearnSectionEnabled, isSparkSectionEnabled, setSectionEnabled, ABACUS_CLASSIC_SECTION_DEFAULTS, EDU_LEARN_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, type HomepageSectionKey } from "@/lib/homepageSections";
-import { emptyHomepageProgramCard } from "@/lib/programsGridItems";
 import { FooterRichEditorFields } from "@/features/marketing/FooterRichEditorFields";
 import { FooterLegalPagesEditor } from "@/features/marketing/FooterLegalPagesEditor";
 import { SocialMediaConnectEditor } from "@/features/marketing/SocialMediaConnectEditor";
@@ -102,18 +99,6 @@ export function AbacusClassicEditorForm({
   };
 
   const rich = config.footer.rich ?? {};
-  const programCards = config.programsSection?.cards ?? [];
-
-  const updateProgramsSection = (patch: Partial<NonNullable<HomepageConfig["programsSection"]>>) => {
-    onChange({
-      ...config,
-      programsSection: { ...config.programsSection, ...patch },
-    });
-  };
-
-  const updateProgramCards = (cards: HomepageProgramCard[]) => {
-    updateProgramsSection({ cards });
-  };
 
   return (
     <HomepageEditorSections>
@@ -242,119 +227,6 @@ export function AbacusClassicEditorForm({
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>
-      </EditorAccordion>
-
-      <EditorAccordion
-        sectionId="programsGrid"
-        title={isCurriculumCoursesTheme ? "Courses designed for success" : "Programs grid"}
-        description={
-          isCurriculumCoursesTheme
-            ? "Shows or hides the public courses grid. Published Curriculum fills the cards."
-            : "Program cards shown in the World-Class Brain Development section"
-        }
-        enabled={isThemeSectionEnabled("programsGrid")}
-        onEnabledChange={(e) => setSection("programsGrid", e)}
-      >
-        <EditorFieldsGrid>
-          <Input
-            label="Eyebrow"
-            value={config.programsSection?.eyebrow ?? ""}
-            onChange={(v) => updateProgramsSection({ eyebrow: v })}
-          />
-          <Input
-            label="Section title"
-            value={config.programsSection?.title ?? ""}
-            onChange={(v) => updateProgramsSection({ title: v })}
-          />
-          <EditorFieldSpan>
-            <Input
-              label="Default scholarship banner"
-              value={config.programsSection?.defaultScholarshipHighlight ?? ""}
-              onChange={(v) => updateProgramsSection({ defaultScholarshipHighlight: v })}
-              placeholder="1 Lakh Success Scholarship!"
-            />
-          </EditorFieldSpan>
-        </EditorFieldsGrid>
-        <EditorSectionNote>
-          {isCurriculumCoursesTheme ? (
-            <>
-              Public <strong>Courses</strong> uses published{" "}
-              <Link to="/app/curriculum">Curriculum</Link> courses (the same catalog as Curriculum syllabus).
-              Homepage program cards below are used only when no published courses exist. Matching card images
-              fill in when a course has no banner.
-            </>
-          ) : (
-            <>
-              Add program cards below. When at least one card has a name, those cards are shown on the public site.
-              If no cards are configured, programs fall back to your{" "}
-              <Link to="/app/curriculum">Curriculum</Link> catalog.
-            </>
-          )}
-        </EditorSectionNote>
-        <EditorItemList
-          onAdd={() =>
-            commit({
-              ...config,
-              programsSection: {
-                ...config.programsSection,
-                cards: [...programCards, emptyHomepageProgramCard()],
-              },
-            })
-          }
-          addLabel="+ Add program card"
-        >
-          {programCards.map((card, index) => (
-            <ProgramCardEditor
-              key={card.id}
-              card={card}
-              index={index}
-              uploadScope={uploadScope}
-              onChange={(next) => {
-                const cards = [...programCards];
-                cards[index] = next;
-                updateProgramCards(cards);
-              }}
-              onRemove={() => updateProgramCards(programCards.filter((_, i) => i !== index))}
-              onPersistImage={(next) =>
-                commitMedia({
-                  ...config,
-                  programsSection: {
-                    ...config.programsSection,
-                    cards: programCards.map((c, i) => (i === index ? next : c)),
-                  },
-                })
-              }
-            />
-          ))}
-        </EditorItemList>
-      </EditorAccordion>
-
-      <EditorAccordion
-        sectionId="curriculumSyllabus"
-        title="Curriculum syllabus"
-        description={
-          isCurriculumCoursesTheme
-            ? "Published Curriculum catalog for Courses (#programs / #curriculum)"
-            : "Full published syllabus at #curriculum on your public site"
-        }
-        enabled={isThemeSectionEnabled("curriculumSyllabus")}
-        onEnabledChange={(e) => setSection("curriculumSyllabus", e)}
-      >
-        <EditorSectionNote>
-          {isCurriculumCoursesTheme ? (
-            <>
-              Manage courses, programs, and chapters at <Link to="/app/curriculum">Curriculum</Link>. This theme
-              shows those published courses in the public <strong>Courses</strong> section — not leftover marketing
-              program cards from another theme.
-            </>
-          ) : (
-            <>
-              Manage courses, programs, and chapters at <Link to="/app/curriculum">Curriculum</Link>. When visible,
-              parents see the full tree at <code>#curriculum</code> — separate from the marketing programs grid at{" "}
-              <code>#programs</code>.
-            </>
-          )}
-        </EditorSectionNote>
       </EditorAccordion>
 
       <EditorAccordion
@@ -990,102 +862,6 @@ export function AbacusClassicEditorForm({
         <SocialMediaConnectEditor socialConnect={socialConnect} onSocialConnectChange={onSocialConnectChange} />
       ) : null}
     </HomepageEditorSections>
-  );
-}
-
-function ProgramCardEditor({
-  card,
-  index,
-  uploadScope,
-  onChange,
-  onRemove,
-  onPersistImage,
-}: {
-  card: HomepageProgramCard;
-  index: number;
-  uploadScope: MarketingUploadScope;
-  onChange: (card: HomepageProgramCard) => void;
-  onRemove: () => void;
-  onPersistImage: (card: HomepageProgramCard) => void;
-}) {
-  const benefits = card.benefits ?? [];
-
-  const updateBenefit = (benefitIndex: number, value: string) => {
-    const next = [...benefits];
-    next[benefitIndex] = value;
-    onChange({ ...card, benefits: next });
-  };
-
-  return (
-    <EditorItemPanel title={`Program ${index + 1}`} onRemove={onRemove} removeLabel="Remove program card">
-      <EditorFieldsGrid>
-        <Input label="Program name" value={card.name} onChange={(name) => onChange({ ...card, name })} />
-        <Input
-          label="Age / grade badge"
-          value={card.ageLabel ?? ""}
-          onChange={(ageLabel) => onChange({ ...card, ageLabel })}
-          placeholder="Age 6–14"
-        />
-        <EditorFieldSpan>
-          <MarketingMediaField
-            label="Card image"
-            value={card.imageUrl ?? ""}
-            onChange={(imageUrl) => onPersistImage({ ...card, imageUrl })}
-            mediaType="image"
-            uploadSubdir={`program-card-${index}`}
-            uploadScope={uploadScope}
-          />
-        </EditorFieldSpan>
-        <Input
-          label="Short description (card blurb)"
-          value={card.description ?? ""}
-          onChange={(description) => onChange({ ...card, description })}
-        />
-        <Input
-          label="Modal intro (optional)"
-          value={card.intro ?? ""}
-          onChange={(intro) => onChange({ ...card, intro })}
-        />
-      </EditorFieldsGrid>
-
-      <EditorGroupedPanel
-        title="Benefits (public course page)"
-        note="Each benefit appears as a bullet point in the program details modal."
-        isEmpty={benefits.length === 0}
-        emptyLabel="No benefits yet."
-        onAdd={() => onChange({ ...card, benefits: [...benefits, ""] })}
-        addLabel="+ Add benefit"
-      >
-        {benefits.length > 0 ? (
-          <EditorFieldsGrid>
-            {benefits.map((benefit, benefitIndex) => (
-              <EditorSubItem
-                key={`${card.id}-benefit-${benefitIndex}`}
-                onRemove={() => onChange({ ...card, benefits: benefits.filter((_, i) => i !== benefitIndex) })}
-                removeLabel="Remove benefit"
-              >
-                <Input
-                  label={`Benefit ${benefitIndex + 1}`}
-                  value={benefit}
-                  onChange={(v) => updateBenefit(benefitIndex, v)}
-                />
-              </EditorSubItem>
-            ))}
-          </EditorFieldsGrid>
-        ) : null}
-      </EditorGroupedPanel>
-
-      <EditorFieldsGrid>
-        <EditorFieldSpan>
-          <Input
-            label="Scholarship highlight (optional)"
-            value={card.scholarshipHighlight ?? ""}
-            onChange={(scholarshipHighlight) => onChange({ ...card, scholarshipHighlight })}
-            placeholder="Overrides brand default for this program"
-          />
-        </EditorFieldSpan>
-      </EditorFieldsGrid>
-    </EditorItemPanel>
   );
 }
 
