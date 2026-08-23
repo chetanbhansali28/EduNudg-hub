@@ -2,7 +2,7 @@
 
 Green/orange public brand sites (`marketing_theme = 'edu-learn'`). Visual reference: **cream page** (`#F6F3ED`, not Novu black), rounded cards, forest green (`#1E5631`), orange CTAs (`#F9A825`), doodle underlines.
 
-Platform admins assign the theme at **Platform → Brands → Edit** → **Brand settings** → **Website theme**. Brand owners edit the **same** homepage JSON at `{brand}.localhost:9000/app/homepage` and `{brand}.localhost:9000/app/center-site`.
+Platform admins assign the theme at **Platform → Brands → Edit** → **Brand settings** → **Website theme**. Brand owners edit the **same** homepage JSON at `{brand}.localhost:9000/app/homepage` and `{brand}.localhost:9000/app/center-site`. Course catalog rows (**Courses designed for success** / **Curriculum syllabus**) are hidden there — publish courses on **Curriculum**.
 
 Hero photo sits in a teal organic blob with doodles; teacher/classroom cards overlap the photo. Stats use overlapping orange + teal tiles. Header CTA is a pill outline; Get Started is solid orange. Brand nav includes **Apply franchise** from stored Navigation & CTAs (same field as Spark).
 
