@@ -20,6 +20,7 @@ import {
   type CurriculumLevel,
 } from "@/lib/curriculumApi";
 import { parseTopicsComma } from "@/lib/curriculumHelpers";
+import { newCurriculumProgramMediaSlotId } from "@/lib/marketingMediaStorage";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import { useAddFormCloser } from "@/features/shared/useAddFormCloser";
 import { useSavedFlash } from "@/features/shared/useSavedFlash";
@@ -72,6 +73,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
   const [requestAddProgram, setRequestAddProgram] = useState(false);
 
   const [addCourse, setAddCourse] = useState(EMPTY_COURSE_FORM);
+  const [addCourseMediaSlotId, setAddCourseMediaSlotId] = useState(newCurriculumProgramMediaSlotId);
   const [editCourse, setEditCourse] = useState(EMPTY_COURSE_FORM);
   const [addLevel, setAddLevel] = useState(EMPTY_LEVEL_FORM);
   const [editLevel, setEditLevel] = useState(EMPTY_LEVEL_FORM);
@@ -170,6 +172,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
       clear();
       invalidateAll();
       setAddCourse(EMPTY_COURSE_FORM);
+      setAddCourseMediaSlotId(newCurriculumProgramMediaSlotId());
       setSelectedCourseId(id);
       setAddCourseOpen(false);
       courseCloser.closeAddForm();
@@ -283,6 +286,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
   const openAddCourse = () => {
     clear();
     setAddCourse(EMPTY_COURSE_FORM);
+    setAddCourseMediaSlotId(newCurriculumProgramMediaSlotId());
     setAddCourseOpen(true);
     setMobileDetailOpen(false);
   };
@@ -290,6 +294,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
   const closeAddCourse = () => {
     setAddCourseOpen(false);
     setAddCourse(EMPTY_COURSE_FORM);
+    setAddCourseMediaSlotId(newCurriculumProgramMediaSlotId());
     courseCloser.closeAddForm();
   };
 
@@ -300,6 +305,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
 
   const detailPanel = selectedCourse ? (
     <CurriculumCourseDetail
+      key={selectedCourse.id}
       brandId={brandId}
       course={selectedCourse}
       courseIndex={Math.max(0, selectedCourseIndex)}
@@ -365,6 +371,7 @@ export function CurriculumWorkspace({ brandId, readOnly = false }: CurriculumWor
   const addCoursePanel = !readOnly ? (
     <CurriculumAddCoursePanel
       brandId={brandId}
+      mediaSlotId={addCourseMediaSlotId}
       value={addCourse}
       onChange={setAddCourse}
       onCancel={closeAddCourse}

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 export type CurriculumCourseStatus = "active" | "draft" | "archived";
@@ -503,16 +503,31 @@ export function CurriculumBannerDropzone({
   uploading?: boolean;
   hint?: string;
 }) {
+  const [imageBroken, setImageBroken] = useState(false);
+
+  useEffect(() => {
+    setImageBroken(false);
+  }, [imageUrl]);
+
+  const showImage = Boolean(imageUrl?.trim()) && !imageBroken;
+  const actionLabel = showImage ? "Replace image" : "Upload image";
+
   return (
     <div className="ed-curriculum-banner">
       <button
         type="button"
-        className={`ed-curriculum-banner-dropzone${imageUrl ? " ed-curriculum-banner-dropzone--filled" : ""}`}
+        className={`ed-curriculum-banner-dropzone${showImage ? " ed-curriculum-banner-dropzone--filled" : ""}`}
         onClick={onUploadClick}
         disabled={uploading}
+        aria-label={showImage ? "Replace course banner" : "Upload course banner"}
       >
-        {imageUrl ? (
-          <img src={imageUrl} alt="" className="ed-curriculum-banner-dropzone__image" />
+        {showImage ? (
+          <img
+            src={imageUrl ?? ""}
+            alt=""
+            className="ed-curriculum-banner-dropzone__image"
+            onError={() => setImageBroken(true)}
+          />
         ) : (
           <>
             <span className="ed-curriculum-banner-dropzone__icon" aria-hidden>
@@ -529,7 +544,15 @@ export function CurriculumBannerDropzone({
           </>
         )}
       </button>
-      {imageUrl && hint ? <p className="ed-curriculum-banner-dropzone__hint">{hint}</p> : null}
+      <button
+        type="button"
+        className="ed-curriculum-banner__action"
+        onClick={onUploadClick}
+        disabled={uploading}
+      >
+        {uploading ? "Uploading…" : actionLabel}
+      </button>
+      {showImage && hint ? <p className="ed-curriculum-banner-dropzone__hint">{hint}</p> : null}
     </div>
   );
 }

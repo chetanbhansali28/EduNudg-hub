@@ -199,6 +199,16 @@ Franchise staff bulk-enroll existing students from **Students** (`/app/students`
 
 See [merchandise spec](../spec/merchandise.md).
 
+## Curriculum course banners
+
+- Brand staff: **Brand portal → Curriculum** — Course Media & Visuals → Course Banner (Thumbnail).
+- Storage path: `{brand_id}/marketing/program-marketing/{program_id}/asset.{ext}` in the **`brand-assets`** bucket. Adding a course uses a draft UUID folder until `programs.id` exists.
+- Do **not** reuse a brand-wide `program-marketing/asset.*` slot — that overwrites every course that pointed at the same file.
+- Existing `marketing_image_url` values keep working; a new upload writes a new per-course object and **Save** updates only that course. Preview Video stays a URL field.
+- If a saved banner file is missing, Course Banner still shows the empty dropzone plus **Upload image** (do not hide the picker behind a zero-height broken `<img>`).
+
+See [brand-curriculum-workspace spec](../../openspec/specs/brand-curriculum-workspace/spec.md).
+
 ## Center public profile (franchise settings)
 
 - Apply migration `046_center_public_profile.sql`: `supabase db push`
