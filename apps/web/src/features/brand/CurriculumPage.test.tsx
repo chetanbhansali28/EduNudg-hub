@@ -165,6 +165,49 @@ describe("CurriculumPage", () => {
     expect(screen.getByText(/PNG, JPEG, WebP, or GIF/i)).toBeDefined();
   });
 
+  it("regression_curriculum_banner_stays_per_course_when_switching", async () => {
+    const abacus = {
+      ...sampleProgram,
+      marketing_image_url: "https://cdn.example/abacus-banner.png",
+    };
+    const vedic = {
+      ...sampleProgram,
+      id: "p2",
+      name: "Vedic Maths",
+      description: "Make maths easy",
+      marketing_image_url: "https://cdn.example/vedic-banner.png",
+    };
+    fromMock.mockImplementation((table: string) => {
+      if (table === "programs") return chain([abacus, vedic]);
+      if (table === "levels") return chain([sampleLevel]);
+      if (table === "center_program_enablement") return chain(null, { count: 0 });
+      if (table === "batches") return chain(null, { count: 0 });
+      if (table === "modules") return chain([]);
+      if (table === "lessons") return chain([]);
+      return chain([]);
+    });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect((document.querySelector(".ed-curriculum-banner-dropzone__image") as HTMLImageElement | null)?.src).toContain(
+        "abacus-banner.png",
+      );
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /Vedic Maths/ }));
+
+    await waitFor(() => {
+      expect((document.querySelector(".ed-curriculum-banner-dropzone__image") as HTMLImageElement | null)?.src).toContain(
+        "vedic-banner.png",
+      );
+    });
+    expect(screen.getByDisplayValue("Vedic Maths")).toBeDefined();
+    expect(
+      (document.querySelector(".ed-curriculum-banner-dropzone__image") as HTMLImageElement).src,
+    ).not.toContain("abacus-banner.png");
+  });
+
   it("regression_desktop_add_course_opens_create_form", async () => {
     mockCurriculumTables();
     renderPage();

@@ -1,6 +1,7 @@
 import { Button, FormGrid, Input, Textarea } from "@edunudg/ui";
 import type { CurriculumProgram, ProgramMarketingInput } from "@/lib/curriculumApi";
 import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
+import { curriculumProgramMediaSubdir } from "@/lib/marketingMediaStorage";
 
 export const EMPTY_COURSE_FORM: ProgramMarketingInput = {
   name: "",
@@ -120,11 +121,14 @@ export function CourseParentMarketingFields({
 
 export function CourseFields({
   brandId,
+  mediaSlotId,
   value,
   onChange,
   readOnly = false,
 }: {
   brandId: string;
+  /** Course id, or a draft UUID while creating. */
+  mediaSlotId: string;
   value: ProgramMarketingInput;
   onChange: (v: ProgramMarketingInput) => void;
   readOnly?: boolean;
@@ -156,7 +160,7 @@ export function CourseFields({
         value={value.marketingImageUrl}
         onChange={(marketingImageUrl) => onChange({ ...value, marketingImageUrl })}
         mediaType="image"
-        uploadSubdir="program-marketing"
+        uploadSubdir={curriculumProgramMediaSubdir(mediaSlotId)}
         uploadScope={uploadScope}
         disabled={readOnly}
       />

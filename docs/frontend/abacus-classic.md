@@ -90,7 +90,7 @@ Card-based programs section (replacing the auto-scroll marquee) with curriculum-
 | 2 | Program details modal | `AcModalShell` in `MarketingLeadModals.tsx` | Benefits list + scholarship banner |
 | 3 | Section headings + program cards (editable) | `AbacusClassicEditorForm` → **Programs grid** | Shared `EditorFieldsGrid` / `EditorItemPanel` helpers from `HomepageEditorShell.tsx` (same UX as Novu admin editor) |
 | 4 | Homepage program cards | `programsSection.cards[]` → `resolveProgramsGridItems()` | Name, image, age badge, blurb, benefits, scholarship; **Add program card** in homepage editor |
-| 5 | Curriculum marketing fields (fallback) | `/app/curriculum` → `CurriculumWorkspace` | Used when no named homepage cards are configured. Create **and** the existing-course editor both include benefits, why parents choose this, skills & outcomes, and scholarship; **Save** updates the saved course. |
+| 5 | Curriculum marketing fields (fallback) | `/app/curriculum` → `CurriculumWorkspace` | Used when no named homepage cards are configured. Create **and** the existing-course editor both include benefits, why parents choose this, skills & outcomes, and scholarship; **Save** updates the saved course. Course Banner uploads go to `{brandId}/marketing/program-marketing/{courseId}/` so one course cannot overwrite another. |
 | 6 | Public curriculum JSON | `brand_public_curriculum_json()` | Migration `042_program_marketing_fields.sql` |
 | 7 | Center sites inherit Abacus theme | `mergeAbacusClassicCenterLandingConfig()` | Brand + center `{center}.{brand}` use Abacus layout, sections, and programs grid |
 | 8 | Center template editor | `BrandCenterSiteEditorPage` at `/app/center-site` | `AbacusClassicEditorForm` when `marketing_theme = abacus-classic` |

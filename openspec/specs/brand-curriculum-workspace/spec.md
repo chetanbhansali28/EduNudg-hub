@@ -78,6 +78,17 @@ Brand staff SHALL see allowed formats, maximum file size, and recommended dimens
 - **THEN** Course Banner (Thumbnail) shows PNG/JPEG/WebP/GIF, maximum 5 MB, and recommended 1280×720 (16:9)
 - **AND** uploads larger than 5 MB are rejected before storage
 
+#### Scenario: Each course banner uses its own storage slot
+
+- **GIVEN** a brand with more than one course on `/app/curriculum`
+- **WHEN** brand staff upload a Course Banner on one course
+- **THEN** Storage writes `{brandId}/marketing/program-marketing/{courseId}/asset.{ext}`
+- **AND** other courses keep their existing `marketing_image_url` files
+- **AND** Preview Video, benefits, and level fields are unchanged
+- **AND** switching courses shows that course’s own saved banner
+- **AND** Course Banner always shows **Upload image** or **Replace image**
+- **AND** a saved URL whose file is missing still shows the empty dropzone so staff can upload again
+
 #### Scenario: Loaded banner fills the preview without side gaps
 
 - **GIVEN** a course with a `marketing_image_url`

@@ -59,7 +59,7 @@ Center public mentors: `regression_center_mentors_show_franchiser_first_then_bra
 
 Center public nav lockup: `regression_franchise_frontend_nav_highlights_logo_and_name` — franchise frontend enlarges the **site name** (`--franchise` nav modifier). Brand and franchise public logos share one size and have no ring (`regression_public_nav_logo_matches_franchise_size_without_border`, `regression_brand_public_nav_logo_matches_franchise_size`).
 
-Curriculum course banner: `regression_curriculum_banner_shows_upload_size_hint` and `regression_curriculum_banner_rejects_images_over_5mb` — dropzone shows formats, 5 MB max, 1280×720; oversized images rejected.
+Curriculum course banner: `regression_curriculum_banner_shows_upload_size_hint` and `regression_curriculum_banner_rejects_images_over_5mb` — dropzone shows formats, 5 MB max, 1280×720; oversized images rejected. Each course uploads to its own Storage folder (`program-marketing/{courseId}`), not a brand-wide `program-marketing` slot — `regression_curriculum_banner_upload_uses_per_course_slot`, `regression_curriculum_course_banner_upload_does_not_share_brand_slot`, `regression_curriculum_banner_stays_per_course_when_switching`. A missing/broken saved banner must still show **Upload image** (`regression_curriculum_banner_always_shows_upload_action`, `regression_curriculum_banner_shows_upload_when_saved_image_fails`).
 
 Curriculum parent marketing: `regression_created_course_shows_parent_marketing_fields` and `regression_created_course_parent_marketing_is_editable` — after create, `/app/curriculum` course detail still shows Add benefit, Why parents choose this, Skills and outcomes, and **Save**.
 

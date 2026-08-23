@@ -4,6 +4,8 @@ import {
   marketingMediaObjectPath,
   MARKETING_IMAGE_MAX_BYTES,
   assertMarketingImageUploadSize,
+  curriculumProgramMediaSubdir,
+  newCurriculumProgramMediaSlotId,
 } from "./marketingMediaStorage";
 
 describe("marketingMediaObjectPath", () => {
@@ -40,6 +42,45 @@ describe("marketingMediaFolder", () => {
     expect(
       marketingMediaFolder({ kind: "brand", brandId: "b1" }, "hero-background")
     ).toBe("b1/marketing/hero-background");
+  });
+});
+
+describe("curriculumProgramMediaSubdir", () => {
+  it("regression_curriculum_banner_upload_uses_per_course_slot", () => {
+    const brandId = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+    const abacus = curriculumProgramMediaSubdir("program-abacus");
+    const vedic = curriculumProgramMediaSubdir("program-vedic");
+    expect(abacus).toBe("program-marketing/program-abacus");
+    expect(vedic).toBe("program-marketing/program-vedic");
+    expect(abacus).not.toBe(vedic);
+    expect(abacus).not.toBe("program-marketing");
+
+    const abacusPath = marketingMediaObjectPath(
+      { kind: "brand", brandId },
+      abacus,
+      new File(["x"], "abacus.png", { type: "image/png" }),
+    );
+    const vedicPath = marketingMediaObjectPath(
+      { kind: "brand", brandId },
+      vedic,
+      new File(["x"], "vedic.png", { type: "image/png" }),
+    );
+    expect(abacusPath).toBe(`${brandId}/marketing/program-marketing/program-abacus/asset.png`);
+    expect(vedicPath).toBe(`${brandId}/marketing/program-marketing/program-vedic/asset.png`);
+    expect(abacusPath).not.toBe(vedicPath);
+    expect(abacusPath).not.toContain("/marketing/program-marketing/asset.");
+  });
+
+  it("regression_new_course_banner_slot_is_unique_draft_id", () => {
+    const a = newCurriculumProgramMediaSlotId();
+    const b = newCurriculumProgramMediaSlotId();
+    expect(a).not.toBe(b);
+    expect(curriculumProgramMediaSubdir(a)).toMatch(/^program-marketing\/[a-zA-Z0-9-]+$/);
+  });
+
+  it("rejects unsafe curriculum media slot ids", () => {
+    expect(() => curriculumProgramMediaSubdir("../hero-background")).toThrow(/Invalid curriculum media slot/);
+    expect(() => curriculumProgramMediaSubdir("")).toThrow(/Invalid curriculum media slot/);
   });
 });
 

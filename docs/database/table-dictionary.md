@@ -108,6 +108,7 @@ Centers with `merchandise` enabled can **SELECT** active rows **tied to a curric
 | Column | Table | Purpose |
 |--------|-------|---------|
 | `why_take`, `what_you_learn`, `marketing_video_url` | `programs`, `levels` | Abacus marketing copy |
+| `marketing_image_url` | `programs` | Course banner URL; Storage object is per course (`program-marketing/{program_id}`), not a shared brand slot |
 | `is_active` | `programs` | Course on/off; false hides from public curriculum and batch pickers, not from `/app/curriculum` |
 | `id` in `brand_public_curriculum_json` | (RPC JSON) | Public course URLs (`/courses/:slug`) disambiguate name collisions; migration `093` |
 | `abacus_level_code`, `topics_covered` | `levels` | Level label + topic list (jsonb array) |

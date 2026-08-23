@@ -4,6 +4,7 @@ import { CourseFields } from "@/features/brand/curriculum/curriculumForms";
 
 type Props = {
   brandId: string;
+  mediaSlotId: string;
   value: ProgramMarketingInput;
   onChange: (value: ProgramMarketingInput) => void;
   onCancel: () => void;
@@ -14,6 +15,7 @@ type Props = {
 
 export function CurriculumAddCoursePanel({
   brandId,
+  mediaSlotId,
   value,
   onChange,
   onCancel,
@@ -44,7 +46,7 @@ export function CurriculumAddCoursePanel({
       </header>
 
       <CurriculumSectionCard title="Course details">
-        <CourseFields brandId={brandId} value={value} onChange={onChange} />
+        <CourseFields brandId={brandId} mediaSlotId={mediaSlotId} value={value} onChange={onChange} />
         <div className="ed-curriculum-add-course__actions">
           <SaveButton
             onClick={onCreate}

@@ -16,7 +16,7 @@ import {
 } from "@edunudg/ui";
 import type { CurriculumProgram, ProgramMarketingInput } from "@/lib/curriculumApi";
 import { MarketingMediaField } from "@/features/marketing/MarketingMediaField";
-import { curriculumBannerUploadHint } from "@/lib/marketingMediaStorage";
+import { curriculumBannerUploadHint, curriculumProgramMediaSubdir } from "@/lib/marketingMediaStorage";
 import { CurriculumLevelPanel } from "@/features/brand/curriculum/CurriculumLevelPanel";
 import { CourseParentMarketingFields, type LevelForm } from "@/features/brand/curriculum/curriculumForms";
 import type { CurriculumLevel, CourseImpactStats } from "@/lib/curriculumApi";
@@ -227,7 +227,7 @@ export function CurriculumCourseDetail({
                 value={editCourse.marketingImageUrl}
                 onChange={(marketingImageUrl) => onEditCourseChange({ ...editCourse, marketingImageUrl })}
                 mediaType="image"
-                uploadSubdir="program-marketing"
+                uploadSubdir={curriculumProgramMediaSubdir(course.id)}
                 uploadScope={uploadScope}
                 disabled={readOnly}
               />

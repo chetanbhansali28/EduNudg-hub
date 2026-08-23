@@ -16,6 +16,23 @@ export function curriculumBannerUploadHint(): string {
   return `PNG, JPEG, WebP, or GIF. Maximum ${MARKETING_IMAGE_MAX_MB} MB. Recommended ${CURRICULUM_BANNER_RECOMMENDED_SIZE} for program cards.`;
 }
 
+/** Safe id for a per-course `brand-assets` folder (UUID, draft slot, or test fixture). */
+const CURRICULUM_MEDIA_SLOT_ID = /^[a-zA-Z0-9-]{1,80}$/;
+
+/** Unique Storage folder for one curriculum course banner (does not share `program-marketing/asset.*`). */
+export function curriculumProgramMediaSubdir(programId: string): string {
+  const id = programId.trim();
+  if (!CURRICULUM_MEDIA_SLOT_ID.test(id)) {
+    throw new Error("Invalid curriculum media slot");
+  }
+  return `program-marketing/${id}`;
+}
+
+/** Draft slot while adding a course, before `programs.id` exists. */
+export function newCurriculumProgramMediaSlotId(): string {
+  return crypto.randomUUID();
+}
+
 export function assertMarketingImageUploadSize(file: File): void {
   if (!file.type.startsWith("image/")) return;
   if (file.size > MARKETING_IMAGE_MAX_BYTES) {
