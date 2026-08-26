@@ -13,6 +13,8 @@ On `*.vercel.app` (same-origin mode), every brand/center/learn URL needs `portal
 **Wrong:** `...?brand=smart-brain-abacus/login` — `/login` becomes part of the slug.  
 **Right:** `.../login?portal=brand&brand=smart-brain-abacus`
 
+Franchise **Student Login** and **Copy Profile URL** use `learnPortalLoginUrl` → `/login?portal=learn&brand=smart-brain-abacus` (never append `/login` after the query). Regression: `regression_vercel_student_login_uses_path_before_portal_query`.
+
 See also: [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md), [test-users.md](./test-users.md), [runbook.md](./runbook.md).
 
 ---
