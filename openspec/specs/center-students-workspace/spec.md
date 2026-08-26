@@ -52,6 +52,18 @@ Center student detail **Portal access** SHALL prefill Login email with `students
 - **THEN** **Portal access** has **Copy Profile URL**
 - **AND** it copies the student/parent learn-portal login URL (`learnPortalLoginUrl`) to the clipboard
 - **AND** the copied URL does not include a password
+- **AND** on Vercel same-origin hosts the URL is `/login?portal=learn&brand=…` (path before `?`), never `?portal=learn&brand=…/login`
+
+### Requirement: Franchise Student Login nav link
+
+Center public **Student Login** SHALL use `learnPortalLoginUrl` so local multi-host and Vercel same-origin both open the learn portal login screen.
+
+#### Scenario: Student Login on Vercel same-origin
+
+- **GIVEN** a franchise public site on `*.vercel.app` with `?portal=center&brand=…&center=…`
+- **WHEN** a visitor clicks **Student Login**
+- **THEN** the href is `/login?portal=learn&brand={brandSlug}` on the same origin
+- **AND** `/login` is the path, not a suffix on the `brand` query value
 
 ### Requirement: Delivery address save feedback
 

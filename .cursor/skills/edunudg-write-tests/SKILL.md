@@ -81,7 +81,7 @@ Brand center enrollment template: `regression_center_site_config_is_its_own_page
 
 Franchise public programs: `regression_center_public_programs_filter_to_enabled_curriculum` — center WHAT WE TEACH / courses show only `center_program_enablement` programs, not the full Center sites template.
 
-Manual student lead: `regression_manual_brand_student_matches_public_enroll_fields` and `regression_manual_center_student_matches_csv_import_fields` — Add Lead is a modal (`ed-import-dialog`) whose fields match the student CSV import template. Center Leads column 2 has extra top padding (`regression_center_leads_detail_has_top_padding`). Portal access Login email shows `login_email` or the parent email (`regression_portal_access_shows_provided_email`). **Copy Profile URL** copies the learn-portal login without a password (`regression_center_student_copies_learn_login_url_without_password`).
+Manual student lead: `regression_manual_brand_student_matches_public_enroll_fields` and `regression_manual_center_student_matches_csv_import_fields` — Add Lead is a modal (`ed-import-dialog`) whose fields match the student CSV import template. Center Leads column 2 has extra top padding (`regression_center_leads_detail_has_top_padding`). Portal access Login email shows `login_email` or the parent email (`regression_portal_access_shows_provided_email`). **Copy Profile URL** copies the learn-portal login without a password (`regression_center_student_copies_learn_login_url_without_password`). Franchise **Student Login** on Vercel must use `/login?portal=learn&brand=…` (`regression_vercel_student_login_uses_path_before_portal_query`).
 
 Coverage target: ≥80% on `packages/*`.
 

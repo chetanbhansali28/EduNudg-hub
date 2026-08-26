@@ -6,7 +6,12 @@ import { CenterPublicNavLogins } from "./CenterPublicNavLogins";
 describe("CenterPublicNavLogins", () => {
   beforeEach(() => {
     vi.stubGlobal("window", {
-      location: { protocol: "http:", hostname: "koramangala.abacusworld.localhost", port: "9000" },
+      location: {
+        protocol: "http:",
+        hostname: "koramangala.abacusworld.localhost",
+        port: "9000",
+        origin: "http://koramangala.abacusworld.localhost:9000",
+      },
     });
   });
 
@@ -24,5 +29,25 @@ describe("CenterPublicNavLogins", () => {
     const link = screen.getByRole("link", { name: "Student Login" });
     expect(link.getAttribute("href")).toBe("http://learn.abacusworld.localhost:9000/login");
     expect(screen.queryByRole("link", { name: /staff login/i })).toBeNull();
+  });
+
+  it("regression_vercel_student_login_uses_path_before_portal_query", () => {
+    vi.stubGlobal("window", {
+      location: {
+        protocol: "https:",
+        hostname: "edunudg-hub.vercel.app",
+        port: "",
+        origin: "https://edunudg-hub.vercel.app",
+      },
+    });
+    render(
+      <MemoryRouter>
+        <CenterPublicNavLogins brandSlug="smart-brain-abacus" />
+      </MemoryRouter>
+    );
+    const link = screen.getByRole("link", { name: "Student Login" });
+    expect(link.getAttribute("href")).toBe(
+      "https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus"
+    );
   });
 });
