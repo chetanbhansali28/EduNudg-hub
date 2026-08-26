@@ -57,7 +57,11 @@ export function StudentProfilePage() {
           </SectionCard>
 
           <SectionCard title="My center" className="ed-sp-section--profile-side">
-            <CenterInfoCard center={profile.data.center} enrollment={profile.data.enrollment} />
+            <CenterInfoCard
+              brandSlug={tenant.brandSlug ?? ""}
+              center={profile.data.center}
+              enrollment={profile.data.enrollment}
+            />
           </SectionCard>
         </div>
       )}

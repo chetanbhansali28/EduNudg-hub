@@ -1,5 +1,6 @@
 import { PhoneLink } from "@edunudg/ui";
 import { formatShortDate, studentInitials } from "@/features/learn/studentFormatters";
+import { resolveCenterWebsiteUrl } from "@/lib/centerPublicNavUrls";
 
 type Center = {
   display_name: string;
@@ -14,12 +15,16 @@ type Enrollment = {
 };
 
 export function CenterInfoCard({
+  brandSlug,
   center,
   enrollment,
 }: {
+  brandSlug: string;
   center: Center;
   enrollment: Enrollment;
 }) {
+  const websiteUrl = resolveCenterWebsiteUrl(brandSlug, center.public_url);
+
   return (
     <div className="ed-sp-center">
       <div className="ed-sp-center__badge" aria-hidden>
@@ -38,8 +43,8 @@ export function CenterInfoCard({
           </p>
         )}
         <div className="ed-sp-center__links">
-          {center.public_url ? (
-            <a className="ed-sp-chip-link" href={center.public_url} target="_blank" rel="noreferrer">
+          {websiteUrl ? (
+            <a className="ed-sp-chip-link" href={websiteUrl} target="_blank" rel="noreferrer">
               Center website
             </a>
           ) : null}

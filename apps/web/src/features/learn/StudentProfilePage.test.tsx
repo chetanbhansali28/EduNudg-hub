@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
@@ -80,6 +80,10 @@ describe("StudentProfilePage", () => {
     updateStudentSelfProfile.mockResolvedValue(mockProfile.student);
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("regression_profile_shows_student_details_form_and_my_center", async () => {
     renderPage();
 
@@ -94,6 +98,38 @@ describe("StudentProfilePage", () => {
 
     expect(screen.getByRole("heading", { name: "My center" })).toBeDefined();
     expect(screen.getByText("Koramangala")).toBeDefined();
+  });
+
+  it("regression_vercel_profile_center_website_avoids_localhost_rpc_url", async () => {
+    const original = window.location;
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      writable: true,
+      value: {
+        protocol: "https:",
+        hostname: "edunudg-hub.vercel.app",
+        port: "",
+        origin: "https://edunudg-hub.vercel.app",
+        href: "https://edunudg-hub.vercel.app/profile?portal=learn&brand=abacusworld",
+        search: "?portal=learn&brand=abacusworld",
+      },
+    });
+
+    try {
+      renderPage();
+
+      const link = await waitFor(() => screen.getByRole("link", { name: "Center website" }));
+      expect(link.getAttribute("href")).toBe(
+        "https://edunudg-hub.vercel.app/?portal=center&brand=abacusworld&center=koramangala"
+      );
+      expect(link.getAttribute("href")).not.toMatch(/localhost|:9000/);
+    } finally {
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        writable: true,
+        value: original,
+      });
+    }
   });
 
   it("regression_profile_saves_from_inline_form", async () => {
