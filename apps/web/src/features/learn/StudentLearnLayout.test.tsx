@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@edunudg/ui";
+import { fetchStudentLearnHome } from "@/lib/studentLearnApi";
 import { StudentLearnLayout } from "./StudentLearnLayout";
 
 vi.mock("@/bootstrap/AuthProvider", () => ({
@@ -54,13 +55,7 @@ vi.mock("@/hooks/useFeatureFlag", () => ({
 
 vi.mock("@/lib/studentLearnApi", () => ({
   StudentLearnRpcError: class StudentLearnRpcError extends Error {},
-  fetchStudentLearnHome: vi.fn().mockResolvedValue({
-    student: {
-      full_name: "Alex Student",
-      student_code: "1001",
-      profile: { photo_url: null },
-    },
-  }),
+  fetchStudentLearnHome: vi.fn(),
 }));
 
 function renderStudentShell() {
@@ -88,6 +83,13 @@ describe("StudentLearnLayout", () => {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
     }));
+    vi.mocked(fetchStudentLearnHome).mockResolvedValue({
+      student: {
+        full_name: "Alex Student",
+        student_code: "1001",
+        profile: { photo_url: null },
+      },
+    } as never);
   });
 
   it("regression_omits_support_sidebar_and_header_action_icons", async () => {
@@ -101,5 +103,22 @@ describe("StudentLearnLayout", () => {
     expect(screen.queryByRole("button", { name: "Help" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Notifications" })).toBeNull();
     expect(screen.getByRole("button", { name: "Logout" })).toBeDefined();
+  });
+
+  it("regression_learn_header_shows_student_profile_photo_when_photo_url_set", async () => {
+    vi.mocked(fetchStudentLearnHome).mockResolvedValue({
+      student: {
+        full_name: "Vihaan",
+        student_code: "250DB0E7",
+        profile: { photo_url: "https://cdn.example/students/vihaan/photo.jpg" },
+      },
+    } as never);
+
+    renderStudentShell();
+
+    await waitFor(() => {
+      const img = document.querySelector("img.ed-header__avatar--img") as HTMLImageElement | null;
+      expect(img?.getAttribute("src")).toBe("https://cdn.example/students/vihaan/photo.jpg");
+    });
   });
 });

@@ -55,6 +55,17 @@ Traceability: FR-S11
 - **THEN** progress, assessments, registrations, and results for other students are not returned
 - **AND** data from a prior enrollment at another center is not mixed into the active enrollment view without explicit enrollment history UI
 
+### Requirement: Learn portal resolves brand scope
+
+The learn (and parents) host SHALL resolve `brandId` via `get_portal_branding` when `domain_mappings` lacks a learn row, so Home/Progress queries (`enabled: !!brandId`) run. Without `brandId`, the SPA MUST NOT render a blank dashboard.
+
+#### Scenario: Learn host without domain mapping still loads brand id
+
+- **GIVEN** hostname `learn.{brandSlug}.localhost` (or same-origin `?portal=learn&brand=`) with no `domain_mappings` row
+- **WHEN** `resolveTenantScope` runs
+- **THEN** it calls `get_portal_branding` for that brand slug and sets `tenant.brandId`
+- **AND** student Home/Progress RPCs are enabled (`regression_learn_portal_needs_brand_id_from_branding`)
+
 ### Requirement: Student portal authentication
 
 Center staff SHALL invite students to the learn portal; students SHALL link their auth account to their student record on first login.
@@ -247,7 +258,7 @@ Traceability: FR-S20
 
 ### Requirement: Student profile and transparency
 
-The profile page SHALL show student demographics, active enrollment, and center contact details read-only.
+The profile page SHALL show student demographics, active enrollment, and center contact details. Students MAY upload a profile photo; after **Save profile**, `student_profiles.photo_url` SHALL be returned on both `get_student_profile` and `get_student_learn_home` so the learn shell header avatar shows the photo (not only initials).
 
 Traceability: FR-S21
 
@@ -257,6 +268,13 @@ Traceability: FR-S21
 - **THEN** the page shows student name, code, DOB, school/city from `student_profiles`
 - **AND** active enrollment: center name, enrolled date, batch if assigned, curriculum version label
 - **AND** center contact phone and public URL
+
+#### Scenario: Saved photo appears in learn header
+
+- **GIVEN** student S has `student_profiles.photo_url` set
+- **WHEN** learn shell loads `get_student_learn_home`
+- **THEN** `student.profile.photo_url` is present
+- **AND** the header avatar uses that URL (`regression_learn_header_shows_student_profile_photo_when_photo_url_set`)
 
 #### Scenario: Profile does not expose other students
 

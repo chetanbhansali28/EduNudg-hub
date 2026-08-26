@@ -8,8 +8,10 @@ description: Host-based tenant resolution and portal routing for EduNudg.
 ## Flow
 
 1. `packages/tenant` resolves hostname → `domain_mappings`
-2. `TenantProvider` in `apps/web/src/bootstrap/`
-3. React Router mounts platform `/admin`, brand, or center tree
+2. `TenantProvider` → `resolveTenantScope` fills `brandId` via `get_portal_branding` for **brand, center, learn, and parents** (not platform only)
+3. React Router mounts platform `/admin`, brand, center, or learn tree
+
+Learn Home/Progress use `useTenant().brandId`. If learn skips branding, `brandId` stays null, queries never run, and the dashboard is blank even when a course is assigned.
 
 ## Files
 

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { TenantContext } from "@edunudg/tenant";
-import { mergePortalBrandingScope, needsPortalScopeIds } from "./resolveTenantScope";
+import {
+  mergePortalBrandingScope,
+  needsBrandPortalBranding,
+  needsPortalScopeIds,
+} from "./resolveTenantScope";
 
 const ABACUSWORLD_BRAND_ID = "a0000000-0000-4000-8000-000000000001";
 const KORAMANGALA_CENTER_ID = "b0000000-0000-4000-8000-000000000001";
@@ -90,6 +94,33 @@ describe("resolveTenantScope helpers", () => {
 
     expect(merged.brandId).toBe(ABACUSWORLD_BRAND_ID);
     expect(merged.centerId).toBe(KORAMANGALA_CENTER_ID);
+    expect(needsPortalScopeIds(merged)).toBe(false);
+  });
+
+  it("regression_learn_portal_needs_brand_id_from_branding", () => {
+    const learnTenant: TenantContext = {
+      hostname: "learn.smart-brain-abacus.localhost",
+      portalType: "learn",
+      brandId: null,
+      centerId: null,
+      brandSlug: "smart-brain-abacus",
+      centerSlug: null,
+    };
+    expect(needsBrandPortalBranding(learnTenant)).toBe(true);
+    expect(needsPortalScopeIds(learnTenant)).toBe(true);
+
+    const merged = mergePortalBrandingScope(learnTenant, {
+      brandId: "c0000000-0000-4000-8000-000000000011",
+      brandSlug: "smart-brain-abacus",
+      brandName: "Smart Brain Abacus",
+      brandLogoUrl: null,
+      centerId: null,
+      centerSlug: null,
+      centerName: null,
+      loginHeadline: null,
+      loginSubtext: null,
+    });
+    expect(merged.brandId).toBe("c0000000-0000-4000-8000-000000000011");
     expect(needsPortalScopeIds(merged)).toBe(false);
   });
 });
