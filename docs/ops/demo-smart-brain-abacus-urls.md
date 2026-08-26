@@ -122,9 +122,10 @@ Seed data includes the brand only — no default center. Create centers in the b
 | Public homepage | http://smart-brain-abacus.localhost:9000/ |
 | Brand login | http://smart-brain-abacus.localhost:9000/login |
 | Brand app | http://smart-brain-abacus.localhost:9000/app |
+| Student learn | http://learn.smart-brain-abacus.localhost:9000/ |
 | Platform admin brand detail | http://localhost:9000/admin/brands/smart-brain-abacus |
 
-Local uses subdomain routing — no `?portal=` params required.
+Local uses subdomain routing — no `?portal=` params required. Re-seed (or ensure `learn.smart-brain-abacus.localhost` in `domain_mappings`) so learn resolves `brandId`; SPA also fills `brandId` via `get_portal_branding` for learn/parents.
 
 ---
 

@@ -90,6 +90,22 @@ ON CONFLICT (hostname) DO UPDATE SET
   portal_type = EXCLUDED.portal_type,
   is_primary = EXCLUDED.is_primary;
 
+INSERT INTO public.domain_mappings (hostname, brand_id, center_id, portal_type, is_primary)
+SELECT 'learn.smart-brain-abacus.localhost', b.id, NULL, 'learn', false
+FROM public.brands b
+WHERE b.slug = 'smart-brain-abacus'
+ON CONFLICT (hostname) DO UPDATE SET
+  brand_id = EXCLUDED.brand_id,
+  portal_type = EXCLUDED.portal_type;
+
+INSERT INTO public.domain_mappings (hostname, brand_id, center_id, portal_type, is_primary)
+SELECT 'parents.smart-brain-abacus.localhost', b.id, NULL, 'parents', false
+FROM public.brands b
+WHERE b.slug = 'smart-brain-abacus'
+ON CONFLICT (hostname) DO UPDATE SET
+  brand_id = EXCLUDED.brand_id,
+  portal_type = EXCLUDED.portal_type;
+
 INSERT INTO public.brand_settings (brand_id, settings)
 SELECT b.id, '{"timezone":"Asia/Kolkata"}'::jsonb
 FROM public.brands b

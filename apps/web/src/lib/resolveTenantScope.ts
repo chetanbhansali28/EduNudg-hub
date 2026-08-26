@@ -22,10 +22,22 @@ export function isBrandOrCenterPortal(tenant: TenantContext): boolean {
   return tenant.portalType === "brand" || tenant.portalType === "center";
 }
 
+/** Brand / center / learn / parents all need brand_id for scoped RPCs. */
+export function needsBrandPortalBranding(tenant: TenantContext): boolean {
+  return (
+    Boolean(tenant.brandSlug) &&
+    (tenant.portalType === "brand" ||
+      tenant.portalType === "center" ||
+      tenant.portalType === "learn" ||
+      tenant.portalType === "parents")
+  );
+}
+
 export function needsPortalScopeIds(tenant: TenantContext): boolean {
   if (!tenant.brandSlug) return false;
   if (tenant.portalType === "brand") return !tenant.brandId;
   if (tenant.portalType === "center") return !tenant.brandId || !tenant.centerId;
+  if (tenant.portalType === "learn" || tenant.portalType === "parents") return !tenant.brandId;
   return false;
 }
 
@@ -68,7 +80,8 @@ async function resolveTenantScopeOnce(
       ? base
       : mergeDomainMapping(base, mapping as DomainMappingRow | null);
 
-    if (!tenant.brandSlug || !isBrandOrCenterPortal(tenant)) return tenant;
+    // Learn/parents must also resolve brandId (Home/Progress use useTenant().brandId).
+    if (!needsBrandPortalBranding(tenant)) return tenant;
 
     const { data, error } = await supabase.rpc("get_portal_branding", {
       p_brand_slug: tenant.brandSlug,

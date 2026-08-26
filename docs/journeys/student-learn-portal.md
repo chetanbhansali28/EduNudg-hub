@@ -14,10 +14,11 @@ flowchart LR
 
 ## Steps
 
-1. Center staff set `students.login_email` and call `invite_student_portal_access`.
-2. Student authenticates on the learn host and links via `link_student_auth_user` when `user_id` is null.
-3. Learn RPCs (e.g. `get_student_learn_home`) require an **active** center enrollment under the brand; otherwise UI shows contact-center guidance (`NO_ACTIVE_ENROLLMENT`).
-4. Dashboard shows enrollment-scoped progress, assessments, and competitions (FR-S10+).
+1. Center staff set `students.login_email` and call `invite_student_portal_access` (stores email only — does not create Auth password).
+2. Learn host must resolve `brandId` (`resolveTenantScope` + `get_portal_branding`, or `learn.{brand}.localhost` in `domain_mappings`). Without `brandId`, Home is blank.
+3. Student authenticates on the learn host; `resolve_student_for_learn` auto-links when Auth email matches `login_email` and `user_id` is null (center **Linked** filter then shows 1).
+4. Learn RPCs require an **active** center enrollment under the brand; otherwise UI shows contact-center guidance (`NO_ACTIVE_ENROLLMENT`).
+5. Pinned course (`pin_enrollment_program`) appears on Progress via `get_student_program_ladders`. Dashboard shows enrollment-scoped progress, assessments, and competitions (FR-S10+).
 
 ## Success criteria
 

@@ -1233,6 +1233,7 @@
   height: 72px;
   border-radius: 999px;
   object-fit: cover;
+  object-position: center 20%;
   border: 2px solid var(--ed-card);
   background: var(--ed-muted-surface, var(--ed-card));
 }

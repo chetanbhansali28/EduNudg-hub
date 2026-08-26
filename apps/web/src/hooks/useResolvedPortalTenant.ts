@@ -4,8 +4,8 @@ import { useTenant } from "@/bootstrap/TenantProvider";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
 import type { PortalBranding } from "@/lib/portalBranding";
 import {
-  isBrandOrCenterPortal,
   mergePortalBrandingScope,
+  needsBrandPortalBranding,
   needsPortalScopeIds,
 } from "@/lib/resolveTenantScope";
 
@@ -29,8 +29,7 @@ export function useResolvedPortalTenant() {
   );
 
   const scopeIdsPending =
-    isBrandOrCenterPortal(tenant) &&
-    Boolean(tenant.brandSlug) &&
+    needsBrandPortalBranding(tenant) &&
     (brandingQuery.isFetching || !brandingQuery.isFetched);
 
   const legacyIdsPending = needsPortalScopeIds(resolvedTenant) && !brandingQuery.isFetched;

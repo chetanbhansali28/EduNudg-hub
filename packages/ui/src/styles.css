@@ -531,6 +531,8 @@
 .ed-header__avatar--img {
   display: block;
   border: 2px solid var(--ed-border);
+  object-fit: cover;
+  object-position: center 20%;
 }
 
 .ed-header__profile-name {
