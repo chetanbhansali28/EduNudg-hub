@@ -19,6 +19,7 @@ flowchart LR
 3. Student authenticates on the learn host; `resolve_student_for_learn` auto-links when Auth email matches `login_email` and `user_id` is null (center **Linked** filter then shows 1).
 4. Learn RPCs require an **active** center enrollment under the brand; otherwise UI shows contact-center guidance (`NO_ACTIVE_ENROLLMENT`).
 5. Pinned course (`pin_enrollment_program`) appears on Progress via `get_student_program_ladders`. Dashboard shows enrollment-scoped progress, assessments, and competitions (FR-S10+).
+6. Profile **Center website** must not use raw RPC `center.public_url` (`http://*.localhost:9000/` from `domain_mappings`). Client rewrites with `resolveCenterWebsiteUrl` so Vercel opens `/?portal=center&brand=…&center=…`.
 
 ## Success criteria
 

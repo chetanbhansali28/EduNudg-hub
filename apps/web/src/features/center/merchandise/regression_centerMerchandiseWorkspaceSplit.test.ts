@@ -54,4 +54,20 @@ describe("center merchandise workspace split", () => {
       /\.ed-merch-product__thumb\s*\{[^}]*width:\s*2\.75rem/s,
     );
   });
+
+  it("regression_center_merchandise_shop_title_wraps_instead_of_overlapping_price", () => {
+    const uiCss = readFileSync(
+      resolve(__dirname, "../../../../../../packages/ui/src/styles.css"),
+      "utf8",
+    );
+    expect(uiCss).toMatch(
+      /\.ed-product-card--row \.ed-product-card__name\s*\{[^}]*overflow-wrap:\s*anywhere/s,
+    );
+    expect(uiCss).toMatch(
+      /\.ed-product-card--row \.ed-product-card__name\s*\{[^}]*min-width:\s*0/s,
+    );
+    expect(uiCss).toMatch(
+      /\.ed-product-card--row \.ed-product-card__price\s*\{[^}]*flex:\s*0\s+0\s+auto/s,
+    );
+  });
 });

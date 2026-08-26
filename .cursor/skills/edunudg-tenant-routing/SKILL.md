@@ -31,3 +31,4 @@ Learn Home/Progress use `useTenant().brandId`. If learn skips branding, `brandId
 - With `VITE_PORTAL_BASE_DOMAIN=example.com`, rewrite `*.localhost` mappings to `*.example.com` and use real subdomains (requires wildcard DNS on Vercel).
 - Redeploy Edge Function `platform-portal-handoff` so it preserves portal query params.
 - Login links MUST use `portalLoginUrl` / `learnPortalLoginUrl` (path `/login` **before** `?portal=`). Never append `/login` onto a same-origin URL that already has a query string — that produces `brand=slug/login`.
+- Learn profile **Center website** MUST use `resolveCenterWebsiteUrl` (not raw RPC `center.public_url`). RPC still returns `http://*.localhost:9000/` from `domain_mappings`; the client rewrites to `/?portal=center&brand=…&center=…` on Vercel.

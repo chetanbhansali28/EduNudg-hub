@@ -108,6 +108,8 @@ Center staff SHALL shop and track kit orders at `/app/merchandise` with the same
 - **GIVEN** a center user on `/app/merchandise` Shop on desktop
 - **THEN** each catalog SKU is a horizontal card spanning the list column
 - **AND** the card header uses an 8rem photo beside title + price (badge/SKU and Curriculum/Program under the title), while quantity and **Add to Order** stack in a full-width footer so the add label is never clipped at Curriculum list width
+- **AND** the title wraps within the remaining flex space (`min-width: 0`, `overflow-wrap: anywhere`) so it never paints over the price
+- **AND** the price stays `flex: 0 0 auto` with `white-space: nowrap` so it remains readable beside the title
 - **AND** the desktop list/detail split matches Curriculum (`minmax(16rem, 0.95fr)` list, `minmax(0, 2.05fr)` detail)
 - **AND** the list does not place two product cards side by side
 
@@ -118,4 +120,4 @@ Center staff SHALL shop and track kit orders at `/app/merchandise` with the same
 - **THEN** the catalog card shows **Curriculum: Abacus Core** and **Program: Level 1**
 - **AND** search also matches those course and level names
 
-Traceability: regression — `regression_center_merchandise_shop_shows_catalog_curriculum`.
+Traceability: regression — `regression_center_merchandise_shop_shows_catalog_curriculum`, `regression_center_merchandise_shop_title_wraps_instead_of_overlapping_price`, `regression_center_merchandise_shop_row_image_is_at_least_double_width`.

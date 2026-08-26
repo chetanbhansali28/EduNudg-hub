@@ -268,6 +268,7 @@ Traceability: FR-S21
 - **THEN** the page shows student name, code, DOB, school/city from `student_profiles`
 - **AND** active enrollment: center name, enrolled date, batch if assigned, curriculum version label
 - **AND** center contact phone and public URL
+- **AND** **Center website** rewrites RPC `http://{center}.{brand}.localhost:9000/` via `resolveCenterWebsiteUrl` / `centerPortalUrl` so Vercel same-origin opens `/?portal=center&brand=…&center=…` (never raw localhost:9000)
 
 #### Scenario: Saved photo appears in learn header
 
@@ -275,6 +276,8 @@ Traceability: FR-S21
 - **WHEN** learn shell loads `get_student_learn_home`
 - **THEN** `student.profile.photo_url` is present
 - **AND** the header avatar uses that URL (`regression_learn_header_shows_student_profile_photo_when_photo_url_set`)
+
+Traceability: regression — `regression_vercel_center_website_rewrites_localhost_rpc_url`, `regression_vercel_profile_center_website_avoids_localhost_rpc_url`.
 
 #### Scenario: Profile does not expose other students
 
