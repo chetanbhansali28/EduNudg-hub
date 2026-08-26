@@ -66,7 +66,7 @@ See [manual-leads.md](./manual-leads.md).
 | Function | Description |
 |----------|-------------|
 | `update_lead_status(p_lead_id, p_status)` | Sets `last_center_action_at` |
-| `convert_lead_to_student(p_lead_id, p_overrides jsonb)` | Field mapping per FR-C13; transactional |
+| `convert_lead_to_student(p_lead_id, p_overrides jsonb)` | Field mapping per FR-C13; transactional; empty `child_dob` override treated as null (`094_convert_lead_empty_child_dob.sql`) |
 | `import_center_students(p_center_id, p_rows jsonb)` | CSV bulk enroll; auto `STU-NNN` student_code; profile phone from WhatsApp |
 
 ## SLA computation

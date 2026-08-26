@@ -191,17 +191,23 @@ export type ConvertLeadOverrides = {
   pincode?: string;
 };
 
+/** Empty form fields must be null — Postgres rejects `""::date` for child_dob. */
+export function blankToNull(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
 export async function convertLeadToStudent(leadId: string, overrides?: ConvertLeadOverrides) {
   const { data, error } = await getSupabase().rpc("convert_lead_to_student", {
     p_lead_id: leadId,
     p_overrides: overrides
       ? {
-          parent_name: overrides.parentName ?? null,
-          child_name: overrides.childName ?? null,
-          child_dob: overrides.childDob ?? null,
-          school_name: overrides.schoolName ?? null,
-          city: overrides.city ?? null,
-          pincode: overrides.pincode ?? null,
+          parent_name: blankToNull(overrides.parentName),
+          child_name: blankToNull(overrides.childName),
+          child_dob: blankToNull(overrides.childDob),
+          school_name: blankToNull(overrides.schoolName),
+          city: blankToNull(overrides.city),
+          pincode: blankToNull(overrides.pincode),
         }
       : {},
   });

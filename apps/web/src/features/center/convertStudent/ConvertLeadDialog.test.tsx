@@ -44,4 +44,18 @@ describe("ConvertLeadDialog", () => {
       expect.objectContaining({ parentName: "Parent Name", childName: "Child Name" })
     );
   });
+
+  it("regression_inline_quick_confirm_omits_dob_when_lead_has_none", () => {
+    const onConfirm = vi.fn();
+    render(
+      <ConvertLeadDialog
+        lead={{ ...lead, child_dob: null }}
+        variant="inline"
+        onConfirm={onConfirm}
+        onCancel={() => undefined}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Create student enrollment/i }));
+    expect(onConfirm).toHaveBeenCalledWith(expect.objectContaining({ childDob: "" }));
+  });
 });
