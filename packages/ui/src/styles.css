@@ -6479,6 +6479,7 @@ body.ed-nav-open {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .ed-product-card--row .ed-product-card__identity {
@@ -6495,6 +6496,9 @@ body.ed-nav-open {
   min-width: 0;
   font-size: 0.9375rem;
   font-weight: 650;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.3;
 }
 
 .ed-product-card--row .ed-product-card__sku {
@@ -6517,10 +6521,12 @@ body.ed-nav-open {
 
 .ed-product-card--row .ed-product-card__price {
   flex: 0 0 auto;
+  max-width: 45%;
   white-space: nowrap;
   font-size: 0.9375rem;
   font-variant-numeric: tabular-nums;
   line-height: 1.3;
+  text-align: right;
 }
 
 .ed-product-card--row .ed-product-card__desc {
