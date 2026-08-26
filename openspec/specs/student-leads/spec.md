@@ -197,6 +197,13 @@ Traceability: FR-C12, FR-C13, FR-C14
 - **AND** maps lead fields per FR-C13 (parent name, WhatsApp, child name/DOB, school, pincode, city, `source_lead_id`)
 - **AND** sets `leads.status` to `converted`
 
+#### Scenario: Convert without child DOB
+
+- **WHEN** center staff convert a lead whose `child_dob` is null and the convert form sends an empty DOB override
+- **THEN** `convert_lead_to_student` treats empty `child_dob` as null (not `""::date`)
+- **AND** the enrollment succeeds with `students.date_of_birth` null when the lead also has no DOB
+- **AND** the client MUST send `child_dob: null` for blank form values (`regression_convert_lead_empty_child_dob_sends_null_not_empty_string`)
+
 #### Scenario: Cannot convert unassigned lead
 
 - **WHEN** center staff attempt to convert a brand lead not assigned to their `center_id`

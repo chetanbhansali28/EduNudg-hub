@@ -108,7 +108,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | `whatsapp_e164` | `parents.phone_e164` | Normalized E.164 |
 | `email` | `parents.email` | If column exists or profile |
 | `child_name` | `students.full_name` | |
-| `child_dob` | `students.date_of_birth` | |
+| `child_dob` | `students.date_of_birth` | Empty override `""` MUST become null (never `""::date`) |
 | `school_name` | `student_profiles.school_name` or `students` JSONB | Phase A: JSONB on student ok |
 | `pincode` | `student_profiles.pincode` or lead copy on enrollment notes | |
 | `city` | `student_profiles.city` | From lead |

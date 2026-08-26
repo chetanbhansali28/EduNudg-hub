@@ -164,4 +164,27 @@ describe("leadsApi", () => {
       }),
     });
   });
+
+  it("regression_convert_lead_empty_child_dob_sends_null_not_empty_string", async () => {
+    rpc.mockResolvedValue({ data: "student-1", error: null });
+    await convertLeadToStudent("lead-1", {
+      parentName: "nilesh Gattani",
+      childName: "Vihaan",
+      childDob: "",
+      schoolName: "",
+      city: "pune",
+      pincode: "411057",
+    });
+    expect(rpc).toHaveBeenCalledWith("convert_lead_to_student", {
+      p_lead_id: "lead-1",
+      p_overrides: {
+        parent_name: "nilesh Gattani",
+        child_name: "Vihaan",
+        child_dob: null,
+        school_name: null,
+        city: "pune",
+        pincode: "411057",
+      },
+    });
+  });
 });
