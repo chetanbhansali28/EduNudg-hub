@@ -81,17 +81,18 @@ async function resolveTenantScopeOnce(
       : mergeDomainMapping(base, mapping as DomainMappingRow | null);
 
     // Learn/parents must also resolve brandId (Home/Progress use useTenant().brandId).
-    if (!needsBrandPortalBranding(tenant)) return tenant;
+    const brandSlug = tenant.brandSlug;
+    if (!brandSlug || !needsBrandPortalBranding(tenant)) return tenant;
 
     const { data, error } = await supabase.rpc("get_portal_branding", {
-      p_brand_slug: tenant.brandSlug,
+      p_brand_slug: brandSlug,
       p_center_slug: tenant.centerSlug,
     });
 
     if (error) return tenant;
 
     const branding = parsePortalBrandingRpc(data);
-    seedPortalBrandingCache(tenant.brandSlug, tenant.centerSlug, branding);
+    seedPortalBrandingCache(brandSlug, tenant.centerSlug, branding);
     tenant = mergePortalBrandingScope(tenant, branding);
 
     return tenant;
