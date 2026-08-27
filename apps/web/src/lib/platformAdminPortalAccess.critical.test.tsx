@@ -91,6 +91,10 @@ vi.mock("@/lib/supabase", () => ({
   }),
 }));
 
+vi.mock("@/services/auth/accessAuditApi", () => ({
+  reportAccessAudit: vi.fn(async () => undefined),
+}));
+
 describe("CRITICAL platform admin portal access", () => {
   const originalLocation = window.location;
 

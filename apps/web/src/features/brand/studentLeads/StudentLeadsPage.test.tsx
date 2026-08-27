@@ -34,6 +34,20 @@ vi.mock("@/features/brand/hooks/useBrandScope", () => ({
   useBrandScope: () => ({ brandId: "brand-1", brandSlug: "abacus", isLoading: false, missingBrand: false }),
 }));
 
+vi.mock("@/bootstrap/TenantProvider", () => ({
+  useTenant: () => ({
+    portalType: "brand",
+    brandId: "brand-1",
+    centerId: null,
+    brandSlug: "abacus",
+    hostname: "abacus.localhost",
+  }),
+}));
+
+vi.mock("@/services/auth/accessAuditApi", () => ({
+  reportAccessAudit: vi.fn(async () => undefined),
+}));
+
 vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
   useOpsBreakpoint: () => ({ isDesktop: true, isMobile: false }),
 }));

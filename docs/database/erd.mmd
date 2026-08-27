@@ -1,5 +1,8 @@
 erDiagram
   brands ||--o{ franchise_centers : owns
+  brands ||--o{ client_error_reports : tags
+  brands ||--o{ access_audit_logs : tags
+  brands ||--o{ auth_audit_logs : tags
   brands ||--o{ programs : defines
   brands ||--o{ students : owns
   brands ||--o{ leads : captures

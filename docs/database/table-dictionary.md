@@ -13,6 +13,8 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `enrollment_history` | `created_by` only |
 | `brand_status_events` | `created_by` only |
 | `auth_audit_logs` | `created_by` only; login/logout/failure/denied. Network IP stamped by Edge Function `auth-audit`, not the SPA. |
+| `access_audit_logs` | `created_by` only; sensitive staff actions (export, view_pii, credentials, handoff). |
+| `client_error_reports` | `created_by` only; fatal SPA errors. Platform-only SELECT. |
 | `lead_events` | timeline |
 | `lead_assignment_history` | reassignments |
 
@@ -24,7 +26,9 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `brands` | platform | Franchise brand tenant |
 | `franchise_centers` | brand | Physical center / franchise; public profile fields below. CSV import sets `slug` from **name** (unique `-2` suffix if needed). |
 | `memberships` | auth | User role per scope |
-| `auth_audit_logs` | auth | Append-only sign-in events (`login_success`, `login_failure`, `logout`, `access_denied`) with `portal`, optional `brand_id`/`center_id`, session dedup. Platform `/admin/audit` Auth stream. Full IP is platform-only. |
+| `auth_audit_logs` | auth | Append-only sign-in events (`login_success`, `login_failure`, `logout`, `access_denied`) with `portal`, optional `brand_id`/`center_id`, session dedup. Platform `/admin/audit` Auth stream. Full IP is platform-only. Tenant staff read via `list_tenant_staff_audit` (failed-login emails and raw IP redacted). |
+| `access_audit_logs` | audit | Sensitive actions: CSV export, Copy Profile URL, owner credentials, platform portal handoff. Platform SELECT; tenant via `list_tenant_staff_audit`. |
+| `client_error_reports` | audit | Fatal SPA errors (ErrorBoundary, `window.onerror`, `unhandledrejection`). Platform `/admin/audit` Errors stream only. |
 | `domain_mappings` | routing | Hostname → portal |
 | `platform_brand_signups` | platform | Self-serve EduNudg brand signup queue |
 

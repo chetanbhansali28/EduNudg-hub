@@ -7,6 +7,7 @@ import { PortalDocumentHead } from "@/components/PortalDocumentHead";
 import { OAuthReturnRedirect } from "@/features/auth/OAuthReturnRedirect";
 import { shouldUseAdminThemeProvider } from "@/lib/appThemeShell";
 import { AppRoutes } from "@/routes/AppRoutes";
+import { ClientErrorReporter } from "@/components/ClientErrorReporter";
 
 function AppThemeShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
@@ -23,7 +24,9 @@ export function App() {
         <BrowserRouter>
           <OAuthReturnRedirect />
           <AppThemeShell>
-            <AppRoutes />
+            <ClientErrorReporter>
+              <AppRoutes />
+            </ClientErrorReporter>
           </AppThemeShell>
         </BrowserRouter>
       </AuthProvider>

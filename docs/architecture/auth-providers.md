@@ -43,7 +43,7 @@ Platform admins open brand/center/learn/parents hosts without a separate passwor
 
 Does not use Supabase `action_link` redirects to subdomains. Details: [platform-admin-portal-handoff.md](../ops/platform-admin-portal-handoff.md).
 
-All events → `auth_audit_logs` via RPC `log_auth_audit_event` (`login_success` once per session, `logout`, `login_failure`, `access_denied`). Platform `/admin/audit` **Auth** stream. Optional Edge Function `auth-audit` stamps IP (platform ops), `ip_hash`, and `ip_country`. Until that function is deployed, `/admin/audit` shows **Not captured** for IP (RPC fallback has no client address). **Copy JSON** copies the selected row; it replaced a no-op Full Audit Trail button.
+All events → `auth_audit_logs` via RPC `log_auth_audit_event` (`login_success` once per session, `logout`, `login_failure`, `access_denied`). Platform `/admin/audit` **Auth** stream; brand/center `/app/audit` uses `list_tenant_staff_audit` (no raw IP, failed-login emails redacted). Sensitive staff actions → `access_audit_logs` via `log_access_audit_event`. Fatal SPA errors → `client_error_reports` (platform **Errors** stream only). Optional Edge Function `auth-audit` stamps IP (platform ops), `ip_hash`, and `ip_country`. Until that function is deployed, `/admin/audit` shows **Not captured** for IP (RPC fallback has no client address). **Copy JSON** copies the selected row; it replaced a no-op Full Audit Trail button.
 
 ```bash
 pnpm dlx supabase@2.104.0 functions deploy auth-audit

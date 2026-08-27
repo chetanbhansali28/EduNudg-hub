@@ -15,7 +15,8 @@ DECLARE
     'submit_franchise_inquiry',
     'get_brand_landing_public',
     'get_brand_success_stories_public',
-    'log_auth_audit_event'
+    'log_auth_audit_event',
+    'log_client_error_event'
   ];
 BEGIN
   SELECT with_check INTO v_check

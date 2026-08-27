@@ -134,7 +134,7 @@ supabase db push
 pnpm dlx supabase functions deploy auth-audit
 ```
 
-Auth audit (login/logout) uses migration `097_auth_audit_events.sql`. Platform `/admin/audit` **Auth** stream. Deploy `auth-audit` so IP/country are stored; the SPA still logs events via RPC if the function is missing.
+Auth audit (login/logout) uses migration `097_auth_audit_events.sql`. Access logs and SPA error reports use `098_error_and_access_audit.sql`. `099_revoke_anon_access_audit.sql` revokes direct `anon` EXECUTE on access/tenant audit RPCs (Supabase default privileges grant `anon` even after `REVOKE FROM PUBLIC`). Platform `/admin/audit` streams: Mutations, Auth, Access, Errors. Brand/center `/app/audit` is Auth + Access only. Deploy `auth-audit` so IP/country are stored; the SPA still logs auth events via RPC if the function is missing. Apply 098 then 099 with `supabase db push` (or the SQL editor) before Errors/Access appear. If `rls_security_hardening.sql` fails on leftover `anon` EXECUTE (e.g. `competition_quiz_meta_for_student`), apply `100_revoke_anon_security_definer_execute.sql` — it re-sweeps all public SECURITY DEFINER functions.
 
 ## Tests
 

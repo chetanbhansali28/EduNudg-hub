@@ -113,6 +113,20 @@ vi.mock("@/features/brand/hooks/useBrandScope", () => ({
   }),
 }));
 
+vi.mock("@/bootstrap/TenantProvider", () => ({
+  useTenant: () => ({
+    portalType: "brand",
+    brandId: "brand-1",
+    centerId: null,
+    brandSlug: "smart-brain-abacus",
+    hostname: "smart-brain-abacus.localhost",
+  }),
+}));
+
+vi.mock("@/services/auth/accessAuditApi", () => ({
+  reportAccessAudit: vi.fn(async () => undefined),
+}));
+
 vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
   useOpsBreakpoint: () => ({ isDesktop: true, isMobile: false }),
 }));

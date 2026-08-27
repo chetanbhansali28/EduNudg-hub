@@ -59,7 +59,7 @@ const MATRIX: Record<string, Record<string, string[]>> = {
     ],
   },
   audit_logs: {
-    read: ["platform_super_admin", "platform_ops"],
+    read: ["platform_super_admin", "platform_ops", "brand_owner", "brand_admin", "center_owner", "center_manager"],
   },
   competitions: {
     create: ["platform_super_admin", "platform_ops", "brand_owner", "brand_admin"],

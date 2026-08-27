@@ -1,9 +1,14 @@
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
+import type { TenantContext } from "@edunudg/tenant";
 import {
   applyAuditDirectoryNames,
+  mapAccessAuditToPlatformLog,
   mapAuthAuditToPlatformLog,
+  mapClientErrorToPlatformLog,
+  type AccessAuditRow,
   type AuthAuditRow,
+  type ClientErrorRow,
   type PlatformAuditLog,
 } from "@/lib/platformAuditHelpers";
 
@@ -91,19 +96,41 @@ async function fetchAuditDirectoryNames(
   return { brands, centers };
 }
 
-/** Newest mutation + auth audit rows for platform `/admin/audit`. */
+/** Newest mutation, auth, access, and error rows for platform `/admin/audit`. */
 export async function fetchPlatformAuditLogs(): Promise<PlatformAuditLog[]> {
-  const [mutations, auth] = await Promise.all([
+  const [mutations, auth, access, errors] = await Promise.all([
     fetchNewestRows<PlatformAuditLog>("platform_audit_logs", AUDIT_FETCH_MAX_PER_TABLE),
     fetchNewestRows<AuthAuditRow>("auth_audit_logs", AUDIT_FETCH_MAX_PER_TABLE),
+    fetchNewestRows<AccessAuditRow>("access_audit_logs", AUDIT_FETCH_MAX_PER_TABLE),
+    fetchNewestRows<ClientErrorRow>("client_error_reports", AUDIT_FETCH_MAX_PER_TABLE),
   ]);
   const mutationRows = mutations.map((row) => ({ ...row, source: "mutation" as const }));
   const authRows = auth.map(mapAuthAuditToPlatformLog);
-  const merged = [...mutationRows, ...authRows].sort(
+  const accessRows = access.map(mapAccessAuditToPlatformLog);
+  const errorRows = errors.map(mapClientErrorToPlatformLog);
+  const merged = [...mutationRows, ...authRows, ...accessRows, ...errorRows].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
   const brandIds = [...new Set(merged.map((row) => row.brand_id).filter((id): id is string => Boolean(id)))];
   const centerIds = [...new Set(merged.map((row) => row.center_id).filter((id): id is string => Boolean(id)))];
   const names = await fetchAuditDirectoryNames(brandIds, centerIds);
   return applyAuditDirectoryNames(merged, names);
+}
+
+export async function fetchTenantStaffAuditLogs(
+  tenant: Pick<TenantContext, "portalType" | "brandId" | "centerId">
+): Promise<PlatformAuditLog[]> {
+  const { data, error } = await getSupabase().rpc("list_tenant_staff_audit", {
+    p_brand_id: tenant.brandId,
+    p_center_id: tenant.portalType === "center" ? tenant.centerId : null,
+    p_limit: AUDIT_FETCH_MAX_PER_TABLE,
+  });
+  const rows = (error ? [] : ((data as PlatformAuditLog[] | null) ?? [])) as PlatformAuditLog[];
+  const brandIds = [...new Set(rows.map((row) => row.brand_id).filter((id): id is string => Boolean(id)))];
+  const centerIds = [...new Set(rows.map((row) => row.center_id).filter((id): id is string => Boolean(id)))];
+  const names = await fetchAuditDirectoryNames(brandIds, centerIds);
+  return applyAuditDirectoryNames(
+    rows.map((row) => ({ ...row, ip_address: null })),
+    names
+  );
 }

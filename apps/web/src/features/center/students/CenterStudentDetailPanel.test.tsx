@@ -74,6 +74,10 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
   }),
 }));
 
+vi.mock("@/services/auth/accessAuditApi", () => ({
+  reportAccessAudit: vi.fn(async () => undefined),
+}));
+
 const student = {
   id: "s1",
   full_name: "Asha Kumar",

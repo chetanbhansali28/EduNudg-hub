@@ -15,6 +15,10 @@ vi.mock("@/lib/supabase", () => ({
   }),
 }));
 
+vi.mock("@/services/auth/accessAuditApi", () => ({
+  reportAccessAudit: vi.fn(async () => undefined),
+}));
+
 describe("brandOwnerCredentialsApi", () => {
   beforeEach(() => {
     rpcMock.mockReset();

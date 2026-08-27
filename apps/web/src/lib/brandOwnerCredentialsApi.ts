@@ -60,5 +60,15 @@ export async function upsertBrandOwnerCredentials(
   if (payload?.error) return { error: payload.error };
   if (!payload?.ok) return { error: "Failed to save brand login credentials" };
 
+  const { reportAccessAudit } = await import("@/services/auth/accessAuditApi");
+  void reportAccessAudit({
+    action: "credentials",
+    resourceType: "brand_owner",
+    resourceId: input.brandId,
+    tenant: { portalType: "platform", brandId: input.brandId, centerId: null },
+    path: "/admin/brands",
+    metadata: { email },
+  });
+
   return { error: null };
 }

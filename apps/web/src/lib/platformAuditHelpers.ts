@@ -12,7 +12,7 @@ export type PlatformAuditLog = {
   center_id?: string | null;
   payload?: Record<string, unknown> | null;
   created_at: string;
-  source?: "mutation" | "auth";
+  source?: "mutation" | "auth" | "error" | "access";
   portal?: string | null;
   ip_address?: string | null;
   ip_country?: string | null;
@@ -39,7 +39,7 @@ export type AuthAuditRow = {
 };
 
 export type AuditDateRange = "24h" | "7d" | "all";
-export type AuditStream = "all" | "mutations" | "auth";
+export type AuditStream = "all" | "mutations" | "auth" | "access" | "errors";
 export type AuditPortalFilter = "all" | "staff" | "learn" | "parents";
 
 export const AUDIT_PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
@@ -97,6 +97,92 @@ export function mapAuthAuditToPlatformLog(row: AuthAuditRow): PlatformAuditLog {
   };
 }
 
+export type ClientErrorRow = {
+  id: string;
+  user_id?: string | null;
+  created_by?: string | null;
+  brand_id?: string | null;
+  center_id?: string | null;
+  portal?: string | null;
+  route?: string | null;
+  message: string;
+  stack?: string | null;
+  user_agent?: string | null;
+  metadata?: Record<string, unknown> | null;
+  created_at: string;
+};
+
+export type AccessAuditRow = {
+  id: string;
+  actor_id?: string | null;
+  created_by?: string | null;
+  action: string;
+  resource_type: string;
+  resource_id?: string | null;
+  brand_id?: string | null;
+  center_id?: string | null;
+  portal?: string | null;
+  path?: string | null;
+  ip_address?: string | null;
+  ip_hash?: string | null;
+  ip_country?: string | null;
+  user_agent?: string | null;
+  metadata?: Record<string, unknown> | null;
+  created_at: string;
+};
+
+export function mapClientErrorToPlatformLog(row: ClientErrorRow): PlatformAuditLog {
+  return {
+    id: row.id,
+    actor_id: row.user_id ?? row.created_by,
+    created_by: row.created_by ?? row.user_id,
+    action: "client_error",
+    resource_type: "client",
+    resource_id: row.user_id ?? null,
+    brand_id: row.brand_id,
+    center_id: row.center_id,
+    created_at: row.created_at,
+    source: "error",
+    portal: row.portal ?? null,
+    payload: {
+      ...(row.metadata ?? {}),
+      message: row.message,
+      stack: row.stack,
+      route: row.route,
+      portal: row.portal,
+      user_agent: row.user_agent,
+    },
+  };
+}
+
+export function mapAccessAuditToPlatformLog(row: AccessAuditRow): PlatformAuditLog {
+  const meta = row.metadata ?? {};
+  return {
+    id: row.id,
+    actor_id: row.actor_id ?? row.created_by,
+    created_by: row.created_by ?? row.actor_id,
+    action: row.action,
+    resource_type: row.resource_type,
+    resource_id: row.resource_id ?? null,
+    brand_id: row.brand_id,
+    center_id: row.center_id,
+    created_at: row.created_at,
+    source: "access",
+    portal: row.portal ?? null,
+    ip_address: row.ip_address ?? null,
+    ip_country: row.ip_country ?? null,
+    payload: {
+      ...meta,
+      path: row.path,
+      portal: row.portal,
+      user_agent: row.user_agent,
+      ip_hash: row.ip_hash,
+      ip_country: row.ip_country,
+      ip_address: row.ip_address,
+    },
+  };
+}
+
 export function applyAuditDirectoryNames(
   logs: PlatformAuditLog[],
   names: { brands: Record<string, string>; centers: Record<string, string> }
@@ -140,6 +226,9 @@ const SECURITY_ACTIONS = new Set([
   "maintenance_mode_on",
   "login_failure",
   "access_denied",
+  "client_error",
+  "credentials",
+  "handoff",
 ]);
 
 export function auditActionLabel(action: string, resourceType: string): string {
@@ -151,6 +240,11 @@ export function auditActionLabel(action: string, resourceType: string): string {
   if (action === "logout") return "LOGOUT";
   if (action === "login_failure") return "LOGIN_FAILURE";
   if (action === "access_denied") return "ACCESS_DENIED";
+  if (action === "client_error") return "CLIENT_ERROR";
+  if (action === "export") return "EXPORT";
+  if (action === "view_pii") return "VIEW_PII";
+  if (action === "credentials") return "CREDENTIALS";
+  if (action === "handoff") return "HANDOFF";
   if (normalized.includes("maintenance")) return "MAINTENANCE_MODE_ON";
   return `${action}_${resourceType}`.replace(/\s+/g, "_").toUpperCase();
 }
@@ -246,7 +340,8 @@ export function auditIpAddress(log: PlatformAuditLog): string {
   const country = log.ip_country || (typeof payload.ip_country === "string" ? payload.ip_country : "");
   if (country) return country;
   if (log.action.includes("cron") || log.resource_type.includes("cron")) return "Cron Job";
-  if (log.source === "auth" || log.resource_type === "auth") return "Not captured";
+  if (log.source === "error") return "—";
+  if (log.source === "auth" || log.resource_type === "auth" || log.source === "access") return "Not captured";
   return "—";
 }
 
@@ -371,6 +466,8 @@ export function filterAuditLogs(
     const source = log.source ?? "mutation";
     if (streamFilter === "auth" && source !== "auth") return false;
     if (streamFilter === "mutations" && source !== "mutation") return false;
+    if (streamFilter === "access" && source !== "access") return false;
+    if (streamFilter === "errors" && source !== "error") return false;
     if (portalFilter === "learn" && log.portal !== "learn") return false;
     if (portalFilter === "parents" && log.portal !== "parents") return false;
     if (portalFilter === "staff" && !isStaffAuditPortal(log.portal)) return false;

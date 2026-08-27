@@ -52,6 +52,18 @@ export function filterNavByFeatureFlags(
     .filter((section) => section.items.length > 0);
 }
 
+export function filterNavByHref(
+  sections: ShellNavSection[],
+  allowHref: (href: string) => boolean
+): ShellNavSection[] {
+  return sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => allowHref(item.href)),
+    }))
+    .filter((section) => section.items.length > 0);
+}
+
 type NavDef = { path: string; label: string; icon: ReactNode; badge?: number };
 
 function item(path: string, label: string, icon: ReactNode, pathname: string, badge?: number): ShellNavItem {
@@ -128,6 +140,7 @@ export function brandNavSections(pathname: string): ShellNavSection[] {
         { path: "/app/homepage", label: "Homepage", icon: <IconBook /> },
         { path: "/app/center-site", label: "Center Site Configuration", icon: <IconBuilding /> },
         { path: "/app/billing", label: "Billing", icon: <IconWallet /> },
+        { path: "/app/audit", label: "Audit Logs", icon: <IconClipboard /> },
         { path: "/app/settings", label: "Settings", icon: <IconSettings /> },
       ],
       pathname
@@ -153,7 +166,10 @@ export function centerNavSections(pathname: string): ShellNavSection[] {
       ],
       pathname
     ),
-    section("General", [{ path: "/app/settings", label: "Settings", icon: <IconSettings /> }], pathname),
+    section("General", [
+      { path: "/app/audit", label: "Audit Logs", icon: <IconClipboard /> },
+      { path: "/app/settings", label: "Settings", icon: <IconSettings /> },
+    ], pathname),
   ];
 }
 

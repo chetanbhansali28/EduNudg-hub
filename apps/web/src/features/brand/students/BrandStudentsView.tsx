@@ -12,6 +12,8 @@ import {
   CentersSearchField,
 } from "@edunudg/ui";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
+import { useTenant } from "@/bootstrap/TenantProvider";
+import { reportAccessAudit } from "@/services/auth/accessAuditApi";
 import { BrandStudentDetailPanel } from "@/features/brand/students/BrandStudentDetailPanel";
 import {
   downloadBrandStudentsCsv,
@@ -49,6 +51,7 @@ const KPI_ICONS = {
 };
 
 export function BrandStudentsView() {
+  const tenant = useTenant();
   const { brandId, brandSlug, missingBrand } = useBrandScope();
   const { isMobile } = useOpsBreakpoint();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -140,7 +143,16 @@ export function BrandStudentsView() {
             type="button"
             variant="secondary"
             disabled={all.length === 0}
-            onClick={() => downloadBrandStudentsCsv(all, brandSlug ?? "")}
+            onClick={() => {
+              void reportAccessAudit({
+                action: "export",
+                resourceType: "students_csv",
+                tenant,
+                path: "/app/students",
+                metadata: { rowCount: all.length },
+              });
+              downloadBrandStudentsCsv(all, brandSlug ?? "");
+            }}
           >
             Export CSV
           </Button>

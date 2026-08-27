@@ -3,6 +3,7 @@ import {
   brandNavSections,
   centerNavSections,
   filterNavByFeatureFlags,
+  filterNavByHref,
   platformNavSections,
   studentBottomNavItems,
   studentNavSections,
@@ -289,5 +290,18 @@ describe("portalNav", () => {
     ]);
 
     expect(items.some((item) => item.label === "Logout")).toBe(false);
+  });
+
+  it("regression_brand_and_center_nav_include_audit_logs", () => {
+    const brand = brandNavSections("/app/audit").find((s) => s.title === "General");
+    const center = centerNavSections("/app/audit").find((s) => s.title === "General");
+    expect(brand?.items.find((i) => i.href === "/app/audit")?.label).toBe("Audit Logs");
+    expect(center?.items.find((i) => i.href === "/app/audit")?.active).toBe(true);
+  });
+
+  it("regression_filterNavByHref_hides_audit_without_permission", () => {
+    const sections = filterNavByHref(brandNavSections("/app"), (href) => href !== "/app/audit");
+    const general = sections.find((s) => s.title === "General");
+    expect(general?.items.some((i) => i.href === "/app/audit")).toBe(false);
   });
 });
