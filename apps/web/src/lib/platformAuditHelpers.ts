@@ -12,9 +12,117 @@ export type PlatformAuditLog = {
   center_id?: string | null;
   payload?: Record<string, unknown> | null;
   created_at: string;
+  source?: "mutation" | "auth";
+  portal?: string | null;
+  ip_address?: string | null;
+  ip_country?: string | null;
+  brand_name?: string | null;
+  center_name?: string | null;
+};
+
+export type AuthAuditRow = {
+  id: string;
+  user_id?: string | null;
+  created_by?: string | null;
+  event_type: string;
+  provider?: string | null;
+  ip_address?: string | null;
+  ip_hash?: string | null;
+  ip_country?: string | null;
+  user_agent?: string | null;
+  metadata?: Record<string, unknown> | null;
+  brand_id?: string | null;
+  center_id?: string | null;
+  portal?: string | null;
+  session_id?: string | null;
+  created_at: string;
 };
 
 export type AuditDateRange = "24h" | "7d" | "all";
+export type AuditStream = "all" | "mutations" | "auth";
+export type AuditPortalFilter = "all" | "staff" | "learn" | "parents";
+
+export const AUDIT_PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+export type AuditPageSize = (typeof AUDIT_PAGE_SIZE_OPTIONS)[number];
+
+export function auditPageWindow(
+  total: number,
+  page: number,
+  pageSize: number
+): { pageCount: number; currentPage: number; start: number; end: number } {
+  const size = Math.max(1, pageSize);
+  const pageCount = Math.max(1, Math.ceil(total / size));
+  const currentPage = Math.min(Math.max(0, page), pageCount - 1);
+  if (total === 0) return { pageCount, currentPage: 0, start: 0, end: 0 };
+  const start = currentPage * size + 1;
+  const end = Math.min((currentPage + 1) * size, total);
+  return { pageCount, currentPage, start, end };
+}
+
+export function mapAuthAuditToPlatformLog(row: AuthAuditRow): PlatformAuditLog {
+  const meta = row.metadata ?? {};
+  const email = typeof meta.email === "string" ? meta.email : typeof meta.identifier === "string" ? meta.identifier : null;
+  const action =
+    row.event_type === "passkey_login"
+      ? "login"
+      : row.event_type === "login_success"
+        ? "login"
+        : row.event_type;
+  return {
+    id: row.id,
+    actor_id: row.user_id ?? row.created_by,
+    created_by: row.created_by ?? row.user_id,
+    action,
+    resource_type: "auth",
+    resource_id: row.user_id ?? null,
+    brand_id: row.brand_id,
+    center_id: row.center_id,
+    created_at: row.created_at,
+    source: "auth",
+    portal: row.portal ?? null,
+    ip_address: row.ip_address ?? (typeof meta.ip_address === "string" ? meta.ip_address : null),
+    ip_country: row.ip_country ?? null,
+    payload: {
+      ...meta,
+      event_type: row.event_type,
+      provider: row.provider,
+      portal: row.portal,
+      session_id: row.session_id,
+      user_agent: row.user_agent,
+      ip_hash: row.ip_hash,
+      ip_country: row.ip_country,
+      ip_address: row.ip_address,
+      email,
+    },
+  };
+}
+
+export function applyAuditDirectoryNames(
+  logs: PlatformAuditLog[],
+  names: { brands: Record<string, string>; centers: Record<string, string> }
+): PlatformAuditLog[] {
+  return logs.map((log) => ({
+    ...log,
+    brand_name: log.brand_id ? names.brands[log.brand_id] ?? log.brand_name ?? null : null,
+    center_name: log.center_id ? names.centers[log.center_id] ?? log.center_name ?? null : null,
+  }));
+}
+
+export function auditBrandTag(log: PlatformAuditLog): string | null {
+  if (!log.brand_id) return null;
+  const short = log.brand_id.slice(0, 8);
+  return log.brand_name ? `Brand: ${log.brand_name} (${short})` : `Brand: ${short}`;
+}
+
+export function auditCenterTag(log: PlatformAuditLog): string | null {
+  if (!log.center_id) return null;
+  const short = log.center_id.slice(0, 8);
+  return log.center_name ? `Center: ${log.center_name} (${short})` : `Center: ${short}`;
+}
+
+export function isStaffAuditPortal(portal: string | null | undefined): boolean {
+  return portal === "platform" || portal === "brand" || portal === "center" || !portal;
+}
 
 export type AuditSummary = {
   events24h: number;
@@ -25,7 +133,14 @@ export type AuditSummary = {
   systemHealth: string;
 };
 
-const SECURITY_ACTIONS = new Set(["delete", "reject", "upsert_owner_credentials", "maintenance_mode_on"]);
+const SECURITY_ACTIONS = new Set([
+  "delete",
+  "reject",
+  "upsert_owner_credentials",
+  "maintenance_mode_on",
+  "login_failure",
+  "access_denied",
+]);
 
 export function auditActionLabel(action: string, resourceType: string): string {
   const normalized = `${action}_${resourceType}`.replace(/-/g, "_");
@@ -33,6 +148,9 @@ export function auditActionLabel(action: string, resourceType: string): string {
   if (action === "approve" && resourceType === "platform_brand_signup") return "BRAND_CREATED";
   if (action === "delete" && resourceType.includes("user")) return "DELETE_USER";
   if (action === "login") return "LOGIN";
+  if (action === "logout") return "LOGOUT";
+  if (action === "login_failure") return "LOGIN_FAILURE";
+  if (action === "access_denied") return "ACCESS_DENIED";
   if (normalized.includes("maintenance")) return "MAINTENANCE_MODE_ON";
   return `${action}_${resourceType}`.replace(/\s+/g, "_").toUpperCase();
 }
@@ -47,7 +165,8 @@ export function auditActionTone(action: string, resourceType: string): AuditActi
 }
 
 export function auditCategory(action: string, resourceType: string): string {
-  if (action === "login") return "LOGIN";
+  if (action === "login" || action === "logout") return "LOGIN";
+  if (action === "login_failure" || action === "access_denied") return "SECURITY";
   if (resourceType.includes("invoice") || resourceType.includes("revenue")) return "REVENUE";
   if (action === "delete" || action === "reject" || resourceType.includes("security")) return "SECURITY";
   if (resourceType.includes("brand") || action === "approve") return "BRANDS";
@@ -65,8 +184,10 @@ export function auditCategoryTone(action: string, resourceType: string): AuditCa
 }
 
 export function auditEventTitle(log: PlatformAuditLog): string {
-  const admin = auditActorName(log);
-  if (log.action === "login") return "Admin Session Started";
+  if (log.action === "login") return "Session started";
+  if (log.action === "logout") return "Signed out";
+  if (log.action === "login_failure") return "Sign-in failed";
+  if (log.action === "access_denied") return "Portal access denied";
   if (log.action === "approve") return "Brand Signup Approved";
   if (log.action === "reject") return "Brand Signup Rejected";
   if (log.action === "assign") return "Subscription Assigned";
@@ -81,7 +202,17 @@ export function auditEventDescription(log: PlatformAuditLog): string {
   const admin = auditActorName(log);
   const resource = formatResourceLabel(log);
   if (log.action === "login") {
-    return `Administrator ${admin} logged into the platform via Web Dashboard.`;
+    const portal = log.portal ?? (typeof log.payload?.portal === "string" ? log.payload.portal : "portal");
+    return `${admin} signed in (${portal}).`;
+  }
+  if (log.action === "logout") {
+    return `${admin} signed out.`;
+  }
+  if (log.action === "login_failure") {
+    return `Failed sign-in attempt.`;
+  }
+  if (log.action === "access_denied") {
+    return `${admin} signed in but is not authorized for this website.`;
   }
   return `Administrator ${admin} performed ${humanizeAction(log.action)} on ${resource}.`;
 }
@@ -108,15 +239,48 @@ export function auditActorInitials(log: PlatformAuditLog): string {
 export function auditIpAddress(log: PlatformAuditLog): string {
   const payload = log.payload ?? {};
   const ip =
+    log.ip_address ||
     (typeof payload.ip_address === "string" && payload.ip_address) ||
     (typeof payload.ip === "string" && payload.ip);
   if (ip) return ip;
+  const country = log.ip_country || (typeof payload.ip_country === "string" ? payload.ip_country : "");
+  if (country) return country;
   if (log.action.includes("cron") || log.resource_type.includes("cron")) return "Cron Job";
+  if (log.source === "auth" || log.resource_type === "auth") return "Not captured";
   return "—";
 }
 
+export function formatAuditTrailJson(log: PlatformAuditLog): string {
+  return JSON.stringify(
+    {
+      id: log.id,
+      created_at: log.created_at,
+      action: log.action,
+      resource_type: log.resource_type,
+      actor_id: log.actor_id ?? log.created_by,
+      brand_id: log.brand_id,
+      center_id: log.center_id,
+      portal: log.portal,
+      ip_address: log.ip_address,
+      ip_country: log.ip_country,
+      brand_name: log.brand_name,
+      center_name: log.center_name,
+      payload: log.payload ?? {},
+    },
+    null,
+    2
+  );
+}
+
 export function formatResourceLabel(log: PlatformAuditLog): string {
+  if (log.resource_type === "auth") {
+    const portal =
+      log.portal || (typeof log.payload?.portal === "string" ? log.payload.portal : null);
+    if (log.brand_name) return log.brand_name;
+    return portal ? `${portal} sign-in` : "Sign-in";
+  }
   if (log.resource_type === "platform_brand_signup") return "Brand signup";
+  if (log.brand_name) return log.brand_name;
   if (log.brand_id) return `Brand ID: #${log.brand_id.slice(0, 5)}`;
   if (log.resource_id) {
     const prefix = log.resource_type.includes("user") ? "User ID" : "Resource ID";
@@ -188,11 +352,15 @@ export function filterAuditLogs(
     actionFilter,
     adminFilter,
     dateRange,
+    streamFilter = "all",
+    portalFilter = "all",
   }: {
     search: string;
     actionFilter: string;
     adminFilter: string;
     dateRange: AuditDateRange;
+    streamFilter?: AuditStream;
+    portalFilter?: AuditPortalFilter;
   }
 ): PlatformAuditLog[] {
   const now = Date.now();
@@ -200,6 +368,12 @@ export function filterAuditLogs(
   const needle = search.trim().toLowerCase();
 
   return logs.filter((log) => {
+    const source = log.source ?? "mutation";
+    if (streamFilter === "auth" && source !== "auth") return false;
+    if (streamFilter === "mutations" && source !== "mutation") return false;
+    if (portalFilter === "learn" && log.portal !== "learn") return false;
+    if (portalFilter === "parents" && log.portal !== "parents") return false;
+    if (portalFilter === "staff" && !isStaffAuditPortal(log.portal)) return false;
     if (dateRange === "24h" && now - new Date(log.created_at).getTime() > dayMs) return false;
     if (dateRange === "7d" && now - new Date(log.created_at).getTime() > 7 * dayMs) return false;
     if (actionFilter !== "all" && log.action !== actionFilter && log.resource_type !== actionFilter) return false;
@@ -213,6 +387,10 @@ export function filterAuditLogs(
       log.resource_type,
       auditActorName(log),
       formatResourceLabel(log),
+      auditIpAddress(log),
+      log.portal ?? "",
+      log.brand_name ?? "",
+      log.center_name ?? "",
       JSON.stringify(log.payload ?? {}),
     ]
       .join(" ")
@@ -243,9 +421,10 @@ export function auditFilterOptions(logs: PlatformAuditLog[]) {
 
 export function auditEntityTags(log: PlatformAuditLog): string[] {
   const tags: string[] = [`User: ${auditActorName(log)}`];
-  if (log.brand_id) tags.push(`Brand: ${log.brand_id.slice(0, 8)}`);
-  if (log.center_id) tags.push(`Center: ${log.center_id.slice(0, 8)}`);
-  if (log.resource_type.includes("brand")) tags.push("Org: Franchise Alpha");
+  const brand = auditBrandTag(log);
+  const center = auditCenterTag(log);
+  if (brand) tags.push(brand);
+  if (center) tags.push(center);
   return tags;
 }
 

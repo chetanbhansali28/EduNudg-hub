@@ -51,6 +51,7 @@ Platform-admin **Open** / **Brand backend** uses `/auth/handoff` on each portal 
 
 ```bash
 pnpm dlx supabase functions deploy platform-portal-handoff
+pnpm dlx supabase functions deploy auth-audit
 ```
 
 Add production URLs when you deploy.
@@ -118,6 +119,7 @@ Deploy all functions (no Docker), including **`platform-portal-handoff`** for pl
 supabase functions deploy
 # or individually:
 pnpm dlx supabase functions deploy platform-portal-handoff
+pnpm dlx supabase functions deploy auth-audit
 pnpm dlx supabase functions deploy brand-owner-credentials
 ```
 

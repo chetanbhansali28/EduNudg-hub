@@ -20,7 +20,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | | ↳ Brand signups | `/admin/brands` | Manual add + pending queue + approve |
 | | Subscriptions | `/admin/subscriptions` | Exists |
 | | Revenue & Usage | `/admin/revenue` | Exists |
-| | Audit Logs | `/admin/audit` | Exists |
+| | Audit Logs | `/admin/audit` | Exists — mutations + Auth stream; search; 25/50/100 rows; loads newest 2000 per table |
 | General | Settings | `/admin/settings` | Exists |
 | | Homepage (marketing editor) | `/admin/homepage` | Exists — platform homepage editor only |
 | Footer | Log out | — | Exists |

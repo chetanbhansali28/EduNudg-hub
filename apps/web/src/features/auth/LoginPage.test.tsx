@@ -234,7 +234,7 @@ describe("LoginPage", () => {
     renderLogin("/login");
 
     await waitFor(() => {
-      expect(signOut).toHaveBeenCalled();
+      expect(signOut).toHaveBeenCalledWith({ audit: "access_denied" });
       expect(screen.getByRole("alert").textContent).toContain("stranger@gmail.com is not authorized");
     });
 
