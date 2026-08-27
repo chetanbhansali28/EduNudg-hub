@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
+import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { ThemeProvider } from "@edunudg/ui";
 import { AppErrorBoundary } from "./AppErrorBoundary";
 
-function Boom() {
+function Boom(): ReactNode {
   throw new Error("render crash");
 }
 
