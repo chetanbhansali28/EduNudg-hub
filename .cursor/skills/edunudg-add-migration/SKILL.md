@@ -10,7 +10,7 @@ description: Add or change Supabase database schema for EduNudg. Use when creati
 1. Read `supabase/migrations/000_audit_standard.sql` for audit helpers.
 2. Create `supabase/migrations/NNN_short_name.sql`. **The numeric prefix must be unique** — two files sharing `089_*.sql` means only one applies (PostgREST then 400s on the missing columns/RPC).
 3. Include `brand_id` / `center_id` per tenant scope.
-4. Add `created_by`, `updated_by`, trigger `set_row_audit()` for mutable tables.
+4. Add `created_by`, `updated_by`, trigger `set_row_audit()` for mutable tables. Append-only logs (`auth_audit_logs`, `access_audit_logs`, `client_error_reports`, …) need `created_by` only — add the table name to `APPEND_ONLY` in `scripts/audit-schema.mjs`.
 5. `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` + policies using `is_platform_admin()`, `has_brand_access()`, `has_center_access()`.
 6. Update `docs/database/table-dictionary.md`.
 7. Add RLS test in `supabase/tests/`.

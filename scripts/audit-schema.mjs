@@ -9,6 +9,8 @@ const APPEND_ONLY = new Set([
   "enrollment_history",
   "brand_status_events",
   "auth_audit_logs",
+  "access_audit_logs",
+  "client_error_reports",
 ]);
 
 const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith(".sql"));
