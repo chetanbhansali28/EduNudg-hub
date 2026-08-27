@@ -26,6 +26,7 @@ Decisions already locked: sensitive access only (not every route); platform sees
 ## Impact
 
 - Migration `097_auth_audit_events.sql`, RPC `log_auth_audit_event`, Edge Function `auth-audit`.
-- `AuthProvider`, `LoginPage`, platform `AuditLogsPage`.
+- Migration `098_error_and_access_audit.sql`: `client_error_reports`, `access_audit_logs`, `list_tenant_staff_audit`.
+- `AuthProvider`, `LoginPage`, platform `AuditLogsPage`, brand/center `/app/audit`, ErrorBoundary.
 - Docs: auth-providers, edge-functions, table-dictionary, navigation.
 - Tests: Vitest + RLS; later Playwright if the audit empty-state copy is a journey.

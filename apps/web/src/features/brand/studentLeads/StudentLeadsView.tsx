@@ -40,7 +40,8 @@ import {
   sortLeads,
   type LeadFilter,
 } from "@/features/brand/studentLeads/studentLeadsHelpers";
-import "../franchiseApplications/franchiseApplications.css";
+import { useTenant } from "@/bootstrap/TenantProvider";
+import { reportAccessAudit } from "@/services/auth/accessAuditApi";
 import "./studentLeads.css";
 
 const ICON_SEARCH = (
@@ -62,6 +63,7 @@ function StatusBadge({ label, tone }: ReturnType<typeof leadInboxStatusPresentat
 }
 
 export function StudentLeadsView({ brandId }: { brandId: string }) {
+  const tenant = useTenant();
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const { isDesktop, isMobile } = useOpsBreakpoint();
@@ -319,7 +321,19 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
         subtitle="Manage parent inquiries and track conversion pipeline."
         actions={
           <>
-            <Button variant="secondary" onClick={() => downloadLeadsCsv(allLeads)}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void reportAccessAudit({
+                  action: "export",
+                  resourceType: "leads_csv",
+                  tenant,
+                  path: "/app/leads",
+                  metadata: { rowCount: allLeads.length },
+                });
+                downloadLeadsCsv(allLeads);
+              }}
+            >
               Export List
             </Button>
             <Button onClick={() => setAddLeadOpen(true)}>+ New Lead</Button>

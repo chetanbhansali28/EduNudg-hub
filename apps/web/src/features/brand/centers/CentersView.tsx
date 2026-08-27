@@ -12,6 +12,8 @@ import {
   CentersSearchField,
 } from "@edunudg/ui";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
+import { useTenant } from "@/bootstrap/TenantProvider";
+import { reportAccessAudit } from "@/services/auth/accessAuditApi";
 import { CenterDetailPanel } from "@/features/brand/centers/CenterDetailPanel";
 import { FranchiseCenterImportDialog } from "@/features/platform/FranchiseCenterImportDialog";
 import {
@@ -49,6 +51,7 @@ const KPI_ICONS = {
 };
 
 export function CentersView() {
+  const tenant = useTenant();
   const { brandId, brandSlug, missingBrand } = useBrandScope();
   const qc = useQueryClient();
   const { isMobile } = useOpsBreakpoint();
@@ -170,7 +173,16 @@ export function CentersView() {
               type="button"
               variant="secondary"
               disabled={all.length === 0}
-              onClick={() => downloadBrandCentersCsv(all, brandSlug)}
+              onClick={() => {
+                void reportAccessAudit({
+                  action: "export",
+                  resourceType: "franchise_csv",
+                  tenant,
+                  path: "/app/centers",
+                  metadata: { rowCount: all.length },
+                });
+                downloadBrandCentersCsv(all, brandSlug);
+              }}
             >
               Export Franchise
             </Button>

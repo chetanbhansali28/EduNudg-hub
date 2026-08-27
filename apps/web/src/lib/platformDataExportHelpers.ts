@@ -219,6 +219,14 @@ export function downloadPlatformDataCsvBundle(bundle: PlatformDataExportBundle, 
 export async function exportPlatformData(format: "xlsx" | "csv" = "xlsx"): Promise<void> {
   const { fetchPlatformDataExport } = await import("@/lib/platformDataExportApi");
   const bundle = await fetchPlatformDataExport();
+  const { reportAccessAudit } = await import("@/services/auth/accessAuditApi");
+  void reportAccessAudit({
+    action: "export",
+    resourceType: "platform_data",
+    tenant: { portalType: "platform", brandId: null, centerId: null },
+    path: "/admin/settings",
+    metadata: { format },
+  });
   if (format === "csv") {
     downloadPlatformDataCsvBundle(bundle);
     return;

@@ -20,7 +20,7 @@ Target state for v1 implementation. Source of truth for menu labels; routes must
 | | ↳ Brand signups | `/admin/brands` | Manual add + pending queue + approve |
 | | Subscriptions | `/admin/subscriptions` | Exists |
 | | Revenue & Usage | `/admin/revenue` | Exists |
-| | Audit Logs | `/admin/audit` | Exists — mutations + Auth stream; search; 25/50/100 rows; loads newest 2000 per table |
+| | Audit Logs | `/admin/audit` | Exists — mutations + Auth + Access + Errors; search; 25/50/100 rows; loads newest 2000 per table |
 | General | Settings | `/admin/settings` | Exists |
 | | Homepage (marketing editor) | `/admin/homepage` | Exists — platform homepage editor only |
 | Footer | Log out | — | Exists |
@@ -49,6 +49,7 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 | General | **Homepage** | `/app/homepage` | Exists — brand public site editor |
 | | **Center Site Configuration** | `/app/center-site` | Exists — parent enrollment template (`center_landing`) |
 | | Settings | `/app/settings` | Exists — white-label + SLA; logo is Homepage Site logo |
+| | **Audit Logs** | `/app/audit` | Exists — Auth + Access for this brand (masked IP; no Errors). Brand owner/admin. |
 | | **Billing** | `/app/billing` | Exists — subscription checkout stub |
 | Footer | Log out | — | Exists |
 
@@ -72,6 +73,7 @@ On desktop and mobile, the staff chrome lockup shows the **brand name** next to 
 | | Assessments | `/app/assessments` | Phase D |
 | | Reports | `/app/reports` | Phase D |
 | General | Settings | `/app/settings` | Exists — public profile (photo, address, phone) |
+| | **Audit Logs** | `/app/audit` | Exists — Auth + Access for this center (masked IP; no Errors). Center owner/manager. |
 | Footer | Log out | — | Exists |
 
 **Center `/app/settings`:** franchise staff edit display name, description, address, photo, and phone. Login email is read-only from auth; public marketing URL is the center website. Footer social icons use brand Social Media Connect.

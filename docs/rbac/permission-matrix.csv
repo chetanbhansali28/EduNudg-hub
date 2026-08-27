@@ -27,7 +27,7 @@ inventory,update,n,n,y,y,y,y,n,n
 royalties,read,y,y,y,y,n,n,n,y
 royalties,approve,n,n,y,y,n,n,n,n
 analytics,read,y,y,y,y,y,y,y,y
-audit_logs,read,y,y,n,n,n,n,n,n
+audit_logs,read,y,y,y,y,y,y,n,n
 domain_mappings,update,y,y,y,n,n,n,n,n
 competitions,create,y,y,y,y,n,n,n,n
 competitions,read,y,y,y,y,y,y,y,n

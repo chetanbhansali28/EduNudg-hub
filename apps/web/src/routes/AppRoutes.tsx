@@ -13,6 +13,8 @@ import { BrandDetailPage } from "@/features/platform/BrandDetailPage";
 import { SubscriptionsPage } from "@/features/platform/SubscriptionsPage";
 import { RevenuePage } from "@/features/platform/RevenuePage";
 import { AuditLogsPage } from "@/features/platform/AuditLogsPage";
+import { StaffAuditPage } from "@/features/shared/StaffAuditPage";
+import { RequirePermission } from "@/features/auth/RequirePermission";
 import { SettingsPage } from "@/features/platform/SettingsPage";
 import { BrandLandingPage } from "@/features/brand/BrandLandingPage";
 import { BrandAboutPage } from "@/features/brand/BrandAboutPage";
@@ -238,6 +240,14 @@ export function AppRoutes() {
             />
             <Route path="homepage" element={<BrandMarketingEditorPage />} />
             <Route path="center-site" element={<BrandCenterSiteEditorPage />} />
+            <Route
+              path="audit"
+              element={
+                <RequirePermission resource="audit_logs" action="read">
+                  <StaffAuditPage />
+                </RequirePermission>
+              }
+            />
             <Route path="settings" element={<BrandSettingsPage />} />
           </Route>
         </>
@@ -263,6 +273,14 @@ export function AppRoutes() {
             <Route index element={<CenterDashboard />} />
             <Route path="leads" element={<CenterLeadsPage />} />
             <Route path="students" element={<StudentsPage />} />
+            <Route
+              path="audit"
+              element={
+                <RequirePermission resource="audit_logs" action="read">
+                  <StaffAuditPage />
+                </RequirePermission>
+              }
+            />
             <Route path="settings" element={<CenterSettingsPage />} />
             <Route
               path="merchandise"

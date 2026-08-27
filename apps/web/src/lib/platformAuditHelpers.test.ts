@@ -143,4 +143,30 @@ describe("platformAuditHelpers", () => {
     expect(json).toContain('"id": "abc"');
     expect(json).toContain("platform_brand_signup");
   });
+
+  it("regression_access_and_error_stream_filters", () => {
+    const logs: PlatformAuditLog[] = [
+      sampleLog({ id: "a", action: "login", resource_type: "auth", source: "auth" }),
+      sampleLog({ id: "b", action: "export", resource_type: "franchise_csv", source: "access" }),
+      sampleLog({ id: "c", action: "client_error", resource_type: "client", source: "error" }),
+    ];
+    expect(
+      filterAuditLogs(logs, {
+        search: "",
+        actionFilter: "all",
+        adminFilter: "all",
+        dateRange: "all",
+        streamFilter: "access",
+      }).map((row) => row.id)
+    ).toEqual(["b"]);
+    expect(
+      filterAuditLogs(logs, {
+        search: "",
+        actionFilter: "all",
+        adminFilter: "all",
+        dateRange: "all",
+        streamFilter: "errors",
+      }).map((row) => row.id)
+    ).toEqual(["c"]);
+  });
 });

@@ -60,6 +60,18 @@ export async function openPortalAsPlatformAdmin(target: PortalTarget): Promise<v
   if (error || !url) {
     throw new Error(error ?? "Could not open portal as platform admin");
   }
+  const { reportAccessAudit } = await import("@/services/auth/accessAuditApi");
+  void reportAccessAudit({
+    action: "handoff",
+    resourceType: "portal",
+    tenant: { portalType: "platform", brandId: null, centerId: null },
+    path: portalBackendPath(target),
+    metadata: {
+      portalType: target.portalType,
+      brandSlug: target.brandSlug ?? null,
+      centerSlug: target.centerSlug ?? null,
+    },
+  });
   window.open(ensureSameOriginHandoffParams(url, target), "_blank", "noopener,noreferrer");
 }
 

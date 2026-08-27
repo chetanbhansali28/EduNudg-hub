@@ -19,4 +19,5 @@ See [Navigation spec](../spec/navigation-spec.md).
 - **Merchandise** (`/app/merchandise`) — same chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; Shop catalog is one horizontal card per SKU with Curriculum/Program under the SKU and a stacked qty / full-width **Add to Order** footer for courses assigned to this franchise; desktop list column matches Curriculum width; gated by brand `merchandise` (legacy `/app/kits` redirects)
 - Staff chrome (all `/app` routes) shows the **brand name** next to the Site logo, with the franchise display name in a smaller line under it
 - **Settings** (`/app/settings`) — edit public center profile (photo, address, phone); login email from auth; public footer social uses brand Social Media Connect
+- **Audit Logs** (`/app/audit`) — Auth + Access for this center (no Errors; IP masked). Owner/manager only.
 - Assessments / Reports — Phase D

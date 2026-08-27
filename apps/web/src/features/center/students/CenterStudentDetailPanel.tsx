@@ -29,6 +29,7 @@ import type { CenterStudentDetailTab } from "@/features/center/students/centerSt
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { useSavedFlash } from "@/features/shared/useSavedFlash";
 import { useTenant } from "@/bootstrap/TenantProvider";
+import { reportAccessAudit } from "@/services/auth/accessAuditApi";
 
 type Props = {
   student: CenterStudentRow;
@@ -237,6 +238,13 @@ export function CenterStudentDetailPanel({
     if (!slug) return;
     try {
       await navigator.clipboard.writeText(studentProfileLoginUrl(slug));
+      void reportAccessAudit({
+        action: "view_pii",
+        resourceType: "student_profile_url",
+        resourceId: student.id,
+        tenant,
+        path: "/app/students",
+      });
       setCopiedProfileUrl(true);
       window.setTimeout(() => setCopiedProfileUrl(false), 2000);
     } catch {

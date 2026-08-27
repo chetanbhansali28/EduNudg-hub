@@ -19,7 +19,7 @@ describe("AuditLogsPage", () => {
       </QueryClientProvider>
     );
     expect(
-      (await screen.findAllByText(/Track sign-in, sign-out, and administrative actions/)).length
+      (await screen.findAllByText(/Track sign-in, sign-out, sensitive access, errors, and administrative actions/)).length
     ).toBeGreaterThan(0);
     expect((await screen.findAllByText(/No audit events yet/)).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Staff or student sign-in/).length).toBeGreaterThan(0);

@@ -5,7 +5,9 @@ import { useTenant } from "@/bootstrap/TenantProvider";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { useBrandFeatureFlags } from "@/hooks/useFeatureFlag";
 import { useStaffShellWelcome } from "@/hooks/useStaffShellWelcome";
-import { centerNavSections, filterNavByFeatureFlags, signOutNavItem, CENTER_FEATURE_FLAGS } from "@/lib/portalNav";
+import { centerNavSections, filterNavByFeatureFlags, filterNavByHref, signOutNavItem, CENTER_FEATURE_FLAGS } from "@/lib/portalNav";
+import { canAny } from "@edunudg/permissions";
+import { useMembership } from "@/hooks/useMembership";
 import { resolveShellProductName } from "@/lib/portalBranding";
 import { StaffMobileChrome } from "@/features/shared/StaffMobileChrome";
 
@@ -15,7 +17,12 @@ export function CenterLayout() {
   const tenant = useTenant();
   const { data: branding } = usePortalBranding();
   const featureFlags = useBrandFeatureFlags();
-  const navSections = filterNavByFeatureFlags(centerNavSections(pathname), featureFlags, CENTER_FEATURE_FLAGS);
+  const { data: memberships } = useMembership();
+  const canAudit = canAny((memberships ?? []).map((m) => m.role_key), "audit_logs", "read");
+  const navSections = filterNavByHref(
+    filterNavByFeatureFlags(centerNavSections(pathname), featureFlags, CENTER_FEATURE_FLAGS),
+    (href) => href !== "/app/audit" || canAudit
+  );
   const shell = resolveShellProductName(
     tenant.portalType,
     branding ?? {

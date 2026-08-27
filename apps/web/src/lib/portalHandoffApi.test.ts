@@ -9,6 +9,10 @@ vi.mock("@/lib/supabase", () => ({
   }),
 }));
 
+vi.mock("@/services/auth/accessAuditApi", () => ({
+  reportAccessAudit: vi.fn(async () => undefined),
+}));
+
 describe("portalHandoffApi", () => {
   beforeEach(() => {
     invokeMock.mockReset();

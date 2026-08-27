@@ -76,6 +76,23 @@ const ICON_DOWNLOAD = (
   </svg>
 );
 
+function auditStreamOptions(variant: "platform" | "tenant") {
+  if (variant === "tenant") {
+    return [
+      { value: "all", label: "All" },
+      { value: "auth", label: "Auth" },
+      { value: "access", label: "Access" },
+    ];
+  }
+  return [
+    { value: "all", label: "All" },
+    { value: "auth", label: "Auth" },
+    { value: "access", label: "Access" },
+    { value: "mutations", label: "Mutations" },
+    { value: "errors", label: "Errors" },
+  ];
+}
+
 function categoryIcon(category: string) {
   if (category === "LOGIN") return "⤴";
   if (category === "REVENUE") return "₹";
@@ -116,9 +133,11 @@ function DetailContent({ log }: { log: PlatformAuditLog }) {
 export function AuditLogsPageView({
   logs,
   loading,
+  variant = "platform",
 }: {
   logs: PlatformAuditLog[];
   loading?: boolean;
+  variant?: "platform" | "tenant";
 }) {
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
@@ -209,7 +228,11 @@ export function AuditLogsPageView({
           <>
             <AuditPageHeader
               title="Audit Logs"
-              subtitle="Track sign-in, sign-out, and administrative actions."
+              subtitle={
+                variant === "tenant"
+                  ? "Sign-in events and sensitive staff actions for this organization."
+                  : "Track sign-in, sign-out, sensitive access, errors, and administrative actions."
+              }
             />
             <AuditMobileSearch
               value={search}
@@ -225,11 +248,7 @@ export function AuditLogsPageView({
                   label="Stream"
                   value={streamFilter}
                   onChange={(value) => setStreamFilter(value as AuditStream)}
-                  options={[
-                    { value: "all", label: "All" },
-                    { value: "auth", label: "Auth" },
-                    { value: "mutations", label: "Mutations" },
-                  ]}
+                  options={auditStreamOptions(variant)}
                   icon={ICON_FILTER}
                 />
                 <AuditFilterSelect
@@ -319,7 +338,11 @@ export function AuditLogsPageView({
           <>
             <AuditPageHeader
               title="Audit Logs"
-              subtitle="Track sign-in, sign-out, and administrative actions."
+              subtitle={
+                variant === "tenant"
+                  ? "Sign-in events and sensitive staff actions for this organization."
+                  : "Track sign-in, sign-out, sensitive access, errors, and administrative actions."
+              }
             />
 
             <AuditSummaryGrid>
@@ -360,11 +383,7 @@ export function AuditLogsPageView({
                       setStreamFilter(value as AuditStream);
                       setPage(0);
                     }}
-                    options={[
-                      { value: "all", label: "All" },
-                      { value: "auth", label: "Auth" },
-                      { value: "mutations", label: "Mutations" },
-                    ]}
+                    options={auditStreamOptions(variant)}
                     icon={ICON_FILTER}
                   />
                   <AuditFilterSelect

@@ -62,5 +62,15 @@ export async function upsertCenterOwnerCredentials(
   if (payload?.error) return { error: payload.error };
   if (!payload?.ok) return { error: "Failed to save franchise login credentials" };
 
+  const { reportAccessAudit } = await import("@/services/auth/accessAuditApi");
+  void reportAccessAudit({
+    action: "credentials",
+    resourceType: "center_owner",
+    resourceId: input.centerId,
+    tenant: { portalType: "brand", brandId: input.brandId, centerId: input.centerId },
+    path: "/app/centers",
+    metadata: { email },
+  });
+
   return { error: null };
 }

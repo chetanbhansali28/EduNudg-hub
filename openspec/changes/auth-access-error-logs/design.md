@@ -6,7 +6,7 @@
 
 **Goals:** reliable auth events; never block login if audit fails; platform ops can filter Auth vs Mutations; capture IP only from the Edge Function.
 
-**Non-Goals (later phases):** every staff route view; brand/center audit UI; client error inbox; retention jobs.
+**Non-Goals (later phases):** every staff route view; retention jobs.
 
 ## Decisions
 

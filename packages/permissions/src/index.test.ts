@@ -51,4 +51,13 @@ describe("can", () => {
     expect(can("brand_admin", "programs", "update")).toBe(true);
     expect(can("center_owner", "programs", "update")).toBe(false);
   });
+
+  it("regression_tenant_staff_can_read_audit_logs", () => {
+    expect(can("brand_owner", "audit_logs", "read")).toBe(true);
+    expect(can("brand_admin", "audit_logs", "read")).toBe(true);
+    expect(can("center_owner", "audit_logs", "read")).toBe(true);
+    expect(can("center_manager", "audit_logs", "read")).toBe(true);
+    expect(can("center_admissions", "audit_logs", "read")).toBe(false);
+    expect(canAny(["center_finance"], "audit_logs", "read")).toBe(false);
+  });
 });

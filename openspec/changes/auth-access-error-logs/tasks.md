@@ -11,12 +11,12 @@
 
 ## Phase B — Client errors (later)
 
-- [ ] 9. `client_error_reports` + ErrorBoundary + platform Errors tab
+- [x] 9. `client_error_reports` + ErrorBoundary + platform Errors tab
 
 ## Phase C — Sensitive access + tenant UI (later)
 
-- [ ] 10. Access log table + exports/PII/credentials/handoff
-- [ ] 11. Brand and center `/app/audit` (masked IP)
+- [x] 10. Access log table + exports/PII/credentials/handoff
+- [x] 11. Brand and center `/app/audit` (masked IP)
 
 ## Phase D — Retention (later)
 

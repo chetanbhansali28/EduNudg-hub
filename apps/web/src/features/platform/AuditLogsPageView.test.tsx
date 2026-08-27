@@ -55,4 +55,26 @@ describe("AuditLogsPageView", () => {
     expect(writeText).toHaveBeenCalled();
     expect(String(writeText.mock.calls[0]?.[0])).toContain("log-copy");
   });
+
+  it("regression_tenant_audit_omits_errors_and_mutations_streams", () => {
+    render(
+      <ThemeProvider>
+        <AuditLogsPageView
+          variant="tenant"
+          logs={[
+            {
+              id: "log-1",
+              action: "export",
+              resource_type: "franchise_csv",
+              source: "access",
+              created_at: new Date().toISOString(),
+            },
+          ]}
+        />
+      </ThemeProvider>
+    );
+    expect(screen.queryAllByText("Errors")).toHaveLength(0);
+    expect(screen.queryAllByText("Mutations")).toHaveLength(0);
+    expect(screen.getAllByText("Access").length).toBeGreaterThan(0);
+  });
 });
