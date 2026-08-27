@@ -201,25 +201,87 @@ export function AuditPagination({
   onNext,
   disablePrevious,
   disableNext,
+  pageLabel,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
 }: {
   summary: string;
   onPrevious?: () => void;
   onNext?: () => void;
   disablePrevious?: boolean;
   disableNext?: boolean;
+  pageLabel?: string;
+  pageSize?: string;
+  pageSizeOptions?: { value: string; label: string }[];
+  onPageSizeChange?: (value: string) => void;
 }) {
   return (
     <div className="ed-audit-pagination">
       <p className="ed-audit-pagination__summary">{summary}</p>
-      <div className="ed-audit-pagination__nav">
-        <button type="button" className="ed-audit-pagination__btn" onClick={onPrevious} disabled={disablePrevious}>
-          ‹
-        </button>
-        <button type="button" className="ed-audit-pagination__btn" onClick={onNext} disabled={disableNext}>
-          ›
-        </button>
+      <div className="ed-audit-pagination__controls">
+        {pageSizeOptions && onPageSizeChange ? (
+          <label className="ed-audit-pagination__size">
+            Rows
+            <select
+              className="ed-audit-pagination__select"
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(e.target.value)}
+            >
+              {pageSizeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        {pageLabel ? <span className="ed-audit-pagination__page">{pageLabel}</span> : null}
+        <div className="ed-audit-pagination__nav">
+          <button
+            type="button"
+            className="ed-audit-pagination__btn"
+            onClick={onPrevious}
+            disabled={disablePrevious}
+            aria-label="Previous page"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            className="ed-audit-pagination__btn"
+            onClick={onNext}
+            disabled={disableNext}
+            aria-label="Next page"
+          >
+            ›
+          </button>
+        </div>
       </div>
     </div>
+  );
+}
+
+export function AuditSearchField({
+  value,
+  onChange,
+  placeholder = "Search email, action, IP, portal…",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) {
+  return (
+    <label className="ed-audit-search">
+      <span className="ed-sr-only">Search audit logs</span>
+      <input
+        type="search"
+        className="ed-audit-search__input"
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </label>
   );
 }
 
@@ -308,7 +370,7 @@ export function AuditMobileSearch({
         <input
           type="search"
           className="ed-audit-mobile-search__input"
-          placeholder="Search activities..."
+          placeholder="Search email, action, IP…"
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />

@@ -131,7 +131,10 @@ Do **not** put empty values in a GitHub Environment named `production` for these
 ```bash
 supabase migration new my_change
 supabase db push
+pnpm dlx supabase functions deploy auth-audit
 ```
+
+Auth audit (login/logout) uses migration `097_auth_audit_events.sql`. Platform `/admin/audit` **Auth** stream. Deploy `auth-audit` so IP/country are stored; the SPA still logs events via RPC if the function is missing.
 
 ## Tests
 

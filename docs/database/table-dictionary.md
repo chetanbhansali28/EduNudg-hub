@@ -12,7 +12,7 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `platform_audit_logs` | `created_by` only |
 | `enrollment_history` | `created_by` only |
 | `brand_status_events` | `created_by` only |
-| `auth_audit_logs` | `created_by` only |
+| `auth_audit_logs` | `created_by` only; login/logout/failure/denied. Network IP stamped by Edge Function `auth-audit`, not the SPA. |
 | `lead_events` | timeline |
 | `lead_assignment_history` | reassignments |
 
@@ -24,6 +24,7 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `brands` | platform | Franchise brand tenant |
 | `franchise_centers` | brand | Physical center / franchise; public profile fields below. CSV import sets `slug` from **name** (unique `-2` suffix if needed). |
 | `memberships` | auth | User role per scope |
+| `auth_audit_logs` | auth | Append-only sign-in events (`login_success`, `login_failure`, `logout`, `access_denied`) with `portal`, optional `brand_id`/`center_id`, session dedup. Platform `/admin/audit` Auth stream. Full IP is platform-only. |
 | `domain_mappings` | routing | Hostname → portal |
 | `platform_brand_signups` | platform | Self-serve EduNudg brand signup queue |
 
@@ -127,6 +128,7 @@ Centers with `merchandise` enabled can **SELECT** active rows **tied to a curric
 
 | Function | Description |
 |----------|-------------|
+| `log_auth_audit_event` | Append auth audit (anon: `login_failure` only) |
 | `get_portal_branding` | Login + staff chrome (Site logo; franchise `display_name`) |
 | `get_brand_landing_public` | Brand marketing |
 | `submit_franchise_inquiry_v2` | Franchise application |

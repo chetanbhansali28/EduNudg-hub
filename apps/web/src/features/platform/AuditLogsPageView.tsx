@@ -17,6 +17,7 @@ import {
   AuditPageHeader,
   AuditPagination,
   AuditPrimaryButton,
+  AuditSearchField,
   AuditShell,
   AuditSummaryCard,
   AuditSummaryGrid,
@@ -36,21 +37,31 @@ import {
   auditEventTitle,
   auditFilterOptions,
   auditIpAddress,
+  auditPageWindow,
   auditRequestId,
+  AUDIT_PAGE_SIZE_OPTIONS,
   computeAuditSummary,
   exportAuditCsv,
   filterAuditLogs,
+  formatAuditTrailJson,
   formatAuditTimestamp,
   formatResourceLabel,
   groupLogsByDay,
   type AuditDateRange,
+  type AuditPageSize,
+  type AuditPortalFilter,
+  type AuditStream,
   type PlatformAuditLog,
 } from "@/lib/platformAuditHelpers";
 import "./auditLogsPage.css";
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE_SELECT_OPTIONS = AUDIT_PAGE_SIZE_OPTIONS.map((size) => ({
+  value: String(size),
+  label: String(size),
+}));
 
 const AUDIT_EVENT_HINTS = [
+  "Staff or student sign-in, sign-out, or access denied",
   "Brand signup approved or rejected",
   "Subscription plan created, updated, or deleted",
   "Brand subscription assigned, updated, or removed",
@@ -74,11 +85,23 @@ function categoryIcon(category: string) {
   return "•";
 }
 
+function networkHint(log: PlatformAuditLog): string {
+  const ip = auditIpAddress(log);
+  if (ip !== "Not captured" && ip !== "—") return `IP ${ip}`;
+  if (log.source === "auth" || log.resource_type === "auth") {
+    return "IP is recorded only when Edge Function auth-audit is deployed. This row was saved via RPC (no client IP).";
+  }
+  return "No IP on this event.";
+}
+
 function DetailContent({ log }: { log: PlatformAuditLog }) {
   return (
     <>
       <AuditDetailSection title="Description">
         <p>{auditEventDescription(log)}</p>
+      </AuditDetailSection>
+      <AuditDetailSection title="Network">
+        <p>{networkHint(log)}</p>
       </AuditDetailSection>
       <AuditDetailSection title="Changed Data (JSON)">
         <AuditJsonBlock>{JSON.stringify(log.payload ?? {}, null, 2)}</AuditJsonBlock>
@@ -100,25 +123,50 @@ export function AuditLogsPageView({
   const [search, setSearch] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
   const [adminFilter, setAdminFilter] = useState("all");
-  const [dateRange, setDateRange] = useState<AuditDateRange>("24h");
+  const [dateRange, setDateRange] = useState<AuditDateRange>("7d");
+  const [streamFilter, setStreamFilter] = useState<AuditStream>("all");
+  const [portalFilter, setPortalFilter] = useState<AuditPortalFilter>("all");
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState<AuditPageSize>(25);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [copiedTrail, setCopiedTrail] = useState(false);
 
   const summary = useMemo(() => computeAuditSummary(logs), [logs]);
   const { actionOptions, adminOptions } = useMemo(() => auditFilterOptions(logs), [logs]);
 
   const filtered = useMemo(
-    () => filterAuditLogs(logs, { search, actionFilter, adminFilter, dateRange }),
-    [logs, search, actionFilter, adminFilter, dateRange]
+    () =>
+      filterAuditLogs(logs, {
+        search,
+        actionFilter,
+        adminFilter,
+        dateRange,
+        streamFilter,
+        portalFilter,
+      }),
+    [logs, search, actionFilter, adminFilter, dateRange, streamFilter, portalFilter]
   );
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount - 1);
-  const pageItems = filtered.slice(currentPage * PAGE_SIZE, currentPage * PAGE_SIZE + PAGE_SIZE);
+  const { pageCount, currentPage, start, end } = auditPageWindow(filtered.length, page, pageSize);
+  const pageItems = filtered.slice(currentPage * pageSize, currentPage * pageSize + pageSize);
   const selected = filtered.find((log) => log.id === selectedId) ?? pageItems[0] ?? null;
 
-  const mobileGroups = useMemo(() => groupLogsByDay(filtered.slice(0, 20)), [filtered]);
+  const copySelectedTrail = () => {
+    if (!selected) return;
+    void navigator.clipboard.writeText(formatAuditTrailJson(selected)).then(() => {
+      setCopiedTrail(true);
+      window.setTimeout(() => setCopiedTrail(false), 2000);
+    });
+  };
+
+  const copyTrailButton = (
+    <AuditOutlineButton onClick={copySelectedTrail}>
+      {copiedTrail ? "Copied JSON" : "Copy JSON"}
+    </AuditOutlineButton>
+  );
+
+  const mobileGroups = useMemo(() => groupLogsByDay(pageItems), [pageItems]);
 
   const tableRows = pageItems.map((log) => {
     const ts = formatAuditTimestamp(log.created_at);
@@ -161,7 +209,7 @@ export function AuditLogsPageView({
           <>
             <AuditPageHeader
               title="Audit Logs"
-              subtitle="Track system-wide administrative actions and security events."
+              subtitle="Track sign-in, sign-out, and administrative actions."
             />
             <AuditMobileSearch
               value={search}
@@ -173,6 +221,17 @@ export function AuditLogsPageView({
             />
             {mobileFiltersOpen ? (
               <div className="ed-audit-page__mobile-filters">
+                <AuditFilterSelect
+                  label="Stream"
+                  value={streamFilter}
+                  onChange={(value) => setStreamFilter(value as AuditStream)}
+                  options={[
+                    { value: "all", label: "All" },
+                    { value: "auth", label: "Auth" },
+                    { value: "mutations", label: "Mutations" },
+                  ]}
+                  icon={ICON_FILTER}
+                />
                 <AuditFilterSelect
                   label="Action"
                   value={actionFilter}
@@ -198,33 +257,49 @@ export function AuditLogsPageView({
             ) : filtered.length === 0 ? (
               emptyState
             ) : (
-              mobileGroups.map((group) => (
-                <AuditMobileGroup key={group.label} label={group.label}>
-                  {group.items.map((log) => {
-                    const category = auditCategory(log.action, log.resource_type);
-                    const tone = auditCategoryTone(log.action, log.resource_type);
-                    const ts = formatAuditTimestamp(log.created_at);
-                    return (
-                      <AuditMobileItem
-                        key={log.id}
-                        icon={categoryIcon(category)}
-                        iconTone={tone}
-                        category={category}
-                        time={ts.mobileTime}
-                        title={auditEventTitle(log)}
-                        meta={
-                          <>
-                            Admin: {auditActorName(log)}
-                            <br />
-                            {formatResourceLabel(log)} · IP: {auditIpAddress(log)}
-                          </>
-                        }
-                        onClick={() => setSelectedId(log.id)}
-                      />
-                    );
-                  })}
-                </AuditMobileGroup>
-              ))
+              <>
+                {mobileGroups.map((group) => (
+                  <AuditMobileGroup key={group.label} label={group.label}>
+                    {group.items.map((log) => {
+                      const category = auditCategory(log.action, log.resource_type);
+                      const tone = auditCategoryTone(log.action, log.resource_type);
+                      const ts = formatAuditTimestamp(log.created_at);
+                      return (
+                        <AuditMobileItem
+                          key={log.id}
+                          icon={categoryIcon(category)}
+                          iconTone={tone}
+                          category={category}
+                          time={ts.mobileTime}
+                          title={auditEventTitle(log)}
+                          meta={
+                            <>
+                              Admin: {auditActorName(log)}
+                              <br />
+                              {formatResourceLabel(log)} · IP: {auditIpAddress(log)}
+                            </>
+                          }
+                          onClick={() => setSelectedId(log.id)}
+                        />
+                      );
+                    })}
+                  </AuditMobileGroup>
+                ))}
+                <AuditPagination
+                  summary={`Showing ${start}-${end} of ${filtered.length.toLocaleString("en-IN")}`}
+                  pageLabel={`Page ${currentPage + 1} of ${pageCount}`}
+                  pageSize={String(pageSize)}
+                  pageSizeOptions={PAGE_SIZE_SELECT_OPTIONS}
+                  onPageSizeChange={(value) => {
+                    setPageSize(Number(value) as AuditPageSize);
+                    setPage(0);
+                  }}
+                  onPrevious={() => setPage((p) => Math.max(0, p - 1))}
+                  onNext={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+                  disablePrevious={currentPage === 0}
+                  disableNext={currentPage >= pageCount - 1}
+                />
+              </>
             )}
             <AuditFab label="Export audit logs" onClick={() => exportAuditCsv(filtered)}>
               {ICON_DOWNLOAD}
@@ -234,7 +309,7 @@ export function AuditLogsPageView({
               title="Entry Metadata"
               subtitle={selected ? `Request ID: ${auditRequestId(selected)}` : undefined}
               onClose={() => setSelectedId(null)}
-              footer={<AuditOutlineButton>Full Audit Trail</AuditOutlineButton>}
+              footer={copyTrailButton}
             >
               {selected ? <DetailContent log={selected} /> : null}
             </AuditDetailPanel>
@@ -244,7 +319,7 @@ export function AuditLogsPageView({
           <>
             <AuditPageHeader
               title="Audit Logs"
-              subtitle="Track system-wide administrative actions and security events."
+              subtitle="Track sign-in, sign-out, and administrative actions."
             />
 
             <AuditSummaryGrid>
@@ -271,6 +346,42 @@ export function AuditLogsPageView({
             <AuditToolbar
               filters={
                 <>
+                  <AuditSearchField
+                    value={search}
+                    onChange={(value) => {
+                      setSearch(value);
+                      setPage(0);
+                    }}
+                  />
+                  <AuditFilterSelect
+                    label="Stream"
+                    value={streamFilter}
+                    onChange={(value) => {
+                      setStreamFilter(value as AuditStream);
+                      setPage(0);
+                    }}
+                    options={[
+                      { value: "all", label: "All" },
+                      { value: "auth", label: "Auth" },
+                      { value: "mutations", label: "Mutations" },
+                    ]}
+                    icon={ICON_FILTER}
+                  />
+                  <AuditFilterSelect
+                    label="Portal"
+                    value={portalFilter}
+                    onChange={(value) => {
+                      setPortalFilter(value as AuditPortalFilter);
+                      setPage(0);
+                    }}
+                    options={[
+                      { value: "all", label: "All portals" },
+                      { value: "staff", label: "Staff" },
+                      { value: "learn", label: "Learn" },
+                      { value: "parents", label: "Parent" },
+                    ]}
+                    icon={ICON_FILTER}
+                  />
                   <AuditFilterSelect
                     label="Action Type"
                     value={actionFilter}
@@ -336,7 +447,14 @@ export function AuditLogsPageView({
                         onSelect={setSelectedId}
                       />
                       <AuditPagination
-                        summary={`Showing ${filtered.length === 0 ? 0 : currentPage * PAGE_SIZE + 1}-${Math.min((currentPage + 1) * PAGE_SIZE, filtered.length)} of ${filtered.length.toLocaleString("en-IN")} entries`}
+                        summary={`Showing ${start}-${end} of ${filtered.length.toLocaleString("en-IN")} entries`}
+                        pageLabel={`Page ${currentPage + 1} of ${pageCount}`}
+                        pageSize={String(pageSize)}
+                        pageSizeOptions={PAGE_SIZE_SELECT_OPTIONS}
+                        onPageSizeChange={(value) => {
+                          setPageSize(Number(value) as AuditPageSize);
+                          setPage(0);
+                        }}
                         onPrevious={() => setPage((p) => Math.max(0, p - 1))}
                         onNext={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
                         disablePrevious={currentPage === 0}
@@ -352,7 +470,7 @@ export function AuditLogsPageView({
                   title="Entry Metadata"
                   subtitle={selected ? `Request ID: ${auditRequestId(selected)}` : undefined}
                   onClose={() => setSelectedId(null)}
-                  footer={<AuditOutlineButton>Full Audit Trail</AuditOutlineButton>}
+                  footer={copyTrailButton}
                 >
                   {selected ? <DetailContent log={selected} /> : null}
                 </AuditDetailPanel>

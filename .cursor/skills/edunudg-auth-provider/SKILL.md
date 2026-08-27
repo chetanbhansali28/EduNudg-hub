@@ -18,7 +18,8 @@ description: Implement or change auth — Google, Facebook, WhatsApp OTP, passke
 
 ## Rules
 
-- Log events to `auth_audit_logs`
+- Log events to `auth_audit_logs` via `reportAuthAudit` / RPC `log_auth_audit_event` (`login_success` session-deduped, `logout`, `login_failure`, `access_denied`). Never block login if audit fails.
+- Deploy `auth-audit` so platform ops get IP + country; SPA falls back to RPC without IP.
 - Rate-limit OTP via `auth_rate_limits`
 - Never expose service role in client
 

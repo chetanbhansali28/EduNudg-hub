@@ -1,8 +1,12 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
 import { buildStaffOAuthRedirectUrl } from "@/services/auth/oauthRedirect";
+import { reportAuthAudit } from "@/services/auth/authAuditApi";
 import { signInWithPasskey as passkeySignIn } from "@/services/auth/passkeyService";
+import { useTenant } from "@/bootstrap/TenantProvider";
+
+export type SignOutAudit = "logout" | "access_denied" | "none";
 
 interface AuthState {
   session: Session | null;
@@ -15,12 +19,15 @@ interface AuthState {
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithOtpPhone: (phone: string) => Promise<{ error: Error | null }>;
   signInWithPasskey: () => Promise<{ error: Error | null }>;
-  signOut: () => Promise<void>;
+  signOut: (options?: { audit?: SignOutAudit }) => Promise<void>;
 }
 
 const AuthCtx = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const tenant = useTenant();
+  const tenantRef = useRef(tenant);
+  tenantRef.current = tenant;
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,8 +43,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .finally(() => {
           if (!cancelled) setLoading(false);
         });
-      const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
         if (!cancelled) setSession(s);
+        if (cancelled || event !== "SIGNED_IN" || !s) return;
+        void reportAuthAudit({
+          eventType: "login_success",
+          tenant: tenantRef.current,
+          session: s,
+        });
       });
       return () => {
         cancelled = true;
@@ -62,25 +75,64 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithEmail = async (email: string, password: string) => {
+    const trimmed = email.trim().toLowerCase();
     try {
       const { error } = await getSupabase().auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+        email: trimmed,
         password,
       });
-      return { error: error ? new Error(error.message) : null };
+      if (error) {
+        await reportAuthAudit({
+          eventType: "login_failure",
+          tenant: tenantRef.current,
+          provider: "email",
+          identifier: trimmed,
+        });
+        return { error: new Error(error.message) };
+      }
+      return { error: null };
     } catch (e) {
+      await reportAuthAudit({
+        eventType: "login_failure",
+        tenant: tenantRef.current,
+        provider: "email",
+        identifier: trimmed,
+      });
       return { error: e instanceof Error ? e : new Error("Sign in failed") };
     }
   };
 
   const signInWithOtpPhone = async (phone: string) => {
     const { error } = await getSupabase().auth.signInWithOtp({ phone });
+    if (error) {
+      void reportAuthAudit({
+        eventType: "login_failure",
+        tenant: tenantRef.current,
+        provider: "whatsapp",
+        identifier: phone.trim(),
+      });
+    }
     return { error: error as Error | null };
   };
 
   const signInWithPasskey = async () => passkeySignIn();
 
-  const signOut = async () => {
+  const signOut = async (options?: { audit?: SignOutAudit }) => {
+    const mode = options?.audit ?? "logout";
+    const current = session;
+    if (mode === "access_denied" && current) {
+      await reportAuthAudit({
+        eventType: "access_denied",
+        tenant: tenantRef.current,
+        session: current,
+      });
+    } else if (mode === "logout" && current) {
+      await reportAuthAudit({
+        eventType: "logout",
+        tenant: tenantRef.current,
+        session: current,
+      });
+    }
     await getSupabase().auth.signOut();
   };
 

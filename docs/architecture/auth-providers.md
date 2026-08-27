@@ -43,6 +43,10 @@ Platform admins open brand/center/learn/parents hosts without a separate passwor
 
 Does not use Supabase `action_link` redirects to subdomains. Details: [platform-admin-portal-handoff.md](../ops/platform-admin-portal-handoff.md).
 
-All events → `auth_audit_logs`.
+All events → `auth_audit_logs` via RPC `log_auth_audit_event` (`login_success` once per session, `logout`, `login_failure`, `access_denied`). Platform `/admin/audit` **Auth** stream. Optional Edge Function `auth-audit` stamps IP (platform ops), `ip_hash`, and `ip_country`. Until that function is deployed, `/admin/audit` shows **Not captured** for IP (RPC fallback has no client address). **Copy JSON** copies the selected row; it replaced a no-op Full Audit Trail button.
+
+```bash
+pnpm dlx supabase@2.104.0 functions deploy auth-audit
+```
 
 OAuth redirect URLs (local dev): set in **Supabase Dashboard → Authentication → URL configuration** — Site URL `http://localhost:9000` (not `3000`), redirects `http://localhost:9000/**`.

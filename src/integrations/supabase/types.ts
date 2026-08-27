@@ -125,10 +125,16 @@ export type Database = {
           event_type: string
           id: string
           ip_address: unknown
+          ip_country: string | null
+          ip_hash: string | null
           metadata: Json | null
+          portal: string | null
           provider: Database["public"]["Enums"]["auth_provider"] | null
+          session_id: string | null
           user_agent: string | null
           user_id: string | null
+          brand_id: string | null
+          center_id: string | null
         }
         Insert: {
           created_at?: string
@@ -136,10 +142,16 @@ export type Database = {
           event_type: string
           id?: string
           ip_address?: unknown
+          ip_country?: string | null
+          ip_hash?: string | null
           metadata?: Json | null
+          portal?: string | null
           provider?: Database["public"]["Enums"]["auth_provider"] | null
+          session_id?: string | null
           user_agent?: string | null
           user_id?: string | null
+          brand_id?: string | null
+          center_id?: string | null
         }
         Update: {
           created_at?: string
@@ -147,10 +159,16 @@ export type Database = {
           event_type?: string
           id?: string
           ip_address?: unknown
+          ip_country?: string | null
+          ip_hash?: string | null
           metadata?: Json | null
+          portal?: string | null
           provider?: Database["public"]["Enums"]["auth_provider"] | null
+          session_id?: string | null
           user_agent?: string | null
           user_id?: string | null
+          brand_id?: string | null
+          center_id?: string | null
         }
         Relationships: []
       }
@@ -4259,6 +4277,20 @@ export type Database = {
         Returns: Json
       }
       list_public_subscription_plans: { Args: never; Returns: Json }
+      log_auth_audit_event: {
+        Args: {
+          p_event_type: string
+          p_provider?: Database["public"]["Enums"]["auth_provider"]
+          p_session_id?: string
+          p_portal?: string
+          p_brand_id?: string
+          p_center_id?: string
+          p_user_agent?: string
+          p_metadata?: Json
+          p_identifier?: string
+        }
+        Returns: string
+      }
       log_platform_audit: {
         Args: {
           p_action: string

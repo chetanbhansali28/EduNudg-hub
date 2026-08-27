@@ -13042,6 +13042,24 @@ a.ed-directory-brand-row__name:hover {
   align-items: center;
   gap: 0.625rem;
   flex-wrap: wrap;
+  flex: 1 1 40rem;
+}
+
+.ed-audit-search {
+  flex: 1 1 16rem;
+  min-width: 12rem;
+}
+
+.ed-audit-search__input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  background: var(--ed-card);
+  font: inherit;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  color: var(--ed-text);
 }
 
 .ed-audit-filter {
@@ -13109,13 +13127,14 @@ a.ed-directory-brand-row__name:hover {
 
 .ed-audit-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .ed-audit-table thead th {
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.65rem 0.7rem;
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -13126,9 +13145,11 @@ a.ed-directory-brand-row__name:hover {
 }
 
 .ed-audit-table tbody td {
-  padding: 0.9rem 1rem;
+  padding: 0.7rem 0.7rem;
   border-bottom: 1px solid var(--ed-border);
   vertical-align: middle;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ed-audit-table tbody tr {
@@ -13197,7 +13218,9 @@ a.ed-directory-brand-row__name:hover {
 }
 
 .ed-audit-admin__name {
+  min-width: 0;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .ed-audit-action {
@@ -13239,6 +13262,7 @@ a.ed-directory-brand-row__name:hover {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  flex-wrap: wrap;
   padding: 0.75rem 1rem;
   border-top: 1px solid var(--ed-border);
 }
@@ -13247,6 +13271,35 @@ a.ed-directory-brand-row__name:hover {
   margin: 0;
   font-size: 0.8125rem;
   color: var(--ed-muted);
+}
+
+.ed-audit-pagination__controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.ed-audit-pagination__size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--ed-muted);
+}
+
+.ed-audit-pagination__select {
+  font: inherit;
+  color: var(--ed-text);
+  border: 1px solid var(--ed-border);
+  border-radius: var(--ed-radius);
+  background: var(--ed-card);
+  padding: 0.2rem 0.4rem;
+}
+
+.ed-audit-pagination__page {
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .ed-audit-pagination__nav {

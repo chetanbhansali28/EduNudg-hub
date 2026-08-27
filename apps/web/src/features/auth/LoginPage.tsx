@@ -111,7 +111,7 @@ export function LoginPage() {
 
     accessDeniedHandled.current = true;
     const deniedEmail = user?.email ?? session.user.email;
-    void signOut().finally(() => {
+    void signOut({ audit: "access_denied" }).finally(() => {
       setError(formatLoginAccessDeniedMessage(deniedEmail));
     });
   }, [session, user?.email, hasAccess, accessPending, isStudentPortal, signOut]);

@@ -8,7 +8,7 @@ EduNudg functions live in [`supabase/functions/`](../../supabase/functions/):
 | `passkey-verify` | WebAuthn login + registration (`login-options`, `login-verify`, `register-options`, `register-verify`, `list`, `delete`) |
 | `brand-owner-credentials` | Platform admin: create/update brand owner Auth user + membership |
 | `center-owner-credentials` | Brand staff (or platform admin): create/update center owner Auth user + `center_owner` membership |
-| `platform-portal-handoff` | Platform admin: one-time `hashed_token` for cross-host `/auth/handoff` sign-in |
+| `auth-audit` | Login/logout/failure ingest; stamps IP hash + country after `log_auth_audit_event` |
 
 **SPA rule:** `BrandEditForm` calls `brand-owner-credentials` only when login email or password fields change (`credentialsChanged`). Saving website theme, name, or status alone must not invoke credentials — otherwise edge 400s block unrelated brand edits.
 
@@ -37,6 +37,7 @@ supabase functions deploy passkey-verify
 supabase functions deploy platform-portal-handoff
 supabase functions deploy brand-owner-credentials
 supabase functions deploy center-owner-credentials
+supabase functions deploy auth-audit
 ```
 
 ## Deploy all functions
