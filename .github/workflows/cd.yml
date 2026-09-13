@@ -48,16 +48,12 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: pnpm/action-setup@v6
-        if: steps.secrets.outputs.ready == 'true'
-        with:
-          version: 9.15.0
-
+      # No pnpm cache: this job never runs `pnpm install`. setup-node `cache: pnpm`
+      # then fails Post Run with "Path(s) specified in the action for caching do(es) not exist".
       - uses: actions/setup-node@v5
         if: steps.secrets.outputs.ready == 'true'
         with:
           node-version: "24"
-          cache: "pnpm"
 
       - name: Install Vercel CLI
         if: steps.secrets.outputs.ready == 'true'
@@ -137,16 +133,12 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: pnpm/action-setup@v6
-        if: steps.secrets.outputs.ready == 'true'
-        with:
-          version: 9.15.0
-
+      # No pnpm cache: this job never runs `pnpm install`. setup-node `cache: pnpm`
+      # then fails Post Run with "Path(s) specified in the action for caching do(es) not exist".
       - uses: actions/setup-node@v5
         if: steps.secrets.outputs.ready == 'true'
         with:
           node-version: "24"
-          cache: "pnpm"
 
       - name: Install Vercel CLI
         if: steps.secrets.outputs.ready == 'true'
