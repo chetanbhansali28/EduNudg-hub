@@ -82,7 +82,7 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 
 **Production on `main` / `master`:** Vercel Git auto-deploy is enabled for those branches only (`apps/web/vercel.json` → `git.deploymentEnabled`). Other branches do not auto-deploy.
 
-**PR previews + optional Actions production:** [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) uses remote Vercel builds when repository secrets are set. If secrets are missing, CD skips the CLI deploy with a warning (does not fail on empty `--token=`). CD must not set `actions/setup-node` `cache: pnpm` — those jobs never `pnpm install`, so Post Run cache save fails with `Path Validation Error` even after a successful `vercel deploy`.
+**PR previews + optional Actions production:** [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) uses remote Vercel builds when repository secrets are set. If secrets are missing, CD skips the CLI deploy with a warning (does not fail on empty `--token=`). CD `setup-node` must set `package-manager-cache: false` (and must not set `cache: pnpm`) — those jobs never install pnpm; v5 otherwise auto-detects `packageManager` in root `package.json` and fails with `Unable to locate executable file: pnpm`, then Post Run cache save fails with `Path Validation Error`.
 
 Do not use local `vercel build` + `vercel deploy --prebuilt` for this Vite SPA when `VITE_*` settings are marked **Sensitive** in Vercel. `vercel pull` intentionally downloads those values as `[SENSITIVE]`; a local build then embeds that marker in the browser bundle. Remote `vercel deploy` builds inside Vercel with the real protected values.
 
