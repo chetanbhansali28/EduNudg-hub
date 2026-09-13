@@ -39,6 +39,8 @@ const {
   membershipState: {
     data: [] as Membership[],
     isLoading: false,
+    isFetched: true,
+    isError: false,
   },
   tenantState: {
     portalType: "platform" as "platform" | "learn" | "brand" | "center" | "parents",
@@ -104,6 +106,10 @@ vi.mock("@/hooks/useMembership", () => ({
   useMembership: () => ({
     data: membershipState.data,
     isLoading: membershipState.isLoading,
+    isPending: membershipState.isLoading || !membershipState.isFetched,
+    isFetching: membershipState.isLoading,
+    isFetched: membershipState.isFetched,
+    isError: membershipState.isError,
   }),
 }));
 
@@ -181,6 +187,8 @@ describe("LoginPage", () => {
     authState.user = null;
     membershipState.data = [];
     membershipState.isLoading = false;
+    membershipState.isFetched = true;
+    membershipState.isError = false;
     portalBrandingState.isFetched = true;
     portalBrandingState.isFetching = false;
     portalBrandingState.isLoading = false;
@@ -244,6 +252,37 @@ describe("LoginPage", () => {
       expect.stringContaining("Maximum update depth exceeded")
     );
     consoleSpy.mockRestore();
+  });
+
+  it("regression_does_not_sign_out_before_memberships_fetch_completes", async () => {
+    authState.session = { user: { id: "user-1", email: "center@new-franchise.com" } };
+    authState.user = { id: "user-1", email: "center@new-franchise.com" };
+    membershipState.data = [];
+    membershipState.isLoading = false;
+    membershipState.isFetched = false;
+
+    renderLogin("/login");
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: exactAccessibleName("Log in") })).toBeDefined();
+    });
+    expect(signOut).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("regression_membership_fetch_error_does_not_sign_out", async () => {
+    authState.session = { user: { id: "user-1", email: "center@new-franchise.com" } };
+    authState.user = { id: "user-1", email: "center@new-franchise.com" };
+    membershipState.data = [];
+    membershipState.isFetched = true;
+    membershipState.isError = true;
+
+    renderLogin("/login");
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert").textContent).toMatch(/could not verify access/i);
+    });
+    expect(signOut).not.toHaveBeenCalled();
   });
 
   it("regression_google_oauth_uses_login_redirect_url", () => {
@@ -373,6 +412,36 @@ describe("LoginPage", () => {
     });
 
     await expectRedirectTo("Student dashboard");
+    expect(signOut).not.toHaveBeenCalled();
+    tenantState.portalType = "platform";
+    tenantState.brandSlug = null;
+  });
+
+  it("regression_learn_portal_does_not_sign_out_without_staff_membership", async () => {
+    tenantState.portalType = "learn";
+    tenantState.brandSlug = "abacusworld";
+    authState.session = { user: { id: "student-1", email: "student@edunudg.com" } };
+    authState.user = { id: "student-1", email: "student@edunudg.com" };
+    membershipState.data = [];
+    membershipState.isFetched = true;
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const router = createMemoryRouter(
+      [
+        { path: "/login", element: <LoginPage /> },
+        { path: "/", element: <div>Student dashboard</div> },
+      ],
+      { initialEntries: ["/login"] }
+    );
+    render(
+      <QueryClientProvider client={qc}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    );
+
+    await expectRedirectTo("Student dashboard");
+    expect(signOut).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).toBeNull();
     tenantState.portalType = "platform";
     tenantState.brandSlug = null;
   });

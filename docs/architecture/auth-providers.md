@@ -33,6 +33,8 @@ Post-login redirect honors `?next=` on `/login` (used after platform-admin hando
 
 OAuth staff sign-in (`signInWithOAuth`) redirects to `{origin}/login` so membership checks run before `/admin` or `/app`. Legacy returns to `/` with `#access_token` are forwarded to `/login` by `OAuthReturnRedirect`.
 
+Staff membership fetch calls `accept_own_invited_memberships` then loads `active` rows. `/login` must wait until that query is fetched — empty memberships before fetch used to look like access-denied and sign the user out immediately (new franchise owners from inquiry/CSV start as `invited`).
+
 ## Platform admin cross-portal handoff
 
 Platform admins open brand/center/learn/parents hosts without a separate password:

@@ -33,6 +33,12 @@ All functions `SECURITY DEFINER`, `SET search_path = public`, validate tenant fr
 
 See [manual-leads.md](./manual-leads.md).
 
+## Auth (authenticated)
+
+| Function | Description |
+|----------|-------------|
+| `accept_own_invited_memberships()` | Sets the caller’s `invited` memberships to `active` on first staff login (franchise/brand invites from inquiry approval or CSV) |
+
 ## Platform admin
 
 | Function | Description |

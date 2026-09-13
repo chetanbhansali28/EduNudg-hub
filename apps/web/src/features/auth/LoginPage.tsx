@@ -9,11 +9,11 @@ import { usePlatformIntegrations } from "@/hooks/usePlatformIntegration";
 import { usePortalBranding } from "@/hooks/usePortalBranding";
 import { useResolvedPortalTenant } from "@/hooks/useResolvedPortalTenant";
 import { fetchHomepageConfig, MARKETING_HOMEPAGE_CONFIG_QUERY_KEY } from "@/lib/homepageApi";
-import { hasPortalMembership } from "@/lib/portalMembership";
+import { hasPortalMembership, isStaffMembershipAccessPending } from "@/lib/portalMembership";
 import { resolveLoginBranding } from "@/lib/portalBranding";
 import { learnPortalLoginUrl } from "@/lib/centerPublicNavUrls";
 import type { HomepageConfig } from "@/types/homepage";
-import { postLoginPath } from "./postLoginPath";
+import { postLoginPath, preservedPortalSearch } from "./postLoginPath";
 import { formatLoginAccessDeniedMessage } from "./loginAccessMessage";
 import { buildStaffOAuthRedirectUrl } from "@/services/auth/oauthRedirect";
 import { resolveSafeInternalPath } from "@/lib/safeInternalPath";
@@ -30,7 +30,8 @@ export function LoginPage() {
   const [searchParams] = useSearchParams();
   const marketingOutlet = useOutletContext<{ marketingChrome?: true; config?: HomepageConfig } | undefined>();
   const inMarketingChrome = marketingOutlet?.marketingChrome === true;
-  const { data: memberships, isLoading: membershipsLoading } = useMembership();
+  const membershipQuery = useMembership();
+  const memberships = membershipQuery.data;
   const brandingQuery = usePortalBranding();
   const integrations = usePlatformIntegrations();
   const homepageQuery = useQuery({
@@ -84,20 +85,30 @@ export function LoginPage() {
   const homepage = inMarketingChrome ? marketingOutlet?.config : homepageQuery.data;
   const portalType = tenant.portalType;
   const isStudentPortal = portalType === "learn" || portalType === "parents";
-  const accessPending =
-    portalTenantResolving || (!isStudentPortal && membershipsLoading);
+  const accessPending = isStaffMembershipAccessPending({
+    isStudentPortal,
+    portalTenantResolving,
+    hasSession: Boolean(session),
+    membershipsFetched: membershipQuery.isFetched,
+    membershipsError: membershipQuery.isError,
+  });
   const hasAccess =
     !session || accessPending ? false : hasPortalMembership(memberships, portalTenant);
 
   const goAfterLogin = useCallback(() => {
     const path = resolveSafeInternalPath(searchParams.get("next"), postLoginPath({ portalType }));
-    navigate(path, { replace: true });
+    navigate({ pathname: path, search: preservedPortalSearch(searchParams) }, { replace: true });
   }, [navigate, portalType, searchParams]);
 
   useEffect(() => {
     if (!session || location.pathname !== "/login" || accessPending || !hasAccess) return;
     goAfterLogin();
   }, [session, location.pathname, accessPending, hasAccess, goAfterLogin]);
+
+  useEffect(() => {
+    if (!session || isStudentPortal || !membershipQuery.isError) return;
+    setError("Could not verify access. Refresh and try again.");
+  }, [session, isStudentPortal, membershipQuery.isError]);
 
   useEffect(() => {
     if (isStudentPortal || accessPending) return;

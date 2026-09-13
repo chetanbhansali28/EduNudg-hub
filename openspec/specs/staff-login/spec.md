@@ -36,6 +36,7 @@ The staff login form SHALL render a primary email/password submit button whose a
 - **THEN** Supabase SHALL redirect to `{origin}/login` (preserving safe `?next=` when present)
 - **AND** if the user lacks portal membership the app SHALL sign them out automatically and show: `{email} is not authorized for this website. Contact your administrator to request access.`
 - **AND** post-login `?next=` values MUST be same-origin relative paths (`/admin`, `/app`) — protocol-relative (`//…`) and absolute URLs are rejected
+- **AND** same-origin `?portal=` / `?brand=` / `?center=` query params SHALL be kept on the post-login `/app` or `/admin` URL
 
 #### Scenario: Split-screen platform login smoke
 
@@ -44,6 +45,46 @@ The staff login form SHALL render a primary email/password submit button whose a
 - **THEN** heading `Welcome back!`, platform account copy, Email field, and exact `Log in` submit are visible
 - **AND** `Log in with Google` is available when Google auth is enabled
 - **AND** the page SHALL render the same enterprise Site nav and site footer as platform `/`
+
+### Requirement: New franchise staff login stays signed in
+
+Staff `/login` SHALL NOT sign the user out until memberships for the current user have been fetched. Invited **brand** (`approve_platform_brand_signup`) and **center** (franchise inquiry approval or CSV import) memberships SHALL become `active` on that first successful staff sign-in via `accept_own_invited_memberships`. Learn and parents `/login` SHALL NOT use staff memberships and SHALL NOT sign the user out for an empty memberships list.
+
+#### Scenario: Memberships still loading are not access-denied
+
+- **GIVEN** a franchise owner has just signed in on a center `/login`
+- **AND** the memberships query has not finished
+- **WHEN** the login gate evaluates access
+- **THEN** the app SHALL NOT call sign-out
+- **AND** SHALL wait until memberships are fetched
+
+#### Scenario: New brand owner is not signed out while memberships load
+
+- **GIVEN** a `brand_owner` has just signed in on a brand `/login`
+- **AND** the memberships query has not finished
+- **WHEN** the login gate evaluates access
+- **THEN** the app SHALL NOT call sign-out
+
+#### Scenario: Invited franchise owner can enter the center portal
+
+- **GIVEN** a `center_owner` membership with status `invited` for the current franchise host
+- **WHEN** that user signs in with a valid password
+- **THEN** `accept_own_invited_memberships` SHALL set the row to `active`
+- **AND** the app SHALL redirect to `/app` (keeping portal query params on same-origin hosts)
+
+#### Scenario: Invited brand owner can enter the brand portal
+
+- **GIVEN** a `brand_owner` membership with status `invited` (platform brand signup approved, credentials not yet synced)
+- **WHEN** that user signs in on the brand host
+- **THEN** `accept_own_invited_memberships` SHALL set the row to `active`
+- **AND** the app SHALL NOT sign them out for an empty memberships list during that accept
+
+#### Scenario: Student login ignores staff memberships
+
+- **GIVEN** a learner session on the learn portal with no staff `memberships` row
+- **WHEN** `/login` evaluates access
+- **THEN** the app SHALL NOT call sign-out
+- **AND** SHALL send the learner to the student home
 
 ### Requirement: Platform login uses public marketing chrome
 

@@ -247,7 +247,7 @@ pnpm dlx supabase functions deploy center-owner-credentials
 | Signed in but `/admin` loops to login | No platform `memberships` | §4 SQL or seed |
 | Google OK on brand host, access denied | No brand `memberships` for that `brand_id` | Brand-owner credentials on platform |
 | Email/password works, Google doesn’t | Different email on Google vs provisioned login | Use same email or link identity in Supabase Auth → Users |
-| `memberships.status = invited` | Not accepted | Set `status = 'active'`, `accepted_at = now()` |
+| `memberships.status = invited` | Invite not accepted yet | First staff login calls `accept_own_invited_memberships` (migration `101`). If login still bounces, confirm that RPC is applied. |
 
 ---
 

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSupabase } from "@/lib/supabase";
-import { supabaseList } from "@/lib/supabaseResult";
 import { useAuth } from "@/bootstrap/AuthProvider";
 
 export interface Membership {
@@ -11,23 +10,29 @@ export interface Membership {
   center_id: string | null;
 }
 
+/** Activate invited rows, then load active staff memberships for the signed-in user. */
+export async function fetchActiveMemberships(userId: string): Promise<Membership[]> {
+  const sb = getSupabase();
+  try {
+    await sb.rpc("accept_own_invited_memberships");
+  } catch {
+    // Login must still work for already-active members if the RPC is not applied yet.
+  }
+  const { data, error } = await sb
+    .from("memberships")
+    .select("id, role_key, scope_type, brand_id, center_id")
+    .eq("user_id", userId)
+    .eq("status", "active");
+  if (error) throw error;
+  return (data ?? []) as Membership[];
+}
+
 export function useMembership() {
   const { user } = useAuth();
   return useQuery({
     queryKey: ["memberships", user?.id],
     enabled: !!user,
-    queryFn: async () => {
-      try {
-        const { data, error } = await getSupabase()
-          .from("memberships")
-          .select("id, role_key, scope_type, brand_id, center_id")
-          .eq("user_id", user!.id)
-          .eq("status", "active");
-        return supabaseList(data, error) as Membership[];
-      } catch {
-        return [];
-      }
-    },
+    queryFn: () => fetchActiveMemberships(user!.id),
   });
 }
 

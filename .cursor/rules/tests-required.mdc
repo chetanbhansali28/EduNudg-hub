@@ -31,7 +31,7 @@ Before finish: `.cursor/skills/edunudg-sync-artifacts/SKILL.md` (specs, docs, te
 
 - **Playwright**: `getByRole({ name })` is substring match — use `{ exact: true }` for shared prefixes (`Log in` vs `Log in with Google`; `Email` vs `Login email (optional)`). Center `/app/leads` list titles use parent name (`leadDisplayName`), not `child_name`.
 - **Testing Library**: do **not** pass `exact: true` (not on `ByRoleOptions`; breaks typecheck). Use `exactAccessibleName("…")` from `@/test/exactAccessibleName` (anchored `/^…$/`).
-- See `openspec/specs/staff-login/spec.md`.
+- See `openspec/specs/staff-login/spec.md`. Staff franchise `/login` MUST keep `regression_does_not_sign_out_before_memberships_fetch_completes`, `regression_accepts_invited_memberships_before_loading_active_rows`, and `regression_center_login_keeps_portal_query_on_app_redirect` green. Brand `/login` MUST keep `regression_brand_does_not_sign_out_before_memberships_fetch_completes` green. Learn `/login` MUST keep `regression_learn_portal_does_not_sign_out_without_staff_membership` green.
 
 ## Platform homepage regressions
 
