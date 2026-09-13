@@ -12,6 +12,8 @@ Public marketing landings share one UI kit under `apps/web/src/features/marketin
 
 **Brand / center content safety:** public + editor paths must always merge stored `landing` / `center_landing`. Fallbacks must not drop landing JSON. Saves use `preserveCustomMarketingMediaUrls`. Seed must not full-replace `brand_settings.settings`. See rule `marketing-homepage-media` and `marketingMediaGuard.ts`. Brand `/app` Center Health treats homepage (`landing` via `/app/homepage`) and franchise site (`center_landing` via `/app/center-site`) as set only when stored JSON has real content (`hasConfiguredMarketingLanding`); empty `{}` or seed-only `{ hero: { subtitle } }` does not count.
 
+**Public SEO / AEO / GEO:** titles, descriptions, canonicals, Open Graph, robots, and JSON-LD are derived automatically (`derivePublicSeo` in `publicSeo.ts`) from landing, published courses, legal uploads, and franchise identity. No SEO editor fields. `PortalDocumentHead` applies the same snapshot in the SPA. Production Vercel rewrites `/robots.txt`, `/sitemap.xml`, `/llms.txt`, and `/.well-known/ai.txt` (and public HTML) ahead of the SPA catch-all. Sitemaps list real routes only (not `#programs`, `/login`, or unpublished `/about`). Center homepages localize `{Brand} in {City}` and canonicalize to the center host. Spec: [`openspec/specs/public-seo/spec.md`](../../openspec/specs/public-seo/spec.md).
+
 ## Brand marketing themes
 
 Platform admins assign a theme per brand at **Platform → Brands → Edit** (`/admin/brands/:slug`) in **Brand settings** → **Website theme**. Stored on `brands.marketing_theme`. **Site logo** and a renamed **Name** on that same form persist to Homepage `landing.meta` (shared with `{brand}/app/homepage`) — `brands.logo_url` is only the login/chrome copy.

@@ -111,6 +111,8 @@ Out of v1 scope. Spec placeholder: mirror student minimal nav when built.
 | Brand | `#apply` franchise, `#enroll-student` student application |
 | Center | `#register` student registration |
 
+Indexable public **routes** (not hashes): platform `/` + `/legal/:kind`; brand `/`, `/about`, `/courses/:slug`, `/legal/:kind`; center `/`, `/courses/:slug`, `/legal/:kind`. See [`public-seo`](../../openspec/specs/public-seo/spec.md).
+
 ---
 
 ## Implementation notes

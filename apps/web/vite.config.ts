@@ -2,9 +2,11 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { locateSourceBabelPlugins } from "./viteLocateSource";
+import { publicSeoDevPlugin } from "./src/vitePublicSeoPlugin";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
+    publicSeoDevPlugin(),
     react({
       babel: {
         plugins: locateSourceBabelPlugins(mode),

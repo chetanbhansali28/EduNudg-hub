@@ -37,6 +37,10 @@ Canonical reference for which experiences run on which hostname. Implementation 
 - **Brand public forms are not gated on paid subscription** (brand may owe platform; marketing still works).
 - **Franchise never purchases an EduNudg subscription.**
 
+## Public SEO files (every public host)
+
+`/robots.txt`, `/sitemap.xml`, `/llms.txt`, and `/.well-known/ai.txt` are host-aware (Vite middleware locally; Vercel `/api/public-seo` in production). They must not be swallowed by the SPA rewrite. Learn and parents stay `noindex`.
+
 ## Related docs
 
 - [Navigation spec](./navigation-spec.md) — sidebar menus per portal

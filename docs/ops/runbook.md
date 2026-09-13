@@ -183,6 +183,7 @@ pnpm test:rls
 - Upload hero, highlight, and feature videos via file pickers in the editor (stored in Supabase `brand-assets`)
 - Brand owners edit brand page **content** at `{brand}.localhost:9000/app/homepage`
 - Brand owners edit the center enrollment template at `{brand}.localhost:9000/app/center-site`
+- Public SEO is automatic (`derivePublicSeo`): no extra editor fields. Vercel serves `/robots.txt`, `/sitemap.xml`, `/llms.txt` via `/api/public-seo` and injects head tags through `/api/seo-document` before the SPA rewrite. Preview hosts (`*-git-*.vercel.app` or `VERCEL_ENV=preview`) are `noindex`.
 
 ## Franchise center CSV import
 

@@ -25,6 +25,7 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | OpenSpec behavioral specs | [`openspec/specs/`](../../openspec/specs/) | GIVEN/WHEN/THEN requirements; supersedes FR tables over time |
 | [staff-login](../../openspec/specs/staff-login/spec.md) | Platform/brand/center `/login` labels + exact accessible-name testing |
 | [marketing-homepage](../../openspec/specs/marketing-homepage/spec.md) | Platform public bundle vs config-only React Query keys; brand Homepage vs Center Site Configuration; pricing ticks use CSS Unicode escape U+2713 |
+| [public-seo](../../openspec/specs/public-seo/spec.md) | Automatic SEO/AEO/GEO for public pages: derived title/canonical/JSON-LD, robots/sitemap/llms, first-HTML injection |
 | [marketing-footer](../../openspec/specs/marketing-footer/spec.md) | Public footer columns + legal pages; Spark has no newsletter CTA |
 | [brand-upcoming-events](../../openspec/specs/brand-upcoming-events/spec.md) | Homepage upcoming events (competitions/workshops/demos) |
 | [platform-settings](../../openspec/specs/platform-settings/spec.md) | Platform settings / feature flags |

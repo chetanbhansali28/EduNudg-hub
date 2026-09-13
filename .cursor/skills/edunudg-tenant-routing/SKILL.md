@@ -17,7 +17,7 @@ Learn Home/Progress use `useTenant().brandId`. If learn skips branding, `brandId
 
 - `packages/tenant/src/resolveTenant.ts`
 - `apps/web/src/routes/*.tsx`
-- `vercel.json` SPA rewrites
+- `apps/web/vercel.json` — discovery files (`/robots.txt`, `/sitemap.xml`, `/llms.txt`) and public HTML (`/api/seo-document`) **before** the SPA catch-all. Do not let `/(.*)` → `index.html` swallow those paths.
 
 ## Local dev
 
@@ -32,3 +32,4 @@ Learn Home/Progress use `useTenant().brandId`. If learn skips branding, `brandId
 - Redeploy Edge Function `platform-portal-handoff` so it preserves portal query params.
 - Login links MUST use `portalLoginUrl` / `learnPortalLoginUrl` (path `/login` **before** `?portal=`). Never append `/login` onto a same-origin URL that already has a query string — that produces `brand=slug/login`.
 - Learn profile **Center website** MUST use `resolveCenterWebsiteUrl` (not raw RPC `center.public_url`). RPC still returns `http://*.localhost:9000/` from `domain_mappings`; the client rewrites to `/?portal=center&brand=…&center=…` on Vercel.
+- Public SEO canonicals use `preferredPublicOrigin` / `derivePublicSeo` (`publicSeo.ts`). When `VITE_PORTAL_BASE_DOMAIN` is set, `*.vercel.app?portal=` is an alias — not the canonical. Center pages canonicalize to the center host, not the brand homepage. Local Vite serves `/robots.txt` `/sitemap.xml` `/llms.txt` via `publicSeoDevPlugin`.
