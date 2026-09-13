@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -5,6 +6,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandCenterSiteEditorPage, BrandMarketingEditorPage } from "./BrandMarketingEditorPage";
 import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { mergeAbacusClassicLandingConfig } from "@/lib/brandLandingDefaults";
+
+function renderAt(ui: ReactElement) {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <MemoryRouter>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </MemoryRouter>
+  );
+}
 
 vi.mock("@/features/brand/hooks/useBrandScope", () => ({
   useBrandScope: () => ({ brandId: "brand-1", brandSlug: "abacus", isLoading: false, missingBrand: false }),
@@ -41,14 +51,7 @@ describe("BrandMarketingEditorPage", () => {
       socialConnect: {},
     });
 
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <MemoryRouter>
-        <QueryClientProvider client={qc}>
-          <BrandMarketingEditorPage />
-        </QueryClientProvider>
-      </MemoryRouter>
-    );
+    renderAt(<BrandMarketingEditorPage />);
     expect(await screen.findByText("Homepage Configuration")).toBeDefined();
     expect(await screen.findByRole("heading", { name: "Brand site (franchise recruitment)" })).toBeDefined();
     expect(screen.queryByRole("button", { name: /Center sites \(parent enrollment template\)/i })).toBeNull();
@@ -73,14 +76,7 @@ describe("BrandMarketingEditorPage", () => {
       socialConnect: {},
     });
 
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <MemoryRouter>
-        <QueryClientProvider client={qc}>
-          <BrandMarketingEditorPage />
-        </QueryClientProvider>
-      </MemoryRouter>
-    );
+    renderAt(<BrandMarketingEditorPage />);
 
     expect(await screen.findByText("Abacus Classic editor form")).toBeDefined();
     expect(screen.queryByText("Novu editor form")).toBeNull();
@@ -100,14 +96,7 @@ describe("BrandCenterSiteEditorPage", () => {
       socialConnect: {},
     });
 
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <MemoryRouter>
-        <QueryClientProvider client={qc}>
-          <BrandCenterSiteEditorPage />
-        </QueryClientProvider>
-      </MemoryRouter>
-    );
+    renderAt(<BrandCenterSiteEditorPage />);
 
     expect(await screen.findByText("Center Site Configuration")).toBeDefined();
     expect(screen.getByRole("heading", { name: "Center sites (parent enrollment template)" })).toBeDefined();
@@ -129,14 +118,7 @@ describe("BrandCenterSiteEditorPage", () => {
       socialConnect: {},
     });
 
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    render(
-      <MemoryRouter>
-        <QueryClientProvider client={qc}>
-          <BrandCenterSiteEditorPage />
-        </QueryClientProvider>
-      </MemoryRouter>
-    );
+    renderAt(<BrandCenterSiteEditorPage />);
 
     expect(await screen.findByText("Center Site Configuration")).toBeDefined();
     expect(screen.getByText("Abacus Classic editor form")).toBeDefined();

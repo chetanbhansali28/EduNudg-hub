@@ -4,6 +4,7 @@ import type { CenterPublicProfile } from "@/lib/centerLandingApi";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { isSparkSectionEnabled } from "@/lib/homepageSections";
+import { hasPublicTestimonials } from "@/lib/mergeBrandTestimonials";
 import { visiblePublicFounders } from "@/lib/centerLandingDefaults";
 import { resolveSparkCoursePrograms, sparkShouldShowCoursesSection } from "@/lib/programsGridItems";
 import { SparkAcademyHero } from "./SparkAcademyHero";
@@ -45,7 +46,8 @@ export function SparkAcademyContent({
   const showJourney = isSparkSectionEnabled(config, "trustMedia") && config.trustMedia;
   const founders = visiblePublicFounders(config.founders);
   const showFounders = isSparkSectionEnabled(config, "founders") && founders.length > 0;
-  const showTestimonials = isSparkSectionEnabled(config, "testimonials");
+  const showTestimonials =
+    isSparkSectionEnabled(config, "testimonials") && hasPublicTestimonials(config.testimonials);
   const showFaq = isSparkSectionEnabled(config, "faq") && config.faq.length > 0;
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
   const showUpcomingEvents =

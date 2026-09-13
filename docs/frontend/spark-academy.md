@@ -13,7 +13,7 @@ Local seeded demo often uses Spark for AbacusWorld — see [Operations runbook](
 | Nav | `SparkAcademyNav` |
 | Hero | `SparkAcademyHero` |
 | Courses / programs | `CoursesSection` (`#programs`; `#curriculum` alias) |
-| Mentors / testimonials | `MentorsSection` (cards centered in the track), `TestimonialsSection` (desktop: cards centered in the row; mobile: horizontal auto-scroll carousel) |
+| Mentors / testimonials | `MentorsSection` (cards centered in the track), `TestimonialsSection` (desktop: cards centered in the row; mobile: horizontal auto-scroll carousel). Public quotes come from published brand success stories only; the section is omitted when the brand has none. |
 | Journey stats | `JourneySection` (`#journey`; YouTube embed at `#trust` when `trustMedia.youtubeUrl` is set) |
 | Features | `FeaturesSection` |
 | Photo gallery | `GallerySection` (`#gallery`; `config.gallery` from **Photo gallery** in `/app/homepage`) |
@@ -27,7 +27,7 @@ Local seeded demo often uses Spark for AbacusWorld — see [Operations runbook](
 
 On a **center** host, `SparkAcademyFooter` receives `centerContact` and shows Franchise Management phone/address under Contact (never the brand placeholder `(222) 545-4543`, brand Head office, or Our presence). Brand hosts keep `headOffice` phone/address or the placeholder.
 
-Section order and toggles follow Spark defaults in `brandLandingDefaults` / homepage section keys. Center hosts inherit the brand theme via `mergeSparkAcademyCenterLandingConfig()`. **Meet Our Expert Mentors** is edited at brand `/app/homepage` under **Mentors / Leadership** (`landing.founders`). Each card shows **Role badge** (e.g. FOUNDER & CEO) and **Title** (company / job line) together — the same fields as Abacus leadership (`regression_spark_mentor_card_shows_role_badge_and_title`). Template **Founder name** is not shown live. On a franchise host the Franchise Identity owner/photo is prepended when present (`overlayCenterFoundersFromIdentity`).
+Section order and toggles follow Spark defaults in `brandLandingDefaults` / homepage section keys. Center hosts inherit the brand theme via `mergeSparkAcademyCenterLandingConfig()`. **Meet Our Expert Mentors** is edited at brand `/app/homepage` under **Mentors / Leadership** (`landing.founders`). The accordion starts with **one** example mentor (not five Unsplash stock cards). Add / update / delete still work. Each card shows **Role badge** (e.g. FOUNDER & CEO) and **Title** (company / job line) together — the same fields as Abacus leadership (`regression_spark_mentor_card_shows_role_badge_and_title`). Template **Founder name** is not shown live. On a franchise host the Franchise Identity owner/photo is prepended when present (`overlayCenterFoundersFromIdentity`).
 
 **Trust & video YouTube URL** renders in a 16:9 block under Journey (`sa-journey__video`, `#trust`). The Journey highlight photo stays. Watch, share, embed, and Shorts URLs convert via `toYoutubeEmbedUrl` (`playsinline=1` so mobile tap-to-play works). The video wrapper is not a `sa-reveal-item` so CSS transforms do not block iframe clicks. Empty URL omits the block. The player is full-width with `aspect-ratio: 16 / 9` and tighter padding/radius below 1024px and 640px (`regression_spark_journey_video_css_is_fluid_on_mobile`). Regression: `regression_spark_journey_renders_youtube_below_photo`, `regression_spark_journey_omits_youtube_when_url_empty`.
 

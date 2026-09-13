@@ -10,7 +10,7 @@ Details: [Portal host matrix](../spec/portal-host-matrix.md), [Marketing landing
 
 See [Navigation spec](../spec/navigation-spec.md). On mobile the top bar shows the brand Site logo beside the product name.
 
-- Home (dashboard — unassigned / stale lead KPIs)
+- Home (dashboard — unassigned / stale lead KPIs; Center Health is six equal checks: 1 curriculum, 2 feedbacks, 2 students, 2 franchises, homepage content at `/app/homepage`, franchise site content at `/app/center-site`; reasons when below 100%; login opens a centered, theme-token setup reminder unless health is 100%)
 - **Student Leads** (`/app/leads`) — franchise-applications pipeline chrome: KPI stats (Pending review, Converted, Lost, Total), search, **Pending review** / **Decided** tabs, persistent list + stacked detail (assignment below applicant); assign; manual add; CSV export
 - **Franchise Applications** (`/app/franchise-applications`) — **Pending review** / **Decided** tabs; KPI stats (Pending review, Approved, Rejected, Total); approve/reject; **Add Franchise** modal; soft-deleted centers stay on **Decided** with a DELETED badge
 - Franchise Centers (`/app/centers`) — edit existing (including Franchise Identity login email/password); **no Social Media editor**; **View Frontend** / **View Backend**; disable/enable; soft-delete; new centers via franchise application approval or primary **Import Franchise** CSV; **Export Franchise** downloads the live roster
@@ -20,7 +20,7 @@ See [Navigation spec](../spec/navigation-spec.md). On mobile the top bar shows t
 - **Success stories** (`/app/success-stories`) — franchise-applications pipeline chrome: KPI stats (Published, Draft, With photo, Total), search, **Published** / **Draft** tabs, persistent list + detail; **Add Story** modal
 - **Merchandise** (`/app/merchandise`) — franchise-applications chrome: `PipelinePageHeader`, KPI stats (Active, Draft, Orders, Total), search + Catalog / Promo Codes / Orders / Payment settings tabs; each tab is list + detail on desktop; catalog SKUs are tied to curriculum courses and levels
 - Analytics (`/app/analytics`) — live KPIs plus Performance Breakdown (headline snapshot, activity-only daily pulse, shared 14D/30D)
-- **Marketing pages** (`/app/homepage`) — brand franchise recruitment site (hero copy + independent Hero CTA, FAQ, footer; success stories feed brand testimonials)
+- **Marketing pages** (`/app/homepage`) — brand franchise recruitment site (hero copy + independent Hero CTA, FAQ, footer; published success stories feed brand **and** franchise testimonials; the section is hidden when none exist)
 - **Center Site Configuration** (`/app/center-site`) — parent enrollment template for every franchise hostname
 - **Billing** (`/app/billing`)
 - **Audit Logs** (`/app/audit`) — Auth + Access for this brand (no Errors; IP masked)

@@ -40,7 +40,8 @@ Authoritative docs for franchise/student journey v1. Plan: [franchise_student_jo
 | [franchise-center-csv-import](../../openspec/specs/franchise-center-csv-import/spec.md) | Platform and brand CSV bulk center import |
 | [brand-curriculum-workspace](../../openspec/specs/brand-curriculum-workspace/spec.md) | Brand `/app/curriculum` courses/levels/units; on/off toggle; mobile **Edit course** overlay matches desktop controls; parent marketing stays editable after create; Spark public courses use published syllabus |
 | [brand-batches-feature-flag](../../openspec/specs/brand-batches-feature-flag/spec.md) | Per-brand Batches module gate |
-| [brand-success-stories](../../openspec/specs/brand-success-stories/spec.md) | Brand `/app/success-stories` pipeline CRUD for testimonials |
+| [brand-dashboard](../../openspec/specs/brand-dashboard/spec.md) | Brand `/app` Today at a glance; Center Health is six equal checks (curriculum / feedback / students / franchises / homepage / franchise site) |
+| [brand-success-stories](../../openspec/specs/brand-success-stories/spec.md) | Brand `/app/success-stories` pipeline CRUD; published rows feed brand **and** franchise testimonials (hidden when none) |
 | [brand-merchandise](../../openspec/specs/brand-merchandise/spec.md) | Brand `/app/merchandise` pipeline chrome; catalog tied to courses/levels; center shop/inventory filtered by assigned courses |
 | [student-learn-portal](../../openspec/specs/student-learn-portal/spec.md) | Learn host enrollment-gated portal |
 | [agent-artifact-sync](../../openspec/specs/agent-artifact-sync/spec.md) | Mandatory sync of specs/docs/tests/skills/agents; agent boundaries |

@@ -32,10 +32,26 @@ Brand staff SHALL manage success stories at `/app/success-stories` with the same
 
 ### Requirement: Published stories appear on the marketing site
 
-Published stories SHALL appear on the brand marketing site testimonials. Drafts SHALL NOT.
+Published stories SHALL appear on the brand and franchise marketing site testimonials. Drafts SHALL NOT. Public quotes SHALL come only from published `brand_success_stories` — theme dummy quotes SHALL NOT render.
 
 #### Scenario: Create published story
 
 - **GIVEN** brand staff submit a title, quote, and author with Published on
 - **WHEN** the insert succeeds
 - **THEN** the row is stored on `brand_success_stories` with `is_published = true`
+
+#### Scenario: Franchise homepage uses brand stories
+
+- **GIVEN** a franchise public homepage
+- **AND** the brand has published success stories
+- **WHEN** the landing bundle is built
+- **THEN** `#testimonials` shows those brand stories
+
+#### Scenario: Hide testimonials when the brand has no published stories
+
+- **GIVEN** a brand or franchise public homepage
+- **AND** the brand has no published success stories
+- **WHEN** the landing bundle is built
+- **THEN** the testimonials section is omitted
+- **AND** theme dummy quotes (for example Spark “John Matthews”) are not shown
+- **AND** nav links to `#testimonials` are removed

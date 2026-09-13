@@ -388,6 +388,158 @@
   background: #16a34a;
 }
 
+.ed-brand-dash__health-checks {
+  margin: 0 0 0.875rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ed-brand-dash__health-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--ed-muted);
+}
+
+.ed-brand-dash__health-check--met {
+  color: #15803d;
+}
+
+.ed-brand-dash__health-check a {
+  color: var(--ed-fg);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.ed-brand-dash__health-check a:hover {
+  color: var(--ed-primary);
+}
+
+.ed-brand-dash__health-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(26.5rem, calc(100vw - 2rem));
+  max-width: min(26.5rem, calc(100vw - 2rem));
+  height: fit-content;
+  max-height: min(36rem, calc(100dvh - 2rem));
+  margin: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ed-fg);
+}
+
+.ed-brand-dash__health-dialog::backdrop {
+  background: color-mix(in srgb, var(--ed-fg) 45%, transparent);
+}
+
+.ed-brand-dash__health-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-height: inherit;
+  overflow: hidden;
+  background: var(--ed-card);
+  color: var(--ed-fg);
+  border: 1px solid var(--ed-border);
+  border-radius: calc(var(--ed-radius-lg) + 2px);
+  box-shadow: var(--ed-shadow);
+}
+
+.ed-brand-dash__health-dialog-header,
+.ed-brand-dash__health-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  padding: 1rem 1.125rem;
+}
+
+.ed-brand-dash__health-dialog-header {
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.ed-brand-dash__health-dialog-header h2 {
+  margin: 0;
+  min-width: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.ed-brand-dash__health-dialog-close {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 1.375rem;
+  line-height: 1;
+  color: var(--ed-muted);
+  cursor: pointer;
+}
+
+.ed-brand-dash__health-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1.125rem 0.25rem;
+}
+
+.ed-brand-dash__health-dialog-intro {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ed-muted);
+}
+
+.ed-brand-dash__health-dialog .ed-brand-dash__health-bar span {
+  background: var(--ed-primary);
+}
+
+.ed-brand-dash__health-dialog-footer {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--ed-border);
+}
+
+.ed-brand-dash__health-dialog-footer .ed-btn {
+  min-width: 6.5rem;
+}
+
+@media (max-width: 640px) {
+  .ed-brand-dash__health-dialog {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem);
+  }
+
+  .ed-brand-dash__health-dialog-header,
+  .ed-brand-dash__health-dialog-body,
+  .ed-brand-dash__health-dialog-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .ed-brand-dash__health-dialog-footer {
+    flex-direction: column;
+    align-items: stretch;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ed-brand-dash__health-dialog-footer .ed-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .ed-brand-dash__avatars {
   display: flex;
   align-items: center;

@@ -27,7 +27,26 @@ describe("fetchBrandLandingBundle", () => {
 
     const bundle = await fetchBrandLandingBundle("abacusworld");
     expect(bundle?.config.testimonials.items).toEqual([{ quote: "Great support.", author: "Priya · Owner" }]);
+    expect(bundle?.config.sections?.testimonials).toBe(true);
     expect(bundle?.publicCurriculum).toEqual([]);
+  });
+
+  it("regression_brand_hides_dummy_testimonials_when_no_published_stories", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Rathi Educom",
+        marketing_theme: "spark-academy",
+        landing: {},
+        success_stories: [],
+        curriculum: [],
+      },
+      error: null,
+    });
+
+    const bundle = await fetchBrandLandingBundle("rathi-educom");
+    expect(bundle?.config.testimonials.items).toEqual([]);
+    expect(bundle?.config.sections?.testimonials).toBe(false);
+    expect(bundle?.config.nav.links.some((link) => link.href === "#testimonials")).toBe(false);
   });
 
   it("parses curriculum programs from RPC payload", async () => {

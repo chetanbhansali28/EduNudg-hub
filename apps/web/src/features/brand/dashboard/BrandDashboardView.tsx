@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { BrandDashboardHome } from "@/lib/brandDashboardHomeApi";
+import { CenterHealthSummary } from "./CenterHealthSummary";
 import {
   brandDashboardGreeting,
   formatCompactRelative,
@@ -103,12 +104,7 @@ function CenterHealthCard({ data }: { data: BrandDashboardHome }) {
   return (
     <section className="ed-brand-dash__panel ed-brand-dash__health" aria-label="Center health">
       <h3 className="ed-brand-dash__health-title">Center Health</h3>
-      <p className="ed-brand-dash__health-copy">
-        {data.centerHealthPercent}% of centers are operating at target margin.
-      </p>
-      <div className="ed-brand-dash__health-bar" aria-hidden>
-        <span style={{ width: `${data.centerHealthPercent}%` }} />
-      </div>
+      <CenterHealthSummary data={data} />
       <div className="ed-brand-dash__avatars" aria-label="Top performing centers">
         {data.centerAvatars.map((avatar) => (
           <span

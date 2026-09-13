@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { mergeAbacusClassicLandingConfig, mergeSparkAcademyLandingConfig, mergeEduLearnLandingConfig, buildBrandLandingConfig } from "./brandLandingDefaults";
+import {
+  mergeAbacusClassicLandingConfig,
+  mergeSparkAcademyLandingConfig,
+  mergeEduLearnLandingConfig,
+  buildBrandLandingConfig,
+  limitSparkThemeDefaultMentors,
+} from "./brandLandingDefaults";
+import type { HomepageFounderProfile } from "@/types/homepage";
 import { isAbacusSectionEnabled } from "./homepageSections";
 import { landingConfigToPartial } from "./brandLandingEditorApi";
 
@@ -66,7 +73,68 @@ describe("mergeAbacusClassicLandingConfig", () => {
   });
 });
 
+const sparkStockMentor = (name: string, photoId: string): HomepageFounderProfile => ({
+  roleBadge: "Mentor",
+  name,
+  title: "Example title",
+  bio: "",
+  photoUrl: `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=480&h=600&q=80`,
+});
+
 describe("mergeSparkAcademyLandingConfig", () => {
+  it("regression_spark_mentors_default_to_one_example_profile", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley");
+    expect(config.founders).toHaveLength(1);
+    expect(config.founders?.[0]?.name).toBe("Sarah Johnson");
+    expect(config.founders?.[0]?.roleBadge).toBe("Mentor");
+    expect(config.founders?.[0]?.title).toBe("AI Expert & Data Scientist");
+  });
+
+  it("regression_spark_mentors_collapse_saved_stock_placeholders_to_one", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley", {
+      founders: [
+        sparkStockMentor("Sarah Johnson", "1573496359142-b8d87734a5a2"),
+        sparkStockMentor("Michael Brown", "1472099645785-5658abf4ff4e"),
+        sparkStockMentor("Rachel Adams", "1507003211169-0a1dd7228f2d"),
+        sparkStockMentor("Maria Lopez", "1580489944761-15a19d654956"),
+        sparkStockMentor("David Chen", "1500648767791-00dcc994a43e"),
+      ],
+    });
+    expect(config.founders).toHaveLength(1);
+    expect(config.founders?.[0]?.name).toBe("Sarah Johnson");
+  });
+
+  it("regression_spark_mentors_keep_custom_profiles_and_one_stock_example", () => {
+    const custom: HomepageFounderProfile = {
+      roleBadge: "FOUNDER",
+      name: "Chetan Bhansali",
+      title: "Brand owner",
+      bio: "",
+      photoUrl: "https://cdn.example/brand-founder.jpg",
+    };
+    const added: HomepageFounderProfile = {
+      roleBadge: "FOUNDER",
+      name: "",
+      title: "",
+      bio: "",
+      photoUrl: "",
+    };
+    const config = mergeSparkAcademyLandingConfig("Digitley", {
+      founders: [
+        custom,
+        sparkStockMentor("Sarah Johnson", "1573496359142-b8d87734a5a2"),
+        sparkStockMentor("Michael Brown", "1472099645785-5658abf4ff4e"),
+        added,
+      ],
+    });
+    expect(config.founders?.map((row) => row.name)).toEqual(["Chetan Bhansali", "Sarah Johnson", ""]);
+  });
+
+  it("regression_spark_mentors_empty_list_stays_empty_after_delete", () => {
+    const config = mergeSparkAcademyLandingConfig("Digitley", { founders: [] });
+    expect(config.founders).toEqual([]);
+  });
+
   it("includes_journey_highlight_fields_on_trust_media", () => {
     const config = mergeSparkAcademyLandingConfig("Abacus World");
     expect(config.trustMedia?.imageUrl).toContain("unsplash.com");
@@ -113,5 +181,12 @@ describe("mergeEduLearnLandingConfig", () => {
     expect(config.sections?.programsGrid).toBe(true);
     expect(config.sections?.curriculumSyllabus).toBe(true);
     expect(config.faq.length).toBeGreaterThan(0);
+  });
+});
+
+describe("limitSparkThemeDefaultMentors", () => {
+  it("leaves a single profile unchanged", () => {
+    const one = [sparkStockMentor("Sarah Johnson", "1573496359142-b8d87734a5a2")];
+    expect(limitSparkThemeDefaultMentors(one)).toEqual(one);
   });
 });

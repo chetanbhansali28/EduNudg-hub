@@ -218,6 +218,27 @@ Brand `/app/homepage` and `/app/center-site` SHALL NOT show **Courses designed f
 - **AND** there is no **+ Add program card** upload on that page
 - **AND** Site, Navigation & CTAs, and Hero remain
 
+### Requirement: First photo in each homepage section is required
+
+Brand `/app/homepage` and `/app/center-site` photo uploads SHALL be required for the first image field in each editor section. Additional photos in the same section stay optional. **Save changes** SHALL not persist when a required photo is empty; the save bar SHALL list the missing fields. Center Site SHALL NOT require About Us photos (that accordion is brand-only). When the homepage **Hero** section is enabled, About Us **Hero banner image** SHALL NOT be required — Spark `/about` already falls back to the homepage Hero photo. About Us hero is required only when Hero is off and About is in play.
+
+- **GIVEN** a brand owner on Homepage Configuration or Center Site Configuration
+- **WHEN** a section has one or more photo upload fields
+- **THEN** the first photo field is marked required
+- **AND** later photos in that section are optional
+- **AND** save is blocked until each required photo has a URL
+- **AND** a filled homepage Hero photo does not produce an About Us **Hero banner image** save error
+
+### Requirement: Unsaved homepage edits ask to save
+
+When Homepage Configuration or Center Site Configuration has unsaved edits, navigating to another in-app page SHALL show **Save your changes?** and scroll to the bottom save bar. The dialog SHALL match the public marketing theme of the site and SHALL offer only **OK** (save, then leave) and **Cancel** (stay). A dirty page SHALL also use the browser `beforeunload` prompt. The guard SHALL work with `BrowserRouter` (in-app link interception) and SHALL NOT call `useBlocker`.
+
+- **GIVEN** a brand owner has unsaved homepage or center-site edits
+- **WHEN** they navigate to another staff page
+- **THEN** a save dialog appears
+- **AND** the viewport scrolls to the save bar at the bottom
+- **AND** they remain on the editor until they choose **OK** or **Cancel**
+
 ### Requirement: Homepage editor Save stays available
 
 Brand `/app/homepage`, `/app/center-site`, and platform `/admin/homepage` **Save changes** SHALL stay clickable when the form is clean. Discard SHALL appear only when there are unsaved edits. **Save changes** SHALL disable only while a save is in flight.

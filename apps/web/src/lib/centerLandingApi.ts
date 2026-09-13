@@ -14,7 +14,7 @@ import {
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { restrictProgramsSectionToEnabledCurriculum } from "@/lib/programsGridItems";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
-import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
+import { applyPublishedSuccessStoriesToPublicLanding } from "@/lib/mergeBrandTestimonials";
 import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPublicSite";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { parseBrandLegalPagesRecord, type BrandLegalPages } from "@/lib/brandLegalPages";
@@ -230,12 +230,12 @@ function buildConfigWithStories(
     brandFounders: HomepageFounderProfile[];
   }
 ): HomepageConfig {
-  const config = buildCenterConfigForTheme(theme, centerName, brandName, city, landing, logoUrl);
+  const config = applyPublishedSuccessStoriesToPublicLanding(
+    buildCenterConfigForTheme(theme, centerName, brandName, city, landing, logoUrl),
+    stories
+  );
   const merged = applyCenterPublicOverlays(
-    {
-      ...config,
-      testimonials: mergePublishedSuccessStories(config.testimonials, stories),
-    },
+    config,
     centerName,
     brandName,
     founderIdentity ?? {
@@ -377,7 +377,10 @@ export async function fetchCenterLandingBundle(
       socialConnect,
     };
   } catch {
-    const config = buildCenterLandingConfig(fallbackCenter, fallbackBrand, null);
+    const config = applyPublishedSuccessStoriesToPublicLanding(
+      buildCenterLandingConfig(fallbackCenter, fallbackBrand, null),
+      []
+    );
     return {
       config: syncMarketingNavLinks(
         applyCenterPublicOverlays(config, fallbackCenter, fallbackBrand, {

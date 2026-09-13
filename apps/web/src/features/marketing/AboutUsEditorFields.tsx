@@ -17,6 +17,7 @@ type Props = {
   commit: (config: HomepageConfig) => void;
   commitMedia: (config: HomepageConfig) => void;
   uploadScope: MarketingUploadScope;
+  leadPhotoRequired?: boolean;
 };
 
 export function AboutUsEditorFields({
@@ -25,6 +26,7 @@ export function AboutUsEditorFields({
   commit,
   commitMedia,
   uploadScope,
+  leadPhotoRequired = false,
 }: Props) {
   const section = config.about ?? emptyAboutSection(config.meta.siteName || "Our brand");
 
@@ -79,6 +81,7 @@ export function AboutUsEditorFields({
             uploadSubdir="about-hero"
             uploadScope={uploadScope}
             layout="hero"
+            required={leadPhotoRequired}
           />
         </EditorFieldSpan>
         <Input

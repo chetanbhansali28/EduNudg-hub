@@ -57,9 +57,131 @@ export function percentChange(current: number, previous: number): number | null 
   return Math.round(((current - previous) / previous) * 100);
 }
 
-export function computeCenterHealthPercent(activeCenters: number, totalCenters: number): number {
-  if (totalCenters <= 0) return 0;
-  return Math.round((activeCenters / totalCenters) * 100);
+export type CenterHealthCheckKey =
+  | "curriculum"
+  | "feedback"
+  | "students"
+  | "franchises"
+  | "homepage"
+  | "centerSite";
+
+export type CenterHealthCheck = {
+  key: CenterHealthCheckKey;
+  label: string;
+  current: number;
+  required: number;
+  met: boolean;
+  remaining: number;
+  href: string;
+  reason: string;
+};
+
+export type CenterHealthScore = {
+  percent: number;
+  checks: CenterHealthCheck[];
+  unmetReasons: string[];
+};
+
+export const CENTER_HEALTH_CHECK_COUNT = 6;
+
+const CENTER_HEALTH_RULES: {
+  key: CenterHealthCheckKey;
+  label: string;
+  singular: string;
+  plural: string;
+  required: number;
+  href: string;
+  todoLabel?: string;
+  doneLabel?: string;
+}[] = [
+  { key: "curriculum", label: "Curriculum", singular: "curriculum", plural: "curricula", required: 1, href: "/app/curriculum" },
+  { key: "feedback", label: "Feedback", singular: "feedback", plural: "feedbacks", required: 2, href: "/app/success-stories" },
+  { key: "students", label: "Students", singular: "student", plural: "students", required: 2, href: "/app/students" },
+  { key: "franchises", label: "Franchises", singular: "franchise", plural: "franchises", required: 2, href: "/app/centers" },
+  {
+    key: "homepage",
+    label: "Homepage",
+    singular: "homepage",
+    plural: "homepages",
+    required: 1,
+    href: "/app/homepage",
+    todoLabel: "Set homepage content",
+    doneLabel: "Homepage content is set",
+  },
+  {
+    key: "centerSite",
+    label: "Franchise site",
+    singular: "franchise site",
+    plural: "franchise sites",
+    required: 1,
+    href: "/app/center-site",
+    todoLabel: "Set franchise site content",
+    doneLabel: "Franchise site content is set",
+  },
+];
+
+export function centerHealthReason(input: {
+  singular: string;
+  plural: string;
+  current: number;
+  required: number;
+}): string {
+  const remaining = Math.max(0, input.required - input.current);
+  const noun = remaining === 1 ? input.singular : input.plural;
+  if (input.current <= 0) {
+    return `Add ${input.required} ${input.required === 1 ? input.singular : input.plural} (${input.current} of ${input.required})`;
+  }
+  return `Add ${remaining} more ${noun} (${input.current} of ${input.required})`;
+}
+
+/** Equal-weight setup checks. 100% only when every minimum is met. */
+export function buildCenterHealthScore(input: {
+  curriculumCount: number;
+  feedbackCount: number;
+  studentCount: number;
+  franchiseCount: number;
+  homepageSet: boolean;
+  centerSiteSet: boolean;
+}): CenterHealthScore {
+  const counts: Record<CenterHealthCheckKey, number> = {
+    curriculum: input.curriculumCount,
+    feedback: input.feedbackCount,
+    students: input.studentCount,
+    franchises: input.franchiseCount,
+    homepage: input.homepageSet ? 1 : 0,
+    centerSite: input.centerSiteSet ? 1 : 0,
+  };
+
+  const checks = CENTER_HEALTH_RULES.map((rule) => {
+    const current = Math.max(0, counts[rule.key]);
+    const remaining = Math.max(0, rule.required - current);
+    const met = remaining === 0;
+    return {
+      key: rule.key,
+      label: rule.label,
+      current,
+      required: rule.required,
+      met,
+      remaining,
+      href: rule.href,
+      reason: met
+        ? (rule.doneLabel ?? `${rule.label} ${current} of ${rule.required}`)
+        : (rule.todoLabel ??
+          centerHealthReason({
+            singular: rule.singular,
+            plural: rule.plural,
+            current,
+            required: rule.required,
+          })),
+    };
+  });
+
+  const metCount = checks.filter((check) => check.met).length;
+  return {
+    percent: Math.round((metCount / CENTER_HEALTH_CHECK_COUNT) * 100),
+    checks,
+    unmetReasons: checks.filter((check) => !check.met).map((check) => check.reason),
+  };
 }
 
 export function buildRevenueBarHeights(rows: BrandDailyTrendRow[], days = 7): number[] {

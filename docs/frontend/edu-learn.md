@@ -17,7 +17,7 @@ Switching a brand from Spark or Abacus to EduLearn keeps the existing `landing` 
 | Stats | `EduLearnStats` | Trust / journey + live center/student counts. YouTube URL from Trust & video renders below the photo (`#trust`) |
 | Leadership | `EduLearnMentors` | Homepage Mentors / Leadership (`#founders`). Role badge, name, and title match Abacus / Spark (`regression_edu_learn_mentor_card_shows_role_badge_and_title`) |
 | Events | `UpcomingEventsSection` | Homepage upcoming events |
-| Testimonials | `EduLearnTestimonials` | Success stories |
+| Testimonials | `EduLearnTestimonials` | Published brand success stories only; omitted when none |
 | FAQ | `EduLearnFaq` | Homepage FAQ |
 | Resources | `EduLearnResources` | Photo gallery (first 3 images) |
 | Green band | `EduLearnCtaBand` | Footer CTA |

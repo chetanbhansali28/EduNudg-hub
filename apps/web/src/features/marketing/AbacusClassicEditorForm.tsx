@@ -17,6 +17,7 @@ import { FooterLegalPagesEditor } from "@/features/marketing/FooterLegalPagesEdi
 import { SocialMediaConnectEditor } from "@/features/marketing/SocialMediaConnectEditor";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
+import { isAboutHeroPhotoRequired } from "@/lib/marketingRequiredPhotos";
 import {
   EditorAccordion,
   EditorFieldSpan,
@@ -122,6 +123,7 @@ export function AbacusClassicEditorForm({
               uploadSubdir=""
               uploadScope={uploadScope}
               layout="logo"
+              required
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>
@@ -224,6 +226,7 @@ export function AbacusClassicEditorForm({
               uploadSubdir="hero-background"
               uploadScope={uploadScope}
               layout="hero"
+              required
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>
@@ -256,6 +259,7 @@ export function AbacusClassicEditorForm({
                 mediaType="image"
                 uploadSubdir="features-showcase"
                 uploadScope={uploadScope}
+                required
               />
             </EditorFieldSpan>
             <Input
@@ -399,6 +403,7 @@ export function AbacusClassicEditorForm({
               onChange={onChange}
               uploadScope={uploadScope}
               onPersist={commitMedia}
+              photoRequired={i === 0}
               onRemove={() =>
                 commit({ ...config, founders: (config.founders ?? []).filter((_, idx) => idx !== i) })
               }
@@ -440,6 +445,11 @@ export function AbacusClassicEditorForm({
             commit={commit}
             commitMedia={commitMedia}
             uploadScope={uploadScope}
+            leadPhotoRequired={isAboutHeroPhotoRequired({
+              config,
+              marketingTheme,
+              portalMode,
+            })}
           />
         </EditorAccordion>
       ) : null}
@@ -505,6 +515,7 @@ export function AbacusClassicEditorForm({
                   mediaType="image"
                   uploadSubdir="trust-journey"
                   uploadScope={uploadScope}
+                  required
                 />
               </EditorFieldSpan>
               <Input
@@ -697,6 +708,7 @@ export function AbacusClassicEditorForm({
                     mediaType="image"
                     uploadSubdir={`gallery-${i}`}
                     uploadScope={uploadScope}
+                    required={i === 0}
                   />
                 </EditorFieldSpan>
                 <Input
@@ -928,6 +940,7 @@ function FounderEditor({
   onChange,
   uploadScope,
   onPersist,
+  photoRequired = false,
   onRemove,
 }: {
   founder: HomepageFounderProfile;
@@ -936,6 +949,7 @@ function FounderEditor({
   onChange: (c: HomepageConfig) => void;
   uploadScope: MarketingUploadScope;
   onPersist: (c: HomepageConfig) => void;
+  photoRequired?: boolean;
   onRemove: () => void;
 }) {
   const update = (patch: Partial<HomepageFounderProfile>) => {
@@ -968,6 +982,7 @@ function FounderEditor({
             mediaType="image"
             uploadSubdir={`founder-${index}`}
             uploadScope={uploadScope}
+            required={photoRequired}
           />
         </EditorFieldSpan>
       </EditorFieldsGrid>

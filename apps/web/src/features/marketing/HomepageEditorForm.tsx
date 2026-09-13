@@ -42,6 +42,7 @@ import { FooterLegalPagesEditor } from "./FooterLegalPagesEditor";
 import { SocialMediaConnectEditor } from "./SocialMediaConnectEditor";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
+import { isAboutHeroPhotoRequired } from "@/lib/marketingRequiredPhotos";
 import { UpcomingEventsEditorFields } from "./UpcomingEventsEditorFields";
 import { AboutUsEditorFields } from "./AboutUsEditorFields";
 
@@ -83,6 +84,7 @@ export function HomepageEditorForm({
 }: HomepageEditorFormProps) {
   const config = mergeHomepageConfig(rawConfig ?? DEFAULT_HOMEPAGE_CONFIG);
   const isPlatformEditor = portalMode === "platform";
+  const requireLeadPhoto = !isPlatformEditor;
   const sectionDefaults = isPlatformEditor ? ENTERPRISE_PLATFORM_SECTION_DEFAULTS : undefined;
   const sections = mergeSectionVisibility(config.sections, sectionDefaults);
 
@@ -153,6 +155,7 @@ export function HomepageEditorForm({
                 uploadScope.kind === "brand" ? uploadScope : { kind: "platform-logo" }
               }
               layout="logo"
+              required={requireLeadPhoto}
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>
@@ -281,6 +284,7 @@ export function HomepageEditorForm({
               uploadSubdir="hero-background"
               uploadScope={uploadScope}
               layout="hero"
+              required={requireLeadPhoto}
             />
           </EditorFieldSpan>
           {!isPlatformEditor ? (
@@ -813,6 +817,7 @@ export function HomepageEditorForm({
                     uploadSubdir={`showcase-${card.id}-bg`}
                     uploadScope={uploadScope}
                     layout="hero"
+                    required={requireLeadPhoto && i === 0}
                   />
                 </EditorFieldSpan>
                 <EditorFieldSpan>
@@ -869,6 +874,11 @@ export function HomepageEditorForm({
           commit={commit}
           commitMedia={commitMedia}
           uploadScope={uploadScope}
+          leadPhotoRequired={isAboutHeroPhotoRequired({
+            config,
+            marketingTheme,
+            portalMode,
+          })}
         />
       </EditorAccordion>
       ) : null}
@@ -1187,6 +1197,7 @@ export function HomepageEditorForm({
               uploadScope={uploadScope}
               layout="hero"
               recommendedSize="1920×800px"
+              required={requireLeadPhoto}
             />
           </EditorFieldSpan>
         </EditorFieldsGrid>

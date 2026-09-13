@@ -11,6 +11,8 @@ import {
   mergeAbacusClassicLandingConfig,
   mergeSparkAcademyLandingConfig,
   mergeEduLearnLandingConfig,
+  SPARK_STOCK_FOUNDER_NAMES,
+  limitSparkThemeDefaultMentors,
 } from "@/lib/brandLandingDefaults";
 
 /** Brand editor preview name for `center_landing` — never show this on a live center host. */
@@ -62,14 +64,6 @@ export function overlayCenterLandingIdentity(
     },
   };
 }
-
-const SPARK_STOCK_FOUNDER_NAMES = new Set([
-  "sarah johnson",
-  "michael brown",
-  "rachel adams",
-  "maria lopez",
-  "david chen",
-]);
 
 export type CenterFounderIdentity = {
   /** Franchise Identity name (`franchise_centers.name`) — center owner. */
@@ -394,7 +388,7 @@ export function mergeSparkAcademyCenterLandingConfig(
       intro: partial?.trustMedia?.intro ?? centerBase.hero.subtitle,
       cards: partial?.trustMedia?.cards ?? sparkBase.trustMedia!.cards,
     },
-    founders: partial?.founders ?? sparkBase.founders,
+    founders: limitSparkThemeDefaultMentors(partial?.founders) ?? sparkBase.founders,
     gallery: { ...sparkBase.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? sparkBase.gallery!.images },
     footerCta: { ...centerBase.footerCta, ...partial?.footerCta },
     footer: {
@@ -458,7 +452,7 @@ export function mergeEduLearnCenterLandingConfig(
       ...partial?.trustMedia,
       cards: partial?.trustMedia?.cards ?? eduBase.trustMedia!.cards,
     },
-    founders: partial?.founders ?? eduBase.founders,
+    founders: limitSparkThemeDefaultMentors(partial?.founders) ?? eduBase.founders,
     programsSection: {
       ...eduBase.programsSection,
       ...partial?.programsSection,

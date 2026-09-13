@@ -35,7 +35,7 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
-| Main menu | Home | `/app` | Exists — stale/unassigned lead KPIs |
+| Main menu | Home | `/app` | Exists — Today at a glance; Center Health is six equal checks (1 curriculum, 2 feedbacks, 2 students, 2 franchises, homepage content, franchise site content); login reminder popup when below 100% |
 | Features | **Student Leads** | `/app/leads` | Exists — same pipeline chrome as Franchise Applications; Pending review / Decided; KPI stats; search; list + stacked detail (assignment below applicant); manual add, assign |
 | | **Franchise Applications** | `/app/franchise-applications` | Exists — Pending review / Decided; KPI stats; Add Franchise modal; deleted centers stay on Decided |
 | | Franchise Centers | `/app/centers` | Exists — import CSV, **Export Franchise**, view frontend/backend, disable/enable, soft-delete; no Social Media editor |

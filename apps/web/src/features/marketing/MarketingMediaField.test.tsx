@@ -23,6 +23,40 @@ describe("MarketingMediaField", () => {
     expect(screen.getByLabelText("Hero side image").getAttribute("type")).toBe("file");
   });
 
+  it("regression_required_photo_shows_asterisk_and_hint_when_empty", () => {
+    render(
+      <MarketingMediaField
+        label="Site logo"
+        value=""
+        onChange={() => undefined}
+        mediaType="image"
+        uploadSubdir=""
+        uploadScope={{ kind: "platform" }}
+        layout="logo"
+        required
+      />
+    );
+
+    expect(document.querySelector(".ed-field__required")).toBeDefined();
+    expect(screen.getByText("This photo is required.")).toBeDefined();
+  });
+
+  it("regression_optional_photo_omits_required_hint", () => {
+    render(
+      <MarketingMediaField
+        label="Phone frame image"
+        value=""
+        onChange={() => undefined}
+        mediaType="image"
+        uploadSubdir="hero-phone-frame"
+        uploadScope={{ kind: "platform" }}
+      />
+    );
+
+    expect(document.querySelector(".ed-field__required")).toBeNull();
+    expect(screen.queryByText("This photo is required.")).toBeNull();
+  });
+
   it("critical_hero_layout_exposes_replace_file_picker_when_value_set", () => {
     render(
       <MarketingMediaField

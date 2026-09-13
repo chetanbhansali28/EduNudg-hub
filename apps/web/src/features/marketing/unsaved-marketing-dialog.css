@@ -1,0 +1,157 @@
+/* Leave-guard dialog — tokens follow the public marketing theme of the site being edited. */
+
+.ed-unsaved-changes-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 0.48);
+}
+
+.ed-unsaved-changes {
+  width: min(100%, 28rem);
+  padding: 1.35rem 1.4rem 1.25rem;
+  border-radius: 1.25rem;
+  background: #fff;
+  border: 1px solid var(--ed-border);
+  box-shadow: 0 24px 56px rgb(15 23 42 / 0.18);
+  color: var(--ed-fg);
+  font-family: var(--ed-font-body);
+}
+
+.ed-unsaved-changes__title {
+  margin: 0 0 0.65rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+  color: var(--ed-fg);
+}
+
+.ed-unsaved-changes__description {
+  margin: 0 0 1.15rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--ed-muted);
+}
+
+.ed-unsaved-changes__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.ed-unsaved-changes__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5rem;
+  padding: 0.7rem 1.35rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ed-unsaved-changes__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ed-unsaved-changes__btn--cancel {
+  background: #fff;
+  color: var(--ed-fg);
+  border-color: var(--ed-border);
+}
+
+.ed-unsaved-changes__btn--ok {
+  background: var(--ed-primary);
+  color: var(--ed-primary-fg);
+}
+
+.ed-unsaved-changes--spark-academy {
+  --sa-navy: #0f172a;
+  --sa-muted: #64748b;
+  --sa-border: #e2e8f0;
+  --sa-heading-font: Inter, system-ui, -apple-system, sans-serif;
+  font-family: var(--sa-heading-font);
+  color: var(--sa-navy);
+  border-color: var(--sa-border);
+}
+
+.ed-unsaved-changes--spark-academy .ed-unsaved-changes__title {
+  font-family: var(--sa-heading-font);
+  color: var(--sa-navy);
+}
+
+.ed-unsaved-changes--spark-academy .ed-unsaved-changes__description {
+  color: var(--sa-muted);
+}
+
+.ed-unsaved-changes--spark-academy .ed-unsaved-changes__btn--cancel {
+  color: var(--sa-navy);
+  border-color: var(--sa-border);
+}
+
+.ed-unsaved-changes--spark-academy .ed-unsaved-changes__btn--ok {
+  background: var(--sa-navy);
+  color: #fff;
+}
+
+.ed-unsaved-changes--spark-academy .ed-unsaved-changes__btn--ok:hover:not(:disabled) {
+  background: #020617;
+}
+
+.ed-unsaved-changes--edu-learn {
+  --el-green: #1e5631;
+  --el-orange: #f9a825;
+  --el-ink: #333333;
+  --el-muted: #5b6168;
+  --el-font: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--el-font);
+  color: var(--el-ink);
+  background: #fff;
+}
+
+.ed-unsaved-changes--edu-learn .ed-unsaved-changes__title {
+  color: var(--el-green);
+}
+
+.ed-unsaved-changes--edu-learn .ed-unsaved-changes__description {
+  color: var(--el-muted);
+}
+
+.ed-unsaved-changes--edu-learn .ed-unsaved-changes__btn--cancel {
+  color: var(--el-ink);
+  border-color: #d8d2c8;
+}
+
+.ed-unsaved-changes--edu-learn .ed-unsaved-changes__btn--ok {
+  background: var(--el-orange);
+  color: #1a1a1a;
+}
+
+.ed-unsaved-changes--abacus-classic {
+  --ac-navy: #0f172a;
+  --ac-blue: #2563eb;
+  --ac-muted: #64748b;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  color: var(--ac-navy);
+}
+
+.ed-unsaved-changes--abacus-classic .ed-unsaved-changes__title {
+  color: var(--ac-navy);
+}
+
+.ed-unsaved-changes--abacus-classic .ed-unsaved-changes__description {
+  color: var(--ac-muted);
+}
+
+.ed-unsaved-changes--abacus-classic .ed-unsaved-changes__btn--ok {
+  background: var(--ac-blue);
+  color: #fff;
+}

@@ -2,16 +2,18 @@ import { fetchBrandAnalyticsStats } from "@/lib/brandAnalyticsStats";
 import {
   buildBrandActivityFeed,
   buildCenterAvatars,
+  buildCenterHealthScore,
   buildExpansionGoals,
   buildRevenueBarHeights,
-  computeCenterHealthPercent,
   computeRevenueTrendPercent,
   percentChange,
   type BrandDashboardActivity,
-  type BrandExpansionGoal,
   type BrandCenterAvatar,
+  type BrandExpansionGoal,
+  type CenterHealthCheck,
 } from "@/lib/brandDashboardHelpers";
 import { countStaleBrandLeads } from "@/lib/leadsApi";
+import { hasConfiguredMarketingLanding } from "@/lib/marketingLandingContent";
 import { getSupabase } from "@/lib/supabase";
 
 export type BrandDashboardHome = {
@@ -23,6 +25,7 @@ export type BrandDashboardHome = {
   revenueTrendPercent: number | null;
   revenueBars: number[];
   centerHealthPercent: number;
+  centerHealthChecks: CenterHealthCheck[];
   activeCenters: number;
   pendingCenters: number;
   centerAvatars: BrandCenterAvatar[];
@@ -60,6 +63,10 @@ export async function fetchBrandDashboardHome(brandId: string, now = new Date())
     recentUnassignedWeekRes,
     recentUnassignedPriorRes,
     brandSettingsRes,
+    programsCountRes,
+    storiesCountRes,
+    studentsCountRes,
+    franchisesCountRes,
   ] = await Promise.all([
     fetchBrandAnalyticsStats(brandId),
     sb
@@ -104,6 +111,14 @@ export async function fetchBrandDashboardHome(brandId: string, now = new Date())
       .gte("created_at", twoWeeksAgoIso)
       .lt("created_at", weekAgoIso),
     sb.from("brand_settings").select("settings").eq("brand_id", brandId).maybeSingle(),
+    sb.from("programs").select("id", { count: "exact", head: true }).eq("brand_id", brandId).is("deleted_at", null),
+    sb.from("brand_success_stories").select("id", { count: "exact", head: true }).eq("brand_id", brandId),
+    sb.from("students").select("id", { count: "exact", head: true }).eq("brand_id", brandId).is("deleted_at", null),
+    sb
+      .from("franchise_centers")
+      .select("id", { count: "exact", head: true })
+      .eq("brand_id", brandId)
+      .is("deleted_at", null),
   ]);
 
   const inquiries = inquiriesRes.data ?? [];
@@ -117,15 +132,29 @@ export async function fetchBrandDashboardHome(brandId: string, now = new Date())
   const centers = centersRes.data ?? [];
   const activeCenters = centers.filter((row) => row.status === "active").length;
   const pendingCenters = centers.filter((row) => row.status !== "active").length;
-  const maxCenters =
-    (brandSettingsRes.data?.settings as { features?: { max_franchise_centers?: number | null } } | null)?.features
-      ?.max_franchise_centers ?? null;
+  const brandSettings = brandSettingsRes.data?.settings as
+    | {
+        features?: { max_franchise_centers?: number | null };
+        landing?: unknown;
+        center_landing?: unknown;
+      }
+    | null;
+  const maxCenters = brandSettings?.features?.max_franchise_centers ?? null;
 
   const { avatars, extraCount } = buildCenterAvatars(
     analytics.topCenters.length > 0
       ? analytics.topCenters.map((center) => ({ name: center.name }))
       : centers.filter((row) => row.status === "active").map((row) => ({ name: row.name }))
   );
+
+  const centerHealth = buildCenterHealthScore({
+    curriculumCount: programsCountRes.count ?? 0,
+    feedbackCount: storiesCountRes.count ?? 0,
+    studentCount: studentsCountRes.count ?? 0,
+    franchiseCount: franchisesCountRes.count ?? 0,
+    homepageSet: hasConfiguredMarketingLanding(brandSettings?.landing),
+    centerSiteSet: hasConfiguredMarketingLanding(brandSettings?.center_landing),
+  });
 
   return {
     unassignedLeads,
@@ -135,7 +164,8 @@ export async function fetchBrandDashboardHome(brandId: string, now = new Date())
     revenueTotalCents: analytics.revenue30dCents,
     revenueTrendPercent: computeRevenueTrendPercent(analytics.recentDaily),
     revenueBars: buildRevenueBarHeights(analytics.recentDaily),
-    centerHealthPercent: computeCenterHealthPercent(activeCenters, centers.length),
+    centerHealthPercent: centerHealth.percent,
+    centerHealthChecks: centerHealth.checks,
     activeCenters,
     pendingCenters,
     centerAvatars: avatars,

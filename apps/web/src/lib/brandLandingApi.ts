@@ -4,7 +4,7 @@ import { parseBrandLegalPages, parseBrandLegalPagesRecord } from "@/lib/brandLeg
 import { parseBrandSocialConnect } from "@/lib/brandSocialConnect";
 import { parsePublicCurriculum, type PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { parsePublicSuccessStories } from "@/lib/brandSuccessStoriesPublic";
-import { mergePublishedSuccessStories } from "@/lib/mergeBrandTestimonials";
+import { applyPublishedSuccessStoriesToPublicLanding } from "@/lib/mergeBrandTestimonials";
 import type { BrandLandingBundle, BrandPublicStats } from "@/lib/brandLandingBundle";
 import { applyCanonicalSiteName, syncMarketingNavLinks } from "@/lib/marketingPublicSite";
 import type { MarketingTheme, HomepageConfig } from "@/types/homepage";
@@ -74,10 +74,7 @@ function buildBundle(
   );
   const config = buildConfigForTheme(theme, canonicalName, row?.landing ?? undefined, row?.brand_logo_url ?? null);
   const merged = applyCanonicalSiteName(
-    {
-      ...config,
-      testimonials: mergePublishedSuccessStories(config.testimonials, stories),
-    },
+    applyPublishedSuccessStoriesToPublicLanding(config, stories),
     canonicalName
   );
   return {
@@ -104,10 +101,7 @@ function fallbackBundle(
 ): BrandLandingBundle {
   const config = buildConfigForTheme(theme, fallbackName, landingPartial, logoUrl);
   const merged = applyCanonicalSiteName(
-    {
-      ...config,
-      testimonials: mergePublishedSuccessStories(config.testimonials, stories),
-    },
+    applyPublishedSuccessStoriesToPublicLanding(config, stories),
     fallbackName
   );
   return {

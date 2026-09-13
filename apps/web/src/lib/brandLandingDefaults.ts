@@ -3,9 +3,39 @@ import { DEFAULT_HOMEPAGE_CONFIG } from "@/lib/homepageDefaults";
 import { ABACUS_CLASSIC_SECTION_DEFAULTS, EDU_LEARN_SECTION_DEFAULTS, SPARK_ACADEMY_SECTION_DEFAULTS, mergeAbacusClassicSectionVisibility, mergeEduLearnSectionVisibility, mergeSectionVisibility, mergeSparkAcademySectionVisibility } from "@/lib/homepageSections";
 import { withDefaultFeatureVideos } from "@/lib/marketingFeatureSections";
 import { mergeAboutSection } from "@/lib/aboutUs";
-import type { HomepageConfig } from "@/types/homepage";
+import type { HomepageConfig, HomepageFounderProfile } from "@/types/homepage";
 
 const SPARK_FOOTER_PHONE = "(222) 545-4543";
+
+/** Spark Academy Unsplash stock names — editor keeps one example so staff see how to fill a card. */
+export const SPARK_STOCK_FOUNDER_NAMES = new Set([
+  "sarah johnson",
+  "michael brown",
+  "rachel adams",
+  "maria lopez",
+  "david chen",
+]);
+
+function isSparkStockFounder(founder: HomepageFounderProfile): boolean {
+  return (
+    SPARK_STOCK_FOUNDER_NAMES.has(founder.name.trim().toLowerCase()) &&
+    (founder.photoUrl ?? "").includes("unsplash.com")
+  );
+}
+
+/** Drop extra Spark Unsplash placeholders. Custom mentors and add/update/delete stay intact. */
+export function limitSparkThemeDefaultMentors(
+  founders: HomepageFounderProfile[] | undefined
+): HomepageFounderProfile[] | undefined {
+  if (!founders || founders.length <= 1) return founders;
+  let keptStock = false;
+  return founders.filter((founder) => {
+    if (!isSparkStockFounder(founder)) return true;
+    if (keptStock) return false;
+    keptStock = true;
+    return true;
+  });
+}
 
 /** Franchise-recruitment landing defaults for a brand hostname (e.g. abacusworld.localhost). */
 export function buildBrandLandingConfig(
@@ -370,7 +400,7 @@ export function mergeAbacusClassicLandingConfig(
       ...partial?.trustMedia,
       cards: partial?.trustMedia?.cards ?? base.trustMedia!.cards,
     },
-    founders: partial?.founders ?? base.founders,
+    founders: limitSparkThemeDefaultMentors(partial?.founders) ?? base.founders,
     gallery: { ...base.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? base.gallery!.images },
     programsSection: {
       ...base.programsSection!,
@@ -510,38 +540,6 @@ export function buildSparkAcademyLandingPartial(brandName: string): Partial<Home
         bio: "",
         photoUrl:
           "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=480&h=600&q=80",
-      },
-      {
-        roleBadge: "Mentor",
-        name: "Michael Brown",
-        title: "Cybersecurity Specialist",
-        bio: "",
-        photoUrl:
-          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=480&h=600&q=80",
-      },
-      {
-        roleBadge: "Mentor",
-        name: "Rachel Adams",
-        title: "Financial Analyst",
-        bio: "",
-        photoUrl:
-          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=480&h=600&q=80",
-      },
-      {
-        roleBadge: "Mentor",
-        name: "Maria Lopez",
-        title: "UX/UI Mentor",
-        bio: "",
-        photoUrl:
-          "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=480&h=600&q=80",
-      },
-      {
-        roleBadge: "Mentor",
-        name: "David Chen",
-        title: "Product Strategy Lead",
-        bio: "",
-        photoUrl:
-          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=480&h=600&q=80",
       },
     ],
     gallery: {
@@ -690,7 +688,7 @@ export function mergeSparkAcademyLandingConfig(
       ...partial?.trustMedia,
       cards: partial?.trustMedia?.cards ?? base.trustMedia!.cards,
     },
-    founders: partial?.founders ?? base.founders,
+    founders: limitSparkThemeDefaultMentors(partial?.founders) ?? base.founders,
     gallery: { ...base.gallery!, ...partial?.gallery, images: partial?.gallery?.images ?? base.gallery!.images },
     footerCta: { ...base.footerCta!, ...partial?.footerCta },
     footer: {
@@ -913,7 +911,7 @@ export function mergeEduLearnLandingConfig(
       ...partial?.trustMedia,
       cards: partial?.trustMedia?.cards ?? base.trustMedia!.cards,
     },
-    founders: partial?.founders ?? base.founders,
+    founders: limitSparkThemeDefaultMentors(partial?.founders) ?? base.founders,
     programsSection: {
       ...base.programsSection,
       ...partial?.programsSection,

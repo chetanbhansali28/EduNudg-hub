@@ -3946,6 +3946,21 @@
   font-weight: 500;
 }
 
+.ed-field__required {
+  color: var(--ed-danger, #dc2626);
+  font-weight: 700;
+}
+
+.ed-field__required-hint {
+  color: var(--ed-danger, #dc2626);
+  margin: 0.35rem 0 0;
+}
+
+.ed-homepage-editor-save-error {
+  color: var(--ed-danger, #dc2626);
+  margin: 0 0 0.75rem;
+}
+
 .ed-field__input {
   width: 100%;
   padding: 0.625rem 0.875rem;

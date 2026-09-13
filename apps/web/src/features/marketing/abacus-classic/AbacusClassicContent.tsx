@@ -1,6 +1,7 @@
 import type { HomepageConfig } from "@/types/homepage";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { isAbacusSectionEnabled } from "@/lib/homepageSections";
+import { hasPublicTestimonials } from "@/lib/mergeBrandTestimonials";
 import { visiblePublicFounders } from "@/lib/centerLandingDefaults";
 import { TestimonialsCarousel } from "../TestimonialsCarousel";
 import { AbacusClassicHero } from "./AbacusClassicHero";
@@ -46,7 +47,8 @@ export function AbacusClassicContent({ config, publicCurriculum }: Props) {
   const founders = visiblePublicFounders(config.founders);
   const showFounders = isAbacusSectionEnabled(config, "founders") && founders.length > 0;
   const showTrust = isAbacusSectionEnabled(config, "trustMedia") && config.trustMedia;
-  const showTestimonials = isAbacusSectionEnabled(config, "testimonials");
+  const showTestimonials =
+    isAbacusSectionEnabled(config, "testimonials") && hasPublicTestimonials(config.testimonials);
   const showFaq = isAbacusSectionEnabled(config, "faq") && config.faq.length > 0;
   const showGallery = isAbacusSectionEnabled(config, "gallery") && (config.gallery?.images.length ?? 0) > 0;
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);

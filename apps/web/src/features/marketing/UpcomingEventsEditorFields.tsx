@@ -36,7 +36,8 @@ export function UpcomingEventsEditorFields({
     <>
       <EditorSectionNote>
         Competitions, workshops, demos, and other events. Only upcoming dates (today or later) appear on the
-        public homepage. Optional image, time, and duration per event. Set max items to limit how many show.
+        public homepage. The first event cover image is required; later covers, time, and duration are optional.
+        Set max items to limit how many show.
       </EditorSectionNote>
       <EditorFieldsGrid>
         <Input
@@ -92,6 +93,7 @@ export function UpcomingEventsEditorFields({
             onChange={onChange}
             uploadScope={uploadScope}
             onPersist={commitMedia}
+            imageRequired={i === 0}
             onRemove={() =>
               commit({
                 ...config,
@@ -115,6 +117,7 @@ function UpcomingEventEditorItem({
   onChange,
   uploadScope,
   onPersist,
+  imageRequired = false,
   onRemove,
 }: {
   event: HomepageUpcomingEvent;
@@ -123,6 +126,7 @@ function UpcomingEventEditorItem({
   onChange: (c: HomepageConfig) => void;
   uploadScope: MarketingUploadScope;
   onPersist: (c: HomepageConfig) => void;
+  imageRequired?: boolean;
   onRemove: () => void;
 }) {
   const section = config.upcomingEvents ?? emptyUpcomingEventsSection();
@@ -214,13 +218,14 @@ function UpcomingEventEditorItem({
         />
         <EditorFieldSpan>
           <MarketingMediaField
-            label="Cover image (optional)"
+            label={imageRequired ? "Cover image" : "Cover image (optional)"}
             value={event.imageUrl ?? ""}
             onChange={(imageUrl) => persist({ imageUrl: imageUrl || undefined })}
             mediaType="image"
             uploadSubdir={`event-${index}`}
             uploadScope={uploadScope}
             layout="hero"
+            required={imageRequired}
           />
         </EditorFieldSpan>
       </EditorFieldsGrid>

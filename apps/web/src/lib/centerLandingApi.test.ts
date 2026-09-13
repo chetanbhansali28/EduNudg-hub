@@ -226,4 +226,50 @@ describe("fetchCenterLandingBundle", () => {
     expect(rpc).toHaveBeenCalledWith("get_brand_landing_public", { p_brand_slug: "shree-samarth" });
     expect(bundle?.config.founders?.map((row) => row.name)).toEqual(["Bhavana Soni", "Chetan Bhansali"]);
   });
+
+  it("regression_center_hides_dummy_testimonials_when_brand_has_no_stories", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Rathi Educom",
+        brand_slug: "rathi-educom",
+        marketing_theme: "spark-academy",
+        center_name: "Digitley Pune",
+        center_display_name: "Digitley Pune",
+        center_slug: "digitley-pune",
+        landing: {},
+        success_stories: [],
+        curriculum: [],
+      },
+      error: null,
+    });
+
+    const bundle = await fetchCenterLandingBundle("rathi-educom", "digitley-pune");
+    expect(bundle?.config.testimonials.items).toEqual([]);
+    expect(bundle?.config.sections?.testimonials).toBe(false);
+    expect(bundle?.config.nav.links.some((link) => link.href === "#testimonials")).toBe(false);
+    expect(bundle?.config.testimonials.items.some((item) => item.author === "John Matthews")).toBe(false);
+  });
+
+  it("regression_center_shows_brand_success_stories_on_homepage", async () => {
+    rpc.mockResolvedValue({
+      data: {
+        brand_name: "Rathi Educom",
+        brand_slug: "rathi-educom",
+        marketing_theme: "spark-academy",
+        center_name: "Digitley Pune",
+        center_display_name: "Digitley Pune",
+        center_slug: "digitley-pune",
+        landing: {},
+        success_stories: [{ quote: "Our kids love the classes.", author: "Asha · Parent" }],
+        curriculum: [],
+      },
+      error: null,
+    });
+
+    const bundle = await fetchCenterLandingBundle("rathi-educom", "digitley-pune");
+    expect(bundle?.config.testimonials.items).toEqual([
+      { quote: "Our kids love the classes.", author: "Asha · Parent" },
+    ]);
+    expect(bundle?.config.sections?.testimonials).toBe(true);
+  });
 });

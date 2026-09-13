@@ -102,6 +102,15 @@ AND card / list headings share `--sa-h3-size` (1.0625rem, weight 700)
 AND the hero remains the larger display title (`--sa-h1-size`)
 AND footer column labels stay small uppercase chrome (not section titles)
 
+### Mentors / Leadership editor seeds one example profile
+
+Brand Homepage **Mentors / Leadership** (`landing.founders`) SHALL seed a single dummy profile so staff can see how to fill a card. Spark Academy SHALL NOT pre-fill five Unsplash stock mentors. Add, update, and delete of mentor cards SHALL remain available. Saved custom names/photos SHALL be kept. Extra leftover Spark Unsplash stock cards MAY collapse to one example on load.
+
+- **GIVEN** a Spark Academy brand with no saved mentors, or only leftover Unsplash stock names
+- **WHEN** brand staff open `/app/homepage` Mentors / Leadership
+- **THEN** they see one example profile
+- **AND** they can still add, edit, or delete mentor cards
+
 ### Spark Academy mentors show role badge and title
 
 Spark Academy **Meet Our Expert Mentors** SHALL render the same Homepage founder fields as Abacus Classic leadership: **Role badge** (`roleBadge`, e.g. FOUNDER & CEO) and **Title** (`title`, e.g. company name) together. The card SHALL NOT hide the role badge when title is filled.

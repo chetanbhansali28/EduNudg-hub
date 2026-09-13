@@ -4,6 +4,7 @@ import type { CenterPublicProfile } from "@/lib/centerLandingApi";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import type { BrandPublicStats } from "@/lib/brandLandingBundle";
 import { isEduLearnSectionEnabled } from "@/lib/homepageSections";
+import { hasPublicTestimonials } from "@/lib/mergeBrandTestimonials";
 import { visiblePublicFounders } from "@/lib/centerLandingDefaults";
 import { resolveSparkCoursePrograms, sparkShouldShowCoursesSection } from "@/lib/programsGridItems";
 import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
@@ -46,7 +47,8 @@ export function EduLearnContent({
   const showStats = isEduLearnSectionEnabled(config, "trustMedia") && Boolean(config.trustMedia);
   const founders = visiblePublicFounders(config.founders);
   const showFounders = isEduLearnSectionEnabled(config, "founders") && founders.length > 0;
-  const showTestimonials = isEduLearnSectionEnabled(config, "testimonials");
+  const showTestimonials =
+    isEduLearnSectionEnabled(config, "testimonials") && hasPublicTestimonials(config.testimonials);
   const showFaq = isEduLearnSectionEnabled(config, "faq") && config.faq.length > 0;
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
   const showUpcomingEvents =

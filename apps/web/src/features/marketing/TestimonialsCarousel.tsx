@@ -27,7 +27,9 @@ function TestimonialCard({ quote, author }: { quote: string; author: string }) {
 }
 
 export function TestimonialsCarousel({ testimonials }: { testimonials: HomepageConfig["testimonials"] }) {
-  const items = testimonials.items;
+  const items = testimonials.items ?? [];
+  if (items.length === 0) return null;
+
   const doubled = [...items, ...items];
 
   const titleParts = testimonials.title.match(/^(.+?)(\s*)(\S+\.?)$/);

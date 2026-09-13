@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase";
+import { clearCenterHealthReminders } from "@/lib/centerHealthReminder";
 import { buildStaffOAuthRedirectUrl } from "@/services/auth/oauthRedirect";
 import { reportAuthAudit } from "@/services/auth/authAuditApi";
 import { signInWithPasskey as passkeySignIn } from "@/services/auth/passkeyService";
@@ -134,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     }
     await getSupabase().auth.signOut();
+    clearCenterHealthReminders();
   };
 
   return (

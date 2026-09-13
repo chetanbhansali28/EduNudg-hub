@@ -42,7 +42,40 @@ type Props = {
   recommendedSize?: string;
   /** Called after a successful upload with the new public URL (e.g. auto-save config). */
   onUploaded?: (url: string) => void | Promise<void>;
+  /** First photo in a homepage / center-site section. */
+  required?: boolean;
 };
+
+function MediaFieldLabel({
+  htmlFor,
+  label,
+  required,
+}: {
+  htmlFor?: string;
+  label: string;
+  required?: boolean;
+}) {
+  const mark = required ? (
+    <span className="ed-field__required" aria-hidden>
+      {" "}
+      *
+    </span>
+  ) : null;
+  if (htmlFor) {
+    return (
+      <label className="ed-field__label" htmlFor={htmlFor}>
+        {label}
+        {mark}
+      </label>
+    );
+  }
+  return (
+    <span className="ed-field__label">
+      {label}
+      {mark}
+    </span>
+  );
+}
 
 export function MarketingMediaField({
   label,
@@ -55,6 +88,7 @@ export function MarketingMediaField({
   layout = "default",
   recommendedSize,
   onUploaded,
+  required = false,
 }: Props) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -87,14 +121,21 @@ export function MarketingMediaField({
       type="file"
       accept={MARKETING_MEDIA_ACCEPT}
       disabled={disabled || pending}
+      required={required && !value.trim()}
       onChange={(e) => void handleFile(e.target.files?.[0])}
     />
   );
+  const requiredHint =
+    required && !value.trim() ? (
+      <p className="ed-text-sm ed-field__required-hint" role="status">
+        This photo is required.
+      </p>
+    ) : null;
 
   if (layout === "logo") {
     return (
       <div className="ed-field ed-marketing-media-field ed-marketing-media-field--logo">
-        <span className="ed-field__label">{label}</span>
+        <MediaFieldLabel label={label} required={required} />
         <div className="ed-marketing-media-logo">
           <div className="ed-marketing-media-logo__preview">
             {value ? (
@@ -124,6 +165,7 @@ export function MarketingMediaField({
           </div>
         </div>
         {pending ? <p className="ed-text-sm ed-muted">Uploading…</p> : null}
+        {requiredHint}
         {error ? (
           <p className="ed-text-sm" role="alert">
             {error}
@@ -136,9 +178,7 @@ export function MarketingMediaField({
   if (layout === "hero") {
     return (
       <div className="ed-field ed-marketing-media-field ed-marketing-media-field--hero">
-        <label className="ed-field__label" htmlFor={inputId}>
-          {label}
-        </label>
+        <MediaFieldLabel htmlFor={inputId} label={label} required={required} />
         {value && !showVideoPreview ? (
           <img key={value} src={value} alt="" className="ed-marketing-media-hero__preview" />
         ) : null}
@@ -180,6 +220,7 @@ export function MarketingMediaField({
           )}
         </div>
         {pending ? <p className="ed-text-sm ed-muted">Uploading…</p> : null}
+        {requiredHint}
         {error ? (
           <p className="ed-text-sm" role="alert">
             {error}
@@ -191,9 +232,7 @@ export function MarketingMediaField({
 
   return (
     <div className="ed-field ed-marketing-media-field">
-      <label className="ed-field__label" htmlFor={inputId}>
-        {label}
-      </label>
+      <MediaFieldLabel htmlFor={inputId} label={label} required={required} />
       {value && !showVideoPreview ? (
         <img key={value} src={value} alt="" className="ed-marketing-media-preview" />
       ) : null}
@@ -229,6 +268,7 @@ export function MarketingMediaField({
         )}
       </div>
       {pending ? <p className="ed-text-sm ed-muted">Uploading…</p> : null}
+      {requiredHint}
       {error ? (
         <p className="ed-text-sm" role="alert">
           {error}

@@ -16,6 +16,7 @@ import { CurriculumPublicSection } from "./CurriculumPublicSection";
 import { MarketingBackgroundMedia } from "./MarketingBackgroundMedia";
 import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
 import { isSectionEnabled } from "@/lib/homepageSections";
+import { hasPublicTestimonials } from "@/lib/mergeBrandTestimonials";
 import { useScrollReveal } from "./useScrollReveal";
 import { UpcomingEventsSection } from "./UpcomingEventsSection";
 import { resolveVisibleUpcomingEvents } from "@/lib/upcomingEvents";
@@ -68,7 +69,8 @@ function MarketingContentView({
   const showFeatures = isSectionEnabled(config, "featureScroll") && config.featureSections.length > 0;
   const showHighlights = isSectionEnabled(config, "highlights") && config.showcaseCards.length > 0;
   const showPrivacy = isSectionEnabled(config, "privacy");
-  const showTestimonials = isSectionEnabled(config, "testimonials");
+  const showTestimonials =
+    isSectionEnabled(config, "testimonials") && hasPublicTestimonials(config.testimonials);
   const showFaq = isSectionEnabled(config, "faq") && config.faq.length > 0;
   const upcomingEvents = resolveVisibleUpcomingEvents(config.upcomingEvents);
   const showUpcomingEvents =

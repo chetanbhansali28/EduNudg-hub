@@ -4,7 +4,7 @@ import {
   buildBrandActivityFeed,
   buildExpansionGoals,
   buildRevenueBarHeights,
-  computeCenterHealthPercent,
+  buildCenterHealthScore,
   computeRevenueTrendPercent,
   formatCompactRelative,
   formatInrCompact,
@@ -90,6 +90,47 @@ describe("brandDashboardHelpers", () => {
   it("regression_brand_dashboard_greeting_uses_director_fallback", () => {
     expect(brandDashboardGreeting("", 9)).toBe("Good morning, Director");
     expect(percentChange(12, 10)).toBe(20);
-    expect(computeCenterHealthPercent(9, 10)).toBe(90);
+  });
+
+  it("regression_center_health_is_100_only_when_all_setup_minimums_are_met", () => {
+    const complete = buildCenterHealthScore({
+      curriculumCount: 1,
+      feedbackCount: 2,
+      studentCount: 2,
+      franchiseCount: 2,
+      homepageSet: true,
+      centerSiteSet: true,
+    });
+    expect(complete.percent).toBe(100);
+    expect(complete.unmetReasons).toEqual([]);
+
+    const missingFeedbackAndFranchises = buildCenterHealthScore({
+      curriculumCount: 3,
+      feedbackCount: 1,
+      studentCount: 8,
+      franchiseCount: 0,
+      homepageSet: true,
+      centerSiteSet: true,
+    });
+    expect(missingFeedbackAndFranchises.percent).toBe(67);
+    expect(missingFeedbackAndFranchises.unmetReasons).toEqual([
+      "Add 1 more feedback (1 of 2)",
+      "Add 2 franchises (0 of 2)",
+    ]);
+  });
+
+  it("regression_center_health_includes_homepage_and_franchise_site_content", () => {
+    const missingSites = buildCenterHealthScore({
+      curriculumCount: 1,
+      feedbackCount: 2,
+      studentCount: 2,
+      franchiseCount: 2,
+      homepageSet: false,
+      centerSiteSet: false,
+    });
+    expect(missingSites.percent).toBe(67);
+    expect(missingSites.unmetReasons).toEqual(["Set homepage content", "Set franchise site content"]);
+    expect(missingSites.checks.find((check) => check.key === "homepage")?.href).toBe("/app/homepage");
+    expect(missingSites.checks.find((check) => check.key === "centerSite")?.href).toBe("/app/center-site");
   });
 });

@@ -8,6 +8,7 @@ import {
   HomepageEditorPanels,
   HomepageEditorShell,
 } from "@/features/marketing/HomepageEditorShell";
+import { useUnsavedMarketingNavigation } from "@/features/marketing/UnsavedMarketingChangesDialog";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import {
   fetchBrandMarketingEditor,
@@ -21,6 +22,11 @@ import { getSupabase } from "@/lib/supabase";
 import { formatLastSavedLabel } from "@/lib/formatRelativeTime";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
+import {
+  missingRequiredMarketingPhotoLabels,
+  requiredMarketingPhotosMessage,
+  scrollMarketingEditorToBottom,
+} from "@/lib/marketingRequiredPhotos";
 import { usesAlternateThemeEditor } from "@/lib/marketingThemeLayout";
 import type { HomepageConfig } from "@/types/homepage";
 
@@ -56,6 +62,7 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
   const [brandUpdatedAt, setBrandUpdatedAt] = useState<string | null>(null);
   const [centerUpdatedAt, setCenterUpdatedAt] = useState<string | null>(null);
   const [marketingTheme, setMarketingTheme] = useState<import("@/types/homepage").MarketingTheme>("novu");
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   const editor = useQuery({
     queryKey: ["brand-marketing-editor", brandId],
@@ -172,6 +179,62 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
     return stamp ? formatLastSavedLabel(stamp) : null;
   }, [variant, brandUpdatedAt, centerUpdatedAt]);
 
+  const portalMode = variant === "center" ? "center" : "brand";
+  const activeConfig = variant === "center" ? centerConfig : brandConfig;
+  const activeDirty = variant === "center" ? !!centerDirty : brandDirty;
+  const activeSavePending = variant === "center" ? saveCenter.isPending : saveBrand.isPending;
+
+  const validateRequiredPhotos = (payload: HomepageConfig): boolean => {
+    const missing = missingRequiredMarketingPhotoLabels({
+      config: payload,
+      marketingTheme,
+      portalMode,
+    });
+    const message = requiredMarketingPhotosMessage(missing);
+    setPhotoError(message);
+    if (message) {
+      scrollMarketingEditorToBottom();
+      return false;
+    }
+    return true;
+  };
+
+  const persistActive = async (payload?: HomepageConfig): Promise<boolean> => {
+    const next = payload ?? activeConfig;
+    if (!next) return false;
+    if (!validateRequiredPhotos(next)) return false;
+    try {
+      if (variant === "center") {
+        await saveCenter.mutateAsync(next);
+      } else {
+        await saveBrand.mutateAsync(next);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const discardActive = () => {
+    setPhotoError(null);
+    if (variant === "center" && centerBaseline) {
+      setCenterConfig(centerBaseline);
+      return;
+    }
+    if (brandBaseline) {
+      setBrandConfig(brandBaseline);
+      setLegalPages(legalPagesBaseline);
+      setSocialConnect(socialConnectBaseline);
+    }
+  };
+
+  const { dialog: unsavedDialog } = useUnsavedMarketingNavigation({
+    isDirty: activeDirty,
+    savePending: activeSavePending,
+    marketingTheme,
+    onSave: () => persistActive(),
+  });
+
   if (missingBrand) {
     return <p className="ed-empty">Brand context not found.</p>;
   }
@@ -194,6 +257,8 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
 
   if (variant === "center" && centerConfig && centerBaseline) {
     return (
+      <>
+      {unsavedDialog}
       <HomepageEditorShell
         title="Center Site Configuration"
         subtitle="Template for every center hostname. Center name and city are filled in per location."
@@ -205,11 +270,12 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
             title="Center sites (parent enrollment template)"
             icon="apartment"
             iconTone="secondary"
-            onSave={() => saveCenter.mutate(centerConfig)}
-            onDiscard={() => setCenterConfig(centerBaseline)}
+            onSave={() => void persistActive(centerConfig)}
+            onDiscard={discardActive}
             isDirty={!!centerDirty}
             savePending={saveCenter.isPending}
             saved={centerSaved}
+            saveError={photoError}
             description="Public enrollment pages on each franchise hostname inherit this template."
           >
             {usesAlternateThemeEditor(marketingTheme) ? (
@@ -240,6 +306,7 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
           </HomepageEditorPanel>
         </HomepageEditorPanels>
       </HomepageEditorShell>
+      </>
     );
   }
 
@@ -248,6 +315,8 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
   }
 
   return (
+    <>
+    {unsavedDialog}
     <HomepageEditorShell
       title="Homepage Configuration"
       subtitle="Manage your public brand recruitment site."
@@ -259,15 +328,12 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
           title="Brand site (franchise recruitment)"
           icon="storefront"
           iconTone="primary"
-          onSave={() => saveBrand.mutate(brandConfig)}
-          onDiscard={() => {
-            setBrandConfig(brandBaseline);
-            setLegalPages(legalPagesBaseline);
-            setSocialConnect(socialConnectBaseline);
-          }}
+          onSave={() => void persistActive(brandConfig)}
+          onDiscard={discardActive}
           isDirty={brandDirty}
           savePending={saveBrand.isPending}
           saved={brandSaved}
+          saveError={photoError}
           description={
             <>
               Public homepage on your brand hostname. Testimonial quotes come from published{" "}
@@ -316,6 +382,7 @@ function BrandMarketingLandingEditor({ variant }: { variant: MarketingEditorVari
         </HomepageEditorPanel>
       </HomepageEditorPanels>
     </HomepageEditorShell>
+    </>
   );
 }
 

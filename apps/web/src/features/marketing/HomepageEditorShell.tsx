@@ -194,6 +194,7 @@ type PanelProps = {
   savePending?: boolean;
   saved?: boolean;
   saveLabel?: string;
+  saveError?: string | null;
   /** When true and no page-panel group is present, start expanded. */
   defaultOpen?: boolean;
   children: ReactNode;
@@ -212,6 +213,7 @@ export function HomepageEditorPanel({
   savePending,
   saved,
   saveLabel = "Save changes",
+  saveError = null,
   defaultOpen = true,
   children,
 }: PanelProps) {
@@ -300,6 +302,11 @@ export function HomepageEditorPanel({
           </div>
           <div id={bodyId} className="ed-editor-accordion__body ed-homepage-editor-panel__body">
             {children}
+            {saveError ? (
+              <p className="ed-text-sm ed-homepage-editor-save-error" role="alert">
+                {saveError}
+              </p>
+            ) : null}
             <EditorSaveBar
               isDirty={isDirty}
               onDiscard={onDiscard}

@@ -60,6 +60,28 @@ describe("SparkAcademyContent", () => {
     expect(screen.queryByText("Give your child a head start in mental math")).toBeNull();
   });
 
+  it("regression_spark_omits_testimonials_when_no_public_stories", () => {
+    const config = {
+      ...mergeSparkAcademyLandingConfig("Educat Demo"),
+      testimonials: {
+        title: "What Our Learners Are Saying",
+        subtitle: "Hear directly from our students.",
+        items: [],
+      },
+      sections: { testimonials: false },
+    };
+    render(
+      <MemoryRouter>
+        <LeadModalProvider>
+          <SparkAcademyContent config={config} portalMode="center" brandSlug="educat-demo" />
+        </LeadModalProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByText("What Our Learners Are Saying")).toBeNull();
+    expect(document.getElementById("testimonials")).toBeNull();
+  });
+
   it("regression_spark_course_cards_center_in_grid", () => {
     const config = mergeSparkAcademyLandingConfig("Educat Demo");
     render(
