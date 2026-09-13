@@ -25,7 +25,7 @@ pnpm test:e2e
 
 If package tests fail with missing `vitest/vitest.mjs`, run `pnpm install` (see `assert-workspace-test-bins.mjs`).
 
-Use **Vitest ≥4** (matches CI Node 24). Mock constructors with `class`, not arrow `vi.fn(() => …)` — Vitest 4 rejects arrow mocks used with `new` (e.g. `IntersectionObserver`). Auth login tests that render `RequireMembership` must mock `@/lib/supabase` (center operational status).
+Use **Vitest ≥4** (matches CI Node 24). Mock constructors with `class`, not arrow `vi.fn(() => …)` — Vitest 4 rejects arrow mocks used with `new` (e.g. `IntersectionObserver`). Auth login tests that render `RequireMembership` must mock `@/lib/supabase` (center operational status). Staff membership mocks MUST set `isFetched: true` when a session exists, or `/login` will wait forever. New franchise login MUST keep `regression_does_not_sign_out_before_memberships_fetch_completes` and `regression_accepts_invited_memberships_before_loading_active_rows` green.
 
 When mocking `@/lib/homepageApi`, use `importOriginal` and spread `...actual` so query-key constants (`MARKETING_HOMEPAGE_CONFIG_QUERY_KEY`, `MARKETING_PUBLIC_BUNDLE_QUERY_KEY`) remain defined. Never reuse the config-only key for `{ config, legalPages }` bundles — see `openspec/specs/marketing-homepage/spec.md`.
 

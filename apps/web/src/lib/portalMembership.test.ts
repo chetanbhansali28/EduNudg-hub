@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TenantContext } from "@edunudg/tenant";
-import { hasPortalMembership } from "./portalMembership";
+import { hasPortalMembership, isStaffMembershipAccessPending } from "./portalMembership";
 import type { Membership } from "@/hooks/useMembership";
 
 function tenant(partial: Partial<TenantContext> & Pick<TenantContext, "portalType">): TenantContext {
@@ -78,5 +78,55 @@ describe("hasPortalMembership", () => {
         tenant({ portalType: "learn", brandSlug: "abacusworld", hostname: "learn.abacusworld.localhost" })
       )
     ).toBe(true);
+  });
+});
+
+describe("isStaffMembershipAccessPending", () => {
+  it("regression_holds_staff_login_until_memberships_are_fetched", () => {
+    expect(
+      isStaffMembershipAccessPending({
+        isStudentPortal: false,
+        portalTenantResolving: false,
+        hasSession: true,
+        membershipsFetched: false,
+        membershipsError: false,
+      })
+    ).toBe(true);
+  });
+
+  it("regression_holds_staff_login_when_memberships_query_errors", () => {
+    expect(
+      isStaffMembershipAccessPending({
+        isStudentPortal: false,
+        portalTenantResolving: false,
+        hasSession: true,
+        membershipsFetched: true,
+        membershipsError: true,
+      })
+    ).toBe(true);
+  });
+
+  it("allows_access_check_after_memberships_fetch", () => {
+    expect(
+      isStaffMembershipAccessPending({
+        isStudentPortal: false,
+        portalTenantResolving: false,
+        hasSession: true,
+        membershipsFetched: true,
+        membershipsError: false,
+      })
+    ).toBe(false);
+  });
+
+  it("regression_learn_portal_skips_staff_membership_gate", () => {
+    expect(
+      isStaffMembershipAccessPending({
+        isStudentPortal: true,
+        portalTenantResolving: false,
+        hasSession: true,
+        membershipsFetched: false,
+        membershipsError: false,
+      })
+    ).toBe(false);
   });
 });

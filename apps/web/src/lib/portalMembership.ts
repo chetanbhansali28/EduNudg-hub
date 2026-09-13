@@ -35,3 +35,16 @@ export function hasPortalMembership(memberships: Membership[] | undefined, tenan
 
   return true;
 }
+
+/** True while staff login must not treat empty memberships as access-denied. */
+export function isStaffMembershipAccessPending(input: {
+  isStudentPortal: boolean;
+  portalTenantResolving: boolean;
+  hasSession: boolean;
+  membershipsFetched: boolean;
+  membershipsError: boolean;
+}): boolean {
+  if (input.portalTenantResolving) return true;
+  if (input.isStudentPortal || !input.hasSession) return false;
+  return !input.membershipsFetched || input.membershipsError;
+}

@@ -25,7 +25,7 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `profiles` | user | Extended auth user profile |
 | `brands` | platform | Franchise brand tenant |
 | `franchise_centers` | brand | Physical center / franchise; public profile fields below. CSV import sets `slug` from **name** (unique `-2` suffix if needed). |
-| `memberships` | auth | User role per scope |
+| `memberships` | auth | User role per scope. Inquiry/CSV franchise owners start as `invited`; first staff login calls `accept_own_invited_memberships()` (migration `101`) so they are not signed out immediately. |
 | `auth_audit_logs` | auth | Append-only sign-in events (`login_success`, `login_failure`, `logout`, `access_denied`) with `portal`, optional `brand_id`/`center_id`, session dedup. Platform `/admin/audit` Auth stream. Full IP is platform-only. Tenant staff read via `list_tenant_staff_audit` (failed-login emails and raw IP redacted). |
 | `access_audit_logs` | audit | Sensitive actions: CSV export, Copy Profile URL, owner credentials, platform portal handoff. Platform SELECT; tenant via `list_tenant_staff_audit`. |
 | `client_error_reports` | audit | Fatal SPA errors (ErrorBoundary, `window.onerror`, `unhandledrejection`). Platform `/admin/audit` Errors stream only. |

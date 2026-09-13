@@ -17,6 +17,8 @@ const { authState, membershipState, tenantState, portalBrandingState, signOut } 
   membershipState: {
     data: [] as Membership[],
     isLoading: false,
+    isFetched: true,
+    isError: false,
   },
   tenantState: {
     portalType: "platform" as "platform" | "brand" | "center",
@@ -58,6 +60,10 @@ vi.mock("@/hooks/useMembership", () => ({
   useMembership: () => ({
     data: membershipState.data,
     isLoading: membershipState.isLoading,
+    isPending: membershipState.isLoading || !membershipState.isFetched,
+    isFetching: membershipState.isLoading,
+    isFetched: membershipState.isFetched,
+    isError: membershipState.isError,
   }),
 }));
 
@@ -145,6 +151,8 @@ describe("RequireMembership", () => {
     authState.user = { id: "user-1", email: "stranger@gmail.com" };
     membershipState.data = [];
     membershipState.isLoading = false;
+    membershipState.isFetched = true;
+    membershipState.isError = false;
     tenantState.portalType = "platform";
     tenantState.brandId = null;
     tenantState.centerId = null;
@@ -167,6 +175,18 @@ describe("RequireMembership", () => {
       expect.stringContaining("Maximum update depth exceeded")
     );
     consoleSpy.mockRestore();
+  });
+
+  it("regression_waits_for_memberships_fetch_before_login_redirect", () => {
+    membershipState.isFetched = false;
+    membershipState.isLoading = false;
+
+    renderProtectedRoute("/admin");
+
+    expect(screen.getByText("Checking access…")).toBeDefined();
+    expect(signOut).not.toHaveBeenCalled();
+    expect(screen.queryByText("Admin home")).toBeNull();
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
   it("regression_suspended_center_staff_blocked", async () => {

@@ -57,6 +57,8 @@ pnpm dlx supabase@2.104.0 functions deploy center-owner-credentials
 
 If center login fails after setting credentials: confirm migration `073_center_owner_credentials.sql` is applied and the edge function is deployed.
 
+**Login then immediate logout on a new franchise or new brand:** `/login` used to treat empty memberships as access-denied while the query was still loading, and inquiry/CSV franchise owners plus approved brand signups stay `invited` until first login. Apply migration `101_accept_own_invited_memberships.sql` (`supabase db push`) so invited `center_owner` / `brand_owner` rows activate on sign-in. Use the franchise login URL (`{center}.{brand}.localhost:9000/login` or `/login?portal=center&brand=…&center=…`) or the brand login URL (`{brand}.localhost:9000/login`), not the platform `/login`. Student (learn) login does not use staff memberships and is not signed out for an empty memberships list.
+
 Seeded demo brand login remains `owner@edunudg.com` / `admin` at http://abacusworld.localhost:9000/login when `test-users.sql` has been applied.
 
 ## Demo URL sheet (Vercel)

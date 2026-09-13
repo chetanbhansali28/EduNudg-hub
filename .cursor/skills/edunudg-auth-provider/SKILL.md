@@ -19,6 +19,7 @@ description: Implement or change auth — Google, Facebook, WhatsApp OTP, passke
 ## Rules
 
 - Log events to `auth_audit_logs` via `reportAuthAudit` / RPC `log_auth_audit_event` (`login_success` session-deduped, `logout`, `login_failure`, `access_denied`). Never block login if audit fails.
+- After sign-in, `fetchActiveMemberships` calls `accept_own_invited_memberships` then loads `status = active`. `/login` must wait for `isFetched` (not only `isLoading`) before access-denied sign-out — otherwise a new franchise owner logs in and is signed out immediately.
 - Sensitive staff actions (CSV export, Copy Profile URL, owner credentials, portal handoff) use `reportAccessAudit` / `log_access_audit_event`. Fatal SPA errors use `reportClientError` / `log_client_error_event` (do not ingest every `console.error`).
 - Deploy `auth-audit` so platform ops get IP + country; SPA falls back to RPC without IP.
 - Brand owner/admin and center owner/manager read tenant Auth+Access via `list_tenant_staff_audit`. Errors stay platform-only.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { postLoginPath } from "./postLoginPath";
+import { postLoginPath, preservedPortalSearch } from "./postLoginPath";
 
 describe("postLoginPath", () => {
   it("sends platform users to /admin", () => {
@@ -14,5 +14,13 @@ describe("postLoginPath", () => {
   it("sends learn and parents portals to student home", () => {
     expect(postLoginPath({ portalType: "learn" })).toBe("/");
     expect(postLoginPath({ portalType: "parents" })).toBe("/");
+  });
+
+  it("regression_preserves_same_origin_franchise_portal_query", () => {
+    expect(
+      preservedPortalSearch(
+        new URLSearchParams("portal=center&brand=abacusworld&center=pune&next=/app")
+      )
+    ).toBe("?portal=center&brand=abacusworld&center=pune");
   });
 });

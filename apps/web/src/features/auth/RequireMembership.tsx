@@ -27,7 +27,7 @@ function hasBrandOversightRole(
 export function RequireMembership({ children }: { children: ReactNode }) {
   const tenant = useTenant();
   const { tenant: portalTenant, isResolving: portalTenantResolving } = useResolvedPortalTenant();
-  const { data: memberships, isLoading } = useMembership();
+  const { data: memberships, isLoading, isFetched, isError } = useMembership();
 
   const centerStatus = useQuery({
     queryKey: ["center-operational-status", portalTenant.centerId],
@@ -47,7 +47,7 @@ export function RequireMembership({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
-  if (isLoading || portalTenantResolving || centerStatus.isLoading) {
+  if (isLoading || !isFetched || isError || portalTenantResolving || centerStatus.isLoading) {
     return (
       <ThemeProvider>
         <div className="ed-login">

@@ -21,6 +21,8 @@ const { signInWithEmail, authState, membershipState, tenantState, portalBranding
   membershipState: {
     data: [] as Membership[],
     isLoading: false,
+    isFetched: true,
+    isError: false,
   },
   tenantState: {
     portalType: "center" as const,
@@ -85,6 +87,10 @@ vi.mock("@/hooks/useMembership", () => ({
   useMembership: () => ({
     data: membershipState.data,
     isLoading: membershipState.isLoading,
+    isPending: membershipState.isLoading || !membershipState.isFetched,
+    isFetching: membershipState.isLoading,
+    isFetched: membershipState.isFetched,
+    isError: membershipState.isError,
   }),
 }));
 
@@ -160,7 +166,7 @@ function renderCenterLogin(initialPath = "/login") {
   );
   const view = render(shell);
   rerenderRef.current = () => view.rerender(shell);
-  return view;
+  return { ...view, router };
 }
 
 describe("LoginPage center portal", () => {
@@ -170,6 +176,8 @@ describe("LoginPage center portal", () => {
     authState.user = null;
     membershipState.data = [];
     membershipState.isLoading = false;
+    membershipState.isFetched = true;
+    membershipState.isError = false;
     portalBrandingState.isFetched = true;
     portalBrandingState.isFetching = false;
     portalBrandingState.isLoading = false;
@@ -208,6 +216,28 @@ describe("LoginPage center portal", () => {
 
     await expectRedirectTo("Center app home");
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
+  });
+
+  it("regression_center_login_keeps_portal_query_on_app_redirect", async () => {
+    authState.session = { user: { id: "f0000000-0000-4000-8000-000000000003" } };
+    authState.user = { id: "f0000000-0000-4000-8000-000000000003" };
+    membershipState.data = [
+      {
+        id: "c0000000-0000-4000-8000-000000000003",
+        role_key: "center_owner",
+        scope_type: "center",
+        brand_id: ABACUSWORLD_BRAND_ID,
+        center_id: KORAMANGALA_CENTER_ID,
+      },
+    ];
+
+    const { router } = renderCenterLogin(
+      "/login?portal=center&brand=abacusworld&center=koramangala"
+    );
+
+    await expectRedirectTo("Center app home");
+    expect(router.state.location.pathname).toBe("/app");
+    expect(router.state.location.search).toBe("?portal=center&brand=abacusworld&center=koramangala");
   });
 
 });

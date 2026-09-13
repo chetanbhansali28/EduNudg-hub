@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expectRedirectTo } from "./expectRedirectTo";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
@@ -11,9 +11,18 @@ import { exactAccessibleName } from "@/test/exactAccessibleName";
 /** IDs from supabase/seed/test-users.sql */
 const ABACUSWORLD_BRAND_ID = "a0000000-0000-4000-8000-000000000001";
 
-const { signInWithEmail, authState, membershipState, tenantState, portalBrandingState, rerenderRef } =
+const { signInWithEmail, signOut, authState, membershipState, tenantState, portalBrandingState, rerenderRef } =
   vi.hoisted(() => ({
   signInWithEmail: vi.fn(),
+  signOut: vi.fn().mockImplementation(async () => {
+    authState.session = null;
+    authState.user = null;
+    try {
+      rerenderRef.current();
+    } catch {
+      // Router unmounted during async sign-out in tests
+    }
+  }),
   authState: {
     session: null as { user: { id: string } } | null,
     user: null as { id: string } | null,
@@ -21,6 +30,8 @@ const { signInWithEmail, authState, membershipState, tenantState, portalBranding
   membershipState: {
     data: [] as Membership[],
     isLoading: false,
+    isFetched: true,
+    isError: false,
   },
   tenantState: {
     portalType: "brand" as const,
@@ -74,6 +85,7 @@ vi.mock("@/bootstrap/AuthProvider", () => ({
     },
     signInWithOtpPhone: vi.fn().mockResolvedValue({ error: null }),
     signInWithPasskey: vi.fn().mockResolvedValue({ error: null }),
+    signOut,
   }),
 }));
 
@@ -85,6 +97,10 @@ vi.mock("@/hooks/useMembership", () => ({
   useMembership: () => ({
     data: membershipState.data,
     isLoading: membershipState.isLoading,
+    isPending: membershipState.isLoading || !membershipState.isFetched,
+    isFetching: membershipState.isLoading,
+    isFetched: membershipState.isFetched,
+    isError: membershipState.isError,
   }),
 }));
 
@@ -166,10 +182,13 @@ function renderBrandLogin(initialPath = "/login") {
 describe("LoginPage brand portal", () => {
   beforeEach(() => {
     signInWithEmail.mockReset();
+    signOut.mockClear();
     authState.session = null;
     authState.user = null;
     membershipState.data = [];
     membershipState.isLoading = false;
+    membershipState.isFetched = true;
+    membershipState.isError = false;
     tenantState.brandId = ABACUSWORLD_BRAND_ID;
     portalBrandingState.isFetched = true;
     portalBrandingState.isFetching = false;
@@ -270,6 +289,22 @@ describe("LoginPage brand portal", () => {
 
     await expectRedirectTo("Brand app home");
     expect(screen.queryByText(/do not have access to this portal/i)).toBeNull();
+  });
+
+  it("regression_brand_does_not_sign_out_before_memberships_fetch_completes", async () => {
+    authState.session = { user: { id: "f0000000-0000-4000-8000-000000000002" } };
+    authState.user = { id: "f0000000-0000-4000-8000-000000000002" };
+    membershipState.data = [];
+    membershipState.isLoading = false;
+    membershipState.isFetched = false;
+
+    renderBrandLogin("/login");
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: exactAccessibleName("Log in") })).toBeDefined();
+    });
+    expect(signOut).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 
 });

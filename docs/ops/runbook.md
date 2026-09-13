@@ -42,6 +42,8 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | http://koramangala.abacusworld.localhost:9000/app | Center operations dashboard |
 | http://learn.abacusworld.localhost:9000/login | Student login (white-label) |
 
+New franchise owners must use the center login URL (or `/login?portal=center&brand=…&center=…` on Vercel), not platform `/login`. New brand owners use `{brand}.localhost:9000/login`. Apply migration `101_accept_own_invited_memberships.sql` so invited owner rows activate on first staff sign-in. Student (learn) login does not use staff memberships.
+
 **Marketing landing UI** (shared nav, hero, feature phone stage, footer): see [marketing-landing.md](../frontend/marketing-landing.md). On mobile/tablet, nav CTA is right-aligned; feature blocks snap one per screen.
 
 **White-label copy** (optional): Brand Settings → **White-label & Login Copy**. Saves `login_headline` / `login_subtext` on `brand_settings.settings`. Login screens read them via `get_portal_branding`. Empty fields use per-portal defaults. Settings shows a mini login split that updates as you type (hero stays visible). **Save Copy** publishes and clears the in-memory branding cache so `/login` (desktop, where the real hero is shown) picks up new text.
@@ -80,7 +82,7 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 
 **Production on `main` / `master`:** Vercel Git auto-deploy is enabled for those branches only (`apps/web/vercel.json` → `git.deploymentEnabled`). Other branches do not auto-deploy.
 
-**PR previews + optional Actions production:** [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) uses remote Vercel builds when repository secrets are set. If secrets are missing, CD skips the CLI deploy with a warning (does not fail on empty `--token=`).
+**PR previews + optional Actions production:** [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) uses remote Vercel builds when repository secrets are set. If secrets are missing, CD skips the CLI deploy with a warning (does not fail on empty `--token=`). CD `setup-node` must set `package-manager-cache: false` (and must not set `cache: pnpm`) — those jobs never install pnpm; v5 otherwise auto-detects `packageManager` in root `package.json` and fails with `Unable to locate executable file: pnpm`, then Post Run cache save fails with `Path Validation Error`.
 
 Do not use local `vercel build` + `vercel deploy --prebuilt` for this Vite SPA when `VITE_*` settings are marked **Sensitive** in Vercel. `vercel pull` intentionally downloads those values as `[SENSITIVE]`; a local build then embeds that marker in the browser bundle. Remote `vercel deploy` builds inside Vercel with the real protected values.
 
