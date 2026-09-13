@@ -2,6 +2,15 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+describe("publicSeo vite plugin", () => {
+  it("regression_vite_seo_plugin_does_not_statically_import_app_aliases", () => {
+    const plugin = readFileSync(resolve(__dirname, "../vitePublicSeoPlugin.ts"), "utf8");
+    expect(plugin).not.toMatch(/from\s+["']@\//);
+    expect(plugin).not.toMatch(/from\s+["']\.\/lib\/publicSeo/);
+    expect(plugin).toContain("ssrLoadModule");
+  });
+});
+
 describe("publicSeo vercel rewrites", () => {
   it("regression_vercel_rewrites_do_not_swallow_robots_sitemap_llms", () => {
     const json = JSON.parse(readFileSync(resolve(__dirname, "../../vercel.json"), "utf8")) as {

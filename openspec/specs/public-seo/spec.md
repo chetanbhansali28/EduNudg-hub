@@ -83,3 +83,13 @@ Indexable pages SHALL emit JSON-LD: WebSite + Organization (brand/platform), Edu
 ### Requirement: First HTML includes the tags
 
 Production HTML for public paths SHALL include the derived title, description, canonical, robots, Open Graph, and JSON-LD before JavaScript runs. The SPA SHALL keep the same tags in `PortalDocumentHead` after navigation.
+
+### Requirement: Vite config must load without app aliases
+
+`vitePublicSeoPlugin` SHALL NOT statically import `@/` or `publicSeoHandlers`. Dev discovery SHALL load handlers through `ssrLoadModule` so `vite build` can load `vite.config.ts`.
+
+#### Scenario: Plugin stays off the Vite config import graph
+
+- **GIVEN** `vite.config.ts` registers `publicSeoDevPlugin`
+- **WHEN** `vite build` loads the config
+- **THEN** the plugin does not import `@/lib` or `./lib/publicSeoHandlers` at module load time
