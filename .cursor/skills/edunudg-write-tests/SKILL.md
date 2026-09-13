@@ -13,7 +13,7 @@ description: Write tests for EduNudg features and bugfixes. Required for every P
 | Migration / RLS | `supabase/tests/rls_*.sql` |
 | Bug fix | `regression_*` test |
 
-Use portal helpers in `e2e/helpers/portal.ts` (CI overrides; `E2E_USE_LOCAL_HOSTS=1` for subdomains). Skip OAuth/payment live flows. Golden paths require Supabase env. Playwright platform admin is `admin@edunudg.com` / `admin1` (`E2E_USERS.platform`); brand/center/student seed passwords stay `admin`.
+Use portal helpers in `e2e/helpers/portal.ts` (CI overrides; `E2E_USE_LOCAL_HOSTS=1` for subdomains). Skip OAuth/payment live flows. Golden paths require Supabase env. Public lead **submit** specs also require seeded `abacusworld` (`hasE2ESeedTenant` → `get_brand_landing_public`); skip instead of asserting against **Brand not found**. Playwright platform admin is `admin@edunudg.com` / `admin1` (`E2E_USERS.platform`); brand/center/student seed passwords stay `admin`.
 
 ## Commands
 
@@ -33,7 +33,7 @@ When mocking `@/lib/homepageApi`, use `importOriginal` and spread `...actual` so
 
 **CSS `content` glyphs:** marketing/public stylesheets must use Unicode escapes (`content` = U+2713 via `\\2713`) for checkmarks — never a raw `✓`. Double-encoded UTF-8 becomes `â` after production minify. Regression: `regression_pricing_feature_checkmarks_use_css_unicode_escape`.
 
-Spark Academy / Abacus Classic public lead forms live in modals — Playwright helpers: `e2e/helpers/leadModals.ts` (dialog-scoped fills; deep links `#enroll`, `#enroll-student`, `#register`, `#apply`). Mapping: `resolveLeadModalKind.ts`; hash open: `LeadModalHashOpener`. Spark skins dialogs with `ac-modal--spark` (`regression_spark_lead_modals_use_theme_classes`, `regression_spark_lead_modal_css_matches_theme_tokens`). Spark homepage motion: `regression_spark_homepage_motion_css_respects_reduced_motion`, `regression_spark_section_items_stagger_inside_blocks`. Center Path B passes `centerSlug` so enroll submits `submitCenterStudentRegistration`.
+Spark Academy / Abacus Classic public lead forms live in modals — Playwright helpers: `e2e/helpers/leadModals.ts` (dialog-scoped fills; deep links `#enroll`, `#enroll-student`, `#register`, `#apply`). Novu seed (`abacusworld`) is inline: franchise uses **Phone** / **Preferred city**, student uses **WhatsApp number**. Mapping: `resolveLeadModalKind.ts`; hash open: `LeadModalHashOpener`. Spark skins dialogs with `ac-modal--spark` (`regression_spark_lead_modals_use_theme_classes`, `regression_spark_lead_modal_css_matches_theme_tokens`). Spark homepage motion: `regression_spark_homepage_motion_css_respects_reduced_motion`, `regression_spark_section_items_stagger_inside_blocks`. Center Path B passes `centerSlug` so enroll submits `submitCenterStudentRegistration`.
 
 **E2E brand cleanup:** any test that approves a platform brand signup must call `cleanupEphemeralE2EBrand` (see `e2e/helpers/brandCleanup.ts`) so `/admin/brands`, `/admin/subscriptions`, and `/admin/audit` do not accumulate `E2E Brand …` rows. Prefer hard-delete via `hardDeleteEphemeralE2EBrands` (SQL or platform RPC `purge_ephemeral_e2e_brands`) — removes brands, `brand_subscriptions`, signups, and audit logs (not soft archive). Matchers: `e2eEphemeralBrand.ts`.
 

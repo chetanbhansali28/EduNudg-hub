@@ -47,13 +47,14 @@ export type CenterLandingOutletContext = {
 
 export function CenterPublicLayout({ showFooter = true }: Props) {
   const tenant = useTenant();
-  const brandSlug = tenant.brandSlug ?? "brand";
-  const centerSlug = tenant.centerSlug ?? "center";
+  const brandSlug = tenant.brandSlug?.trim() ?? "";
+  const centerSlug = tenant.centerSlug?.trim() ?? "";
   const location = useLocation();
 
   const { data: bundle, isLoading } = useQuery({
     queryKey: ["center-landing", brandSlug, centerSlug],
     queryFn: () => fetchCenterLandingBundle(brandSlug, centerSlug),
+    enabled: Boolean(brandSlug && centerSlug),
   });
 
   const theme = bundle?.marketingTheme ?? "novu";

@@ -1,19 +1,23 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { mergeAbacusClassicLandingConfig, buildBrandLandingConfig, mergeSparkAcademyLandingConfig, mergeEduLearnLandingConfig } from "@/lib/brandLandingDefaults";
 import { BrandPublicLayout } from "./BrandPublicLayout";
 
-vi.mock("@/bootstrap/TenantProvider", () => ({
-  useTenant: () => ({
-    portalType: "brand",
+const { tenantState } = vi.hoisted(() => ({
+  tenantState: {
+    portalType: "brand" as const,
     hostname: "smart-brain-abacus.localhost",
-    brandSlug: "smart-brain-abacus",
+    brandSlug: "smart-brain-abacus" as string | null,
     brandId: null,
     centerId: null,
     centerSlug: null,
-  }),
+  },
+}));
+
+vi.mock("@/bootstrap/TenantProvider", () => ({
+  useTenant: () => tenantState,
 }));
 
 vi.mock("@/lib/brandLandingApi", () => ({
@@ -29,6 +33,32 @@ vi.mock("@/features/marketing/FooterSection", () => ({
 }));
 
 describe("BrandPublicLayout", () => {
+  beforeEach(() => {
+    tenantState.brandSlug = "smart-brain-abacus";
+  });
+
+  it("regression_public_layout_does_not_fetch_dummy_brand_slug", async () => {
+    tenantState.brandSlug = null;
+    const { fetchBrandLandingBundle } = await import("@/lib/brandLandingApi");
+    vi.mocked(fetchBrandLandingBundle).mockClear();
+
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route element={<BrandPublicLayout />}>
+              <Route path="/" element={<div>Page body</div>} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText("Loading…")).toBeDefined();
+    expect(fetchBrandLandingBundle).not.toHaveBeenCalled();
+  });
+
   it("sprint1_renders_novu_layout_for_novu_theme", async () => {
     const { fetchBrandLandingBundle } = await import("@/lib/brandLandingApi");
     vi.mocked(fetchBrandLandingBundle).mockResolvedValue({

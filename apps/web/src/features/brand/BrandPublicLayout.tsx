@@ -34,13 +34,14 @@ type Props = {
 
 export function BrandPublicLayout({ showFooter = true }: Props) {
   const tenant = useTenant();
-  const brandSlug = tenant.brandSlug ?? "brand";
+  const brandSlug = tenant.brandSlug?.trim() ?? "";
   const location = useLocation();
 
   const { data: bundle, isLoading } = useQuery({
     queryKey: ["brand-landing", brandSlug],
     queryFn: () => fetchBrandLandingBundle(brandSlug),
     select: normalizeBrandLandingBundle,
+    enabled: Boolean(brandSlug),
   });
 
   const theme = bundle?.marketingTheme ?? "novu";

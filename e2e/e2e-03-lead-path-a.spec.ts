@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { authStatePath, hasE2EBackend } from "./helpers/env";
+import { authStatePath, E2E_SEED_SKIP_REASON, hasE2EBackend, hasE2ESeedTenant } from "./helpers/env";
 import { brandUrl, centerUrl, SEED } from "./helpers/portal";
-import { fillBrandStudentLead } from "./helpers/leadModals";
+import { expectLeadReceived, fillBrandStudentLead } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
   makeE2ELeadFields,
@@ -11,6 +11,7 @@ test.describe("E2E-03 — Student lead Path A (brand → assign → convert)", (
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
 
   test("parent applies on brand → brand sees unassigned → center convert path", async ({ browser }) => {
+    test.skip(!(await hasE2ESeedTenant()), E2E_SEED_SKIP_REASON);
     test.setTimeout(90_000);
     const fields = makeE2ELeadFields({ tag: `path-a-${Date.now().toString(36)}` });
 
@@ -30,9 +31,7 @@ test.describe("E2E-03 — Student lead Path A (brand → assign → convert)", (
         },
         brandUrl(SEED.brandSlug, "/#enroll-student")
       );
-      await expect(publicPage.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
-        timeout: 20_000,
-      });
+      await expectLeadReceived(publicPage);
       await publicCtx.close();
 
       const brandCtx = await browser.newContext({ storageState: authStatePath("brand") });

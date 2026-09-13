@@ -33,6 +33,8 @@ On Spark Academy, lead dialogs SHALL use Spark chrome (`ac-modal--spark`): Inter
 - **WHEN** a parent submits the student application on the brand public homepage
 - **THEN** the system creates or merges a lead via `submit_brand_student_application`
 - **AND** sets `lead_source = brand` with `center_id` null
+- **AND** the public layout never submits with a placeholder slug such as `brand`
+- **AND** Playwright Path A / Path B / merge / lost / stale submit specs skip unless `get_brand_landing_public` returns the seeded `abacusworld` tenant
 
 #### Scenario: Lead modal fits viewport on desktop and mobile
 

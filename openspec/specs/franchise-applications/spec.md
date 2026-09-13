@@ -37,6 +37,13 @@ Traceability: FR-B01, FR-B03
 - **WHEN** a franchise applicant attempts to apply
 - **THEN** they use the brand host only — not the platform brand-signup form or center registration form
 
+#### Scenario: Public apply uses the tenant brand slug
+
+- **GIVEN** the brand public layout has no resolved `brandSlug`
+- **WHEN** the page loads
+- **THEN** it does not fetch landing or submit inquiries with a placeholder slug such as `brand`
+- **AND** Playwright public apply (E2E-02) skips unless `get_brand_landing_public` returns the seeded `abacusworld` tenant
+
 ### Requirement: Franchise applications workspace
 
 Brand staff SHALL manage franchise inquiries at `/app/franchise-applications`, separate from Settings.

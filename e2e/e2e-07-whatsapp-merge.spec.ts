@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { hasE2EBackend } from "./helpers/env";
+import { E2E_SEED_SKIP_REASON, hasE2EBackend, hasE2ESeedTenant } from "./helpers/env";
 import { brandUrl, SEED } from "./helpers/portal";
-import { fillBrandStudentLead, expectLeadFormReady } from "./helpers/leadModals";
+import { expectLeadFormReady, expectLeadReceived, fillBrandStudentLead } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
   makeE2ELeadFields,
@@ -13,6 +13,7 @@ test.describe("E2E-07 — WhatsApp duplicate merge", () => {
   test("second application same WhatsApp merges (success, no duplicate toast of two creates)", async ({
     page,
   }) => {
+    test.skip(!(await hasE2ESeedTenant()), E2E_SEED_SKIP_REASON);
     const tag = `merge-${Date.now().toString(36)}`;
     const fields = makeE2ELeadFields({ tag });
     const enrollUrl = brandUrl(SEED.brandSlug, "/#enroll-student");
@@ -34,14 +35,10 @@ test.describe("E2E-07 — WhatsApp duplicate merge", () => {
       }
 
       await submit("a");
-      await expect(page.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
-        timeout: 20_000,
-      });
+      await expectLeadReceived(page);
 
       await submit("b");
-      await expect(page.getByRole("status").filter({ hasText: /received|contact you/i })).toBeVisible({
-        timeout: 20_000,
-      });
+      await expectLeadReceived(page);
     } finally {
       await cleanupEphemeralE2ELead({ brandId: SEED.brandId, whatsapp: fields.whatsapp });
     }

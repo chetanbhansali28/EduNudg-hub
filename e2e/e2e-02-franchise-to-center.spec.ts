@@ -1,13 +1,14 @@
 import { test, expect } from "@playwright/test";
-import { authStatePath, hasE2EBackend } from "./helpers/env";
+import { authStatePath, E2E_SEED_SKIP_REASON, hasE2EBackend, hasE2ESeedTenant } from "./helpers/env";
 import { uniqueWhatsApp } from "./helpers/auth";
 import { brandUrl, centerUrl, SEED } from "./helpers/portal";
-import { fillFranchiseApplication, expectLeadDialogOpen } from "./helpers/leadModals";
+import { fillFranchiseApplication, expectLeadDialogOpen, expectLeadReceived } from "./helpers/leadModals";
 
 test.describe("E2E-02 — Franchise application → center live", () => {
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
 
   test("applicant submits franchise application on brand public site", async ({ page }) => {
+    test.skip(!(await hasE2ESeedTenant()), E2E_SEED_SKIP_REASON);
     const suffix = Date.now().toString(36);
     await page.goto(brandUrl(SEED.brandSlug, "/#apply"));
     await fillFranchiseApplication(
@@ -21,9 +22,7 @@ test.describe("E2E-02 — Franchise application → center live", () => {
       },
       brandUrl(SEED.brandSlug, "/#apply")
     );
-    await expect(page.getByText(/received|submitted|thank|success/i).first()).toBeVisible({
-      timeout: 20_000,
-    });
+    await expectLeadReceived(page);
   });
 
   test("brand owner sees franchise applications queue", async ({ browser }) => {

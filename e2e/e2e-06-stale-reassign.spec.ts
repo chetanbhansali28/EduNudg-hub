@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { authStatePath, hasDatabaseUrl, hasE2EBackend } from "./helpers/env";
+import { authStatePath, E2E_SEED_SKIP_REASON, hasDatabaseUrl, hasE2EBackend, hasE2ESeedTenant } from "./helpers/env";
 import { brandUrl, SEED } from "./helpers/portal";
 import { backdateLeadStale, findLeadIdByWhatsapp } from "./helpers/sql";
 import { fillBrandStudentLead } from "./helpers/leadModals";
@@ -13,6 +13,7 @@ test.describe("E2E-06 — Stale lead & reallocation", () => {
   test.skip(!hasDatabaseUrl(), "Requires DATABASE_URL for stale backdate");
 
   test("backdated assigned lead appears in Stale; reassign works", async ({ browser }) => {
+    test.skip(!(await hasE2ESeedTenant()), E2E_SEED_SKIP_REASON);
     const fields = makeE2ELeadFields({ tag: `stale-${Date.now().toString(36)}` });
 
     try {

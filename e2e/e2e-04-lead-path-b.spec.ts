@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { authStatePath, hasE2EBackend } from "./helpers/env";
+import { authStatePath, E2E_SEED_SKIP_REASON, hasE2EBackend, hasE2ESeedTenant } from "./helpers/env";
 import { brandUrl, centerUrl, SEED } from "./helpers/portal";
-import { fillCenterStudentRegistration } from "./helpers/leadModals";
+import { expectLeadReceived, fillCenterStudentRegistration } from "./helpers/leadModals";
 import {
   cleanupEphemeralE2ELead,
   makeE2ELeadFields,
@@ -11,6 +11,7 @@ test.describe("E2E-04 — Student lead Path B (center register → convert)", ()
   test.skip(!hasE2EBackend(), "Requires VITE_SUPABASE_URL + anon key");
 
   test("parent registers on center site → center lead → brand visibility", async ({ browser }) => {
+    test.skip(!(await hasE2ESeedTenant()), E2E_SEED_SKIP_REASON);
     const fields = makeE2ELeadFields({ tag: `path-b-${Date.now().toString(36)}` });
 
     try {
@@ -27,9 +28,7 @@ test.describe("E2E-04 — Student lead Path B (center register → convert)", ()
         },
         centerUrl(SEED.brandSlug, SEED.centerSlug, "/#register")
       );
-      await expect(
-        publicPage.getByRole("status").filter({ hasText: /Registration received|received/i })
-      ).toBeVisible({ timeout: 20_000 });
+      await expectLeadReceived(publicPage);
       await publicCtx.close();
 
       const centerCtx = await browser.newContext({ storageState: authStatePath("center") });

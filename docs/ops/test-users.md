@@ -61,6 +61,8 @@ If center login fails after setting credentials: confirm migration `073_center_o
 
 Seeded demo brand login remains `owner@edunudg.com` / `admin` at http://abacusworld.localhost:9000/login when `test-users.sql` has been applied.
 
+Playwright public lead **submits** (franchise apply, brand/center student apply, merge, lost, stale) require that same seed: `hasE2ESeedTenant()` probes `get_brand_landing_public('abacusworld')`. A connected cloud project without `abacusworld` skips those mutations instead of failing with **Brand not found**. Staff `/app` specs can still run when seed users exist.
+
 ## Demo URL sheet (Vercel)
 
 Bookmark list for **Smart Brain Abacus** client demos: [demo-smart-brain-abacus-urls.md](./demo-smart-brain-abacus-urls.md)

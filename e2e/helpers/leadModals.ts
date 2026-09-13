@@ -3,10 +3,11 @@ import { expect } from "@playwright/test";
 
 /**
  * Public lead forms:
- * - Abacus Classic / Spark Academy → <dialog> modals (LeadModalHashOpener)
+ * - Abacus Classic / Spark Academy / EduLearn → <dialog> modals (LeadModalHashOpener)
  * - Novu → inline sections (#enroll-student, #register, #apply, #enroll)
  *
- * Seeded E2E brand `abacusworld` uses Novu, so helpers must support both.
+ * Seeded E2E brand `abacusworld` uses Novu. Franchise Novu labels are Phone /
+ * Preferred city; modal themes use WhatsApp number / City.
  */
 export function leadDialog(page: Page): Locator {
   return page.locator("dialog[open]").first();
@@ -20,6 +21,26 @@ function sectionIdFromHash(hash: string): string {
 
 export function leadInlineSection(page: Page, hash: string): Locator {
   return page.locator(`#${sectionIdFromHash(hash)}`);
+}
+
+async function fillByLabels(root: Locator, labels: string[], value: string) {
+  for (const label of labels) {
+    const field = root.getByLabel(label, { exact: true });
+    if ((await field.count()) === 0) continue;
+    if (!(await field.first().isVisible().catch(() => false))) continue;
+    await field.first().fill(value);
+    return;
+  }
+  await root.getByLabel(labels[0]!, { exact: true }).fill(value);
+}
+
+async function submitLeadForm(form: Locator) {
+  const typed = form.locator('button[type="submit"]').first();
+  if ((await typed.count()) > 0) {
+    await typed.click();
+    return;
+  }
+  await form.getByRole("button", { name: SUBMIT_NAME }).click();
 }
 
 /** Visible lead form: open dialog (modal themes) or inline section (Novu). */
@@ -66,6 +87,16 @@ export async function openLeadDeepLink(page: Page, url: string) {
 const SUBMIT_NAME =
   /book free demo|request a free trial|register for a free trial|submit|apply|enroll|register/i;
 
+export async function expectLeadReceived(page: Page, match = /received|contact you|thank|success/i) {
+  const status = page.getByRole("status").filter({ hasText: match });
+  const alert = page.getByRole("alert");
+  await expect(status.or(alert).first()).toBeVisible({ timeout: 20_000 });
+  if ((await status.isVisible().catch(() => false)) === false) {
+    const detail = (await alert.textContent().catch(() => ""))?.trim() || "unknown error";
+    throw new Error(`Lead submit did not succeed: ${detail}`);
+  }
+}
+
 export async function fillBrandStudentLead(
   page: Page,
   fields: {
@@ -79,18 +110,14 @@ export async function fillBrandStudentLead(
   deepLinkUrl?: string
 ) {
   const hash = deepLinkUrl ? new URL(deepLinkUrl).hash || "#enroll-student" : "#enroll-student";
-  if (deepLinkUrl) await openLeadDeepLink(page, deepLinkUrl);
-  else await expectLeadFormReady(page, hash);
-  const form = (await leadDialog(page).isVisible().catch(() => false))
-    ? leadDialog(page)
-    : leadInlineSection(page, hash);
+  const form = deepLinkUrl ? await openLeadDeepLink(page, deepLinkUrl) : await expectLeadFormReady(page, hash);
   await form.getByLabel("Parent name").fill(fields.parentName);
-  await form.getByLabel("WhatsApp number").fill(fields.whatsapp);
+  await fillByLabels(form, ["WhatsApp number", "Phone"], fields.whatsapp);
   await form.getByLabel("Email").fill(fields.email);
   await form.getByLabel("Child name").fill(fields.childName);
-  await form.getByLabel("City", { exact: true }).fill(fields.city);
-  await form.getByLabel("Pincode", { exact: true }).fill(fields.pincode);
-  await form.getByRole("button", { name: SUBMIT_NAME }).click();
+  await fillByLabels(form, ["City", "Preferred city"], fields.city);
+  await fillByLabels(form, ["Pincode", "Pincode (optional)"], fields.pincode);
+  await submitLeadForm(form);
 }
 
 export async function fillCenterStudentRegistration(
@@ -104,16 +131,12 @@ export async function fillCenterStudentRegistration(
   deepLinkUrl?: string
 ) {
   const hash = deepLinkUrl ? new URL(deepLinkUrl).hash || "#register" : "#register";
-  if (deepLinkUrl) await openLeadDeepLink(page, deepLinkUrl);
-  else await expectLeadFormReady(page, hash);
-  const form = (await leadDialog(page).isVisible().catch(() => false))
-    ? leadDialog(page)
-    : leadInlineSection(page, hash);
+  const form = deepLinkUrl ? await openLeadDeepLink(page, deepLinkUrl) : await expectLeadFormReady(page, hash);
   await form.getByLabel("Parent name").fill(fields.parentName);
-  await form.getByLabel("WhatsApp number").fill(fields.whatsapp);
+  await fillByLabels(form, ["WhatsApp number", "Phone"], fields.whatsapp);
   await form.getByLabel("Email").fill(fields.email);
   await form.getByLabel("Child name").fill(fields.childName);
-  await form.getByRole("button", { name: SUBMIT_NAME }).click();
+  await submitLeadForm(form);
 }
 
 export async function fillFranchiseApplication(
@@ -128,17 +151,16 @@ export async function fillFranchiseApplication(
   deepLinkUrl?: string
 ) {
   const hash = deepLinkUrl ? new URL(deepLinkUrl).hash || "#apply" : "#apply";
-  if (deepLinkUrl) await openLeadDeepLink(page, deepLinkUrl);
-  else await expectLeadFormReady(page, hash);
-  const form = (await leadDialog(page).isVisible().catch(() => false))
-    ? leadDialog(page)
-    : leadInlineSection(page, hash);
+  const form = deepLinkUrl ? await openLeadDeepLink(page, deepLinkUrl) : await expectLeadFormReady(page, hash);
   await form.getByLabel("Full name").fill(fields.fullName);
   await form.getByLabel("Email").fill(fields.email);
-  await form.getByLabel("WhatsApp number").fill(fields.whatsapp);
-  await form.getByLabel("City", { exact: true }).fill(fields.city);
+  await fillByLabels(form, ["WhatsApp number", "Phone"], fields.whatsapp);
+  await fillByLabels(form, ["City", "Preferred city"], fields.city);
   if (fields.qualification) {
-    await form.getByLabel("Educational qualification").fill(fields.qualification);
+    const qual = form.getByLabel("Educational qualification", { exact: true });
+    if ((await qual.count()) > 0 && (await qual.isVisible().catch(() => false))) {
+      await qual.fill(fields.qualification);
+    }
   }
-  await form.getByRole("button", { name: /apply for franchise|submit|apply/i }).click();
+  await submitLeadForm(form);
 }

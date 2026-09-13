@@ -7,12 +7,12 @@ Maps checklist IDs to automation layer. Update `status` / `test file` as coverag
 | id | layer | status | test file / notes |
 |----|-------|--------|-------------------|
 | E2E-01 | e2e | partial | `e2e/e2e-01-brand-onboarding.spec.ts` (needs backend; hard-deletes ephemeral brand + audit after approve) |
-| E2E-02 | e2e | partial | `e2e/e2e-02-franchise-to-center.spec.ts` |
-| E2E-03 | e2e | partial | `e2e/e2e-03-lead-path-a.spec.ts` |
-| E2E-04 | e2e | partial | `e2e/e2e-04-lead-path-b.spec.ts` |
-| E2E-05 | e2e | partial | `e2e/e2e-05-lost-reopen.spec.ts` |
-| E2E-06 | e2e | partial | `e2e/e2e-06-stale-reassign.spec.ts` (+ SQL helper) |
-| E2E-07 | e2e+rls | partial | `e2e/e2e-07-whatsapp-merge.spec.ts`; `rls_franchise_student_journey.sql` |
+| E2E-02 | e2e | partial | `e2e/e2e-02-franchise-to-center.spec.ts` (submit skips without seeded `abacusworld`) |
+| E2E-03 | e2e | partial | `e2e/e2e-03-lead-path-a.spec.ts` (submit skips without seeded `abacusworld`) |
+| E2E-04 | e2e | partial | `e2e/e2e-04-lead-path-b.spec.ts` (submit skips without seeded `abacusworld`) |
+| E2E-05 | e2e | partial | `e2e/e2e-05-lost-reopen.spec.ts` (submit skips without seeded `abacusworld`) |
+| E2E-06 | e2e | partial | `e2e/e2e-06-stale-reassign.spec.ts` (+ SQL helper; submit skips without seeded `abacusworld`) |
+| E2E-07 | e2e+rls | partial | `e2e/e2e-07-whatsapp-merge.spec.ts`; `rls_franchise_student_journey.sql` (submit skips without seeded `abacusworld`) |
 | E2E-08 | e2e | partial | `e2e/e2e-08-manual-entry.spec.ts` |
 | E2E-09 | e2e | partial | `e2e/e2e-09-learn-portal.spec.ts` |
 | E2E-10 | e2e | partial | `e2e/e2e-10-center-public-profile.spec.ts` |
