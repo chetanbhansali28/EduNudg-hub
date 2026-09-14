@@ -1,18 +1,21 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { centerPublicLoginHrefs } from "@/features/marketing/CenterPublicNavLogins";
+import { MarketingHomeLink } from "@/features/marketing/MarketingPublicOrigin";
 import { MarketingSectionNavLink } from "@/features/marketing/MarketingSectionNavLink";
 import { EduLearnCta } from "./EduLearnCta";
+import { FranchiseBrandWordmark } from "@/features/marketing/FranchiseBrandWordmark";
 
 type Props = {
   config: HomepageConfig;
   brandSlug?: string;
+  brandName?: string | null;
+  centerSlug?: string | null;
 };
 
-export function EduLearnNav({ config, brandSlug }: Props) {
-  const logins = brandSlug ? centerPublicLoginHrefs(brandSlug) : null;
+export function EduLearnNav({ config, brandSlug, brandName, centerSlug }: Props) {
+  const logins = brandSlug ? centerPublicLoginHrefs(brandSlug, centerSlug) : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const logoUrl = config.meta.logoUrl?.trim() || null;
@@ -54,10 +57,13 @@ export function EduLearnNav({ config, brandSlug }: Props) {
               aria-label="Site menu"
             >
               <div className="el-nav__drawer-head">
-                <Link to="/" className="el-nav__drawer-brand" onClick={closeMenu}>
+                <MarketingHomeLink className="el-nav__drawer-brand" onClick={closeMenu}>
                   {mark}
-                  <span>{config.meta.siteName}</span>
-                </Link>
+                  <FranchiseBrandWordmark
+                    siteName={config.meta.siteName}
+                    brandName={logins ? brandName : null}
+                  />
+                </MarketingHomeLink>
                 <button type="button" className="el-nav__drawer-close" aria-label="Close menu" onClick={closeMenu}>
                   ×
                 </button>
@@ -109,10 +115,14 @@ export function EduLearnNav({ config, brandSlug }: Props) {
           >
             <span className="el-nav__menu-icon" aria-hidden />
           </button>
-          <Link to="/" className="el-nav__logo-link">
+          <MarketingHomeLink className="el-nav__logo-link">
             {mark}
-            <span className="el-nav__wordmark">{config.meta.siteName}</span>
-          </Link>
+            <FranchiseBrandWordmark
+              className="el-nav__wordmark"
+              siteName={config.meta.siteName}
+              brandName={logins ? brandName : null}
+            />
+          </MarketingHomeLink>
         </div>
         <nav className="el-nav__links" aria-label="Sections">
           {config.nav.links.map((link, i) => (

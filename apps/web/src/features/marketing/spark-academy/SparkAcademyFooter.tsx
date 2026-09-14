@@ -9,6 +9,7 @@ import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIc
 import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
 import { FooterLinkColumn } from "@/features/marketing/footer/FooterLinkColumn";
 import { CenterFooterContactBlock } from "@/features/marketing/footer/CenterFooterContactBlock";
+import { FranchiseBrandWordmark } from "@/features/marketing/FranchiseBrandWordmark";
 
 type Props = {
   config: HomepageConfig;
@@ -16,6 +17,7 @@ type Props = {
   socialConnect?: BrandSocialConnect;
   /** Center host only — `null` hides brand placeholder phone. */
   centerContact?: CenterFooterContact | null;
+  brandName?: string | null;
 };
 
 const DEFAULT_PHONE = "(222) 545-4543";
@@ -31,6 +33,7 @@ export function SparkAcademyFooter({
   legalPages = {},
   socialConnect = {},
   centerContact,
+  brandName,
 }: Props) {
   const rich = config.footer.rich;
   const onCenterHost = centerContact !== undefined;
@@ -60,7 +63,11 @@ export function SparkAcademyFooter({
               ) : (
                 <span className="sa-site-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
               )}
-              <strong>{config.meta.siteName}</strong>
+              <FranchiseBrandWordmark
+                className="sa-site-footer__wordmark"
+                siteName={config.meta.siteName}
+                brandName={brandName}
+              />
             </div>
             {rich?.description ? <p className="sa-site-footer__blurb">{rich.description}</p> : null}
           </div>

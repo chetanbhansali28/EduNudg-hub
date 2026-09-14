@@ -191,7 +191,7 @@ export function LoginPage() {
           ) : import.meta.env.DEV && tenant.portalType === "center" && tenant.brandSlug ? (
             <>
               Staff: <code>center@edunudg.com</code> / <code>admin</code>. Parents and students use{" "}
-              <a href={learnPortalLoginUrl(tenant.brandSlug)}>Student login</a>.
+              <a href={learnPortalLoginUrl(tenant.brandSlug, tenant.centerSlug)}>Student login</a>.
             </>
           ) : undefined
         }
@@ -335,7 +335,7 @@ export function LoginPage() {
         {tenant.portalType === "center" && tenant.brandSlug ? (
           <p className="ed-login-form__extra">
             Parent or student?{" "}
-            <a href={learnPortalLoginUrl(tenant.brandSlug)}>Sign in to the student portal</a>
+            <a href={learnPortalLoginUrl(tenant.brandSlug, tenant.centerSlug)}>Sign in to the student portal</a>
             {" · "}
             <Link to="/">← Center homepage</Link>
           </p>

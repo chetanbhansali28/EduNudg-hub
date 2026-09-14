@@ -86,14 +86,14 @@ describe("AppShell responsive", () => {
     expect(document.querySelector(".ed-mobile-bar__subtitle")).toBeNull();
   });
 
-  it("regression_center_shell_lockup_shows_brand_then_franchise_name", () => {
+  it("regression_center_shell_lockup_shows_franchise_by_brand", () => {
     render(
       <MemoryRouter>
         <ThemeProvider>
           <AppShell
-            portalLabel="Center · Koramangala Franchise"
-            productName="Smart Brain Abacus"
-            portalTagline="Koramangala Franchise"
+            portalLabel="Center · Rathi Educon"
+            productName="Rathi Educon"
+            portalTagline="by Smart Brain"
             logoUrl="https://cdn.example/smart-brain-logo.png"
             mobileNavMode="bottom"
             mobileChrome={<nav aria-label="Center navigation">Nav</nav>}
@@ -105,10 +105,10 @@ describe("AppShell responsive", () => {
       </MemoryRouter>
     );
 
-    expect(document.querySelector(".ed-sidebar__name")?.textContent).toBe("Smart Brain Abacus");
-    expect(document.querySelector(".ed-sidebar__tagline")?.textContent).toBe("Koramangala Franchise");
-    expect(document.querySelector(".ed-mobile-bar__title")?.textContent).toBe("Smart Brain Abacus");
-    expect(document.querySelector(".ed-mobile-bar__subtitle")?.textContent).toBe("Koramangala Franchise");
+    expect(document.querySelector(".ed-sidebar__name")?.textContent).toBe("Rathi Educon");
+    expect(document.querySelector(".ed-sidebar__tagline")?.textContent).toBe("by Smart Brain");
+    expect(document.querySelector(".ed-mobile-bar__title")?.textContent).toBe("Rathi Educon");
+    expect(document.querySelector(".ed-mobile-bar__subtitle")?.textContent).toBe("by Smart Brain");
     expect(document.querySelector(".ed-shell--has-portal-tagline")).toBeTruthy();
   });
 

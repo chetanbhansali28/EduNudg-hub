@@ -1,17 +1,21 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { CenterPublicNavLogins } from "./CenterPublicNavLogins";
 import { MarketingCtaLink } from "./MarketingCtaLink";
+import { MarketingHomeLink } from "./MarketingPublicOrigin";
 import { MarketingSectionNavLink } from "./MarketingSectionNavLink";
 import { useHeroIntroComplete } from "./useHeroIntroComplete";
 import { useNavTheme } from "./useNavTheme";
+import { FranchiseBrandWordmark } from "./FranchiseBrandWordmark";
+import { franchiseBrandLockup } from "@/lib/portalBranding";
 
 type Props = {
   config: HomepageConfig;
   /** When set (center public site), show Student Login in the main nav. */
   brandSlug?: string;
+  brandName?: string | null;
+  centerSlug?: string | null;
 };
 
 function MenuIcon({ open }: { open: boolean }) {
@@ -24,7 +28,7 @@ function MenuIcon({ open }: { open: boolean }) {
   );
 }
 
-export function MarketingNav({ config, brandSlug }: Props) {
+export function MarketingNav({ config, brandSlug, brandName, centerSlug }: Props) {
   const theme = useNavTheme();
   const heroIntroComplete = useHeroIntroComplete();
   const isLightBg = theme === "light";
@@ -48,6 +52,7 @@ export function MarketingNav({ config, brandSlug }: Props) {
   }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
+  const lockup = franchiseBrandLockup(config.meta.siteName, brandSlug ? brandName : null);
 
   const drawer =
     menuOpen && typeof document !== "undefined"
@@ -67,7 +72,11 @@ export function MarketingNav({ config, brandSlug }: Props) {
               aria-label="Site menu"
             >
               <div className="novu-nav-bar__drawer-head">
-                <span className="novu-nav-bar__drawer-title">{config.meta.siteName}</span>
+                <FranchiseBrandWordmark
+                  className="novu-nav-bar__drawer-title"
+                  siteName={config.meta.siteName}
+                  brandName={brandSlug ? brandName : null}
+                />
                 <button
                   type="button"
                   className="novu-nav-bar__drawer-close"
@@ -88,7 +97,12 @@ export function MarketingNav({ config, brandSlug }: Props) {
                   />
                 ))}
                 {brandSlug ? (
-                  <CenterPublicNavLogins brandSlug={brandSlug} inDropdown onNavigate={closeMenu} />
+                  <CenterPublicNavLogins
+                    brandSlug={brandSlug}
+                    centerSlug={centerSlug}
+                    inDropdown
+                    onNavigate={closeMenu}
+                  />
                 ) : null}
               </div>
             </div>
@@ -115,7 +129,7 @@ export function MarketingNav({ config, brandSlug }: Props) {
             <MenuIcon open={menuOpen} />
           </button>
 
-          <Link to="/" className="novu-nav-bar__logo" aria-label={`${config.meta.siteName} home`}>
+          <MarketingHomeLink className="novu-nav-bar__logo" aria-label={`${lockup.accessibleName} home`}>
             {logoUrl ? (
               <img
                 src={logoUrl}
@@ -129,8 +143,12 @@ export function MarketingNav({ config, brandSlug }: Props) {
                 {config.meta.siteName.charAt(0)}
               </span>
             )}
-            <span className="novu-nav-bar__wordmark">{config.meta.siteName}</span>
-          </Link>
+            <FranchiseBrandWordmark
+              className="novu-nav-bar__wordmark"
+              siteName={config.meta.siteName}
+              brandName={brandSlug ? brandName : null}
+            />
+          </MarketingHomeLink>
         </div>
 
         <div className={`novu-nav-bar__pill ${isLightBg ? "novu-nav-bar__pill--on-white" : ""}`}>
@@ -142,7 +160,9 @@ export function MarketingNav({ config, brandSlug }: Props) {
               className="novu-nav-bar__link"
             />
           ))}
-          {brandSlug ? <CenterPublicNavLogins brandSlug={brandSlug} isLightBg={isLightBg} /> : null}
+          {brandSlug ? (
+            <CenterPublicNavLogins brandSlug={brandSlug} centerSlug={centerSlug} isLightBg={isLightBg} />
+          ) : null}
           <MarketingCtaLink
             href={config.nav.ctaHref}
             label={config.nav.ctaLabel}

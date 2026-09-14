@@ -8,6 +8,7 @@ import { BrandSocialFooterIcons } from "@/features/marketing/BrandSocialFooterIc
 import { FooterLinkColumn } from "@/features/marketing/footer/FooterLinkColumn";
 import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
 import { CenterFooterContactBlock } from "@/features/marketing/footer/CenterFooterContactBlock";
+import { FranchiseBrandWordmark } from "@/features/marketing/FranchiseBrandWordmark";
 
 type Props = {
   config: HomepageConfig;
@@ -15,6 +16,7 @@ type Props = {
   socialConnect?: BrandSocialConnect;
   /** Center host only — `null` hides brand Head office. */
   centerContact?: CenterFooterContact | null;
+  brandName?: string | null;
 };
 
 export function AbacusClassicFooter({
@@ -22,6 +24,7 @@ export function AbacusClassicFooter({
   legalPages = {},
   socialConnect = {},
   centerContact,
+  brandName,
 }: Props) {
   const rich = config.footer.rich;
   const stats = buildBrandFooterStats(rich);
@@ -34,11 +37,20 @@ export function AbacusClassicFooter({
       <div className="ac-footer__inner">
         <div className="ac-footer__grid">
           <div className="ac-footer__brand">
-            {config.meta.logoUrl ? (
-              <img src={config.meta.logoUrl} alt="" className="ac-footer__logo" width={56} height={56} />
-            ) : (
-              <span className="ac-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
-            )}
+            <div className="ac-footer__brand-lockup">
+              {config.meta.logoUrl ? (
+                <img src={config.meta.logoUrl} alt="" className="ac-footer__logo" width={56} height={56} />
+              ) : (
+                <span className="ac-footer__logo-fallback">{config.meta.siteName.charAt(0)}</span>
+              )}
+              {brandName ? (
+                <FranchiseBrandWordmark
+                  className="ac-footer__wordmark"
+                  siteName={config.meta.siteName}
+                  brandName={brandName}
+                />
+              ) : null}
+            </div>
             {rich?.description ? <p>{rich.description}</p> : null}
             {rich?.badges && rich.badges.length > 0 ? (
               <div className="ac-footer__badges">

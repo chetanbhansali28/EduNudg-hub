@@ -51,6 +51,6 @@ export function filterCenterStudents(
 }
 
 /** Student/parent learn-portal login URL to share — host + /login only, never a password. */
-export function studentProfileLoginUrl(brandSlug: string): string {
-  return learnPortalLoginUrl(brandSlug.trim());
+export function studentProfileLoginUrl(brandSlug: string, centerSlug?: string | null): string {
+  return learnPortalLoginUrl(brandSlug.trim(), centerSlug);
 }

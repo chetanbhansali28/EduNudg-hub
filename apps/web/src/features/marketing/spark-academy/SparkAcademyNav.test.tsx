@@ -189,4 +189,18 @@ describe("SparkAcademyNav", () => {
     expect(within(drawer).getByText("Smart Brain Abacus")).toBeDefined();
     expect(logo?.nextElementSibling?.classList.contains("sa-nav__drawer-title")).toBe(true);
   });
+
+  it("regression_franchise_nav_shows_center_then_by_brand", () => {
+    const config = mergeSparkAcademyLandingConfig("Rathi Educon");
+    config.meta.logoUrl = "https://cdn.example.com/smart-brain-logo.png";
+
+    render(
+      <MemoryRouter>
+        <SparkAcademyNav config={config} brandSlug="smart-brain" brandName="Smart Brain" />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText("Rathi Educon")).toBeDefined();
+    expect(screen.getByText("by Smart Brain")).toBeDefined();
+  });
 });

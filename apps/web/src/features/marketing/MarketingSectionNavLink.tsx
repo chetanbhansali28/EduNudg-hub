@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { resolveMarketingSectionHref } from "@/lib/marketingPublicSite";
+import { marketingHrefWithPublicOrigin, useMarketingPublicOrigin } from "./MarketingPublicOrigin";
 
 type Props = {
   href: string;
@@ -14,7 +15,8 @@ type Props = {
  */
 export function MarketingSectionNavLink({ href, label, className, onClick }: Props) {
   const { pathname } = useLocation();
-  const resolved = resolveMarketingSectionHref(href, pathname);
+  const publicOrigin = useMarketingPublicOrigin();
+  const resolved = marketingHrefWithPublicOrigin(resolveMarketingSectionHref(href, pathname), publicOrigin);
 
   if (resolved.startsWith("/") && !resolved.startsWith("//") && !/^https?:/i.test(resolved)) {
     return (

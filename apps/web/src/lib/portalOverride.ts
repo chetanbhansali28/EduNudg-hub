@@ -83,7 +83,7 @@ export function portalOverrideSearchParams(override: PortalOverride): URLSearchP
   const params = new URLSearchParams();
   params.set("portal", override.portalType);
   params.set("brand", override.brandSlug);
-  if (override.portalType === "center" && override.centerSlug) {
+  if (override.centerSlug) {
     params.set("center", override.centerSlug);
   }
   return params;

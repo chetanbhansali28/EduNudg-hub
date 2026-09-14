@@ -40,7 +40,7 @@ Full setup: [supabase-cloud-setup.md](./supabase-cloud-setup.md)
 | http://koramangala.abacusworld.localhost:9000/ | Center parent enrollment landing (public) |
 | http://koramangala.abacusworld.localhost:9000/login | Center staff login |
 | http://koramangala.abacusworld.localhost:9000/app | Center operations dashboard |
-| http://learn.abacusworld.localhost:9000/login | Student login (white-label) |
+| http://learn.abacusworld.localhost:9000/login | Student login (franchise public nav + footer when `?center=` is known) |
 
 New franchise owners must use the center login URL (or `/login?portal=center&brand=…&center=…` on Vercel), not platform `/login`. New brand owners use `{brand}.localhost:9000/login`. Apply migration `101_accept_own_invited_memberships.sql` so invited owner rows activate on first staff sign-in. Student (learn) login does not use staff memberships.
 

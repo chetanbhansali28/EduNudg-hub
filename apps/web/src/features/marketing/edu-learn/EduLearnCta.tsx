@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useLeadModalOptional } from "@/features/marketing/abacus-classic/LeadModalContext";
 import { resolveLeadModalKind } from "@/features/marketing/abacus-classic/MarketingLeadModals";
+import { marketingHrefWithPublicOrigin, useMarketingPublicOrigin } from "@/features/marketing/MarketingPublicOrigin";
 
 type Props = {
   label: string;
@@ -21,6 +22,7 @@ export function EduLearnCta({
 }: Props) {
   const modal = useLeadModalOptional();
   const modalKind = resolveLeadModalKind(href);
+  const resolvedHref = marketingHrefWithPublicOrigin(href, useMarketingPublicOrigin());
   const classes = `el-btn el-btn--${variant}${icon ? " el-btn--icon" : ""} ${className}`.trim();
   const content = icon ? <span aria-hidden>→</span> : label;
 
@@ -41,7 +43,7 @@ export function EduLearnCta({
   }
 
   return (
-    <a href={href} className={classes} aria-label={icon ? label : undefined} onClick={onClick}>
+    <a href={resolvedHref} className={classes} aria-label={icon ? label : undefined} onClick={onClick}>
       {content}
     </a>
   );

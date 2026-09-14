@@ -63,6 +63,7 @@ import { StudentCompetitionsPage } from "@/features/learn/StudentCompetitionsPag
 import { StudentActivityPage } from "@/features/learn/StudentActivityPage";
 import { StudentProfilePage } from "@/features/learn/StudentProfilePage";
 import { ParentPortalPage } from "@/features/learn/ParentPortalPage";
+import { LearnPublicLoginLayout } from "@/features/learn/LearnPublicLoginLayout";
 import { ThemeProvider } from "@edunudg/ui";
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -87,7 +88,9 @@ export function AppRoutes() {
     return (
       <Routes>
         <Route path="/auth/handoff" element={<AuthHandoffPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route element={<LearnPublicLoginLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+        </Route>
         <Route
           path="/"
           element={

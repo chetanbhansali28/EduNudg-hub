@@ -31,6 +31,8 @@ import "@/features/marketing/edu-learn/edu-learn.css";
 
 type Props = {
   showFooter?: boolean;
+  /** Learn `/login` may resolve a franchise slug that the learn host tenant does not carry. */
+  centerSlug?: string;
 };
 
 export type CenterLandingOutletContext = {
@@ -43,12 +45,14 @@ export type CenterLandingOutletContext = {
   publicStats: import("@/lib/brandLandingBundle").BrandPublicStats;
   legalPages: import("@/lib/brandLegalPages").BrandLegalPages;
   socialConnect: import("@/lib/brandSocialConnect").BrandSocialConnect;
+  /** True when page is wrapped by franchise public nav/footer (learn `/login`). */
+  marketingChrome?: true;
 };
 
-export function CenterPublicLayout({ showFooter = true }: Props) {
+export function CenterPublicLayout({ showFooter = true, centerSlug: centerSlugProp }: Props) {
   const tenant = useTenant();
   const brandSlug = tenant.brandSlug?.trim() ?? "";
-  const centerSlug = tenant.centerSlug?.trim() ?? "";
+  const centerSlug = (centerSlugProp ?? tenant.centerSlug)?.trim() ?? "";
   const location = useLocation();
 
   const { data: bundle, isLoading } = useQuery({
@@ -70,8 +74,9 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
 
   useEffect(() => {
     if (isLoading || !bundle) return;
+    if (location.pathname === "/login") return;
     scrollToMarketingHash(location.hash);
-  }, [isLoading, bundle, location.hash]);
+  }, [isLoading, bundle, location.hash, location.pathname]);
 
   if (isLoading || !bundle) {
     return (
@@ -83,17 +88,19 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
 
   const publicConfig = sanitizeCenterPublicNavConfig(bundle.config);
   const centerContact = centerFooterContactFromProfile(bundle.profile);
+  const brandName = bundle.profile.brandName;
+  const isLoginRoute = location.pathname === "/login";
 
   const layoutInner = (
-    <div className={marketingPageClassName(theme)}>
+    <div className={`${marketingPageClassName(theme)}${isLoginRoute ? " marketing-page--login" : ""}`}>
       {isAbacusClassic ? (
-        <AbacusClassicNav config={publicConfig} brandSlug={brandSlug} />
+        <AbacusClassicNav config={publicConfig} brandSlug={brandSlug} brandName={brandName} centerSlug={centerSlug} />
       ) : isSparkAcademy ? (
-        <SparkAcademyNav config={publicConfig} brandSlug={brandSlug} />
+        <SparkAcademyNav config={publicConfig} brandSlug={brandSlug} brandName={brandName} centerSlug={centerSlug} />
       ) : isEduLearn ? (
-        <EduLearnNav config={publicConfig} brandSlug={brandSlug} />
+        <EduLearnNav config={publicConfig} brandSlug={brandSlug} brandName={brandName} centerSlug={centerSlug} />
       ) : (
-        <MarketingNav config={publicConfig} brandSlug={brandSlug} />
+        <MarketingNav config={publicConfig} brandSlug={brandSlug} brandName={brandName} centerSlug={centerSlug} />
       )}
       <Outlet
         context={{
@@ -106,6 +113,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           publicStats: bundle.publicStats,
           legalPages: bundle.legalPages,
           socialConnect: bundle.socialConnect,
+          ...(isLoginRoute ? { marketingChrome: true as const } : {}),
         }}
       />
       {showFooter && !isAbacusClassic && !isSparkAcademy && !isEduLearn ? (
@@ -122,6 +130,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           legalPages={bundle.legalPages}
           socialConnect={bundle.socialConnect}
           centerContact={centerContact}
+          brandName={brandName}
         />
       ) : null}
       {showFooter && isSparkAcademy ? (
@@ -130,6 +139,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           legalPages={bundle.legalPages}
           socialConnect={bundle.socialConnect}
           centerContact={centerContact}
+          brandName={brandName}
         />
       ) : null}
       {showFooter && isEduLearn ? (
@@ -138,9 +148,10 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
           legalPages={bundle.legalPages}
           socialConnect={bundle.socialConnect}
           centerContact={centerContact}
+          brandName={brandName}
         />
       ) : null}
-      {themeUsesLeadModals(theme) ? (
+      {themeUsesLeadModals(theme) && !isLoginRoute ? (
         <MarketingLeadModals brandSlug={brandSlug} centerSlug={centerSlug} theme={theme} />
       ) : null}
     </div>
@@ -149,7 +160,7 @@ export function CenterPublicLayout({ showFooter = true }: Props) {
   if (themeUsesLeadModals(theme)) {
     return (
       <LeadModalProvider>
-        <LeadModalHashOpener />
+        {!isLoginRoute ? <LeadModalHashOpener /> : null}
         {layoutInner}
       </LeadModalProvider>
     );

@@ -166,7 +166,9 @@ describe("CenterStudentDetailPanel", () => {
   it("regression_center_student_copies_learn_login_url_without_password", async () => {
     fireEvent.click(screen.getByRole("button", { name: "Copy Profile URL" }));
     await waitFor(() => {
-      expect(writeText).toHaveBeenCalledWith("http://learn.smart-brain-abacus.localhost:9000/login");
+      expect(writeText).toHaveBeenCalledWith(
+        "http://learn.smart-brain-abacus.localhost:9000/login?center=smart-brain-abacus"
+      );
     });
     expect(writeText.mock.calls[0]?.[0]).not.toMatch(/password/i);
     expect(await screen.findByRole("button", { name: "Copied" })).toBeDefined();

@@ -500,6 +500,7 @@ export type LoginBrandingProps = {
   subtext: string;
   accountTitle?: string;
   accountSubtitle?: string;
+  portalTagline?: string | null;
 };
 
 export type LoginFooterLink = {
@@ -559,13 +560,27 @@ export function LoginLayout({
   ];
   const isDesktopLogin = useMinWidth(960);
 
+  function LoginWordmark() {
+    return (
+      <p className="ed-login-hero__wordmark">
+        <span className="ed-login-hero__wordmark-name">{branding.productName}</span>
+        {branding.portalTagline ? (
+          <span className="ed-login-hero__wordmark-byline">{branding.portalTagline}</span>
+        ) : null}
+      </p>
+    );
+  }
+
   return (
     <div className="ed-login-page">
       <div className="ed-login-page__frame">
         <aside className="ed-login-hero" aria-hidden={false}>
           <div className="ed-login-hero__inner">
-            <div className="ed-login-hero__emblem">
-              <LoginBrandMark logoUrl={branding.logoUrl} productName={branding.productName} />
+            <div className="ed-login-hero__lockup">
+              <div className="ed-login-hero__emblem">
+                <LoginBrandMark logoUrl={branding.logoUrl} productName={branding.productName} />
+              </div>
+              <LoginWordmark />
             </div>
             <h1 className="ed-login-hero__headline">{branding.headline}</h1>
             <p className="ed-login-hero__subtext">{branding.subtext}</p>
@@ -580,7 +595,10 @@ export function LoginLayout({
         <div className="ed-login-panel">
           {!isDesktopLogin ? (
             <header className="ed-login-panel__mobile-head">
-              <LoginBrandMark logoUrl={branding.logoUrl} productName={branding.productName} />
+              <div className="ed-login-panel__mobile-lockup">
+                <LoginBrandMark logoUrl={branding.logoUrl} productName={branding.productName} />
+                <LoginWordmark />
+              </div>
               <h1 className="ed-login-panel__title">{accountTitle}</h1>
               <p className="ed-login-panel__subtitle">{accountSubtitle}</p>
             </header>
@@ -615,11 +633,13 @@ export function ComingSoonPage({
   portalLabel,
   productName,
   logoUrl,
+  portalTagline,
   message = "This portal is coming in a later release.",
 }: {
   portalLabel: string;
   productName?: string;
   logoUrl?: string | null;
+  portalTagline?: string | null;
   message?: string;
 }) {
   const title = productName ?? portalLabel;
@@ -635,6 +655,7 @@ export function ComingSoonPage({
           </span>
         )}
         <h1>{title}</h1>
+        {portalTagline ? <p className="ed-coming-soon__byline">{portalTagline}</p> : null}
         <p className="ed-muted">{portalLabel}</p>
         <p>{message}</p>
       </div>

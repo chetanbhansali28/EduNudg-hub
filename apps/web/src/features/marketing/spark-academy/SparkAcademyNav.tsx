@@ -1,18 +1,21 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { centerPublicLoginHrefs } from "@/features/marketing/CenterPublicNavLogins";
+import { MarketingHomeLink } from "@/features/marketing/MarketingPublicOrigin";
 import { MarketingSectionNavLink } from "@/features/marketing/MarketingSectionNavLink";
 import { SparkAcademyCta } from "./SparkAcademyCta";
+import { FranchiseBrandWordmark } from "@/features/marketing/FranchiseBrandWordmark";
 
 type Props = {
   config: HomepageConfig;
   brandSlug?: string;
+  brandName?: string | null;
+  centerSlug?: string | null;
 };
 
-export function SparkAcademyNav({ config, brandSlug }: Props) {
-  const logins = brandSlug ? centerPublicLoginHrefs(brandSlug) : null;
+export function SparkAcademyNav({ config, brandSlug, brandName, centerSlug }: Props) {
+  const logins = brandSlug ? centerPublicLoginHrefs(brandSlug, centerSlug) : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const logoUrl = config.meta.logoUrl?.trim() || null;
@@ -60,10 +63,14 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
               aria-label="Site menu"
             >
               <div className="sa-nav__drawer-head">
-                <Link to="/" className="sa-nav__drawer-brand" onClick={closeMenu}>
+                <MarketingHomeLink className="sa-nav__drawer-brand" onClick={closeMenu}>
                   {renderBrandMark()}
-                  <span className="sa-nav__drawer-title">{config.meta.siteName}</span>
-                </Link>
+                  <FranchiseBrandWordmark
+                    className="sa-nav__drawer-title"
+                    siteName={config.meta.siteName}
+                    brandName={logins ? brandName : null}
+                  />
+                </MarketingHomeLink>
                 <button type="button" className="sa-nav__drawer-close" aria-label="Close menu" onClick={closeMenu}>
                   ×
                 </button>
@@ -122,10 +129,14 @@ export function SparkAcademyNav({ config, brandSlug }: Props) {
             <span className="sa-nav__menu-icon" aria-hidden />
           </button>
 
-          <Link to="/" className="sa-nav__logo-link">
+          <MarketingHomeLink className="sa-nav__logo-link">
             {renderBrandMark()}
-            <span className="sa-nav__wordmark">{config.meta.siteName}</span>
-          </Link>
+            <FranchiseBrandWordmark
+              className="sa-nav__wordmark"
+              siteName={config.meta.siteName}
+              brandName={logins ? brandName : null}
+            />
+          </MarketingHomeLink>
         </div>
 
         <nav className="sa-nav__links" aria-label="Sections">

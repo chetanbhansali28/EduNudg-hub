@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import type { HomepageLink } from "@/types/homepage";
 import { resolveMarketingSectionHref } from "@/lib/marketingPublicSite";
+import { marketingHrefWithPublicOrigin, useMarketingPublicOrigin } from "@/features/marketing/MarketingPublicOrigin";
 
 type Props = {
   href: string;
@@ -11,10 +12,13 @@ type Props = {
 
 export function MarketingFooterLink({ href, label, className, externalClassName }: Props) {
   const { pathname } = useLocation();
-  const resolved = resolveMarketingSectionHref(href, pathname);
+  const resolved = marketingHrefWithPublicOrigin(
+    resolveMarketingSectionHref(href, pathname),
+    useMarketingPublicOrigin()
+  );
   const linkClass = className ?? "mkt-footer-shell__link";
 
-  if (resolved.startsWith("/") && !resolved.startsWith("//")) {
+  if (resolved.startsWith("/") && !resolved.startsWith("//") && !/^https?:/i.test(resolved)) {
     return (
       <Link to={resolved} className={linkClass}>
         {label}

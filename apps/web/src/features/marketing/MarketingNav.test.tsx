@@ -100,4 +100,23 @@ describe("MarketingNav", () => {
     expect(logo?.getAttribute("width")).toBe("64");
     expect(screen.getByText("Nilesh Gattani Center")).toBeDefined();
   });
+
+  it("regression_franchise_nav_shows_center_then_by_brand", () => {
+    const config = sanitizeCenterPublicNavConfig(
+      buildCenterLandingConfig("Rathi Educon", "Smart Brain", "Pune")
+    );
+    config.meta.logoUrl = "https://cdn.example/smart-brain-logo.png";
+
+    render(
+      <MemoryRouter>
+        <MarketingNav config={config} brandSlug="smart-brain" brandName="Smart Brain" />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole("link", { name: "Rathi Educon by Smart Brain home" })).toBeDefined();
+    expect(screen.getByText("Rathi Educon")).toBeDefined();
+    expect(screen.getByText("by Smart Brain")).toBeDefined();
+    const logo = document.querySelector(".novu-nav-bar__logo-img") as HTMLImageElement;
+    expect(logo?.getAttribute("src")).toBe("https://cdn.example/smart-brain-logo.png");
+  });
 });

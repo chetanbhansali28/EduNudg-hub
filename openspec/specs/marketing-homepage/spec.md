@@ -117,12 +117,12 @@ Brand identity copy and logo SHALL live in `brand_settings.settings.landing.meta
 - **AND** the viewport is mobile
 - **THEN** the staff top bar shows that logo beside the product name
 
-#### Scenario: Center staff chrome shows brand then franchise name
+#### Scenario: Center staff chrome shows franchise by brand
 
 - **GIVEN** franchise staff are on center `/app` (including `/app/merchandise`)
-- **THEN** the sidebar and mobile bar show the brand name next to the Site logo
-- **AND** the franchise display name appears in a smaller line under the brand name
-- **AND** `/login` still uses the franchise name as the product name
+- **THEN** the sidebar and mobile bar show the franchise display name next to the Site logo
+- **AND** a smaller “by {brand}” line appears under the franchise name when the names differ
+- **AND** `/login` uses the same lockup (franchise name, then “by {brand}”)
 
 #### Scenario: Public nav logo is franchise size without a frame
 

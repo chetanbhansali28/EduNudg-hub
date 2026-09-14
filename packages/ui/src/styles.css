@@ -775,15 +775,54 @@
   max-width: 22rem;
 }
 
+.ed-login-hero__lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0 auto 1.75rem;
+  text-align: left;
+}
+
 .ed-login-hero__emblem {
   display: grid;
   place-items: center;
   width: 5.5rem;
   height: 5.5rem;
-  margin: 0 auto 1.75rem;
+  margin: 0;
+  flex-shrink: 0;
   border-radius: 1rem;
   background: rgb(255 255 255 / 0.14);
   border: 1px solid rgb(255 255 255 / 0.2);
+}
+
+.ed-login-hero__wordmark {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ed-login-hero__wordmark-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.ed-login-hero .ed-login-hero__wordmark-name {
+  color: #ffffff;
+}
+
+.ed-login-hero__wordmark-byline {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.ed-login-hero .ed-login-hero__wordmark-byline {
+  color: rgb(255 255 255 / 0.78);
 }
 
 .ed-login-hero__headline {
@@ -880,6 +919,22 @@
   align-items: center;
   text-align: center;
   margin-bottom: 1.25rem;
+}
+
+.ed-login-panel__mobile-lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.ed-login-panel__mobile-lockup .ed-login-hero__wordmark-name {
+  color: var(--ed-fg);
+}
+
+.ed-login-panel__mobile-lockup .ed-login-hero__wordmark-byline {
+  color: var(--ed-muted);
 }
 
 @media (min-width: 960px) {
@@ -4201,6 +4256,12 @@
   font-weight: 700;
   letter-spacing: -0.03em;
   margin: 1rem 0 0.5rem;
+}
+
+.ed-coming-soon__byline {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .ed-coming-soon p {

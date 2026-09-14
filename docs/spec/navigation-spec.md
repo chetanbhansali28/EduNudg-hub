@@ -59,7 +59,7 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 
 ## Center (franchise) — `/app`
 
-On desktop and mobile, the staff chrome lockup shows the **brand name** next to the Site logo, with the franchise **display name** (from Franchise Identity) in a smaller line under it. Login still greets with the franchise name.
+On desktop and mobile, the staff chrome lockup shows the **franchise display name** next to the Site logo, with a smaller **by {brand}** line under it when the names differ. Login uses the same lockup.
 
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
@@ -83,6 +83,8 @@ On desktop and mobile, the staff chrome lockup shows the **brand name** next to 
 ---
 
 ## Student — `learn.*` host
+
+Authenticated student chrome uses the same franchise lockup as center staff (franchise name, then “by {brand}”) from the student’s center, with the brand Site logo.
 
 | Section | Item | Route | Status |
 |---------|------|-------|--------|
@@ -108,8 +110,9 @@ Out of v1 scope. Spec placeholder: mirror student minimal nav when built.
 | Host | CTA anchors |
 |------|-------------|
 | Platform | Sign in → `/login`; brand signup section on `/` |
-| Brand | `#apply` franchise, `#enroll-student` student application |
-| Center | `#register` student registration |
+| Brand | `#apply` franchise, `#enroll-student` student application; `/login` uses brand public nav/footer |
+| Center | `#register` student registration; **Student Login** → `learn.{brand}/login?center={center}` |
+| Learn | `/login` uses that franchise public nav/footer when the center is known |
 
 Indexable public **routes** (not hashes): platform `/` + `/legal/:kind`; brand `/`, `/about`, `/courses/:slug`, `/legal/:kind`; center `/`, `/courses/:slug`, `/legal/:kind`. See [`public-seo`](../../openspec/specs/public-seo/spec.md).
 

@@ -24,6 +24,20 @@ describe("learnPortalLoginUrl", () => {
     );
   });
 
+  it("appends franchise center so learn /login can load public chrome", () => {
+    vi.stubGlobal("window", {
+      location: {
+        protocol: "http:",
+        hostname: "koramangala.abacusworld.localhost",
+        port: "9000",
+        origin: "http://koramangala.abacusworld.localhost:9000",
+      },
+    });
+    expect(learnPortalLoginUrl("abacusworld", "koramangala")).toBe(
+      "http://learn.abacusworld.localhost:9000/login?center=koramangala"
+    );
+  });
+
   it("regression_vercel_student_login_uses_path_before_portal_query", () => {
     vi.stubGlobal("window", {
       location: {
@@ -36,6 +50,9 @@ describe("learnPortalLoginUrl", () => {
     const url = learnPortalLoginUrl("smart-brain-abacus");
     expect(url).toBe(
       "https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus"
+    );
+    expect(learnPortalLoginUrl("smart-brain-abacus", "smart-brain-abacus")).toBe(
+      "https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus&center=smart-brain-abacus"
     );
     expect(url).not.toMatch(/brand=[^&]*\/login/);
   });

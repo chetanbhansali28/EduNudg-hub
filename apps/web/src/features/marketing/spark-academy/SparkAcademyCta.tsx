@@ -1,5 +1,6 @@
 import { useLeadModalOptional } from "@/features/marketing/abacus-classic/LeadModalContext";
 import { resolveLeadModalKind } from "@/features/marketing/abacus-classic/MarketingLeadModals";
+import { marketingHrefWithPublicOrigin, useMarketingPublicOrigin } from "@/features/marketing/MarketingPublicOrigin";
 
 type Props = {
   label: string;
@@ -20,6 +21,7 @@ export function SparkAcademyCta({
 }: Props) {
   const modal = useLeadModalOptional();
   const modalKind = resolveLeadModalKind(href);
+  const resolvedHref = marketingHrefWithPublicOrigin(href, useMarketingPublicOrigin());
 
   const classes = `sa-btn sa-btn--${variant} ${className}`.trim();
   const content = (
@@ -45,7 +47,7 @@ export function SparkAcademyCta({
   }
 
   return (
-    <a href={href} className={classes} onClick={onClick}>
+    <a href={resolvedHref} className={classes} onClick={onClick}>
       {content}
     </a>
   );

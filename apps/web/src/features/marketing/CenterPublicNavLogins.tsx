@@ -2,6 +2,7 @@ import { learnPortalLoginUrl } from "@/lib/centerPublicNavUrls";
 
 type Props = {
   brandSlug: string;
+  centerSlug?: string | null;
   isLightBg?: boolean;
   className?: string;
   inDropdown?: boolean;
@@ -10,12 +11,13 @@ type Props = {
 
 export function CenterPublicNavLogins({
   brandSlug,
+  centerSlug,
   isLightBg,
   className,
   inDropdown,
   onNavigate,
 }: Props) {
-  const studentHref = learnPortalLoginUrl(brandSlug);
+  const studentHref = learnPortalLoginUrl(brandSlug, centerSlug);
 
   const linkClass = inDropdown
     ? "novu-nav-bar__dropdown-link novu-nav-bar__dropdown-link--login"
@@ -37,8 +39,8 @@ export function CenterPublicNavLogins({
   );
 }
 
-export function centerPublicLoginHrefs(brandSlug: string) {
+export function centerPublicLoginHrefs(brandSlug: string, centerSlug?: string | null) {
   return {
-    studentLoginHref: learnPortalLoginUrl(brandSlug),
+    studentLoginHref: learnPortalLoginUrl(brandSlug, centerSlug),
   };
 }

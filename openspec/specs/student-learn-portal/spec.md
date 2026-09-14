@@ -89,6 +89,18 @@ Traceability: FR-S12
 - **WHEN** two student rows under the same brand attempt to link the same `user_id`
 - **THEN** the second link is rejected
 
+### Requirement: Learn login uses franchise public chrome
+
+Learn host `/login` SHALL render the franchise public nav and footer (same theme as `{center}.{brand}/`) when the franchise is known from `?center=`, a franchise-host referrer, or sessionStorage for that brand. Nav, CTA, and footer links SHALL point at the franchise public origin so they do not stay on the learn app. When no franchise can be resolved, the brand public nav/footer MAY be used instead. The login split SHALL NOT use a full-viewport `ThemeProvider` shell that hides that chrome. Franchise **Student Login** and **Copy Profile URL** SHALL include the center slug so this chrome can load. Regression: `regression_learn_login_renders_franchise_nav_and_footer`.
+
+#### Scenario: Student login from a franchise site keeps that franchise header and footer
+
+- **GIVEN** a visitor opens `learn.{brand}/login?center={center}` (or arrives from `{center}.{brand}` with that slug stored)
+- **WHEN** the login form is ready
+- **THEN** the franchise public header and footer are visible
+- **AND** the layout root has class `marketing-page--login`
+- **AND** enroll lead modals SHALL NOT mount on `/login`
+
 ### Requirement: Comprehensive learn dashboard
 
 The system SHALL provide `get_student_learn_home(brand_id)` returning a single JSON payload sufficient to render the full dashboard without additional round-trips for core widgets.

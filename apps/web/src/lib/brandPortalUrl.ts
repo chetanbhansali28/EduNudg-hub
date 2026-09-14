@@ -208,7 +208,12 @@ export function portalLoginUrl(target: PortalTarget): string {
     return sameOriginUrl("/login", target);
   }
   const origin = portalOriginUrl(target).replace(/\/$/, "");
-  return `${origin}/login`;
+  const login = `${origin}/login`;
+  const center = target.centerSlug?.trim().toLowerCase() ?? "";
+  if ((target.portalType === "learn" || target.portalType === "parents") && center) {
+    return `${login}?center=${encodeURIComponent(center)}`;
+  }
+  return login;
 }
 
 /** Callback URL on the target portal host; edge function appends token_hash for verifyOtp handoff. */

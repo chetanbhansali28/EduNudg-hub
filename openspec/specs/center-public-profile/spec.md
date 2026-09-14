@@ -85,7 +85,8 @@ On a **center** host, Novu, Abacus Classic, and Spark Academy footers SHALL show
 - **WHEN** a visitor opens a center (franchise) public site
 - **THEN** the sticky nav uses a franchise lockup (`ac-nav--franchise` / `sa-nav--franchise` / `el-nav--franchise` / `novu-nav-bar--franchise`)
 - **AND** the brand logo matches the brand homepage nav size and has no ring or frame
-- **AND** the site name is larger and bolder than on the brand homepage nav
+- **AND** the site name is the franchise display name, larger and bolder than on the brand homepage nav
+- **AND** a smaller “by {brand}” line appears under the franchise name when the names differ
 
 #### Scenario: Footer contact uses franchise address on every theme
 

@@ -37,7 +37,7 @@ Brand owners edit **content** at `{brand}.localhost:9000/app/homepage` (brand si
 
 **Center public contact:** all four themes overlay Franchise Management Location & Contact in the footer (`centerFooterContactFromProfile` → `centerContact` on `CenterPublicLayout`). Novu adds a **This center** column (and still shows the about-center blurb). Abacus replaces **Head office** with **This center**. Spark **Contact Us** uses the franchise phone and address (no `(222)` placeholder). EduLearn uses the same franchise overlay in `EduLearnFooter`. Brand HQ / “Our presence” stay on the **brand** site only.
 
-**Center public nav lockup:** franchise hosts (`brandSlug` on `AbacusClassicNav` / `SparkAcademyNav` / `EduLearnNav` / `MarketingNav`) use `--franchise` modifiers so the site name is larger and bolder. The brand Site logo uses the same size on brand and franchise public nav and has no ring or frame (`regression_public_nav_logo_matches_franchise_size_without_border`).
+**Center public nav lockup:** franchise hosts (`brandSlug` on `AbacusClassicNav` / `SparkAcademyNav` / `EduLearnNav` / `MarketingNav`) use `--franchise` modifiers so the franchise site name is larger and bolder, with a smaller **by {brand}** line when the names differ (`regression_franchise_nav_shows_center_then_by_brand`). The brand Site logo uses the same size on brand and franchise public nav and has no ring or frame (`regression_public_nav_logo_matches_franchise_size_without_border`).
 
 When a brand switches from Novu to Abacus Classic, Spark Academy, or EduLearn, stored `landing` JSON is merged with the new theme defaults. **Novu-era section toggles do not disable Abacus/Spark/EduLearn sections** until the brand owner saves from the alternate-theme editor (detected via Abacus/Spark-specific fields in JSON; EduLearn also honors those markers). Shared copy (hero, FAQ, testimonials, features, courses, **Apply franchise**) is preserved. See `mergeAbacusClassicSectionVisibility()` / `mergeEduLearnSectionVisibility()` in `homepageSections.ts`.
 
@@ -128,6 +128,8 @@ Sharing one key caused login to stick on **Loading…** after visiting the publi
 **Platform `/login` chrome:** `MarketingPublicLayout` wraps `/login` with the same `EnterpriseNav` + `EnterpriseSiteFooter` as `/`. The layout root adds `marketing-page--login` so the form sits between header and footer without a full-viewport admin `ThemeProvider`. Regression: `regression_login_renders_platform_nav_and_footer`, `regression_platform_login_renders_marketing_nav_and_footer`.
 
 **Brand `/login` chrome:** `BrandPublicLayout` wraps `{brand}/login` with the same theme nav and footer as `{brand}/` (Abacus Classic, Spark Academy, or Novu). Regression: `regression_brand_login_renders_public_nav_and_footer`.
+
+**Learn `/login` chrome:** `LearnPublicLoginLayout` wraps `learn.{brand}/login` with franchise public nav/footer when `?center=`, a franchise-host referrer, or sessionStorage identifies the center (Student Login and Copy Profile URL pass that slug). Nav/CTA/footer links use the franchise public origin. Without a center, brand public chrome is the fallback. Regression: `regression_learn_login_renders_franchise_nav_and_footer`.
 
 ## Lead modals (Abacus / Spark)
 

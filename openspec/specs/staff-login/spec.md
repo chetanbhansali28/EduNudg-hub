@@ -111,6 +111,18 @@ Brand host `/login` SHALL render as a child of `BrandPublicLayout` with the same
 - **AND** the layout root has class `marketing-page--login`
 - **AND** enroll/apply lead modals SHALL NOT mount on `/login` (so staff Email is unique)
 
+### Requirement: Learn login uses franchise public marketing chrome
+
+Learn host `/login` SHALL render as a child of `LearnPublicLoginLayout`. When the franchise is known, that layout uses `CenterPublicLayout` (`marketing-page--login`) with the same nav and footer as `{center}.{brand}/`. When it is not, brand public chrome MAY wrap the form. The login split SHALL NOT use a full-viewport `ThemeProvider` shell that hides that chrome. Regression: `regression_learn_login_renders_franchise_nav_and_footer`.
+
+#### Scenario: Student login keeps franchise nav and footer
+
+- **GIVEN** a visitor opens `/login` on the learn host with a known franchise (`?center=` or franchise referrer)
+- **WHEN** the login form is ready
+- **THEN** the franchise public header (Abacus `header.ac-nav`, Spark `header.sa-nav`, EduLearn `header.el-nav`, or Novu `.novu-nav-bar`) is visible
+- **AND** the matching site footer is visible
+- **AND** the layout root has class `marketing-page--login`
+
 ### Requirement: Automated tests use library-correct exact name matchers
 
 Exact accessible-name matching SHALL use the API supported by each test library:

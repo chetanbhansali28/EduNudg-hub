@@ -9,12 +9,15 @@ import { FooterLegalLinks } from "@/features/marketing/footer/FooterLegalLinks";
 import { MarketingSectionNavLink } from "@/features/marketing/MarketingSectionNavLink";
 import { CenterFooterContactBlock } from "@/features/marketing/footer/CenterFooterContactBlock";
 import { EduLearnCta } from "./EduLearnCta";
+import { MarketingHomeLink } from "@/features/marketing/MarketingPublicOrigin";
+import { FranchiseBrandWordmark } from "@/features/marketing/FranchiseBrandWordmark";
 
 type Props = {
   config: HomepageConfig;
   legalPages?: BrandLegalPages;
   socialConnect?: BrandSocialConnect;
   centerContact?: CenterFooterContact | null;
+  brandName?: string | null;
 };
 
 export function EduLearnFooter({
@@ -22,6 +25,7 @@ export function EduLearnFooter({
   legalPages = {},
   socialConnect = {},
   centerContact,
+  brandName,
 }: Props) {
   const onCenterHost = centerContact !== undefined;
   const showSocial = hasBrandSocialFooterIcons(socialConnect);
@@ -38,10 +42,14 @@ export function EduLearnFooter({
     <footer className="el-footer mkt-footer-shell">
       <div className="el-footer__inner">
         <div className="el-footer__top">
-          <a href="/" className="el-footer__brand">
+          <MarketingHomeLink className="el-footer__brand">
             {logoUrl ? <img src={logoUrl} alt="" className="el-nav__logo-img" width={38} height={38} /> : null}
-            <span className="el-nav__wordmark">{config.meta.siteName}</span>
-          </a>
+            <FranchiseBrandWordmark
+              className="el-nav__wordmark"
+              siteName={config.meta.siteName}
+              brandName={brandName}
+            />
+          </MarketingHomeLink>
           <nav className="el-footer__links" aria-label="Footer">
             {links.map((link, i) => (
               <MarketingSectionNavLink

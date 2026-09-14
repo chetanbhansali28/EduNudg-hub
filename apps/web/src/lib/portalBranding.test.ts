@@ -40,25 +40,50 @@ describe("resolveLoginBranding", () => {
       "downtown"
     );
     expect(copy.productName).toBe("Downtown Center");
+    expect(copy.portalTagline).toBe("by Fundora");
     expect(copy.headline).toContain("Downtown Center");
   });
 
-  it("regression_center_shell_lockup_shows_brand_then_franchise_name", () => {
+  it("regression_center_shell_lockup_shows_franchise_by_brand", () => {
     const shell = resolveShellProductName(
       "center",
       {
         ...empty,
-        brandName: "Smart Brain Abacus",
+        brandName: "Smart Brain",
         brandLogoUrl: "https://cdn/logo.png",
-        centerName: "Koramangala Franchise",
+        centerName: "Rathi Educon",
       },
-      "smart-brain-abacus",
-      "koramangala"
+      "smart-brain",
+      "rathi-educon"
     );
-    expect(shell.productName).toBe("Smart Brain Abacus");
-    expect(shell.portalTagline).toBe("Koramangala Franchise");
-    expect(shell.franchiseName).toBe("Koramangala Franchise");
+    expect(shell.productName).toBe("Rathi Educon");
+    expect(shell.portalTagline).toBe("by Smart Brain");
+    expect(shell.franchiseName).toBe("Rathi Educon");
     expect(shell.logoUrl).toBe("https://cdn/logo.png");
+  });
+
+  it("regression_learn_shell_lockup_uses_student_center_name", () => {
+    const shell = resolveShellProductName(
+      "learn",
+      { ...empty, brandName: "Smart Brain", brandLogoUrl: "https://cdn/logo.png" },
+      "smart-brain",
+      null,
+      { franchiseName: "Rathi Educon" }
+    );
+    expect(shell.productName).toBe("Rathi Educon");
+    expect(shell.portalTagline).toBe("by Smart Brain");
+    expect(shell.logoUrl).toBe("https://cdn/logo.png");
+  });
+
+  it("regression_franchise_lockup_omits_byline_when_names_match", () => {
+    const copy = resolveLoginBranding(
+      "center",
+      { ...empty, brandName: "Smart Brain", centerName: "Smart Brain" },
+      "smart-brain",
+      "smart-brain"
+    );
+    expect(copy.productName).toBe("Smart Brain");
+    expect(copy.portalTagline).toBeNull();
   });
 
   it("regression_brand_shell_lockup_omits_franchise_tagline", () => {

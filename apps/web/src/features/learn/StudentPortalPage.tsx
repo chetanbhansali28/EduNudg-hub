@@ -29,6 +29,7 @@ export function StudentPortalPage() {
         portalLabel="Student portal"
         productName={shell.productName}
         logoUrl={shell.logoUrl}
+        portalTagline={shell.portalTagline}
         message="Student learning features are coming in Phase 2."
       />
     </ThemeProvider>

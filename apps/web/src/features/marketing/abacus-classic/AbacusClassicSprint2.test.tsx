@@ -154,6 +154,24 @@ describe("Abacus Classic Sprint 2 — nav and hero CTAs", () => {
     expect(logo?.getAttribute("height")).toBe("64");
     expect(screen.getByText("Nilesh Gattani Center")).toBeDefined();
   });
+
+  it("regression_franchise_nav_shows_center_then_by_brand", () => {
+    const centerConfig = {
+      ...config,
+      meta: { ...config.meta, siteName: "Rathi Educon", logoUrl: "https://cdn.example/logo.png" },
+    };
+
+    render(
+      wrapWithLeadModal(
+        <MemoryRouter>
+          <AbacusClassicNav config={centerConfig} brandSlug="smart-brain" brandName="Smart Brain" />
+        </MemoryRouter>
+      )
+    );
+
+    expect(screen.getByText("Rathi Educon")).toBeDefined();
+    expect(screen.getByText("by Smart Brain")).toBeDefined();
+  });
 });
 
 describe("Abacus Classic Sprint 2 — lead modals", () => {

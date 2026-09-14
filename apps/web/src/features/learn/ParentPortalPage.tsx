@@ -29,6 +29,7 @@ export function ParentPortalPage() {
         portalLabel="Parent portal"
         productName={shell.productName}
         logoUrl={shell.logoUrl}
+        portalTagline={shell.portalTagline}
         message="Parent features are coming in Phase 2."
       />
     </ThemeProvider>

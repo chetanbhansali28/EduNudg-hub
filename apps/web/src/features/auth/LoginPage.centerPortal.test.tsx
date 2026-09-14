@@ -240,4 +240,15 @@ describe("LoginPage center portal", () => {
     expect(router.state.location.search).toBe("?portal=center&brand=abacusworld&center=koramangala");
   });
 
+  it("regression_center_login_lockup_shows_franchise_by_brand", () => {
+    renderCenterLogin();
+
+    expect(document.querySelector(".ed-login-hero__wordmark-name")?.textContent).toBe(
+      "Abacus World Koramangala"
+    );
+    expect(document.querySelector(".ed-login-hero__wordmark-byline")?.textContent).toBe("by Abacus World");
+    expect(document.querySelector(".ed-login-brand__logo")?.getAttribute("src")).toBe(
+      "https://cdn.example/logo.png"
+    );
+  });
 });

@@ -3,6 +3,7 @@ import type { HomepageConfig } from "@/types/homepage";
 import type { BrandLegalPages } from "@/lib/brandLegalPages";
 import { buildFooterLegalLinks } from "@/lib/marketingFooterHelpers";
 import { resolveMarketingSectionHref } from "@/lib/marketingPublicSite";
+import { marketingHrefWithPublicOrigin, useMarketingPublicOrigin } from "@/features/marketing/MarketingPublicOrigin";
 
 type Props = {
   config: HomepageConfig;
@@ -23,10 +24,13 @@ function FooterLegalAnchor({
   linkClassName?: string;
 }) {
   const { pathname } = useLocation();
-  const resolved = resolveMarketingSectionHref(href, pathname);
+  const resolved = marketingHrefWithPublicOrigin(
+    resolveMarketingSectionHref(href, pathname),
+    useMarketingPublicOrigin()
+  );
   const className = linkClassName ?? "mkt-footer-shell__link";
 
-  if (resolved.startsWith("/") && !resolved.startsWith("//")) {
+  if (resolved.startsWith("/") && !resolved.startsWith("//") && !/^https?:/i.test(resolved)) {
     return (
       <Link to={resolved} className={className}>
         {label}

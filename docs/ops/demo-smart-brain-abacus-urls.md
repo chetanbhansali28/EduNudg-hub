@@ -13,7 +13,7 @@ On `*.vercel.app` (same-origin mode), every brand/center/learn URL needs `portal
 **Wrong:** `...?brand=smart-brain-abacus/login` — `/login` becomes part of the slug.  
 **Right:** `.../login?portal=brand&brand=smart-brain-abacus`
 
-Franchise **Student Login** and **Copy Profile URL** use `learnPortalLoginUrl` → `/login?portal=learn&brand=smart-brain-abacus` (never append `/login` after the query). Regression: `regression_vercel_student_login_uses_path_before_portal_query`.
+Franchise **Student Login** and **Copy Profile URL** use `learnPortalLoginUrl` → `/login?portal=learn&brand=smart-brain-abacus&center={center}` (path before `?`; never append `/login` after the query). Regression: `regression_vercel_student_login_uses_path_before_portal_query`. Learn `/login` loads that franchise’s public nav/footer from the center slug (`regression_learn_login_renders_franchise_nav_and_footer`).
 
 See also: [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md), [test-users.md](./test-users.md), [runbook.md](./runbook.md).
 
@@ -110,7 +110,7 @@ Seed data includes the brand only — no default center. Create centers in the b
 | Purpose | URL |
 |---------|-----|
 | Student portal home | https://edunudg-hub.vercel.app/?portal=learn&brand=smart-brain-abacus |
-| Student login | https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus |
+| Student login | https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus&center={center-slug} |
 | Parent portal | https://edunudg-hub.vercel.app/?portal=parents&brand=smart-brain-abacus |
 
 ---

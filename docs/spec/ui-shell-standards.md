@@ -20,8 +20,8 @@ Tests: `apps/web/src/features/shared/backendKpiTheme.test.tsx`.
 
 ## Sidebar
 
-- **Desktop:** collapsible left panel ([`packages/ui/src/shell.tsx`](../../packages/ui/src/shell.tsx)); state in `localStorage`. Center `/app` lockup shows the **brand name** next to the Site logo, with the franchise **display name** as a smaller tagline (`regression_center_shell_lockup_shows_brand_then_franchise_name`).
-- **Tablet / mobile:** hidden by default; staff portals use a **bottom nav** plus a top bar. The mobile bar shows the tenant **logo** (`logoUrl`, typically the Site logo) beside the product name (`regression_staff_mobile_bar_shows_brand_logo`). On center `/app` that product name is the brand name, with the franchise display name under it (`regression_center_shell_lockup_shows_brand_then_franchise_name`). Hamburger drawer is for portals that still use `mobileNavMode="drawer"`.
+- **Desktop:** collapsible left panel ([`packages/ui/src/shell.tsx`](../../packages/ui/src/shell.tsx)); state in `localStorage`. Center `/app` lockup shows the **franchise display name** next to the Site logo, with a smaller **by {brand}** line under it (`regression_center_shell_lockup_shows_franchise_by_brand`).
+- **Tablet / mobile:** hidden by default; staff portals use a **bottom nav** plus a top bar. The mobile bar shows the tenant **logo** (`logoUrl`, typically the Site logo) beside the product name (`regression_staff_mobile_bar_shows_brand_logo`). On center `/app` that product name is the franchise display name, with **by {brand}** under it (`regression_center_shell_lockup_shows_franchise_by_brand`). Hamburger drawer is for portals that still use `mobileNavMode="drawer"`.
 - Nav definitions: [`portalNav.tsx`](../../apps/web/src/lib/portalNav.tsx) — must match [navigation-spec.md](./navigation-spec.md)
 
 ## Content grid

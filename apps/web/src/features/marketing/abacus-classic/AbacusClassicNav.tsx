@@ -1,18 +1,21 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { Link } from "react-router-dom";
 import type { HomepageConfig } from "@/types/homepage";
 import { centerPublicLoginHrefs } from "@/features/marketing/CenterPublicNavLogins";
+import { MarketingHomeLink } from "@/features/marketing/MarketingPublicOrigin";
 import { MarketingSectionNavLink } from "@/features/marketing/MarketingSectionNavLink";
 import { AbacusCtaButton } from "./MarketingLeadModals";
+import { FranchiseBrandWordmark } from "@/features/marketing/FranchiseBrandWordmark";
 
 type Props = {
   config: HomepageConfig;
   brandSlug?: string;
+  brandName?: string | null;
+  centerSlug?: string | null;
 };
 
-export function AbacusClassicNav({ config, brandSlug }: Props) {
-  const logins = brandSlug ? centerPublicLoginHrefs(brandSlug) : null;
+export function AbacusClassicNav({ config, brandSlug, brandName, centerSlug }: Props) {
+  const logins = brandSlug ? centerPublicLoginHrefs(brandSlug, centerSlug) : null;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const logoUrl = config.meta.logoUrl?.trim() || null;
@@ -54,7 +57,11 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
               aria-label="Site menu"
             >
               <div className="ac-nav__drawer-head">
-                <span className="ac-nav__drawer-title">{config.meta.siteName}</span>
+                <FranchiseBrandWordmark
+                  className="ac-nav__drawer-title"
+                  siteName={config.meta.siteName}
+                  brandName={logins ? brandName : null}
+                />
                 <button type="button" className="ac-nav__drawer-close" aria-label="Close menu" onClick={closeMenu}>
                   ×
                 </button>
@@ -95,14 +102,18 @@ export function AbacusClassicNav({ config, brandSlug }: Props) {
             <span className="ac-nav__menu-icon" aria-hidden />
           </button>
 
-          <Link to="/" className="ac-nav__logo-link">
+          <MarketingHomeLink className="ac-nav__logo-link">
             {logoUrl ? (
               <img src={logoUrl} alt="" className="ac-nav__logo-img" width={64} height={64} />
             ) : (
               <span className="ac-nav__logo-fallback">{config.meta.siteName.charAt(0)}</span>
             )}
-            <span className="ac-nav__wordmark">{config.meta.siteName}</span>
-          </Link>
+            <FranchiseBrandWordmark
+              className="ac-nav__wordmark"
+              siteName={config.meta.siteName}
+              brandName={logins ? brandName : null}
+            />
+          </MarketingHomeLink>
         </div>
 
         <nav className="ac-nav__links" aria-label="Sections">

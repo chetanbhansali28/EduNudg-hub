@@ -22,12 +22,14 @@ describe("CenterPublicNavLogins", () => {
   it("shows only Student Login linking to learn portal", () => {
     render(
       <MemoryRouter>
-        <CenterPublicNavLogins brandSlug="abacusworld" />
+        <CenterPublicNavLogins brandSlug="abacusworld" centerSlug="koramangala" />
       </MemoryRouter>
     );
 
     const link = screen.getByRole("link", { name: "Student Login" });
-    expect(link.getAttribute("href")).toBe("http://learn.abacusworld.localhost:9000/login");
+    expect(link.getAttribute("href")).toBe(
+      "http://learn.abacusworld.localhost:9000/login?center=koramangala"
+    );
     expect(screen.queryByRole("link", { name: /staff login/i })).toBeNull();
   });
 
@@ -42,12 +44,12 @@ describe("CenterPublicNavLogins", () => {
     });
     render(
       <MemoryRouter>
-        <CenterPublicNavLogins brandSlug="smart-brain-abacus" />
+        <CenterPublicNavLogins brandSlug="smart-brain-abacus" centerSlug="smart-brain-abacus" />
       </MemoryRouter>
     );
     const link = screen.getByRole("link", { name: "Student Login" });
     expect(link.getAttribute("href")).toBe(
-      "https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus"
+      "https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus&center=smart-brain-abacus"
     );
   });
 });

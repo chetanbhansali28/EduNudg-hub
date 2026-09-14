@@ -20,24 +20,6 @@ export function StudentLearnLayout() {
   const { isMobile } = useStudentBreakpoint();
   const featureFlags = useBrandFeatureFlags();
   const { data: branding } = usePortalBranding();
-  const shell = resolveShellProductName(
-    tenant.portalType,
-    branding ?? {
-      brandId: null,
-      brandSlug: null,
-      brandName: null,
-      brandLogoUrl: null,
-      centerId: null,
-      centerSlug: null,
-      centerName: null,
-      loginHeadline: null,
-      loginSubtext: null,
-    },
-    tenant.brandSlug,
-    tenant.centerSlug
-  );
-  const authProfile = displayUserFromAuth(user);
-
   const studentProfile = useQuery({
     queryKey: ["student-learn-home", tenant.brandId],
     enabled: !!tenant.brandId,
@@ -46,16 +28,40 @@ export function StudentLearnLayout() {
     staleTime: 60_000,
   });
 
-  const student = studentProfile.data?.student;
+  const home = studentProfile.data;
+  const student = home?.student;
+  const brandingRow = branding ?? {
+    brandId: null,
+    brandSlug: null,
+    brandName: null,
+    brandLogoUrl: null,
+    centerId: null,
+    centerSlug: null,
+    centerName: null,
+    loginHeadline: null,
+    loginSubtext: null,
+  };
+  const shell = resolveShellProductName(
+    tenant.portalType,
+    {
+      ...brandingRow,
+      brandName: brandingRow.brandName ?? home?.brand.name ?? null,
+      brandLogoUrl: brandingRow.brandLogoUrl ?? home?.brand.logo_url ?? null,
+    },
+    tenant.brandSlug,
+    tenant.centerSlug,
+    { franchiseName: home?.center.display_name }
+  );
+  const authProfile = displayUserFromAuth(user);
   const studentCode = student?.student_code;
   const avatarUrl = student?.profile.photo_url;
 
   return (
     <AppShell
       productName={shell.productName}
-      logoUrl={shell.logoUrl}
+      logoUrl={shell.logoUrl ?? home?.brand.logo_url ?? null}
       portalLabel={`Learn · ${shell.productName}`}
-      portalTagline="Student portal"
+      portalTagline={shell.portalTagline}
       user={{
         name: student?.full_name ?? authProfile.name,
         email: authProfile.email,

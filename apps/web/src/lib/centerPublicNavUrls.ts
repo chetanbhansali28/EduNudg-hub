@@ -2,11 +2,11 @@ import { centerPortalUrl, portalLoginUrl } from "@/lib/brandPortalUrl";
 
 /**
  * Student/parent learn portal sign-in for a brand.
- * Local: `http://learn.{brand}.localhost:9000/login`
+ * Local: `http://learn.{brand}.localhost:9000/login` (`?center=` when the franchise is known)
  * Vercel same-origin: `/login?portal=learn&brand=…` (path before `?` — never append `/login` after the query).
  */
-export function learnPortalLoginUrl(brandSlug: string): string {
-  return portalLoginUrl({ portalType: "learn", brandSlug });
+export function learnPortalLoginUrl(brandSlug: string, centerSlug?: string | null): string {
+  return portalLoginUrl({ portalType: "learn", brandSlug, centerSlug });
 }
 
 /**

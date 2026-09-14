@@ -23,7 +23,7 @@ vi.mock("@/bootstrap/TenantProvider", () => ({
     brandId: "brand-1",
     brandSlug: "abacusworld",
     centerSlug: null,
-    portalType: "student",
+    portalType: "learn",
   }),
 }));
 
@@ -89,6 +89,8 @@ describe("StudentLearnLayout", () => {
         student_code: "1001",
         profile: { photo_url: null },
       },
+      brand: { id: "brand-1", name: "Abacus World", logo_url: null },
+      center: { id: "c1", display_name: "Koramangala Center", public_url: "" },
     } as never);
   });
 
@@ -105,6 +107,25 @@ describe("StudentLearnLayout", () => {
     expect(screen.getByRole("button", { name: "Logout" })).toBeDefined();
   });
 
+  it("regression_learn_shell_lockup_shows_franchise_by_brand", async () => {
+    vi.mocked(fetchStudentLearnHome).mockResolvedValue({
+      student: {
+        full_name: "Alex Student",
+        student_code: "1001",
+        profile: { photo_url: null },
+      },
+      brand: { id: "brand-1", name: "Smart Brain", logo_url: "https://cdn.example/smart-brain-logo.png" },
+      center: { id: "c1", display_name: "Rathi Educon", public_url: "" },
+    } as never);
+
+    renderStudentShell();
+
+    await waitFor(() => {
+      expect(document.querySelector(".ed-sidebar__name")?.textContent).toBe("Rathi Educon");
+    });
+    expect(document.querySelector(".ed-sidebar__tagline")?.textContent).toBe("by Abacus World");
+  });
+
   it("regression_learn_header_shows_student_profile_photo_when_photo_url_set", async () => {
     vi.mocked(fetchStudentLearnHome).mockResolvedValue({
       student: {
@@ -112,6 +133,8 @@ describe("StudentLearnLayout", () => {
         student_code: "250DB0E7",
         profile: { photo_url: "https://cdn.example/students/vihaan/photo.jpg" },
       },
+      brand: { id: "brand-1", name: "Abacus World", logo_url: null },
+      center: { id: "c1", display_name: "Koramangala Center", public_url: "" },
     } as never);
 
     renderStudentShell();

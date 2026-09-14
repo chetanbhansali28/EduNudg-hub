@@ -237,7 +237,7 @@ export function CenterStudentDetailPanel({
     const slug = tenant.brandSlug?.trim();
     if (!slug) return;
     try {
-      await navigator.clipboard.writeText(studentProfileLoginUrl(slug));
+      await navigator.clipboard.writeText(studentProfileLoginUrl(slug, tenant.centerSlug));
       void reportAccessAudit({
         action: "view_pii",
         resourceType: "student_profile_url",
