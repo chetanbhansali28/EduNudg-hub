@@ -1,9 +1,9 @@
-import { isAboutPagePublished } from "@/lib/aboutUs";
-import { BRAND_LEGAL_PAGE_LABELS, parseLegalPageKind, type BrandLegalPageKind } from "@/lib/brandLegalPages";
-import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
-import { findPublicCourse, publicCourseSlug } from "@/lib/publicCourseSlug";
-import { isBrandAssetsUrl, isStockMarketingUrl } from "@/lib/marketingMediaGuard";
-import type { HomepageConfig } from "@/types/homepage";
+import { isAboutPagePublished } from "./aboutUs";
+import { BRAND_LEGAL_PAGE_LABELS, parseLegalPageKind, type BrandLegalPageKind } from "./brandLegalPages";
+import type { PublicCurriculumProgram } from "./brandCurriculumPublic";
+import { findPublicCourse, publicCourseSlug } from "./publicCourseSlug";
+import { isBrandAssetsUrl, isStockMarketingUrl } from "./marketingMediaGuard";
+import type { HomepageConfig } from "../types/homepage";
 
 export type PublicSeoPortal = "platform" | "brand" | "center" | "learn" | "parents";
 

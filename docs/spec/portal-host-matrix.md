@@ -39,7 +39,7 @@ Canonical reference for which experiences run on which hostname. Implementation 
 
 ## Public SEO files (every public host)
 
-`/robots.txt`, `/sitemap.xml`, `/llms.txt`, and `/.well-known/ai.txt` are host-aware (Vite middleware locally; Vercel `/api/public-seo` in production). They must not be swallowed by the SPA rewrite. Learn and parents stay `noindex`.
+`/robots.txt`, `/sitemap.xml`, `/llms.txt`, and `/.well-known/ai.txt` are host-aware (Vite middleware locally; Vercel `/api/public-seo` in production). They must not be swallowed by the SPA rewrite. `/login` stays on `/index.html`. Learn and parents stay `noindex`.
 
 ## Related docs
 

@@ -17,7 +17,7 @@ Learn Home/Progress use `useTenant().brandId`. If learn skips branding, `brandId
 
 - `packages/tenant/src/resolveTenant.ts`
 - `apps/web/src/routes/*.tsx`
-- `apps/web/vercel.json` — discovery files (`/robots.txt`, `/sitemap.xml`, `/llms.txt`) and public HTML (`/api/seo-document`) **before** the SPA catch-all. Do not let `/(.*)` → `index.html` swallow those paths.
+- `apps/web/vercel.json` — discovery files (`/robots.txt`, `/sitemap.xml`, `/llms.txt`) and indexable HTML (`/`, `/about`, `/courses/:slug`, `/legal/:kind` → `/api/seo-document`) **before** the SPA catch-all (`/login` and `/app` stay on `/index.html`). Do not let `/(.*)` → `index.html` swallow robots/sitemap. Never send `/login` through `/api/seo-document`.
 
 ## Local dev
 

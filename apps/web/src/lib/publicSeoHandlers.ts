@@ -1,7 +1,7 @@
-import { deriveRequestPublicSeo, resolveSeoTenant, sitemapInputFromRequest } from "@/lib/publicSeoRequest";
-import { buildAiTxt, buildLlmsTxt, buildRobotsTxt, buildSitemapXml, isPublicDiscoveryPath } from "@/lib/publicSeoDiscovery";
-import { injectPublicSeoHead } from "@/lib/publicSeoHtml";
-import { loadPublicSeoPageDataRemote, readPublicSeoEnv } from "@/lib/publicSeoRemote";
+import { deriveRequestPublicSeo, resolveSeoTenant, sitemapInputFromRequest } from "./publicSeoRequest";
+import { buildAiTxt, buildLlmsTxt, buildRobotsTxt, buildSitemapXml, isPublicDiscoveryPath } from "./publicSeoDiscovery";
+import { injectPublicSeoHead } from "./publicSeoHtml";
+import { loadPublicSeoPageDataRemote, readPublicSeoEnv } from "./publicSeoRemote";
 
 export function requestHost(req: Request): string {
   const url = new URL(req.url);

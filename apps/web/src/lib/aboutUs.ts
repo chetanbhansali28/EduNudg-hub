@@ -8,7 +8,7 @@ import type {
   HomepageFounderProfile,
   HomepageTrustCard,
   HomepageTrustMedia,
-} from "@/types/homepage";
+} from "../types/homepage";
 
 export function emptyAboutFeature(): HomepageAboutFeature {
   return {

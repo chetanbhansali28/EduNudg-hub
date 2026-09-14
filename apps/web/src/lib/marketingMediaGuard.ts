@@ -1,4 +1,4 @@
-import type { HomepageConfig } from "@/types/homepage";
+import type { HomepageConfig } from "../types/homepage";
 
 const BRAND_ASSETS_URL_RE = /\/storage\/v1\/object\/public\/brand-assets\//i;
 const STOCK_UNSPLASH_RE = /images\.unsplash\.com/i;

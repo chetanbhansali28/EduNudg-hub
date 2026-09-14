@@ -8,9 +8,13 @@
     { "source": "/llms.txt", "destination": "/api/public-seo?file=llms" },
     { "source": "/.well-known/ai.txt", "destination": "/api/public-seo?file=ai" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/", "destination": "/api/seo-document" },
+    { "source": "/about", "destination": "/api/seo-document" },
+    { "source": "/courses/:slug", "destination": "/api/seo-document" },
+    { "source": "/legal/:kind", "destination": "/api/seo-document" },
     {
-      "source": "/((?!api/|assets/|favicon\\.svg|index\\.html).*)",
-      "destination": "/api/seo-document"
+      "source": "/((?!api/|assets/).*)",
+      "destination": "/index.html"
     }
   ],
   "git": {

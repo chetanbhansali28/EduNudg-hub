@@ -4,8 +4,8 @@ import {
   preferredPublicOrigin,
   type PublicSeoInput,
   type PublicSeoPortal,
-} from "@/lib/publicSeo";
-import { BRAND_LEGAL_PAGE_KINDS, type BrandLegalPageKind } from "@/lib/brandLegalPages";
+} from "./publicSeo";
+import { BRAND_LEGAL_PAGE_KINDS, type BrandLegalPageKind } from "./brandLegalPages";
 
 export const PUBLIC_SEO_AI_CRAWLERS = ["GPTBot", "ChatGPT-User", "PerplexityBot", "ClaudeBot", "Google-Extended"] as const;
 

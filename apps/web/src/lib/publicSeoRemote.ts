@@ -1,10 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
-import { parsePublicCurriculum } from "@/lib/brandCurriculumPublic";
-import { parseBrandLegalPagesRecord, type BrandLegalPages } from "@/lib/brandLegalPages";
-import { parseBrandSocialConnect, type BrandSocialConnect } from "@/lib/brandSocialConnect";
-import type { HomepageConfig } from "@/types/homepage";
-import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
-import type { PublicSeoCenter } from "@/lib/publicSeo";
+import { parsePublicCurriculum, type PublicCurriculumProgram } from "./brandCurriculumPublic";
+import { parseBrandLegalPagesRecord, type BrandLegalPages } from "./brandLegalPages";
+import { parseBrandSocialConnect, type BrandSocialConnect } from "./brandSocialConnect";
+import type { HomepageConfig } from "../types/homepage";
+import type { PublicSeoCenter } from "./publicSeo";
 export type PublicSeoRemoteEnv = {
   supabaseUrl: string;
   supabaseAnonKey: string;

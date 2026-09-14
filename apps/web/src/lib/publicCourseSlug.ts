@@ -1,5 +1,5 @@
-import { slugifyBrandName } from "@/lib/brandSlug";
-import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
+import type { PublicCurriculumProgram } from "./brandCurriculumPublic";
+import { slugifyBrandName } from "./slugifyName";
 
 export const PUBLIC_COURSE_PATH_PREFIX = "/courses";
 

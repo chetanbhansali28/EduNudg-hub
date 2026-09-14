@@ -82,7 +82,18 @@ Indexable pages SHALL emit JSON-LD: WebSite + Organization (brand/platform), Edu
 
 ### Requirement: First HTML includes the tags
 
-Production HTML for public paths SHALL include the derived title, description, canonical, robots, Open Graph, and JSON-LD before JavaScript runs. The SPA SHALL keep the same tags in `PortalDocumentHead` after navigation.
+Production HTML for **indexable** public paths (`/`, `/about`, `/courses/:slug`, `/legal/:kind`) SHALL include the derived title, description, canonical, robots, Open Graph, and JSON-LD before JavaScript runs. The SPA SHALL keep the same tags in `PortalDocumentHead` after navigation.
+
+### Requirement: SPA routes stay on static HTML
+
+`/login`, `/app/*`, `/admin/*`, `/favicon.ico`, and other non-indexable SPA paths SHALL rewrite to `/index.html`. They SHALL NOT go through `/api/seo-document`. Vercel Node functions SHALL accept path-only IncomingMessage URLs and SHALL NOT crash the login page.
+
+#### Scenario: Login is not a serverless document
+
+- **GIVEN** a request for `/login` on the Vercel host
+- **WHEN** rewrites are applied
+- **THEN** the destination is `/index.html`
+- **AND** it is not `/api/seo-document`
 
 ### Requirement: Vite config must load without app aliases
 

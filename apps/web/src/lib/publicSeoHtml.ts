@@ -1,4 +1,4 @@
-import type { PublicSeoSnapshot } from "@/lib/publicSeo";
+import type { PublicSeoSnapshot } from "./publicSeo";
 
 export const PUBLIC_SEO_HEAD_MARK = "<!--edunudg-public-seo-->";
 

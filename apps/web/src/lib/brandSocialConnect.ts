@@ -1,4 +1,4 @@
-import type { HomepageConfig } from "@/types/homepage";
+import type { HomepageConfig } from "../types/homepage";
 
 export type BrandSocialConnect = {
   facebookUrl?: string;

@@ -1,17 +1,18 @@
 import { isPlatformHost, resolveTenantFromHost, type PortalType } from "@edunudg/tenant";
-import { parsePortalOverrideFromSearch, syntheticLookupHostname } from "@/lib/portalOverride";
+import { parsePortalOverrideFromSearch, syntheticLookupHostname } from "./portalOverride";
 import {
   BRAND_LEGAL_PAGE_KINDS,
   hasBrandLegalPage,
   type BrandLegalPageKind,
   type BrandLegalPages,
-} from "@/lib/brandLegalPages";
-import type { PublicCurriculumProgram } from "@/lib/brandCurriculumPublic";
-import type { BrandSocialConnect } from "@/lib/brandSocialConnect";
-import type { HomepageConfig } from "@/types/homepage";
+} from "./brandLegalPages";
+import type { PublicCurriculumProgram } from "./brandCurriculumPublic";
+import type { BrandSocialConnect } from "./brandSocialConnect";
+import type { HomepageConfig } from "../types/homepage";
 import {
   courseForPath,
   derivePublicSeo,
+  isVercelAppHost,
   publishedCourseSitemapPaths,
   seoInputFromHomepage,
   socialSameAsUrls,
@@ -19,9 +20,8 @@ import {
   type PublicSeoInput,
   type PublicSeoPortal,
   type PublicSeoSnapshot,
-} from "@/lib/publicSeo";
-import type { PublicSitemapInput } from "@/lib/publicSeoDiscovery";
-import { isVercelAppHost } from "@/lib/publicSeo";
+} from "./publicSeo";
+import type { PublicSitemapInput } from "./publicSeoDiscovery";
 
 export function resolveSeoTenant(hostname: string, search = ""): { portal: PublicSeoPortal; brandSlug: string | null; centerSlug: string | null } {
   const host = hostname.split(":")[0].toLowerCase();

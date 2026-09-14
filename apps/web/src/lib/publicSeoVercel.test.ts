@@ -12,10 +12,11 @@ describe("publicSeo vite plugin", () => {
 });
 
 describe("publicSeo vercel rewrites", () => {
+  const json = JSON.parse(readFileSync(resolve(__dirname, "../../vercel.json"), "utf8")) as {
+    rewrites: Array<{ source: string; destination: string }>;
+  };
+
   it("regression_vercel_rewrites_do_not_swallow_robots_sitemap_llms", () => {
-    const json = JSON.parse(readFileSync(resolve(__dirname, "../../vercel.json"), "utf8")) as {
-      rewrites: Array<{ source: string; destination: string }>;
-    };
     const sources = json.rewrites.map((row) => row.source);
     const destinations = json.rewrites.map((row) => row.destination);
     expect(sources[0]).toBe("/robots.txt");
@@ -27,6 +28,31 @@ describe("publicSeo vercel rewrites", () => {
     const robotsIndex = json.rewrites.findIndex((row) => row.source === "/robots.txt");
     expect(robotsIndex).toBeGreaterThanOrEqual(0);
     expect(catchAllIndex).toBeGreaterThan(robotsIndex);
-    expect(json.rewrites[catchAllIndex]?.destination).toBe("/api/seo-document");
+    expect(json.rewrites[catchAllIndex]?.destination).toBe("/index.html");
+  });
+
+  it("regression_vercel_login_is_not_rewritten_to_seo_document", () => {
+    const loginRewrite = json.rewrites.find((row) => row.source === "/login");
+    expect(loginRewrite).toBeUndefined();
+    const catchAll = json.rewrites.find((row) => row.source.includes("(?!api/"));
+    expect(catchAll?.destination).toBe("/index.html");
+    expect(catchAll?.destination).not.toBe("/api/seo-document");
+    const htmlDestinations = json.rewrites.filter((row) => row.destination === "/api/seo-document").map((row) => row.source);
+    expect(htmlDestinations).toEqual(["/", "/about", "/courses/:slug", "/legal/:kind"]);
+    expect(htmlDestinations).not.toContain("/login");
+    expect(htmlDestinations).not.toContain("/favicon.ico");
+    expect(htmlDestinations).not.toContain("/app");
+  });
+});
+
+describe("publicSeo vercel function graph", () => {
+  it("regression_vercel_seo_handlers_do_not_import_app_aliases", () => {
+    const handlers = readFileSync(resolve(__dirname, "./publicSeoHandlers.ts"), "utf8");
+    const courseSlug = readFileSync(resolve(__dirname, "./publicCourseSlug.ts"), "utf8");
+    const seo = readFileSync(resolve(__dirname, "./publicSeo.ts"), "utf8");
+    expect(handlers).not.toMatch(/from\s+["']@\//);
+    expect(courseSlug).not.toMatch(/from\s+["']@\//);
+    expect(courseSlug).not.toMatch(/from\s+["'].*brandSlug["']/);
+    expect(seo).not.toMatch(/from\s+["']@\//);
   });
 });
